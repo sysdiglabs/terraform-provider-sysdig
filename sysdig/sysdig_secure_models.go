@@ -6,16 +6,6 @@ import (
 	"io"
 )
 
-type ConfigurationValue struct {
-	Values  []string `json:"values"`
-	OnMatch string   `json:"onMatch"`
-}
-
-type Configuration struct {
-	List      []ConfigurationValue `json:"list"`
-	OnDefault string               `json:"onDefault"`
-}
-
 type Action struct {
 	AfterEventNs         int    `json:"afterEventNs,omitempty"`
 	BeforeEventNs        int    `json:"beforeEventNs,omitempty"`
@@ -28,18 +18,17 @@ type FalcoConfiguration struct {
 }
 
 type Policy struct {
-	ID                           int                `json:"id,omitempty"`
-	Name                         string             `json:"name"`
-	Description                  string             `json:"description"`
-	Severity                     int                `json:"severity"`
-	ContainerScope               bool               `json:"containerScope"`
-	HostScope                    bool               `json:"hostScope"`
-	Enabled                      bool               `json:"enabled"`
-	ContainerImagesConfiguration Configuration      `json:"containerImagesConfiguration,omitempty"`
-	Actions                      []Action           `json:"actions,omitempty"`
-	Scope                        string             `json:"scope,omitempty"`
-	FalcoConfiguration           FalcoConfiguration `json:"falcoConfiguration,omitempty"`
-	Version                      int                `json:"version,omitempty"`
+	ID                 int                `json:"id,omitempty"`
+	Name               string             `json:"name"`
+	Description        string             `json:"description"`
+	Severity           int                `json:"severity"`
+	ContainerScope     bool               `json:"containerScope"`
+	HostScope          bool               `json:"hostScope"`
+	Enabled            bool               `json:"enabled"`
+	Actions            []Action           `json:"actions,omitempty"`
+	Scope              string             `json:"scope,omitempty"`
+	FalcoConfiguration FalcoConfiguration `json:"falcoConfiguration,omitempty"`
+	Version            int                `json:"version,omitempty"`
 }
 
 type policyWrapper struct {

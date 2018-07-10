@@ -101,15 +101,6 @@ func aPolicy() sysdig.Policy {
 				IsLimitedToContainer: false,
 			},
 		},
-		ContainerImagesConfiguration: sysdig.Configuration{
-			OnDefault: "DEFAULT_MATCH_EFFECT_DENY",
-			List: []sysdig.ConfigurationValue{
-				sysdig.ConfigurationValue{
-					Values:  []string{"mysql"},
-					OnMatch: "MATCH_EFFECT_ACCEPT",
-				},
-			},
-		},
 	}
 }
 

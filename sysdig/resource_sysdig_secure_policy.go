@@ -60,7 +60,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 			},
 			"falco_rule_name_regex": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"actions": {
 				Type:     schema.TypeList,
@@ -119,15 +119,6 @@ func policyFromResourceData(d *schema.ResourceData) Policy {
 		HostScope:      d.Get("host_scope").(bool),
 		Enabled:        d.Get("enabled").(bool),
 		Scope:          d.Get("filter").(string),
-		ContainerImagesConfiguration: Configuration{
-			OnDefault: "DEFAULT_MATCH_EFFECT_DENY",
-			List: []ConfigurationValue{
-				ConfigurationValue{
-					Values:  []string{"mysql"},
-					OnMatch: "MATCH_EFFECT_ACCEPT",
-				},
-			},
-		},
 	}
 
 	addActionsToPolicy(d, &policy)
