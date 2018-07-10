@@ -119,15 +119,6 @@ func aPolicyWithoutNameAndDescription() sysdig.Policy {
 		ContainerScope: true,
 		HostScope:      true,
 		Enabled:        true,
-		ContainerImagesConfiguration: sysdig.Configuration{
-			OnDefault: "DEFAULT_MATCH_EFFECT_DENY",
-			List: []sysdig.ConfigurationValue{
-				sysdig.ConfigurationValue{
-					Values:  []string{"mysql"},
-					OnMatch: "MATCH_EFFECT_ACCEPT",
-				},
-			},
-		},
 	}
 }
 

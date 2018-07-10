@@ -35,7 +35,7 @@ type Policy struct {
 	ContainerScope               bool               `json:"containerScope"`
 	HostScope                    bool               `json:"hostScope"`
 	Enabled                      bool               `json:"enabled"`
-	ContainerImagesConfiguration Configuration      `json:"containerImagesConfiguration"`
+	ContainerImagesConfiguration Configuration      `json:"containerImagesConfiguration,omitempty"`
 	Actions                      []Action           `json:"actions,omitempty"`
 	Scope                        string             `json:"scope,omitempty"`
 	FalcoConfiguration           FalcoConfiguration `json:"falcoConfiguration,omitempty"`
