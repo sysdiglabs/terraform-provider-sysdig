@@ -23,10 +23,12 @@ $ mkdir -p $GOPATH/src/github.com/draios; cd $GOPATH/src/github.com/draios
 $ git clone git@github.com:draios/terraform-provider-sysdig
 ```
 
-Enter the provider directory and build the provider
+Ensure you have [dep](https://golang.github.io/dep/) installed and enter the
+provider directory and build the provider
 
 ```sh
 $ cd $GOPATH/src/github.com/draios/terraform-provider-sysdig
+$ dep ensure
 $ make build
 ```
 
