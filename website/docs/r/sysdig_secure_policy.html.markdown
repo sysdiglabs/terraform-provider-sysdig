@@ -36,8 +36,7 @@ resource "sysdig_secure_policy" "write_apt_database" {
   //}
 
   // Falco rule selection
-  // depends_on = ["sysdig_secure_user_rules_file.this"]
-  // falco_rule_name_regex = "Unexpected spawned process traefik"
+  falco_rule_name_regex = "Unexpected spawned process traefik"
 }
 ```
 

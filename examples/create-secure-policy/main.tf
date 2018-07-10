@@ -25,6 +25,5 @@ resource "sysdig_secure_policy" "sample" {
   //}
 
   // Falco rule selection
-  depends_on = ["sysdig_secure_user_rules_file.this"]
   falco_rule_name_regex = "Unexpected spawned process traefik"
 }
