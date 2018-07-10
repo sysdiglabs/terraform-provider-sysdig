@@ -1,0 +1,30 @@
+<% wrap_layout :inner do %>
+  <% content_for :sidebar do %>
+  <div class="docs-sidebar hidden-print affix-top" role="complementary">
+  <ul class="nav docs-sidenav">
+    <li<%= sidebar_current("docs-home") %>>
+    <a href="/docs/providers/index.html">All Providers</a>
+    </li>
+
+    <li<%= sidebar_current("docs-sysdig-index") %>>
+    <a href="/docs/providers/sysdig/index.html">Sysdig Provider</a>
+    </li>
+
+    <li<%= sidebar_current("docs-sysdig-secure") %>>
+    <a href="#">Sysdig Secure Resources</a>
+    <ul class="nav nav-visible">
+      <li<%= sidebar_current("docs-sysdig-secure-policy") %>>
+      <a href="/docs/providers/sysdig/r/sysdig-secure-policy.html">sysdig_secure_policy</a>
+      </li>
+
+      <li<%= sidebar_current("docs-sysdig-secure-user-rules-file") %>>
+      <a href="/docs/providers/sysdig/r/sysdig-secure-user-rules-file.html">sysdig_secure_user_rules_file</a>
+      </li>
+    </ul>
+    </li>
+  </ul>
+</div>
+  <% end %>
+
+<%= yield %>
+  <% end %>
