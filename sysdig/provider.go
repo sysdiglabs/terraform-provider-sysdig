@@ -20,8 +20,9 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"sysdig_secure_policy":          resourceSysdigSecurePolicy(),
-			"sysdig_secure_user_rules_file": resourceSysdigSecureUserRulesFile(),
+			"sysdig_secure_policy":               resourceSysdigSecurePolicy(),
+			"sysdig_secure_user_rules_file":      resourceSysdigSecureUserRulesFile(),
+			"sysdig_secure_notification_channel": resourceSysdigSecureNotificationChannel(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

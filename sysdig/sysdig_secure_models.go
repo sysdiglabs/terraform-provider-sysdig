@@ -17,6 +17,8 @@ type FalcoConfiguration struct {
 	RuleNameRegEx string `json:"ruleNameRegEx"`
 }
 
+// -------- Policies --------
+
 type Policy struct {
 	ID                 int                `json:"id,omitempty"`
 	Name               string             `json:"name"`
@@ -47,6 +49,8 @@ func PolicyFromJSON(body []byte) Policy {
 	return result.Policy
 }
 
+// -------- User Rules File --------
+
 type UserRulesFile struct {
 	Content string `json:"content"`
 	Version int    `json:"version"`
@@ -66,4 +70,45 @@ func UserRulesFileFromJSON(body []byte) UserRulesFile {
 	json.Unmarshal(body, &result)
 
 	return result.UserRulesFile
+}
+
+// -------- Notification Channels --------
+
+type NotificationChannelOptions struct {
+	EmailRecipients []string `json:"emailRecipients,omitempty"` // Type: email
+
+	SnsTopicARNs []string `json:"snsTopicARNs,omitempty"` // Type: SNS
+
+	APIKey     string `json:"apiKey,omitempty"`     // Type: VictorOps
+	RoutingKey string `json:"routingKey,omitempty"` // Type: VictorOps
+
+	Url string `json:"url,omitempty"` // Type: OpsGenie and Webhook
+
+	NotifyOnOk      bool `json:"notifyOnOk"`
+	NotifyOnResolve bool `json:"notifyOnResolve"`
+}
+
+type NotificationChannel struct {
+	ID      int                        `json:"id,omitempty"`
+	Version int                        `json:"version,omitempty"`
+	Type    string                     `json:"type"`
+	Name    string                     `json:"name"`
+	Enabled bool                       `json:"enabled"`
+	Options NotificationChannelOptions `json:"options"`
+}
+
+func (n NotificationChannel) ToJSON() io.Reader {
+	payload, _ := json.Marshal(notificationChannelWrapper{n})
+	return bytes.NewBuffer(payload)
+}
+
+func NotificationChannelFromJSON(body []byte) NotificationChannel {
+	var result notificationChannelWrapper
+	json.Unmarshal(body, &result)
+
+	return result.NotificationChannel
+}
+
+type notificationChannelWrapper struct {
+	NotificationChannel NotificationChannel `json:"notificationChannel"`
 }

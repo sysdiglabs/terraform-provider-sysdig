@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -16,6 +17,11 @@ type SysdigSecureClient interface {
 
 	GetUserRulesFile() (UserRulesFile, error)
 	UpdateUserRulesFile(UserRulesFile) (UserRulesFile, error)
+
+	CreateNotificationChannel(NotificationChannel) (NotificationChannel, error)
+	GetNotificationChannelById(int) (NotificationChannel, error)
+	DeleteNotificationChannel(int) error
+	UpdateNotificationChannel(NotificationChannel) (NotificationChannel, error)
 }
 
 func NewSysdigSecureClient(sysdigSecureAPIToken string, url string) SysdigSecureClient {
@@ -32,6 +38,85 @@ type sysdigSecureClient struct {
 	httpClient           *http.Client
 }
 
+// == NotificationChannel ==============================================================================================
+
+func (client *sysdigSecureClient) GetNotificationChannelById(id int) (nc NotificationChannel, err error) {
+	response, err := client.doSysdigSecureRequest(http.MethodGet, client.GetNotificationChannelUrl(id), nil)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	body, _ := ioutil.ReadAll(response.Body)
+
+	if response.StatusCode != http.StatusOK {
+		err = errors.New(response.Status)
+		return
+	}
+
+	nc = NotificationChannelFromJSON(body)
+	return
+}
+
+func (client *sysdigSecureClient) CreateNotificationChannel(ncRequest NotificationChannel) (nc NotificationChannel, err error) {
+	response, err := client.doSysdigSecureRequest(http.MethodPost, client.GetNotificationChannelsUrl(), ncRequest.ToJSON())
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	body, _ := ioutil.ReadAll(response.Body)
+
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
+		err = errors.New(response.Status)
+		return
+	}
+
+	nc = NotificationChannelFromJSON(body)
+	return
+}
+
+func (client *sysdigSecureClient) UpdateNotificationChannel(ncRequest NotificationChannel) (nc NotificationChannel, err error) {
+	response, err := client.doSysdigSecureRequest(http.MethodPut, client.GetNotificationChannelUrl(ncRequest.ID), ncRequest.ToJSON())
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	body, _ := ioutil.ReadAll(response.Body)
+
+	if response.StatusCode != http.StatusOK {
+		err = errors.New(response.Status)
+		return
+	}
+
+	nc = NotificationChannelFromJSON(body)
+	return
+
+}
+
+func (client *sysdigSecureClient) DeleteNotificationChannel(id int) error {
+	response, err := client.doSysdigSecureRequest(http.MethodDelete, client.GetNotificationChannelUrl(id), nil)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusNoContent {
+		return errors.New(response.Status)
+	}
+	return nil
+}
+
+func (client *sysdigSecureClient) GetNotificationChannelsUrl() string {
+	return fmt.Sprintf("%s/api/notificationChannels", client.URL)
+}
+
+func (client *sysdigSecureClient) GetNotificationChannelUrl(id int) string {
+	return fmt.Sprintf("%s/api/notificationChannels/%d", client.URL, id)
+}
+
+// == Policy ===========================================================================================================
 func (client *sysdigSecureClient) CreatePolicy(policyRequest Policy) (Policy, error) {
 	response, _ := client.doSysdigSecureRequest("POST", client.policiesURL(), policyRequest.ToJSON())
 	body, _ := ioutil.ReadAll(response.Body)
