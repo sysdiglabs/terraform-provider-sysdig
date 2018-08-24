@@ -117,6 +117,7 @@ func (client *sysdigSecureClient) GetNotificationChannelUrl(id int) string {
 }
 
 // == Policy ===========================================================================================================
+
 func (client *sysdigSecureClient) CreatePolicy(policyRequest Policy) (Policy, error) {
 	response, _ := client.doSysdigSecureRequest("POST", client.policiesURL(), policyRequest.ToJSON())
 	body, _ := ioutil.ReadAll(response.Body)

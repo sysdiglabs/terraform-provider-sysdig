@@ -62,6 +62,13 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"notification_channels": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"actions": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -123,10 +130,17 @@ func policyFromResourceData(d *schema.ResourceData) Policy {
 
 	addActionsToPolicy(d, &policy)
 
-	falcoRuleNameRegex := d.Get("falco_rule_name_regex")
-	if falcoRuleNameRegex != nil {
+	if falcoRuleNameRegex := d.Get("falco_rule_name_regex"); falcoRuleNameRegex != nil {
 		policy.FalcoConfiguration = FalcoConfiguration{
 			RuleNameRegEx: falcoRuleNameRegex.(string),
+		}
+	}
+
+	if notificationChannelIds, ok := d.Get("notification_channels").([]interface{}); ok {
+		for _, id := range notificationChannelIds {
+			if idStr, ok := id.(string); ok {
+				policy.NotificationChannelIds = append(policy.NotificationChannelIds, strings.TrimSpace(idStr))
+			}
 		}
 	}
 
@@ -187,6 +201,7 @@ func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
 			d.Set("actions.0.capture.seconds_before_event", action.BeforeEventNs/100000000)
 		}
 	}
+	d.Set("notification_channels", policy.NotificationChannelIds)
 
 	if policy.FalcoConfiguration.RuleNameRegEx != "" {
 		d.Set("falco_rule_name_regex", policy.FalcoConfiguration.RuleNameRegEx)

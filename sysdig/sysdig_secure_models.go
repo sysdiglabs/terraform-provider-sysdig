@@ -20,17 +20,18 @@ type FalcoConfiguration struct {
 // -------- Policies --------
 
 type Policy struct {
-	ID                 int                `json:"id,omitempty"`
-	Name               string             `json:"name"`
-	Description        string             `json:"description"`
-	Severity           int                `json:"severity"`
-	ContainerScope     bool               `json:"containerScope"`
-	HostScope          bool               `json:"hostScope"`
-	Enabled            bool               `json:"enabled"`
-	Actions            []Action           `json:"actions,omitempty"`
-	Scope              string             `json:"scope,omitempty"`
-	FalcoConfiguration FalcoConfiguration `json:"falcoConfiguration,omitempty"`
-	Version            int                `json:"version,omitempty"`
+	ID                     int                `json:"id,omitempty"`
+	Name                   string             `json:"name"`
+	Description            string             `json:"description"`
+	Severity               int                `json:"severity"`
+	ContainerScope         bool               `json:"containerScope"`
+	HostScope              bool               `json:"hostScope"`
+	Enabled                bool               `json:"enabled"`
+	Actions                []Action           `json:"actions,omitempty"`
+	Scope                  string             `json:"scope,omitempty"`
+	FalcoConfiguration     FalcoConfiguration `json:"falcoConfiguration,omitempty"`
+	Version                int                `json:"version,omitempty"`
+	NotificationChannelIds []string           `json:"notificationChannelIds,omitempty"`
 }
 
 type policyWrapper struct {

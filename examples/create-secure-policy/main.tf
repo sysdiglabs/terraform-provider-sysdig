@@ -61,6 +61,10 @@ resource "sysdig_secure_policy" "sample" {
   container_scope = true
   host_scope = true
 
+  notification_channels = [
+    "${sysdig_secure_notification_channel.sample-email.id}",
+    "${sysdig_secure_notification_channel.sample-opsgenie.id}"]
+
   //actions {
   //  container = "pause"
 
