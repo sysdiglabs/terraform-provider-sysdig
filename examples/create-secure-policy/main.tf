@@ -77,3 +77,25 @@ resource "sysdig_secure_policy" "sample" {
   // Falco rule selection
   falco_rule_name_regex = "Unexpected spawned process traefik"
 }
+
+
+resource "sysdig_secure_policy" "sample2" {
+  name = "Other example of Policy"
+  description = "this is other example of policy"
+  severity = 4
+  enabled = true
+
+  container_scope = true
+  host_scope = true
+
+  notification_channels = [
+    "${sysdig_secure_notification_channel.sample-victorops.id}"]
+
+  falco_rule_name_regex = "Unexpected spawned process traefik"
+}
+
+resource "sysdig_secure_policies_priority" "priority" {
+  policies = [
+    "${sysdig_secure_policy.sample2.id}",
+    "${sysdig_secure_policy.sample.id}"]
+}

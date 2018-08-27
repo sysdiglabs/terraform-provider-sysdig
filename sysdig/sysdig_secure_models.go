@@ -31,7 +31,7 @@ type Policy struct {
 	Scope                  string             `json:"scope,omitempty"`
 	FalcoConfiguration     FalcoConfiguration `json:"falcoConfiguration,omitempty"`
 	Version                int                `json:"version,omitempty"`
-	NotificationChannelIds []string           `json:"notificationChannelIds,omitempty"`
+	NotificationChannelIds []int              `json:"notificationChannelIds,omitempty"`
 }
 
 type policyWrapper struct {
@@ -71,6 +71,28 @@ func UserRulesFileFromJSON(body []byte) UserRulesFile {
 	json.Unmarshal(body, &result)
 
 	return result.UserRulesFile
+}
+
+// -------- Policies Priority ---------
+
+type PoliciesPriority struct {
+	Version   int   `json:"version,omitempty"`
+	PolicyIds []int `json:"policyIds"`
+}
+
+type policiesPriorityWrapper struct {
+	Priorities PoliciesPriority `json:"priorities"`
+}
+
+func (pp *PoliciesPriority) ToJSON() io.Reader {
+	payload, _ := json.Marshal(policiesPriorityWrapper{*pp})
+	return bytes.NewBuffer(payload)
+}
+
+func PoliciesPriorityFromJSON(body []byte) PoliciesPriority {
+	var result policiesPriorityWrapper
+	json.Unmarshal(body, &result)
+	return result.Priorities
 }
 
 // -------- Notification Channels --------

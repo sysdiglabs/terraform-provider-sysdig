@@ -22,6 +22,10 @@ type SysdigSecureClient interface {
 	GetNotificationChannelById(int) (NotificationChannel, error)
 	DeleteNotificationChannel(int) error
 	UpdateNotificationChannel(NotificationChannel) (NotificationChannel, error)
+
+	CreatePoliciesPriority(PoliciesPriority) (PoliciesPriority, error)
+	UpdatePoliciesPriority(PoliciesPriority) (PoliciesPriority, error)
+	GetPoliciesPriority() (PoliciesPriority, error)
 }
 
 func NewSysdigSecureClient(sysdigSecureAPIToken string, url string) SysdigSecureClient {
@@ -181,6 +185,8 @@ func (client *sysdigSecureClient) GetPolicyById(policyID int) (Policy, error) {
 	return PolicyFromJSON(body), nil
 }
 
+// == User Falco Rules =================================================================================================
+
 func (client *sysdigSecureClient) GetUserRulesFile() (UserRulesFile, error) {
 	response, _ := client.doSysdigSecureRequest("GET", client.userRulesFileURL(), nil)
 	body, _ := ioutil.ReadAll(response.Body)
@@ -209,4 +215,52 @@ func (client *sysdigSecureClient) UpdateUserRulesFile(userRulesFileRequest UserR
 	defer response.Body.Close()
 
 	return UserRulesFileFromJSON(body), nil
+}
+
+// == Policies Priority ================================================================================================
+
+func (client *sysdigSecureClient) CreatePoliciesPriority(priorityRequest PoliciesPriority) (priority PoliciesPriority, err error) {
+	response, err := client.doSysdigSecureRequest(http.MethodPut, client.policiesPriorityURL(), priorityRequest.ToJSON())
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	body, _ := ioutil.ReadAll(response.Body)
+
+	if response.StatusCode != http.StatusOK {
+		err = errors.New(response.Status)
+		return
+	}
+
+	priority = PoliciesPriorityFromJSON(body)
+	return
+
+}
+
+// Same behaviour as Create
+func (client *sysdigSecureClient) UpdatePoliciesPriority(priorityRequest PoliciesPriority) (priority PoliciesPriority, err error) {
+	return client.CreatePoliciesPriority(priorityRequest)
+}
+
+func (client *sysdigSecureClient) GetPoliciesPriority() (priority PoliciesPriority, err error) {
+	response, err := client.doSysdigSecureRequest(http.MethodGet, client.policiesPriorityURL(), nil)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	body, _ := ioutil.ReadAll(response.Body)
+
+	if response.StatusCode != http.StatusOK {
+		err = errors.New(response.Status)
+		return
+	}
+
+	priority = PoliciesPriorityFromJSON(body)
+	return
+}
+
+func (client *sysdigSecureClient) policiesPriorityURL() string {
+	return fmt.Sprintf("%s/api/policies/priorities", client.URL)
 }

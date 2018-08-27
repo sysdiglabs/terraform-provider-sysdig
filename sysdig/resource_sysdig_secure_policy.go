@@ -63,7 +63,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 				Required: true,
 			},
 			"notification_channels": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -136,10 +136,13 @@ func policyFromResourceData(d *schema.ResourceData) Policy {
 		}
 	}
 
-	if notificationChannelIds, ok := d.Get("notification_channels").([]interface{}); ok {
-		for _, id := range notificationChannelIds {
+	if notificationChannelIdSet, ok := d.Get("notification_channels").(*schema.Set); ok {
+		list := notificationChannelIdSet.List()
+		for _, id := range list {
 			if idStr, ok := id.(string); ok {
-				policy.NotificationChannelIds = append(policy.NotificationChannelIds, strings.TrimSpace(idStr))
+				idStr = strings.TrimSpace(idStr)
+				idInt, _ := strconv.Atoi(idStr)
+				policy.NotificationChannelIds = append(policy.NotificationChannelIds, idInt)
 			}
 		}
 	}
@@ -201,7 +204,12 @@ func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
 			d.Set("actions.0.capture.seconds_before_event", action.BeforeEventNs/100000000)
 		}
 	}
-	d.Set("notification_channels", policy.NotificationChannelIds)
+
+	var ncIds []string
+	for _, idStr := range policy.NotificationChannelIds {
+		ncIds = append(ncIds, strconv.Itoa(idStr))
+	}
+	d.Set("notification_channels", ncIds)
 
 	if policy.FalcoConfiguration.RuleNameRegEx != "" {
 		d.Set("falco_rule_name_regex", policy.FalcoConfiguration.RuleNameRegEx)
