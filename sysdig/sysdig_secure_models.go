@@ -99,13 +99,11 @@ func PoliciesPriorityFromJSON(body []byte) PoliciesPriority {
 
 type NotificationChannelOptions struct {
 	EmailRecipients []string `json:"emailRecipients,omitempty"` // Type: email
-
-	SnsTopicARNs []string `json:"snsTopicARNs,omitempty"` // Type: SNS
-
-	APIKey     string `json:"apiKey,omitempty"`     // Type: VictorOps
-	RoutingKey string `json:"routingKey,omitempty"` // Type: VictorOps
-
-	Url string `json:"url,omitempty"` // Type: OpsGenie and Webhook
+	SnsTopicARNs    []string `json:"snsTopicARNs,omitempty"`    // Type: SNS
+	APIKey          string   `json:"apiKey,omitempty"`          // Type: VictorOps
+	RoutingKey      string   `json:"routingKey,omitempty"`      // Type: VictorOps
+	Url             string   `json:"url,omitempty"`             // Type: OpsGenie, Webhook and Slack
+	Channel         string   `json:"channel,omitempty"`         // Type: Slack
 
 	NotifyOnOk      bool `json:"notifyOnOk"`
 	NotifyOnResolve bool `json:"notifyOnResolve"`

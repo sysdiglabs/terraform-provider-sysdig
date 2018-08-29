@@ -55,6 +55,10 @@ func resourceSysdigSecureNotificationChannel() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"channel": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"notify_when_ok": {
 				Type:     schema.TypeBool,
 				Required: true,
@@ -109,6 +113,7 @@ func resourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interfac
 	d.Set("topics", nc.Options.SnsTopicARNs)
 	d.Set("api_key", nc.Options.APIKey)
 	d.Set("url", nc.Options.Url)
+	d.Set("channel", nc.Options.Channel)
 	d.Set("routing_key", nc.Options.RoutingKey)
 	d.Set("notify_when_ok", nc.Options.NotifyOnOk)
 	d.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
@@ -163,6 +168,7 @@ const (
 	opsgenie  = "OPSGENIE"
 	victorops = "VICTOROPS"
 	webhook   = "WEBHOOK"
+	slack     = "SLACK"
 )
 
 func notificationChannelFromResourceData(d *schema.ResourceData) (nc NotificationChannel, err error) {
@@ -233,8 +239,21 @@ func notificationChannelFromResourceData(d *schema.ResourceData) (nc Notificatio
 			err = fmt.Errorf(fieldNotSetError, "url", channelType)
 			return
 		}
+	case slack:
+		if url, ok := d.Get("url").(string); ok && url != "" {
+			nc.Options.Url = url
+		} else {
+			err = fmt.Errorf(fieldNotSetError, "url", channelType)
+			return
+		}
+		if channel, ok := d.Get("channel").(string); ok && channel != "" {
+			nc.Options.Channel = channel
+		} else {
+			err = fmt.Errorf(fieldNotSetError, "channel", channelType)
+			return
+		}
 	default:
-		validChannelTypes := []string{email, amazonSns, opsgenie, victorops, webhook}
+		validChannelTypes := []string{email, amazonSns, opsgenie, victorops, webhook, slack}
 		err = fmt.Errorf("error type not recognized, must be one of the following: %s", validChannelTypes)
 		return
 	}

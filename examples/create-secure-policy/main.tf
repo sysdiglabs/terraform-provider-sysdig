@@ -50,6 +50,16 @@ resource "sysdig_secure_notification_channel" "sample-webhook" {
   notify_when_resolved = false
 }
 
+resource "sysdig_secure_notification_channel" "sample-slack" {
+  name = "Example Channel - Slack"
+  enabled = true
+  type = "SLACK"
+  url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+  channel = "#sysdig"
+  notify_when_ok = true
+  notify_when_resolved = true
+}
+
 resource "sysdig_secure_policy" "sample" {
   name = "Write apt stuff"
   description = "an attempt to write to the dpkg database by any non-dpkg related program"
