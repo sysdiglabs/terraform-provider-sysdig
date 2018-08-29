@@ -1,0 +1,10 @@
+version: "3"
+services:
+  oanc:
+    build: .
+    image: oanc
+    environment:
+      SDC_TOKEN: "your_token"
+      SDC_URL: "https://secure.sysdig.com"
+    container_name: oanc
+    tty: true
