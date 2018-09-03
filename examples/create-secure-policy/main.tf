@@ -98,6 +98,78 @@ resource "sysdig_secure_policy" "sample2" {
   container_scope = true
   host_scope = true
 
+
+  processes = {
+    default = "accept"
+    whitelist = [
+      "mysql",
+      "apache"]
+    blacklist = [
+      "ssh"]
+  }
+
+  containers = {
+    default = "none"
+    whitelist = [
+      "cassandra"]
+    blacklist = [
+      "mongo"]
+  }
+
+  syscalls = {
+    default = "accept"
+    whitelist = [
+      "accept",
+      "close"]
+    blacklist = [
+      "bind",
+      "bpf"]
+  }
+
+  network = {
+    inbound = "accept"
+
+    outbound = "deny"
+
+    listening_ports {
+
+      default = "none"
+      tcp {
+        whitelist = [
+          80,
+          443]
+        blacklist = [
+          8080,
+          5000]
+      }
+      udp {
+        whitelist = [
+          53,
+          4000]
+        blacklist = [
+          3400,
+          543]
+      }
+    }
+  }
+
+  filesystem = {
+    read = {
+      whitelist = [
+        "/home"]
+      blacklist = [
+        "/etc"]
+    }
+    readwrite = {
+      whitelist = [
+        "/home"]
+      blacklist = [
+        "/tmp"]
+    }
+    other_paths = "none"
+  }
+
+
   notification_channels = [
     "${sysdig_secure_notification_channel.sample-victorops.id}"]
 
