@@ -59,6 +59,11 @@ func (client *sysdigSecureClient) GetNotificationChannelById(id int) (nc Notific
 	}
 
 	nc = NotificationChannelFromJSON(body)
+
+	if nc.Version == 0 {
+		err = fmt.Errorf("NotificationChannel with ID: %d does not exists", id)
+		return
+	}
 	return
 }
 

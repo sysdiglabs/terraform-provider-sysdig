@@ -215,8 +215,8 @@ func TestGetNotificationChannelById(t *testing.T) {
 func TestGetNotificationChannelByIdFailsWhenDoesNotExist(t *testing.T) {
 	sysdigSecureClient := sysdig.NewSysdigSecureClient(os.Getenv("SYSDIG_SECURE_API_TOKEN"), "https://secure.sysdig.com")
 
-	nonExistentId := 1
-	_, err := sysdigSecureClient.GetNotificationChannelById(nonExistentId)
+	nonExistentID := 1
+	_, err := sysdigSecureClient.GetNotificationChannelById(nonExistentID)
 
 	assert.NotNil(t, err)
 }
