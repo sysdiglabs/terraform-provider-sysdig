@@ -187,8 +187,8 @@ func TestUpdateNotificationChannelFailsWhenDoesNotExist(t *testing.T) {
 	assert.Nil(t, err)
 	defer sysdigSecureClient.DeleteNotificationChannel(channel.ID)
 
-	nonExistentId := 1
-	channel.ID = nonExistentId
+	nonExistentID := 1
+	channel.ID = nonExistentID
 	channel.Name = "Changed Name"
 	_, err = sysdigSecureClient.UpdateNotificationChannel(channel)
 
