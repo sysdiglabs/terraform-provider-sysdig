@@ -190,8 +190,8 @@ type NotificationChannel struct {
 	Options NotificationChannelOptions `json:"options"`
 }
 
-func (n NotificationChannel) ToJSON() io.Reader {
-	payload, _ := json.Marshal(notificationChannelWrapper{n})
+func (n *NotificationChannel) ToJSON() io.Reader {
+	payload, _ := json.Marshal(notificationChannelWrapper{*n})
 	return bytes.NewBuffer(payload)
 }
 
