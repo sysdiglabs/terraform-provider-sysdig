@@ -6,6 +6,28 @@ import (
 	"io"
 )
 
+// -------- Policies --------
+
+type Policy struct {
+	ID                           int                           `json:"id,omitempty"`
+	Name                         string                        `json:"name"`
+	Description                  string                        `json:"description"`
+	Severity                     int                           `json:"severity"`
+	ContainerScope               bool                          `json:"containerScope"`
+	HostScope                    bool                          `json:"hostScope"`
+	Enabled                      bool                          `json:"enabled"`
+	Actions                      []Action                      `json:"actions,omitempty"`
+	Scope                        string                        `json:"scope,omitempty"`
+	FalcoConfiguration           FalcoConfiguration            `json:"falcoConfiguration,omitempty"`
+	ProcessesConfiguration       *ProcessesConfiguration       `json:"processesConfiguration,omitempty"`
+	ContainerImagesConfiguration *ContainerImagesConfiguration `json:"containerImagesConfiguration,omitempty"`
+	FileSystemConfiguration      *FileSystemConfiguration      `json:"fileSystemConfiguration,omitempty"`
+	SyscallsConfiguration        *SyscallsConfiguration        `json:"syscallsConfiguration,omitempty"`
+	NetworkConfiguration         *NetworkConfiguration         `json:"networkConfiguration,omitempty"`
+	Version                      int                           `json:"version,omitempty"`
+	NotificationChannelIds       []int                         `json:"notificationChannelIds,omitempty"`
+}
+
 type Action struct {
 	AfterEventNs         int    `json:"afterEventNs,omitempty"`
 	BeforeEventNs        int    `json:"beforeEventNs,omitempty"`
@@ -17,21 +39,71 @@ type FalcoConfiguration struct {
 	RuleNameRegEx string `json:"ruleNameRegEx"`
 }
 
-// -------- Policies --------
+type ProcessesConfigurationElement struct {
+	Values  []string `json:"values"`
+	OnMatch string   `json:"onMatch"`
+}
 
-type Policy struct {
-	ID                     int                `json:"id,omitempty"`
-	Name                   string             `json:"name"`
-	Description            string             `json:"description"`
-	Severity               int                `json:"severity"`
-	ContainerScope         bool               `json:"containerScope"`
-	HostScope              bool               `json:"hostScope"`
-	Enabled                bool               `json:"enabled"`
-	Actions                []Action           `json:"actions,omitempty"`
-	Scope                  string             `json:"scope,omitempty"`
-	FalcoConfiguration     FalcoConfiguration `json:"falcoConfiguration,omitempty"`
-	Version                int                `json:"version,omitempty"`
-	NotificationChannelIds []int              `json:"notificationChannelIds,omitempty"`
+type ProcessesConfiguration struct {
+	OnDefault string                          `json:"onDefault"`
+	Fields    []string                        `json:"fields"`
+	List      []ProcessesConfigurationElement `json:"list,omitempty"`
+}
+
+type ContainerImagesConfigurationElement struct {
+	Values  []string `json:"values"`
+	OnMatch string   `json:"onMatch"`
+}
+
+type ContainerImagesConfiguration struct {
+	OnDefault string                                `json:"onDefault"`
+	Fields    []string                              `json:"fields"`
+	List      []ContainerImagesConfigurationElement `json:"list"`
+}
+
+type FileSystemConfigurationListElement struct {
+	Values     []string `json:"values"`
+	OnMatch    string   `json:"onMatch"`
+	AccessType string   `json:"accessType"`
+}
+
+type FileSystemConfiguration struct {
+	OnDefault string                               `json:"onDefault"`
+	Fields    []string                             `json:"fields"`
+	List      []FileSystemConfigurationListElement `json:"list"`
+}
+
+type SyscallsConfigurationElement struct {
+	Values  []string `json:"values"`
+	OnMatch string   `json:"onMatch"`
+}
+
+type SyscallsConfiguration struct {
+	OnDefault string                         `json:"onDefault"`
+	Fields    []string                       `json:"fields"`
+	List      []SyscallsConfigurationElement `json:"list"`
+}
+
+type NetworkConfigurationListeningPortsListElement struct {
+	Values   []string `json:"values"`
+	OnMatch  string   `json:"onMatch"`
+	NetProto string   `json:"netProto"`
+}
+
+type NetworkConfiguration struct {
+	ListeningPorts struct {
+		OnDefault string                                          `json:"onDefault"`
+		Fields    []string                                        `json:"fields"`
+		List      []NetworkConfigurationListeningPortsListElement `json:"list"`
+	} `json:"listeningPorts"`
+	Inbound struct {
+		OnDefault string   `json:"onDefault"`
+		Fields    []string `json:"fields"`
+	} `json:"inbound"`
+	Outbound struct {
+		OnDefault string   `json:"onDefault"`
+		Fields    []string `json:"fields"`
+	} `json:"outbound"`
 }
 
 type policyWrapper struct {
