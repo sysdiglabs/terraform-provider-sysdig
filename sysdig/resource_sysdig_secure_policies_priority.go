@@ -62,6 +62,7 @@ func resourceSysdigSecurePoliciesPriorityCreate(d *schema.ResourceData, meta int
 		return err
 	}
 
+	d.SetId(strconv.Itoa(priority.Version))
 	d.Set("policies", priority.PolicyIds)
 	d.Set("version", priority.Version)
 
