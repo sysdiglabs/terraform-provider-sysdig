@@ -3,6 +3,8 @@ package sysdig
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -30,7 +32,7 @@ func Provider() terraform.ResourceProvider {
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	sysdigSecureClient := NewSysdigSecureClient(
+	sysdigSecureClient := secure.NewSysdigSecureClient(
 		d.Get("sysdig_secure_api_token").(string),
 		d.Get("sysdig_secure_url").(string),
 	)

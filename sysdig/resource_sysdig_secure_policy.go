@@ -7,6 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
 
 var defaultMatchActions = map[string]string{
@@ -333,7 +335,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 }
 
 func resourceSysdigPolicyCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	policy := policyFromResourceData(d)
 	policy, err := client.CreatePolicy(policy)
@@ -347,8 +349,8 @@ func resourceSysdigPolicyCreate(d *schema.ResourceData, meta interface{}) error 
 	return nil
 }
 
-func policyFromResourceData(d *schema.ResourceData) Policy {
-	policy := Policy{
+func policyFromResourceData(d *schema.ResourceData) secure.Policy {
+	policy := secure.Policy{
 		Name:           d.Get("name").(string),
 		Description:    d.Get("description").(string),
 		Severity:       d.Get("severity").(int),
@@ -366,7 +368,7 @@ func policyFromResourceData(d *schema.ResourceData) Policy {
 	addFilesystemToPolicy(d, &policy)
 
 	if falcoRuleNameRegex := d.Get("falco_rule_name_regex"); falcoRuleNameRegex != nil {
-		policy.FalcoConfiguration = FalcoConfiguration{
+		policy.FalcoConfiguration = secure.FalcoConfiguration{
 			RuleNameRegEx: falcoRuleNameRegex.(string),
 		}
 	}
@@ -384,13 +386,13 @@ func policyFromResourceData(d *schema.ResourceData) Policy {
 
 	return policy
 }
-func addFilesystemToPolicy(d *schema.ResourceData, policy *Policy) {
+func addFilesystemToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 	filesystem := d.Get("filesystem").([]interface{})
 	if len(filesystem) == 0 {
 		return
 	}
 
-	policy.FileSystemConfiguration = &FileSystemConfiguration{
+	policy.FileSystemConfiguration = &secure.FileSystemConfiguration{
 		Fields: []string{
 			"fd.name",
 			"proc.cmdline",
@@ -412,7 +414,7 @@ func addFilesystemToPolicy(d *schema.ResourceData, policy *Policy) {
 	}
 
 	if readWhitelist := d.Get("filesystem.0.read.0.whitelist").(*schema.Set); readWhitelist.Len() > 0 {
-		policy.FileSystemConfiguration.List = append(policy.FileSystemConfiguration.List, FileSystemConfigurationListElement{
+		policy.FileSystemConfiguration.List = append(policy.FileSystemConfiguration.List, secure.FileSystemConfigurationListElement{
 			Values:     setToSlice(readWhitelist),
 			AccessType: "ACCESS_READ",
 			OnMatch:    matchActions["accept"],
@@ -420,7 +422,7 @@ func addFilesystemToPolicy(d *schema.ResourceData, policy *Policy) {
 	}
 
 	if readBlacklist := d.Get("filesystem.0.read.0.blacklist").(*schema.Set); readBlacklist.Len() > 0 {
-		policy.FileSystemConfiguration.List = append(policy.FileSystemConfiguration.List, FileSystemConfigurationListElement{
+		policy.FileSystemConfiguration.List = append(policy.FileSystemConfiguration.List, secure.FileSystemConfigurationListElement{
 			Values:     setToSlice(readBlacklist),
 			AccessType: "ACCESS_READ",
 			OnMatch:    matchActions["deny"],
@@ -428,7 +430,7 @@ func addFilesystemToPolicy(d *schema.ResourceData, policy *Policy) {
 	}
 
 	if readwriteWhitelist := d.Get("filesystem.0.readwrite.0.whitelist").(*schema.Set); readwriteWhitelist.Len() > 0 {
-		policy.FileSystemConfiguration.List = append(policy.FileSystemConfiguration.List, FileSystemConfigurationListElement{
+		policy.FileSystemConfiguration.List = append(policy.FileSystemConfiguration.List, secure.FileSystemConfigurationListElement{
 			Values:     setToSlice(readwriteWhitelist),
 			AccessType: "ACCESS_READWRITE",
 			OnMatch:    matchActions["accept"],
@@ -436,7 +438,7 @@ func addFilesystemToPolicy(d *schema.ResourceData, policy *Policy) {
 	}
 
 	if readwriteBlacklist := d.Get("filesystem.0.readwrite.0.blacklist").(*schema.Set); readwriteBlacklist.Len() > 0 {
-		policy.FileSystemConfiguration.List = append(policy.FileSystemConfiguration.List, FileSystemConfigurationListElement{
+		policy.FileSystemConfiguration.List = append(policy.FileSystemConfiguration.List, secure.FileSystemConfigurationListElement{
 			Values:     setToSlice(readwriteBlacklist),
 			AccessType: "ACCESS_READWRITE",
 			OnMatch:    matchActions["deny"],
@@ -444,13 +446,13 @@ func addFilesystemToPolicy(d *schema.ResourceData, policy *Policy) {
 	}
 }
 
-func addProcessesToPolicy(d *schema.ResourceData, policy *Policy) {
+func addProcessesToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 	processes := d.Get("processes").([]interface{})
 	if len(processes) == 0 {
 		return
 	}
 
-	policy.ProcessesConfiguration = &ProcessesConfiguration{
+	policy.ProcessesConfiguration = &secure.ProcessesConfiguration{
 		Fields: []string{
 			"proc.name",
 			"proc.cmdline",
@@ -464,7 +466,7 @@ func addProcessesToPolicy(d *schema.ResourceData, policy *Policy) {
 	}
 
 	if whitelist := d.Get("processes.0.whitelist").(*schema.Set); whitelist.Len() > 0 {
-		element := ProcessesConfigurationElement{
+		element := secure.ProcessesConfigurationElement{
 			OnMatch: matchActions["accept"],
 		}
 		for _, value := range whitelist.List() {
@@ -473,7 +475,7 @@ func addProcessesToPolicy(d *schema.ResourceData, policy *Policy) {
 		policy.ProcessesConfiguration.List = append(policy.ProcessesConfiguration.List, element)
 	}
 	if blacklist := d.Get("processes.0.blacklist").(*schema.Set); blacklist.Len() > 0 {
-		element := ProcessesConfigurationElement{
+		element := secure.ProcessesConfigurationElement{
 			OnMatch: matchActions["deny"],
 		}
 		for _, value := range blacklist.List() {
@@ -483,13 +485,13 @@ func addProcessesToPolicy(d *schema.ResourceData, policy *Policy) {
 	}
 }
 
-func addContainersToPolicy(d *schema.ResourceData, policy *Policy) {
+func addContainersToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 	containers := d.Get("containers").([]interface{})
 	if len(containers) == 0 {
 		return
 	}
 
-	policy.ContainerImagesConfiguration = &ContainerImagesConfiguration{
+	policy.ContainerImagesConfiguration = &secure.ContainerImagesConfiguration{
 		Fields: []string{
 			"container.id",
 			"container.name",
@@ -505,7 +507,7 @@ func addContainersToPolicy(d *schema.ResourceData, policy *Policy) {
 	}
 
 	if whitelist := d.Get("containers.0.whitelist").(*schema.Set); whitelist.Len() > 0 {
-		element := ContainerImagesConfigurationElement{
+		element := secure.ContainerImagesConfigurationElement{
 			OnMatch: matchActions["accept"],
 		}
 		for _, value := range whitelist.List() {
@@ -514,7 +516,7 @@ func addContainersToPolicy(d *schema.ResourceData, policy *Policy) {
 		policy.ContainerImagesConfiguration.List = append(policy.ContainerImagesConfiguration.List, element)
 	}
 	if blacklist := d.Get("containers.0.blacklist").(*schema.Set); blacklist.Len() > 0 {
-		element := ContainerImagesConfigurationElement{
+		element := secure.ContainerImagesConfigurationElement{
 			OnMatch: matchActions["deny"],
 		}
 		for _, value := range blacklist.List() {
@@ -524,13 +526,13 @@ func addContainersToPolicy(d *schema.ResourceData, policy *Policy) {
 	}
 }
 
-func addSyscallsToPolicy(d *schema.ResourceData, policy *Policy) {
+func addSyscallsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 	syscalls := d.Get("syscalls").([]interface{})
 	if len(syscalls) == 0 {
 		return
 	}
 
-	policy.SyscallsConfiguration = &SyscallsConfiguration{
+	policy.SyscallsConfiguration = &secure.SyscallsConfiguration{
 		Fields: []string{
 			"evt.type",
 			"proc.cmdline",
@@ -545,7 +547,7 @@ func addSyscallsToPolicy(d *schema.ResourceData, policy *Policy) {
 	}
 
 	if whitelist := d.Get("syscalls.0.whitelist").(*schema.Set); whitelist.Len() > 0 {
-		element := SyscallsConfigurationElement{
+		element := secure.SyscallsConfigurationElement{
 			OnMatch: matchActions["accept"],
 		}
 		for _, value := range whitelist.List() {
@@ -554,7 +556,7 @@ func addSyscallsToPolicy(d *schema.ResourceData, policy *Policy) {
 		policy.SyscallsConfiguration.List = append(policy.SyscallsConfiguration.List, element)
 	}
 	if blacklist := d.Get("syscalls.0.blacklist").(*schema.Set); blacklist.Len() > 0 {
-		element := SyscallsConfigurationElement{
+		element := secure.SyscallsConfigurationElement{
 			OnMatch: matchActions["deny"],
 		}
 		for _, value := range blacklist.List() {
@@ -564,26 +566,26 @@ func addSyscallsToPolicy(d *schema.ResourceData, policy *Policy) {
 	}
 }
 
-func addActionsToPolicy(d *schema.ResourceData, policy *Policy) {
+func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 	actions := d.Get("actions").([]interface{})
 	if len(actions) == 0 {
 		return
 	}
 
-	policy.Actions = []Action{}
+	policy.Actions = []secure.Action{}
 
 	containerAction := d.Get("actions.0.container").(string)
 	if containerAction != "" {
 		containerAction = strings.ToUpper("POLICY_ACTION_" + containerAction)
 
-		policy.Actions = append(policy.Actions, Action{Type: containerAction})
+		policy.Actions = append(policy.Actions, secure.Action{Type: containerAction})
 	}
 
 	captureAction := d.Get("actions.0.capture").(map[string]interface{})
 	if len(captureAction) != 0 {
 		afterEventNs, _ := strconv.Atoi(d.Get("actions.0.capture.seconds_after_event").(string) + "000000000")
 		beforeEventNs, _ := strconv.Atoi(d.Get("actions.0.capture.seconds_before_event").(string) + "000000000")
-		policy.Actions = append(policy.Actions, Action{
+		policy.Actions = append(policy.Actions, secure.Action{
 			Type:                 "POLICY_ACTION_CAPTURE",
 			IsLimitedToContainer: false,
 			AfterEventNs:         afterEventNs,
@@ -592,13 +594,13 @@ func addActionsToPolicy(d *schema.ResourceData, policy *Policy) {
 	}
 }
 
-func addNetworkToPolicy(d *schema.ResourceData, policy *Policy) {
+func addNetworkToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 	network := d.Get("network").([]interface{})
 	if len(network) == 0 {
 		return
 	}
 
-	policy.NetworkConfiguration = &NetworkConfiguration{}
+	policy.NetworkConfiguration = &secure.NetworkConfiguration{}
 	policy.NetworkConfiguration.Inbound.Fields = []string{
 		"fd.l4proto",
 		"fd.sip",
@@ -637,7 +639,7 @@ func addNetworkToPolicy(d *schema.ResourceData, policy *Policy) {
 
 	if tcpActions := d.Get("network.0.listening_ports.0.tcp.0").(map[string]interface{}); len(tcpActions) != 0 {
 		if tcpWhitelist := d.Get("network.0.listening_ports.0.tcp.0.whitelist").(*schema.Set); tcpWhitelist.Len() != 0 {
-			element := NetworkConfigurationListeningPortsListElement{
+			element := secure.NetworkConfigurationListeningPortsListElement{
 				NetProto: "PROTO_TCP",
 				OnMatch:  matchActions["accept"],
 			}
@@ -647,7 +649,7 @@ func addNetworkToPolicy(d *schema.ResourceData, policy *Policy) {
 			policy.NetworkConfiguration.ListeningPorts.List = append(policy.NetworkConfiguration.ListeningPorts.List, element)
 		}
 		if tcpBlackList := d.Get("network.0.listening_ports.0.tcp.0.blacklist").(*schema.Set); tcpBlackList.Len() != 0 {
-			element := NetworkConfigurationListeningPortsListElement{
+			element := secure.NetworkConfigurationListeningPortsListElement{
 				NetProto: "PROTO_TCP",
 				OnMatch:  matchActions["deny"],
 			}
@@ -660,7 +662,7 @@ func addNetworkToPolicy(d *schema.ResourceData, policy *Policy) {
 
 	if udpActions := d.Get("network.0.listening_ports.0.udp.0").(map[string]interface{}); len(udpActions) != 0 {
 		if udpWhiteList := d.Get("network.0.listening_ports.0.udp.0.whitelist").(*schema.Set); udpWhiteList.Len() != 0 {
-			element := NetworkConfigurationListeningPortsListElement{
+			element := secure.NetworkConfigurationListeningPortsListElement{
 				NetProto: "PROTO_UDP",
 				OnMatch:  matchActions["accept"],
 			}
@@ -670,7 +672,7 @@ func addNetworkToPolicy(d *schema.ResourceData, policy *Policy) {
 			policy.NetworkConfiguration.ListeningPorts.List = append(policy.NetworkConfiguration.ListeningPorts.List, element)
 		}
 		if udpBlackList := d.Get("network.0.listening_ports.0.udp.0.blacklist").(*schema.Set); udpBlackList.Len() != 0 {
-			element := NetworkConfigurationListeningPortsListElement{
+			element := secure.NetworkConfigurationListeningPortsListElement{
 				NetProto: "PROTO_UDP",
 				OnMatch:  matchActions["deny"],
 			}
@@ -685,7 +687,7 @@ func addNetworkToPolicy(d *schema.ResourceData, policy *Policy) {
 }
 
 func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	id, _ := strconv.Atoi(d.Id())
 	policy, err := client.GetPolicyById(id)
@@ -728,7 +730,8 @@ func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
 
 	return nil
 }
-func resourceSysdigPolicyReadFilesystem(policy Policy, d *schema.ResourceData) {
+
+func resourceSysdigPolicyReadFilesystem(policy secure.Policy, d *schema.ResourceData) {
 	if policy.FileSystemConfiguration == nil {
 		return
 	}
@@ -767,7 +770,7 @@ func resourceSysdigPolicyReadFilesystem(policy Policy, d *schema.ResourceData) {
 	d.Set("filesystem.0.readwrite.blacklist", readwriteBlacklist)
 }
 
-func resourceSysdigPolicyReadNetwork(policy Policy, d *schema.ResourceData) {
+func resourceSysdigPolicyReadNetwork(policy secure.Policy, d *schema.ResourceData) {
 	if policy.NetworkConfiguration == nil {
 		return // No network configuration set
 	}
@@ -821,7 +824,7 @@ func resourceSysdigPolicyReadNetwork(policy Policy, d *schema.ResourceData) {
 	d.Set("network.0.listening_ports.0.udp.0.blacklist", udpDeny)
 }
 
-func resourceSysdigPolicyReadProcesses(policy Policy, d *schema.ResourceData) {
+func resourceSysdigPolicyReadProcesses(policy secure.Policy, d *schema.ResourceData) {
 	if policy.ProcessesConfiguration == nil {
 		return
 	}
@@ -845,7 +848,7 @@ func resourceSysdigPolicyReadProcesses(policy Policy, d *schema.ResourceData) {
 	d.Set("processes.0.blacklist", blackList)
 }
 
-func resourceSysdigPolicyReadContainers(policy Policy, d *schema.ResourceData) {
+func resourceSysdigPolicyReadContainers(policy secure.Policy, d *schema.ResourceData) {
 	if policy.ContainerImagesConfiguration == nil {
 		return
 	}
@@ -869,7 +872,7 @@ func resourceSysdigPolicyReadContainers(policy Policy, d *schema.ResourceData) {
 	d.Set("containers.0.blacklist", blackList)
 }
 
-func resourceSysdigPolicyReadSyscalls(policy Policy, d *schema.ResourceData) {
+func resourceSysdigPolicyReadSyscalls(policy secure.Policy, d *schema.ResourceData) {
 	if policy.SyscallsConfiguration == nil {
 		return
 	}
@@ -895,7 +898,7 @@ func resourceSysdigPolicyReadSyscalls(policy Policy, d *schema.ResourceData) {
 }
 
 func resourceSysdigPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	id, _ := strconv.Atoi(d.Id())
 
@@ -903,7 +906,7 @@ func resourceSysdigPolicyDelete(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceSysdigPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	policy := policyFromResourceData(d)
 	policy.Version = d.Get("version").(int)

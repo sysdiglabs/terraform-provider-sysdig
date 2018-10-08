@@ -2,11 +2,14 @@ package sysdig
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform/helper/schema"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
 
 func resourceSysdigSecureNotificationChannel() *schema.Resource {
@@ -76,7 +79,7 @@ func resourceSysdigSecureNotificationChannel() *schema.Resource {
 }
 
 func resourceSysdigNotificationChannelCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	notificationChannel, err := notificationChannelFromResourceData(d)
 	if err != nil {
@@ -96,7 +99,7 @@ func resourceSysdigNotificationChannelCreate(d *schema.ResourceData, meta interf
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	id, _ := strconv.Atoi(d.Id())
 	nc, err := client.GetNotificationChannelById(id)
@@ -138,7 +141,7 @@ func resourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interfac
 }
 
 func resourceSysdigNotificationChannelUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	nc, err := notificationChannelFromResourceData(d)
 	if err != nil {
@@ -154,7 +157,7 @@ func resourceSysdigNotificationChannelUpdate(d *schema.ResourceData, meta interf
 }
 
 func resourceSysdigNotificationChannelDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	id, _ := strconv.Atoi(d.Id())
 
@@ -171,15 +174,15 @@ const (
 	slack     = "SLACK"
 )
 
-func notificationChannelFromResourceData(d *schema.ResourceData) (nc NotificationChannel, err error) {
+func notificationChannelFromResourceData(d *schema.ResourceData) (nc secure.NotificationChannel, err error) {
 
 	channelType := strings.ToUpper(d.Get("type").(string))
 
-	nc = NotificationChannel{
+	nc = secure.NotificationChannel{
 		Name:    d.Get("name").(string),
 		Enabled: d.Get("enabled").(bool),
 		Type:    channelType,
-		Options: NotificationChannelOptions{
+		Options: secure.NotificationChannelOptions{
 			NotifyOnOk:      d.Get("notify_when_ok").(bool),
 			NotifyOnResolve: d.Get("notify_when_resolved").(bool),
 		},

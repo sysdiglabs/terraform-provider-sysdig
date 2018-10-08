@@ -1,4 +1,4 @@
-package sysdig_test
+package secure_test
 
 import (
 	"os"

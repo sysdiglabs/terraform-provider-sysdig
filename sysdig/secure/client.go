@@ -1,4 +1,4 @@
-package sysdig
+package secure
 
 import (
 	"errors"

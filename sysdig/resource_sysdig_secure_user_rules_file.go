@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform/helper/schema"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
 
 func resourceSysdigSecureUserRulesFile() *schema.Resource {
@@ -37,7 +39,7 @@ func resourceSysdigSecureUserRulesFile() *schema.Resource {
 }
 
 func resouceSysdigUserRulesFileUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	userRulesFile, err := updateCurrentUserRulesFile(client, d.Get("content").(string))
 	if err != nil {
@@ -50,23 +52,23 @@ func resouceSysdigUserRulesFileUpdate(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func updateCurrentUserRulesFile(client SysdigSecureClient, content string) (UserRulesFile, error) {
+func updateCurrentUserRulesFile(client secure.SysdigSecureClient, content string) (secure.UserRulesFile, error) {
 	userRulesFile, err := client.GetUserRulesFile()
 	if err != nil {
-		return UserRulesFile{}, err
+		return secure.UserRulesFile{}, err
 	}
 	userRulesFile.Content = content
 
 	userRulesFile, err = client.UpdateUserRulesFile(userRulesFile)
 	if err != nil {
-		return UserRulesFile{}, err
+		return secure.UserRulesFile{}, err
 	}
 
 	return userRulesFile, nil
 }
 
 func resouceSysdigUserRulesFileRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	userRulesFile, err := client.GetUserRulesFile()
 	if err != nil {
@@ -81,7 +83,7 @@ func resouceSysdigUserRulesFileRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resouceSysdigUserRulesFileDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	_, err := updateCurrentUserRulesFile(client, "")
 

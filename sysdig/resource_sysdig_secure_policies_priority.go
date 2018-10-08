@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform/helper/schema"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
 
 func resourceSysdigSecurePoliciesPriority() *schema.Resource {
@@ -53,7 +55,7 @@ func uniqueIntSlice(intSlice []int) []int {
 }
 
 func resourceSysdigSecurePoliciesPriorityCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	priority := policiesPriorityFromResourceData(d, client)
 
@@ -69,7 +71,7 @@ func resourceSysdigSecurePoliciesPriorityCreate(d *schema.ResourceData, meta int
 	return nil
 }
 
-func policiesPriorityFromResourceData(d *schema.ResourceData, client SysdigSecureClient) (priority PoliciesPriority) {
+func policiesPriorityFromResourceData(d *schema.ResourceData, client secure.SysdigSecureClient) (priority secure.PoliciesPriority) {
 	policies := d.Get("policies").([]interface{})
 
 	var policiesId []int
@@ -81,7 +83,7 @@ func policiesPriorityFromResourceData(d *schema.ResourceData, client SysdigSecur
 		}
 	}
 
-	priority = PoliciesPriority{
+	priority = secure.PoliciesPriority{
 		PolicyIds: policiesId,
 		Version:   d.Get("version").(int),
 	}
@@ -100,7 +102,7 @@ func policiesPriorityFromResourceData(d *schema.ResourceData, client SysdigSecur
 }
 
 func resourceSysdigSecurePoliciesPriorityRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SysdigSecureClient)
+	client := meta.(secure.SysdigSecureClient)
 
 	priority, err := client.GetPoliciesPriority()
 
