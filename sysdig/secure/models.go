@@ -176,6 +176,9 @@ type NotificationChannelOptions struct {
 	RoutingKey      string   `json:"routingKey,omitempty"`      // Type: VictorOps
 	Url             string   `json:"url,omitempty"`             // Type: OpsGenie, Webhook and Slack
 	Channel         string   `json:"channel,omitempty"`         // Type: Slack
+	Account         string   `json:"account,omitempty"`         // Type: PagerDuty
+	ServiceKey      string   `json:"serviceKey,omitempty"`      // Type: PagerDuty
+	ServiceName     string   `json:"serviceName,omitempty"`     // Type: PagerDuty
 
 	NotifyOnOk      bool `json:"notifyOnOk"`
 	NotifyOnResolve bool `json:"notifyOnResolve"`
