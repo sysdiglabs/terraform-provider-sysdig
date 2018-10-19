@@ -62,6 +62,19 @@ func resourceSysdigSecureNotificationChannel() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"account": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"service_key": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			"service_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"notify_when_ok": {
 				Type:     schema.TypeBool,
 				Required: true,
@@ -117,6 +130,9 @@ func resourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interfac
 	d.Set("api_key", nc.Options.APIKey)
 	d.Set("url", nc.Options.Url)
 	d.Set("channel", nc.Options.Channel)
+	d.Set("account", nc.Options.Account)
+	d.Set("service_key", nc.Options.ServiceKey)
+	d.Set("service_name", nc.Options.ServiceName)
 	d.Set("routing_key", nc.Options.RoutingKey)
 	d.Set("notify_when_ok", nc.Options.NotifyOnOk)
 	d.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
@@ -172,6 +188,7 @@ const (
 	victorops = "VICTOROPS"
 	webhook   = "WEBHOOK"
 	slack     = "SLACK"
+	pagerduty = "PAGER_DUTY"
 )
 
 func notificationChannelFromResourceData(d *schema.ResourceData) (nc secure.NotificationChannel, err error) {
@@ -255,8 +272,27 @@ func notificationChannelFromResourceData(d *schema.ResourceData) (nc secure.Noti
 			err = fmt.Errorf(fieldNotSetError, "channel", channelType)
 			return
 		}
+	case pagerduty:
+		if account, ok := d.Get("account").(string); ok && account != "" {
+			nc.Options.Account = account
+		} else {
+			err = fmt.Errorf(fieldNotSetError, "account", channelType)
+			return
+		}
+		if serviceKey, ok := d.Get("service_key").(string); ok && serviceKey != "" {
+			nc.Options.ServiceKey = serviceKey
+		} else {
+			err = fmt.Errorf(fieldNotSetError, "service_key", channelType)
+			return
+		}
+		if serviceName, ok := d.Get("service_name").(string); ok && serviceName != "" {
+			nc.Options.ServiceName = serviceName
+		} else {
+			err = fmt.Errorf(fieldNotSetError, "service_name", channelType)
+			return
+		}
 	default:
-		validChannelTypes := []string{email, amazonSns, opsgenie, victorops, webhook, slack}
+		validChannelTypes := []string{email, amazonSns, opsgenie, victorops, webhook, slack, pagerduty}
 		err = fmt.Errorf("error type not recognized, must be one of the following: %s", validChannelTypes)
 		return
 	}

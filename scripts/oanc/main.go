@@ -10,10 +10,15 @@ import (
 	"strings"
 )
 
+const (
+	slack     = "SLACK"
+	pagerduty = "PAGER_DUTY"
+)
+
 type NotificationChannelList []NotificationChannel
 
 func (nc NotificationChannelList) String() string {
-	resourceTemplate := `resource "sysdig_secure_notification_channel" "example-slack-%d" {
+	slackResourceTemplate := `resource "sysdig_secure_notification_channel" "example-slack-%d" {
   name = "%s"
   enabled = %t
   type = "%s"
@@ -23,9 +28,28 @@ func (nc NotificationChannelList) String() string {
   notify_when_resolved = %t
 }
 `
+
+	pdResourceTemplate := `resource "sysdig_secure_notification_channel" "example-pager-duty-%d" {
+  name = "%s"
+  enabled = %t
+  type = "%s"
+  account = "%s"
+  service_key = "%s"
+  service_name = "%s"
+  notify_when_ok = %t
+  notify_when_resolved = %t
+}
+`
+
+	var ncStr string
 	builder := strings.Builder{}
-	for id, slack := range nc {
-		ncStr := fmt.Sprintf(resourceTemplate, id, slack.Name, slack.Enabled, slack.Type, slack.Options.URL, slack.Options.Channel, slack.Options.NotifyOnOk, slack.Options.NotifyOnResolve)
+	for id, channel := range nc {
+		switch channel.Type {
+		case slack:
+			ncStr = fmt.Sprintf(slackResourceTemplate, id, channel.Name, channel.Enabled, channel.Type, channel.Options.URL, channel.Options.Channel, channel.Options.NotifyOnOk, channel.Options.NotifyOnResolve)
+		case pagerduty:
+			ncStr = fmt.Sprintf(pdResourceTemplate, id, channel.Name, channel.Enabled, channel.Type, channel.Options.Account, channel.Options.ServiceKey, channel.Options.ServiceName, channel.Options.NotifyOnOk, channel.Options.NotifyOnResolve)
+		}
 		builder.WriteString(ncStr)
 	}
 	return builder.String()
@@ -42,9 +66,12 @@ type NotificationChannel struct {
 	Name                 string `json:"name"`
 	Options              struct {
 		NotifyOnOk      bool   `json:"notifyOnOk"`
-		URL             string `json:"url"`
-		Channel         string `json:"channel"`
 		NotifyOnResolve bool   `json:"notifyOnResolve"`
+		Account         string `json:"account,omitempty"`     // Type: PagerDuty
+		ServiceKey      string `json:"serviceKey,omitempty"`  // Type: PagerDuty
+		ServiceName     string `json:"serviceName,omitempty"` // Type: PagerDuty
+		Channel         string `json:"channel,omitempty"`     // Type: Slack
+		URL             string `json:"url,omitempty"`         // Type: Slack
 	} `json:"options"`
 }
 
@@ -87,7 +114,13 @@ func main() {
 
 	var slackNC NotificationChannelList
 	for _, nc := range data.NotificationChannels {
+
+		fmt.Printf("%+v\n", nc)
 		if nc.Type == "SLACK" {
+			slackNC = append(slackNC, nc)
+		}
+
+		if nc.Type == "PAGER_DUTY" {
 			slackNC = append(slackNC, nc)
 		}
 	}
