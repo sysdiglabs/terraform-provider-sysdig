@@ -11,8 +11,8 @@ Terraform Provider for Sysdig
 Requirements
 ------------
 
--	[Terraform](https://www.terraform.io/downloads.html) 0.10.x
--	[Go](https://golang.org/doc/install) 1.9 (to build the provider plugin)
+-	[Terraform](https://www.terraform.io/downloads.html) 0.12.x
+-	[Go](https://golang.org/doc/install) 1.12 (to build the provider plugin)
 
 Building The Provider
 ---------------------
@@ -20,16 +20,8 @@ Building The Provider
 Clone repository to: `$GOPATH/src/github.com/draios/terraform-provider-sysdig`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/draios; cd $GOPATH/src/github.com/draios
 $ git clone git@github.com:draios/terraform-provider-sysdig
-```
-
-Ensure you have [dep](https://golang.github.io/dep/) installed and enter the
-provider directory and build the provider
-
-```sh
-$ cd $GOPATH/src/github.com/draios/terraform-provider-sysdig
-$ dep ensure
+$ cd terraform-provider-sysdig
 $ make build
 ```
 
