@@ -99,7 +99,7 @@ resource "sysdig_secure_policy" "sample2" {
   host_scope = true
 
 
-  processes = {
+  processes {
     default = "accept"
     whitelist = [
       "mysql",
@@ -108,7 +108,7 @@ resource "sysdig_secure_policy" "sample2" {
       "ssh"]
   }
 
-  containers = {
+  containers {
     default = "none"
     whitelist = [
       "cassandra"]
@@ -116,7 +116,7 @@ resource "sysdig_secure_policy" "sample2" {
       "mongo"]
   }
 
-  syscalls = {
+  syscalls {
     default = "accept"
     whitelist = [
       "accept",
@@ -126,13 +126,12 @@ resource "sysdig_secure_policy" "sample2" {
       "bpf"]
   }
 
-  network = {
+  network {
     inbound = "accept"
 
     outbound = "deny"
 
     listening_ports {
-
       default = "none"
       tcp {
         whitelist = [
@@ -153,14 +152,14 @@ resource "sysdig_secure_policy" "sample2" {
     }
   }
 
-  filesystem = {
-    read = {
+  filesystem {
+    read {
       whitelist = [
         "/home"]
       blacklist = [
         "/etc"]
     }
-    readwrite = {
+    readwrite {
       whitelist = [
         "/home"]
       blacklist = [
