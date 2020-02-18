@@ -11,17 +11,15 @@ type SysdigSecureClient interface {
 	UpdatePolicy(Policy) (Policy, error)
 	GetPolicyById(int) (Policy, error)
 
-	GetUserRulesFile() (UserRulesFile, error)
-	UpdateUserRulesFile(UserRulesFile) (UserRulesFile, error)
+	CreateRule(Rule) (Rule, error)
+	GetRuleByID(int) (Rule, error)
+	UpdateRule(Rule) (Rule, error)
+	DeleteRule(int) error
 
 	CreateNotificationChannel(NotificationChannel) (NotificationChannel, error)
 	GetNotificationChannelById(int) (NotificationChannel, error)
 	DeleteNotificationChannel(int) error
 	UpdateNotificationChannel(NotificationChannel) (NotificationChannel, error)
-
-	CreatePoliciesPriority(PoliciesPriority) (PoliciesPriority, error)
-	UpdatePoliciesPriority(PoliciesPriority) (PoliciesPriority, error)
-	GetPoliciesPriority() (PoliciesPriority, error)
 }
 
 func NewSysdigSecureClient(sysdigSecureAPIToken string, url string) SysdigSecureClient {

@@ -1,8 +1,8 @@
 package sysdig
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
@@ -13,6 +13,7 @@ func Provider() terraform.ResourceProvider {
 			"sysdig_secure_api_token": {
 				Type:        schema.TypeString,
 				Required:    true,
+				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_SECURE_API_TOKEN", nil),
 			},
 			"sysdig_secure_url": {
@@ -23,9 +24,13 @@ func Provider() terraform.ResourceProvider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_policy":               resourceSysdigSecurePolicy(),
-			"sysdig_secure_user_rules_file":      resourceSysdigSecureUserRulesFile(),
 			"sysdig_secure_notification_channel": resourceSysdigSecureNotificationChannel(),
-			"sysdig_secure_policies_priority":    resourceSysdigSecurePoliciesPriority(),
+			"sysdig_secure_rule_container":       resourceSysdigSecureRuleContainer(),
+			"sysdig_secure_rule_filesystem":      resourceSysdigSecureRuleFilesystem(),
+			"sysdig_secure_rule_network":         resourceSysdigSecureRuleNetwork(),
+			"sysdig_secure_rule_process":         resourceSysdigSecureRuleProcess(),
+			"sysdig_secure_rule_syscall":         resourceSysdigSecureRuleSyscall(),
+			"sysdig_secure_rule_falco":           resourceSysdigSecureRuleFalco(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

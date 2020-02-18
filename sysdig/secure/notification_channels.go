@@ -74,7 +74,7 @@ func (client *sysdigSecureClient) DeleteNotificationChannel(id int) error {
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusNoContent {
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
 		return errors.New(response.Status)
 	}
 	return nil

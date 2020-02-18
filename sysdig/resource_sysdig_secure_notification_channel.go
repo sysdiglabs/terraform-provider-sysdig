@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
@@ -87,6 +87,11 @@ func resourceSysdigSecureNotificationChannel() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"send_test_notification": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -136,6 +141,7 @@ func resourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interfac
 	d.Set("routing_key", nc.Options.RoutingKey)
 	d.Set("notify_when_ok", nc.Options.NotifyOnOk)
 	d.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
+	d.Set("send_test_notification", nc.Options.SendTestNotification)
 
 	// When we receive a notification channel of type OpsGenie,
 	// the API sends us the URL, but we are configuring the API
@@ -200,8 +206,9 @@ func notificationChannelFromResourceData(d *schema.ResourceData) (nc secure.Noti
 		Enabled: d.Get("enabled").(bool),
 		Type:    channelType,
 		Options: secure.NotificationChannelOptions{
-			NotifyOnOk:      d.Get("notify_when_ok").(bool),
-			NotifyOnResolve: d.Get("notify_when_resolved").(bool),
+			NotifyOnOk:           d.Get("notify_when_ok").(bool),
+			NotifyOnResolve:      d.Get("notify_when_resolved").(bool),
+			SendTestNotification: d.Get("send_test_notification").(bool),
 		},
 	}
 

@@ -2,13 +2,20 @@ package secure
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
-	"strconv"
+	"net/http"
 )
 
-func (client *sysdigSecureClient) CreatePolicy(policyRequest Policy) (Policy, error) {
-	response, _ := client.doSysdigSecureRequest("POST", client.policiesURL(), policyRequest.ToJSON())
-	body, _ := ioutil.ReadAll(response.Body)
+func (client *sysdigSecureClient) CreatePolicy(policyRequest Policy) (policy Policy, err error) {
+	response, err := client.doSysdigSecureRequest(http.MethodPost, client.policiesURL(), policyRequest.ToJSON())
+	if err != nil {
+		return
+	}
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return
+	}
 
 	if response.StatusCode != 200 {
 		return Policy{}, errors.New(string(body))
@@ -20,11 +27,11 @@ func (client *sysdigSecureClient) CreatePolicy(policyRequest Policy) (Policy, er
 }
 
 func (client *sysdigSecureClient) policiesURL() string {
-	return client.URL + "/api/policies"
+	return fmt.Sprintf("%s/api/v2/policies", client.URL)
 }
 
 func (client *sysdigSecureClient) DeletePolicy(policyID int) error {
-	response, err := client.doSysdigSecureRequest("DELETE", client.policyURL(policyID), nil)
+	response, err := client.doSysdigSecureRequest(http.MethodDelete, client.policyURL(policyID), nil)
 
 	defer response.Body.Close()
 
@@ -32,12 +39,20 @@ func (client *sysdigSecureClient) DeletePolicy(policyID int) error {
 }
 
 func (client *sysdigSecureClient) policyURL(policyID int) string {
-	return client.URL + "/api/policies/" + strconv.Itoa(policyID)
+	return fmt.Sprintf("%s/api/v2/policies/%d", client.URL, policyID)
+
 }
 
-func (client *sysdigSecureClient) UpdatePolicy(policyRequest Policy) (Policy, error) {
-	response, _ := client.doSysdigSecureRequest("PUT", client.policyURL(policyRequest.ID), policyRequest.ToJSON())
-	body, _ := ioutil.ReadAll(response.Body)
+func (client *sysdigSecureClient) UpdatePolicy(policyRequest Policy) (policy Policy, err error) {
+	response, err := client.doSysdigSecureRequest(http.MethodPut, client.policyURL(policyRequest.ID), policyRequest.ToJSON())
+	if err != nil {
+		return
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return
+	}
 
 	if response.StatusCode != 200 {
 		return Policy{}, errors.New(string(body))
@@ -48,9 +63,15 @@ func (client *sysdigSecureClient) UpdatePolicy(policyRequest Policy) (Policy, er
 	return PolicyFromJSON(body), nil
 }
 
-func (client *sysdigSecureClient) GetPolicyById(policyID int) (Policy, error) {
-	response, _ := client.doSysdigSecureRequest("GET", client.policyURL(policyID), nil)
-	body, _ := ioutil.ReadAll(response.Body)
+func (client *sysdigSecureClient) GetPolicyById(policyID int) (policy Policy, err error) {
+	response, err := client.doSysdigSecureRequest(http.MethodGet, client.policyURL(policyID), nil)
+	if err != nil {
+		return
+	}
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return
+	}
 
 	if response.StatusCode != 200 {
 		return Policy{}, errors.New(string(body))

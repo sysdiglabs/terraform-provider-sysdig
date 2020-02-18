@@ -1,0 +1,114 @@
+package sysdig_test
+
+import (
+	"fmt"
+	"github.com/draios/terraform-provider-sysdig/sysdig"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"os"
+	"testing"
+)
+
+func TestAccRuleFilesystem(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		Providers: map[string]terraform.ResourceProvider{
+			"sysdig": sysdig.Provider(),
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: ruleFilesystemWithName(rText()),
+			},
+			{
+				Config: ruleFilesystemWithoutTagsWithName(rText()),
+			},
+			{
+				Config: ruleFilesystemWithReadonlyWithName(rText()),
+			},
+			{
+				Config: ruleFilesystemWithReadwriteWithName(rText()),
+			},
+			{
+				Config: ruleFilesystemMinimalConfig(rText()),
+			},
+		},
+	})
+}
+
+func ruleFilesystemWithName(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_filesystem"  "foo" {
+  name = "TERRAFORM TEST %s"
+  description = "TERRAFORM TEST %s"
+  tags = ["filesystem", "cis"]
+
+  read_only {
+    matching = true // default
+    paths = ["/etc"]
+  }
+
+  read_write {
+    matching = false // default
+    paths = ["/tmp"]
+  }
+}`, name, name)
+}
+
+func ruleFilesystemWithoutTagsWithName(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_filesystem"  "foo" {
+  name = "TERRAFORM TEST %s"
+  description = "TERRAFORM TEST %s"
+  
+  read_only {
+    matching = true // default
+    paths = ["/etc"]
+  }
+
+  read_write {
+    matching = false // default
+    paths = ["/tmp"]
+  }
+}`, name, name)
+}
+
+func ruleFilesystemWithReadonlyWithName(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_filesystem"  "foo" {
+  name = "TERRAFORM TEST %s"
+  description = "TERRAFORM TEST %s"
+  
+  read_only {
+    matching = true // default
+    paths = ["/etc"]
+  }
+}`, name, name)
+}
+
+func ruleFilesystemWithReadwriteWithName(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_filesystem"  "foo" {
+  name = "TERRAFORM TEST %s"
+  description = "TERRAFORM TEST %s"
+  
+  read_write {
+    matching = true // default
+    paths = ["/etc"]
+  }
+}`, name, name)
+}
+
+func ruleFilesystemMinimalConfig(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_filesystem"  "foo-minimal" {
+  name = "TERRAFORM TEST %s"
+  description = "TERRAFORM TEST %s"
+}`, name, name)
+}

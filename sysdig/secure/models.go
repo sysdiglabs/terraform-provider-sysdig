@@ -9,117 +9,34 @@ import (
 // -------- Policies --------
 
 type Policy struct {
-	ID                           int                           `json:"id,omitempty"`
-	Name                         string                        `json:"name"`
-	Description                  string                        `json:"description"`
-	Severity                     int                           `json:"severity"`
-	ContainerScope               bool                          `json:"containerScope"`
-	HostScope                    bool                          `json:"hostScope"`
-	Enabled                      bool                          `json:"enabled"`
-	Actions                      []Action                      `json:"actions,omitempty"`
-	Scope                        string                        `json:"scope,omitempty"`
-	FalcoConfiguration           FalcoConfiguration            `json:"falcoConfiguration,omitempty"`
-	ProcessesConfiguration       *ProcessesConfiguration       `json:"processesConfiguration,omitempty"`
-	ContainerImagesConfiguration *ContainerImagesConfiguration `json:"containerImagesConfiguration,omitempty"`
-	FileSystemConfiguration      *FileSystemConfiguration      `json:"fileSystemConfiguration,omitempty"`
-	SyscallsConfiguration        *SyscallsConfiguration        `json:"syscallsConfiguration,omitempty"`
-	NetworkConfiguration         *NetworkConfiguration         `json:"networkConfiguration,omitempty"`
-	Version                      int                           `json:"version,omitempty"`
-	NotificationChannelIds       []int                         `json:"notificationChannelIds,omitempty"`
+	ID                     int      `json:"id,omitempty"`
+	Name                   string   `json:"name"`
+	Description            string   `json:"description"`
+	Severity               int      `json:"severity"`
+	Enabled                bool     `json:"enabled"`
+	RuleNames              []string `json:"ruleNames"`
+	Actions                []Action `json:"actions"`
+	Scope                  string   `json:"scope,omitempty"`
+	Version                int      `json:"version,omitempty"`
+	NotificationChannelIds []int    `json:"notificationChannelIds"`
 }
 
 type Action struct {
 	AfterEventNs         int    `json:"afterEventNs,omitempty"`
 	BeforeEventNs        int    `json:"beforeEventNs,omitempty"`
-	IsLimitedToContainer bool   `json:"isLimitedToContainer,omitempty"`
+	IsLimitedToContainer bool   `json:"isLimitedToContainer"`
 	Type                 string `json:"type"`
 }
 
-type FalcoConfiguration struct {
-	RuleNameRegEx string `json:"ruleNameRegEx"`
-}
-
-type ProcessesConfigurationElement struct {
-	Values  []string `json:"values"`
-	OnMatch string   `json:"onMatch"`
-}
-
-type ProcessesConfiguration struct {
-	OnDefault string                          `json:"onDefault"`
-	Fields    []string                        `json:"fields"`
-	List      []ProcessesConfigurationElement `json:"list,omitempty"`
-}
-
-type ContainerImagesConfigurationElement struct {
-	Values  []string `json:"values"`
-	OnMatch string   `json:"onMatch"`
-}
-
-type ContainerImagesConfiguration struct {
-	OnDefault string                                `json:"onDefault"`
-	Fields    []string                              `json:"fields"`
-	List      []ContainerImagesConfigurationElement `json:"list"`
-}
-
-type FileSystemConfigurationListElement struct {
-	Values     []string `json:"values"`
-	OnMatch    string   `json:"onMatch"`
-	AccessType string   `json:"accessType"`
-}
-
-type FileSystemConfiguration struct {
-	OnDefault string                               `json:"onDefault"`
-	Fields    []string                             `json:"fields"`
-	List      []FileSystemConfigurationListElement `json:"list"`
-}
-
-type SyscallsConfigurationElement struct {
-	Values  []string `json:"values"`
-	OnMatch string   `json:"onMatch"`
-}
-
-type SyscallsConfiguration struct {
-	OnDefault string                         `json:"onDefault"`
-	Fields    []string                       `json:"fields"`
-	List      []SyscallsConfigurationElement `json:"list"`
-}
-
-type NetworkConfigurationListeningPortsListElement struct {
-	Values   []string `json:"values"`
-	OnMatch  string   `json:"onMatch"`
-	NetProto string   `json:"netProto"`
-}
-
-type NetworkConfiguration struct {
-	ListeningPorts struct {
-		OnDefault string                                          `json:"onDefault"`
-		Fields    []string                                        `json:"fields"`
-		List      []NetworkConfigurationListeningPortsListElement `json:"list"`
-	} `json:"listeningPorts"`
-	Inbound struct {
-		OnDefault string   `json:"onDefault"`
-		Fields    []string `json:"fields"`
-	} `json:"inbound"`
-	Outbound struct {
-		OnDefault string   `json:"onDefault"`
-		Fields    []string `json:"fields"`
-	} `json:"outbound"`
-}
-
-type policyWrapper struct {
-	Policy Policy `json:"policy"`
-}
-
 func (policy *Policy) ToJSON() io.Reader {
-	payload, _ := json.Marshal(policyWrapper{*policy})
+	payload, _ := json.Marshal(policy)
 	return bytes.NewBuffer(payload)
 }
 
-func PolicyFromJSON(body []byte) Policy {
-	var result policyWrapper
+func PolicyFromJSON(body []byte) (result Policy) {
 	json.Unmarshal(body, &result)
 
-	return result.Policy
+	return result
 }
 
 // -------- User Rules File --------
@@ -145,28 +62,6 @@ func UserRulesFileFromJSON(body []byte) UserRulesFile {
 	return result.UserRulesFile
 }
 
-// -------- Policies Priority ---------
-
-type PoliciesPriority struct {
-	Version   int   `json:"version,omitempty"`
-	PolicyIds []int `json:"policyIds"`
-}
-
-type policiesPriorityWrapper struct {
-	Priorities PoliciesPriority `json:"priorities"`
-}
-
-func (pp *PoliciesPriority) ToJSON() io.Reader {
-	payload, _ := json.Marshal(policiesPriorityWrapper{*pp})
-	return bytes.NewBuffer(payload)
-}
-
-func PoliciesPriorityFromJSON(body []byte) PoliciesPriority {
-	var result policiesPriorityWrapper
-	json.Unmarshal(body, &result)
-	return result.Priorities
-}
-
 // -------- Notification Channels --------
 
 type NotificationChannelOptions struct {
@@ -180,8 +75,9 @@ type NotificationChannelOptions struct {
 	ServiceKey      string   `json:"serviceKey,omitempty"`      // Type: PagerDuty
 	ServiceName     string   `json:"serviceName,omitempty"`     // Type: PagerDuty
 
-	NotifyOnOk      bool `json:"notifyOnOk"`
-	NotifyOnResolve bool `json:"notifyOnResolve"`
+	NotifyOnOk           bool `json:"notifyOnOk"`
+	NotifyOnResolve      bool `json:"notifyOnResolve"`
+	SendTestNotification bool `json:"sendTestNotification"`
 }
 
 type NotificationChannel struct {
@@ -207,4 +103,94 @@ func NotificationChannelFromJSON(body []byte) NotificationChannel {
 
 type notificationChannelWrapper struct {
 	NotificationChannel NotificationChannel `json:"notificationChannel"`
+}
+
+// -------- Rules --------
+
+type Rule struct {
+	ID          int      `json:"id,omitempty"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Tags        []string `json:"tags"`
+	Details     Details  `json:"details"`
+	Version     int      `json:"version,omitempty"`
+}
+
+type Details struct {
+	// Containers
+	Containers *Containers `json:"containers,omitempty"`
+
+	// Filesystems
+	ReadWritePaths *ReadWritePaths `json:"readWritePaths,omitempty"`
+	ReadPaths      *ReadPaths      `json:"readPaths,omitempty"`
+
+	// Network
+	AllOutbound    bool            `json:"allOutbound,omitempty"`
+	AllInbound     bool            `json:"allInbound,omitempty"`
+	TCPListenPorts *TCPListenPorts `json:"tcpListenPorts,omitempty"`
+	UDPListenPorts *UDPListenPorts `json:"udpListenPorts,omitempty"`
+
+	// Processes
+	Processes *Processes `json:"processes,omitempty"`
+
+	// Syscalls
+	Syscalls *Syscalls `json:"syscalls,omitempty"`
+
+	// Falco
+	Append    bool       `json:"append,omitempty"`
+	Source    string     `json:"source,omitempty"`
+	Output    string     `json:"output,omitempty"`
+	Condition *Condition `json:"condition,omitempty"`
+	Priority  string     `json:"priority,omitempty"`
+
+	RuleType string `json:"ruleType"`
+}
+
+type Containers struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type ReadWritePaths struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+type ReadPaths struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type TCPListenPorts struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type UDPListenPorts struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type Processes struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type Syscalls struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type Condition struct {
+	Condition  string        `json:"condition"`
+	Components []interface{} `json:"components"`
+}
+
+func (r *Rule) ToJSON() io.Reader {
+	payload, _ := json.Marshal(r)
+	return bytes.NewBuffer(payload)
+}
+
+func RuleFromJSON(body []byte) (rule Rule, err error) {
+	err = json.Unmarshal(body, &rule)
+	return
 }
