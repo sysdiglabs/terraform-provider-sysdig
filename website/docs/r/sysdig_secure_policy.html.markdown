@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Policy.
 ---
 
-# sysdig\secure\_policy
+# sysdig\_secure\_policy
 
 Creates a Sysdig Secure Policy.
 
@@ -22,21 +22,21 @@ resource "sysdig_secure_policy" "write_apt_database" {
   enabled = true
 
   // Scope selection
-  //filter = "host.ip.private = \"10.0.23.1\""
-  container_scope = true
-  host_scope = true
+  scope = "container.id != \"\""
 
-  //actions {
-  //  container = "pause"
+  // Rule selection
+  rule_names = ["Terminal shell in container"]
 
-  //  capture {
-  //    seconds_before_event = 60
-  //    seconds_after_event = 60
-  //  }
-  //}
+  actions {
+    container = "stop"
+    capture {
+      seconds_before_event = 5
+      seconds_after_event = 10
+    }
+  }
 
-  // Falco rule selection
-  falco_rule_name_regex = "Unexpected spawned process traefik"
+  notification_channels = [10000]
+
 }
 ```
 
@@ -46,24 +46,18 @@ resource "sysdig_secure_policy" "write_apt_database" {
 
 * `description` - (Required) The description of Secure policy.
 
-* `severity` - (Required) The severity of Secure policy. The accepted values
-    are: 2 (High), 4 (Medium) and 6 (Low).
+* `severity` - (Optional) The severity of Secure policy. The accepted values
+    are: 0 (High), 4 (Medium), 6 (Low) and 7 (Info). The default value is 4 (Medium).
 
-* `enabled` - (Required) Will secure process with this rule?
+* `enabled` - (Optional) Will secure process with this rule?. By default this is true.
 
 - - -
 
 ### Scope selection
 
-* `host_scope` - (Required) The application scope of this rule. Does this rule
-    applies to hosts?
-
-* `container_scope` - (Required) The application scope of this rule. Does this
-    rule applies to containers? Note that the rule should apply at least to one
-    scope, host or container.
-
-* `filter` - (Optional) Limit appplication scope based in one expresion. By
-    example: "host.ip.private = \"10.0.23.1\""
+* `scope` - (Optional) Limit appplication scope based in one expresion. For
+    example: "host.ip.private = \\"10.0.23.1\\"". By default the rule won't be scoped
+    and will target the entire infrastructure.
 
 - - -
 
@@ -71,24 +65,24 @@ resource "sysdig_secure_policy" "write_apt_database" {
 
 The actions block is optional and supports:
 
-* `container` - (Required) The action applied to container when this Policy is
+* `container` - (Optional) The action applied to container when this Policy is
     triggered. Can be *stop* or *pause*.
 
-which
-The capture block is optional and whan present captures with Sysdig the stream
-of system calls:
-
-* `seconds_before_event` - (Required) Captures the system calls during the
+* `capture` - (Optional) Captures with Sysdig the stream of system calls:
+    * `seconds_before_event` - (Required) Captures the system calls during the
     amount of seconds before the policy was triggered.
-
-* `seconds_after_event` - (Required) Captures the system calls for the amount
+    * `seconds_after_event` - (Required) Captures the system calls for the amount
     of seconds after the policy was triggered.
 
 - - -
 
 ### Falco rule selection
 
-* `falco_rule_name_regex` - (Required) The RegExp for checking matches with
-    Falco Rule name.  When a you have uploaded custom rules, and an alert is
-    raised. Check if that alert matches with this regexp for raising the Policy
-    Alert.
+* `rule_names` - (Optional) Array with the name of the rules to match.
+
+- - -
+
+### Notification
+
+* `notification_channels` - (Optional) IDs of the notification channels to send alerts to
+    when the policy is fired.
