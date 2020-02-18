@@ -52,7 +52,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 				Type:         schema.TypeInt,
 				Default:      4,
 				Optional:     true,
-				ValidateFunc: validation.IntBetween(1, 9),
+				ValidateFunc: validation.IntInSlice([]int{0, 4, 6, 7}),
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
