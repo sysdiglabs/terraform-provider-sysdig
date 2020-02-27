@@ -20,6 +20,7 @@ Use the navigation to the left to read about the available resources.
 ```hcl
 // Configure the Sysdig provider
 provider "sysdig" {
+  sysdig_monitor_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
   sysdig_secure_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 }
 
@@ -33,9 +34,18 @@ resource "sysdig_secure_policy" "unexpected_inbound_tcp_connection_traefik" {
 
 The following keys can be used to configure the provider.
 
+* `sysdig_monitor_api_token` - (Required) The Sysdig Secure API token, it must be
+  present, but you can get it from the `SYSDIG_MONITOR_API_TOKEN` environment variable.
+
 * `sysdig_secure_api_token` - (Required) The Sysdig Secure API token, it must be
   present, but you can get it from the `SYSDIG_SECURE_API_TOKEN` environment variable.
 
+* `sysdig_monitor_url` - (Optional) This is the target Sysdig Secure base API
+  endpoint. It's intended to be used with OnPrem installations. By defaults it
+  points to `https://app.sysdigcloud.com`, and notice that should not be ended
+  with an slash. It can also be sourced from the `SYSDIG_MONITOR_URL` environment
+  variable.
+  
 * `sysdig_secure_url` - (Optional) This is the target Sysdig Secure base API
   endpoint. It's intended to be used with OnPrem installations. By defaults it
   points to `https://secure.sysdig.com`, and notice that should not be ended
