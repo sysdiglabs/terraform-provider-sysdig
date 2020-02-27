@@ -118,7 +118,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 }
 
 func resourceSysdigPolicyCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(secure.SysdigSecureClient)
+	client := meta.(*SysdigClients).sysdigSecureClient
 
 	policy := policyFromResourceData(d)
 	policy, err := client.CreatePolicy(policy)
@@ -192,7 +192,7 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 }
 
 func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(secure.SysdigSecureClient)
+	client := meta.(*SysdigClients).sysdigSecureClient
 
 	id, _ := strconv.Atoi(d.Id())
 	policy, err := client.GetPolicyById(id)
@@ -223,7 +223,7 @@ func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSysdigPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(secure.SysdigSecureClient)
+	client := meta.(*SysdigClients).sysdigSecureClient
 
 	id, _ := strconv.Atoi(d.Id())
 
@@ -231,7 +231,7 @@ func resourceSysdigPolicyDelete(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceSysdigPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(secure.SysdigSecureClient)
+	client := meta.(*SysdigClients).sysdigSecureClient
 
 	policy := policyFromResourceData(d)
 	policy.Version = d.Get("version").(int)

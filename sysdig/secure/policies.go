@@ -40,7 +40,6 @@ func (client *sysdigSecureClient) DeletePolicy(policyID int) error {
 
 func (client *sysdigSecureClient) policyURL(policyID int) string {
 	return fmt.Sprintf("%s/api/v2/policies/%d", client.URL, policyID)
-
 }
 
 func (client *sysdigSecureClient) UpdatePolicy(policyRequest Policy) (policy Policy, err error) {

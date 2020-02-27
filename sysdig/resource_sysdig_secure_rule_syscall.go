@@ -41,7 +41,7 @@ func resourceSysdigSecureRuleSyscall() *schema.Resource {
 }
 
 func resourceSysdigRuleSyscallCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(secure.SysdigSecureClient)
+	client := meta.(*SysdigClients).sysdigSecureClient
 
 	rule := resourceSysdigRuleSyscallFromResourceData(d)
 
@@ -58,7 +58,7 @@ func resourceSysdigRuleSyscallCreate(d *schema.ResourceData, meta interface{}) e
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigRuleSyscallRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(secure.SysdigSecureClient)
+	client := meta.(*SysdigClients).sysdigSecureClient
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -83,7 +83,7 @@ func resourceSysdigRuleSyscallRead(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceSysdigRuleSyscallUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(secure.SysdigSecureClient)
+	client := meta.(*SysdigClients).sysdigSecureClient
 
 	rule := resourceSysdigRuleSyscallFromResourceData(d)
 
@@ -96,7 +96,7 @@ func resourceSysdigRuleSyscallUpdate(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceSysdigRuleSyscallDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(secure.SysdigSecureClient)
+	client := meta.(*SysdigClients).sysdigSecureClient
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {

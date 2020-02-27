@@ -50,7 +50,7 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 }
 
 func resourceSysdigRuleFalcoCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(secure.SysdigSecureClient)
+	client := meta.(*SysdigClients).sysdigSecureClient
 
 	rule := resourceSysdigRuleFalcoFromResourceData(d)
 
@@ -67,7 +67,7 @@ func resourceSysdigRuleFalcoCreate(d *schema.ResourceData, meta interface{}) err
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigRuleFalcoRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(secure.SysdigSecureClient)
+	client := meta.(*SysdigClients).sysdigSecureClient
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -94,7 +94,7 @@ func resourceSysdigRuleFalcoRead(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceSysdigRuleFalcoUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(secure.SysdigSecureClient)
+	client := meta.(*SysdigClients).sysdigSecureClient
 
 	rule := resourceSysdigRuleFalcoFromResourceData(d)
 
@@ -107,7 +107,7 @@ func resourceSysdigRuleFalcoUpdate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceSysdigRuleFalcoDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(secure.SysdigSecureClient)
+	client := meta.(*SysdigClients).sysdigSecureClient
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
