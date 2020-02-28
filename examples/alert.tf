@@ -6,6 +6,8 @@ resource "sysdig_monitor_alert_anomaly" "sample" {
 
   monitor = ["cpu.used.percent", "memory.bytes.used"]
 
+  trigger_after_minutes = 10
+
   multiple_alerts_by = ["kubernetes.cluster.name",
     "kubernetes.namespace.name",
     "kubernetes.deployment.name",
