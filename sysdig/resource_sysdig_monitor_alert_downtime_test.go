@@ -46,7 +46,7 @@ resource "sysdig_monitor_alert_downtime" "sample" {
 	enabled = false
 
 	capture {
-		filename = "TERRAFORM_TEST"
+		filename = "TERRAFORM_TEST.scap"
 		duration = 15
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"regexp"
 	"time"
 )
 
@@ -166,8 +167,9 @@ func resourceSysdigMonitorAlertCapture() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"filename": {
-					Type:     schema.TypeString,
-					Required: true,
+					Type:         schema.TypeString,
+					Required:     true,
+					ValidateFunc: validation.StringMatch(regexp.MustCompile(".*?\\.scap"), "the filename must end in .scap"),
 				},
 				"duration": {
 					Type:     schema.TypeInt,

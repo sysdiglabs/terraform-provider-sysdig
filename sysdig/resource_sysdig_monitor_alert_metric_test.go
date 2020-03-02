@@ -50,7 +50,7 @@ resource "sysdig_monitor_alert_metric" "sample" {
 	multiple_alerts_by = ["kubernetes.deployment.name"]
 
 	capture {
-		filename = "TERRAFORM_TEST"
+		filename = "TERRAFORM_TEST.scap"
 		duration = 15
 	}
 }
@@ -73,7 +73,7 @@ resource "sysdig_monitor_alert_metric" "sample2" {
 	multiple_alerts_by = ["kubernetes.deployment.name"]
 
 	capture {
-		filename = "TERRAFORM_TEST"
+		filename = "TERRAFORM_TEST.scap"
 		duration = 15
 	}
 }
