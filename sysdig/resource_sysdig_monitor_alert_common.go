@@ -189,6 +189,7 @@ func sysdigCaptureFromSet(d *schema.Set) (captures []*monitor.SysdigCapture, err
 		capture := &monitor.SysdigCapture{
 			Name:     m["filename"].(string),
 			Duration: m["duration"].(int),
+			Enabled:  true,
 		}
 		if filter, ok := m["filter"]; ok {
 			capture.Filters = filter.(string)
