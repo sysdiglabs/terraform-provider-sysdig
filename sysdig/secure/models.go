@@ -210,13 +210,13 @@ func (u *User) ToJSON() io.Reader {
 	return bytes.NewBuffer(payload)
 }
 
-func UsersFromJSON(body []byte) User {
-	var result usersWrapper
+func UserFromJSON(body []byte) User {
+	var result userWrapper
 	json.Unmarshal(body, &result)
 
-	return result.Users
+	return result.User
 }
 
-type usersWrapper struct {
-	Users User `json:"user"`
+type userWrapper struct {
+	User User `json:"user"`
 }

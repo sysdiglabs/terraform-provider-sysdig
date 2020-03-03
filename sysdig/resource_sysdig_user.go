@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func resourceSysdigUsers() *schema.Resource {
+func resourceSysdigUser() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{

@@ -21,7 +21,7 @@ func (client *sysdigSecureClient) GetUserById(id int) (u User, err error) {
 		return
 	}
 
-	u = UsersFromJSON(body)
+	u = UserFromJSON(body)
 
 	return
 }
@@ -41,7 +41,7 @@ func (client *sysdigSecureClient) CreateUser(uRequest User) (u User, err error) 
 		return
 	}
 
-	u = UsersFromJSON(body)
+	u = UserFromJSON(body)
 	return
 }
 
@@ -59,7 +59,7 @@ func (client *sysdigSecureClient) UpdateUser(uRequest User) (u User, err error) 
 		return
 	}
 
-	u = UsersFromJSON(body)
+	u = UserFromJSON(body)
 	return
 }
 
