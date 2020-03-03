@@ -20,6 +20,11 @@ type SysdigSecureClient interface {
 	GetNotificationChannelById(int) (NotificationChannel, error)
 	DeleteNotificationChannel(int) error
 	UpdateNotificationChannel(NotificationChannel) (NotificationChannel, error)
+
+	CreateUser(User) (User, error)
+	GetUserById(int) (User, error)
+	DeleteUser(int) error
+	UpdateUser(User) (User, error)
 }
 
 func NewSysdigSecureClient(sysdigSecureAPIToken string, url string) SysdigSecureClient {
