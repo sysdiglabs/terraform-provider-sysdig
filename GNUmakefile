@@ -48,6 +48,15 @@ test-compile:
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
+release: fmtcheck
+	for kernel in linux windows darwin; do \
+		for dist in $$(go tool dist list | grep $$kernel); do  \
+			GOOS=$$kernel; \
+			GOARCH=$$(echo $$dist | cut -d/ -f2); \
+			GOOS=$$GOOS GOARCH=$$GOARCH go build -o terraform-provider-sysdig-$$GOOS-$$GOARCH; \
+		done \
+	done
+
 website:
 ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 	echo "$(WEBSITE_REPO) not found in your GOPATH (necessary for layouts and assets), get-ting..."
