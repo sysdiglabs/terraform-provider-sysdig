@@ -42,35 +42,35 @@ func TestAccUser(t *testing.T) {
 func userWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+with-name-%s@sysdig.com"
+  email      = "terraform-test+user@sysdig.com"
   system_role = "ROLE_USER"
   first_name = "%s"
   last_name  = "%s"
-}`, name, name, name)
+}`, name, name)
 }
 
 func userWithSystemRole(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+with-systemrole-%s@sysdig.com"
+  email      = "terraform-test+user@sysdig.com"
   system_role = "ROLE_CUSTOMER"
   first_name = "%s"
   last_name  = "%s"
-}`, name, name, name)
+}`, name, name)
 }
 
 func userWithoutSystemRole(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+without-systemrole-%s@sysdig.com"
+  email      = "terraform-test+user@sysdig.com"
   first_name = "%s"
   last_name  = "%s"
-}`, name, name, name)
+}`, name, name)
 }
 
 func userMinimumConfiguration(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+minimum-%s@sysdig.com"
-}`, name)
+  email      = "terraform-test+user@sysdig.com"
+}`)
 }
