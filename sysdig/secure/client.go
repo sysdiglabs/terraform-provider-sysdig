@@ -25,6 +25,11 @@ type SysdigSecureClient interface {
 	GetUserById(int) (User, error)
 	DeleteUser(int) error
 	UpdateUser(User) (User, error)
+
+	CreateTeam(Team) (Team, error)
+	GetTeamById(int) (Team, error)
+	DeleteTeam(int) error
+	UpdateTeam(Team) (Team, error)
 }
 
 func NewSysdigSecureClient(sysdigSecureAPIToken string, url string) SysdigSecureClient {
