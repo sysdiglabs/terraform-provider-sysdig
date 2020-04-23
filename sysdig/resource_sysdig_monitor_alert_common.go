@@ -99,7 +99,9 @@ func alertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert, err er
 	}
 
 	if channels, ok := d.GetOk("notification_channels"); ok {
-		alert.NotificationChannelIds = channels.([]int)
+		for _, channel := range channels.([]interface{}) {
+			alert.NotificationChannelIds = append(alert.NotificationChannelIds, channel.(int))
+		}
 	}
 
 	if renotificationMinutes, ok := d.GetOk("renotification_minutes"); ok {

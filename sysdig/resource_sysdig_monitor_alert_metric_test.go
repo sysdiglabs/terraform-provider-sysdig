@@ -29,6 +29,9 @@ func TestAccAlertMetric(t *testing.T) {
 			{
 				Config: alertMetricWithoutScopeWithName(rText()),
 			},
+			{
+				Config: alertMetricWithNotificationChannel(rText()),
+			},
 		},
 	})
 }
@@ -78,4 +81,35 @@ resource "sysdig_monitor_alert_metric" "sample2" {
 	}
 }
 `, name, name)
+}
+
+// Reported by @logdnalf at https://github.com/draios/terraform-provider-sysdig/issues/24
+func alertMetricWithNotificationChannel(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_notification_channel" "sample-pagerduty" {
+	name = "Example Channel %s - Pagerduty"
+	enabled = true
+	type = "PAGER_DUTY"
+	account = "account"
+	service_key = "XXXXXXXXXX"
+	service_name = "sysdig"
+	notify_when_ok = true
+	notify_when_resolved = true
+}
+
+resource "sysdig_monitor_alert_metric" "sample3" {
+	enabled = true
+	name = "TERAFORM TEST - METRIC %s"
+	description = "TERRAFORM TEST - METRIC %s"
+	severity = 6
+	metric = "sum(min(cpu.used.percent)) > 100000"
+	scope = "kubernetes.cluster.name in (\"foo\")"
+	trigger_after_minutes = 20
+	notification_channels = [
+	sysdig_secure_notification_channel.sample-pagerduty.id
+	]
+	multiple_alerts_by = [
+	"kubernetes.cluster.name"
+	]
+}`, name, name, name)
 }

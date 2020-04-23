@@ -43,6 +43,9 @@ func TestAccNotificationChannel(t *testing.T) {
 			{
 				Config: notificationChannelSlackWithName(rText()),
 			},
+			{
+				Config: notificationChannelPagerdutyWithName(rText()),
+			},
 		},
 	})
 }
@@ -116,6 +119,20 @@ resource "sysdig_secure_notification_channel" "sample-slack" {
 	type = "SLACK"
 	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	channel = "#sysdig"
+	notify_when_ok = true
+	notify_when_resolved = true
+}`, name)
+}
+
+func notificationChannelPagerdutyWithName(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_notification_channel" "sample-pagerduty" {
+	name = "Example Channel %s - Pagerduty"
+	enabled = true
+	type = "PAGER_DUTY"
+	account = "account"
+	service_key = "XXXXXXXXXX"
+	service_name = "sysdig"
 	notify_when_ok = true
 	notify_when_resolved = true
 }`, name)
