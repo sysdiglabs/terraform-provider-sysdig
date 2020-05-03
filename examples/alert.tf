@@ -50,7 +50,7 @@ resource "sysdig_monitor_alert_group_outlier" "sample" {
   trigger_after_minutes = 10
 
   capture {
-    filename = "TERRAFORM_TEST"
+    filename = "TERRAFORM_TEST.scap"
     duration = 15
   }
 }
@@ -69,7 +69,7 @@ resource "sysdig_monitor_alert_metric" "sample" {
   "kubernetes.pod.name"]
 
   capture {
-    filename = "CrashLoopBackOff"
+    filename = "CrashLoopBackOff.scap"
     duration = 15
   }
 }
