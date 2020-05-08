@@ -2,7 +2,9 @@ package secure
 
 import (
 	"io"
+	"log"
 	"net/http"
+	"net/http/httputil"
 )
 
 type SysdigSecureClient interface {
@@ -51,5 +53,11 @@ func (client *sysdigSecureClient) doSysdigSecureRequest(method string, url strin
 	request.Header.Set("Authorization", "Bearer "+client.SysdigSecureAPIToken)
 	request.Header.Set("Content-Type", "application/json")
 
-	return client.httpClient.Do(request)
+	out, _ := httputil.DumpRequestOut(request, true)
+	log.Printf("[DEBUG] %s", string(out))
+	response, error := client.httpClient.Do(request)
+
+	out, _ = httputil.DumpResponse(response, true)
+	log.Printf("[DEBUG] %s", string(out))
+	return response, error
 }

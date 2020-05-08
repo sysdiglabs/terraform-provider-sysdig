@@ -8,13 +8,6 @@ import (
 )
 
 func (c *sysdigMonitorClient) CreateAlert(alert Alert) (createdAlert Alert, err error) {
-	//data, err := ioutil.ReadAll(alert.ToJSON())
-	//if err != nil {
-	//	return
-	//}
-	//err = errors.New(string(data))
-	//return
-
 	response, err := c.doSysdigMonitorRequest(http.MethodPost, c.alertsURL(), alert.ToJSON())
 	if err != nil {
 		return

@@ -13,6 +13,8 @@ import (
 func TestAccRuleFalco(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
+	ruleRandomImmutableText := rText()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -24,7 +26,10 @@ func TestAccRuleFalco(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: ruleFalcoTerminalShell(rText()),
+				Config: ruleFalcoTerminalShell(ruleRandomImmutableText),
+			},
+			{
+				Config: ruleFalcoUpdatedTerminalShell(ruleRandomImmutableText),
 			},
 			{
 				Config: ruleFalcoKubeAudit(rText()),
@@ -41,6 +46,20 @@ resource "sysdig_secure_rule_falco" "terminal_shell" {
   tags = ["container", "shell", "mitre_execution"]
 
   condition = "spawned_process and container and shell_procs and proc.tty != 0 and container_entrypoint"
+  output = "A shell was spawned in a container with an attached terminal (user=%%user.name %%container.info shell=%%proc.name parent=%%proc.pname cmdline=%%proc.cmdline terminal=%%proc.tty container_id=%%container.id image=%%container.image.repository)"
+  priority = "notice"
+  source = "syscall" // syscall or k8s_audit
+}`, name, name)
+}
+
+func ruleFalcoUpdatedTerminalShell(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "terminal_shell" {
+  name = "TERRAFORM TEST %s - Terminal Shell"
+  description = "TERRAFORM TEST %s"
+  tags = ["shell", "mitre_execution"]
+
+  condition = "spawned_process and shell_procs and proc.tty != 0 and container_entrypoint"
   output = "A shell was spawned in a container with an attached terminal (user=%%user.name %%container.info shell=%%proc.name parent=%%proc.pname cmdline=%%proc.cmdline terminal=%%proc.tty container_id=%%container.id image=%%container.image.repository)"
   priority = "notice"
   source = "syscall" // syscall or k8s_audit

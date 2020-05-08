@@ -50,7 +50,7 @@ func (client *sysdigSecureClient) GetRuleByID(ruleID int) (result Rule, err erro
 }
 
 func (client *sysdigSecureClient) UpdateRule(rule Rule) (result Rule, err error) {
-	response, _ := client.doSysdigSecureRequest(http.MethodPut, client.policyURL(rule.ID), rule.ToJSON())
+	response, _ := client.doSysdigSecureRequest(http.MethodPut, client.ruleURL(rule.ID), rule.ToJSON())
 	body, _ := ioutil.ReadAll(response.Body)
 
 	if response.StatusCode != http.StatusOK {

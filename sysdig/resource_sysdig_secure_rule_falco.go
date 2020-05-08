@@ -26,7 +26,6 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 		},
 
 		Schema: createRuleSchema(map[string]*schema.Schema{
-
 			"condition": {
 				Type:     schema.TypeString,
 				Required: true,
