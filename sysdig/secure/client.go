@@ -20,6 +20,7 @@ type SysdigSecureClient interface {
 
 	CreateNotificationChannel(NotificationChannel) (NotificationChannel, error)
 	GetNotificationChannelById(int) (NotificationChannel, error)
+	GetNotificationChannelByName(string) (NotificationChannel, error)
 	DeleteNotificationChannel(int) error
 	UpdateNotificationChannel(NotificationChannel) (NotificationChannel, error)
 

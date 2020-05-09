@@ -101,6 +101,17 @@ func NotificationChannelFromJSON(body []byte) NotificationChannel {
 	return result.NotificationChannel
 }
 
+func NotificationChannelListFromJSON(body []byte) []NotificationChannel {
+	var result notificationChannelListWrapper
+	json.Unmarshal(body, &result)
+
+	return result.NotificationChannels
+}
+
+type notificationChannelListWrapper struct {
+	NotificationChannels []NotificationChannel `json:"notificationChannels"`
+}
+
 type notificationChannelWrapper struct {
 	NotificationChannel NotificationChannel `json:"notificationChannel"`
 }

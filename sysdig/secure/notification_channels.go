@@ -30,6 +30,33 @@ func (client *sysdigSecureClient) GetNotificationChannelById(id int) (nc Notific
 	return
 }
 
+func (client *sysdigSecureClient) GetNotificationChannelByName(name string) (nc NotificationChannel, err error) {
+	response, err := client.doSysdigSecureRequest(http.MethodGet, client.GetNotificationChannelsUrl(), nil)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	body, _ := ioutil.ReadAll(response.Body)
+
+	if response.StatusCode != http.StatusOK {
+		err = errors.New(response.Status)
+		return
+	}
+
+	ncList := NotificationChannelListFromJSON(body)
+
+	for _, channel := range ncList {
+		if channel.Name == name {
+			nc = channel
+			return
+		}
+	}
+
+	err = fmt.Errorf("Notification channel with Name: %s does not exist", name)
+	return
+}
+
 func (client *sysdigSecureClient) CreateNotificationChannel(ncRequest NotificationChannel) (nc NotificationChannel, err error) {
 	response, err := client.doSysdigSecureRequest(http.MethodPost, client.GetNotificationChannelsUrl(), ncRequest.ToJSON())
 	if err != nil {

@@ -35,6 +35,8 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
+			"sysdig_user": resourceSysdigUser(),
+
 			"sysdig_secure_policy":               resourceSysdigSecurePolicy(),
 			"sysdig_secure_notification_channel": resourceSysdigSecureNotificationChannel(),
 			"sysdig_secure_rule_container":       resourceSysdigSecureRuleContainer(),
@@ -43,7 +45,6 @@ func Provider() terraform.ResourceProvider {
 			"sysdig_secure_rule_process":         resourceSysdigSecureRuleProcess(),
 			"sysdig_secure_rule_syscall":         resourceSysdigSecureRuleSyscall(),
 			"sysdig_secure_rule_falco":           resourceSysdigSecureRuleFalco(),
-			"sysdig_user":                        resourceSysdigUser(),
 			"sysdig_secure_team":                 resourceSysdigSecureTeam(),
 
 			"sysdig_monitor_alert_downtime":      resourceSysdigMonitorAlertDowntime(),
@@ -51,6 +52,9 @@ func Provider() terraform.ResourceProvider {
 			"sysdig_monitor_alert_event":         resourceSysdigMonitorAlertEvent(),
 			"sysdig_monitor_alert_anomaly":       resourceSysdigMonitorAlertAnomaly(),
 			"sysdig_monitor_alert_group_outlier": resourceSysdigMonitorAlertGroupOutlier(),
+		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"sysdig_secure_notification_channel": dataSourceSysdigSecureNotificationChannel(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
