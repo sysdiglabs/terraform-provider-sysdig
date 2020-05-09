@@ -40,6 +40,7 @@ func resourceSysdigSecureList() *schema.Resource {
 			"append": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  false,
 			},
 			"version": {
 				Type:     schema.TypeInt,

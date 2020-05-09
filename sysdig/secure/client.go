@@ -38,6 +38,11 @@ type SysdigSecureClient interface {
 	GetListById(int) (List, error)
 	DeleteList(int) error
 	UpdateList(List) (List, error)
+
+	CreateMacro(Macro) (Macro, error)
+	GetMacroById(int) (Macro, error)
+	DeleteMacro(int) error
+	UpdateMacro(Macro) (Macro, error)
 }
 
 func NewSysdigSecureClient(sysdigSecureAPIToken string, url string) SysdigSecureClient {
