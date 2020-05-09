@@ -91,7 +91,6 @@ func (client *sysdigSecureClient) UpdateNotificationChannel(ncRequest Notificati
 
 	nc = NotificationChannelFromJSON(body)
 	return
-
 }
 
 func (client *sysdigSecureClient) DeleteNotificationChannel(id int) error {

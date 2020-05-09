@@ -46,6 +46,7 @@ func Provider() terraform.ResourceProvider {
 			"sysdig_secure_rule_syscall":         resourceSysdigSecureRuleSyscall(),
 			"sysdig_secure_rule_falco":           resourceSysdigSecureRuleFalco(),
 			"sysdig_secure_team":                 resourceSysdigSecureTeam(),
+			"sysdig_secure_list":                 resourceSysdigSecureList(),
 
 			"sysdig_monitor_alert_downtime":      resourceSysdigMonitorAlertDowntime(),
 			"sysdig_monitor_alert_metric":        resourceSysdigMonitorAlertMetric(),
