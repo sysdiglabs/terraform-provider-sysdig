@@ -47,11 +47,14 @@ func resourceSysdigUser() *schema.Resource {
 }
 
 func resourceSysdigUserCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	user := userFromResourceData(d)
 
-	user, err := client.CreateUser(user)
+	user, err = client.CreateUser(user)
 	if err != nil {
 		return err
 	}
@@ -64,7 +67,10 @@ func resourceSysdigUserCreate(d *schema.ResourceData, meta interface{}) error {
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigUserRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, _ := strconv.Atoi(d.Id())
 	u, err := client.GetUserById(id)
@@ -84,20 +90,26 @@ func resourceSysdigUserRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSysdigUserUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	u := userFromResourceData(d)
 
 	u.Version = d.Get("version").(int)
 	u.ID, _ = strconv.Atoi(d.Id())
 
-	_, err := client.UpdateUser(u)
+	_, err = client.UpdateUser(u)
 
 	return err
 }
 
 func resourceSysdigUserDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, _ := strconv.Atoi(d.Id())
 

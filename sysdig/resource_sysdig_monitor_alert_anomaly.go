@@ -39,7 +39,10 @@ func resourceSysdigMonitorAlertAnomaly() *schema.Resource {
 }
 
 func resourceSysdigAlertAnomalyCreate(data *schema.ResourceData, i interface{}) error {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return err
+	}
 
 	alert, err := anomalyAlertFromResourceData(data)
 	if err != nil {
@@ -57,7 +60,10 @@ func resourceSysdigAlertAnomalyCreate(data *schema.ResourceData, i interface{}) 
 }
 
 func resourceSysdigAlertAnomalyUpdate(data *schema.ResourceData, i interface{}) (err error) {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return
+	}
 
 	alert, err := anomalyAlertFromResourceData(data)
 	if err != nil {
@@ -72,7 +78,10 @@ func resourceSysdigAlertAnomalyUpdate(data *schema.ResourceData, i interface{}) 
 }
 
 func resourceSysdigAlertAnomalyRead(data *schema.ResourceData, i interface{}) (err error) {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return
+	}
 
 	id, err := strconv.Atoi(data.Id())
 	if err != nil {
@@ -95,7 +104,10 @@ func resourceSysdigAlertAnomalyRead(data *schema.ResourceData, i interface{}) (e
 }
 
 func resourceSysdigAlertAnomalyDelete(data *schema.ResourceData, i interface{}) (err error) {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return
+	}
 
 	id, err := strconv.Atoi(data.Id())
 	if err != nil {

@@ -80,11 +80,14 @@ func resourceSysdigSecureTeam() *schema.Resource {
 }
 
 func resourceSysdigTeamCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	team := teamFromResourceData(d)
 
-	team, err := client.CreateTeam(team)
+	team, err = client.CreateTeam(team)
 	if err != nil {
 		return err
 	}
@@ -97,7 +100,10 @@ func resourceSysdigTeamCreate(d *schema.ResourceData, meta interface{}) error {
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigTeamRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, _ := strconv.Atoi(d.Id())
 	t, err := client.GetTeamById(id)
@@ -121,20 +127,26 @@ func resourceSysdigTeamRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSysdigTeamUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	t := teamFromResourceData(d)
 
 	t.Version = d.Get("version").(int)
 	t.ID, _ = strconv.Atoi(d.Id())
 
-	_, err := client.UpdateTeam(t)
+	_, err = client.UpdateTeam(t)
 
 	return err
 }
 
 func resourceSysdigTeamDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, _ := strconv.Atoi(d.Id())
 

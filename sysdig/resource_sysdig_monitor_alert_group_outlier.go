@@ -34,7 +34,10 @@ func resourceSysdigMonitorAlertGroupOutlier() *schema.Resource {
 }
 
 func resourceSysdigAlertGroupOutlierCreate(data *schema.ResourceData, i interface{}) error {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return err
+	}
 
 	alert, err := groupOutlierAlertFromResourceData(data)
 	if err != nil {
@@ -52,7 +55,10 @@ func resourceSysdigAlertGroupOutlierCreate(data *schema.ResourceData, i interfac
 }
 
 func resourceSysdigAlertGroupOutlierUpdate(data *schema.ResourceData, i interface{}) (err error) {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return
+	}
 
 	alert, err := groupOutlierAlertFromResourceData(data)
 	if err != nil {
@@ -67,7 +73,10 @@ func resourceSysdigAlertGroupOutlierUpdate(data *schema.ResourceData, i interfac
 }
 
 func resourceSysdigAlertGroupOutlierRead(data *schema.ResourceData, i interface{}) (err error) {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return
+	}
 
 	id, err := strconv.Atoi(data.Id())
 	if err != nil {
@@ -90,7 +99,10 @@ func resourceSysdigAlertGroupOutlierRead(data *schema.ResourceData, i interface{
 }
 
 func resourceSysdigAlertGroupOutlierDelete(data *schema.ResourceData, i interface{}) (err error) {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return
+	}
 
 	id, err := strconv.Atoi(data.Id())
 	if err != nil {

@@ -47,10 +47,13 @@ func resourceSysdigSecureMacro() *schema.Resource {
 }
 
 func resourceSysdigMacroCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	macro := macroFromResourceData(d)
-	macro, err := client.CreateMacro(macro)
+	macro, err = client.CreateMacro(macro)
 	if err != nil {
 		return err
 	}
@@ -62,7 +65,10 @@ func resourceSysdigMacroCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSysdigMacroUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	macro := macroFromResourceData(d)
 	macro.Version = d.Get("version").(int)
@@ -70,12 +76,15 @@ func resourceSysdigMacroUpdate(d *schema.ResourceData, meta interface{}) error {
 	id, _ := strconv.Atoi(d.Id())
 	macro.ID = id
 
-	_, err := client.UpdateMacro(macro)
+	_, err = client.UpdateMacro(macro)
 	return err
 }
 
 func resourceSysdigMacroRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, _ := strconv.Atoi(d.Id())
 	macro, err := client.GetMacroById(id)
@@ -93,7 +102,10 @@ func resourceSysdigMacroRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSysdigMacroDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, _ := strconv.Atoi(d.Id())
 

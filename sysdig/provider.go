@@ -3,9 +3,6 @@ package sysdig
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
-	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -13,24 +10,24 @@ func Provider() terraform.ResourceProvider {
 		Schema: map[string]*schema.Schema{
 			"sysdig_secure_api_token": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_SECURE_API_TOKEN", nil),
 			},
 			"sysdig_secure_url": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_SECURE_URL", "https://secure.sysdig.com"),
 			},
 			"sysdig_monitor_api_token": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_MONITOR_API_TOKEN", nil),
 			},
 			"sysdig_monitor_url": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_MONITOR_URL", "https://app.sysdigcloud.com"),
 			},
 		},
@@ -62,21 +59,7 @@ func Provider() terraform.ResourceProvider {
 	}
 }
 
-type SysdigClients struct {
-	sysdigMonitorClient monitor.SysdigMonitorClient
-	sysdigSecureClient  secure.SysdigSecureClient
-}
-
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	sysdigClient := &SysdigClients{
-		sysdigMonitorClient: monitor.NewSysdigMonitorClient(
-			d.Get("sysdig_monitor_api_token").(string),
-			d.Get("sysdig_monitor_url").(string),
-		),
-		sysdigSecureClient: secure.NewSysdigSecureClient(
-			d.Get("sysdig_secure_api_token").(string),
-			d.Get("sysdig_secure_url").(string),
-		),
-	}
+	sysdigClient := &sysdigClients{d: d}
 	return sysdigClient, nil
 }

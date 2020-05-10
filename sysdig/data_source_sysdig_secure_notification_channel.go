@@ -90,7 +90,10 @@ func dataSourceSysdigSecureNotificationChannel() *schema.Resource {
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func dataSourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	nc, err := client.GetNotificationChannelByName(d.Get("name").(string))
 	if err != nil {

@@ -97,7 +97,10 @@ func resourceSysdigSecureNotificationChannel() *schema.Resource {
 }
 
 func resourceSysdigNotificationChannelCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	notificationChannel, err := notificationChannelFromResourceData(d)
 	if err != nil {
@@ -117,7 +120,10 @@ func resourceSysdigNotificationChannelCreate(d *schema.ResourceData, meta interf
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, _ := strconv.Atoi(d.Id())
 	nc, err := client.GetNotificationChannelById(id)
@@ -163,7 +169,10 @@ func resourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interfac
 }
 
 func resourceSysdigNotificationChannelUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	nc, err := notificationChannelFromResourceData(d)
 	if err != nil {
@@ -179,7 +188,10 @@ func resourceSysdigNotificationChannelUpdate(d *schema.ResourceData, meta interf
 }
 
 func resourceSysdigNotificationChannelDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, _ := strconv.Atoi(d.Id())
 

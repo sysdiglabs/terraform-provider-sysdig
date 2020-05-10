@@ -41,11 +41,14 @@ func resourceSysdigSecureRuleProcess() *schema.Resource {
 }
 
 func resourceSysdigRuleProcessCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	rule := resourceSysdigRuleProcessFromResourceData(d)
 
-	rule, err := client.CreateRule(rule)
+	rule, err = client.CreateRule(rule)
 	if err != nil {
 		return err
 	}
@@ -58,7 +61,10 @@ func resourceSysdigRuleProcessCreate(d *schema.ResourceData, meta interface{}) e
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigRuleProcessRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -83,20 +89,26 @@ func resourceSysdigRuleProcessRead(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceSysdigRuleProcessUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	rule := resourceSysdigRuleProcessFromResourceData(d)
 
 	rule.Version = d.Get("version").(int)
 	rule.ID, _ = strconv.Atoi(d.Id())
 
-	_, err := client.UpdateRule(rule)
+	_, err = client.UpdateRule(rule)
 
 	return err
 }
 
 func resourceSysdigRuleProcessDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {

@@ -51,10 +51,13 @@ func resourceSysdigSecureList() *schema.Resource {
 }
 
 func resourceSysdigListCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	list := listFromResourceData(d)
-	list, err := client.CreateList(list)
+	list, err = client.CreateList(list)
 	if err != nil {
 		return err
 	}
@@ -66,7 +69,10 @@ func resourceSysdigListCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSysdigListUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	list := listFromResourceData(d)
 	list.Version = d.Get("version").(int)
@@ -74,12 +80,15 @@ func resourceSysdigListUpdate(d *schema.ResourceData, meta interface{}) error {
 	id, _ := strconv.Atoi(d.Id())
 	list.ID = id
 
-	_, err := client.UpdateList(list)
+	_, err = client.UpdateList(list)
 	return err
 }
 
 func resourceSysdigListRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, _ := strconv.Atoi(d.Id())
 	list, err := client.GetListById(id)
@@ -97,7 +106,10 @@ func resourceSysdigListRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSysdigListDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, _ := strconv.Atoi(d.Id())
 

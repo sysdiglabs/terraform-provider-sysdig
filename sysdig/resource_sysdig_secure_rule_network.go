@@ -80,7 +80,10 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 }
 
 func resourceSysdigRuleNetworkCreate(d *schema.ResourceData, meta interface{}) (err error) {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	rule, err := resourceSysdigRuleNetworkFromResourceData(d)
 	if err != nil {
@@ -100,7 +103,10 @@ func resourceSysdigRuleNetworkCreate(d *schema.ResourceData, meta interface{}) (
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigRuleNetworkRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -134,7 +140,10 @@ func resourceSysdigRuleNetworkRead(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceSysdigRuleNetworkUpdate(d *schema.ResourceData, meta interface{}) (err error) {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	rule, err := resourceSysdigRuleNetworkFromResourceData(d)
 	if err != nil {
@@ -150,7 +159,10 @@ func resourceSysdigRuleNetworkUpdate(d *schema.ResourceData, meta interface{}) (
 }
 
 func resourceSysdigRuleNetworkDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {

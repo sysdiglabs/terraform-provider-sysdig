@@ -38,7 +38,10 @@ func resourceSysdigMonitorAlertMetric() *schema.Resource {
 }
 
 func resourceSysdigAlertMetricCreate(data *schema.ResourceData, i interface{}) error {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return err
+	}
 
 	alert, err := metricAlertFromResourceData(data)
 	if err != nil {
@@ -56,7 +59,10 @@ func resourceSysdigAlertMetricCreate(data *schema.ResourceData, i interface{}) e
 }
 
 func resourceSysdigAlertMetricUpdate(data *schema.ResourceData, i interface{}) (err error) {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return err
+	}
 
 	alert, err := metricAlertFromResourceData(data)
 	if err != nil {
@@ -71,7 +77,10 @@ func resourceSysdigAlertMetricUpdate(data *schema.ResourceData, i interface{}) (
 }
 
 func resourceSysdigAlertMetricRead(data *schema.ResourceData, i interface{}) (err error) {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return err
+	}
 
 	id, err := strconv.Atoi(data.Id())
 	if err != nil {
@@ -94,7 +103,10 @@ func resourceSysdigAlertMetricRead(data *schema.ResourceData, i interface{}) (er
 }
 
 func resourceSysdigAlertMetricDelete(data *schema.ResourceData, i interface{}) (err error) {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return err
+	}
 
 	id, err := strconv.Atoi(data.Id())
 	if err != nil {

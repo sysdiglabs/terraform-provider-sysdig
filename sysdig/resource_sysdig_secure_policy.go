@@ -118,10 +118,13 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 }
 
 func resourceSysdigPolicyCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	policy := policyFromResourceData(d)
-	policy, err := client.CreatePolicy(policy)
+	policy, err = client.CreatePolicy(policy)
 	if err != nil {
 		return err
 	}
@@ -192,7 +195,10 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 }
 
 func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, _ := strconv.Atoi(d.Id())
 	policy, err := client.GetPolicyById(id)
@@ -223,7 +229,10 @@ func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSysdigPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, _ := strconv.Atoi(d.Id())
 
@@ -231,7 +240,10 @@ func resourceSysdigPolicyDelete(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceSysdigPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	policy := policyFromResourceData(d)
 	policy.Version = d.Get("version").(int)
@@ -239,6 +251,6 @@ func resourceSysdigPolicyUpdate(d *schema.ResourceData, meta interface{}) error 
 	id, _ := strconv.Atoi(d.Id())
 	policy.ID = id
 
-	_, err := client.UpdatePolicy(policy)
+	_, err = client.UpdatePolicy(policy)
 	return err
 }

@@ -72,7 +72,10 @@ func resourceSysdigSecureRuleFilesystem() *schema.Resource {
 }
 
 func resourceSysdigRuleFilesystemCreate(d *schema.ResourceData, meta interface{}) (err error) {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	rule, err := resourceSysdigRuleFilesystemFromResourceData(d)
 	if err != nil {
@@ -92,7 +95,10 @@ func resourceSysdigRuleFilesystemCreate(d *schema.ResourceData, meta interface{}
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigRuleFilesystemRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -123,7 +129,10 @@ func resourceSysdigRuleFilesystemRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceSysdigRuleFilesystemUpdate(d *schema.ResourceData, meta interface{}) (err error) {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	rule, err := resourceSysdigRuleFilesystemFromResourceData(d)
 	if err != nil {
@@ -139,7 +148,10 @@ func resourceSysdigRuleFilesystemUpdate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceSysdigRuleFilesystemDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*SysdigClients).sysdigSecureClient
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		return err
+	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {

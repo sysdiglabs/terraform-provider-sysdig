@@ -40,7 +40,10 @@ func resourceSysdigMonitorAlertDowntime() *schema.Resource {
 }
 
 func resourceSysdigAlertDowntimeCreate(data *schema.ResourceData, i interface{}) error {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return err
+	}
 
 	alert, err := downtimeAlertFromResourceData(data)
 	if err != nil {
@@ -58,7 +61,10 @@ func resourceSysdigAlertDowntimeCreate(data *schema.ResourceData, i interface{})
 }
 
 func resourceSysdigAlertDowntimeUpdate(data *schema.ResourceData, i interface{}) (err error) {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return
+	}
 
 	alert, err := downtimeAlertFromResourceData(data)
 	if err != nil {
@@ -73,7 +79,10 @@ func resourceSysdigAlertDowntimeUpdate(data *schema.ResourceData, i interface{})
 }
 
 func resourceSysdigAlertDowntimeRead(data *schema.ResourceData, i interface{}) (err error) {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return
+	}
 
 	id, err := strconv.Atoi(data.Id())
 	if err != nil {
@@ -95,7 +104,10 @@ func resourceSysdigAlertDowntimeRead(data *schema.ResourceData, i interface{}) (
 	return
 }
 func resourceSysdigAlertDowntimeDelete(data *schema.ResourceData, i interface{}) (err error) {
-	client := i.(*SysdigClients).sysdigMonitorClient
+	client, err := i.(SysdigClients).sysdigMonitorClient()
+	if err != nil {
+		return
+	}
 
 	id, err := strconv.Atoi(data.Id())
 	if err != nil {
