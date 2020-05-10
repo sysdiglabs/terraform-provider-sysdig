@@ -14,11 +14,11 @@ type SysdigClients interface {
 }
 
 type sysdigClients struct {
-	d                    *schema.ResourceData
-	onceMonitor          sync.Once
-	onceSecure           sync.Once
-	_sysdigMonitorClient monitor.SysdigMonitorClient
-	_sysdigSecureClient  secure.SysdigSecureClient
+	d             *schema.ResourceData
+	onceMonitor   sync.Once
+	onceSecure    sync.Once
+	monitorClient monitor.SysdigMonitorClient
+	secureClient  secure.SysdigSecureClient
 }
 
 func (c *sysdigClients) sysdigMonitorClient() (m monitor.SysdigMonitorClient, err error) {
@@ -29,13 +29,13 @@ func (c *sysdigClients) sysdigMonitorClient() (m monitor.SysdigMonitorClient, er
 	}
 
 	c.onceMonitor.Do(func() {
-		c._sysdigMonitorClient = monitor.NewSysdigMonitorClient(
+		c.monitorClient = monitor.NewSysdigMonitorClient(
 			monitorAPIToken,
 			c.d.Get("sysdig_monitor_url").(string),
 		)
 	})
 
-	return c._sysdigMonitorClient, nil
+	return c.monitorClient, nil
 }
 
 func (c *sysdigClients) sysdigSecureClient() (s secure.SysdigSecureClient, err error) {
@@ -46,11 +46,11 @@ func (c *sysdigClients) sysdigSecureClient() (s secure.SysdigSecureClient, err e
 	}
 
 	c.onceSecure.Do(func() {
-		c._sysdigSecureClient = secure.NewSysdigSecureClient(
+		c.secureClient = secure.NewSysdigSecureClient(
 			secureAPIToken,
 			c.d.Get("sysdig_secure_url").(string),
 		)
 	})
 
-	return c._sysdigSecureClient, nil
+	return c.secureClient, nil
 }
