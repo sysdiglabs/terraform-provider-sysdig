@@ -19,6 +19,11 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_SECURE_URL", "https://secure.sysdig.com"),
 			},
+			"sysdig_secure_insecure_tls": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_SECURE_INSECURE_TLS", false),
+			},
 			"sysdig_monitor_api_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -29,6 +34,11 @@ func Provider() terraform.ResourceProvider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_MONITOR_URL", "https://app.sysdigcloud.com"),
+			},
+			"sysdig_monitor_insecure_tls": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_MONITOR_INSECURE_TLS", false),
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{

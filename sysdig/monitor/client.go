@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"crypto/tls"
 	"io"
 	"net/http"
 )
@@ -12,11 +13,17 @@ type SysdigMonitorClient interface {
 	GetAlertById(int) (Alert, error)
 }
 
-func NewSysdigMonitorClient(apiToken string, url string) SysdigMonitorClient {
+func NewSysdigMonitorClient(apiToken string, url string, insecure bool) SysdigMonitorClient {
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
+		},
+	}
+
 	return &sysdigMonitorClient{
 		SysdigMonitorAPIToken: apiToken,
 		URL:                   url,
-		httpClient:            http.DefaultClient,
+		httpClient:            httpClient,
 	}
 }
 

@@ -1,6 +1,7 @@
 package secure
 
 import (
+	"crypto/tls"
 	"io"
 	"log"
 	"net/http"
@@ -45,11 +46,17 @@ type SysdigSecureClient interface {
 	UpdateMacro(Macro) (Macro, error)
 }
 
-func NewSysdigSecureClient(sysdigSecureAPIToken string, url string) SysdigSecureClient {
+func NewSysdigSecureClient(sysdigSecureAPIToken string, url string, insecure bool) SysdigSecureClient {
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
+		},
+	}
+
 	return &sysdigSecureClient{
 		SysdigSecureAPIToken: sysdigSecureAPIToken,
 		URL:                  url,
-		httpClient:           http.DefaultClient,
+		httpClient:           httpClient,
 	}
 }
 

@@ -32,6 +32,7 @@ func (c *sysdigClients) sysdigMonitorClient() (m monitor.SysdigMonitorClient, er
 		c.monitorClient = monitor.NewSysdigMonitorClient(
 			monitorAPIToken,
 			c.d.Get("sysdig_monitor_url").(string),
+			c.d.Get("sysdig_monitor_insecure_tls").(bool),
 		)
 	})
 
@@ -49,6 +50,7 @@ func (c *sysdigClients) sysdigSecureClient() (s secure.SysdigSecureClient, err e
 		c.secureClient = secure.NewSysdigSecureClient(
 			secureAPIToken,
 			c.d.Get("sysdig_secure_url").(string),
+			c.d.Get("sysdig_secure_insecure_tls").(bool),
 		)
 	})
 
