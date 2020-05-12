@@ -34,11 +34,13 @@ resource "sysdig_secure_policy" "unexpected_inbound_tcp_connection_traefik" {
 
 The following keys can be used to configure the provider.
 
-* `sysdig_monitor_api_token` - (Required) The Sysdig Secure API token, it must be
+* `sysdig_monitor_api_token` - (Optional) The Sysdig Secure API token, it must be
   present, but you can get it from the `SYSDIG_MONITOR_API_TOKEN` environment variable.
+  Required if any `sysdig_monitor_*` resource or data source is used. 
 
-* `sysdig_secure_api_token` - (Required) The Sysdig Secure API token, it must be
+* `sysdig_secure_api_token` - (Optional) The Sysdig Secure API token, it must be
   present, but you can get it from the `SYSDIG_SECURE_API_TOKEN` environment variable.
+  Required if any `sysdig_secure_*` resource or data source is used.
 
 * `sysdig_monitor_url` - (Optional) This is the target Sysdig Secure base API
   endpoint. It's intended to be used with OnPrem installations. By defaults it
@@ -51,3 +53,13 @@ The following keys can be used to configure the provider.
   points to `https://secure.sysdig.com`, and notice that should not be ended
   with an slash. It can also be sourced from the `SYSDIG_SECURE_URL` environment
   variable.
+  
+* `sysdig_monitor_insecure_tls` - (Optional) Defines if the HTTP client can ignore
+  the use of invalid HTTPS certificates in the Monitor API. It can be useful for 
+  on-prem installations. It can also be sourced from the `SYSDIG_MONITOR_INSECURE_TLS`
+  environment variable. By default this is false.
+
+* `sysdig_secure_insecure_tls` - (Optional) Defines if the HTTP client can ignore
+  the use of invalid HTTPS certificates in the Secure API. It can be useful for 
+  on-prem installations. It can also be sourced from the `SYSDIG_SECURE_INSECURE_TLS`
+  environment variable. By default this is false.
