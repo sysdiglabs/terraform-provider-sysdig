@@ -15,8 +15,10 @@ func TestAccUser(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
+			secure := os.Getenv("SYSDIG_SECURE_API_TOKEN")
+			if monitor == "" && secure == "" {
+				t.Fatal("either SYSDIG_MONITOR_API_TOKEN or SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
 			}
 		},
 		Providers: map[string]terraform.ResourceProvider{

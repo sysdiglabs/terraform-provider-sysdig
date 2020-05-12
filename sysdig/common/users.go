@@ -1,4 +1,4 @@
-package secure
+package common
 
 import (
 	"errors"
@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-func (client *sysdigSecureClient) GetUserById(id int) (u User, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodGet, client.GetUserUrl(id), nil)
+func (client *sysdigCommonClient) GetUserById(id int) (u User, err error) {
+	response, err := client.doSysdigCommonRequest(http.MethodGet, client.GetUserUrl(id), nil)
 	if err != nil {
 		return
 	}
@@ -26,8 +26,8 @@ func (client *sysdigSecureClient) GetUserById(id int) (u User, err error) {
 	return
 }
 
-func (client *sysdigSecureClient) CreateUser(uRequest User) (u User, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodPost, client.GetUsersUrl(), uRequest.ToJSON())
+func (client *sysdigCommonClient) CreateUser(uRequest User) (u User, err error) {
+	response, err := client.doSysdigCommonRequest(http.MethodPost, client.GetUsersUrl(), uRequest.ToJSON())
 
 	if err != nil {
 		return
@@ -45,8 +45,8 @@ func (client *sysdigSecureClient) CreateUser(uRequest User) (u User, err error) 
 	return
 }
 
-func (client *sysdigSecureClient) UpdateUser(uRequest User) (u User, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodPut, client.GetUserUrl(uRequest.ID), uRequest.ToJSON())
+func (client *sysdigCommonClient) UpdateUser(uRequest User) (u User, err error) {
+	response, err := client.doSysdigCommonRequest(http.MethodPut, client.GetUserUrl(uRequest.ID), uRequest.ToJSON())
 	if err != nil {
 		return
 	}
@@ -63,8 +63,8 @@ func (client *sysdigSecureClient) UpdateUser(uRequest User) (u User, err error) 
 	return
 }
 
-func (client *sysdigSecureClient) DeleteUser(id int) error {
-	response, err := client.doSysdigSecureRequest(http.MethodDelete, client.GetUserUrl(id), nil)
+func (client *sysdigCommonClient) DeleteUser(id int) error {
+	response, err := client.doSysdigCommonRequest(http.MethodDelete, client.GetUserUrl(id), nil)
 	if err != nil {
 		return err
 	}
@@ -76,10 +76,10 @@ func (client *sysdigSecureClient) DeleteUser(id int) error {
 	return nil
 }
 
-func (client *sysdigSecureClient) GetUsersUrl() string {
+func (client *sysdigCommonClient) GetUsersUrl() string {
 	return fmt.Sprintf("%s/api/users", client.URL)
 }
 
-func (client *sysdigSecureClient) GetUserUrl(id int) string {
+func (client *sysdigCommonClient) GetUserUrl(id int) string {
 	return fmt.Sprintf("%s/api/users/%d", client.URL, id)
 }

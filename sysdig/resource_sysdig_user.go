@@ -1,7 +1,7 @@
 package sysdig
 
 import (
-	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
+	"github.com/draios/terraform-provider-sysdig/sysdig/common"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"strconv"
 	"time"
@@ -47,7 +47,7 @@ func resourceSysdigUser() *schema.Resource {
 }
 
 func resourceSysdigUserCreate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func resourceSysdigUserCreate(d *schema.ResourceData, meta interface{}) error {
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigUserRead(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func resourceSysdigUserRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSysdigUserUpdate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func resourceSysdigUserUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSysdigUserDelete(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
 		return err
 	}
@@ -116,8 +116,8 @@ func resourceSysdigUserDelete(d *schema.ResourceData, meta interface{}) error {
 	return client.DeleteUser(id)
 }
 
-func userFromResourceData(d *schema.ResourceData) (u secure.User) {
-	u = secure.User{
+func userFromResourceData(d *schema.ResourceData) (u common.User) {
+	u = common.User{
 		SystemRole: d.Get("system_role").(string),
 		Email:      d.Get("email").(string),
 		FirstName:  d.Get("first_name").(string),
