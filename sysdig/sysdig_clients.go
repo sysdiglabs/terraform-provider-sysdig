@@ -17,6 +17,7 @@ type SysdigClients interface {
 
 type sysdigClients struct {
 	d             *schema.ResourceData
+	mu            sync.Mutex
 	onceMonitor   sync.Once
 	onceSecure    sync.Once
 	onceCommon    sync.Once
@@ -26,6 +27,8 @@ type sysdigClients struct {
 }
 
 func (c *sysdigClients) sysdigMonitorClient() (m monitor.SysdigMonitorClient, err error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	monitorAPIToken := c.d.Get("sysdig_monitor_api_token").(string)
 	if monitorAPIToken == "" {
 		err = errors.New("sysdig monitor token not provided")
@@ -44,6 +47,8 @@ func (c *sysdigClients) sysdigMonitorClient() (m monitor.SysdigMonitorClient, er
 }
 
 func (c *sysdigClients) sysdigSecureClient() (s secure.SysdigSecureClient, err error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	secureAPIToken := c.d.Get("sysdig_secure_api_token").(string)
 	if secureAPIToken == "" {
 		err = errors.New("sysdig secure token not provided")
@@ -62,6 +67,8 @@ func (c *sysdigClients) sysdigSecureClient() (s secure.SysdigSecureClient, err e
 }
 
 func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	monitorAPIToken := c.d.Get("sysdig_monitor_api_token").(string)
 	secureAPIToken := c.d.Get("sysdig_secure_api_token").(string)
 
@@ -88,5 +95,4 @@ func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err 
 	})
 
 	return c.commonClient, nil
-
 }
