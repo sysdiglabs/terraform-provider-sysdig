@@ -1,4 +1,4 @@
-package secure
+package common
 
 import (
 	"errors"
@@ -7,9 +7,9 @@ import (
 	"net/http"
 )
 
-func (client *sysdigSecureClient) getUserIdbyEmail(userRoles []UserRoles) ([]UserRoles, error) {
+func (client *sysdigCommonClient) getUserIdbyEmail(userRoles []UserRoles) ([]UserRoles, error) {
 	// Get UsersList from API
-	response, err := client.doSysdigSecureRequest(http.MethodGet, client.getUsersListUrl(), nil)
+	response, err := client.doSysdigCommonRequest(http.MethodGet, client.getUsersListUrl(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +44,8 @@ func (client *sysdigSecureClient) getUserIdbyEmail(userRoles []UserRoles) ([]Use
 	return modifiedUserRoles, nil
 }
 
-func (client *sysdigSecureClient) GetTeamById(id int) (t Team, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodGet, client.GetTeamUrl(id), nil)
+func (client *sysdigCommonClient) GetTeamById(id int) (t Team, err error) {
+	response, err := client.doSysdigCommonRequest(http.MethodGet, client.GetTeamUrl(id), nil)
 	if err != nil {
 		return
 	}
@@ -63,13 +63,13 @@ func (client *sysdigSecureClient) GetTeamById(id int) (t Team, err error) {
 	return
 }
 
-func (client *sysdigSecureClient) CreateTeam(tRequest Team) (t Team, err error) {
+func (client *sysdigCommonClient) CreateTeam(tRequest Team) (t Team, err error) {
 	tRequest.UserRoles, err = client.getUserIdbyEmail(tRequest.UserRoles)
 	if err != nil {
 		return
 	}
 
-	response, err := client.doSysdigSecureRequest(http.MethodPost, client.GetTeamsUrl(), tRequest.ToJSON())
+	response, err := client.doSysdigCommonRequest(http.MethodPost, client.GetTeamsUrl(), tRequest.ToJSON())
 
 	if err != nil {
 		return
@@ -87,13 +87,13 @@ func (client *sysdigSecureClient) CreateTeam(tRequest Team) (t Team, err error) 
 	return
 }
 
-func (client *sysdigSecureClient) UpdateTeam(tRequest Team) (t Team, err error) {
+func (client *sysdigCommonClient) UpdateTeam(tRequest Team) (t Team, err error) {
 	tRequest.UserRoles, err = client.getUserIdbyEmail(tRequest.UserRoles)
 	if err != nil {
 		return
 	}
 
-	response, err := client.doSysdigSecureRequest(http.MethodPut, client.GetTeamUrl(tRequest.ID), tRequest.ToJSON())
+	response, err := client.doSysdigCommonRequest(http.MethodPut, client.GetTeamUrl(tRequest.ID), tRequest.ToJSON())
 	if err != nil {
 		return
 	}
@@ -110,8 +110,8 @@ func (client *sysdigSecureClient) UpdateTeam(tRequest Team) (t Team, err error) 
 	return
 }
 
-func (client *sysdigSecureClient) DeleteTeam(id int) error {
-	response, err := client.doSysdigSecureRequest(http.MethodDelete, client.GetTeamUrl(id), nil)
+func (client *sysdigCommonClient) DeleteTeam(id int) error {
+	response, err := client.doSysdigCommonRequest(http.MethodDelete, client.GetTeamUrl(id), nil)
 	if err != nil {
 		return err
 	}
@@ -123,14 +123,14 @@ func (client *sysdigSecureClient) DeleteTeam(id int) error {
 	return nil
 }
 
-func (client *sysdigSecureClient) getUsersListUrl() string {
+func (client *sysdigCommonClient) getUsersListUrl() string {
 	return fmt.Sprintf("%s/api/users/light", client.URL)
 }
 
-func (client *sysdigSecureClient) GetTeamsUrl() string {
+func (client *sysdigCommonClient) GetTeamsUrl() string {
 	return fmt.Sprintf("%s/api/teams", client.URL)
 }
 
-func (client *sysdigSecureClient) GetTeamUrl(id int) string {
+func (client *sysdigCommonClient) GetTeamUrl(id int) string {
 	return fmt.Sprintf("%s/api/teams/%d", client.URL, id)
 }

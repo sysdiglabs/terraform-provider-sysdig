@@ -25,11 +25,6 @@ type SysdigSecureClient interface {
 	DeleteNotificationChannel(int) error
 	UpdateNotificationChannel(NotificationChannel) (NotificationChannel, error)
 
-	CreateTeam(Team) (Team, error)
-	GetTeamById(int) (Team, error)
-	DeleteTeam(int) error
-	UpdateTeam(Team) (Team, error)
-
 	CreateList(List) (List, error)
 	GetListById(int) (List, error)
 	DeleteList(int) error

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"strings"
 	"crypto/tls"
 	"io"
 	"log"
@@ -13,6 +14,11 @@ type SysdigCommonClient interface {
 	GetUserById(int) (User, error)
 	DeleteUser(int) error
 	UpdateUser(User) (User, error)
+
+	CreateTeam(Team) (Team, error)
+	GetTeamById(int) (Team, error)
+	DeleteTeam(int) error
+	UpdateTeam(Team) (Team, error)
 }
 
 func NewSysdigCommonClient(sysdigAPIToken string, url string, insecure bool) SysdigCommonClient {
@@ -36,9 +42,27 @@ type sysdigCommonClient struct {
 }
 
 func (client *sysdigCommonClient) doSysdigCommonRequest(method string, url string, payload io.Reader) (*http.Response, error) {
-	request, _ := http.NewRequest(method, url, payload)
-	request.Header.Set("Authorization", "Bearer "+client.SysdigAPIToken)
+
+	var IBMInstanceID string
+	var URL string
+
+	if url[0:10] == "instanceid" {
+		result := strings.Split(url, "::")
+		IBMInstanceID = strings.Split(result[0], "=")[1]
+		URL = strings.Split(result[1], "=")[1]
+	} else {
+		URL = url
+	}
+
+	request, _ := http.NewRequest(method, URL, payload)
 	request.Header.Set("Content-Type", "application/json")
+
+	if IBMInstanceID != "" {
+		request.Header.Set("Authorization", client.SysdigAPIToken)
+		request.Header.Set("IBMInstanceID", IBMInstanceID)
+	} else {
+		request.Header.Set("Authorization", "Bearer "+client.SysdigAPIToken)
+	}
 
 	out, _ := httputil.DumpRequestOut(request, true)
 	log.Printf("[DEBUG] %s", string(out))

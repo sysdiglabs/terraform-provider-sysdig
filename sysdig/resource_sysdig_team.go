@@ -1,13 +1,13 @@
 package sysdig
 
 import (
-	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
+	"github.com/draios/terraform-provider-sysdig/sysdig/common"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"strconv"
 	"time"
 )
 
-func resourceSysdigSecureTeam() *schema.Resource {
+func resourceSysdigTeam() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
@@ -48,6 +48,21 @@ func resourceSysdigSecureTeam() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"use_aws_metrics": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"use_custom_events": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"use_beacon_metrics": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"user_roles": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -80,7 +95,7 @@ func resourceSysdigSecureTeam() *schema.Resource {
 }
 
 func resourceSysdigTeamCreate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
 		return err
 	}
@@ -100,7 +115,7 @@ func resourceSysdigTeamCreate(d *schema.ResourceData, meta interface{}) error {
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigTeamRead(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
 		return err
 	}
@@ -120,6 +135,9 @@ func resourceSysdigTeamRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("scope_by", t.ScopeBy)
 	d.Set("filter", t.Filter)
 	d.Set("canUseSysdigCapture", t.CanUseSysdigCapture)
+	d.Set("CanUseAwsMetrics", t.CanUseAwsMetrics)
+	d.Set("CanUseCustomEvents", t.CanUseCustomEvents)
+	d.Set("CanUseBeaconMetrics", t.CanUseBeaconMetrics)
 	d.Set("default_team", t.DefaultTeam)
 	d.Set("user_roles", t.UserRoles)
 
@@ -127,7 +145,7 @@ func resourceSysdigTeamRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSysdigTeamUpdate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
 		return err
 	}
@@ -143,7 +161,7 @@ func resourceSysdigTeamUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSysdigTeamDelete(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
 		return err
 	}
@@ -153,22 +171,25 @@ func resourceSysdigTeamDelete(d *schema.ResourceData, meta interface{}) error {
 	return client.DeleteTeam(id)
 }
 
-func teamFromResourceData(d *schema.ResourceData) secure.Team {
-	t := secure.Team{
+func teamFromResourceData(d *schema.ResourceData) common.Team {
+	t := common.Team{
 		Theme:               d.Get("theme").(string),
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
 		ScopeBy:             d.Get("scope_by").(string),
 		Filter:              d.Get("filter").(string),
 		CanUseSysdigCapture: d.Get("use_sysdig_capture").(bool),
+		CanUseAwsMetrics: d.Get("use_aws_metrics").(bool),
+		CanUseCustomEvents: d.Get("use_custom_events").(bool),
+		CanUseBeaconMetrics: d.Get("use_beacon_metrics").(bool),
 		DefaultTeam:         d.Get("default_team").(bool),
-		Products:            []string{"SDS"},
+		Products:            []string{"SDS","SDC"},
 	}
 
-	userRoles := []secure.UserRoles{}
+	userRoles := []common.UserRoles{}
 	for _, userRole := range d.Get("user_roles").(*schema.Set).List() {
 		ur := userRole.(map[string]interface{})
-		userRoles = append(userRoles, secure.UserRoles{
+		userRoles = append(userRoles, common.UserRoles{
 			Email: ur["email"].(string),
 			Role:  ur["role"].(string),
 		})

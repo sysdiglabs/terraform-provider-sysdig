@@ -43,6 +43,7 @@ func Provider() terraform.ResourceProvider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"sysdig_user": resourceSysdigUser(),
+			"sysdig_team": resourceSysdigTeam(),
 
 			"sysdig_secure_policy":               resourceSysdigSecurePolicy(),
 			"sysdig_secure_notification_channel": resourceSysdigSecureNotificationChannel(),
@@ -52,7 +53,6 @@ func Provider() terraform.ResourceProvider {
 			"sysdig_secure_rule_process":         resourceSysdigSecureRuleProcess(),
 			"sysdig_secure_rule_syscall":         resourceSysdigSecureRuleSyscall(),
 			"sysdig_secure_rule_falco":           resourceSysdigSecureRuleFalco(),
-			"sysdig_secure_team":                 resourceSysdigSecureTeam(),
 			"sysdig_secure_list":                 resourceSysdigSecureList(),
 			"sysdig_secure_macro":                resourceSysdigSecureMacro(),
 
