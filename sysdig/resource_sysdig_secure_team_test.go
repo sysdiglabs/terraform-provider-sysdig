@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestAccTeam(t *testing.T) {
+func TestAccSecureTeam(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.Test(t, resource.TestCase{
@@ -24,22 +24,16 @@ func TestAccTeam(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: teamWithName(rText()),
+				Config: secureTeamWithName(rText()),
 			},
 			{
-				Config: teamWithOneUser(rText()),
-			},
-			{
-				Config: teamWithTwoUser(rText()),
-			},
-			{
-				Config: teamMinimumConfiguration(rText()),
+				Config: secureTeamMinimumConfiguration(rText()),
 			},
 		},
 	})
 }
 
-func teamWithName(name string) string {
+func secureTeamWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_team" "sample" {
   name               = "sample-%s"
@@ -49,56 +43,7 @@ resource "sysdig_secure_team" "sample" {
 }`, name, name)
 }
 
-func teamWithOneUser(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_user" "sample" {
-  email      = "terraform-test+team@sysdig.com"
-}
-
-resource "sysdig_secure_team" "sample" {
-  name               = "sample-%s"
-  description        = "%s"
-  scope_by           = "container"
-  filter             = "container.image.repo = \"sysdig/agent\""
-  use_sysdig_capture = false
-
-  user_roles {
-    email = sysdig_user.sample.email
-    role  = "ROLE_TEAM_EDIT"
-  }
-}`, name, name)
-}
-
-func teamWithTwoUser(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_user" "sample1" {
-  email      = "terraform-test+team-1@sysdig.com"
-}
-
-resource "sysdig_user" "sample2" {
-  email      = "terraform-test+team-2@sysdig.com"
-}
-
-resource "sysdig_secure_team" "sample" {
-  name               = "sample-%s"
-  description        = "%s"
-  scope_by           = "container"
-  filter             = "container.image.repo = \"sysdig/agent\""
-  use_sysdig_capture = false
-
-  user_roles {
-    email = sysdig_user.sample1.email
-    role  = "ROLE_TEAM_EDIT"
-  }
-
-  user_roles {
-    email = sysdig_user.sample2.email
-    role  = "ROLE_TEAM_MANAGER"
-  }
-}`, name, name)
-}
-
-func teamMinimumConfiguration(name string) string {
+func secureTeamMinimumConfiguration(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_team" "sample" {
   name      = "sample-%s"

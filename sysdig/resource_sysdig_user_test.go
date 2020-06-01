@@ -35,7 +35,7 @@ func TestAccUser(t *testing.T) {
 				Config: userWithoutSystemRole(rText()),
 			},
 			{
-				Config: userMinimumConfiguration(rText()),
+				Config: userMinimumConfiguration(),
 			},
 		},
 	})
@@ -70,7 +70,7 @@ resource "sysdig_user" "sample" {
 }`, name, name)
 }
 
-func userMinimumConfiguration(name string) string {
+func userMinimumConfiguration() string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
   email      = "terraform-test+user@sysdig.com"

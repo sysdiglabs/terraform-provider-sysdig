@@ -1,20 +1,21 @@
 package sysdig
 
 import (
-	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
+	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"strconv"
 	"time"
 )
 
-func resourceSysdigSecureTeam() *schema.Resource {
+func resourceSysdigMonitorTeam() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigSecureTeamCreate,
-		Update: resourceSysdigSecureTeamUpdate,
-		Read:   resourceSysdigSecureTeamRead,
-		Delete: resourceSysdigSecureTeamDelete,
+		Create: resourceSysdigMonitorTeamCreate,
+		Update: resourceSysdigMonitorTeamUpdate,
+		Read:   resourceSysdigMonitorTeamRead,
+		Delete: resourceSysdigMonitorTeamDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -27,7 +28,7 @@ func resourceSysdigSecureTeam() *schema.Resource {
 			"theme": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "#73A1F7",
+				Default:  "#05C391",
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -40,16 +41,26 @@ func resourceSysdigSecureTeam() *schema.Resource {
 			"scope_by": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "container",
+				Default:  "host",
 			},
 			"filter": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"use_sysdig_capture": {
+			"can_use_sysdig_capture": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Default:  false,
+			},
+			"can_see_infrastructure_events": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"can_use_aws_data": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"user_roles": {
 				Type:     schema.TypeSet,
@@ -60,11 +71,29 @@ func resourceSysdigSecureTeam() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-
 						"role": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      "ROLE_TEAM_STANDARD",
+							ValidateFunc: validation.StringInSlice([]string{"ROLE_TEAM_STANDARD", "ROLE_TEAM_EDIT", "ROLE_TEAM_READ", "ROLE_TEAM_MANAGER"}, false),
+						},
+					},
+				},
+			},
+			"entrypoint": {
+				Type:     schema.TypeList,
+				Required: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"Explore", "Dashboards", "Events", "Alerts", "Settings"}, false),
+						},
+
+						"selection": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Default:  "ROLE_TEAM_STANDARD",
 						},
 					},
 				},
@@ -82,13 +111,13 @@ func resourceSysdigSecureTeam() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureTeamCreate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorTeamCreate(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
 
-	team := secureTeamFromResourceData(d)
+	team := teamFromResourceData(d)
 
 	team, err = client.CreateTeam(team)
 	if err != nil {
@@ -102,8 +131,8 @@ func resourceSysdigSecureTeamCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigSecureTeamRead(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorTeamRead(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
@@ -120,22 +149,23 @@ func resourceSysdigSecureTeamRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("theme", t.Theme)
 	d.Set("name", t.Name)
 	d.Set("description", t.Description)
-	d.Set("scope_by", t.ScopeBy)
+	d.Set("scope_by", t.Show)
 	d.Set("filter", t.Filter)
 	d.Set("canUseSysdigCapture", t.CanUseSysdigCapture)
 	d.Set("default_team", t.DefaultTeam)
 	d.Set("user_roles", t.UserRoles)
+	d.Set("entrypoint", t.EntryPoint)
 
 	return nil
 }
 
-func resourceSysdigSecureTeamUpdate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorTeamUpdate(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
 
-	t := secureTeamFromResourceData(d)
+	t := teamFromResourceData(d)
 
 	t.Version = d.Get("version").(int)
 	t.ID, _ = strconv.Atoi(d.Id())
@@ -145,8 +175,8 @@ func resourceSysdigSecureTeamUpdate(d *schema.ResourceData, meta interface{}) er
 	return err
 }
 
-func resourceSysdigSecureTeamDelete(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorTeamDelete(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
@@ -156,26 +186,33 @@ func resourceSysdigSecureTeamDelete(d *schema.ResourceData, meta interface{}) er
 	return client.DeleteTeam(id)
 }
 
-func secureTeamFromResourceData(d *schema.ResourceData) secure.Team {
-	t := secure.Team{
+func teamFromResourceData(d *schema.ResourceData) monitor.Team {
+	t := monitor.Team{
 		Theme:               d.Get("theme").(string),
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
-		ScopeBy:             d.Get("scope_by").(string),
+		Show:                d.Get("scope_by").(string),
 		Filter:              d.Get("filter").(string),
-		CanUseSysdigCapture: d.Get("use_sysdig_capture").(bool),
+		CanUseSysdigCapture: d.Get("can_use_sysdig_capture").(bool),
+		CanUseCustomEvents:  d.Get("can_see_infrastructure_events").(bool),
+		CanUseAwsMetrics:    d.Get("can_use_aws_data").(bool),
 		DefaultTeam:         d.Get("default_team").(bool),
 	}
 
-	userRoles := []secure.UserRoles{}
+	userRoles := []monitor.UserRoles{}
 	for _, userRole := range d.Get("user_roles").(*schema.Set).List() {
 		ur := userRole.(map[string]interface{})
-		userRoles = append(userRoles, secure.UserRoles{
+		userRoles = append(userRoles, monitor.UserRoles{
 			Email: ur["email"].(string),
 			Role:  ur["role"].(string),
 		})
 	}
 	t.UserRoles = userRoles
+
+	t.EntryPoint.Module = d.Get("entrypoint.0.type").(string)
+	if val, ok := d.GetOk("entrypoint.0.selection"); ok {
+		t.EntryPoint.Selection = val.(string)
+	}
 
 	return t
 }

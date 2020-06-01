@@ -61,6 +61,7 @@ func Provider() terraform.ResourceProvider {
 			"sysdig_monitor_alert_event":         resourceSysdigMonitorAlertEvent(),
 			"sysdig_monitor_alert_anomaly":       resourceSysdigMonitorAlertAnomaly(),
 			"sysdig_monitor_alert_group_outlier": resourceSysdigMonitorAlertGroupOutlier(),
+			"sysdig_monitor_team":                resourceSysdigMonitorTeam(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_notification_channel": dataSourceSysdigSecureNotificationChannel(),

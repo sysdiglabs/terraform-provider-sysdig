@@ -3,7 +3,9 @@ package monitor
 import (
 	"crypto/tls"
 	"io"
+	"log"
 	"net/http"
+	"net/http/httputil"
 )
 
 type SysdigMonitorClient interface {
@@ -11,6 +13,11 @@ type SysdigMonitorClient interface {
 	DeleteAlert(int) error
 	UpdateAlert(Alert) (Alert, error)
 	GetAlertById(int) (Alert, error)
+
+	CreateTeam(Team) (Team, error)
+	GetTeamById(int) (Team, error)
+	UpdateTeam(Team) (Team, error)
+	DeleteTeam(int) error
 }
 
 func NewSysdigMonitorClient(apiToken string, url string, insecure bool) SysdigMonitorClient {
@@ -38,5 +45,13 @@ func (c *sysdigMonitorClient) doSysdigMonitorRequest(method string, url string, 
 	request.Header.Set("Authorization", "Bearer "+c.SysdigMonitorAPIToken)
 	request.Header.Set("Content-Type", "application/json")
 
-	return c.httpClient.Do(request)
+	out, _ := httputil.DumpRequestOut(request, true)
+	log.Printf("[DEBUG] %s", string(out))
+
+	response, err := c.httpClient.Do(request)
+
+	out, _ = httputil.DumpResponse(response, true)
+	log.Printf("[DEBUG] %s", string(out))
+
+	return response, err
 }

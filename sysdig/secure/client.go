@@ -68,9 +68,9 @@ func (client *sysdigSecureClient) doSysdigSecureRequest(method string, url strin
 
 	out, _ := httputil.DumpRequestOut(request, true)
 	log.Printf("[DEBUG] %s", string(out))
-	response, error := client.httpClient.Do(request)
+	response, err := client.httpClient.Do(request)
 
 	out, _ = httputil.DumpResponse(response, true)
 	log.Printf("[DEBUG] %s", string(out))
-	return response, error
+	return response, err
 }

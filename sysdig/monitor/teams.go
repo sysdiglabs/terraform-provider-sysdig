@@ -1,4 +1,4 @@
-package secure
+package monitor
 
 import (
 	"errors"
@@ -7,9 +7,9 @@ import (
 	"net/http"
 )
 
-func (client *sysdigSecureClient) getUserIdbyEmail(userRoles []UserRoles) ([]UserRoles, error) {
+func (client *sysdigMonitorClient) getUserIdbyEmail(userRoles []UserRoles) ([]UserRoles, error) {
 	// Get UsersList from API
-	response, err := client.doSysdigSecureRequest(http.MethodGet, client.getUsersListUrl(), nil)
+	response, err := client.doSysdigMonitorRequest(http.MethodGet, client.getUsersListUrl(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (client *sysdigSecureClient) getUserIdbyEmail(userRoles []UserRoles) ([]Use
 		usersMap[u.Email] = u.ID
 	}
 
-	var modifiedUserRoles []UserRoles
+	modifiedUserRoles := []UserRoles{}
 
 	for _, userRole := range userRoles {
 		ur := userRole
@@ -44,8 +44,8 @@ func (client *sysdigSecureClient) getUserIdbyEmail(userRoles []UserRoles) ([]Use
 	return modifiedUserRoles, nil
 }
 
-func (client *sysdigSecureClient) GetTeamById(id int) (t Team, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodGet, client.GetTeamUrl(id), nil)
+func (client *sysdigMonitorClient) GetTeamById(id int) (t Team, err error) {
+	response, err := client.doSysdigMonitorRequest(http.MethodGet, client.GetTeamUrl(id), nil)
 	if err != nil {
 		return
 	}
@@ -63,14 +63,14 @@ func (client *sysdigSecureClient) GetTeamById(id int) (t Team, err error) {
 	return
 }
 
-func (client *sysdigSecureClient) CreateTeam(tRequest Team) (t Team, err error) {
+func (client *sysdigMonitorClient) CreateTeam(tRequest Team) (t Team, err error) {
 	tRequest.UserRoles, err = client.getUserIdbyEmail(tRequest.UserRoles)
 	if err != nil {
 		return
 	}
-	tRequest.Products = []string{"SDS"}
+	tRequest.Origin = "SYSDIG"
 
-	response, err := client.doSysdigSecureRequest(http.MethodPost, client.GetTeamsUrl(), tRequest.ToJSON())
+	response, err := client.doSysdigMonitorRequest(http.MethodPost, client.GetTeamsUrl(), tRequest.ToJSON())
 
 	if err != nil {
 		return
@@ -80,7 +80,7 @@ func (client *sysdigSecureClient) CreateTeam(tRequest Team) (t Team, err error) 
 	body, _ := ioutil.ReadAll(response.Body)
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		err = errors.New(response.Status)
+		err = errors.New(response.Status + " " + string(body))
 		return
 	}
 
@@ -88,14 +88,14 @@ func (client *sysdigSecureClient) CreateTeam(tRequest Team) (t Team, err error) 
 	return
 }
 
-func (client *sysdigSecureClient) UpdateTeam(tRequest Team) (t Team, err error) {
+func (client *sysdigMonitorClient) UpdateTeam(tRequest Team) (t Team, err error) {
 	tRequest.UserRoles, err = client.getUserIdbyEmail(tRequest.UserRoles)
 	if err != nil {
 		return
 	}
-	tRequest.Products = []string{"SDS"}
+	tRequest.Products = []string{"SDC"}
 
-	response, err := client.doSysdigSecureRequest(http.MethodPut, client.GetTeamUrl(tRequest.ID), tRequest.ToJSON())
+	response, err := client.doSysdigMonitorRequest(http.MethodPut, client.GetTeamUrl(tRequest.ID), tRequest.ToJSON())
 	if err != nil {
 		return
 	}
@@ -112,8 +112,8 @@ func (client *sysdigSecureClient) UpdateTeam(tRequest Team) (t Team, err error) 
 	return
 }
 
-func (client *sysdigSecureClient) DeleteTeam(id int) error {
-	response, err := client.doSysdigSecureRequest(http.MethodDelete, client.GetTeamUrl(id), nil)
+func (client *sysdigMonitorClient) DeleteTeam(id int) error {
+	response, err := client.doSysdigMonitorRequest(http.MethodDelete, client.GetTeamUrl(id), nil)
 	if err != nil {
 		return err
 	}
@@ -125,14 +125,14 @@ func (client *sysdigSecureClient) DeleteTeam(id int) error {
 	return nil
 }
 
-func (client *sysdigSecureClient) getUsersListUrl() string {
+func (client *sysdigMonitorClient) getUsersListUrl() string {
 	return fmt.Sprintf("%s/api/users/light", client.URL)
 }
 
-func (client *sysdigSecureClient) GetTeamsUrl() string {
+func (client *sysdigMonitorClient) GetTeamsUrl() string {
 	return fmt.Sprintf("%s/api/teams", client.URL)
 }
 
-func (client *sysdigSecureClient) GetTeamUrl(id int) string {
+func (client *sysdigMonitorClient) GetTeamUrl(id int) string {
 	return fmt.Sprintf("%s/api/teams/%d", client.URL, id)
 }
