@@ -40,6 +40,11 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_MONITOR_INSECURE_TLS", false),
 			},
+			"extra_headers": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"sysdig_user": resourceSysdigUser(),
