@@ -20,6 +20,12 @@ type SysdigMonitorClient interface {
 	DeleteTeam(int) error
 }
 
+func WithExtraHeaders(client SysdigMonitorClient, extraHeaders map[string]string) SysdigMonitorClient {
+	rawClient := client.(*sysdigMonitorClient)
+	rawClient.extraHeaders = extraHeaders
+	return client
+}
+
 func NewSysdigMonitorClient(apiToken string, url string, insecure bool) SysdigMonitorClient {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
@@ -38,17 +44,23 @@ type sysdigMonitorClient struct {
 	SysdigMonitorAPIToken string
 	URL                   string
 	httpClient            *http.Client
+	extraHeaders          map[string]string
 }
 
-func (c *sysdigMonitorClient) doSysdigMonitorRequest(method string, url string, payload io.Reader) (*http.Response, error) {
+func (client *sysdigMonitorClient) doSysdigMonitorRequest(method string, url string, payload io.Reader) (*http.Response, error) {
 	request, _ := http.NewRequest(method, url, payload)
-	request.Header.Set("Authorization", "Bearer "+c.SysdigMonitorAPIToken)
+	request.Header.Set("Authorization", "Bearer "+client.SysdigMonitorAPIToken)
 	request.Header.Set("Content-Type", "application/json")
+	if client.extraHeaders != nil {
+		for key, value := range client.extraHeaders {
+			request.Header.Set(key, value)
+		}
+	}
 
 	out, _ := httputil.DumpRequestOut(request, true)
 	log.Printf("[DEBUG] %s", string(out))
 
-	response, err := c.httpClient.Do(request)
+	response, err := client.httpClient.Do(request)
 
 	out, _ = httputil.DumpResponse(response, true)
 	log.Printf("[DEBUG] %s", string(out))

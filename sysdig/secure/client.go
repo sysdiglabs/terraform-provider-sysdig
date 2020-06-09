@@ -41,6 +41,12 @@ type SysdigSecureClient interface {
 	UpdateMacro(Macro) (Macro, error)
 }
 
+func WithExtraHeaders(client SysdigSecureClient, extraHeaders map[string]string) SysdigSecureClient {
+	rawClient := client.(*sysdigSecureClient)
+	rawClient.extraHeaders = extraHeaders
+	return client
+}
+
 func NewSysdigSecureClient(sysdigSecureAPIToken string, url string, insecure bool) SysdigSecureClient {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
@@ -59,12 +65,18 @@ type sysdigSecureClient struct {
 	SysdigSecureAPIToken string
 	URL                  string
 	httpClient           *http.Client
+	extraHeaders         map[string]string
 }
 
 func (client *sysdigSecureClient) doSysdigSecureRequest(method string, url string, payload io.Reader) (*http.Response, error) {
 	request, _ := http.NewRequest(method, url, payload)
 	request.Header.Set("Authorization", "Bearer "+client.SysdigSecureAPIToken)
 	request.Header.Set("Content-Type", "application/json")
+	if client.extraHeaders != nil {
+		for key, value := range client.extraHeaders {
+			request.Header.Set(key, value)
+		}
+	}
 
 	out, _ := httputil.DumpRequestOut(request, true)
 	log.Printf("[DEBUG] %s", string(out))

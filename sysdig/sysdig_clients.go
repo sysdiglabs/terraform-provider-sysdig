@@ -41,6 +41,15 @@ func (c *sysdigClients) sysdigMonitorClient() (m monitor.SysdigMonitorClient, er
 			c.d.Get("sysdig_monitor_url").(string),
 			c.d.Get("sysdig_monitor_insecure_tls").(bool),
 		)
+
+		if headers, ok := c.d.GetOk("extra_headers"); ok {
+			extraHeaders := headers.(map[string]interface{})
+			extraHeadersTransformed := map[string]string{}
+			for key := range extraHeaders {
+				extraHeadersTransformed[key] = extraHeaders[key].(string)
+			}
+			c.monitorClient = monitor.WithExtraHeaders(c.monitorClient, extraHeadersTransformed)
+		}
 	})
 
 	return c.monitorClient, nil
@@ -61,6 +70,15 @@ func (c *sysdigClients) sysdigSecureClient() (s secure.SysdigSecureClient, err e
 			c.d.Get("sysdig_secure_url").(string),
 			c.d.Get("sysdig_secure_insecure_tls").(bool),
 		)
+
+		if headers, ok := c.d.GetOk("extra_headers"); ok {
+			extraHeaders := headers.(map[string]interface{})
+			extraHeadersTransformed := map[string]string{}
+			for key := range extraHeaders {
+				extraHeadersTransformed[key] = extraHeaders[key].(string)
+			}
+			c.secureClient = secure.WithExtraHeaders(c.secureClient, extraHeadersTransformed)
+		}
 	})
 
 	return c.secureClient, nil
@@ -92,6 +110,15 @@ func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err 
 			commonURL,
 			commonInsecure,
 		)
+
+		if headers, ok := c.d.GetOk("extra_headers"); ok {
+			extraHeaders := headers.(map[string]interface{})
+			extraHeadersTransformed := map[string]string{}
+			for key := range extraHeaders {
+				extraHeadersTransformed[key] = extraHeaders[key].(string)
+			}
+			c.commonClient = common.WithExtraHeaders(c.commonClient, extraHeadersTransformed)
+		}
 	})
 
 	return c.commonClient, nil
