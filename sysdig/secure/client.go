@@ -51,6 +51,7 @@ func NewSysdigSecureClient(sysdigSecureAPIToken string, url string, insecure boo
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
+			Proxy:           http.ProxyFromEnvironment,
 		},
 	}
 
