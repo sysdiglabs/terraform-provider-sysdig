@@ -13,18 +13,70 @@
     <li<%= sidebar_current("docs-sysdig-secure") %>>
     <a href="#">Sysdig Secure Resources</a>
     <ul class="nav nav-visible">
-      <li<%= sidebar_current("docs-sysdig-secure-policy") %>>
-      <a href="/docs/providers/sysdig/r/sysdig-secure-policy.html">sysdig_secure_policy</a>
+      <li<%= sidebar_current("docs-sysdig-secure-list") %>>
+        <a href="/docs/providers/sysdig/r/sysdig_secure_list.html">sysdig_secure_list</a>
       </li>
-
-      <li<%= sidebar_current("docs-sysdig-secure-user-rules-file") %>>
-      <a href="/docs/providers/sysdig/r/sysdig-secure-user-rules-file.html">sysdig_secure_user_rules_file</a>
+      <li<%= sidebar_current("docs-sysdig-secure-macro") %>>
+        <a href="/docs/providers/sysdig/r/sysdig_secure_macro.html">sysdig_secure_macro</a>
+      </li>
+      <li<%= sidebar_current("docs-sysdig-secure-notification-channel") %>>
+        <a href="/docs/providers/sysdig/r/sysdig_secure_notification_channel.html">sysdig_secure_notification_channel</a>
+      </li>
+      <li<%= sidebar_current("docs-sysdig-secure-policy") %>>
+        <a href="/docs/providers/sysdig/r/sysdig_secure_policy.html">sysdig_secure_policy</a>
+      </li>
+      <li<%= sidebar_current("docs-sysdig-secure-rule-container") %>>
+        <a href="/docs/providers/sysdig/r/sysdig_secure_rule_container.html">sysdig_secure_rule_container</a>
+      </li>
+      <li<%= sidebar_current("docs-sysdig-secure-rule-falco") %>>
+        <a href="/docs/providers/sysdig/r/sysdig_secure_rule_falco.html">sysdig_secure_rule_falco</a>
+      </li>
+      <li<%= sidebar_current("docs-sysdig-secure-rule-filesystem") %>>
+        <a href="/docs/providers/sysdig/r/sysdig_secure_rule_filesystem.html">sysdig_secure_rule_filesystem</a>
+      </li>
+      <li<%= sidebar_current("docs-sysdig-secure-rule-network") %>>
+        <a href="/docs/providers/sysdig/r/sysdig_secure_rule_network.html">sysdig_secure_rule_network</a>
+      </li>
+      <li<%= sidebar_current("docs-sysdig-secure-rule-process") %>>
+        <a href="/docs/providers/sysdig/r/sysdig_secure_rule_process.html">sysdig_secure_rule_process</a>
+      </li>
+      <li<%= sidebar_current("docs-sysdig-secure-rule-syscall") %>>
+        <a href="/docs/providers/sysdig/r/sysdig_secure_rule_syscall.html">sysdig_secure_rule_syscall</a>
       </li>
     </ul>
+    </li>
+
+    <li<%= sidebar_current("docs-sysdig-monitor") %>>
+    <a href="#">Sysdig Monitor Resources</a>
+    <ul class="nav nav-visible">
+        <li<%= sidebar_current("docs-sysdig-monitor-alert-anomaly") %>>
+          <a href="/docs/providers/sysdig/r/sysdig_monitor_alert_anomaly.html">sysdig_monitor_alert_anomaly</a>
+        </li>
+        <li<%= sidebar_current("docs-sysdig-monitor-alert-downtime") %>>
+          <a href="/docs/providers/sysdig/r/sysdig_monitor_alert_downtime.html">sysdig_monitor_alert_downtime</a>
+        </li>
+        <li<%= sidebar_current("docs-sysdig-monitor-alert-event") %>>
+          <a href="/docs/providers/sysdig/r/sysdig_monitor_alert_event.html">sysdig_monitor_alert_event</a>
+        </li>
+        <li<%= sidebar_current("docs-sysdig-monitor-alert-group-outlier") %>>
+          <a href="/docs/providers/sysdig/r/sysdig_monitor_alert_group_outlier.html">sysdig_monitor_alert_group_outlier</a>
+        </li>
+        <li<%= sidebar_current("docs-sysdig-monitor-alert-metric") %>>
+          <a href="/docs/providers/sysdig/r/sysdig_monitor_alert_metric.html">sysdig_monitor_alert_metric</a>
+        </li>
+    </ul>
+    </li>
+    <li<%= sidebar_current("docs-sysdig-monitor") %>>
+      <a href="#">Sysdig Platform Resources</a>
+      <ul class="nav nav-visible">
+       <li<%= sidebar_current("docs-sysdig-user") %>>
+         <a href="/docs/providers/sysdig/r/sysdig_user.html">sysdig_user</a>
+       </li>
+      </ul>
     </li>
   </ul>
 </div>
   <% end %>
 
-<%= yield %>
-  <% end %>
+    <%= yield %>
+<% end %>

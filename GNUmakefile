@@ -4,6 +4,7 @@ GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 PKG_NAME=sysdig
 WEBSITE_REPO=github.com/hashicorp/terraform-website
 VERSION=$(shell [ ! -z `git tag -l --contains HEAD` ] && git tag -l --contains HEAD || git rev-parse --short HEAD)
+GOPATH=$(shell go env GOPATH)
 
 default: build
 
@@ -59,18 +60,28 @@ release: fmtcheck
 		done \
 	done
 
+.PHONY: website
 website:
 ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 	echo "$(WEBSITE_REPO) not found in your GOPATH (necessary for layouts and assets), get-ting..."
 	git clone https://$(WEBSITE_REPO) $(GOPATH)/src/$(WEBSITE_REPO)
+	(cd $(GOPATH)/src/$(WEBSITE_REPO); \
+	  ln -s $(shell pwd) ext/providers/sysdig; \
+	  ln -s ../../../ext/providers/sysdig/website/sysdig.erb content/source/layouts/sysdig.erb; \
+	  ln -s ../../../../ext/providers/sysdig/website/docs content/source/docs/providers/sysdig; \
+	)
 endif
-	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
+	$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
+.PHONY: website-test
 website-test:
 ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 	echo "$(WEBSITE_REPO) not found in your GOPATH (necessary for layouts and assets), get-ting..."
 	git clone https://$(WEBSITE_REPO) $(GOPATH)/src/$(WEBSITE_REPO)
+	(cd $(GOPATH)/src/$(WEBSITE_REPO); \
+	  ln -s $(shell pwd) ext/providers/sysdig; \
+	  ln -s ../../../ext/providers/sysdig/website/sysdig.erb content/source/layouts/sysdig.erb; \
+	  ln -s ../../../../ext/providers/sysdig/website/docs content/source/docs/providers/sysdig; \
+	)
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
-
-.PHONY: build sweep test testacc vet fmt fmtcheck errcheck vendor-status test-compile website website-test
