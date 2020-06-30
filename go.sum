@@ -112,8 +112,6 @@ github.com/hashicorp/terraform-config-inspect v0.0.0-20191115094559-17f92b0546e8
 github.com/hashicorp/terraform-config-inspect v0.0.0-20191115094559-17f92b0546e8/go.mod h1:p+ivJws3dpqbp1iP84+npOyAmTTOLMgCzrXd3GSdn/A=
 github.com/hashicorp/terraform-json v0.4.0 h1:KNh29iNxozP5adfUFBJ4/fWd0Cu3taGgjHB38JYqOF4=
 github.com/hashicorp/terraform-json v0.4.0/go.mod h1:eAbqb4w0pSlRmdvl8fOyHAi/+8jnkVYN28gJkSJrLhU=
-github.com/hashicorp/terraform-plugin-sdk v1.12.0 h1:HPp65ShSsKUMPf6jD50UQn/xAjyrGVO4FxI63bvu+pc=
-github.com/hashicorp/terraform-plugin-sdk v1.12.0/go.mod h1:HiWIPD/T9HixIhQUwaSoDQxo4BLFdmiBi/Qz5gjB8Q0=
 github.com/hashicorp/terraform-plugin-sdk v1.13.0 h1:8v2/ZNiI12OHxEn8pzJ3noCHyRc0biKbKj+iFv5ZWKw=
 github.com/hashicorp/terraform-plugin-sdk v1.13.0/go.mod h1:HiWIPD/T9HixIhQUwaSoDQxo4BLFdmiBi/Qz5gjB8Q0=
 github.com/hashicorp/terraform-plugin-test v1.3.0 h1:hU5LoxrOn9qvOo+LTKN6mSav2J+dAMprbdxJPEQvp4U=
@@ -181,6 +179,8 @@ github.com/sergi/go-diff v1.0.0 h1:Kpca3qRNrduNnOQeazBd0ysaKrUJiIuISHxogkT9RPQ=
 github.com/sergi/go-diff v1.0.0/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAmXWZgo=
 github.com/spf13/afero v1.2.2 h1:5jhuqJyZCZf2JRofRvN/nIFgIWNzPa3/Vz8mYylgbWc=
 github.com/spf13/afero v1.2.2/go.mod h1:9ZxEEn6pIJ8Rxe320qSDBk6AsU0r9pR7Q4OcevTdifk=
+github.com/spf13/cast v1.3.1 h1:nFm6S0SMdyzrzcmThSipiEubIDy8WEXKNZ0UOgiRpng=
+github.com/spf13/cast v1.3.1/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkUJE=
 github.com/spf13/pflag v1.0.2/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
 github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

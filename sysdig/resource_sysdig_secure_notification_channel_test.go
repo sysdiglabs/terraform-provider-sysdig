@@ -26,31 +26,31 @@ func TestAccNotificationChannel(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: notificationChannelEmailWithName(rText()),
+				Config: oldNotificationChannelEmailWithName(rText()),
 			},
 			{
-				Config: notificationChannelAmazonSNSWithName(rText()),
+				Config: oldNotificationChannelAmazonSNSWithName(rText()),
 			},
 			{
-				Config: notificationChannelOpsGenieWithName(rText()),
+				Config: oldNotificationChannelOpsGenieWithName(rText()),
 			},
 			{
-				Config: notificationChannelVictorOpsWithName(rText()),
+				Config: oldNotificationChannelVictorOpsWithName(rText()),
 			},
 			{
-				Config: notificationChannelWebhookWithName(rText()),
+				Config: oldNotificationChannelWebhookWithName(rText()),
 			},
 			{
-				Config: notificationChannelSlackWithName(rText()),
+				Config: oldNotificationChannelSlackWithName(rText()),
 			},
 			{
-				Config: notificationChannelPagerdutyWithName(rText()),
+				Config: oldNotificationChannelPagerdutyWithName(rText()),
 			},
 		},
 	})
 }
 
-func notificationChannelEmailWithName(name string) string {
+func oldNotificationChannelEmailWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel" "sample_email" {
 	name = "%s"
@@ -62,7 +62,7 @@ resource "sysdig_secure_notification_channel" "sample_email" {
 }`, name)
 }
 
-func notificationChannelAmazonSNSWithName(name string) string {
+func oldNotificationChannelAmazonSNSWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel" "sample-amazon-sns" {
 	name = "Example Channel %s - Amazon SNS"
@@ -74,7 +74,7 @@ resource "sysdig_secure_notification_channel" "sample-amazon-sns" {
 }`, name)
 }
 
-func notificationChannelVictorOpsWithName(name string) string {
+func oldNotificationChannelVictorOpsWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel" "sample-victorops" {
 	name = "Example Channel %s - VictorOps"
@@ -87,7 +87,7 @@ resource "sysdig_secure_notification_channel" "sample-victorops" {
 }`, name)
 }
 
-func notificationChannelOpsGenieWithName(name string) string {
+func oldNotificationChannelOpsGenieWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel" "sample-opsgenie" {
 	name = "Example Channel %s - OpsGenie"
@@ -99,7 +99,7 @@ resource "sysdig_secure_notification_channel" "sample-opsgenie" {
 }`, name)
 }
 
-func notificationChannelWebhookWithName(name string) string {
+func oldNotificationChannelWebhookWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel" "sample-webhook" {
 	name = "Example Channel %s - Webhook"
@@ -111,7 +111,7 @@ resource "sysdig_secure_notification_channel" "sample-webhook" {
 }`, name)
 }
 
-func notificationChannelSlackWithName(name string) string {
+func oldNotificationChannelSlackWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel" "sample-slack" {
 	name = "Example Channel %s - Slack"
@@ -124,7 +124,7 @@ resource "sysdig_secure_notification_channel" "sample-slack" {
 }`, name)
 }
 
-func notificationChannelPagerdutyWithName(name string) string {
+func oldNotificationChannelPagerdutyWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel" "sample-pagerduty" {
 	name = "Example Channel %s - Pagerduty"

@@ -24,6 +24,8 @@ func resourceSysdigSecureNotificationChannel() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
 		},
+		DeprecationMessage: "The sysdig_secure_notification_channel resource will be replaced in future versions, " +
+			"and split out into different resources, depending on the type of the notification channel.",
 
 		Schema: map[string]*schema.Schema{
 			"name": {

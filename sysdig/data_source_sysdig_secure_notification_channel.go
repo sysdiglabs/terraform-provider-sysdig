@@ -18,6 +18,9 @@ func dataSourceSysdigSecureNotificationChannel() *schema.Resource {
 			Read: schema.DefaultTimeout(timeout),
 		},
 
+		DeprecationMessage: "The sysdig_secure_notification_channel data source will be replaced in the next version, " +
+			"and split out into different data sources, depending on the type of the notification channel.",
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
