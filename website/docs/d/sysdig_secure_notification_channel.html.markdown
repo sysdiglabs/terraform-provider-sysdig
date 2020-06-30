@@ -1,7 +1,7 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_notification_channel"
-sidebar_current: "docs-sysdig-secure-notification-channel"
+sidebar_current: "docs-sysdig-secure-notification-channel-ds"
 description: |-
   Retrieves a Sysdig Secure Notification Channel.
 ---
