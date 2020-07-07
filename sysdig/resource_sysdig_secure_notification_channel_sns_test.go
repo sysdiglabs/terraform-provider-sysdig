@@ -2,15 +2,17 @@ package sysdig_test
 
 import (
 	"fmt"
-	"github.com/draios/terraform-provider-sysdig/sysdig"
+	"os"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"os"
-	"testing"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccNotificationChannelSNS(t *testing.T) {
+func TestAccSecureNotificationChannelSNS(t *testing.T) {
 	//var ncBefore, ncAfter secure.NotificationChannel
 
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
@@ -26,13 +28,13 @@ func TestAccNotificationChannelSNS(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: notificationChannelAmazonSNSWithName(rText()),
+				Config: secureNotificationChannelAmazonSNSWithName(rText()),
 			},
 		},
 	})
 }
 
-func notificationChannelAmazonSNSWithName(name string) string {
+func secureNotificationChannelAmazonSNSWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel_sns" "sample-amazon-sns" {
 	name = "Example Channel %s - Amazon SNS"

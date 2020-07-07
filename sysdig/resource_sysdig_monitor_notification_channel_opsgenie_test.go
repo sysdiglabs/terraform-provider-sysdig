@@ -12,15 +12,15 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccSecureNotificationChannelVictorOps(t *testing.T) {
-	//var ncBefore, ncAfter secure.NotificationChannel
+func TestAccMonitorNotificationChannelOpsGenie(t *testing.T) {
+	//var ncBefore, ncAfter monitor.NotificationChannel
 
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			if v := os.Getenv("SYSDIG_MONITOR_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_MONITOR_API_TOKEN must be set for acceptance tests")
 			}
 		},
 		Providers: map[string]terraform.ResourceProvider{
@@ -28,21 +28,19 @@ func TestAccSecureNotificationChannelVictorOps(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureNotificationChannelVictorOpsWithName(rText()),
+				Config: monitorNotificationChannelOpsGenieWithName(rText()),
 			},
 		},
 	})
 }
 
-func secureNotificationChannelVictorOpsWithName(name string) string {
+func monitorNotificationChannelOpsGenieWithName(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_notification_channel_victorops" "sample-victorops" {
-	name = "Example Channel %s - VictorOps"
+resource "sysdig_monitor_notification_channel_opsgenie" "sample-opsgenie" {
+	name = "Example Channel %s - OpsGenie"
 	enabled = true
-	api_key = "1234342-4234243-4234-2"
-	routing_key = "My team"
+	api_key = "2349324-342354353-5324-23"
 	notify_when_ok = false
 	notify_when_resolved = false
-	send_test_notification = false
 }`, name)
 }

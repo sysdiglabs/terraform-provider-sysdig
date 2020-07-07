@@ -59,9 +59,9 @@ resource "sysdig_secure_policy" "sample" {
     }
   }
 
-  notification_channels = [sysdig_secure_notification_channel.sample_email.id]
+  notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
 }
-`, notificationChannelEmailWithName(name), ruleFalcoTerminalShell(name), name, name)
+`, secureNotificationChannelEmailWithName(name), ruleFalcoTerminalShell(name), name, name)
 }
 
 func policyWithoutActions(name string) string {
@@ -76,9 +76,9 @@ resource "sysdig_secure_policy" "sample2" {
   scope = "container.id != \"\""
   rule_names = [sysdig_secure_rule_falco.terminal_shell.name]
 
-  notification_channels = [sysdig_secure_notification_channel.sample_email.id]
+  notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
 }
-`, notificationChannelEmailWithName(name), ruleFalcoTerminalShell(name), name, name)
+`, secureNotificationChannelEmailWithName(name), ruleFalcoTerminalShell(name), name, name)
 }
 
 func policyWithoutNotificationChannels(name string) string {

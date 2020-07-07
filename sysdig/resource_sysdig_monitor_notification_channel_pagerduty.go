@@ -6,17 +6,17 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
+	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
 )
 
-func resourceSysdigSecureNotificationChannelPagerduty() *schema.Resource {
+func resourceSysdigMonitorNotificationChannelPagerduty() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigSecureNotificationChannelPagerdutyCreate,
-		Update: resourceSysdigSecureNotificationChannelPagerdutyUpdate,
-		Read:   resourceSysdigSecureNotificationChannelPagerdutyRead,
-		Delete: resourceSysdigSecureNotificationChannelPagerdutyDelete,
+		Create: resourceSysdigMonitorNotificationChannelPagerdutyCreate,
+		Update: resourceSysdigMonitorNotificationChannelPagerdutyUpdate,
+		Read:   resourceSysdigMonitorNotificationChannelPagerdutyRead,
+		Delete: resourceSysdigMonitorNotificationChannelPagerdutyDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -25,7 +25,7 @@ func resourceSysdigSecureNotificationChannelPagerduty() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 
-		Schema: createSecureNotificationChannelSchema(map[string]*schema.Schema{
+		Schema: createMonitorNotificationChannelSchema(map[string]*schema.Schema{
 			"account": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -42,13 +42,13 @@ func resourceSysdigSecureNotificationChannelPagerduty() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureNotificationChannelPagerdutyCreate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelPagerdutyCreate(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
 
-	notificationChannel, err := secureNotificationChannelPagerdutyFromResourceData(d)
+	notificationChannel, err := monitorNotificationChannelPagerdutyFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -65,8 +65,8 @@ func resourceSysdigSecureNotificationChannelPagerdutyCreate(d *schema.ResourceDa
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigSecureNotificationChannelPagerdutyRead(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelPagerdutyRead(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func resourceSysdigSecureNotificationChannelPagerdutyRead(d *schema.ResourceData
 		d.SetId("")
 	}
 
-	err = secureNotificationChannelPagerdutyToResourceData(&nc, d)
+	err = monitorNotificationChannelPagerdutyToResourceData(&nc, d)
 	if err != nil {
 		return err
 	}
@@ -86,13 +86,13 @@ func resourceSysdigSecureNotificationChannelPagerdutyRead(d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelPagerdutyUpdate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelPagerdutyUpdate(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
 
-	nc, err := secureNotificationChannelPagerdutyFromResourceData(d)
+	nc, err := monitorNotificationChannelPagerdutyFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -105,8 +105,8 @@ func resourceSysdigSecureNotificationChannelPagerdutyUpdate(d *schema.ResourceDa
 	return err
 }
 
-func resourceSysdigSecureNotificationChannelPagerdutyDelete(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelPagerdutyDelete(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
@@ -118,8 +118,8 @@ func resourceSysdigSecureNotificationChannelPagerdutyDelete(d *schema.ResourceDa
 
 // Channel type for Notification Channels
 
-func secureNotificationChannelPagerdutyFromResourceData(d *schema.ResourceData) (nc secure.NotificationChannel, err error) {
-	nc, err = secureNotificationChannelFromResourceData(d)
+func monitorNotificationChannelPagerdutyFromResourceData(d *schema.ResourceData) (nc monitor.NotificationChannel, err error) {
+	nc, err = monitorNotificationChannelFromResourceData(d)
 	if err != nil {
 		return
 	}
@@ -132,8 +132,8 @@ func secureNotificationChannelPagerdutyFromResourceData(d *schema.ResourceData) 
 	return
 }
 
-func secureNotificationChannelPagerdutyToResourceData(nc *secure.NotificationChannel, d *schema.ResourceData) (err error) {
-	err = secureNotificationChannelToResourceData(nc, d)
+func monitorNotificationChannelPagerdutyToResourceData(nc *monitor.NotificationChannel, d *schema.ResourceData) (err error) {
+	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return
 	}

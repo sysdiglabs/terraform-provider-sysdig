@@ -2,15 +2,17 @@ package sysdig_test
 
 import (
 	"fmt"
-	"github.com/draios/terraform-provider-sysdig/sysdig"
+	"os"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"os"
-	"testing"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccNotificationChannelOpsGenie(t *testing.T) {
+func TestAccSecureNotificationChannelOpsGenie(t *testing.T) {
 	//var ncBefore, ncAfter secure.NotificationChannel
 
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
@@ -26,13 +28,13 @@ func TestAccNotificationChannelOpsGenie(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: notificationChannelOpsGenieWithName(rText()),
+				Config: secureNotificationChannelOpsGenieWithName(rText()),
 			},
 		},
 	})
 }
 
-func notificationChannelOpsGenieWithName(name string) string {
+func secureNotificationChannelOpsGenieWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel_opsgenie" "sample-opsgenie" {
 	name = "Example Channel %s - OpsGenie"

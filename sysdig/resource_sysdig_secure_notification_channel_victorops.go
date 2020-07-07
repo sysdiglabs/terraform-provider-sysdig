@@ -4,18 +4,19 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
 
 func resourceSysdigSecureNotificationChannelVictorOps() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigNotificationChannelVictorOpsCreate,
-		Update: resourceSysdigNotificationChannelVictorOpsUpdate,
-		Read:   resourceSysdigNotificationChannelVictorOpsRead,
-		Delete: resourceSysdigNotificationChannelVictorOpsDelete,
+		Create: resourceSysdigSecureNotificationChannelVictorOpsCreate,
+		Update: resourceSysdigSecureNotificationChannelVictorOpsUpdate,
+		Read:   resourceSysdigSecureNotificationChannelVictorOpsRead,
+		Delete: resourceSysdigSecureNotificationChannelVictorOpsDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -37,7 +38,7 @@ func resourceSysdigSecureNotificationChannelVictorOps() *schema.Resource {
 	}
 }
 
-func resourceSysdigNotificationChannelVictorOpsCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelVictorOpsCreate(d *schema.ResourceData, meta interface{}) error {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
 		return err
@@ -60,7 +61,7 @@ func resourceSysdigNotificationChannelVictorOpsCreate(d *schema.ResourceData, me
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigNotificationChannelVictorOpsRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelVictorOpsRead(d *schema.ResourceData, meta interface{}) error {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
 		return err
@@ -81,7 +82,7 @@ func resourceSysdigNotificationChannelVictorOpsRead(d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceSysdigNotificationChannelVictorOpsUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelVictorOpsUpdate(d *schema.ResourceData, meta interface{}) error {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
 		return err
@@ -100,7 +101,7 @@ func resourceSysdigNotificationChannelVictorOpsUpdate(d *schema.ResourceData, me
 	return err
 }
 
-func resourceSysdigNotificationChannelVictorOpsDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelVictorOpsDelete(d *schema.ResourceData, meta interface{}) error {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
 		return err

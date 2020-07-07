@@ -4,18 +4,19 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
 
 func resourceSysdigSecureNotificationChannelWebhook() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigNotificationChannelWebhookCreate,
-		Update: resourceSysdigNotificationChannelWebhookUpdate,
-		Read:   resourceSysdigNotificationChannelWebhookRead,
-		Delete: resourceSysdigNotificationChannelWebhookDelete,
+		Create: resourceSysdigSecureNotificationChannelWebhookCreate,
+		Update: resourceSysdigSecureNotificationChannelWebhookUpdate,
+		Read:   resourceSysdigSecureNotificationChannelWebhookRead,
+		Delete: resourceSysdigSecureNotificationChannelWebhookDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -33,7 +34,7 @@ func resourceSysdigSecureNotificationChannelWebhook() *schema.Resource {
 	}
 }
 
-func resourceSysdigNotificationChannelWebhookCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelWebhookCreate(d *schema.ResourceData, meta interface{}) error {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
 		return err
@@ -56,7 +57,7 @@ func resourceSysdigNotificationChannelWebhookCreate(d *schema.ResourceData, meta
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigNotificationChannelWebhookRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelWebhookRead(d *schema.ResourceData, meta interface{}) error {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
 		return err
@@ -77,7 +78,7 @@ func resourceSysdigNotificationChannelWebhookRead(d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceSysdigNotificationChannelWebhookUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelWebhookUpdate(d *schema.ResourceData, meta interface{}) error {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
 		return err
@@ -96,7 +97,7 @@ func resourceSysdigNotificationChannelWebhookUpdate(d *schema.ResourceData, meta
 	return err
 }
 
-func resourceSysdigNotificationChannelWebhookDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelWebhookDelete(d *schema.ResourceData, meta interface{}) error {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
 		return err

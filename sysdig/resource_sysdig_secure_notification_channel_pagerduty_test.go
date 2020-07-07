@@ -2,15 +2,17 @@ package sysdig_test
 
 import (
 	"fmt"
-	"github.com/draios/terraform-provider-sysdig/sysdig"
+	"os"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"os"
-	"testing"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccNotificationChannelPagerduty(t *testing.T) {
+func TestAccSecureNotificationChannelPagerduty(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.Test(t, resource.TestCase{
@@ -24,13 +26,13 @@ func TestAccNotificationChannelPagerduty(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: notificationChannelPagerdutyWithName(rText()),
+				Config: secureNotificationChannelPagerdutyWithName(rText()),
 			},
 		},
 	})
 }
 
-func notificationChannelPagerdutyWithName(name string) string {
+func secureNotificationChannelPagerdutyWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel_pagerduty" "sample-pagerduty" {
 	name = "Example Channel %s - Pagerduty"

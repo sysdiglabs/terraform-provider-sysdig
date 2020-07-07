@@ -3,10 +3,10 @@ package sysdig
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
+	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
 )
 
-func createSecureNotificationChannelSchema(original map[string]*schema.Schema) map[string]*schema.Schema {
+func createMonitorNotificationChannelSchema(original map[string]*schema.Schema) map[string]*schema.Schema {
 	notificationChannelSchema := map[string]*schema.Schema{
 		"name": {
 			Type:     schema.TypeString,
@@ -42,11 +42,11 @@ func createSecureNotificationChannelSchema(original map[string]*schema.Schema) m
 	return notificationChannelSchema
 }
 
-func secureNotificationChannelFromResourceData(d *schema.ResourceData) (nc secure.NotificationChannel, err error) {
-	nc = secure.NotificationChannel{
+func monitorNotificationChannelFromResourceData(d *schema.ResourceData) (nc monitor.NotificationChannel, err error) {
+	nc = monitor.NotificationChannel{
 		Name:    d.Get("name").(string),
 		Enabled: d.Get("enabled").(bool),
-		Options: secure.NotificationChannelOptions{
+		Options: monitor.NotificationChannelOptions{
 			NotifyOnOk:           d.Get("notify_when_ok").(bool),
 			NotifyOnResolve:      d.Get("notify_when_resolved").(bool),
 			SendTestNotification: d.Get("send_test_notification").(bool),
@@ -55,7 +55,7 @@ func secureNotificationChannelFromResourceData(d *schema.ResourceData) (nc secur
 	return
 }
 
-func secureNotificationChannelToResourceData(nc *secure.NotificationChannel, data *schema.ResourceData) (err error) {
+func monitorNotificationChannelToResourceData(nc *monitor.NotificationChannel, data *schema.ResourceData) (err error) {
 	data.Set("version", nc.Version)
 	data.Set("name", nc.Name)
 	data.Set("enabled", nc.Enabled)

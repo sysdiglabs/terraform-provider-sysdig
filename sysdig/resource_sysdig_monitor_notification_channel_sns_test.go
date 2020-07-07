@@ -12,15 +12,15 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccSecureNotificationChannelVictorOps(t *testing.T) {
-	//var ncBefore, ncAfter secure.NotificationChannel
+func TestAccMonitorNotificationChannelSNS(t *testing.T) {
+	//var ncBefore, ncAfter monitor.NotificationChannel
 
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			if v := os.Getenv("SYSDIG_MONITOR_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_MONITOR_API_TOKEN must be set for acceptance tests")
 			}
 		},
 		Providers: map[string]terraform.ResourceProvider{
@@ -28,19 +28,18 @@ func TestAccSecureNotificationChannelVictorOps(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureNotificationChannelVictorOpsWithName(rText()),
+				Config: monitorNotificationChannelAmazonSNSWithName(rText()),
 			},
 		},
 	})
 }
 
-func secureNotificationChannelVictorOpsWithName(name string) string {
+func monitorNotificationChannelAmazonSNSWithName(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_notification_channel_victorops" "sample-victorops" {
-	name = "Example Channel %s - VictorOps"
+resource "sysdig_monitor_notification_channel_sns" "sample-amazon-sns" {
+	name = "Example Channel %s - Amazon SNS"
 	enabled = true
-	api_key = "1234342-4234243-4234-2"
-	routing_key = "My team"
+	topics = ["arn:aws:sns:us-east-1:273489009834:my-alerts2", "arn:aws:sns:us-east-1:279948934544:my-alerts"]
 	notify_when_ok = false
 	notify_when_resolved = false
 	send_test_notification = false

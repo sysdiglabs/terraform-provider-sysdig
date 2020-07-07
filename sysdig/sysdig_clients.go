@@ -2,11 +2,13 @@ package sysdig
 
 import (
 	"errors"
+	"sync"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+
 	"github.com/draios/terraform-provider-sysdig/sysdig/common"
 	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"sync"
 )
 
 type SysdigClients interface {

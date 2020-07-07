@@ -6,17 +6,17 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
+	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
 )
 
-func resourceSysdigSecureNotificationChannelSlack() *schema.Resource {
+func resourceSysdigMonitorNotificationChannelSlack() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigSecureNotificationChannelSlackCreate,
-		Update: resourceSysdigSecureNotificationChannelSlackUpdate,
-		Read:   resourceSysdigSecureNotificationChannelSlackRead,
-		Delete: resourceSysdigSecureNotificationChannelSlackDelete,
+		Create: resourceSysdigMonitorNotificationChannelSlackCreate,
+		Update: resourceSysdigMonitorNotificationChannelSlackUpdate,
+		Read:   resourceSysdigMonitorNotificationChannelSlackRead,
+		Delete: resourceSysdigMonitorNotificationChannelSlackDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -25,7 +25,7 @@ func resourceSysdigSecureNotificationChannelSlack() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 
-		Schema: createSecureNotificationChannelSchema(map[string]*schema.Schema{
+		Schema: createMonitorNotificationChannelSchema(map[string]*schema.Schema{
 			"url": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -38,13 +38,13 @@ func resourceSysdigSecureNotificationChannelSlack() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureNotificationChannelSlackCreate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelSlackCreate(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
 
-	notificationChannel, err := secureNotificationChannelSlackFromResourceData(d)
+	notificationChannel, err := monitorNotificationChannelSlackFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -61,8 +61,8 @@ func resourceSysdigSecureNotificationChannelSlackCreate(d *schema.ResourceData, 
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigSecureNotificationChannelSlackRead(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelSlackRead(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func resourceSysdigSecureNotificationChannelSlackRead(d *schema.ResourceData, me
 		d.SetId("")
 	}
 
-	err = secureNotificationChannelSlackToResourceData(&nc, d)
+	err = monitorNotificationChannelSlackToResourceData(&nc, d)
 	if err != nil {
 		return err
 	}
@@ -82,13 +82,13 @@ func resourceSysdigSecureNotificationChannelSlackRead(d *schema.ResourceData, me
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelSlackUpdate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelSlackUpdate(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
 
-	nc, err := secureNotificationChannelSlackFromResourceData(d)
+	nc, err := monitorNotificationChannelSlackFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -101,8 +101,8 @@ func resourceSysdigSecureNotificationChannelSlackUpdate(d *schema.ResourceData, 
 	return err
 }
 
-func resourceSysdigSecureNotificationChannelSlackDelete(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelSlackDelete(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
@@ -114,8 +114,8 @@ func resourceSysdigSecureNotificationChannelSlackDelete(d *schema.ResourceData, 
 
 // Channel type for Notification Channels
 
-func secureNotificationChannelSlackFromResourceData(d *schema.ResourceData) (nc secure.NotificationChannel, err error) {
-	nc, err = secureNotificationChannelFromResourceData(d)
+func monitorNotificationChannelSlackFromResourceData(d *schema.ResourceData) (nc monitor.NotificationChannel, err error) {
+	nc, err = monitorNotificationChannelFromResourceData(d)
 	if err != nil {
 		return
 	}
@@ -126,8 +126,8 @@ func secureNotificationChannelSlackFromResourceData(d *schema.ResourceData) (nc 
 	return
 }
 
-func secureNotificationChannelSlackToResourceData(nc *secure.NotificationChannel, d *schema.ResourceData) (err error) {
-	err = secureNotificationChannelToResourceData(nc, d)
+func monitorNotificationChannelSlackToResourceData(nc *monitor.NotificationChannel, d *schema.ResourceData) (err error) {
+	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return
 	}

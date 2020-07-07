@@ -86,7 +86,6 @@ type Team struct {
 	Description         string      `json:"description"`
 	Name                string      `json:"name"`
 	ID                  int         `json:"id,omitempty"`
-	Default             bool        `json:"default"`
 	Version             int         `json:"version,omitempty"`
 	Origin              string      `json:"origin,omitempty"`
 	LastUpdated         int64       `json:"lastUpdated,omitempty"`
@@ -148,4 +147,58 @@ func UsersListFromJSON(body []byte) []UsersList {
 
 type usersListWrapper struct {
 	UsersList []UsersList `json:"users"`
+}
+
+// -------- Notification Channels --------
+
+type NotificationChannelOptions struct {
+	EmailRecipients []string `json:"emailRecipients,omitempty"` // Type: email
+	SnsTopicARNs    []string `json:"snsTopicARNs,omitempty"`    // Type: SNS
+	APIKey          string   `json:"apiKey,omitempty"`          // Type: VictorOps
+	RoutingKey      string   `json:"routingKey,omitempty"`      // Type: VictorOps
+	Url             string   `json:"url,omitempty"`             // Type: OpsGenie, Webhook and Slack
+	Channel         string   `json:"channel,omitempty"`         // Type: Slack
+	Account         string   `json:"account,omitempty"`         // Type: PagerDuty
+	ServiceKey      string   `json:"serviceKey,omitempty"`      // Type: PagerDuty
+	ServiceName     string   `json:"serviceName,omitempty"`     // Type: PagerDuty
+
+	NotifyOnOk           bool `json:"notifyOnOk"`
+	NotifyOnResolve      bool `json:"notifyOnResolve"`
+	SendTestNotification bool `json:"sendTestNotification"`
+}
+
+type NotificationChannel struct {
+	ID      int                        `json:"id,omitempty"`
+	Version int                        `json:"version,omitempty"`
+	Type    string                     `json:"type"`
+	Name    string                     `json:"name"`
+	Enabled bool                       `json:"enabled"`
+	Options NotificationChannelOptions `json:"options"`
+}
+
+func (n *NotificationChannel) ToJSON() io.Reader {
+	payload, _ := json.Marshal(notificationChannelWrapper{*n})
+	return bytes.NewBuffer(payload)
+}
+
+func NotificationChannelFromJSON(body []byte) NotificationChannel {
+	var result notificationChannelWrapper
+	json.Unmarshal(body, &result)
+
+	return result.NotificationChannel
+}
+
+func NotificationChannelListFromJSON(body []byte) []NotificationChannel {
+	var result notificationChannelListWrapper
+	json.Unmarshal(body, &result)
+
+	return result.NotificationChannels
+}
+
+type notificationChannelListWrapper struct {
+	NotificationChannels []NotificationChannel `json:"notificationChannels"`
+}
+
+type notificationChannelWrapper struct {
+	NotificationChannel NotificationChannel `json:"notificationChannel"`
 }

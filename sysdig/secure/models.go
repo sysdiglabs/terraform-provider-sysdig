@@ -270,7 +270,7 @@ type Team struct {
 
 type UserRoles struct {
 	UserId int    `json:"userId"`
-	Email  string `json:"userName",omitempty`
+	Email  string `json:"userName,omitempty"`
 	Role   string `json:"role"`
 }
 

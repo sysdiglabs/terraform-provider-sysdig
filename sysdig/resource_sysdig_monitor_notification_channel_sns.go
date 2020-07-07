@@ -7,17 +7,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/spf13/cast"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
+	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
 )
 
-func resourceSysdigSecureNotificationChannelSNS() *schema.Resource {
+func resourceSysdigMonitorNotificationChannelSNS() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigSecureNotificationChannelSNSCreate,
-		Update: resourceSysdigSecureNotificationChannelSNSUpdate,
-		Read:   resourceSysdigSecureNotificationChannelSNSRead,
-		Delete: resourceSysdigSecureNotificationChannelSNSDelete,
+		Create: resourceSysdigMonitorNotificationChannelSNSCreate,
+		Update: resourceSysdigMonitorNotificationChannelSNSUpdate,
+		Read:   resourceSysdigMonitorNotificationChannelSNSRead,
+		Delete: resourceSysdigMonitorNotificationChannelSNSDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -26,7 +26,7 @@ func resourceSysdigSecureNotificationChannelSNS() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 
-		Schema: createSecureNotificationChannelSchema(map[string]*schema.Schema{
+		Schema: createMonitorNotificationChannelSchema(map[string]*schema.Schema{
 			"topics": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -36,13 +36,13 @@ func resourceSysdigSecureNotificationChannelSNS() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureNotificationChannelSNSCreate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelSNSCreate(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
 
-	notificationChannel, err := secureNotificationChannelSNSFromResourceData(d)
+	notificationChannel, err := monitorNotificationChannelSNSFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -59,8 +59,8 @@ func resourceSysdigSecureNotificationChannelSNSCreate(d *schema.ResourceData, me
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigSecureNotificationChannelSNSRead(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelSNSRead(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func resourceSysdigSecureNotificationChannelSNSRead(d *schema.ResourceData, meta
 		d.SetId("")
 	}
 
-	err = secureNotificationChannelSNSToResourceData(&nc, d)
+	err = monitorNotificationChannelSNSToResourceData(&nc, d)
 	if err != nil {
 		return err
 	}
@@ -80,13 +80,13 @@ func resourceSysdigSecureNotificationChannelSNSRead(d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelSNSUpdate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelSNSUpdate(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
 
-	nc, err := secureNotificationChannelSNSFromResourceData(d)
+	nc, err := monitorNotificationChannelSNSFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -99,8 +99,8 @@ func resourceSysdigSecureNotificationChannelSNSUpdate(d *schema.ResourceData, me
 	return err
 }
 
-func resourceSysdigSecureNotificationChannelSNSDelete(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelSNSDelete(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
@@ -112,8 +112,8 @@ func resourceSysdigSecureNotificationChannelSNSDelete(d *schema.ResourceData, me
 
 // Channel type for Notification Channels
 
-func secureNotificationChannelSNSFromResourceData(d *schema.ResourceData) (nc secure.NotificationChannel, err error) {
-	nc, err = secureNotificationChannelFromResourceData(d)
+func monitorNotificationChannelSNSFromResourceData(d *schema.ResourceData) (nc monitor.NotificationChannel, err error) {
+	nc, err = monitorNotificationChannelFromResourceData(d)
 	if err != nil {
 		return
 	}
@@ -123,8 +123,8 @@ func secureNotificationChannelSNSFromResourceData(d *schema.ResourceData) (nc se
 	return
 }
 
-func secureNotificationChannelSNSToResourceData(nc *secure.NotificationChannel, d *schema.ResourceData) (err error) {
-	err = secureNotificationChannelToResourceData(nc, d)
+func monitorNotificationChannelSNSToResourceData(nc *monitor.NotificationChannel, d *schema.ResourceData) (err error) {
+	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return
 	}

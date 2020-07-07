@@ -7,17 +7,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/spf13/cast"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
+	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
 )
 
-func resourceSysdigSecureNotificationChannelEmail() *schema.Resource {
+func resourceSysdigMonitorNotificationChannelEmail() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigSecureNotificationChannelEmailCreate,
-		Update: resourceSysdigSecureNotificationChannelEmailUpdate,
-		Read:   resourceSysdigSecureNotificationChannelEmailRead,
-		Delete: resourceSysdigSecureNotificationChannelEmailDelete,
+		Create: resourceSysdigMonitorNotificationChannelEmailCreate,
+		Update: resourceSysdigMonitorNotificationChannelEmailUpdate,
+		Read:   resourceSysdigMonitorNotificationChannelEmailRead,
+		Delete: resourceSysdigMonitorNotificationChannelEmailDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -26,7 +26,7 @@ func resourceSysdigSecureNotificationChannelEmail() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 
-		Schema: createSecureNotificationChannelSchema(map[string]*schema.Schema{
+		Schema: createMonitorNotificationChannelSchema(map[string]*schema.Schema{
 			"recipients": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -36,13 +36,13 @@ func resourceSysdigSecureNotificationChannelEmail() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureNotificationChannelEmailCreate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelEmailCreate(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
 
-	notificationChannel, err := secureNotificationChannelEmailFromResourceData(d)
+	notificationChannel, err := monitorNotificationChannelEmailFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -59,8 +59,8 @@ func resourceSysdigSecureNotificationChannelEmailCreate(d *schema.ResourceData, 
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigSecureNotificationChannelEmailRead(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelEmailRead(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func resourceSysdigSecureNotificationChannelEmailRead(d *schema.ResourceData, me
 		d.SetId("")
 	}
 
-	err = secureNotificationChannelEmailToResourceData(&nc, d)
+	err = monitorNotificationChannelEmailToResourceData(&nc, d)
 	if err != nil {
 		return err
 	}
@@ -80,13 +80,13 @@ func resourceSysdigSecureNotificationChannelEmailRead(d *schema.ResourceData, me
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelEmailUpdate(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelEmailUpdate(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
 
-	nc, err := secureNotificationChannelEmailFromResourceData(d)
+	nc, err := monitorNotificationChannelEmailFromResourceData(d)
 	if err != nil {
 		return err
 	}
@@ -99,8 +99,8 @@ func resourceSysdigSecureNotificationChannelEmailUpdate(d *schema.ResourceData, 
 	return err
 }
 
-func resourceSysdigSecureNotificationChannelEmailDelete(d *schema.ResourceData, meta interface{}) error {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+func resourceSysdigMonitorNotificationChannelEmailDelete(d *schema.ResourceData, meta interface{}) error {
+	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return err
 	}
@@ -112,8 +112,8 @@ func resourceSysdigSecureNotificationChannelEmailDelete(d *schema.ResourceData, 
 
 // Channel type for Notification Channels
 
-func secureNotificationChannelEmailFromResourceData(d *schema.ResourceData) (nc secure.NotificationChannel, err error) {
-	nc, err = secureNotificationChannelFromResourceData(d)
+func monitorNotificationChannelEmailFromResourceData(d *schema.ResourceData) (nc monitor.NotificationChannel, err error) {
+	nc, err = monitorNotificationChannelFromResourceData(d)
 	if err != nil {
 		return
 	}
@@ -123,8 +123,8 @@ func secureNotificationChannelEmailFromResourceData(d *schema.ResourceData) (nc 
 	return
 }
 
-func secureNotificationChannelEmailToResourceData(nc *secure.NotificationChannel, d *schema.ResourceData) (err error) {
-	err = secureNotificationChannelToResourceData(nc, d)
+func monitorNotificationChannelEmailToResourceData(nc *monitor.NotificationChannel, d *schema.ResourceData) (err error) {
+	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return
 	}

@@ -12,15 +12,15 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccSecureNotificationChannelVictorOps(t *testing.T) {
-	//var ncBefore, ncAfter secure.NotificationChannel
+func TestAccMonitorNotificationChannelVictorOps(t *testing.T) {
+	//var ncBefore, ncAfter monitor.NotificationChannel
 
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			if v := os.Getenv("SYSDIG_MONITOR_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_MONITOR_API_TOKEN must be set for acceptance tests")
 			}
 		},
 		Providers: map[string]terraform.ResourceProvider{
@@ -28,15 +28,15 @@ func TestAccSecureNotificationChannelVictorOps(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureNotificationChannelVictorOpsWithName(rText()),
+				Config: monitorNotificationChannelVictorOpsWithName(rText()),
 			},
 		},
 	})
 }
 
-func secureNotificationChannelVictorOpsWithName(name string) string {
+func monitorNotificationChannelVictorOpsWithName(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_notification_channel_victorops" "sample-victorops" {
+resource "sysdig_monitor_notification_channel_victorops" "sample-victorops" {
 	name = "Example Channel %s - VictorOps"
 	enabled = true
 	api_key = "1234342-4234243-4234-2"

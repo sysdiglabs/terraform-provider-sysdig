@@ -2,15 +2,17 @@ package sysdig_test
 
 import (
 	"fmt"
-	"github.com/draios/terraform-provider-sysdig/sysdig"
+	"os"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"os"
-	"testing"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccNotificationChannelWebhook(t *testing.T) {
+func TestAccSecureNotificationChannelWebhook(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.Test(t, resource.TestCase{
@@ -24,13 +26,13 @@ func TestAccNotificationChannelWebhook(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: notificationChannelWebhookWithName(rText()),
+				Config: secureNotificationChannelWebhookWithName(rText()),
 			},
 		},
 	})
 }
 
-func notificationChannelWebhookWithName(name string) string {
+func secureNotificationChannelWebhookWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel_webhook" "sample-webhook" {
 	name = "Example Channel %s - Webhook"

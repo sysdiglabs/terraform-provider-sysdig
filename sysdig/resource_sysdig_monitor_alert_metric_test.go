@@ -44,7 +44,7 @@ resource "sysdig_monitor_alert_metric" "sample" {
 	severity = 3
 
 	metric = "avg(avg(cpu.used.percent)) > 50"
-	scope = "kubernetes.cluster.name in (\"pulsar\")"
+	scope = "agent.id in (\"foo\")"
 	
 	trigger_after_minutes = 10
 
@@ -73,7 +73,7 @@ resource "sysdig_monitor_alert_metric" "sample2" {
 
 	enabled = false
 
-	multiple_alerts_by = ["kubernetes.deployment.name"]
+	multiple_alerts_by = ["host.hostName"]
 
 	capture {
 		filename = "TERRAFORM_TEST.scap"
@@ -103,13 +103,13 @@ resource "sysdig_monitor_alert_metric" "sample3" {
 	description = "TERRAFORM TEST - METRIC %s"
 	severity = 6
 	metric = "sum(min(cpu.used.percent)) > 100000"
-	scope = "kubernetes.cluster.name in (\"foo\")"
+	scope = "agent.id in (\"foo\")"
 	trigger_after_minutes = 20
 	notification_channels = [
 	sysdig_secure_notification_channel.sample-pagerduty.id
 	]
 	multiple_alerts_by = [
-	"kubernetes.cluster.name"
+	"host.hostName"
 	]
 }`, name, name, name)
 }

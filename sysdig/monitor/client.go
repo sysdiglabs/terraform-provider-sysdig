@@ -18,6 +18,12 @@ type SysdigMonitorClient interface {
 	GetTeamById(int) (Team, error)
 	UpdateTeam(Team) (Team, error)
 	DeleteTeam(int) error
+
+	CreateNotificationChannel(NotificationChannel) (NotificationChannel, error)
+	GetNotificationChannelById(int) (NotificationChannel, error)
+	GetNotificationChannelByName(string) (NotificationChannel, error)
+	DeleteNotificationChannel(int) error
+	UpdateNotificationChannel(NotificationChannel) (NotificationChannel, error)
 }
 
 func WithExtraHeaders(client SysdigMonitorClient, extraHeaders map[string]string) SysdigMonitorClient {
