@@ -10,7 +10,7 @@ description: |-
 
 Creates a Sysdig Secure Notification Channel.
 
-~> **Note:** This resource is still experimental, and is subject of being changed.
+!> **Warning:** This resource is deprecated and will be removed. Please use the different `sysdig_secure_notification_channel_*` resources.
 
 ## Example usage
 
