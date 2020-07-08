@@ -14,15 +14,18 @@ func createMonitorNotificationChannelSchema(original map[string]*schema.Schema) 
 		},
 		"enabled": {
 			Type:     schema.TypeBool,
-			Required: true,
+			Optional: true,
+			Default:  true,
 		},
 		"notify_when_ok": {
 			Type:     schema.TypeBool,
-			Required: true,
+			Optional: true,
+			Default:  false,
 		},
 		"notify_when_resolved": {
 			Type:     schema.TypeBool,
-			Required: true,
+			Optional: true,
+			Default:  false,
 		},
 		"version": {
 			Type:     schema.TypeInt,
