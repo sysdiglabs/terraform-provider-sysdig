@@ -20,7 +20,7 @@ jobs:
     - name: Generate docs from files
       run: |
         cd docs
-        ./generate.sh > index.md
+        ./generate.sh > usage.md
 
     - name: Commit updated docs
       run: |
