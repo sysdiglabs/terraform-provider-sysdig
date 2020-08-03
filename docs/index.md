@@ -42,7 +42,7 @@ The Terraform Provider for Sysdig exposes resources like Alerts, Notification Ch
 Falco Lists, Falco Macros, Policies, and many more, so you don't need to interact with the UI
 to configure those, and enabling you to define and update them as code.
 
-For more information, check: https://www.terraform.io/docs/configuration/providers.html
+For more information, check: [https://www.terraform.io/docs/configuration/providers.html](https://www.terraform.io/docs/configuration/providers.html)
 
 
 ## Installation
@@ -51,13 +51,13 @@ To use the provider, first you need to install Terraform, which is the main exec
 interacts with the provider.
 
 Download the Terraform executable for your OS/Architecture from 
-here: https://www.terraform.io/downloads.html
+here: [https://www.terraform.io/downloads.html](https://www.terraform.io/downloads.html)
 
 When you have it installed, download the 
 [latest version of the Terraform Provider for Sysdig](https://github.com/sysdiglabs/terraform-provider-sysdig/releases/latest)
 for your OS/Architecture, extract it and move the executable under `$HOME/.terraform.d/plugins` (you need to create
 this directory if it does not exist yet) as this link suggests: 
-https://www.terraform.io/docs/configuration/providers.html#third-party-plugins.
+[https://www.terraform.io/docs/configuration/providers.html#third-party-plugins](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) .
 
 ## E2E example
 
