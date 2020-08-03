@@ -1,0 +1,41 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+.page-header {
+    background-color: white !important;
+    background-image: none;
+    box-shadow: 0 1px 8px 0 rgba(0,0,0,.05);
+}
+
+body, .main-content, .page-header {
+    color: #55565b;
+}
+
+@media screen and (min-width: 64em) {
+    .page-header {
+        padding: 2rem 2rem;
+    }
+}
+
+.main-content h1, .main-content h2, .main-content h3, .main-content h4, .main-content h5, .main-content h6 {
+    color: #101820;
+}
+
+a {
+    color: #ff9e1b
+}
+.project-tagline {
+    margin-bottom: auto;
+}
+
+.highlight .c, .highlight .cd {
+    color: #6666EE;
+}
+
+@media screen and (min-width: 64em) {
+    .main-content {
+        padding: 2rem 4rem;
+    }
+}
