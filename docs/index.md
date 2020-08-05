@@ -20,7 +20,7 @@ The Terraform Provider for Sysdig allows you to manage your configuration in Sys
 and Sysdig Monitor as code, allowing you to synchronize your declarative configuration with
 the configuration at the Platform.
 
-This enables you several cases like:
+You can instrument several use cases like:
 - Backup/restore
 - Disaster recovery
 - Configuration version management
@@ -39,7 +39,7 @@ for your OS/Architecture, extract it and move the executable under `$HOME/.terra
 this directory if it does not exist yet) as this link suggests: 
 [https://www.terraform.io/docs/configuration/providers.html#third-party-plugins](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) .
 
-## Use example
+## Usage example
 
 Terraform will use the Sysdig provider when you specify a [resource](https://www.terraform.io/docs/configuration/resources.html)
 or [data source](https://www.terraform.io/docs/configuration/data-sources.html) with a name starting with `sysdig_*` (i.e.: `sysdig_user`)
