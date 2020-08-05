@@ -2,48 +2,28 @@
 
 ## Introduction
 
-### What is terraform
+### What is Terraform
 
-Terraform is a tool for building, changing, and versioning infrastructure safely and efficiently. 
+[Terraform](https://www.terraform.io/) is a tool for building, changing, and versioning infrastructure safely and efficiently. 
 Terraform can manage existing and popular service providers as well as custom in-house solutions.
 
 Configuration files describe to Terraform the components needed to run a single application or 
 your entire datacenter. Terraform generates an execution plan describing what it will do to reach the 
-desired state, and then executes it to build the described infrastructure or configuration. 
+desired state, and then executes it to build the described infrastructure or configuration.
+
 As the configuration changes, Terraform is able to determine what changed and create incremental execution 
 plans which can be applied.
 
-### How can this integration help you
-
-Messing up a configuration can have terrible consequences.
- 
-By following the GitOps principles, in which all the configuration has to be applied as code, 
-committed into a git repository (the single source of truth), and reviewed by the whole team,
-we can spot this kind of problem easily.
- 
-In case an error passed the reviews, a quick investigation would have revealed who and when 
-changed the messed configuration, and fixing the issue would be as easy as reverting the 
-configuration changes.
+### Terraform Provider for Sysdig
 
 The Terraform Provider for Sysdig allows you to manage your configuration in Sysdig Secure 
-and Sysdig Monitor as code, so this kind of scenario don't happen to you.
+and Sysdig Monitor as code, allowing you to synchronize your declarative configuration with
+the configuration at the Platform.
 
-### What is a provider and how do they work
-
-While resources are the primary construct in the Terraform language, 
-the behaviors of resources rely on their associated resource types, 
-and these types are defined by providers.
-
-Each provider offers a set of named resource types, and defines 
-for each resource type which arguments it accepts, which attributes it exports, 
-and how changes to resources of that type are actually applied to remote APIs.
-
-The Terraform Provider for Sysdig exposes resources like Alerts, Notification Channels, 
-Falco Lists, Falco Macros, Policies, and many more, so you don't need to interact with the UI
-to configure those, and enabling you to define and update them as code.
-
-For more information, check: [https://www.terraform.io/docs/configuration/providers.html](https://www.terraform.io/docs/configuration/providers.html)
-
+This enables you several cases like:
+- Backup/restore
+- Disaster recovery
+- Configuration version management
 
 ## Installation
 
@@ -59,10 +39,10 @@ for your OS/Architecture, extract it and move the executable under `$HOME/.terra
 this directory if it does not exist yet) as this link suggests: 
 [https://www.terraform.io/docs/configuration/providers.html#third-party-plugins](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) .
 
-## E2E example
+## Use example
 
-Terraform understands that it needs to use the Sysdig provider when you specify a resource
-or data source with a name starting with `sysdig_*` (i.e.: `sysdig_user`)
+Terraform will use the Sysdig provider when you specify a [resource](https://www.terraform.io/docs/configuration/resources.html)
+or [data source](https://www.terraform.io/docs/configuration/data-sources.html) with a name starting with `sysdig_*` (i.e.: `sysdig_user`)
 
 But in order to actually create valid requests to the API and create/update/remove those resources,
 you need to specify a correct API token for the product.
@@ -84,13 +64,13 @@ $ export SYSDIG_SECURE_API_TOKEN=323232323-3232-3232-32323232
 $ export SYSDIG_MONITOR_API_TOKEN=343434343-3434-3434-34343434
 ```
 
-Once you execute Terraform an apply the manifests, that env vars will be used to configure
-the provider and create API calls with them.
+Once you execute Terraform and apply the manifests, that env vars will be used to configure
+the provider and create API calls.
 
 ### Configure the provider: Using a tfvars file
 
 To use a [tfvars file](https://www.terraform.io/docs/configuration/variables.html#variable-definitions-tfvars-files)
-you need to first create it, and specify the API tokens as variables, for example:
+you need to first create it, and specify the API tokens as [variables](https://www.terraform.io/docs/configuration/variables.html), for example:
 
 ```
 # File: terraform.tfvars
@@ -110,10 +90,13 @@ provider "sysdig" {
 
 ### Creating resources with Terraform
 
-We are going to create a pair of rules able to detect SSH connections and shells spawned in containers.
+This is an example to create a pair of rules able to detect SSH connections and 
+shells spawned in containers.
                 
-We start by defining a couple of rules in the `rules.tf` file. One rule will detect inbound and outbound connections 
+Start by defining a couple of rules in the `rules.tf` file. One rule will detect inbound and outbound connections 
 made to the port 22, and the other will detect a shell process being spawned.
+
+For more information about the configuration blocks, see: [https://www.terraform.io/docs/configuration/syntax.html](https://www.terraform.io/docs/configuration/syntax.html)
 
 ```hcl
 resource "sysdig_secure_rule_network" "disallowed_ssh_connection" {
@@ -139,7 +122,7 @@ resource "sysdig_secure_rule_process" "terminal_shell" {
 }
 ``` 
 
-Now we are going to create a policy in a file called `policy.tf` to define how these rules 
+Now create a policy in a file called `policy.tf` to define how these rules 
 are applied. The policy will stop the affected container and trigger a capture for 
 further troubleshooting. 
 
@@ -169,7 +152,7 @@ With the given `scope`, the policy will only be applied to processes being execu
 scope = "container.id != \"\""
 ``` 
 
-Let’s do a terraform apply to apply these resources in the backend: 
+Using `terraform apply` the resources are applied in the backend: 
 
 ![Terraform apply creates the resources](./assets/img/terraform-apply-create-sysdig-provider.png)
 
@@ -180,15 +163,15 @@ Let’s do a terraform apply to apply these resources in the backend:
  After applying the plan, Terraform reports that the 3 resources have been successfully created. The policy uses the 
  rules created before, that’s why it’s the last one being created.
 
-The resources have been created, let’s see how they look in Sysdig Secure: 
+The resources have been created, this is how they look in Sysdig Secure: 
 
 ![Terraform rules created in Sysdig Secure](./assets/img/terraform-rules-created-sysdig-secure.png)
 
 ![Terraform policy created in Sysdig Secure](./assets/img/terraform-policy-created-sysdig-secure.png)
 
-Now we are protected against terminal shells or SSH connections in our container infrastructure using security as code. 
-But wait, if this policy triggers we won’t notice unless we define a notification channel. 
-Let’s create two notification channels, one for the email and another one for slack in a file called `notification.tf`:
+ But now the problem is that, if this policy triggers there's no alert notice unless notification channels are defined. 
+Creating two notification channels, one for the email and another one for slack in a file called `notification.tf`,
+will alert us when the policy is triggered:
 
 ```hcl
 resource "sysdig_secure_notification_channel" "devops-email" {
@@ -211,7 +194,7 @@ resource "sysdig_secure_notification_channel" "devops-slack" {
 }
 ```
 
-Let’s bind them to the policy as well modifying the file `policy.tf`, note the `notification_channels` property:
+Bind them to the policy, modifying the file `policy.tf`; note the `notification_channels` property:
 
 ```hcl
 resource "sysdig_secure_policy" "terminal_shell_or_ssh_in_container" {
@@ -236,24 +219,25 @@ resource "sysdig_secure_policy" "terminal_shell_or_ssh_in_container" {
 }
 ``` 
 
-If we do a `terraform apply`, it will tell us that it will create 2 new resources and modify the existing policy:
+Finally, doing a `terraform apply`, it will inform that it will create 2 new resources and modify the existing policy:
 
 ![Terraform apply updates the resources](./assets/img/terraform-apply-update-sysdig-provider.png)
 
- After inputting **yes**, Terraform will create the notification channels and bind them to the policy, ensuring that the state in Monitor and Secure matches our state defined in the code.
+ After inputting **yes**, Terraform will create the notification channels and bind them to the policy, 
+ ensuring that the state in Monitor and Secure matches our state defined in the code.
 
-We can see those new resources appearing on Sysdig UI: 
+This is how the resources appear on the Sysdig Secure UI: 
 
 ![Terraform apply creates new notification channels](./assets/img/terraform-new-resources-notification-sysdig.png)
 
 ![Terraform updates the policy resource](./assets/img/terraform-updated-resources-policy-sysdig.png)
 
-Now, if someone tries to update it manually, we can always re-apply our policies, and Terraform will
-restore the desired status from our `.tf` manifests.
+Now, if someone tries to update it manually, by re-applying the policies, Terraform will
+restore the desired status from the `.tf` manifests.
 
-## Reference to resources documentation
+## Full Terraform resources documentation
 
-You can check all the available resources and datasources for the Terraform Provider for Sysdig here: 
+Check all the available resources and datasources for the Terraform Provider for Sysdig here: 
 
 [Terraform provider for Sysdig Datasources](./usage.md)
 
