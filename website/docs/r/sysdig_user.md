@@ -33,3 +33,6 @@ resource "sysdig_user" "foo-bar" {
 * `first_name` - (Optional) The name of the user.
 
 * `last_name` - (Optional) The last name of the user.
+
+* `password` - (Optional) The password for the user. If the password is defined, the user will not receive
+  a confirmation email.

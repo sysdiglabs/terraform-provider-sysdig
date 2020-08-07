@@ -26,6 +26,9 @@ func TestAccUser(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
+				Config: userWithPassword(rText()),
+			},
+			{
 				Config: userWithName(rText()),
 			},
 			{
@@ -75,4 +78,13 @@ func userMinimumConfiguration() string {
 resource "sysdig_user" "sample" {
   email      = "terraform-test+user@sysdig.com"
 }`)
+}
+
+func userWithPassword(password string) string {
+	return fmt.Sprintf(`
+resource "sysdig_user" "sample" {
+  email      = "terraform-test+user@sysdig.com"
+  password   = "%s"
+}
+`, password)
 }

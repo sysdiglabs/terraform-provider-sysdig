@@ -14,6 +14,7 @@ type User struct {
 	Email      string `json:"username"`
 	FirstName  string `json:"firstName,omitempty"`
 	LastName   string `json:"lastName,omitempty"`
+	Password   string `json:"password,omitempty"`
 }
 
 func (u *User) ToJSON() io.Reader {

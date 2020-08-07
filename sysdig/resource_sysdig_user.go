@@ -25,6 +25,11 @@ func resourceSysdigUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"password": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Sensitive: true,
+			},
 			"system_role": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -119,6 +124,7 @@ func resourceSysdigUserDelete(d *schema.ResourceData, meta interface{}) error {
 func userFromResourceData(d *schema.ResourceData) (u common.User) {
 	u = common.User{
 		SystemRole: d.Get("system_role").(string),
+		Password:   d.Get("password").(string),
 		Email:      d.Get("email").(string),
 		FirstName:  d.Get("first_name").(string),
 		LastName:   d.Get("last_name").(string),
