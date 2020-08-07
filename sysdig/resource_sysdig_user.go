@@ -26,8 +26,8 @@ func resourceSysdigUser() *schema.Resource {
 				Required: true,
 			},
 			"password": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
 				Sensitive: true,
 			},
 			"system_role": {
