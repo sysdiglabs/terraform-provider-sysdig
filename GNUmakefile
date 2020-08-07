@@ -50,16 +50,6 @@ test-compile:
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
-release: fmtcheck
-	for kernel in linux windows darwin; do \
-		for dist in $$(go tool dist list | grep $$kernel); do  \
-			GOOS=$$kernel; \
-			GOARCH=$$(echo $$dist | cut -d/ -f2); \
-			GOOS=$$GOOS GOARCH=$$GOARCH go build -o terraform-provider-sysdig_$(VERSION); \
-			tar -czf terraform-provider-sysdig-$$GOOS-$$GOARCH.tar.gz terraform-provider-sysdig_$(VERSION) --remove-files; \
-		done \
-	done
-
 .PHONY: website
 website:
 ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
