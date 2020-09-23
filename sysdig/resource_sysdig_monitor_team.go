@@ -2,8 +2,8 @@ package sysdig
 
 import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strconv"
 	"time"
 )
@@ -64,7 +64,7 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 			},
 			"user_roles": {
 				Type:     schema.TypeSet,
-				Optional: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"email": {
@@ -151,12 +151,31 @@ func resourceSysdigMonitorTeamRead(d *schema.ResourceData, meta interface{}) err
 	d.Set("description", t.Description)
 	d.Set("scope_by", t.Show)
 	d.Set("filter", t.Filter)
-	d.Set("canUseSysdigCapture", t.CanUseSysdigCapture)
+	d.Set("can_use_sysdig_capture", t.CanUseSysdigCapture)
 	d.Set("default_team", t.DefaultTeam)
-	d.Set("user_roles", t.UserRoles)
-	d.Set("entrypoint", t.EntryPoint)
+	d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
+	d.Set("entrypoint", entrypointToSet(t.EntryPoint))
 
 	return nil
+}
+
+func userMonitorRolesToSet(userRoles []monitor.UserRoles) (res []map[string]interface{}) {
+	for _, role := range userRoles {
+		roleMap := map[string]interface{}{
+			"email": role.Email,
+			"role":  role.Role,
+		}
+		res = append(res, roleMap)
+	}
+	return
+}
+
+func entrypointToSet(entrypoint monitor.EntryPoint) (res []map[string]interface{}) {
+	entrypointMap := map[string]interface{}{
+		"type":      entrypoint.Module,
+		"selection": entrypoint.Selection,
+	}
+	return append(res, entrypointMap)
 }
 
 func resourceSysdigMonitorTeamUpdate(d *schema.ResourceData, meta interface{}) error {

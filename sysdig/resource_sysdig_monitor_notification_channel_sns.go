@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/spf13/cast"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
@@ -118,7 +118,7 @@ func monitorNotificationChannelSNSFromResourceData(d *schema.ResourceData) (nc m
 		return
 	}
 
-	nc.Type = "SNS"
+	nc.Type = NOTIFICATION_CHANNEL_TYPE_AMAZON_SNS
 	nc.Options.SnsTopicARNs = cast.ToStringSlice(d.Get("topics").(*schema.Set).List())
 	return
 }

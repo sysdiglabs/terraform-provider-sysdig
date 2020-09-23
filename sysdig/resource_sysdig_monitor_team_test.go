@@ -3,9 +3,9 @@ package sysdig_test
 import (
 	"fmt"
 	"github.com/draios/terraform-provider-sysdig/sysdig"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"os"
 	"testing"
 )
@@ -19,8 +19,10 @@ func TestAccMonitorTeam(t *testing.T) {
 				t.Fatal("SYSDIG_MONITOR_API_TOKEN must be set for acceptance tests")
 			}
 		},
-		Providers: map[string]terraform.ResourceProvider{
-			"sysdig": sysdig.Provider(),
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
 		},
 		Steps: []resource.TestStep{
 			{
@@ -44,7 +46,16 @@ resource "sysdig_monitor_team" "sample" {
   entrypoint {
 	type = "Explore"
   }
-}`, name)
+
+  user_roles {
+    email = data.sysdig_current_user.me.email
+    role = "ROLE_TEAM_MANAGER"
+  }
+}
+
+data "sysdig_current_user" "me" {
+}
+`, name)
 }
 
 func monitorTeamWithName(name string) string {
@@ -58,7 +69,16 @@ resource "sysdig_monitor_team" "sample" {
   entrypoint {
 	type = "Explore"
   }
-}`, name, name)
+
+  user_roles {
+    email = data.sysdig_current_user.me.email
+    role = "ROLE_TEAM_MANAGER"
+  }
+}
+
+data "sysdig_current_user" "me" {
+}
+`, name, name)
 }
 
 func monitorTeamWithFullConfig(name string) string {
@@ -75,5 +95,15 @@ resource "sysdig_monitor_team" "sample" {
   entrypoint {
 	type = "Dashboards"
   }
-}`, name, name)
+  
+
+  user_roles {
+    email = data.sysdig_current_user.me.email
+    role = "ROLE_TEAM_MANAGER"
+  }
+}
+
+data "sysdig_current_user" "me" {
+}
+`, name, name)
 }

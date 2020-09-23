@@ -13,6 +13,7 @@ type SysdigCommonClient interface {
 	GetUserById(int) (User, error)
 	DeleteUser(int) error
 	UpdateUser(User) (User, error)
+	GetCurrentUser() (User, error)
 }
 
 func WithExtraHeaders(client SysdigCommonClient, extraHeaders map[string]string) SysdigCommonClient {

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
@@ -120,10 +120,18 @@ func resourceSysdigRuleFilesystemRead(d *schema.ResourceData, meta interface{}) 
 		return errors.New("no readWritePaths for a filesystem rule")
 	}
 
-	d.Set("read_only.0.matching", rule.Details.ReadPaths.MatchItems)
-	d.Set("read_only.0.paths", rule.Details.ReadPaths.Items)
-	d.Set("read_write.0.matching", rule.Details.ReadWritePaths.MatchItems)
-	d.Set("read_write.0.paths", rule.Details.ReadWritePaths.Items)
+	if len(rule.Details.ReadPaths.Items) > 0 {
+		d.Set("read_only", []map[string]interface{}{{
+			"matching": rule.Details.ReadPaths.MatchItems,
+			"paths":    rule.Details.ReadPaths.Items,
+		}})
+	}
+	if len(rule.Details.ReadWritePaths.Items) > 0 {
+		d.Set("read_write", []map[string]interface{}{{
+			"matching": rule.Details.ReadWritePaths.MatchItems,
+			"paths":    rule.Details.ReadWritePaths.Items,
+		}})
+	}
 
 	return nil
 }

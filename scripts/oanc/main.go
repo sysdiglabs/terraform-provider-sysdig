@@ -18,21 +18,19 @@ const (
 type NotificationChannelList []NotificationChannel
 
 func (nc NotificationChannelList) String() string {
-	slackResourceTemplate := `resource "sysdig_secure_notification_channel" "example-slack-%d" {
+	slackResourceTemplate := `resource "sysdig_secure_notification_channel_slack" "example-slack-%d" {
   name = "%s"
   enabled = %t
-  type = "%s"
-  url = "%s"
+  url = "sysdig_monitor_team%s"
   channel = "%s"
   notify_when_ok = %t
   notify_when_resolved = %t
 }
 `
 
-	pdResourceTemplate := `resource "sysdig_secure_notification_channel" "example-pager-duty-%d" {
+	pdResourceTemplate := `resource "sysdig_secure_notification_channel_pagerduty" "example-pager-duty-%d" {
   name = "%s"
   enabled = %t
-  type = "%s"
   account = "%s"
   service_key = "%s"
   service_name = "%s"
@@ -46,9 +44,9 @@ func (nc NotificationChannelList) String() string {
 	for id, channel := range nc {
 		switch channel.Type {
 		case slack:
-			ncStr = fmt.Sprintf(slackResourceTemplate, id, channel.Name, channel.Enabled, channel.Type, channel.Options.URL, channel.Options.Channel, channel.Options.NotifyOnOk, channel.Options.NotifyOnResolve)
+			ncStr = fmt.Sprintf(slackResourceTemplate, id, channel.Name, channel.Enabled, channel.Options.URL, channel.Options.Channel, channel.Options.NotifyOnOk, channel.Options.NotifyOnResolve)
 		case pagerduty:
-			ncStr = fmt.Sprintf(pdResourceTemplate, id, channel.Name, channel.Enabled, channel.Type, channel.Options.Account, channel.Options.ServiceKey, channel.Options.ServiceName, channel.Options.NotifyOnOk, channel.Options.NotifyOnResolve)
+			ncStr = fmt.Sprintf(pdResourceTemplate, id, channel.Name, channel.Enabled, channel.Options.Account, channel.Options.ServiceKey, channel.Options.ServiceName, channel.Options.NotifyOnOk, channel.Options.NotifyOnResolve)
 		}
 		builder.WriteString(ncStr)
 	}

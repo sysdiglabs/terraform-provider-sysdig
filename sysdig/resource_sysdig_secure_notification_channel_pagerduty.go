@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
@@ -124,7 +124,7 @@ func secureNotificationChannelPagerdutyFromResourceData(d *schema.ResourceData) 
 		return
 	}
 
-	nc.Type = "PAGER_DUTY"
+	nc.Type = NOTIFICATION_CHANNEL_TYPE_PAGERDUTY
 	nc.Options.Account = d.Get("account").(string)
 	nc.Options.ServiceKey = d.Get("service_key").(string)
 	nc.Options.ServiceName = d.Get("service_name").(string)

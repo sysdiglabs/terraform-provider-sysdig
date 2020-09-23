@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
 )
@@ -118,7 +118,7 @@ func monitorNotificationChannelVictorOpsFromResourceData(d *schema.ResourceData)
 		return
 	}
 
-	nc.Type = "VICTOROPS"
+	nc.Type = NOTIFICATION_CHANNEL_TYPE_VICTOROPS
 	nc.Options.APIKey = d.Get("api_key").(string)
 	nc.Options.RoutingKey = d.Get("routing_key").(string)
 	return

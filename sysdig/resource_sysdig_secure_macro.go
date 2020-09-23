@@ -2,7 +2,7 @@ package sysdig
 
 import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strconv"
 	"time"
 )
@@ -95,7 +95,7 @@ func resourceSysdigMacroRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("name", macro.Name)
 	d.Set("version", macro.Version)
-	d.Set("items", macro.Condition.Condition)
+	d.Set("condition", macro.Condition.Condition)
 	d.Set("append", macro.Append)
 
 	return nil
