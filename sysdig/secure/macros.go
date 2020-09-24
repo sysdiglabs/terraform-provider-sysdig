@@ -1,14 +1,15 @@
 package secure
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
-func (client *sysdigSecureClient) CreateMacro(macroRequest Macro) (macro Macro, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodPost, client.GetMacrosUrl(), macroRequest.ToJSON())
+func (client *sysdigSecureClient) CreateMacro(ctx context.Context, macroRequest Macro) (macro Macro, err error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodPost, client.GetMacrosUrl(), macroRequest.ToJSON())
 	if err != nil {
 		return
 	}
@@ -25,8 +26,8 @@ func (client *sysdigSecureClient) CreateMacro(macroRequest Macro) (macro Macro, 
 	return
 }
 
-func (client *sysdigSecureClient) GetMacroById(id int) (macro Macro, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodGet, client.GetMacroUrl(id), nil)
+func (client *sysdigSecureClient) GetMacroById(ctx context.Context, id int) (macro Macro, err error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodGet, client.GetMacroUrl(id), nil)
 	if err != nil {
 		return
 	}
@@ -51,8 +52,8 @@ func (client *sysdigSecureClient) GetMacroById(id int) (macro Macro, err error) 
 	return
 }
 
-func (client *sysdigSecureClient) UpdateMacro(macroRequest Macro) (macro Macro, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodPut, client.GetMacroUrl(macroRequest.ID), macroRequest.ToJSON())
+func (client *sysdigSecureClient) UpdateMacro(ctx context.Context, macroRequest Macro) (macro Macro, err error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodPut, client.GetMacroUrl(macroRequest.ID), macroRequest.ToJSON())
 	if err != nil {
 		return
 	}
@@ -68,8 +69,8 @@ func (client *sysdigSecureClient) UpdateMacro(macroRequest Macro) (macro Macro, 
 	return MacroFromJSON(body)
 }
 
-func (client *sysdigSecureClient) DeleteMacro(id int) error {
-	response, err := client.doSysdigSecureRequest(http.MethodDelete, client.GetMacroUrl(id), nil)
+func (client *sysdigSecureClient) DeleteMacro(ctx context.Context, id int) error {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodDelete, client.GetMacroUrl(id), nil)
 	if err != nil {
 		return err
 	}

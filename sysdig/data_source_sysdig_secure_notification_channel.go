@@ -1,6 +1,8 @@
 package sysdig
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"regexp"
 	"strconv"
 	"strings"
@@ -23,7 +25,7 @@ func dataSourceSysdigSecureNotificationChannel() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Read: dataSourceSysdigNotificationChannelRead,
+		ReadContext: dataSourceSysdigNotificationChannelRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),
@@ -103,15 +105,15 @@ func dataSourceSysdigSecureNotificationChannel() *schema.Resource {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	nc, err := client.GetNotificationChannelByName(d.Get("name").(string))
+	nc, err := client.GetNotificationChannelByName(ctx, d.Get("name").(string))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(nc.ID))
@@ -142,7 +144,7 @@ func dataSourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interf
 	if nc.Type == NOTIFICATION_CHANNEL_TYPE_OPSGENIE {
 		regex, err := regexp.Compile("apiKey=(.*)?$")
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		key := regex.FindStringSubmatch(nc.Options.Url)[1]
 		d.Set("api_key", key)

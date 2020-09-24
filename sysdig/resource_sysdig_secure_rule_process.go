@@ -1,7 +1,8 @@
 package sysdig
 
 import (
-	"errors"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"time"
 
@@ -14,10 +15,10 @@ func resourceSysdigSecureRuleProcess() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigRuleProcessCreate,
-		Update: resourceSysdigRuleProcessUpdate,
-		Read:   resourceSysdigRuleProcessRead,
-		Delete: resourceSysdigRuleProcessDelete,
+		CreateContext: resourceSysdigRuleProcessCreate,
+		UpdateContext: resourceSysdigRuleProcessUpdate,
+		ReadContext:   resourceSysdigRuleProcessRead,
+		DeleteContext: resourceSysdigRuleProcessDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -40,17 +41,17 @@ func resourceSysdigSecureRuleProcess() *schema.Resource {
 	}
 }
 
-func resourceSysdigRuleProcessCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleProcessCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	rule := resourceSysdigRuleProcessFromResourceData(d)
 
-	rule, err = client.CreateRule(rule)
+	rule, err = client.CreateRule(ctx, rule)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
@@ -60,25 +61,25 @@ func resourceSysdigRuleProcessCreate(d *schema.ResourceData, meta interface{}) e
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleProcessRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	rule, err := client.GetRuleByID(id)
+	rule, err := client.GetRuleByID(ctx, id)
 
 	if err != nil {
 		d.SetId("")
 	}
 
 	if rule.Details.Processes == nil {
-		return errors.New("no process data for a process rule")
+		return diag.Errorf("no process data for a process rule")
 	}
 
 	updateResourceDataForRule(d, rule)
@@ -88,10 +89,10 @@ func resourceSysdigRuleProcessRead(d *schema.ResourceData, meta interface{}) err
 	return nil
 }
 
-func resourceSysdigRuleProcessUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleProcessUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	rule := resourceSysdigRuleProcessFromResourceData(d)
@@ -99,23 +100,30 @@ func resourceSysdigRuleProcessUpdate(d *schema.ResourceData, meta interface{}) e
 	rule.Version = d.Get("version").(int)
 	rule.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateRule(rule)
+	_, err = client.UpdateRule(ctx, rule)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigRuleProcessDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleProcessDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return client.DeleteRule(id)
+	err = client.DeleteRule(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func resourceSysdigRuleProcessFromResourceData(d *schema.ResourceData) secure.Rule {

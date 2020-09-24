@@ -1,6 +1,8 @@
 package sysdig
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"time"
 
@@ -13,10 +15,10 @@ func resourceSysdigSecureNotificationChannelWebhook() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigSecureNotificationChannelWebhookCreate,
-		Update: resourceSysdigSecureNotificationChannelWebhookUpdate,
-		Read:   resourceSysdigSecureNotificationChannelWebhookRead,
-		Delete: resourceSysdigSecureNotificationChannelWebhookDelete,
+		CreateContext: resourceSysdigSecureNotificationChannelWebhookCreate,
+		UpdateContext: resourceSysdigSecureNotificationChannelWebhookUpdate,
+		ReadContext:   resourceSysdigSecureNotificationChannelWebhookRead,
+		DeleteContext: resourceSysdigSecureNotificationChannelWebhookDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -34,20 +36,20 @@ func resourceSysdigSecureNotificationChannelWebhook() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureNotificationChannelWebhookCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelWebhookCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	notificationChannel, err := secureNotificationChannelWebhookFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	notificationChannel, err = client.CreateNotificationChannel(notificationChannel)
+	notificationChannel, err = client.CreateNotificationChannel(ctx, notificationChannel)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
@@ -57,14 +59,14 @@ func resourceSysdigSecureNotificationChannelWebhookCreate(d *schema.ResourceData
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigSecureNotificationChannelWebhookRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelWebhookRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(id)
+	nc, err := client.GetNotificationChannelById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -72,40 +74,48 @@ func resourceSysdigSecureNotificationChannelWebhookRead(d *schema.ResourceData, 
 
 	err = secureNotificationChannelWebhookToResourceData(&nc, d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelWebhookUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelWebhookUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	nc, err := secureNotificationChannelWebhookFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	nc.Version = d.Get("version").(int)
 	nc.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateNotificationChannel(nc)
+	_, err = client.UpdateNotificationChannel(ctx, nc)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigSecureNotificationChannelWebhookDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelWebhookDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
 
-	return client.DeleteNotificationChannel(id)
+	err = client.DeleteNotificationChannel(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
 // Channel type for Notification Channels

@@ -1,7 +1,9 @@
 package sysdig
 
 import (
+	"context"
 	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strconv"
@@ -12,10 +14,10 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigMonitorTeamCreate,
-		Update: resourceSysdigMonitorTeamUpdate,
-		Read:   resourceSysdigMonitorTeamRead,
-		Delete: resourceSysdigMonitorTeamDelete,
+		CreateContext: resourceSysdigMonitorTeamCreate,
+		UpdateContext: resourceSysdigMonitorTeamUpdate,
+		ReadContext:   resourceSysdigMonitorTeamRead,
+		DeleteContext: resourceSysdigMonitorTeamDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -111,17 +113,17 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 	}
 }
 
-func resourceSysdigMonitorTeamCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorTeamCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	team := teamFromResourceData(d)
 
-	team, err = client.CreateTeam(team)
+	team, err = client.CreateTeam(ctx, team)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(team.ID))
@@ -131,18 +133,18 @@ func resourceSysdigMonitorTeamCreate(d *schema.ResourceData, meta interface{}) e
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigMonitorTeamRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	t, err := client.GetTeamById(id)
+	t, err := client.GetTeamById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.Set("version", t.Version)
@@ -182,10 +184,10 @@ func entrypointToSet(entrypoint monitor.EntryPoint) (res []map[string]interface{
 	return append(res, entrypointMap)
 }
 
-func resourceSysdigMonitorTeamUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorTeamUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	t := teamFromResourceData(d)
@@ -193,20 +195,27 @@ func resourceSysdigMonitorTeamUpdate(d *schema.ResourceData, meta interface{}) e
 	t.Version = d.Get("version").(int)
 	t.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateTeam(t)
+	_, err = client.UpdateTeam(ctx, t)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigMonitorTeamDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorTeamDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
 
-	return client.DeleteTeam(id)
+	err = client.DeleteTeam(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func teamFromResourceData(d *schema.ResourceData) monitor.Team {

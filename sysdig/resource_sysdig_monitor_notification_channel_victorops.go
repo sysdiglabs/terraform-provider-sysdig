@@ -1,6 +1,8 @@
 package sysdig
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"time"
 
@@ -13,10 +15,10 @@ func resourceSysdigMonitorNotificationChannelVictorOps() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigMonitorNotificationChannelVictorOpsCreate,
-		Update: resourceSysdigMonitorNotificationChannelVictorOpsUpdate,
-		Read:   resourceSysdigMonitorNotificationChannelVictorOpsRead,
-		Delete: resourceSysdigMonitorNotificationChannelVictorOpsDelete,
+		CreateContext: resourceSysdigMonitorNotificationChannelVictorOpsCreate,
+		UpdateContext: resourceSysdigMonitorNotificationChannelVictorOpsUpdate,
+		ReadContext:   resourceSysdigMonitorNotificationChannelVictorOpsRead,
+		DeleteContext: resourceSysdigMonitorNotificationChannelVictorOpsDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -38,20 +40,20 @@ func resourceSysdigMonitorNotificationChannelVictorOps() *schema.Resource {
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelVictorOpsCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorNotificationChannelVictorOpsCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	notificationChannel, err := monitorNotificationChannelVictorOpsFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	notificationChannel, err = client.CreateNotificationChannel(notificationChannel)
+	notificationChannel, err = client.CreateNotificationChannel(ctx, notificationChannel)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
@@ -61,14 +63,14 @@ func resourceSysdigMonitorNotificationChannelVictorOpsCreate(d *schema.ResourceD
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigMonitorNotificationChannelVictorOpsRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorNotificationChannelVictorOpsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(id)
+	nc, err := client.GetNotificationChannelById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -76,40 +78,47 @@ func resourceSysdigMonitorNotificationChannelVictorOpsRead(d *schema.ResourceDat
 
 	err = monitorNotificationChannelVictorOpsToResourceData(&nc, d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelVictorOpsUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorNotificationChannelVictorOpsUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	nc, err := monitorNotificationChannelVictorOpsFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	nc.Version = d.Get("version").(int)
 	nc.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateNotificationChannel(nc)
+	_, err = client.UpdateNotificationChannel(ctx, nc)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelVictorOpsDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorNotificationChannelVictorOpsDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
 
-	return client.DeleteNotificationChannel(id)
+	err = client.DeleteNotificationChannel(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func monitorNotificationChannelVictorOpsFromResourceData(d *schema.ResourceData) (nc monitor.NotificationChannel, err error) {

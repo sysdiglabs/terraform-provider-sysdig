@@ -1,14 +1,15 @@
 package common
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
-func (client *sysdigCommonClient) GetUserById(id int) (u User, err error) {
-	response, err := client.doSysdigCommonRequest(http.MethodGet, client.GetUserUrl(id), nil)
+func (client *sysdigCommonClient) GetUserById(ctx context.Context, id int) (u User, err error) {
+	response, err := client.doSysdigCommonRequest(ctx, http.MethodGet, client.GetUserUrl(id), nil)
 	if err != nil {
 		return
 	}
@@ -26,8 +27,8 @@ func (client *sysdigCommonClient) GetUserById(id int) (u User, err error) {
 	return
 }
 
-func (client *sysdigCommonClient) CreateUser(uRequest User) (u User, err error) {
-	response, err := client.doSysdigCommonRequest(http.MethodPost, client.GetUsersUrl(), uRequest.ToJSON())
+func (client *sysdigCommonClient) CreateUser(ctx context.Context, uRequest User) (u User, err error) {
+	response, err := client.doSysdigCommonRequest(ctx, http.MethodPost, client.GetUsersUrl(), uRequest.ToJSON())
 
 	if err != nil {
 		return
@@ -45,8 +46,8 @@ func (client *sysdigCommonClient) CreateUser(uRequest User) (u User, err error) 
 	return
 }
 
-func (client *sysdigCommonClient) UpdateUser(uRequest User) (u User, err error) {
-	response, err := client.doSysdigCommonRequest(http.MethodPut, client.GetUserUrl(uRequest.ID), uRequest.ToJSON())
+func (client *sysdigCommonClient) UpdateUser(ctx context.Context, uRequest User) (u User, err error) {
+	response, err := client.doSysdigCommonRequest(ctx, http.MethodPut, client.GetUserUrl(uRequest.ID), uRequest.ToJSON())
 	if err != nil {
 		return
 	}
@@ -63,8 +64,8 @@ func (client *sysdigCommonClient) UpdateUser(uRequest User) (u User, err error) 
 	return
 }
 
-func (client *sysdigCommonClient) DeleteUser(id int) error {
-	response, err := client.doSysdigCommonRequest(http.MethodDelete, client.GetUserUrl(id), nil)
+func (client *sysdigCommonClient) DeleteUser(ctx context.Context, id int) error {
+	response, err := client.doSysdigCommonRequest(ctx, http.MethodDelete, client.GetUserUrl(id), nil)
 	if err != nil {
 		return err
 	}
@@ -76,8 +77,8 @@ func (client *sysdigCommonClient) DeleteUser(id int) error {
 	return nil
 }
 
-func (client *sysdigCommonClient) GetCurrentUser() (u User, err error) {
-	response, err := client.doSysdigCommonRequest(http.MethodGet, client.GetCurrentUserUrl(), nil)
+func (client *sysdigCommonClient) GetCurrentUser(ctx context.Context) (u User, err error) {
+	response, err := client.doSysdigCommonRequest(ctx, http.MethodGet, client.GetCurrentUserUrl(), nil)
 	if err != nil {
 		return
 	}
