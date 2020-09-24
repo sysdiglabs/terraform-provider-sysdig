@@ -2,7 +2,8 @@ package sysdig
 
 import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strconv"
 	"time"
 )
@@ -62,9 +63,10 @@ func resourceSysdigSecureTeam() *schema.Resource {
 						},
 
 						"role": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "ROLE_TEAM_STANDARD",
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      "ROLE_TEAM_STANDARD",
+							ValidateFunc: validation.StringInSlice([]string{"ROLE_TEAM_STANDARD", "ROLE_TEAM_EDIT", "ROLE_TEAM_READ", "ROLE_TEAM_MANAGER"}, false),
 						},
 					},
 				},
@@ -122,11 +124,25 @@ func resourceSysdigSecureTeamRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("description", t.Description)
 	d.Set("scope_by", t.ScopeBy)
 	d.Set("filter", t.Filter)
-	d.Set("canUseSysdigCapture", t.CanUseSysdigCapture)
+	d.Set("use_sysdig_capture", t.CanUseSysdigCapture)
 	d.Set("default_team", t.DefaultTeam)
-	d.Set("user_roles", t.UserRoles)
+	d.Set("user_roles", userSecureRolesToSet(t.UserRoles))
 
 	return nil
+}
+
+func userSecureRolesToSet(userRoles []secure.UserRoles) (res []map[string]interface{}) {
+	for _, role := range userRoles {
+		if role.Admin {
+			continue // Admins are added by default, so skip them
+		}
+		roleMap := map[string]interface{}{
+			"email": role.Email,
+			"role":  role.Role,
+		}
+		res = append(res, roleMap)
+	}
+	return
 }
 
 func resourceSysdigSecureTeamUpdate(d *schema.ResourceData, meta interface{}) error {

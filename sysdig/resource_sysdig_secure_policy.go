@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
@@ -212,13 +212,20 @@ func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("scope", policy.Scope)
 	d.Set("enabled", policy.Enabled)
 	d.Set("version", policy.Version)
+
+	actions := []map[string]interface{}{{}}
 	for _, action := range policy.Actions {
 		if action.Type != "POLICY_ACTION_CAPTURE" {
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
-			d.Set("actions.0.container", strings.ToLower(action))
+			actions[0]["container"] = strings.ToLower(action)
+			d.Set("actions", actions)
+			//d.Set("actions.0.container", strings.ToLower(action))
 		} else {
-			d.Set("actions.0.capture.seconds_after_event", action.AfterEventNs/1000000000)
-			d.Set("actions.0.capture.seconds_before_event", action.BeforeEventNs/100000000)
+			actions[0]["capture"] = []map[string]interface{}{{
+				"seconds_after_event":  action.AfterEventNs / 1000000000,
+				"seconds_before_event": action.BeforeEventNs / 1000000000,
+			}}
+			d.Set("actions", actions)
 		}
 	}
 

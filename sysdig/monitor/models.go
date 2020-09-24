@@ -109,6 +109,7 @@ type UserRoles struct {
 	UserId int    `json:"userId"`
 	Email  string `json:"userName,omitempty"`
 	Role   string `json:"role"`
+	Admin  bool   `json:"admin,omitempty"`
 }
 
 type EntryPoint struct {

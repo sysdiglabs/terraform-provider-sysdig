@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/spf13/cast"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
@@ -118,7 +118,7 @@ func monitorNotificationChannelEmailFromResourceData(d *schema.ResourceData) (nc
 		return
 	}
 
-	nc.Type = "EMAIL"
+	nc.Type = NOTIFICATION_CHANNEL_TYPE_EMAIL
 	nc.Options.EmailRecipients = cast.ToStringSlice(d.Get("recipients").(*schema.Set).List())
 	return
 }

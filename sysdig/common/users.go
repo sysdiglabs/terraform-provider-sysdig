@@ -76,10 +76,31 @@ func (client *sysdigCommonClient) DeleteUser(id int) error {
 	return nil
 }
 
+func (client *sysdigCommonClient) GetCurrentUser() (u User, err error) {
+	response, err := client.doSysdigCommonRequest(http.MethodGet, client.GetCurrentUserUrl(), nil)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		err = errors.New(response.Status)
+		return
+	}
+	body, _ := ioutil.ReadAll(response.Body)
+
+	u = UserFromJSON(body)
+	return
+}
+
 func (client *sysdigCommonClient) GetUsersUrl() string {
 	return fmt.Sprintf("%s/api/users", client.URL)
 }
 
 func (client *sysdigCommonClient) GetUserUrl(id int) string {
 	return fmt.Sprintf("%s/api/users/%d", client.URL, id)
+}
+
+func (client *sysdigCommonClient) GetCurrentUserUrl() string {
+	return fmt.Sprintf("%s/api/users/me", client.URL)
 }

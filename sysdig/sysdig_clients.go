@@ -4,7 +4,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/common"
 	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
@@ -131,10 +131,18 @@ func resourceSysdigRuleNetworkRead(d *schema.ResourceData, meta interface{}) err
 		return errors.New("no udpListenPorts for a filesystem rule")
 	}
 
-	d.Set("tcp.0.matching", rule.Details.TCPListenPorts.MatchItems)
-	d.Set("tcp.0.ports", rule.Details.TCPListenPorts.Items)
-	d.Set("udp.0.matching", rule.Details.UDPListenPorts.MatchItems)
-	d.Set("udp.0.ports", rule.Details.UDPListenPorts.Items)
+	if len(rule.Details.TCPListenPorts.Items) > 0 {
+		d.Set("tcp", []map[string]interface{}{{
+			"matching": rule.Details.TCPListenPorts.MatchItems,
+			"ports":    rule.Details.TCPListenPorts.Items,
+		}})
+	}
+	if len(rule.Details.UDPListenPorts.Items) > 0 {
+		d.Set("udp", []map[string]interface{}{{
+			"matching": rule.Details.UDPListenPorts.MatchItems,
+			"ports":    rule.Details.UDPListenPorts.Items,
+		}})
+	}
 
 	return nil
 }

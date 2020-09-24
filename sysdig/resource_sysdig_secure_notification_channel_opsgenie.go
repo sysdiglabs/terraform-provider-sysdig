@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
@@ -118,7 +118,7 @@ func secureNotificationChannelOpsGenieFromResourceData(d *schema.ResourceData) (
 		return
 	}
 
-	nc.Type = "OPSGENIE"
+	nc.Type = NOTIFICATION_CHANNEL_TYPE_OPSGENIE
 	apiKey := d.Get("api_key").(string)
 	nc.Options.Url = fmt.Sprintf("https://api.opsgenie.com/v1/json/sysdigcloud?apiKey=%s", apiKey)
 	return

@@ -3,9 +3,20 @@ package sysdig
 import (
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+const (
+	NOTIFICATION_CHANNEL_TYPE_EMAIL      = "EMAIL"
+	NOTIFICATION_CHANNEL_TYPE_AMAZON_SNS = "SNS"
+	NOTIFICATION_CHANNEL_TYPE_OPSGENIE   = "OPSGENIE"
+	NOTIFICATION_CHANNEL_TYPE_VICTOROPS  = "VICTOROPS"
+	NOTIFICATION_CHANNEL_TYPE_WEBHOOK    = "WEBHOOK"
+	NOTIFICATION_CHANNEL_TYPE_SLACK      = "SLACK"
+	NOTIFICATION_CHANNEL_TYPE_PAGERDUTY  = "PAGER_DUTY"
 )
 
 func dataSourceSysdigSecureNotificationChannel() *schema.Resource {
@@ -108,8 +119,8 @@ func dataSourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interf
 	d.Set("name", nc.Name)
 	d.Set("enabled", nc.Enabled)
 	d.Set("type", nc.Type)
-	d.Set("recipients", nc.Options.EmailRecipients)
-	d.Set("topics", nc.Options.SnsTopicARNs)
+	d.Set("recipients", strings.Join(nc.Options.EmailRecipients, ","))
+	d.Set("topics", strings.Join(nc.Options.SnsTopicARNs, ","))
 	d.Set("api_key", nc.Options.APIKey)
 	d.Set("url", nc.Options.Url)
 	d.Set("channel", nc.Options.Channel)
@@ -128,7 +139,7 @@ func dataSourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interf
 	// didn't change at all.
 	// We need to extract the key from the url the API gives us
 	// to avoid this Terraform's behaviour.
-	if nc.Type == opsgenie {
+	if nc.Type == NOTIFICATION_CHANNEL_TYPE_OPSGENIE {
 		regex, err := regexp.Compile("apiKey=(.*)?$")
 		if err != nil {
 			return err

@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
 )
@@ -116,7 +116,7 @@ func monitorNotificationChannelWebhookFromResourceData(d *schema.ResourceData) (
 		return
 	}
 
-	nc.Type = "WEBHOOK"
+	nc.Type = NOTIFICATION_CHANNEL_TYPE_WEBHOOK
 	nc.Options.Url = d.Get("url").(string)
 	return
 }
