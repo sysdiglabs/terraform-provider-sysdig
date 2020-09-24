@@ -46,16 +46,7 @@ resource "sysdig_monitor_team" "sample" {
   entrypoint {
 	type = "Explore"
   }
-
-  user_roles {
-    email = data.sysdig_current_user.me.email
-    role = "ROLE_TEAM_MANAGER"
-  }
-}
-
-data "sysdig_current_user" "me" {
-}
-`, name)
+}`, name)
 }
 
 func monitorTeamWithName(name string) string {
@@ -69,16 +60,7 @@ resource "sysdig_monitor_team" "sample" {
   entrypoint {
 	type = "Explore"
   }
-
-  user_roles {
-    email = data.sysdig_current_user.me.email
-    role = "ROLE_TEAM_MANAGER"
-  }
-}
-
-data "sysdig_current_user" "me" {
-}
-`, name, name)
+}`, name, name)
 }
 
 func monitorTeamWithFullConfig(name string) string {
@@ -95,15 +77,5 @@ resource "sysdig_monitor_team" "sample" {
   entrypoint {
 	type = "Dashboards"
   }
-  
-
-  user_roles {
-    email = data.sysdig_current_user.me.email
-    role = "ROLE_TEAM_MANAGER"
-  }
-}
-
-data "sysdig_current_user" "me" {
-}
-`, name, name)
+}`, name, name)
 }

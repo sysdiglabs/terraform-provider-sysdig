@@ -41,9 +41,6 @@ data "sysdig_current_user" "me" {
 
 * `name` - (Required) The name of the Monitor Team. It must be unique.
 
-* `user_roles` - (Required) At least one user role must be specified, which in most of the
-                 scenarios will be the calling user, as well as other accounts.
-                 
 * `entrypoint` - (Required) Main entry point for the current team in the product. 
                  See the Entrypoint argument reference section for more information.
 
@@ -63,6 +60,12 @@ data "sysdig_current_user" "me" {
 
 * `can_use_aws_data` - (Optional) TODO. Default: false.
 
+* `user_roles` - (Optional) Multiple user roles can be specified.
+                 Administrators of the account will be automatically added
+                 to every new created team, so they don't need to be added as a
+                 resource in the Terraform manifest.
+                 
+
 ### Entrypoint Argument Reference
 
 * `type` - (Required) Main entrypoint for the team.
@@ -78,4 +81,3 @@ data "sysdig_current_user" "me" {
 * `role` - (Optional) The role for the user in this group.
            Valid roles are: ROLE_TEAM_STANDARD, ROLE_TEAM_EDIT, ROLE_TEAM_READ, ROLE_TEAM_MANAGER.
            Default: ROLE_TEAM_STANDARD.
-                 

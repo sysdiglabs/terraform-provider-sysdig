@@ -64,7 +64,7 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 			},
 			"user_roles": {
 				Type:     schema.TypeSet,
-				Required: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"email": {
@@ -161,6 +161,10 @@ func resourceSysdigMonitorTeamRead(d *schema.ResourceData, meta interface{}) err
 
 func userMonitorRolesToSet(userRoles []monitor.UserRoles) (res []map[string]interface{}) {
 	for _, role := range userRoles {
+		if role.Admin { // Admins are added by default, so skip them
+			continue
+		}
+
 		roleMap := map[string]interface{}{
 			"email": role.Email,
 			"role":  role.Role,

@@ -54,7 +54,7 @@ func resourceSysdigSecureTeam() *schema.Resource {
 			},
 			"user_roles": {
 				Type:     schema.TypeSet,
-				Required: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"email": {
@@ -133,6 +133,9 @@ func resourceSysdigSecureTeamRead(d *schema.ResourceData, meta interface{}) erro
 
 func userSecureRolesToSet(userRoles []secure.UserRoles) (res []map[string]interface{}) {
 	for _, role := range userRoles {
+		if role.Admin {
+			continue // Admins are added by default, so skip them
+		}
 		roleMap := map[string]interface{}{
 			"email": role.Email,
 			"role":  role.Role,

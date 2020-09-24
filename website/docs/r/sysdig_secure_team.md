@@ -37,10 +37,6 @@ data "sysdig_current_user" "me" {
 
 * `name` - (Required) The name of the Secure Team. It must be unique.
 
-* `user_roles` - (Required) At least one user role must be specified, which in most of the
-                 scenarios will be the calling user, as well as other accounts.
-                 
-
 * `description` - (Optional) A description of the team.
 
 * `theme` - (Optional) Colour of the team. Default: "#73A1F7".
@@ -56,6 +52,11 @@ data "sysdig_current_user" "me" {
 * `default_team` - (Optional) Defines if the team is the default one. Warning: only one can be the default,
                    if you define multiple default teams, Terraform will be updating the API in every execution,
                    even if the state hasn't changed.
+
+* `user_roles` - (Optional) Multiple user roles can be specified.
+                 Administrators of the account will be automatically added
+                 to every new created team, so they don't need to be added as a
+                 resource in the Terraform manifest.
                          
 ### User Role Argument Reference
 

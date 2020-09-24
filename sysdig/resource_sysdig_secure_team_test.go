@@ -42,14 +42,6 @@ resource "sysdig_secure_team" "sample" {
   description        = "%s"
   scope_by           = "container"
   filter             = "container.image.repo = \"sysdig/agent\""
-
-  user_roles {
-    email = data.sysdig_current_user.me.email
-    role = "ROLE_TEAM_MANAGER"
-  }
-}
-
-data "sysdig_current_user" "me" {
 }
 `, name, name)
 }
@@ -58,13 +50,5 @@ func secureTeamMinimumConfiguration(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_team" "sample" {
   name      = "sample-%s"
-
-  user_roles {
-    email = data.sysdig_current_user.me.email
-    role = "ROLE_TEAM_MANAGER"
-  }
-}
-
-data "sysdig_current_user" "me" {
 }`, name)
 }
