@@ -1,7 +1,9 @@
 package sysdig
 
 import (
+	"context"
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strconv"
@@ -12,10 +14,10 @@ func resourceSysdigSecureTeam() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigSecureTeamCreate,
-		Update: resourceSysdigSecureTeamUpdate,
-		Read:   resourceSysdigSecureTeamRead,
-		Delete: resourceSysdigSecureTeamDelete,
+		CreateContext: resourceSysdigSecureTeamCreate,
+		UpdateContext: resourceSysdigSecureTeamUpdate,
+		ReadContext:   resourceSysdigSecureTeamRead,
+		DeleteContext: resourceSysdigSecureTeamDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -84,17 +86,17 @@ func resourceSysdigSecureTeam() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureTeamCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	team := secureTeamFromResourceData(d)
 
-	team, err = client.CreateTeam(team)
+	team, err = client.CreateTeam(ctx, team)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(team.ID))
@@ -104,18 +106,18 @@ func resourceSysdigSecureTeamCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigSecureTeamRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	t, err := client.GetTeamById(id)
+	t, err := client.GetTeamById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.Set("version", t.Version)
@@ -145,10 +147,10 @@ func userSecureRolesToSet(userRoles []secure.UserRoles) (res []map[string]interf
 	return
 }
 
-func resourceSysdigSecureTeamUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureTeamUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	t := secureTeamFromResourceData(d)
@@ -156,20 +158,27 @@ func resourceSysdigSecureTeamUpdate(d *schema.ResourceData, meta interface{}) er
 	t.Version = d.Get("version").(int)
 	t.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateTeam(t)
+	_, err = client.UpdateTeam(ctx, t)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigSecureTeamDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
 
-	return client.DeleteTeam(id)
+	err = client.DeleteTeam(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func secureTeamFromResourceData(d *schema.ResourceData) secure.Team {

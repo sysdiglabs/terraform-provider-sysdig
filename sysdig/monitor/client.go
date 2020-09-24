@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"context"
 	"crypto/tls"
 	"io"
 	"log"
@@ -9,21 +10,21 @@ import (
 )
 
 type SysdigMonitorClient interface {
-	CreateAlert(Alert) (Alert, error)
-	DeleteAlert(int) error
-	UpdateAlert(Alert) (Alert, error)
-	GetAlertById(int) (Alert, error)
+	CreateAlert(context.Context, Alert) (Alert, error)
+	DeleteAlert(context.Context, int) error
+	UpdateAlert(context.Context, Alert) (Alert, error)
+	GetAlertById(context.Context, int) (Alert, error)
 
-	CreateTeam(Team) (Team, error)
-	GetTeamById(int) (Team, error)
-	UpdateTeam(Team) (Team, error)
-	DeleteTeam(int) error
+	CreateTeam(context.Context, Team) (Team, error)
+	GetTeamById(context.Context, int) (Team, error)
+	UpdateTeam(context.Context, Team) (Team, error)
+	DeleteTeam(context.Context, int) error
 
-	CreateNotificationChannel(NotificationChannel) (NotificationChannel, error)
-	GetNotificationChannelById(int) (NotificationChannel, error)
-	GetNotificationChannelByName(string) (NotificationChannel, error)
-	DeleteNotificationChannel(int) error
-	UpdateNotificationChannel(NotificationChannel) (NotificationChannel, error)
+	CreateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
+	GetNotificationChannelById(context.Context, int) (NotificationChannel, error)
+	GetNotificationChannelByName(context.Context, string) (NotificationChannel, error)
+	DeleteNotificationChannel(context.Context, int) error
+	UpdateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
 }
 
 func WithExtraHeaders(client SysdigMonitorClient, extraHeaders map[string]string) SysdigMonitorClient {
@@ -53,8 +54,9 @@ type sysdigMonitorClient struct {
 	extraHeaders          map[string]string
 }
 
-func (client *sysdigMonitorClient) doSysdigMonitorRequest(method string, url string, payload io.Reader) (*http.Response, error) {
+func (client *sysdigMonitorClient) doSysdigMonitorRequest(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {
 	request, _ := http.NewRequest(method, url, payload)
+	request = request.WithContext(ctx)
 	request.Header.Set("Authorization", "Bearer "+client.SysdigMonitorAPIToken)
 	request.Header.Set("Content-Type", "application/json")
 	if client.extraHeaders != nil {

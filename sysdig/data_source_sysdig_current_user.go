@@ -1,6 +1,8 @@
 package sysdig
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"time"
 
@@ -11,7 +13,7 @@ func dataSourceSysdigCurrentUser() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Read: dataSourceSysdigCurrentUserRead,
+		ReadContext: dataSourceSysdigCurrentUserRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),
@@ -39,15 +41,15 @@ func dataSourceSysdigCurrentUser() *schema.Resource {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigCurrentUserRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceSysdigCurrentUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	user, err := client.GetCurrentUser()
+	user, err := client.GetCurrentUser(ctx)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(user.ID))

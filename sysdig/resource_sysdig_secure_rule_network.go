@@ -1,7 +1,8 @@
 package sysdig
 
 import (
-	"errors"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"time"
 
@@ -14,10 +15,10 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigRuleNetworkCreate,
-		Update: resourceSysdigRuleNetworkUpdate,
-		Read:   resourceSysdigRuleNetworkRead,
-		Delete: resourceSysdigRuleNetworkDelete,
+		CreateContext: resourceSysdigRuleNetworkCreate,
+		UpdateContext: resourceSysdigRuleNetworkUpdate,
+		ReadContext:   resourceSysdigRuleNetworkRead,
+		DeleteContext: resourceSysdigRuleNetworkDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -79,41 +80,41 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 	}
 }
 
-func resourceSysdigRuleNetworkCreate(d *schema.ResourceData, meta interface{}) (err error) {
+func resourceSysdigRuleNetworkCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	rule, err := resourceSysdigRuleNetworkFromResourceData(d)
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
-	rule, err = client.CreateRule(rule)
+	rule, err = client.CreateRule(ctx, rule)
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
 	d.Set("version", rule.Version)
 
-	return
+	return nil
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleNetworkRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	rule, err := client.GetRuleByID(id)
+	rule, err := client.GetRuleByID(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -124,11 +125,11 @@ func resourceSysdigRuleNetworkRead(d *schema.ResourceData, meta interface{}) err
 	d.Set("block_outbound", rule.Details.AllOutbound)
 
 	if rule.Details.TCPListenPorts == nil {
-		return errors.New("no tcpListenPorts for a filesystem rule")
+		return diag.Errorf("no tcpListenPorts for a filesystem rule")
 	}
 
 	if rule.Details.UDPListenPorts == nil {
-		return errors.New("no udpListenPorts for a filesystem rule")
+		return diag.Errorf("no udpListenPorts for a filesystem rule")
 	}
 
 	if len(rule.Details.TCPListenPorts.Items) > 0 {
@@ -147,37 +148,45 @@ func resourceSysdigRuleNetworkRead(d *schema.ResourceData, meta interface{}) err
 	return nil
 }
 
-func resourceSysdigRuleNetworkUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+func resourceSysdigRuleNetworkUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	rule, err := resourceSysdigRuleNetworkFromResourceData(d)
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
 	rule.Version = d.Get("version").(int)
 	rule.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateRule(rule)
+	_, err = client.UpdateRule(ctx, rule)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigRuleNetworkDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleNetworkDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return client.DeleteRule(id)
+	err = client.DeleteRule(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
 func resourceSysdigRuleNetworkFromResourceData(d *schema.ResourceData) (rule secure.Rule, err error) {

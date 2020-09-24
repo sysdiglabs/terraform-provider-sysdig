@@ -1,15 +1,16 @@
 package secure
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
-func (client *sysdigSecureClient) getUserIdbyEmail(userRoles []UserRoles) ([]UserRoles, error) {
+func (client *sysdigSecureClient) getUserIdbyEmail(ctx context.Context, userRoles []UserRoles) ([]UserRoles, error) {
 	// Get UsersList from API
-	response, err := client.doSysdigSecureRequest(http.MethodGet, client.getUsersListUrl(), nil)
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodGet, client.getUsersListUrl(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +45,8 @@ func (client *sysdigSecureClient) getUserIdbyEmail(userRoles []UserRoles) ([]Use
 	return modifiedUserRoles, nil
 }
 
-func (client *sysdigSecureClient) GetTeamById(id int) (t Team, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodGet, client.GetTeamUrl(id), nil)
+func (client *sysdigSecureClient) GetTeamById(ctx context.Context, id int) (t Team, err error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodGet, client.GetTeamUrl(id), nil)
 	if err != nil {
 		return
 	}
@@ -63,14 +64,14 @@ func (client *sysdigSecureClient) GetTeamById(id int) (t Team, err error) {
 	return
 }
 
-func (client *sysdigSecureClient) CreateTeam(tRequest Team) (t Team, err error) {
-	tRequest.UserRoles, err = client.getUserIdbyEmail(tRequest.UserRoles)
+func (client *sysdigSecureClient) CreateTeam(ctx context.Context, tRequest Team) (t Team, err error) {
+	tRequest.UserRoles, err = client.getUserIdbyEmail(ctx, tRequest.UserRoles)
 	if err != nil {
 		return
 	}
 	tRequest.Products = []string{"SDS"}
 
-	response, err := client.doSysdigSecureRequest(http.MethodPost, client.GetTeamsUrl(), tRequest.ToJSON())
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodPost, client.GetTeamsUrl(), tRequest.ToJSON())
 
 	if err != nil {
 		return
@@ -88,14 +89,14 @@ func (client *sysdigSecureClient) CreateTeam(tRequest Team) (t Team, err error) 
 	return
 }
 
-func (client *sysdigSecureClient) UpdateTeam(tRequest Team) (t Team, err error) {
-	tRequest.UserRoles, err = client.getUserIdbyEmail(tRequest.UserRoles)
+func (client *sysdigSecureClient) UpdateTeam(ctx context.Context, tRequest Team) (t Team, err error) {
+	tRequest.UserRoles, err = client.getUserIdbyEmail(ctx, tRequest.UserRoles)
 	if err != nil {
 		return
 	}
 	tRequest.Products = []string{"SDS"}
 
-	response, err := client.doSysdigSecureRequest(http.MethodPut, client.GetTeamUrl(tRequest.ID), tRequest.ToJSON())
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodPut, client.GetTeamUrl(tRequest.ID), tRequest.ToJSON())
 	if err != nil {
 		return
 	}
@@ -112,8 +113,8 @@ func (client *sysdigSecureClient) UpdateTeam(tRequest Team) (t Team, err error) 
 	return
 }
 
-func (client *sysdigSecureClient) DeleteTeam(id int) error {
-	response, err := client.doSysdigSecureRequest(http.MethodDelete, client.GetTeamUrl(id), nil)
+func (client *sysdigSecureClient) DeleteTeam(ctx context.Context, id int) error {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodDelete, client.GetTeamUrl(id), nil)
 	if err != nil {
 		return err
 	}

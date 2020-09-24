@@ -1,7 +1,9 @@
 package sysdig
 
 import (
+	"context"
 	"github.com/draios/terraform-provider-sysdig/sysdig/common"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strconv"
 	"time"
@@ -11,10 +13,10 @@ func resourceSysdigUser() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigUserCreate,
-		Update: resourceSysdigUserUpdate,
-		Read:   resourceSysdigUserRead,
-		Delete: resourceSysdigUserDelete,
+		CreateContext: resourceSysdigUserCreate,
+		UpdateContext: resourceSysdigUserUpdate,
+		ReadContext:   resourceSysdigUserRead,
+		DeleteContext: resourceSysdigUserDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -46,17 +48,17 @@ func resourceSysdigUser() *schema.Resource {
 	}
 }
 
-func resourceSysdigUserCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	user := userFromResourceData(d)
 
-	user, err = client.CreateUser(user)
+	user, err = client.CreateUser(ctx, user)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(user.ID))
@@ -66,18 +68,18 @@ func resourceSysdigUserCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigUserRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	u, err := client.GetUserById(id)
+	u, err := client.GetUserById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.Set("version", u.Version)
@@ -89,10 +91,10 @@ func resourceSysdigUserRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceSysdigUserUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	u := userFromResourceData(d)
@@ -100,20 +102,27 @@ func resourceSysdigUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	u.Version = d.Get("version").(int)
 	u.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateUser(u)
+	_, err = client.UpdateUser(ctx, u)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigUserDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigCommonClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
 
-	return client.DeleteUser(id)
+	err = client.DeleteUser(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func userFromResourceData(d *schema.ResourceData) (u common.User) {

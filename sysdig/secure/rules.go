@@ -1,6 +1,7 @@
 package secure
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -15,8 +16,8 @@ func (client *sysdigSecureClient) ruleURL(ruleID int) string {
 	return fmt.Sprintf("%s/api/secure/rules/%d", client.URL, ruleID)
 }
 
-func (client *sysdigSecureClient) CreateRule(rule Rule) (result Rule, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodPost, client.rulesURL(), rule.ToJSON())
+func (client *sysdigSecureClient) CreateRule(ctx context.Context, rule Rule) (result Rule, err error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodPost, client.rulesURL(), rule.ToJSON())
 	if err != nil {
 		return
 	}
@@ -35,8 +36,8 @@ func (client *sysdigSecureClient) CreateRule(rule Rule) (result Rule, err error)
 	return
 }
 
-func (client *sysdigSecureClient) GetRuleByID(ruleID int) (result Rule, err error) {
-	response, _ := client.doSysdigSecureRequest(http.MethodGet, client.ruleURL(ruleID), nil)
+func (client *sysdigSecureClient) GetRuleByID(ctx context.Context, ruleID int) (result Rule, err error) {
+	response, _ := client.doSysdigSecureRequest(ctx, http.MethodGet, client.ruleURL(ruleID), nil)
 	body, _ := ioutil.ReadAll(response.Body)
 
 	if response.StatusCode != 200 {
@@ -49,8 +50,8 @@ func (client *sysdigSecureClient) GetRuleByID(ruleID int) (result Rule, err erro
 	return
 }
 
-func (client *sysdigSecureClient) UpdateRule(rule Rule) (result Rule, err error) {
-	response, _ := client.doSysdigSecureRequest(http.MethodPut, client.ruleURL(rule.ID), rule.ToJSON())
+func (client *sysdigSecureClient) UpdateRule(ctx context.Context, rule Rule) (result Rule, err error) {
+	response, _ := client.doSysdigSecureRequest(ctx, http.MethodPut, client.ruleURL(rule.ID), rule.ToJSON())
 	body, _ := ioutil.ReadAll(response.Body)
 
 	if response.StatusCode != http.StatusOK {
@@ -63,8 +64,8 @@ func (client *sysdigSecureClient) UpdateRule(rule Rule) (result Rule, err error)
 	return
 }
 
-func (client *sysdigSecureClient) DeleteRule(ruleID int) error {
-	response, err := client.doSysdigSecureRequest(http.MethodDelete, client.ruleURL(ruleID), nil)
+func (client *sysdigSecureClient) DeleteRule(ctx context.Context, ruleID int) error {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodDelete, client.ruleURL(ruleID), nil)
 
 	defer response.Body.Close()
 

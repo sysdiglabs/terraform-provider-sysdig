@@ -1,6 +1,7 @@
 package secure
 
 import (
+	"context"
 	"crypto/tls"
 	"io"
 	"log"
@@ -9,36 +10,36 @@ import (
 )
 
 type SysdigSecureClient interface {
-	CreatePolicy(Policy) (Policy, error)
-	DeletePolicy(int) error
-	UpdatePolicy(Policy) (Policy, error)
-	GetPolicyById(int) (Policy, error)
+	CreatePolicy(context.Context, Policy) (Policy, error)
+	DeletePolicy(context.Context, int) error
+	UpdatePolicy(context.Context, Policy) (Policy, error)
+	GetPolicyById(context.Context, int) (Policy, error)
 
-	CreateRule(Rule) (Rule, error)
-	GetRuleByID(int) (Rule, error)
-	UpdateRule(Rule) (Rule, error)
-	DeleteRule(int) error
+	CreateRule(context.Context, Rule) (Rule, error)
+	GetRuleByID(context.Context, int) (Rule, error)
+	UpdateRule(context.Context, Rule) (Rule, error)
+	DeleteRule(context.Context, int) error
 
-	CreateNotificationChannel(NotificationChannel) (NotificationChannel, error)
-	GetNotificationChannelById(int) (NotificationChannel, error)
-	GetNotificationChannelByName(string) (NotificationChannel, error)
-	DeleteNotificationChannel(int) error
-	UpdateNotificationChannel(NotificationChannel) (NotificationChannel, error)
+	CreateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
+	GetNotificationChannelById(context.Context, int) (NotificationChannel, error)
+	GetNotificationChannelByName(context.Context, string) (NotificationChannel, error)
+	DeleteNotificationChannel(context.Context, int) error
+	UpdateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
 
-	CreateTeam(Team) (Team, error)
-	GetTeamById(int) (Team, error)
-	DeleteTeam(int) error
-	UpdateTeam(Team) (Team, error)
+	CreateTeam(context.Context, Team) (Team, error)
+	GetTeamById(context.Context, int) (Team, error)
+	DeleteTeam(context.Context, int) error
+	UpdateTeam(context.Context, Team) (Team, error)
 
-	CreateList(List) (List, error)
-	GetListById(int) (List, error)
-	DeleteList(int) error
-	UpdateList(List) (List, error)
+	CreateList(context.Context, List) (List, error)
+	GetListById(context.Context, int) (List, error)
+	DeleteList(context.Context, int) error
+	UpdateList(context.Context, List) (List, error)
 
-	CreateMacro(Macro) (Macro, error)
-	GetMacroById(int) (Macro, error)
-	DeleteMacro(int) error
-	UpdateMacro(Macro) (Macro, error)
+	CreateMacro(context.Context, Macro) (Macro, error)
+	GetMacroById(context.Context, int) (Macro, error)
+	DeleteMacro(context.Context, int) error
+	UpdateMacro(context.Context, Macro) (Macro, error)
 }
 
 func WithExtraHeaders(client SysdigSecureClient, extraHeaders map[string]string) SysdigSecureClient {
@@ -69,8 +70,9 @@ type sysdigSecureClient struct {
 	extraHeaders         map[string]string
 }
 
-func (client *sysdigSecureClient) doSysdigSecureRequest(method string, url string, payload io.Reader) (*http.Response, error) {
+func (client *sysdigSecureClient) doSysdigSecureRequest(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {
 	request, _ := http.NewRequest(method, url, payload)
+	request = request.WithContext(ctx)
 	request.Header.Set("Authorization", "Bearer "+client.SysdigSecureAPIToken)
 	request.Header.Set("Content-Type", "application/json")
 	if client.extraHeaders != nil {

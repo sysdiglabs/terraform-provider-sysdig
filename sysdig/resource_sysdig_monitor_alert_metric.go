@@ -1,7 +1,9 @@
 package sysdig
 
 import (
+	"context"
 	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strconv"
 	"time"
@@ -11,10 +13,10 @@ func resourceSysdigMonitorAlertMetric() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigAlertMetricCreate,
-		Update: resourceSysdigAlertMetricUpdate,
-		Read:   resourceSysdigAlertMetricRead,
-		Delete: resourceSysdigAlertMetricDelete,
+		CreateContext: resourceSysdigAlertMetricCreate,
+		UpdateContext: resourceSysdigAlertMetricUpdate,
+		ReadContext:   resourceSysdigAlertMetricRead,
+		DeleteContext: resourceSysdigAlertMetricDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -37,20 +39,20 @@ func resourceSysdigMonitorAlertMetric() *schema.Resource {
 	}
 }
 
-func resourceSysdigAlertMetricCreate(data *schema.ResourceData, i interface{}) error {
+func resourceSysdigAlertMetricCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
 	client, err := i.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	alert, err := metricAlertFromResourceData(data)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	alertCreated, err := client.CreateAlert(*alert)
+	alertCreated, err := client.CreateAlert(ctx, *alert)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
@@ -58,36 +60,39 @@ func resourceSysdigAlertMetricCreate(data *schema.ResourceData, i interface{}) e
 	return nil
 }
 
-func resourceSysdigAlertMetricUpdate(data *schema.ResourceData, i interface{}) (err error) {
+func resourceSysdigAlertMetricUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
 	client, err := i.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	alert, err := metricAlertFromResourceData(data)
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
 	alert.ID, _ = strconv.Atoi(data.Id())
 
-	_, err = client.UpdateAlert(*alert)
+	_, err = client.UpdateAlert(ctx, *alert)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return
+	return nil
 }
 
-func resourceSysdigAlertMetricRead(data *schema.ResourceData, i interface{}) (err error) {
+func resourceSysdigAlertMetricRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
 	client, err := i.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(data.Id())
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
-	alert, err := client.GetAlertById(id)
+	alert, err := client.GetAlertById(ctx, id)
 
 	if err != nil {
 		data.SetId("")
@@ -96,24 +101,29 @@ func resourceSysdigAlertMetricRead(data *schema.ResourceData, i interface{}) (er
 
 	err = metricAlertToResourceData(&alert, data)
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
-	return
+	return nil
 }
 
-func resourceSysdigAlertMetricDelete(data *schema.ResourceData, i interface{}) (err error) {
+func resourceSysdigAlertMetricDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
 	client, err := i.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(data.Id())
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
-	return client.DeleteAlert(id)
+	err = client.DeleteAlert(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
 func metricAlertFromResourceData(data *schema.ResourceData) (alert *monitor.Alert, err error) {

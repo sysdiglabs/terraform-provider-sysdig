@@ -1,6 +1,8 @@
 package sysdig
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"time"
 
@@ -14,10 +16,10 @@ func resourceSysdigMonitorNotificationChannelEmail() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigMonitorNotificationChannelEmailCreate,
-		Update: resourceSysdigMonitorNotificationChannelEmailUpdate,
-		Read:   resourceSysdigMonitorNotificationChannelEmailRead,
-		Delete: resourceSysdigMonitorNotificationChannelEmailDelete,
+		CreateContext: resourceSysdigMonitorNotificationChannelEmailCreate,
+		UpdateContext: resourceSysdigMonitorNotificationChannelEmailUpdate,
+		ReadContext:   resourceSysdigMonitorNotificationChannelEmailRead,
+		DeleteContext: resourceSysdigMonitorNotificationChannelEmailDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -36,20 +38,20 @@ func resourceSysdigMonitorNotificationChannelEmail() *schema.Resource {
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelEmailCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorNotificationChannelEmailCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	notificationChannel, err := monitorNotificationChannelEmailFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	notificationChannel, err = client.CreateNotificationChannel(notificationChannel)
+	notificationChannel, err = client.CreateNotificationChannel(ctx, notificationChannel)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
@@ -59,14 +61,14 @@ func resourceSysdigMonitorNotificationChannelEmailCreate(d *schema.ResourceData,
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigMonitorNotificationChannelEmailRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorNotificationChannelEmailRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(id)
+	nc, err := client.GetNotificationChannelById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -74,40 +76,48 @@ func resourceSysdigMonitorNotificationChannelEmailRead(d *schema.ResourceData, m
 
 	err = monitorNotificationChannelEmailToResourceData(&nc, d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelEmailUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorNotificationChannelEmailUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	nc, err := monitorNotificationChannelEmailFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	nc.Version = d.Get("version").(int)
 	nc.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateNotificationChannel(nc)
+	_, err = client.UpdateNotificationChannel(ctx, nc)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelEmailDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorNotificationChannelEmailDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
 
-	return client.DeleteNotificationChannel(id)
+	err = client.DeleteNotificationChannel(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
 // Channel type for Notification Channels

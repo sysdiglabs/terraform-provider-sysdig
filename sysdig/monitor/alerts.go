@@ -1,14 +1,15 @@
 package monitor
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
-func (c *sysdigMonitorClient) CreateAlert(alert Alert) (createdAlert Alert, err error) {
-	response, err := c.doSysdigMonitorRequest(http.MethodPost, c.alertsURL(), alert.ToJSON())
+func (c *sysdigMonitorClient) CreateAlert(ctx context.Context, alert Alert) (createdAlert Alert, err error) {
+	response, err := c.doSysdigMonitorRequest(ctx, http.MethodPost, c.alertsURL(), alert.ToJSON())
 	if err != nil {
 		return
 	}
@@ -27,16 +28,16 @@ func (c *sysdigMonitorClient) CreateAlert(alert Alert) (createdAlert Alert, err 
 	return AlertFromJSON(body), nil
 }
 
-func (c *sysdigMonitorClient) DeleteAlert(alertID int) error {
-	response, err := c.doSysdigMonitorRequest(http.MethodDelete, c.alertURL(alertID), nil)
+func (c *sysdigMonitorClient) DeleteAlert(ctx context.Context, alertID int) error {
+	response, err := c.doSysdigMonitorRequest(ctx, http.MethodDelete, c.alertURL(alertID), nil)
 
 	defer response.Body.Close()
 
 	return err
 }
 
-func (c *sysdigMonitorClient) UpdateAlert(alert Alert) (updatedAlert Alert, err error) {
-	response, err := c.doSysdigMonitorRequest(http.MethodPut, c.alertURL(alert.ID), alert.ToJSON())
+func (c *sysdigMonitorClient) UpdateAlert(ctx context.Context, alert Alert) (updatedAlert Alert, err error) {
+	response, err := c.doSysdigMonitorRequest(ctx, http.MethodPut, c.alertURL(alert.ID), alert.ToJSON())
 	if err != nil {
 		return
 	}
@@ -56,8 +57,8 @@ func (c *sysdigMonitorClient) UpdateAlert(alert Alert) (updatedAlert Alert, err 
 	return AlertFromJSON(body), nil
 }
 
-func (c *sysdigMonitorClient) GetAlertById(alertID int) (alert Alert, err error) {
-	response, err := c.doSysdigMonitorRequest(http.MethodGet, c.alertURL(alertID), nil)
+func (c *sysdigMonitorClient) GetAlertById(ctx context.Context, alertID int) (alert Alert, err error) {
+	response, err := c.doSysdigMonitorRequest(ctx, http.MethodGet, c.alertURL(alertID), nil)
 	if err != nil {
 		return
 	}

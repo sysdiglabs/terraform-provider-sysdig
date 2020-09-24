@@ -1,6 +1,8 @@
 package sysdig
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"strings"
 	"time"
@@ -27,10 +29,10 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigPolicyCreate,
-		Read:   resourceSysdigPolicyRead,
-		Update: resourceSysdigPolicyUpdate,
-		Delete: resourceSysdigPolicyDelete,
+		CreateContext: resourceSysdigPolicyCreate,
+		ReadContext:   resourceSysdigPolicyRead,
+		UpdateContext: resourceSysdigPolicyUpdate,
+		DeleteContext: resourceSysdigPolicyDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -117,16 +119,16 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 	}
 }
 
-func resourceSysdigPolicyCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	policy := policyFromResourceData(d)
-	policy, err = client.CreatePolicy(policy)
+	policy, err = client.CreatePolicy(ctx, policy)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(policy.ID))
@@ -194,14 +196,14 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 	}
 }
 
-func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	policy, err := client.GetPolicyById(id)
+	policy, err := client.GetPolicyById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -235,21 +237,25 @@ func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceSysdigPolicyDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
 
-	return client.DeletePolicy(id)
+	err = client.DeletePolicy(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
-func resourceSysdigPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	policy := policyFromResourceData(d)
@@ -258,6 +264,9 @@ func resourceSysdigPolicyUpdate(d *schema.ResourceData, meta interface{}) error 
 	id, _ := strconv.Atoi(d.Id())
 	policy.ID = id
 
-	_, err = client.UpdatePolicy(policy)
-	return err
+	_, err = client.UpdatePolicy(ctx, policy)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
