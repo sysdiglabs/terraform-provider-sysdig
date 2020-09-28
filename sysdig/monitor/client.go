@@ -25,6 +25,11 @@ type SysdigMonitorClient interface {
 	GetNotificationChannelByName(context.Context, string) (NotificationChannel, error)
 	DeleteNotificationChannel(context.Context, int) error
 	UpdateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
+
+	GetDashboardByID(context.Context, int) (Dashboard, error)
+	CreateDashboard(context.Context, Dashboard) (Dashboard, error)
+	UpdateDashboard(context.Context, Dashboard) (Dashboard, error)
+	DeleteDashboard(context.Context, int) error
 }
 
 func WithExtraHeaders(client SysdigMonitorClient, extraHeaders map[string]string) SysdigMonitorClient {
