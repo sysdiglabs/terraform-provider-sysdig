@@ -3,6 +3,7 @@ package monitor
 import (
 	"context"
 	"crypto/tls"
+	"github.com/draios/terraform-provider-sysdig/sysdig/monitor/model"
 	"io"
 	"log"
 	"net/http"
@@ -26,9 +27,9 @@ type SysdigMonitorClient interface {
 	DeleteNotificationChannel(context.Context, int) error
 	UpdateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
 
-	GetDashboardByID(context.Context, int) (Dashboard, error)
-	CreateDashboard(context.Context, Dashboard) (Dashboard, error)
-	UpdateDashboard(context.Context, Dashboard) (Dashboard, error)
+	GetDashboardByID(context.Context, int) (*model.Dashboard, error)
+	CreateDashboard(context.Context, *model.Dashboard) (*model.Dashboard, error)
+	UpdateDashboard(context.Context, *model.Dashboard) (*model.Dashboard, error)
 	DeleteDashboard(context.Context, int) error
 }
 
