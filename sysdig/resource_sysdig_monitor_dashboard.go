@@ -2,8 +2,7 @@ package sysdig
 
 import (
 	"context"
-	"fmt"
-	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
+	"github.com/draios/terraform-provider-sysdig/sysdig/monitor/model"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -125,7 +124,7 @@ func resourceSysdigDashboardCreate(ctx context.Context, data *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	dashboardCreated, err := client.CreateDashboard(ctx, *dashboard)
+	dashboardCreated, err := client.CreateDashboard(ctx, dashboard)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -148,7 +147,7 @@ func resourceSysdigDashboardUpdate(ctx context.Context, data *schema.ResourceDat
 
 	dashboard.ID, _ = strconv.Atoi(data.Id())
 
-	_, err = client.UpdateDashboard(ctx, *dashboard)
+	_, err = client.UpdateDashboard(ctx, dashboard)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -174,7 +173,7 @@ func resourceSysdigDashboardRead(ctx context.Context, data *schema.ResourceData,
 		return nil
 	}
 
-	err = dashboardToResourceData(&dashboard, data)
+	err = dashboardToResourceData(dashboard, data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -201,142 +200,81 @@ func resourceSysdigDashboardDelete(ctx context.Context, data *schema.ResourceDat
 	return nil
 }
 
-func dashboardFromResourceData(data *schema.ResourceData) (dashboard *monitor.Dashboard, err error) {
-	dashboard = &monitor.Dashboard{
-		Name:        data.Get("name").(string),
-		Description: data.Get("description").(string),
-		Schema:      3,
-		Public:      data.Get("public").(bool),
-		PublicToken: data.Get("public_token").(string),
+func dashboardFromResourceData(data *schema.ResourceData) (dashboard *model.Dashboard, err error) {
+	dashboard = model.NewDashboard(data.Get("name").(string), data.Get("description").(string)).AsPublic(data.Get("public").(bool))
+
+	dashboard.PublicToken = data.Get("public_token").(string)
+
+	panels, err := panelsFromResourceData(data)
+	if err != nil {
+		return nil, err
 	}
 
-	for panelId, panelItr := range data.Get("panel").(*schema.Set).List() {
+	dashboard.AddPanels(panels...)
+	return dashboard, nil
+}
+
+func panelsFromResourceData(data *schema.ResourceData) (panels []*model.Panels, err error) {
+	for _, panelItr := range data.Get("panel").(*schema.Set).List() {
 		panelInfo := panelItr.(map[string]interface{})
 
-		var panelType string
+		var panelType model.PanelType
 		switch panelInfo["type"].(string) {
 		case "timechart":
-			panelType = "advancedTimechart"
+			panelType = model.PanelTypeTimechart
 		case "number":
-			panelType = "advancedNumber"
+			panelType = model.PanelTypeNumber
 		default:
 			panic("unreachable code")
 		}
 
-		panel := monitor.Panels{
-			ID:                     panelId + 1,
-			Name:                   panelInfo["name"].(string),
-			Description:            panelInfo["description"].(string),
-			Type:                   panelType,
-			AdvancedQueries:        dashboardFromResourceData_Queries(panelInfo, panelType),
-			ApplyScopeToAll:        false,
-			ApplySegmentationToAll: false,
-			AxesConfiguration: monitor.AxesConfiguration{
-				Bottom: monitor.Bottom{Enabled: true},
-				Left: monitor.Left{
-					Enabled:        true,
-					DisplayName:    nil,
-					Unit:           "auto",
-					DisplayFormat:  "auto",
-					Decimals:       "",
-					MinValue:       0,
-					MaxValue:       "",
-					MinInputFormat: "ns",
-					MaxInputFormat: "ns",
-					Scale:          "linear",
-				},
-				Right: monitor.Right{
-					Enabled:        true,
-					DisplayName:    nil,
-					Unit:           "auto",
-					DisplayFormat:  "auto",
-					Decimals:       "",
-					MinValue:       0,
-					MaxValue:       "",
-					MinInputFormat: "1",
-					MaxInputFormat: "1",
-					Scale:          "linear",
-				},
-			},
-			LegendConfiguration: monitor.LegendConfiguration{
-				Enabled:     true,
-				Position:    "right",
-				Layout:      "table",
-				ShowCurrent: true,
-				Width:       nil,
-				Height:      nil,
-			},
-			MarkdownSource:        nil,
-			PanelTitleVisible:     false,
-			TextAutosized:         false,
-			TransparentBackground: false,
-		}
-		if panel.Type == "advancedNumber" {
-			if len(panel.AdvancedQueries) > 1 {
-				return nil, fmt.Errorf("a panel of type 'number' can only contain one query")
-			}
-			panel.NumberThresholds.Values = []interface{}{} // These values must be not nil in case of type number
-			panel.NumberThresholds.Base.Severity = "none"
+		panel := model.NewPanel(panelInfo["name"].(string), panelInfo["description"].(string), panelType)
+
+		_, err = panel.WithLayout(panelInfo["pos_x"].(int), panelInfo["pos_y"].(int), panelInfo["width"].(int), panelInfo["height"].(int))
+		if err != nil {
+			return nil, err
 		}
 
-		dashboard.Panels = append(dashboard.Panels, panel)
+		queries := queriesFromResourceData(panelInfo, panel)
+		_, err = panel.AddQueries(queries...)
+		if err != nil {
+			return nil, err
+		}
 
-		dashboard.Layout = append(dashboard.Layout, monitor.Layout{
-			X:       panelInfo["pos_x"].(int),
-			Y:       panelInfo["pos_y"].(int),
-			W:       panelInfo["width"].(int),
-			H:       panelInfo["height"].(int),
-			PanelID: panelId + 1,
-		})
-
+		panels = append(panels, panel)
 	}
-
 	return
 }
 
-func dashboardFromResourceData_Queries(panelInfo map[string]interface{}, panelType string) (queries []monitor.AdvancedQueries) {
-	for queryID, queryItr := range panelInfo["query"].(*schema.Set).List() {
+func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Panels) (newQueries []*model.AdvancedQueries) {
+	for _, queryItr := range panelInfo["query"].(*schema.Set).List() {
 		queryInfo := queryItr.(map[string]interface{})
-		var queryFormat monitor.Format
+
+		promqlQuery := model.NewPromqlQuery(queryInfo["promql"].(string), panel)
+
 		switch queryInfo["unit"].(string) {
 		case "percent":
-			queryFormat = monitor.NewPercentFormat()
+			promqlQuery.WithPercentFormat()
 		case "data":
-			queryFormat = monitor.NewDataFormat()
+			promqlQuery.WithDataFormat()
 		case "data rate":
-			queryFormat = monitor.NewDataRateFormat()
+			promqlQuery.WithDataRateFormat()
 		case "number":
-			queryFormat = monitor.NewNumberFormat()
+			promqlQuery.WithNumberFormat()
 		case "number rate":
-			queryFormat = monitor.NewNumberRateFormat()
+			promqlQuery.WithNumberRateFormat()
 		case "time":
-			queryFormat = monitor.NewTimeFormat()
+			promqlQuery.WithTimeFormat()
 		default:
 			panic("unreachable code")
 		}
 
-		query := monitor.AdvancedQueries{
-			Query:   queryInfo["promql"].(string),
-			Enabled: true,
-			ID:      queryID + 1,
-			DisplayInfo: monitor.DisplayInfo{ // API expects this value to be set like this
-				DisplayName:                   "",
-				TimeSeriesDisplayNameTemplate: "",
-				Type:                          "lines",
-			},
-			Format: queryFormat,
-		}
-		if panelType == "advancedNumber" {
-			query.DisplayInfo.Color = "mixed"
-			query.DisplayInfo.LineWidth = 2
-		}
-		queries = append(queries, query)
+		newQueries = append(newQueries, promqlQuery)
 	}
-
 	return
 }
 
-func dashboardToResourceData(dashboard *monitor.Dashboard, data *schema.ResourceData) (err error) {
+func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceData) (err error) {
 	data.Set("name", dashboard.Name)
 	data.Set("description", dashboard.Description)
 	data.Set("public", dashboard.Public)
@@ -348,17 +286,17 @@ func dashboardToResourceData(dashboard *monitor.Dashboard, data *schema.Resource
 		for _, query := range panel.AdvancedQueries {
 			unit := ""
 			switch query.Format.Unit {
-			case "%":
+			case model.FormatUnitPercentage:
 				unit = "percent"
-			case "byte":
+			case model.FormatUnitData:
 				unit = "data"
-			case "byteRate":
+			case model.FormatUnitDataRate:
 				unit = "data rate"
-			case "number":
+			case model.FormatUnitNumber:
 				unit = "number"
-			case "numberRate":
+			case model.FormatUnitNumberRate:
 				unit = "number rate"
-			case "relativeTime":
+			case model.FormatUnitTime:
 				unit = "time"
 			default:
 				panic("unreachable code")
@@ -370,7 +308,7 @@ func dashboardToResourceData(dashboard *monitor.Dashboard, data *schema.Resource
 			})
 		}
 
-		var panelLayout monitor.Layout
+		var panelLayout *model.Layout
 
 		for _, layout := range dashboard.Layout {
 			if layout.PanelID == panel.ID {
@@ -380,9 +318,9 @@ func dashboardToResourceData(dashboard *monitor.Dashboard, data *schema.Resource
 
 		var panelType string
 		switch panel.Type {
-		case "advancedTimechart":
+		case model.PanelTypeTimechart:
 			panelType = "timechart"
-		case "advancedNumber":
+		case model.PanelTypeNumber:
 			panelType = "number"
 		default:
 			panic("unreachable code")
