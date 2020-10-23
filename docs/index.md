@@ -197,19 +197,17 @@ Creating two notification channels, one for the email and another one for slack 
 will alert us when the policy is triggered:
 
 ```hcl
-resource "sysdig_secure_notification_channel" "devops-email" {
+resource "sysdig_secure_notification_channel_email" "devops-email" {
   name                 = "DevOps e-mail"
   enabled              = true
-  type                 = "EMAIL"
   recipients           = "devops@example.com"
   notify_when_ok       = false
   notify_when_resolved = false
 }
 
-resource "sysdig_secure_notification_channel" "devops-slack" {
+resource "sysdig_secure_notification_channel_slack" "devops-slack" {
   name                 = "DevOps Slack"
   enabled              = true
-  type                 = "SLACK"
   url                  = "https://hooks.slack.com/services/32klj54h2/34hjkhhsd/wjkkrjwlqpfdirej4jrlwkjx"
   channel              = "#devops"
   notify_when_ok       = false
@@ -237,8 +235,8 @@ resource "sysdig_secure_policy" "terminal_shell_or_ssh_in_container" {
     }
   }
 
-  notification_channels = [sysdig_secure_notification_channel.devops-email.id,
-                           sysdig_secure_notification_channel.devops-slack.id]
+  notification_channels = [sysdig_secure_notification_channel_email.devops-email.id,
+                           sysdig_secure_notification_channel_slack.devops-slack.id]
 }
 ``` 
 
