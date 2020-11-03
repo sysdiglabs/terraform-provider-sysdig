@@ -148,7 +148,7 @@ type Details struct {
 	Syscalls *Syscalls `json:"syscalls,omitempty"`
 
 	// Falco
-	Append    bool       `json:"append,omitempty"`
+	Append    *bool      `json:"append,omitempty"`
 	Source    string     `json:"source,omitempty"`
 	Output    string     `json:"output,omitempty"`
 	Condition *Condition `json:"condition,omitempty"`
