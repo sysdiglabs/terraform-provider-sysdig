@@ -2,12 +2,14 @@ package sysdig_test
 
 import (
 	"fmt"
-	"github.com/draios/terraform-provider-sysdig/sysdig"
+	"os"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"os"
-	"testing"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
 func TestAccRuleFalco(t *testing.T) {
@@ -32,6 +34,9 @@ func TestAccRuleFalco(t *testing.T) {
 			},
 			{
 				Config: ruleFalcoUpdatedTerminalShell(ruleRandomImmutableText),
+			},
+			{
+				Config: ruleFalcoTerminalShellWithAppend(),
 			},
 			{
 				Config: ruleFalcoKubeAudit(rText()),
@@ -80,4 +85,19 @@ resource "sysdig_secure_rule_falco" "kube_audit" {
   priority = "debug"
   source = "k8s_audit" // syscall or k8s_audit
 }`, name, name)
+}
+
+func ruleFalcoTerminalShellWithAppend() string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "terminal_shell_append" {
+  name = "Terminal shell in container" # Sysdig-provided
+  description = ""
+  tags = ["shell", "mitre_execution"]
+
+  condition = "and spawned_process and shell_procs and proc.tty != 0 and container_entrypoint"
+  output = "A shell was spawned in a container with an attached terminal (user=%%user.name %%container.info shell=%%proc.name parent=%%proc.pname cmdline=%%proc.cmdline terminal=%%proc.tty container_id=%%container.id image=%%container.image.repository)"
+  priority = "notice"
+  source = "syscall" // syscall or k8s_audit
+  append = true
+}`)
 }

@@ -44,6 +44,7 @@ The following arguments are supported:
 * `output` - (Required) Add additional information to each Falco notification's output.
 * `priority` - (Required) The priority of the Falco rule. It can be: "emergency", "alert", "critical", "error", "warning", "notice", "informational", "informational" or "debug".
 * `source` - (Required) The source of the event. It can be either "syscall" or "k8s_audit".
+* `append` - (Optional) This indicates that the rule being created appends the condition to an existing Sysdig-provided rule. By default this is false. Appending to user-created rules is not supported by the API.
 
 ## Attributes Reference
 

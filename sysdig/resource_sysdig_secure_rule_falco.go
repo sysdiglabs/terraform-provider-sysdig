@@ -45,6 +45,11 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"syscall", "k8s_audit"}, false),
 			},
+			"append": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		}),
 	}
 }
@@ -95,6 +100,9 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 	d.Set("output", rule.Details.Output)
 	d.Set("priority", strings.ToLower(rule.Details.Priority))
 	d.Set("source", rule.Details.Source)
+	if rule.Details.Append != nil {
+		d.Set("append", *rule.Details.Append)
+	}
 
 	return nil
 }
@@ -140,13 +148,17 @@ func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) secure.Rule
 	rule := ruleFromResourceData(d)
 	rule.Details.RuleType = "FALCO"
 
-	rule.Details.Append = false
 	rule.Details.Source = d.Get("source").(string)
 	rule.Details.Output = d.Get("output").(string)
 	rule.Details.Priority = d.Get("priority").(string)
 	rule.Details.Condition = &secure.Condition{
 		Condition:  d.Get("condition").(string),
 		Components: []interface{}{},
+	}
+
+	if appendMode, ok := d.GetOk("append"); ok {
+		ptr := appendMode.(bool)
+		rule.Details.Append = &ptr
 	}
 
 	return rule
