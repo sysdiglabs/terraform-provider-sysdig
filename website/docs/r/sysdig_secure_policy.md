@@ -47,7 +47,7 @@ resource "sysdig_secure_policy" "write_apt_database" {
 * `description` - (Required) The description of Secure policy.
 
 * `severity` - (Optional) The severity of Secure policy. The accepted values
-    are: 0 (High), 4 (Medium), 6 (Low) and 7 (Info). The default value is 4 (Medium).
+    are: 0, 1, 2, 3 (High), 4, 5 (Medium), 6 (Low) and 7 (Info). The default value is 4 (Medium).
 
 * `enabled` - (Optional) Will secure process with this rule?. By default this is true.
 
