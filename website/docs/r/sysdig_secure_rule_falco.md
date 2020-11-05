@@ -33,7 +33,7 @@ resource "sysdig_secure_rule_falco" "example" {
 The following arguments are supported:
 
 * `name` - (Required) The name of the Secure rule. It must be unique.
-* `description` - (Required) The description of Secure rule.
+* `description` - (Optional) The description of Secure rule. By default is empty.
 * `tags` - (Optional) A list of tags for this rule.
 
 - - -
@@ -41,9 +41,9 @@ The following arguments are supported:
 ### Conditions
 
 * `condition` - (Required) A [Falco condition](https://falco.org/docs/rules/) is simply a Boolean predicate on Sysdig events expressed using the Sysdig [filter syntax](http://www.sysdig.org/wiki/sysdig-user-guide/#filtering) and macro terms. 
-* `output` - (Required) Add additional information to each Falco notification's output.
-* `priority` - (Required) The priority of the Falco rule. It can be: "emergency", "alert", "critical", "error", "warning", "notice", "informational", "informational" or "debug".
-* `source` - (Required) The source of the event. It can be either "syscall" or "k8s_audit".
+* `output` - (Optional) Add additional information to each Falco notification's output. Required if append is false.
+* `priority` - (Optional) The priority of the Falco rule. It can be: "emergency", "alert", "critical", "error", "warning", "notice", "informational", "informational" or "debug". By default is "warning".
+* `source` - (Optional) The source of the event. It can be either "syscall" or "k8s_audit". Required if append is false.
 * `append` - (Optional) This indicates that the rule being created appends the condition to an existing Sysdig-provided rule. By default this is false. Appending to user-created rules is not supported by the API.
 
 ## Attributes Reference

@@ -38,7 +38,7 @@ resource "sysdig_secure_rule_filesystem"  "example" {
 The following arguments are supported:
 
 * `name` - (Required) The name of the Secure rule. It must be unique.
-* `description` - (Required) The description of Secure rule.
+* `description` - (Optional) The description of Secure rule. By default is empty.
 * `tags` - (Optional) A list of tags for this rule.
 
 ### Read Only
