@@ -51,10 +51,10 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 				Required: true,
 			},
 			"severity": {
-				Type:         schema.TypeInt,
-				Default:      4,
-				Optional:     true,
-				ValidateDiagFunc: validateDiagFunc(validation.IntBetween(0,7)),
+				Type:             schema.TypeInt,
+				Default:          4,
+				Optional:         true,
+				ValidateDiagFunc: validateDiagFunc(validation.IntBetween(0, 7)),
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
@@ -100,13 +100,13 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"seconds_after_event": {
-										Type:         schema.TypeInt,
-										Required:     true,
+										Type:             schema.TypeInt,
+										Required:         true,
 										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
 									},
 									"seconds_before_event": {
-										Type:         schema.TypeInt,
-										Required:     true,
+										Type:             schema.TypeInt,
+										Required:         true,
 										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
 									},
 								},
