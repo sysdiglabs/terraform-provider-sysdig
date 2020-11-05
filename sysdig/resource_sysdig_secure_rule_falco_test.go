@@ -3,6 +3,7 @@ package sysdig_test
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -41,11 +42,46 @@ func TestAccRuleFalco(t *testing.T) {
 			{
 				Config: ruleFalcoKubeAudit(rText()),
 			},
+			// Incorrect configurations
+			{
+				Config:      ruleFalcoTerminalShellWithMissingOuput(rText()),
+				ExpectError: regexp.MustCompile("output must be set when append = false"),
+			},
+			{
+				Config:      ruleFalcoTerminalShellWithMissingSource(rText()),
+				ExpectError: regexp.MustCompile("source must be set when append = false"),
+			},
 		},
 	})
 }
 
 func ruleFalcoTerminalShell(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "terminal_shell" {
+  name = "TERRAFORM TEST %s - Terminal Shell"
+  tags = ["container", "shell", "mitre_execution"]
+
+  condition = "spawned_process and container and shell_procs and proc.tty != 0 and container_entrypoint"
+  output = "A shell was spawned in a container with an attached terminal (user=%%user.name %%container.info shell=%%proc.name parent=%%proc.pname cmdline=%%proc.cmdline terminal=%%proc.tty container_id=%%container.id image=%%container.image.repository)"
+  priority = "notice"
+  source = "syscall" // syscall or k8s_audit
+}`, name)
+}
+
+func ruleFalcoTerminalShellWithMissingOuput(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "terminal_shell" {
+  name = "TERRAFORM TEST %s - Terminal Shell"
+  description = "TERRAFORM TEST %s"
+  tags = ["container", "shell", "mitre_execution"]
+
+  condition = "spawned_process and container and shell_procs and proc.tty != 0 and container_entrypoint"
+  priority = "notice"
+  source = "syscall" // syscall or k8s_audit
+}`, name, name)
+}
+
+func ruleFalcoTerminalShellWithMissingSource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "terminal_shell" {
   name = "TERRAFORM TEST %s - Terminal Shell"
@@ -55,7 +91,7 @@ resource "sysdig_secure_rule_falco" "terminal_shell" {
   condition = "spawned_process and container and shell_procs and proc.tty != 0 and container_entrypoint"
   output = "A shell was spawned in a container with an attached terminal (user=%%user.name %%container.info shell=%%proc.name parent=%%proc.pname cmdline=%%proc.cmdline terminal=%%proc.tty container_id=%%container.id image=%%container.image.repository)"
   priority = "notice"
-  source = "syscall" // syscall or k8s_audit
+  append = false
 }`, name, name)
 }
 
@@ -91,13 +127,7 @@ func ruleFalcoTerminalShellWithAppend() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "terminal_shell_append" {
   name = "Terminal shell in container" # Sysdig-provided
-  description = ""
-  tags = ["shell", "mitre_execution"]
-
   condition = "and spawned_process and shell_procs and proc.tty != 0 and container_entrypoint"
-  output = "A shell was spawned in a container with an attached terminal (user=%%user.name %%container.info shell=%%proc.name parent=%%proc.pname cmdline=%%proc.cmdline terminal=%%proc.tty container_id=%%container.id image=%%container.image.repository)"
-  priority = "notice"
-  source = "syscall" // syscall or k8s_audit
   append = true
 }`)
 }

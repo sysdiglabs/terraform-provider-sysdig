@@ -16,7 +16,8 @@ func createRuleSchema(original map[string]*schema.Schema) map[string]*schema.Sch
 		},
 		"description": {
 			Type:     schema.TypeString,
-			Required: true,
+			Optional: true,
+			Default:  "",
 		},
 		"tags": {
 			Type:     schema.TypeList,

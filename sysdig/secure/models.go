@@ -150,7 +150,7 @@ type Details struct {
 	// Falco
 	Append    *bool      `json:"append,omitempty"`
 	Source    string     `json:"source,omitempty"`
-	Output    string     `json:"output,omitempty"`
+	Output    string     `json:"output"`
 	Condition *Condition `json:"condition,omitempty"`
 	Priority  string     `json:"priority,omitempty"`
 
