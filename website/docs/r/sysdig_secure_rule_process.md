@@ -28,7 +28,7 @@ resource "sysdig_secure_rule_process" "sample" {
 ## Argument Reference
 
 * `name` - (Required) The name of the Secure rule. It must be unique.
-* `description` - (Required) The description of Secure rule.
+* `description` - (Optional) The description of Secure rule. By default is empty.
 * `tags` - (Optional) A list of tags for this rule.
 
 ### Matching
