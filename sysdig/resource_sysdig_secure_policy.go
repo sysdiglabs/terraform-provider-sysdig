@@ -92,7 +92,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 						"container": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"stop", "pause"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"stop", "pause", "kill"}, false),
 						},
 						"capture": {
 							Type:     schema.TypeList,

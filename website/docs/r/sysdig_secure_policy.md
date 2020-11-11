@@ -66,7 +66,8 @@ resource "sysdig_secure_policy" "write_apt_database" {
 The actions block is optional and supports:
 
 * `container` - (Optional) The action applied to container when this Policy is
-    triggered. Can be *stop* or *pause*.
+    triggered. Can be *stop*, *pause* or *kill*. If this is not specified,
+    no action will be applied at the container level.
 
 * `capture` - (Optional) Captures with Sysdig the stream of system calls:
     * `seconds_before_event` - (Required) Captures the system calls during the

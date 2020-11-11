@@ -40,6 +40,9 @@ func TestAccPolicy(t *testing.T) {
 			{
 				Config: policiesWithDifferentSeverities(rText()),
 			},
+			{
+				Config: policiesWithKillAction(rText()),
+			},
 		},
 	})
 }
@@ -131,4 +134,21 @@ resource "sysdig_secure_policy" "sample_%d" {
 `, i, name, i, name, i, i)
 	}
 	return
+}
+
+func policiesWithKillAction(name string) (res string) {
+	return fmt.Sprintf(`
+resource "sysdig_secure_policy" "sample" {
+  name = "TERRAFORM TEST 1 %s"
+  description = "TERRAFORM TEST %s"
+  enabled = true
+  severity = 4
+  scope = "container.id != \"\""
+  rule_names = ["Terminal shell in container"]
+
+  actions {
+    container = "kill"
+  }
+}
+`, name, name)
 }
