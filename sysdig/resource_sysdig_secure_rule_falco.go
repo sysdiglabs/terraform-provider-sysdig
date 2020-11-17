@@ -41,7 +41,7 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Default:          "warning",
-				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"emergency", "alert", "critical", "error", "warning", "notice", "informational", "debug"}, false)),
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"}, false)),
 			},
 			"source": {
 				Type:             schema.TypeString,
