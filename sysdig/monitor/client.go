@@ -75,6 +75,10 @@ func (client *sysdigMonitorClient) doSysdigMonitorRequest(ctx context.Context, m
 	log.Printf("[DEBUG] %s", string(out))
 
 	response, err := client.httpClient.Do(request)
+	if err != nil {
+		log.Println(err.Error())
+		return response, err
+	}
 
 	out, _ = httputil.DumpResponse(response, true)
 	log.Printf("[DEBUG] %s", string(out))

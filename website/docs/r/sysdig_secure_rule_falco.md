@@ -42,7 +42,7 @@ The following arguments are supported:
 
 * `condition` - (Required) A [Falco condition](https://falco.org/docs/rules/) is simply a Boolean predicate on Sysdig events expressed using the Sysdig [filter syntax](http://www.sysdig.org/wiki/sysdig-user-guide/#filtering) and macro terms. 
 * `output` - (Optional) Add additional information to each Falco notification's output. Required if append is false.
-* `priority` - (Optional) The priority of the Falco rule. It can be: "emergency", "alert", "critical", "error", "warning", "notice", "informational", "informational" or "debug". By default is "warning".
+* `priority` - (Optional) The priority of the Falco rule. It can be: "emergency", "alert", "critical", "error", "warning", "notice", "info" or "debug". By default is "warning".
 * `source` - (Optional) The source of the event. It can be either "syscall" or "k8s_audit". Required if append is false.
 * `append` - (Optional) This indicates that the rule being created appends the condition to an existing Sysdig-provided rule. By default this is false. Appending to user-created rules is not supported by the API.
 
