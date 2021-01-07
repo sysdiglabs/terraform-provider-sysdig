@@ -41,3 +41,11 @@ resource "sysdig_monitor_notification_channel_sns" "sample-amazon-sns" {
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
+  
+## Import
+
+Amazon SNS notification channels for Monitor can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_monitor_notification_channel_sns.example 12345
+```

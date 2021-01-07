@@ -32,3 +32,11 @@ resource "sysdig_secure_list" "allowed_dev_files" {
 * `append` - (Optional)  Adds these elements to an existing list. Used to extend existing lists provided by Sysdig.
     The rules can only be extended once, for example if there is an existing list called "foo", one can have another 
     append rule called "foo" but not a second one. By default this is false.
+
+## Import
+
+Secure lists can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_secure_list.example 12345
+```

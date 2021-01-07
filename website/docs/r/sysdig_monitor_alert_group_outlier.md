@@ -69,3 +69,12 @@ alerts in Sysdig Monitor:
 
 * `version` - Current version of the resource in Sysdig Monitor.
 * `team` - Team ID that owns the alert.
+
+
+## Import
+
+Group Outlier Monitor alerts can be imported using the alert ID, e.g.
+
+```
+$ terraform import sysdig_monitor_alert_group_outlier.example 12345
+```

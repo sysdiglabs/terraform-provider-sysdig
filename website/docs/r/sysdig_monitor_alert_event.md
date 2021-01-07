@@ -75,3 +75,12 @@ alerts in Sysdig Monitor:
 
 * `version` - Current version of the resource in Sysdig Monitor.
 * `team` - Team ID that owns the alert.
+
+
+## Import
+
+Event Monitor alerts can be imported using the alert ID, e.g.
+
+```
+$ terraform import sysdig_monitor_alert_event.example 12345
+```

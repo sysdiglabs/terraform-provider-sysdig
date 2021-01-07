@@ -47,3 +47,11 @@ resource "sysdig_monitor_notification_channel_pagerduty" "sample-pagerduty" {
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
+
+## Import
+
+Pagerduty notification channels for Monitor can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_monitor_notification_channel_pagerduty.example 12345
+```

@@ -65,3 +65,11 @@ data "sysdig_current_user" "me" {
 * `role` - (Optional) The role for the user in this group.
            Valid roles are: ROLE_TEAM_STANDARD, ROLE_TEAM_EDIT, ROLE_TEAM_READ, ROLE_TEAM_MANAGER.
            Default: ROLE_TEAM_STANDARD.
+
+## Import
+
+Secure Teams can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_secure_team.example 12345
+```

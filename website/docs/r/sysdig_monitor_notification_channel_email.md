@@ -42,3 +42,11 @@ resource "sysdig_monitor_notification_channel_email" "sample_email" {
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
+
+## Import
+
+Email notification channels for Monitor can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_monitor_notification_channel_email.example 12345
+```

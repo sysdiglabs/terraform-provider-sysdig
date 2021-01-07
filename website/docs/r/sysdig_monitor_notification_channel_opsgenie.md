@@ -40,3 +40,11 @@ resource "sysdig_monitor_notification_channel_opsgenie" "sample-opsgenie" {
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
+
+## Import
+
+Opsgenie notification channels for Monitor can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_monitor_notification_channel_opsgenie.example 12345
+```
