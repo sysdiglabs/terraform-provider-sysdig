@@ -34,6 +34,11 @@ func TestAccAlertMetric(t *testing.T) {
 			{
 				Config: alertMetricWithNotificationChannel(rText()),
 			},
+			{
+				ResourceName:      "sysdig_secure_notification_channel_pagerduty.sample-pagerduty",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

@@ -28,6 +28,11 @@ func TestAccAlertEvent(t *testing.T) {
 			{
 				Config: alertEventWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_alert_event.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

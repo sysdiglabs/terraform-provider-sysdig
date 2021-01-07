@@ -18,6 +18,9 @@ func resourceSysdigSecureList() *schema.Resource {
 		UpdateContext: resourceSysdigListUpdate,
 		ReadContext:   resourceSysdigListRead,
 		DeleteContext: resourceSysdigListDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

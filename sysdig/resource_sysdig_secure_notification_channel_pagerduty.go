@@ -19,6 +19,9 @@ func resourceSysdigSecureNotificationChannelPagerduty() *schema.Resource {
 		UpdateContext: resourceSysdigSecureNotificationChannelPagerdutyUpdate,
 		ReadContext:   resourceSysdigSecureNotificationChannelPagerdutyRead,
 		DeleteContext: resourceSysdigSecureNotificationChannelPagerdutyDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

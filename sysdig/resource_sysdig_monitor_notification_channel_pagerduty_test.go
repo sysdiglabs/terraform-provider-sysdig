@@ -29,6 +29,11 @@ func TestAccMonitorNotificationChannelPagerduty(t *testing.T) {
 			{
 				Config: monitorNotificationChannelPagerdutyWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_notification_channel_pagerduty.sample-pagerduty",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

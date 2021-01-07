@@ -32,6 +32,11 @@ func TestAccRuleProcess(t *testing.T) {
 				Config: ruleProcessWithoutTags(rText()),
 			},
 			{
+				ResourceName:      "sysdig_secure_rule_process.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: ruleProcessWithMinimalConfig(rText()),
 			},
 		},

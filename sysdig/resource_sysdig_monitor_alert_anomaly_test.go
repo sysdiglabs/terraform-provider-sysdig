@@ -28,6 +28,11 @@ func TestAccAlertAnomaly(t *testing.T) {
 			{
 				Config: alertAnomalyWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_alert_anomaly.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

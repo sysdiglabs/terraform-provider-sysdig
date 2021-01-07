@@ -39,6 +39,11 @@ func TestAccUser(t *testing.T) {
 			{
 				Config: userMinimumConfiguration(),
 			},
+			{
+				ResourceName:      "sysdig_user.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

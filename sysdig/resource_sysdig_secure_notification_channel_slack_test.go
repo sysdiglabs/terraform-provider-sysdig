@@ -29,6 +29,11 @@ func TestAccSecureNotificationChannelSlack(t *testing.T) {
 			{
 				Config: secureNotificationChannelSlackWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_secure_notification_channel_slack.sample-slack",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

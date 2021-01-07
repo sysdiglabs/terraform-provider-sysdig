@@ -37,10 +37,25 @@ func TestAccRuleFalco(t *testing.T) {
 				Config: ruleFalcoUpdatedTerminalShell(ruleRandomImmutableText),
 			},
 			{
+				ResourceName:      "sysdig_secure_rule_falco.terminal_shell",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: ruleFalcoTerminalShellWithAppend(),
 			},
 			{
+				ResourceName:      "sysdig_secure_rule_falco.terminal_shell_append",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: ruleFalcoKubeAudit(rText()),
+			},
+			{
+				ResourceName:      "sysdig_secure_rule_falco.kube_audit",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			// Incorrect configurations
 			{

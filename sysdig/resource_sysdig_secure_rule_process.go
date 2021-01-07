@@ -19,6 +19,9 @@ func resourceSysdigSecureRuleProcess() *schema.Resource {
 		UpdateContext: resourceSysdigRuleProcessUpdate,
 		ReadContext:   resourceSysdigRuleProcessRead,
 		DeleteContext: resourceSysdigRuleProcessDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

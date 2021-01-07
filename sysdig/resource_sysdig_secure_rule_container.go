@@ -19,6 +19,9 @@ func resourceSysdigSecureRuleContainer() *schema.Resource {
 		UpdateContext: resourceSysdigRuleContainerUpdate,
 		ReadContext:   resourceSysdigRuleContainerRead,
 		DeleteContext: resourceSysdigRuleContainerDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

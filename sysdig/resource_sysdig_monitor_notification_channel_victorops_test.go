@@ -31,6 +31,11 @@ func TestAccMonitorNotificationChannelVictorOps(t *testing.T) {
 			{
 				Config: monitorNotificationChannelVictorOpsWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_notification_channel_victorops.sample-victorops",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

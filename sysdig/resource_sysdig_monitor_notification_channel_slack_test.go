@@ -29,6 +29,11 @@ func TestAccMonitorNotificationChannelSlack(t *testing.T) {
 			{
 				Config: monitorNotificationChannelSlackWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_notification_channel_slack.sample-slack",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

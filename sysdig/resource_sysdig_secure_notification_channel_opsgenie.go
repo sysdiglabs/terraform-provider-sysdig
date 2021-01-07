@@ -21,6 +21,9 @@ func resourceSysdigSecureNotificationChannelOpsGenie() *schema.Resource {
 		UpdateContext: resourceSysdigSecureNotificationChannelOpsGenieUpdate,
 		ReadContext:   resourceSysdigSecureNotificationChannelOpsGenieRead,
 		DeleteContext: resourceSysdigSecureNotificationChannelOpsGenieDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

@@ -29,6 +29,11 @@ func TestAccRuleContainer(t *testing.T) {
 				Config: ruleContainerWithName(rText()),
 			},
 			{
+				ResourceName:      "sysdig_secure_rule_container.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: ruleContainerWithNameWithoutTags(rText()),
 			},
 			{

@@ -22,6 +22,9 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 		UpdateContext: resourceSysdigRuleFalcoUpdate,
 		ReadContext:   resourceSysdigRuleFalcoRead,
 		DeleteContext: resourceSysdigRuleFalcoDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

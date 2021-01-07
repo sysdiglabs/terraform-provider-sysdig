@@ -29,6 +29,11 @@ func TestAccRuleSyscall(t *testing.T) {
 				Config: ruleSyscallWithName(rText()),
 			},
 			{
+				ResourceName:      "sysdig_secure_rule_syscall.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: ruleSyscallWithoutTags(rText()),
 			},
 			{

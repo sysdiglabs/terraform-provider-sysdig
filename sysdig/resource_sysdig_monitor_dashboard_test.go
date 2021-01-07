@@ -34,6 +34,11 @@ func TestAccDashboard(t *testing.T) {
 			{
 				Config: multiplePanelsDashboard(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_dashboard.dashboard",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

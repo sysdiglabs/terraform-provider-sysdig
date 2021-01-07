@@ -29,6 +29,11 @@ func TestAccMonitorNotificationChannelWebhook(t *testing.T) {
 			{
 				Config: monitorNotificationChannelWebhookWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_notification_channel_webhook.sample-webhook",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

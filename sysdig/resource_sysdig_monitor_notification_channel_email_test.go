@@ -33,6 +33,11 @@ func TestAccMonitorNotificationChannelEmail(t *testing.T) {
 			{
 				Config: monitorNotificationChannelEmailWithNameInReverseOrder(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_notification_channel_email.sample_email",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

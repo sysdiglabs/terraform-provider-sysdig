@@ -18,6 +18,9 @@ func resourceSysdigSecureTeam() *schema.Resource {
 		UpdateContext: resourceSysdigSecureTeamUpdate,
 		ReadContext:   resourceSysdigSecureTeamRead,
 		DeleteContext: resourceSysdigSecureTeamDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

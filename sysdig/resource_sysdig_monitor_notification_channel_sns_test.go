@@ -31,6 +31,11 @@ func TestAccMonitorNotificationChannelSNS(t *testing.T) {
 			{
 				Config: monitorNotificationChannelAmazonSNSWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_notification_channel_sns.sample-amazon-sns",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
