@@ -139,6 +139,7 @@ func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err e
 	data.Set("trigger_after_minutes", int(trigger_after_minutes.Minutes()))
 	data.Set("team", alert.TeamID)
 	data.Set("enabled", alert.Enabled)
+	data.Set("severity", alert.Severity)
 
 	if len(alert.NotificationChannelIds) > 0 {
 		data.Set("notification_channels", alert.NotificationChannelIds)
