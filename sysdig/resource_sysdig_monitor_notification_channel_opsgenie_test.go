@@ -31,6 +31,11 @@ func TestAccMonitorNotificationChannelOpsGenie(t *testing.T) {
 			{
 				Config: monitorNotificationChannelOpsGenieWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_notification_channel_opsgenie.sample-opsgenie",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

@@ -38,6 +38,11 @@ func TestAccRuleNetwork(t *testing.T) {
 				Config: ruleNetworkWithUDP(rText()),
 			},
 			{
+				ResourceName:      "sysdig_secure_rule_network.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: ruleNetworkWithMinimalConfig(rText()),
 			},
 		},

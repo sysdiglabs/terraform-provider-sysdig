@@ -19,6 +19,9 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 		UpdateContext: resourceSysdigRuleNetworkUpdate,
 		ReadContext:   resourceSysdigRuleNetworkRead,
 		DeleteContext: resourceSysdigRuleNetworkDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

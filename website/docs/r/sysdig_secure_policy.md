@@ -87,3 +87,11 @@ The actions block is optional and supports:
 
 * `notification_channels` - (Optional) IDs of the notification channels to send alerts to
     when the policy is fired.
+
+## Import
+
+Secure runtime policies can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_secure_policy.example 12345
+```

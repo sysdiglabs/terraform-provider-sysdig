@@ -31,6 +31,11 @@ func TestAccSecureNotificationChannelOpsGenie(t *testing.T) {
 			{
 				Config: secureNotificationChannelOpsGenieWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_secure_notification_channel_opsgenie.sample-opsgenie",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

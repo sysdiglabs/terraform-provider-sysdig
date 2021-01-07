@@ -34,6 +34,11 @@ func TestAccMonitorTeam(t *testing.T) {
 			{
 				Config: monitorTeamWithFullConfig(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_team.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

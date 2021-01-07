@@ -36,3 +36,11 @@ resource "sysdig_secure_macro" "https_port" {
 * `append` - (Optional)  Adds these elements to an existing macro. Used to extend existing macros provided by Sysdig.
     The macros can only be extended once, for example if there is an existing macro called "foo", one can have another 
     append macro called "foo" but not a second one. By default this is false.
+
+## Import
+
+Secure macros can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_secure_macro.example 12345
+```

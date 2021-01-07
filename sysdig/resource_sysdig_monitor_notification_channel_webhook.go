@@ -19,6 +19,9 @@ func resourceSysdigMonitorNotificationChannelWebhook() *schema.Resource {
 		UpdateContext: resourceSysdigMonitorNotificationChannelWebhookUpdate,
 		ReadContext:   resourceSysdigMonitorNotificationChannelWebhookRead,
 		DeleteContext: resourceSysdigMonitorNotificationChannelWebhookDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

@@ -112,3 +112,11 @@ In addition to all arguments above, the following attributes are exported:
 * `public_token` - (Computed) Token defined when the dashboard is set Public.
 
 * `version` - (Computed)  The current version of the Dashboard.
+
+## Import
+
+Monitor dashboards can be imported using the dashboard ID, e.g.
+
+```
+$ terraform import sysdig_monitor_dashboard.example 12345
+```

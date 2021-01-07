@@ -32,6 +32,11 @@ func TestAccSecureNotificationChannelEmail(t *testing.T) {
 				Config: secureNotificationChannelEmailWithName(rText()),
 			},
 			{
+				ResourceName:      "sysdig_secure_notification_channel_email.sample_email",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: secureNotificationChannelEmailWithNameInReverseOrder(rText()),
 			},
 		},

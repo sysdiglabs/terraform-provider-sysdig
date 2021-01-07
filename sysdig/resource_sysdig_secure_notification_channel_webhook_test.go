@@ -29,6 +29,11 @@ func TestAccSecureNotificationChannelWebhook(t *testing.T) {
 			{
 				Config: secureNotificationChannelWebhookWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_secure_notification_channel_webhook.sample-webhook",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

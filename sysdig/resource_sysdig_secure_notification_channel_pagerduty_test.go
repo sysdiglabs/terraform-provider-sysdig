@@ -29,6 +29,11 @@ func TestAccSecureNotificationChannelPagerduty(t *testing.T) {
 			{
 				Config: secureNotificationChannelPagerdutyWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_secure_notification_channel_pagerduty.sample-pagerduty",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

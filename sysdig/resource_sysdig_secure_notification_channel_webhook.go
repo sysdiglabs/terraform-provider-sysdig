@@ -19,6 +19,9 @@ func resourceSysdigSecureNotificationChannelWebhook() *schema.Resource {
 		UpdateContext: resourceSysdigSecureNotificationChannelWebhookUpdate,
 		ReadContext:   resourceSysdigSecureNotificationChannelWebhookRead,
 		DeleteContext: resourceSysdigSecureNotificationChannelWebhookDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

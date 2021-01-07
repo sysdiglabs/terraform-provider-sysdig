@@ -29,6 +29,11 @@ func TestAccPolicy(t *testing.T) {
 				Config: policyWithName(rText()),
 			},
 			{
+				ResourceName:      "sysdig_secure_policy.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: policyWithoutActions(rText()),
 			},
 			{

@@ -17,6 +17,9 @@ func resourceSysdigSecureMacro() *schema.Resource {
 		UpdateContext: resourceSysdigMacroUpdate,
 		ReadContext:   resourceSysdigMacroRead,
 		DeleteContext: resourceSysdigMacroDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

@@ -19,6 +19,9 @@ func resourceSysdigSecureRuleFilesystem() *schema.Resource {
 		UpdateContext: resourceSysdigRuleFilesystemUpdate,
 		ReadContext:   resourceSysdigRuleFilesystemRead,
 		DeleteContext: resourceSysdigRuleFilesystemDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

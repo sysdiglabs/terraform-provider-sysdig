@@ -18,6 +18,9 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 		UpdateContext: resourceSysdigMonitorTeamUpdate,
 		ReadContext:   resourceSysdigMonitorTeamRead,
 		DeleteContext: resourceSysdigMonitorTeamDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

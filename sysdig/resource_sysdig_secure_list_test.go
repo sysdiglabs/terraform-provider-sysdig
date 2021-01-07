@@ -36,6 +36,11 @@ func TestAccList(t *testing.T) {
 				Config: listUpdatedWithName(fixedRandomText),
 			},
 			{
+				ResourceName:      "sysdig_secure_list.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: listAppendToDefault(),
 			},
 			{

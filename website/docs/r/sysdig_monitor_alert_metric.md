@@ -74,3 +74,12 @@ alerts in Sysdig Monitor:
 
 * `version` - Current version of the resource in Sysdig Monitor.
 * `team` - Team ID that owns the alert.
+
+
+## Import
+
+Metric Monitor alerts can be imported using the alert ID, e.g.
+
+```
+$ terraform import sysdig_monitor_alert_metric.example 12345
+```

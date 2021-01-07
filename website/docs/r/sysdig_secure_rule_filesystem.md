@@ -56,3 +56,11 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `version` - Current version of the resource in Sysdig Secure.
+
+## Import
+
+Secure filesystem runtime rules can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_secure_rule_filesystem.example 12345
+```

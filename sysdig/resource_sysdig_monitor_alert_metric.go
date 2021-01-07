@@ -17,6 +17,9 @@ func resourceSysdigMonitorAlertMetric() *schema.Resource {
 		UpdateContext: resourceSysdigAlertMetricUpdate,
 		ReadContext:   resourceSysdigAlertMetricRead,
 		DeleteContext: resourceSysdigAlertMetricDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

@@ -20,6 +20,9 @@ func resourceSysdigMonitorNotificationChannelSNS() *schema.Resource {
 		UpdateContext: resourceSysdigMonitorNotificationChannelSNSUpdate,
 		ReadContext:   resourceSysdigMonitorNotificationChannelSNSRead,
 		DeleteContext: resourceSysdigMonitorNotificationChannelSNSDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

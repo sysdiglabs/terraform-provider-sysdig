@@ -28,6 +28,11 @@ func TestAccAlertDowntime(t *testing.T) {
 			{
 				Config: alertDowntimeWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_alert_downtime.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

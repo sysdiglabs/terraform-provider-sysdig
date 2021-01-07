@@ -18,6 +18,9 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 		UpdateContext: resourceSysdigDashboardUpdate,
 		ReadContext:   resourceSysdigDashboardRead,
 		DeleteContext: resourceSysdigDashboardDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
