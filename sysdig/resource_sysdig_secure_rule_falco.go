@@ -26,7 +26,7 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
 			Update: schema.DefaultTimeout(timeout),
-			Read: schema.DefaultTimeout(timeout),
+			Read:   schema.DefaultTimeout(timeout),
 			Delete: schema.DefaultTimeout(timeout),
 		},
 
