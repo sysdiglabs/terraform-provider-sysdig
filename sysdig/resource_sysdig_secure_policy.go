@@ -214,6 +214,7 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 	d.Set("scope", policy.Scope)
 	d.Set("enabled", policy.Enabled)
 	d.Set("version", policy.Version)
+	d.Set("severity", policy.Severity)
 
 	actions := []map[string]interface{}{{}}
 	for _, action := range policy.Actions {

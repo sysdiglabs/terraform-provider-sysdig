@@ -46,7 +46,7 @@ resource "sysdig_secure_rule_process" "foo" {
   tags = ["container", "cis"]
 
   matching = true // default
-  processes = ["bash"]
+  processes = ["bash", "sh"]
 }`, name, name)
 }
 
@@ -57,7 +57,7 @@ resource "sysdig_secure_rule_process" "foo" {
   description = "TERRAFORM TEST %s"
 
   matching = true // default
-  processes = ["bash"]
+  processes = ["bash", "sh"]
 }`, name, name)
 }
 
