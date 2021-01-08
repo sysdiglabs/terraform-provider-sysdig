@@ -10,6 +10,8 @@ import (
 type CustomNotification struct {
 	TitleTemplate  string `json:"titleTemplate"`
 	UseNewTemplate bool   `json:"useNewTemplate"`
+	PrependText    string `json:"prependText,omitempty"`
+	AppendText     string `json:"appendText,omitempty"`
 }
 
 type SysdigCapture struct {

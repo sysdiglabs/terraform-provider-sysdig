@@ -57,6 +57,12 @@ resource "sysdig_monitor_alert_anomaly" "sample" {
 		filename = "TERRAFORM_TEST.scap"
 		duration = 15
 	}
+
+	custom_notification {
+		title = "{{__alert_name__}} is {{__alert_status__}}"
+		prepend = "{{kubernetes.deployment.name}}"
+		append = "{{kubernetes.deployment.name}}"
+	}
 }
 `, name, name)
 }

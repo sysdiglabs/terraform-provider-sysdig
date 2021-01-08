@@ -48,9 +48,10 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Defaults to true.
 * `notification_channels` - (Optional) List of notification channel IDs where an alert must be sent to once fired.
 * `renotification_minutes` - (Optional) Number of minutes for the alert to re-notify until the status is solved.
- 
+* `capture` - (Optional) Enables the creation of a capture file of the syscalls during the event.
+* `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
 
-#### Capture
+### `capture`
 
 Enables the creation of a capture file of the syscalls during the event.
 
@@ -58,7 +59,16 @@ Enables the creation of a capture file of the syscalls during the event.
 * `duration` - (Required) Time frame in seconds of the capture.
 * `filter` - (Optional) Additional filter to apply to the capture. For example: `proc.name contains nginx`.
 
-### Metric alert arguments
+### `custom_notification`
+
+By defining this field, the user can modify the title and the body of the message sent when the alert
+is fired.
+
+* `title` - (Required) Sets the title of the alert. It is commonly defined as `{{__alert_name__}} is {{__alert_status__}}`.
+* `prepend` - (Optional) Text to add before the alert template.
+* `append` - (Optional) Text to add after the alert template.
+
+### Event alert arguments
 
 * `event_name` - (Required) String that matches part of name, tag or the description of Sysdig Events.
 * `source` - (Required) Source of the event. It can be `docker` or `kubernetes`. 
