@@ -1,8 +1,9 @@
 package sysdig
 
 import (
-	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 // Creates a rule with the default schema that a Secure Rule should have,

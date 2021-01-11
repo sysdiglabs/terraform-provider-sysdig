@@ -2,11 +2,13 @@ package sysdig
 
 import (
 	"errors"
-	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"regexp"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 const defaultAlertTitle = "{{__alert_name__}} is {{__alert_status__}}"

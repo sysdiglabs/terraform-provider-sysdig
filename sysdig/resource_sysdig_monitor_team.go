@@ -2,12 +2,14 @@ package sysdig
 
 import (
 	"context"
-	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
+	"strconv"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"strconv"
-	"time"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorTeam() *schema.Resource {

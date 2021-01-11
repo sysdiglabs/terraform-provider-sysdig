@@ -3,7 +3,7 @@ package sysdig
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func createMonitorNotificationChannelSchema(original map[string]*schema.Schema) map[string]*schema.Schema {

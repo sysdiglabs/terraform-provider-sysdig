@@ -3,11 +3,13 @@ package sysdig
 import (
 	"context"
 	"fmt"
-	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strconv"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorAlertDowntime() *schema.Resource {
