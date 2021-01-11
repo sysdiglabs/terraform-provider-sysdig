@@ -120,3 +120,15 @@ Monitor dashboards can be imported using the dashboard ID, e.g.
 ```
 $ terraform import sysdig_monitor_dashboard.example 12345
 ```
+
+Only dashboards that contain supported panels can be imported. Currently supported panel types are:
+- PromQL timecharts
+- PromQL numbers
+
+Only dashboards that contain supported query types can be imported. Currently supported query types:
+- Percent
+- Data
+- Data rate
+- Number
+- Number rate
+- Time
