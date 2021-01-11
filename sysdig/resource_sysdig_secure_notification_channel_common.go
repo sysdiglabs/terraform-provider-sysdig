@@ -1,7 +1,7 @@
 package sysdig
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
@@ -59,8 +59,6 @@ func secureNotificationChannelToResourceData(nc *secure.NotificationChannel, dat
 	data.Set("version", nc.Version)
 	data.Set("name", nc.Name)
 	data.Set("enabled", nc.Enabled)
-	data.Set("type", nc.Type)
-	data.Set("routing_key", nc.Options.RoutingKey)
 	data.Set("notify_when_ok", nc.Options.NotifyOnOk)
 	data.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
 	data.Set("send_test_notification", nc.Options.SendTestNotification)

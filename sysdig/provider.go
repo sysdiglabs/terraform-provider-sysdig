@@ -1,11 +1,12 @@
 package sysdig
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"sysdig_secure_api_token": {
@@ -50,7 +51,6 @@ func Provider() terraform.ResourceProvider {
 			"sysdig_user": resourceSysdigUser(),
 
 			"sysdig_secure_policy":                         resourceSysdigSecurePolicy(),
-			"sysdig_secure_notification_channel":           resourceSysdigSecureNotificationChannel(),
 			"sysdig_secure_notification_channel_email":     resourceSysdigSecureNotificationChannelEmail(),
 			"sysdig_secure_notification_channel_sns":       resourceSysdigSecureNotificationChannelSNS(),
 			"sysdig_secure_notification_channel_opsgenie":  resourceSysdigSecureNotificationChannelOpsGenie(),
@@ -73,6 +73,7 @@ func Provider() terraform.ResourceProvider {
 			"sysdig_monitor_alert_event":                    resourceSysdigMonitorAlertEvent(),
 			"sysdig_monitor_alert_anomaly":                  resourceSysdigMonitorAlertAnomaly(),
 			"sysdig_monitor_alert_group_outlier":            resourceSysdigMonitorAlertGroupOutlier(),
+			"sysdig_monitor_dashboard":                      resourceSysdigMonitorDashboard(),
 			"sysdig_monitor_notification_channel_email":     resourceSysdigMonitorNotificationChannelEmail(),
 			"sysdig_monitor_notification_channel_opsgenie":  resourceSysdigMonitorNotificationChannelOpsGenie(),
 			"sysdig_monitor_notification_channel_pagerduty": resourceSysdigMonitorNotificationChannelPagerduty(),
@@ -84,12 +85,13 @@ func Provider() terraform.ResourceProvider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_notification_channel": dataSourceSysdigSecureNotificationChannel(),
+			"sysdig_current_user":                dataSourceSysdigCurrentUser(),
 		},
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigure,
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	sysdigClient := &sysdigClients{d: d}
 	return sysdigClient, nil
 }

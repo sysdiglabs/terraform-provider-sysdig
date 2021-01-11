@@ -2,12 +2,15 @@ package sysdig_test
 
 import (
 	"fmt"
-	"github.com/draios/terraform-provider-sysdig/sysdig"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"os"
+	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
 func TestAccRuleFalco(t *testing.T) {
@@ -21,8 +24,10 @@ func TestAccRuleFalco(t *testing.T) {
 				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
 			}
 		},
-		Providers: map[string]terraform.ResourceProvider{
-			"sysdig": sysdig.Provider(),
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
 		},
 		Steps: []resource.TestStep{
 			{
@@ -32,7 +37,34 @@ func TestAccRuleFalco(t *testing.T) {
 				Config: ruleFalcoUpdatedTerminalShell(ruleRandomImmutableText),
 			},
 			{
+				ResourceName:      "sysdig_secure_rule_falco.terminal_shell",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: ruleFalcoTerminalShellWithAppend(),
+			},
+			{
+				ResourceName:      "sysdig_secure_rule_falco.terminal_shell_append",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: ruleFalcoKubeAudit(rText()),
+			},
+			{
+				ResourceName:      "sysdig_secure_rule_falco.kube_audit",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Incorrect configurations
+			{
+				Config:      ruleFalcoTerminalShellWithMissingOuput(rText()),
+				ExpectError: regexp.MustCompile("output must be set when append = false"),
+			},
+			{
+				Config:      ruleFalcoTerminalShellWithMissingSource(rText()),
+				ExpectError: regexp.MustCompile("source must be set when append = false"),
 			},
 		},
 	})
@@ -42,13 +74,39 @@ func ruleFalcoTerminalShell(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "terminal_shell" {
   name = "TERRAFORM TEST %s - Terminal Shell"
-  description = "TERRAFORM TEST %s"
   tags = ["container", "shell", "mitre_execution"]
 
   condition = "spawned_process and container and shell_procs and proc.tty != 0 and container_entrypoint"
   output = "A shell was spawned in a container with an attached terminal (user=%%user.name %%container.info shell=%%proc.name parent=%%proc.pname cmdline=%%proc.cmdline terminal=%%proc.tty container_id=%%container.id image=%%container.image.repository)"
   priority = "notice"
   source = "syscall" // syscall or k8s_audit
+}`, name)
+}
+
+func ruleFalcoTerminalShellWithMissingOuput(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "terminal_shell" {
+  name = "TERRAFORM TEST %s - Terminal Shell"
+  description = "TERRAFORM TEST %s"
+  tags = ["container", "shell", "mitre_execution"]
+
+  condition = "spawned_process and container and shell_procs and proc.tty != 0 and container_entrypoint"
+  priority = "notice"
+  source = "syscall" // syscall or k8s_audit
+}`, name, name)
+}
+
+func ruleFalcoTerminalShellWithMissingSource(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "terminal_shell" {
+  name = "TERRAFORM TEST %s - Terminal Shell"
+  description = "TERRAFORM TEST %s"
+  tags = ["container", "shell", "mitre_execution"]
+
+  condition = "spawned_process and container and shell_procs and proc.tty != 0 and container_entrypoint"
+  output = "A shell was spawned in a container with an attached terminal (user=%%user.name %%container.info shell=%%proc.name parent=%%proc.pname cmdline=%%proc.cmdline terminal=%%proc.tty container_id=%%container.id image=%%container.image.repository)"
+  priority = "notice"
+  append = false
 }`, name, name)
 }
 
@@ -78,4 +136,13 @@ resource "sysdig_secure_rule_falco" "kube_audit" {
   priority = "debug"
   source = "k8s_audit" // syscall or k8s_audit
 }`, name, name)
+}
+
+func ruleFalcoTerminalShellWithAppend() string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "terminal_shell_append" {
+  name = "Terminal shell in container" # Sysdig-provided
+  condition = "and spawned_process and shell_procs and proc.tty != 0 and container_entrypoint"
+  append = true
+}`)
 }

@@ -1,14 +1,15 @@
 package secure
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
-func (client *sysdigSecureClient) CreateList(listRequest List) (list List, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodPost, client.GetListsUrl(), listRequest.ToJSON())
+func (client *sysdigSecureClient) CreateList(ctx context.Context, listRequest List) (list List, err error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodPost, client.GetListsUrl(), listRequest.ToJSON())
 	if err != nil {
 		return
 	}
@@ -25,8 +26,8 @@ func (client *sysdigSecureClient) CreateList(listRequest List) (list List, err e
 	return
 }
 
-func (client *sysdigSecureClient) GetListById(id int) (list List, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodGet, client.GetListUrl(id), nil)
+func (client *sysdigSecureClient) GetListById(ctx context.Context, id int) (list List, err error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodGet, client.GetListUrl(id), nil)
 	if err != nil {
 		return
 	}
@@ -51,8 +52,8 @@ func (client *sysdigSecureClient) GetListById(id int) (list List, err error) {
 	return
 }
 
-func (client *sysdigSecureClient) UpdateList(listRequest List) (list List, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodPut, client.GetListUrl(listRequest.ID), listRequest.ToJSON())
+func (client *sysdigSecureClient) UpdateList(ctx context.Context, listRequest List) (list List, err error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodPut, client.GetListUrl(listRequest.ID), listRequest.ToJSON())
 	if err != nil {
 		return
 	}
@@ -68,8 +69,8 @@ func (client *sysdigSecureClient) UpdateList(listRequest List) (list List, err e
 	return ListFromJSON(body)
 }
 
-func (client *sysdigSecureClient) DeleteList(id int) error {
-	response, err := client.doSysdigSecureRequest(http.MethodDelete, client.GetListUrl(id), nil)
+func (client *sysdigSecureClient) DeleteList(ctx context.Context, id int) error {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodDelete, client.GetListUrl(id), nil)
 	if err != nil {
 		return err
 	}

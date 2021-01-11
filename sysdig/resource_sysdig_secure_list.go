@@ -1,21 +1,26 @@
 package sysdig
 
 import (
+	"context"
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strconv"
 	"strings"
 	"time"
 )
 
 func resourceSysdigSecureList() *schema.Resource {
-	timeout := 30 * time.Second
+	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		Create: resourceSysdigListCreate,
-		Update: resourceSysdigListUpdate,
-		Read:   resourceSysdigListRead,
-		Delete: resourceSysdigListDelete,
+		CreateContext: resourceSysdigListCreate,
+		UpdateContext: resourceSysdigListUpdate,
+		ReadContext:   resourceSysdigListRead,
+		DeleteContext: resourceSysdigListDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -50,16 +55,16 @@ func resourceSysdigSecureList() *schema.Resource {
 	}
 }
 
-func resourceSysdigListCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigListCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	list := listFromResourceData(d)
-	list, err = client.CreateList(list)
+	list, err = client.CreateList(ctx, list)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(list.ID))
@@ -68,10 +73,10 @@ func resourceSysdigListCreate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceSysdigListUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigListUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	list := listFromResourceData(d)
@@ -80,18 +85,21 @@ func resourceSysdigListUpdate(d *schema.ResourceData, meta interface{}) error {
 	id, _ := strconv.Atoi(d.Id())
 	list.ID = id
 
-	_, err = client.UpdateList(list)
-	return err
+	_, err = client.UpdateList(ctx, list)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
-func resourceSysdigListRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigListRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	list, err := client.GetListById(id)
+	list, err := client.GetListById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -105,15 +113,19 @@ func resourceSysdigListRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceSysdigListDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigListDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
 
-	return client.DeleteList(id)
+	err = client.DeleteList(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func listFromResourceData(d *schema.ResourceData) secure.List {

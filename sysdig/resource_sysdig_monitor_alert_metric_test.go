@@ -3,9 +3,9 @@ package sysdig_test
 import (
 	"fmt"
 	"github.com/draios/terraform-provider-sysdig/sysdig"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"os"
 	"testing"
 )
@@ -19,8 +19,10 @@ func TestAccAlertMetric(t *testing.T) {
 				t.Fatal("SYSDIG_MONITOR_API_TOKEN must be set for acceptance tests")
 			}
 		},
-		Providers: map[string]terraform.ResourceProvider{
-			"sysdig": sysdig.Provider(),
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
 		},
 		Steps: []resource.TestStep{
 			{
@@ -31,6 +33,11 @@ func TestAccAlertMetric(t *testing.T) {
 			},
 			{
 				Config: alertMetricWithNotificationChannel(rText()),
+			},
+			{
+				ResourceName:      "sysdig_secure_notification_channel_pagerduty.sample-pagerduty",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -86,10 +93,9 @@ resource "sysdig_monitor_alert_metric" "sample2" {
 // Reported by @logdnalf at https://github.com/draios/terraform-provider-sysdig/issues/24
 func alertMetricWithNotificationChannel(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_notification_channel" "sample-pagerduty" {
+resource "sysdig_secure_notification_channel_pagerduty" "sample-pagerduty" {
 	name = "Example Channel %s - Pagerduty"
 	enabled = true
-	type = "PAGER_DUTY"
 	account = "account"
 	service_key = "XXXXXXXXXX"
 	service_name = "sysdig"
@@ -106,7 +112,7 @@ resource "sysdig_monitor_alert_metric" "sample3" {
 	scope = "agent.id in (\"foo\")"
 	trigger_after_minutes = 20
 	notification_channels = [
-	sysdig_secure_notification_channel.sample-pagerduty.id
+	sysdig_secure_notification_channel_pagerduty.sample-pagerduty.id
 	]
 	multiple_alerts_by = [
 	"host.hostName"

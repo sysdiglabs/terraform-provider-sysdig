@@ -3,9 +3,9 @@ package sysdig_test
 import (
 	"fmt"
 	"github.com/draios/terraform-provider-sysdig/sysdig"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"os"
 	"testing"
 )
@@ -20,8 +20,10 @@ func TestAccList(t *testing.T) {
 				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
 			}
 		},
-		Providers: map[string]terraform.ResourceProvider{
-			"sysdig": sysdig.Provider(),
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
 		},
 		Steps: []resource.TestStep{
 			{
@@ -32,6 +34,11 @@ func TestAccList(t *testing.T) {
 			},
 			{
 				Config: listUpdatedWithName(fixedRandomText),
+			},
+			{
+				ResourceName:      "sysdig_secure_list.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: listAppendToDefault(),

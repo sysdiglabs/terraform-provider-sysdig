@@ -1,10 +1,12 @@
 package sysdig
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
@@ -13,10 +15,13 @@ func resourceSysdigSecureNotificationChannelVictorOps() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigSecureNotificationChannelVictorOpsCreate,
-		Update: resourceSysdigSecureNotificationChannelVictorOpsUpdate,
-		Read:   resourceSysdigSecureNotificationChannelVictorOpsRead,
-		Delete: resourceSysdigSecureNotificationChannelVictorOpsDelete,
+		CreateContext: resourceSysdigSecureNotificationChannelVictorOpsCreate,
+		UpdateContext: resourceSysdigSecureNotificationChannelVictorOpsUpdate,
+		ReadContext:   resourceSysdigSecureNotificationChannelVictorOpsRead,
+		DeleteContext: resourceSysdigSecureNotificationChannelVictorOpsDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -38,20 +43,20 @@ func resourceSysdigSecureNotificationChannelVictorOps() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureNotificationChannelVictorOpsCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelVictorOpsCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	notificationChannel, err := secureNotificationChannelVictorOpsFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	notificationChannel, err = client.CreateNotificationChannel(notificationChannel)
+	notificationChannel, err = client.CreateNotificationChannel(ctx, notificationChannel)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
@@ -61,14 +66,14 @@ func resourceSysdigSecureNotificationChannelVictorOpsCreate(d *schema.ResourceDa
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigSecureNotificationChannelVictorOpsRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelVictorOpsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(id)
+	nc, err := client.GetNotificationChannelById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -76,40 +81,47 @@ func resourceSysdigSecureNotificationChannelVictorOpsRead(d *schema.ResourceData
 
 	err = secureNotificationChannelVictorOpsToResourceData(&nc, d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelVictorOpsUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelVictorOpsUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	nc, err := secureNotificationChannelVictorOpsFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	nc.Version = d.Get("version").(int)
 	nc.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateNotificationChannel(nc)
+	_, err = client.UpdateNotificationChannel(ctx, nc)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigSecureNotificationChannelVictorOpsDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigSecureNotificationChannelVictorOpsDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
 
-	return client.DeleteNotificationChannel(id)
+	err = client.DeleteNotificationChannel(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func secureNotificationChannelVictorOpsFromResourceData(d *schema.ResourceData) (nc secure.NotificationChannel, err error) {
@@ -118,7 +130,7 @@ func secureNotificationChannelVictorOpsFromResourceData(d *schema.ResourceData) 
 		return
 	}
 
-	nc.Type = "VICTOROPS"
+	nc.Type = NOTIFICATION_CHANNEL_TYPE_VICTOROPS
 	nc.Options.APIKey = d.Get("api_key").(string)
 	nc.Options.RoutingKey = d.Get("routing_key").(string)
 	return

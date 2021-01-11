@@ -1,14 +1,15 @@
 package secure
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
-func (client *sysdigSecureClient) GetNotificationChannelById(id int) (nc NotificationChannel, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodGet, client.GetNotificationChannelUrl(id), nil)
+func (client *sysdigSecureClient) GetNotificationChannelById(ctx context.Context, id int) (nc NotificationChannel, err error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodGet, client.GetNotificationChannelUrl(id), nil)
 	if err != nil {
 		return
 	}
@@ -30,8 +31,8 @@ func (client *sysdigSecureClient) GetNotificationChannelById(id int) (nc Notific
 	return
 }
 
-func (client *sysdigSecureClient) GetNotificationChannelByName(name string) (nc NotificationChannel, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodGet, client.GetNotificationChannelsUrl(), nil)
+func (client *sysdigSecureClient) GetNotificationChannelByName(ctx context.Context, name string) (nc NotificationChannel, err error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodGet, client.GetNotificationChannelsUrl(), nil)
 	if err != nil {
 		return
 	}
@@ -57,8 +58,8 @@ func (client *sysdigSecureClient) GetNotificationChannelByName(name string) (nc 
 	return
 }
 
-func (client *sysdigSecureClient) CreateNotificationChannel(ncRequest NotificationChannel) (nc NotificationChannel, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodPost, client.GetNotificationChannelsUrl(), ncRequest.ToJSON())
+func (client *sysdigSecureClient) CreateNotificationChannel(ctx context.Context, ncRequest NotificationChannel) (nc NotificationChannel, err error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodPost, client.GetNotificationChannelsUrl(), ncRequest.ToJSON())
 	if err != nil {
 		return
 	}
@@ -75,8 +76,8 @@ func (client *sysdigSecureClient) CreateNotificationChannel(ncRequest Notificati
 	return
 }
 
-func (client *sysdigSecureClient) UpdateNotificationChannel(ncRequest NotificationChannel) (nc NotificationChannel, err error) {
-	response, err := client.doSysdigSecureRequest(http.MethodPut, client.GetNotificationChannelUrl(ncRequest.ID), ncRequest.ToJSON())
+func (client *sysdigSecureClient) UpdateNotificationChannel(ctx context.Context, ncRequest NotificationChannel) (nc NotificationChannel, err error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodPut, client.GetNotificationChannelUrl(ncRequest.ID), ncRequest.ToJSON())
 	if err != nil {
 		return
 	}
@@ -93,8 +94,8 @@ func (client *sysdigSecureClient) UpdateNotificationChannel(ncRequest Notificati
 	return
 }
 
-func (client *sysdigSecureClient) DeleteNotificationChannel(id int) error {
-	response, err := client.doSysdigSecureRequest(http.MethodDelete, client.GetNotificationChannelUrl(id), nil)
+func (client *sysdigSecureClient) DeleteNotificationChannel(ctx context.Context, id int) error {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodDelete, client.GetNotificationChannelUrl(id), nil)
 	if err != nil {
 		return err
 	}

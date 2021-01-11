@@ -1,12 +1,14 @@
 package sysdig
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
@@ -27,10 +29,13 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigPolicyCreate,
-		Read:   resourceSysdigPolicyRead,
-		Update: resourceSysdigPolicyUpdate,
-		Delete: resourceSysdigPolicyDelete,
+		CreateContext: resourceSysdigPolicyCreate,
+		ReadContext:   resourceSysdigPolicyRead,
+		UpdateContext: resourceSysdigPolicyUpdate,
+		DeleteContext: resourceSysdigPolicyDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -49,10 +54,10 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 				Required: true,
 			},
 			"severity": {
-				Type:         schema.TypeInt,
-				Default:      4,
-				Optional:     true,
-				ValidateFunc: validation.IntInSlice([]int{0, 4, 6, 7}),
+				Type:             schema.TypeInt,
+				Default:          4,
+				Optional:         true,
+				ValidateDiagFunc: validateDiagFunc(validation.IntBetween(0, 7)),
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
@@ -90,7 +95,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 						"container": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"stop", "pause"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"stop", "pause", "kill"}, false),
 						},
 						"capture": {
 							Type:     schema.TypeList,
@@ -98,14 +103,14 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"seconds_after_event": {
-										Type:         schema.TypeInt,
-										Required:     true,
-										ValidateFunc: validation.IntAtLeast(0),
+										Type:             schema.TypeInt,
+										Required:         true,
+										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
 									},
 									"seconds_before_event": {
-										Type:         schema.TypeInt,
-										Required:     true,
-										ValidateFunc: validation.IntAtLeast(0),
+										Type:             schema.TypeInt,
+										Required:         true,
+										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
 									},
 								},
 							},
@@ -117,16 +122,16 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 	}
 }
 
-func resourceSysdigPolicyCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	policy := policyFromResourceData(d)
-	policy, err = client.CreatePolicy(policy)
+	policy, err = client.CreatePolicy(ctx, policy)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(policy.ID))
@@ -194,14 +199,14 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 	}
 }
 
-func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	policy, err := client.GetPolicyById(id)
+	policy, err := client.GetPolicyById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -212,13 +217,21 @@ func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("scope", policy.Scope)
 	d.Set("enabled", policy.Enabled)
 	d.Set("version", policy.Version)
+	d.Set("severity", policy.Severity)
+
+	actions := []map[string]interface{}{{}}
 	for _, action := range policy.Actions {
 		if action.Type != "POLICY_ACTION_CAPTURE" {
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
-			d.Set("actions.0.container", strings.ToLower(action))
+			actions[0]["container"] = strings.ToLower(action)
+			d.Set("actions", actions)
+			//d.Set("actions.0.container", strings.ToLower(action))
 		} else {
-			d.Set("actions.0.capture.seconds_after_event", action.AfterEventNs/1000000000)
-			d.Set("actions.0.capture.seconds_before_event", action.BeforeEventNs/100000000)
+			actions[0]["capture"] = []map[string]interface{}{{
+				"seconds_after_event":  action.AfterEventNs / 1000000000,
+				"seconds_before_event": action.BeforeEventNs / 1000000000,
+			}}
+			d.Set("actions", actions)
 		}
 	}
 
@@ -228,21 +241,25 @@ func resourceSysdigPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceSysdigPolicyDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
 
-	return client.DeletePolicy(id)
+	err = client.DeletePolicy(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
-func resourceSysdigPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	policy := policyFromResourceData(d)
@@ -251,6 +268,9 @@ func resourceSysdigPolicyUpdate(d *schema.ResourceData, meta interface{}) error 
 	id, _ := strconv.Atoi(d.Id())
 	policy.ID = id
 
-	_, err = client.UpdatePolicy(policy)
-	return err
+	_, err = client.UpdatePolicy(ctx, policy)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }

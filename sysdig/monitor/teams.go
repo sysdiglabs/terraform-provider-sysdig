@@ -1,15 +1,16 @@
 package monitor
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
-func (client *sysdigMonitorClient) getUserIdbyEmail(userRoles []UserRoles) ([]UserRoles, error) {
+func (client *sysdigMonitorClient) getUserIdbyEmail(ctx context.Context, userRoles []UserRoles) ([]UserRoles, error) {
 	// Get UsersList from API
-	response, err := client.doSysdigMonitorRequest(http.MethodGet, client.getUsersListUrl(), nil)
+	response, err := client.doSysdigMonitorRequest(ctx, http.MethodGet, client.getUsersListUrl(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +45,8 @@ func (client *sysdigMonitorClient) getUserIdbyEmail(userRoles []UserRoles) ([]Us
 	return modifiedUserRoles, nil
 }
 
-func (client *sysdigMonitorClient) GetTeamById(id int) (t Team, err error) {
-	response, err := client.doSysdigMonitorRequest(http.MethodGet, client.GetTeamUrl(id), nil)
+func (client *sysdigMonitorClient) GetTeamById(ctx context.Context, id int) (t Team, err error) {
+	response, err := client.doSysdigMonitorRequest(ctx, http.MethodGet, client.GetTeamUrl(id), nil)
 	if err != nil {
 		return
 	}
@@ -63,14 +64,14 @@ func (client *sysdigMonitorClient) GetTeamById(id int) (t Team, err error) {
 	return
 }
 
-func (client *sysdigMonitorClient) CreateTeam(tRequest Team) (t Team, err error) {
-	tRequest.UserRoles, err = client.getUserIdbyEmail(tRequest.UserRoles)
+func (client *sysdigMonitorClient) CreateTeam(ctx context.Context, tRequest Team) (t Team, err error) {
+	tRequest.UserRoles, err = client.getUserIdbyEmail(ctx, tRequest.UserRoles)
 	if err != nil {
 		return
 	}
 	tRequest.Origin = "SYSDIG"
 
-	response, err := client.doSysdigMonitorRequest(http.MethodPost, client.GetTeamsUrl(), tRequest.ToJSON())
+	response, err := client.doSysdigMonitorRequest(ctx, http.MethodPost, client.GetTeamsUrl(), tRequest.ToJSON())
 
 	if err != nil {
 		return
@@ -88,14 +89,14 @@ func (client *sysdigMonitorClient) CreateTeam(tRequest Team) (t Team, err error)
 	return
 }
 
-func (client *sysdigMonitorClient) UpdateTeam(tRequest Team) (t Team, err error) {
-	tRequest.UserRoles, err = client.getUserIdbyEmail(tRequest.UserRoles)
+func (client *sysdigMonitorClient) UpdateTeam(ctx context.Context, tRequest Team) (t Team, err error) {
+	tRequest.UserRoles, err = client.getUserIdbyEmail(ctx, tRequest.UserRoles)
 	if err != nil {
 		return
 	}
 	tRequest.Products = []string{"SDC"}
 
-	response, err := client.doSysdigMonitorRequest(http.MethodPut, client.GetTeamUrl(tRequest.ID), tRequest.ToJSON())
+	response, err := client.doSysdigMonitorRequest(ctx, http.MethodPut, client.GetTeamUrl(tRequest.ID), tRequest.ToJSON())
 	if err != nil {
 		return
 	}
@@ -112,8 +113,8 @@ func (client *sysdigMonitorClient) UpdateTeam(tRequest Team) (t Team, err error)
 	return
 }
 
-func (client *sysdigMonitorClient) DeleteTeam(id int) error {
-	response, err := client.doSysdigMonitorRequest(http.MethodDelete, client.GetTeamUrl(id), nil)
+func (client *sysdigMonitorClient) DeleteTeam(ctx context.Context, id int) error {
+	response, err := client.doSysdigMonitorRequest(ctx, http.MethodDelete, client.GetTeamUrl(id), nil)
 	if err != nil {
 		return err
 	}

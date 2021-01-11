@@ -1,10 +1,12 @@
 package sysdig
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/spf13/cast"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/monitor"
@@ -14,10 +16,13 @@ func resourceSysdigMonitorNotificationChannelSNS() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigMonitorNotificationChannelSNSCreate,
-		Update: resourceSysdigMonitorNotificationChannelSNSUpdate,
-		Read:   resourceSysdigMonitorNotificationChannelSNSRead,
-		Delete: resourceSysdigMonitorNotificationChannelSNSDelete,
+		CreateContext: resourceSysdigMonitorNotificationChannelSNSCreate,
+		UpdateContext: resourceSysdigMonitorNotificationChannelSNSUpdate,
+		ReadContext:   resourceSysdigMonitorNotificationChannelSNSRead,
+		DeleteContext: resourceSysdigMonitorNotificationChannelSNSDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -36,20 +41,20 @@ func resourceSysdigMonitorNotificationChannelSNS() *schema.Resource {
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelSNSCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorNotificationChannelSNSCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	notificationChannel, err := monitorNotificationChannelSNSFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	notificationChannel, err = client.CreateNotificationChannel(notificationChannel)
+	notificationChannel, err = client.CreateNotificationChannel(ctx, notificationChannel)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
@@ -59,14 +64,14 @@ func resourceSysdigMonitorNotificationChannelSNSCreate(d *schema.ResourceData, m
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigMonitorNotificationChannelSNSRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorNotificationChannelSNSRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(id)
+	nc, err := client.GetNotificationChannelById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -74,40 +79,48 @@ func resourceSysdigMonitorNotificationChannelSNSRead(d *schema.ResourceData, met
 
 	err = monitorNotificationChannelSNSToResourceData(&nc, d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelSNSUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorNotificationChannelSNSUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	nc, err := monitorNotificationChannelSNSFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	nc.Version = d.Get("version").(int)
 	nc.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateNotificationChannel(nc)
+	_, err = client.UpdateNotificationChannel(ctx, nc)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelSNSDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigMonitorNotificationChannelSNSDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
 
-	return client.DeleteNotificationChannel(id)
+	err = client.DeleteNotificationChannel(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
 // Channel type for Notification Channels
@@ -118,7 +131,7 @@ func monitorNotificationChannelSNSFromResourceData(d *schema.ResourceData) (nc m
 		return
 	}
 
-	nc.Type = "SNS"
+	nc.Type = NOTIFICATION_CHANNEL_TYPE_AMAZON_SNS
 	nc.Options.SnsTopicARNs = cast.ToStringSlice(d.Get("topics").(*schema.Set).List())
 	return
 }

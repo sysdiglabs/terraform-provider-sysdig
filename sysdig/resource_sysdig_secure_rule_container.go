@@ -1,26 +1,33 @@
 package sysdig
 
 import (
-	"errors"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
 
 func resourceSysdigSecureRuleContainer() *schema.Resource {
-	timeout := 30 * time.Second
+	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		Create: resourceSysdigRuleContainerCreate,
-		Update: resourceSysdigRuleContainerUpdate,
-		Read:   resourceSysdigRuleContainerRead,
-		Delete: resourceSysdigRuleContainerDelete,
+		CreateContext: resourceSysdigRuleContainerCreate,
+		UpdateContext: resourceSysdigRuleContainerUpdate,
+		ReadContext:   resourceSysdigRuleContainerRead,
+		DeleteContext: resourceSysdigRuleContainerDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
+			Update: schema.DefaultTimeout(timeout),
+			Read:   schema.DefaultTimeout(timeout),
+			Delete: schema.DefaultTimeout(timeout),
 		},
 
 		Schema: createRuleSchema(map[string]*schema.Schema{
@@ -40,17 +47,17 @@ func resourceSysdigSecureRuleContainer() *schema.Resource {
 	}
 }
 
-func resourceSysdigRuleContainerCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleContainerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	rule := resourceSysdigRuleContainerFromResourceData(d)
 
-	rule, err = client.CreateRule(rule)
+	rule, err = client.CreateRule(ctx, rule)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
@@ -60,25 +67,25 @@ func resourceSysdigRuleContainerCreate(d *schema.ResourceData, meta interface{})
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleContainerRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	rule, err := client.GetRuleByID(id)
+	rule, err := client.GetRuleByID(ctx, id)
 
 	if err != nil {
 		d.SetId("")
 	}
 
 	if rule.Details.Containers == nil {
-		return errors.New("no container data for a container rule")
+		return diag.Errorf("no container data for a container rule")
 	}
 
 	updateResourceDataForRule(d, rule)
@@ -88,10 +95,10 @@ func resourceSysdigRuleContainerRead(d *schema.ResourceData, meta interface{}) e
 	return nil
 }
 
-func resourceSysdigRuleContainerUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleContainerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	rule := resourceSysdigRuleContainerFromResourceData(d)
@@ -99,23 +106,30 @@ func resourceSysdigRuleContainerUpdate(d *schema.ResourceData, meta interface{})
 	rule.Version = d.Get("version").(int)
 	rule.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateRule(rule)
+	_, err = client.UpdateRule(ctx, rule)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigRuleContainerDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleContainerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return client.DeleteRule(id)
+	err = client.DeleteRule(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func resourceSysdigRuleContainerFromResourceData(d *schema.ResourceData) secure.Rule {

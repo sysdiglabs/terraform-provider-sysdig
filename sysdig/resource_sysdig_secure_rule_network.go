@@ -1,11 +1,12 @@
 package sysdig
 
 import (
-	"errors"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
@@ -14,10 +15,13 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigRuleNetworkCreate,
-		Update: resourceSysdigRuleNetworkUpdate,
-		Read:   resourceSysdigRuleNetworkRead,
-		Delete: resourceSysdigRuleNetworkDelete,
+		CreateContext: resourceSysdigRuleNetworkCreate,
+		UpdateContext: resourceSysdigRuleNetworkUpdate,
+		ReadContext:   resourceSysdigRuleNetworkRead,
+		DeleteContext: resourceSysdigRuleNetworkDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -46,7 +50,7 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 							Default:  true,
 						},
 						"ports": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Required: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeInt,
@@ -66,7 +70,7 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 							Default:  true,
 						},
 						"ports": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Required: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeInt,
@@ -79,41 +83,41 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 	}
 }
 
-func resourceSysdigRuleNetworkCreate(d *schema.ResourceData, meta interface{}) (err error) {
+func resourceSysdigRuleNetworkCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	rule, err := resourceSysdigRuleNetworkFromResourceData(d)
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
-	rule, err = client.CreateRule(rule)
+	rule, err = client.CreateRule(ctx, rule)
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
 	d.Set("version", rule.Version)
 
-	return
+	return nil
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleNetworkRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	rule, err := client.GetRuleByID(id)
+	rule, err := client.GetRuleByID(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -124,52 +128,84 @@ func resourceSysdigRuleNetworkRead(d *schema.ResourceData, meta interface{}) err
 	d.Set("block_outbound", rule.Details.AllOutbound)
 
 	if rule.Details.TCPListenPorts == nil {
-		return errors.New("no tcpListenPorts for a filesystem rule")
+		return diag.Errorf("no tcpListenPorts for a filesystem rule")
 	}
 
 	if rule.Details.UDPListenPorts == nil {
-		return errors.New("no udpListenPorts for a filesystem rule")
+		return diag.Errorf("no udpListenPorts for a filesystem rule")
 	}
 
-	d.Set("tcp.0.matching", rule.Details.TCPListenPorts.MatchItems)
-	d.Set("tcp.0.ports", rule.Details.TCPListenPorts.Items)
-	d.Set("udp.0.matching", rule.Details.UDPListenPorts.MatchItems)
-	d.Set("udp.0.ports", rule.Details.UDPListenPorts.Items)
+	if len(rule.Details.TCPListenPorts.Items) > 0 {
+		tcpPorts := []int{}
+		for _, port := range rule.Details.TCPListenPorts.Items {
+			intPort, err := strconv.Atoi(port)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			tcpPorts = append(tcpPorts, intPort)
+		}
+		d.Set("tcp", []map[string]interface{}{{
+			"matching": rule.Details.TCPListenPorts.MatchItems,
+			"ports":    tcpPorts,
+		}})
+	}
+	if len(rule.Details.UDPListenPorts.Items) > 0 {
+		udpPorts := []int{}
+		for _, port := range rule.Details.UDPListenPorts.Items {
+			intPort, err := strconv.Atoi(port)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			udpPorts = append(udpPorts, intPort)
+		}
+		d.Set("udp", []map[string]interface{}{{
+			"matching": rule.Details.UDPListenPorts.MatchItems,
+			"ports":    udpPorts,
+		}})
+	}
 
 	return nil
 }
 
-func resourceSysdigRuleNetworkUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+func resourceSysdigRuleNetworkUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	rule, err := resourceSysdigRuleNetworkFromResourceData(d)
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
 	rule.Version = d.Get("version").(int)
 	rule.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateRule(rule)
+	_, err = client.UpdateRule(ctx, rule)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigRuleNetworkDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleNetworkDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return client.DeleteRule(id)
+	err = client.DeleteRule(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
 func resourceSysdigRuleNetworkFromResourceData(d *schema.ResourceData) (rule secure.Rule, err error) {
@@ -183,23 +219,22 @@ func resourceSysdigRuleNetworkFromResourceData(d *schema.ResourceData) (rule sec
 	rule.Details.AllOutbound = d.Get("block_outbound").(bool)
 
 	rule.Details.TCPListenPorts.Items = []string{}
-	if tcpRules, ok := d.Get("tcp").([]interface{}); ok && len(tcpRules) > 0 {
+	if tcpRules := d.Get("tcp").([]interface{}); len(tcpRules) > 0 {
 		rule.Details.TCPListenPorts.MatchItems = d.Get("tcp.0.matching").(bool)
-		for _, port := range d.Get("tcp.0.ports").([]interface{}) {
-			if portStr, ok := port.(string); ok {
-				rule.Details.TCPListenPorts.Items = append(rule.Details.TCPListenPorts.Items, portStr)
-			}
+		for _, port := range d.Get("tcp.0.ports").(*schema.Set).List() {
+			portStr := port.(int)
+			rule.Details.TCPListenPorts.Items = append(rule.Details.TCPListenPorts.Items, strconv.Itoa(portStr))
 		}
 	}
 
 	rule.Details.UDPListenPorts.Items = []string{}
 	if udpRules, ok := d.Get("udp").([]interface{}); ok && len(udpRules) > 0 {
 		rule.Details.UDPListenPorts.MatchItems = d.Get("udp.0.matching").(bool)
-		for _, port := range d.Get("udp.0.ports").([]interface{}) {
-			if portStr, ok := port.(string); ok {
-				rule.Details.UDPListenPorts.Items = append(rule.Details.UDPListenPorts.Items, portStr)
-			}
+		for _, port := range d.Get("udp.0.ports").(*schema.Set).List() {
+			portStr := port.(int)
+			rule.Details.UDPListenPorts.Items = append(rule.Details.UDPListenPorts.Items, strconv.Itoa(portStr))
 		}
 	}
+
 	return
 }

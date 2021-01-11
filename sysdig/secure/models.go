@@ -148,9 +148,9 @@ type Details struct {
 	Syscalls *Syscalls `json:"syscalls,omitempty"`
 
 	// Falco
-	Append    bool       `json:"append,omitempty"`
+	Append    *bool      `json:"append,omitempty"`
 	Source    string     `json:"source,omitempty"`
-	Output    string     `json:"output,omitempty"`
+	Output    string     `json:"output"`
 	Condition *Condition `json:"condition,omitempty"`
 	Priority  string     `json:"priority,omitempty"`
 
@@ -272,6 +272,7 @@ type UserRoles struct {
 	UserId int    `json:"userId"`
 	Email  string `json:"userName,omitempty"`
 	Role   string `json:"role"`
+	Admin  bool   `json:"admin,omitempty"`
 }
 
 func (t *Team) ToJSON() io.Reader {

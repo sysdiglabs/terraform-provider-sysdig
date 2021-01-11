@@ -10,7 +10,7 @@ description: |-
 
 Creates a Sysdig Monitor Notification Channel of type Slack.
 
-~> **Note:** This resource is still experimental, and is subject of being changed.
+`~> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.`
 
 ## Example usage
 
@@ -43,3 +43,11 @@ resource "sysdig_monitor_notification_channel_slack" "sample-slack" {
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
+  
+## Import
+
+Slack notification channels for Monitor can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_monitor_notification_channel_slack.example 12345
+```

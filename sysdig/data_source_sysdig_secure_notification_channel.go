@@ -1,18 +1,31 @@
 package sysdig
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+const (
+	NOTIFICATION_CHANNEL_TYPE_EMAIL      = "EMAIL"
+	NOTIFICATION_CHANNEL_TYPE_AMAZON_SNS = "SNS"
+	NOTIFICATION_CHANNEL_TYPE_OPSGENIE   = "OPSGENIE"
+	NOTIFICATION_CHANNEL_TYPE_VICTOROPS  = "VICTOROPS"
+	NOTIFICATION_CHANNEL_TYPE_WEBHOOK    = "WEBHOOK"
+	NOTIFICATION_CHANNEL_TYPE_SLACK      = "SLACK"
+	NOTIFICATION_CHANNEL_TYPE_PAGERDUTY  = "PAGER_DUTY"
 )
 
 func dataSourceSysdigSecureNotificationChannel() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Read: dataSourceSysdigNotificationChannelRead,
+		ReadContext: dataSourceSysdigNotificationChannelRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),
@@ -92,15 +105,15 @@ func dataSourceSysdigSecureNotificationChannel() *schema.Resource {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	nc, err := client.GetNotificationChannelByName(d.Get("name").(string))
+	nc, err := client.GetNotificationChannelByName(ctx, d.Get("name").(string))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(nc.ID))
@@ -108,8 +121,8 @@ func dataSourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interf
 	d.Set("name", nc.Name)
 	d.Set("enabled", nc.Enabled)
 	d.Set("type", nc.Type)
-	d.Set("recipients", nc.Options.EmailRecipients)
-	d.Set("topics", nc.Options.SnsTopicARNs)
+	d.Set("recipients", strings.Join(nc.Options.EmailRecipients, ","))
+	d.Set("topics", strings.Join(nc.Options.SnsTopicARNs, ","))
 	d.Set("api_key", nc.Options.APIKey)
 	d.Set("url", nc.Options.Url)
 	d.Set("channel", nc.Options.Channel)
@@ -128,10 +141,10 @@ func dataSourceSysdigNotificationChannelRead(d *schema.ResourceData, meta interf
 	// didn't change at all.
 	// We need to extract the key from the url the API gives us
 	// to avoid this Terraform's behaviour.
-	if nc.Type == opsgenie {
+	if nc.Type == NOTIFICATION_CHANNEL_TYPE_OPSGENIE {
 		regex, err := regexp.Compile("apiKey=(.*)?$")
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		key := regex.FindStringSubmatch(nc.Options.Url)[1]
 		d.Set("api_key", key)

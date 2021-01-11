@@ -10,6 +10,8 @@ import (
 type CustomNotification struct {
 	TitleTemplate  string `json:"titleTemplate"`
 	UseNewTemplate bool   `json:"useNewTemplate"`
+	PrependText    string `json:"prependText,omitempty"`
+	AppendText     string `json:"appendText,omitempty"`
 }
 
 type SysdigCapture struct {
@@ -109,6 +111,7 @@ type UserRoles struct {
 	UserId int    `json:"userId"`
 	Email  string `json:"userName,omitempty"`
 	Role   string `json:"role"`
+	Admin  bool   `json:"admin,omitempty"`
 }
 
 type EntryPoint struct {

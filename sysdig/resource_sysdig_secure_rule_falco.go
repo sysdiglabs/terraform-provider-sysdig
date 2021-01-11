@@ -1,28 +1,36 @@
 package sysdig
 
 import (
+	"context"
 	"errors"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
 
 func resourceSysdigSecureRuleFalco() *schema.Resource {
-	timeout := 30 * time.Second
+	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		Create: resourceSysdigRuleFalcoCreate,
-		Update: resourceSysdigRuleFalcoUpdate,
-		Read:   resourceSysdigRuleFalcoRead,
-		Delete: resourceSysdigRuleFalcoDelete,
+		CreateContext: resourceSysdigRuleFalcoCreate,
+		UpdateContext: resourceSysdigRuleFalcoUpdate,
+		ReadContext:   resourceSysdigRuleFalcoRead,
+		DeleteContext: resourceSysdigRuleFalcoDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
+			Update: schema.DefaultTimeout(timeout),
+			Read:   schema.DefaultTimeout(timeout),
+			Delete: schema.DefaultTimeout(timeout),
 		},
 
 		Schema: createRuleSchema(map[string]*schema.Schema{
@@ -32,33 +40,44 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 			},
 			"output": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Default:  "",
 			},
 			"priority": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"emergency", "alert", "critical", "error", "warning", "notice", "informational", "informational", "debug"}, false),
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "warning",
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"}, false)),
 			},
 			"source": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"syscall", "k8s_audit"}, false),
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "",
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"syscall", "k8s_audit"}, false)),
+			},
+			"append": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 		}),
 	}
 }
 
-func resourceSysdigRuleFalcoCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleFalcoCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	rule := resourceSysdigRuleFalcoFromResourceData(d)
-
-	rule, err = client.CreateRule(rule)
+	rule, err := resourceSysdigRuleFalcoFromResourceData(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
+	}
+
+	rule, err = client.CreateRule(ctx, rule)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
@@ -68,25 +87,25 @@ func resourceSysdigRuleFalcoCreate(d *schema.ResourceData, meta interface{}) err
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleFalcoRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	rule, err := client.GetRuleByID(id)
+	rule, err := client.GetRuleByID(ctx, id)
 
 	if err != nil {
 		d.SetId("")
 	}
 
 	if rule.Details.Condition == nil {
-		return errors.New("no condition data for a falco rule")
+		return diag.Errorf("no condition data for a falco rule")
 	}
 
 	updateResourceDataForRule(d, rule)
@@ -94,52 +113,85 @@ func resourceSysdigRuleFalcoRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("output", rule.Details.Output)
 	d.Set("priority", strings.ToLower(rule.Details.Priority))
 	d.Set("source", rule.Details.Source)
+	if rule.Details.Append != nil {
+		d.Set("append", *rule.Details.Append)
+	}
 
 	return nil
 }
 
-func resourceSysdigRuleFalcoUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleFalcoUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	rule := resourceSysdigRuleFalcoFromResourceData(d)
+	rule, err := resourceSysdigRuleFalcoFromResourceData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	rule.Version = d.Get("version").(int)
 	rule.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateRule(rule)
+	_, err = client.UpdateRule(ctx, rule)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigRuleFalcoDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleFalcoDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return client.DeleteRule(id)
+	err = client.DeleteRule(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
-func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) secure.Rule {
+func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) (secure.Rule, error) {
 	rule := ruleFromResourceData(d)
 	rule.Details.RuleType = "FALCO"
 
-	rule.Details.Append = false
-	rule.Details.Source = d.Get("source").(string)
-	rule.Details.Output = d.Get("output").(string)
-	rule.Details.Priority = d.Get("priority").(string)
+	appendMode, appendModeIsSet := d.GetOk("append")
+	if appendModeIsSet {
+		ptr := appendMode.(bool)
+		rule.Details.Append = &ptr
+	}
+
+	if source, ok := d.GetOk("source"); ok && source.(string) != "" {
+		rule.Details.Source = source.(string)
+	} else if !appendModeIsSet || !(appendMode.(bool)) {
+		return secure.Rule{}, errors.New("source must be set when append = false")
+	}
+
+	if output, ok := d.GetOk("output"); ok && output.(string) != "" {
+		rule.Details.Output = output.(string)
+	} else if !appendModeIsSet || !(appendMode.(bool)) {
+		return secure.Rule{}, errors.New("output must be set when append = false")
+	}
+
+	if priority, ok := d.GetOk("priority"); ok && priority.(string) != "" {
+		rule.Details.Priority = priority.(string)
+	} else if !appendModeIsSet || !(appendMode.(bool)) {
+		return secure.Rule{}, errors.New("priority must be set when append = false")
+	}
+
 	rule.Details.Condition = &secure.Condition{
 		Condition:  d.Get("condition").(string),
 		Components: []interface{}{},
 	}
 
-	return rule
+	return rule, nil
 }

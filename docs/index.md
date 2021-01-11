@@ -33,7 +33,30 @@ interacts with the provider.
 Download the Terraform executable for your OS/Architecture from 
 here: [https://www.terraform.io/downloads.html](https://www.terraform.io/downloads.html)
 
-When you have it installed, download the 
+
+### Terraform v0.13+
+
+As of Terraform 0.13, the new block `required_providers` was added,
+making it easier to use community providers, since they are automatically
+downloaded from the Terraform Registry.
+
+You can tell Terraform to download and use `sysdiglabs/sysdig` as the `sysdig`
+provider by defining this block in one of your .tf files. 
+
+```hcl
+terraform {
+  required_providers {
+    sysdig = {
+      source  = "sysdiglabs/sysdig"
+      version = ">= 0.4.0"
+    }
+  }
+}
+```
+
+### Terraform v0.12
+
+In older Terraform versions, you need to download the 
 [latest version of the Terraform Provider for Sysdig](https://github.com/sysdiglabs/terraform-provider-sysdig/releases/latest)
 for your OS/Architecture, extract it and move the executable under `$HOME/.terraform.d/plugins` (you need to create
 this directory if it does not exist yet) as this link suggests: 
@@ -174,19 +197,17 @@ Creating two notification channels, one for the email and another one for slack 
 will alert us when the policy is triggered:
 
 ```hcl
-resource "sysdig_secure_notification_channel" "devops-email" {
+resource "sysdig_secure_notification_channel_email" "devops-email" {
   name                 = "DevOps e-mail"
   enabled              = true
-  type                 = "EMAIL"
   recipients           = "devops@example.com"
   notify_when_ok       = false
   notify_when_resolved = false
 }
 
-resource "sysdig_secure_notification_channel" "devops-slack" {
+resource "sysdig_secure_notification_channel_slack" "devops-slack" {
   name                 = "DevOps Slack"
   enabled              = true
-  type                 = "SLACK"
   url                  = "https://hooks.slack.com/services/32klj54h2/34hjkhhsd/wjkkrjwlqpfdirej4jrlwkjx"
   channel              = "#devops"
   notify_when_ok       = false
@@ -214,8 +235,8 @@ resource "sysdig_secure_policy" "terminal_shell_or_ssh_in_container" {
     }
   }
 
-  notification_channels = [sysdig_secure_notification_channel.devops-email.id,
-                           sysdig_secure_notification_channel.devops-slack.id]
+  notification_channels = [sysdig_secure_notification_channel_email.devops-email.id,
+                           sysdig_secure_notification_channel_slack.devops-slack.id]
 }
 ``` 
 
@@ -239,7 +260,7 @@ restore the desired status from the `.tf` manifests.
 
 Check all the available resources and datasources for the Terraform Provider for Sysdig here: 
 
-[Terraform provider for Sysdig Datasources](./usage.md)
+[Terraform provider for Sysdig Datasources](https://registry.terraform.io/providers/sysdiglabs/sysdig/latest/docs)
 
 ---
 ![Sysdig logo](./assets/img/sysdig-logo-220.png)

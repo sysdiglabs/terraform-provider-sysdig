@@ -2,7 +2,7 @@ package sysdig
 
 import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Creates a rule with the default schema that a Secure Rule should have,
@@ -16,7 +16,8 @@ func createRuleSchema(original map[string]*schema.Schema) map[string]*schema.Sch
 		},
 		"description": {
 			Type:     schema.TypeString,
-			Required: true,
+			Optional: true,
+			Default:  "",
 		},
 		"tags": {
 			Type:     schema.TypeList,

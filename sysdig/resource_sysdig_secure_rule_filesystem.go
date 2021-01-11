@@ -1,11 +1,12 @@
 package sysdig
 
 import (
-	"errors"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
@@ -14,10 +15,13 @@ func resourceSysdigSecureRuleFilesystem() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		Create: resourceSysdigRuleFilesystemCreate,
-		Update: resourceSysdigRuleFilesystemUpdate,
-		Read:   resourceSysdigRuleFilesystemRead,
-		Delete: resourceSysdigRuleFilesystemDelete,
+		CreateContext: resourceSysdigRuleFilesystemCreate,
+		UpdateContext: resourceSysdigRuleFilesystemUpdate,
+		ReadContext:   resourceSysdigRuleFilesystemRead,
+		DeleteContext: resourceSysdigRuleFilesystemDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -71,94 +75,110 @@ func resourceSysdigSecureRuleFilesystem() *schema.Resource {
 	}
 }
 
-func resourceSysdigRuleFilesystemCreate(d *schema.ResourceData, meta interface{}) (err error) {
+func resourceSysdigRuleFilesystemCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	rule, err := resourceSysdigRuleFilesystemFromResourceData(d)
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
-	rule, err = client.CreateRule(rule)
+	rule, err = client.CreateRule(ctx, rule)
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
 	d.Set("version", rule.Version)
 
-	return
+	return nil
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleFilesystemRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	rule, err := client.GetRuleByID(id)
-
+	rule, err := client.GetRuleByID(ctx, id)
 	if err != nil {
 		d.SetId("")
 	}
+
 	updateResourceDataForRule(d, rule)
 
 	if rule.Details.ReadPaths == nil {
-		return errors.New("no readPaths for a filesystem rule")
+		return diag.Errorf("no readPaths for a filesystem rule")
 	}
 
 	if rule.Details.ReadWritePaths == nil {
-		return errors.New("no readWritePaths for a filesystem rule")
+		return diag.Errorf("no readWritePaths for a filesystem rule")
 	}
 
-	d.Set("read_only.0.matching", rule.Details.ReadPaths.MatchItems)
-	d.Set("read_only.0.paths", rule.Details.ReadPaths.Items)
-	d.Set("read_write.0.matching", rule.Details.ReadWritePaths.MatchItems)
-	d.Set("read_write.0.paths", rule.Details.ReadWritePaths.Items)
+	if len(rule.Details.ReadPaths.Items) > 0 {
+		d.Set("read_only", []map[string]interface{}{{
+			"matching": rule.Details.ReadPaths.MatchItems,
+			"paths":    rule.Details.ReadPaths.Items,
+		}})
+	}
+	if len(rule.Details.ReadWritePaths.Items) > 0 {
+		d.Set("read_write", []map[string]interface{}{{
+			"matching": rule.Details.ReadWritePaths.MatchItems,
+			"paths":    rule.Details.ReadWritePaths.Items,
+		}})
+	}
 
 	return nil
 }
 
-func resourceSysdigRuleFilesystemUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+func resourceSysdigRuleFilesystemUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	rule, err := resourceSysdigRuleFilesystemFromResourceData(d)
 	if err != nil {
-		return
+		return diag.FromErr(err)
 	}
 
 	rule.Version = d.Get("version").(int)
 	rule.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateRule(rule)
+	_, err = client.UpdateRule(ctx, rule)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return err
+	return nil
 }
 
-func resourceSysdigRuleFilesystemDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSysdigRuleFilesystemDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return client.DeleteRule(id)
+	err = client.DeleteRule(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
 func resourceSysdigRuleFilesystemFromResourceData(d *schema.ResourceData) (rule secure.Rule, err error) {
