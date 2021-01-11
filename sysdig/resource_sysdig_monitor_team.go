@@ -18,6 +18,9 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 		UpdateContext: resourceSysdigMonitorTeamUpdate,
 		ReadContext:   resourceSysdigMonitorTeamRead,
 		DeleteContext: resourceSysdigMonitorTeamDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -154,6 +157,8 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 	d.Set("scope_by", t.Show)
 	d.Set("filter", t.Filter)
 	d.Set("can_use_sysdig_capture", t.CanUseSysdigCapture)
+	d.Set("can_see_infrastructure_events", t.CanUseCustomEvents)
+	d.Set("can_use_aws_data", t.CanUseAwsMetrics)
 	d.Set("default_team", t.DefaultTeam)
 	d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
 	d.Set("entrypoint", entrypointToSet(t.EntryPoint))

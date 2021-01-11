@@ -10,7 +10,7 @@ description: |-
 
 Creates a Sysdig Secure Filesystem Rule.
 
-~> **Note:** This resource is still experimental, and is subject of being changed.
+`~> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.`
 
 ## Example usage
 
@@ -38,7 +38,7 @@ resource "sysdig_secure_rule_filesystem"  "example" {
 The following arguments are supported:
 
 * `name` - (Required) The name of the Secure rule. It must be unique.
-* `description` - (Required) The description of Secure rule.
+* `description` - (Optional) The description of Secure rule. By default is empty.
 * `tags` - (Optional) A list of tags for this rule.
 
 ### Read Only
@@ -56,3 +56,11 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `version` - Current version of the resource in Sysdig Secure.
+
+## Import
+
+Secure filesystem runtime rules can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_secure_rule_filesystem.example 12345
+```

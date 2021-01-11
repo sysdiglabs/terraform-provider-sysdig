@@ -11,13 +11,16 @@ import (
 )
 
 func resourceSysdigSecureList() *schema.Resource {
-	timeout := 30 * time.Second
+	timeout := 5 * time.Minute
 
 	return &schema.Resource{
 		CreateContext: resourceSysdigListCreate,
 		UpdateContext: resourceSysdigListUpdate,
 		ReadContext:   resourceSysdigListRead,
 		DeleteContext: resourceSysdigListDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

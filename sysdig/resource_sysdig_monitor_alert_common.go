@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const defaultAlertTitle = "{{__alert_name__}} is {{__alert_status__}}"
+
 func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Schema {
 	alertSchema := map[string]*schema.Schema{
 		"name": {
@@ -57,7 +59,50 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 			Optional:     true,
 			ValidateFunc: validation.IntAtLeast(1),
 		},
-		"capture": resourceSysdigMonitorAlertCapture(),
+		"custom_notification": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"title": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"prepend": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"append": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"capture": {
+			Type:     schema.TypeSet,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"filename": {
+						Type:         schema.TypeString,
+						Required:     true,
+						ValidateFunc: validation.StringMatch(regexp.MustCompile(".*?\\.scap"), "the filename must end in .scap"),
+					},
+					"duration": {
+						Type:     schema.TypeInt,
+						Required: true,
+					},
+					"filter": {
+						Type:     schema.TypeString,
+						Optional: true,
+						Default:  "",
+					},
+				},
+			},
+		},
 	}
 
 	for k, v := range original {
@@ -68,6 +113,7 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 }
 
 func alertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert, err error) {
+
 	trigger_after_minutes := time.Duration(d.Get("trigger_after_minutes").(int)) * time.Minute
 	alert = &monitor.Alert{
 		Name:                   d.Get("name").(string),
@@ -76,9 +122,21 @@ func alertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert, err er
 		SegmentBy:              []string{},
 		NotificationChannelIds: []int{},
 		CustomNotification: &monitor.CustomNotification{
-			TitleTemplate:  "{{__alert_name__}} is {{__alert_status__}}",
+			TitleTemplate:  defaultAlertTitle,
 			UseNewTemplate: true,
 		},
+	}
+
+	if _, ok := d.GetOk("custom_notification"); ok {
+		if title, ok := d.GetOk("custom_notification.0.title"); ok {
+			alert.CustomNotification.TitleTemplate = title.(string)
+		}
+		if prependText, ok := d.GetOk("custom_notification.0.prepend"); ok {
+			alert.CustomNotification.PrependText = prependText.(string)
+		}
+		if appendText, ok := d.GetOk("custom_notification.0.append"); ok {
+			alert.CustomNotification.AppendText = appendText.(string)
+		}
 	}
 
 	if scope, ok := d.GetOk("scope"); ok {
@@ -139,6 +197,7 @@ func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err e
 	data.Set("trigger_after_minutes", int(trigger_after_minutes.Minutes()))
 	data.Set("team", alert.TeamID)
 	data.Set("enabled", alert.Enabled)
+	data.Set("severity", alert.Severity)
 
 	if len(alert.NotificationChannelIds) > 0 {
 		data.Set("notification_channels", alert.NotificationChannelIds)
@@ -146,6 +205,23 @@ func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err e
 
 	if alert.ReNotify {
 		data.Set("renotification_minutes", alert.ReNotifyMinutes)
+	}
+
+	if alert.CustomNotification != nil &&
+		(alert.CustomNotification.TitleTemplate != defaultAlertTitle || alert.CustomNotification.AppendText != "" || alert.CustomNotification.PrependText != "") {
+		customNotification := map[string]interface{}{
+			"title": alert.CustomNotification.TitleTemplate,
+		}
+
+		if alert.CustomNotification.AppendText != "" {
+			customNotification["append"] = alert.CustomNotification.AppendText
+		}
+
+		if alert.CustomNotification.PrependText != "" {
+			customNotification["prepend"] = alert.CustomNotification.PrependText
+		}
+
+		data.Set("custom_notification", []interface{}{customNotification})
 	}
 
 	if alert.SysdigCapture != nil && alert.SysdigCapture.Enabled {
@@ -160,31 +236,6 @@ func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err e
 	}
 
 	return
-}
-
-func resourceSysdigMonitorAlertCapture() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeSet,
-		Optional: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"filename": {
-					Type:         schema.TypeString,
-					Required:     true,
-					ValidateFunc: validation.StringMatch(regexp.MustCompile(".*?\\.scap"), "the filename must end in .scap"),
-				},
-				"duration": {
-					Type:     schema.TypeInt,
-					Required: true,
-				},
-				"filter": {
-					Type:     schema.TypeString,
-					Optional: true,
-					Default:  "",
-				},
-			},
-		},
-	}
 }
 
 func sysdigCaptureFromSet(d *schema.Set) (captures []*monitor.SysdigCapture, err error) {

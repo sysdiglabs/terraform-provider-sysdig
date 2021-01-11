@@ -2,28 +2,35 @@ package sysdig
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"errors"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/secure"
 )
 
 func resourceSysdigSecureRuleFalco() *schema.Resource {
-	timeout := 30 * time.Second
+	timeout := 5 * time.Minute
 
 	return &schema.Resource{
 		CreateContext: resourceSysdigRuleFalcoCreate,
 		UpdateContext: resourceSysdigRuleFalcoUpdate,
 		ReadContext:   resourceSysdigRuleFalcoRead,
 		DeleteContext: resourceSysdigRuleFalcoDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
+			Update: schema.DefaultTimeout(timeout),
+			Read:   schema.DefaultTimeout(timeout),
+			Delete: schema.DefaultTimeout(timeout),
 		},
 
 		Schema: createRuleSchema(map[string]*schema.Schema{
@@ -33,17 +40,25 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 			},
 			"output": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Default:  "",
 			},
 			"priority": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"emergency", "alert", "critical", "error", "warning", "notice", "informational", "informational", "debug"}, false),
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "warning",
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"}, false)),
 			},
 			"source": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"syscall", "k8s_audit"}, false),
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "",
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"syscall", "k8s_audit"}, false)),
+			},
+			"append": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 		}),
 	}
@@ -55,7 +70,10 @@ func resourceSysdigRuleFalcoCreate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	rule := resourceSysdigRuleFalcoFromResourceData(d)
+	rule, err := resourceSysdigRuleFalcoFromResourceData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	rule, err = client.CreateRule(ctx, rule)
 	if err != nil {
@@ -95,6 +113,9 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 	d.Set("output", rule.Details.Output)
 	d.Set("priority", strings.ToLower(rule.Details.Priority))
 	d.Set("source", rule.Details.Source)
+	if rule.Details.Append != nil {
+		d.Set("append", *rule.Details.Append)
+	}
 
 	return nil
 }
@@ -105,7 +126,10 @@ func resourceSysdigRuleFalcoUpdate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	rule := resourceSysdigRuleFalcoFromResourceData(d)
+	rule, err := resourceSysdigRuleFalcoFromResourceData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	rule.Version = d.Get("version").(int)
 	rule.ID, _ = strconv.Atoi(d.Id())
@@ -136,18 +160,38 @@ func resourceSysdigRuleFalcoDelete(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) secure.Rule {
+func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) (secure.Rule, error) {
 	rule := ruleFromResourceData(d)
 	rule.Details.RuleType = "FALCO"
 
-	rule.Details.Append = false
-	rule.Details.Source = d.Get("source").(string)
-	rule.Details.Output = d.Get("output").(string)
-	rule.Details.Priority = d.Get("priority").(string)
+	appendMode, appendModeIsSet := d.GetOk("append")
+	if appendModeIsSet {
+		ptr := appendMode.(bool)
+		rule.Details.Append = &ptr
+	}
+
+	if source, ok := d.GetOk("source"); ok && source.(string) != "" {
+		rule.Details.Source = source.(string)
+	} else if !appendModeIsSet || !(appendMode.(bool)) {
+		return secure.Rule{}, errors.New("source must be set when append = false")
+	}
+
+	if output, ok := d.GetOk("output"); ok && output.(string) != "" {
+		rule.Details.Output = output.(string)
+	} else if !appendModeIsSet || !(appendMode.(bool)) {
+		return secure.Rule{}, errors.New("output must be set when append = false")
+	}
+
+	if priority, ok := d.GetOk("priority"); ok && priority.(string) != "" {
+		rule.Details.Priority = priority.(string)
+	} else if !appendModeIsSet || !(appendMode.(bool)) {
+		return secure.Rule{}, errors.New("priority must be set when append = false")
+	}
+
 	rule.Details.Condition = &secure.Condition{
 		Condition:  d.Get("condition").(string),
 		Components: []interface{}{},
 	}
 
-	return rule
+	return rule, nil
 }

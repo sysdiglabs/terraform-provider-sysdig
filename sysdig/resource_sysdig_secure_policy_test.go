@@ -29,6 +29,11 @@ func TestAccPolicy(t *testing.T) {
 				Config: policyWithName(rText()),
 			},
 			{
+				ResourceName:      "sysdig_secure_policy.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: policyWithoutActions(rText()),
 			},
 			{
@@ -36,6 +41,12 @@ func TestAccPolicy(t *testing.T) {
 			},
 			{
 				Config: policyWithMinimumConfiguration(rText()),
+			},
+			{
+				Config: policiesWithDifferentSeverities(rText()),
+			},
+			{
+				Config: policiesWithKillAction(rText()),
 			},
 		},
 	})
@@ -101,6 +112,48 @@ func policyWithMinimumConfiguration(name string) string {
 resource "sysdig_secure_policy" "sample4" {
   name = "TERRAFORM TEST 4 %s"
   description = "TERRAFORM TEST %s"
+}
+`, name, name)
+}
+
+func policiesWithDifferentSeverities(name string) (res string) {
+	for i := 0; i <= 7; i++ {
+		res += fmt.Sprintf(`
+resource "sysdig_secure_policy" "sample_%d" {
+  name = "TERRAFORM TEST 1 %s-%d"
+  description = "TERRAFORM TEST %s-%d"
+  enabled = true
+  severity = %d
+  scope = "container.id != \"\""
+  rule_names = ["Terminal shell in container"]
+
+  actions {
+    container = "stop"
+    capture {
+      seconds_before_event = 5
+      seconds_after_event = 10
+    }
+  }
+}
+
+`, i, name, i, name, i, i)
+	}
+	return
+}
+
+func policiesWithKillAction(name string) (res string) {
+	return fmt.Sprintf(`
+resource "sysdig_secure_policy" "sample" {
+  name = "TERRAFORM TEST 1 %s"
+  description = "TERRAFORM TEST %s"
+  enabled = true
+  severity = 4
+  scope = "container.id != \"\""
+  rule_names = ["Terminal shell in container"]
+
+  actions {
+    container = "kill"
+  }
 }
 `, name, name)
 }

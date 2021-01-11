@@ -17,6 +17,9 @@ func resourceSysdigUser() *schema.Resource {
 		UpdateContext: resourceSysdigUserUpdate,
 		ReadContext:   resourceSysdigUserRead,
 		DeleteContext: resourceSysdigUserDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

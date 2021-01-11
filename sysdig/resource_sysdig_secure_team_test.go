@@ -31,6 +31,11 @@ func TestAccSecureTeam(t *testing.T) {
 			{
 				Config: secureTeamMinimumConfiguration(rText()),
 			},
+			{
+				ResourceName:      "sysdig_secure_team.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

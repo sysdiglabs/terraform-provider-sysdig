@@ -33,6 +33,9 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 		ReadContext:   resourceSysdigPolicyRead,
 		UpdateContext: resourceSysdigPolicyUpdate,
 		DeleteContext: resourceSysdigPolicyDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -51,10 +54,10 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 				Required: true,
 			},
 			"severity": {
-				Type:         schema.TypeInt,
-				Default:      4,
-				Optional:     true,
-				ValidateFunc: validation.IntInSlice([]int{0, 4, 6, 7}),
+				Type:             schema.TypeInt,
+				Default:          4,
+				Optional:         true,
+				ValidateDiagFunc: validateDiagFunc(validation.IntBetween(0, 7)),
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
@@ -92,7 +95,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 						"container": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"stop", "pause"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"stop", "pause", "kill"}, false),
 						},
 						"capture": {
 							Type:     schema.TypeList,
@@ -100,14 +103,14 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"seconds_after_event": {
-										Type:         schema.TypeInt,
-										Required:     true,
-										ValidateFunc: validation.IntAtLeast(0),
+										Type:             schema.TypeInt,
+										Required:         true,
+										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
 									},
 									"seconds_before_event": {
-										Type:         schema.TypeInt,
-										Required:     true,
-										ValidateFunc: validation.IntAtLeast(0),
+										Type:             schema.TypeInt,
+										Required:         true,
+										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
 									},
 								},
 							},
@@ -214,6 +217,7 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 	d.Set("scope", policy.Scope)
 	d.Set("enabled", policy.Enabled)
 	d.Set("version", policy.Version)
+	d.Set("severity", policy.Severity)
 
 	actions := []map[string]interface{}{{}}
 	for _, action := range policy.Actions {

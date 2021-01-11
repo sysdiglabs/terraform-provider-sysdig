@@ -36,6 +36,11 @@ func TestAccMacro(t *testing.T) {
 				Config: macroUpdatedWithName(fixedRandomText),
 			},
 			{
+				ResourceName:      "sysdig_secure_macro.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: macroAppendToDefault(),
 			},
 			{

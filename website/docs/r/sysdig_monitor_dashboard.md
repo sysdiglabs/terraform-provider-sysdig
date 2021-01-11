@@ -10,7 +10,7 @@ description: |-
 
 Creates a Sysdig Monitor Dashboard using PromQL queries.
 
-~> **Note:** This resource is still experimental, and is subject of being changed.
+`~> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.`
 
 ## Example usage
 
@@ -112,3 +112,23 @@ In addition to all arguments above, the following attributes are exported:
 * `public_token` - (Computed) Token defined when the dashboard is set Public.
 
 * `version` - (Computed)  The current version of the Dashboard.
+
+## Import
+
+Monitor dashboards can be imported using the dashboard ID, e.g.
+
+```
+$ terraform import sysdig_monitor_dashboard.example 12345
+```
+
+Only dashboards that contain supported panels can be imported. Currently supported panel types are:
+- PromQL timecharts
+- PromQL numbers
+
+Only dashboards that contain supported query types can be imported. Currently supported query types:
+- Percent
+- Data
+- Data rate
+- Number
+- Number rate
+- Time

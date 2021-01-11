@@ -10,7 +10,7 @@ description: |-
 
 Creates a Sysdig Monitor Team.
 
-~> **Note:** This resource is still experimental, and is subject of being changed.
+`~> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.`
 
 ## Example usage
 
@@ -81,3 +81,11 @@ data "sysdig_current_user" "me" {
 * `role` - (Optional) The role for the user in this group.
            Valid roles are: ROLE_TEAM_STANDARD, ROLE_TEAM_EDIT, ROLE_TEAM_READ, ROLE_TEAM_MANAGER.
            Default: ROLE_TEAM_STANDARD.
+  
+## Import
+
+Monitor Teams can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_monitor_team.example 12345
+```

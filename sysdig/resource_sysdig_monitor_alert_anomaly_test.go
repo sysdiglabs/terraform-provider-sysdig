@@ -28,6 +28,11 @@ func TestAccAlertAnomaly(t *testing.T) {
 			{
 				Config: alertAnomalyWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_alert_anomaly.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -51,6 +56,12 @@ resource "sysdig_monitor_alert_anomaly" "sample" {
 	capture {
 		filename = "TERRAFORM_TEST.scap"
 		duration = 15
+	}
+
+	custom_notification {
+		title = "{{__alert_name__}} is {{__alert_status__}}"
+		prepend = "{{kubernetes.deployment.name}}"
+		append = "{{kubernetes.deployment.name}}"
 	}
 }
 `, name, name)

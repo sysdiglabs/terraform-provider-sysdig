@@ -38,6 +38,11 @@ func TestAccRuleFilesystem(t *testing.T) {
 				Config: ruleFilesystemWithReadwriteWithName(rText()),
 			},
 			{
+				ResourceName:      "sysdig_secure_rule_filesystem.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: ruleFilesystemMinimalConfig(rText()),
 			},
 		},

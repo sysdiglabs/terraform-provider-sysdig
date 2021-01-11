@@ -20,6 +20,9 @@ func resourceSysdigSecureNotificationChannelEmail() *schema.Resource {
 		UpdateContext: resourceSysdigSecureNotificationChannelEmailUpdate,
 		ReadContext:   resourceSysdigSecureNotificationChannelEmailRead,
 		DeleteContext: resourceSysdigSecureNotificationChannelEmailDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

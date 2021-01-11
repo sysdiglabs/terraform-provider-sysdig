@@ -10,7 +10,7 @@ description: |-
 
 Creates a Sysdig Secure Policy.
 
-~> **Note:** This resource is still experimental, and is subject of being changed.
+~> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.  
 
 ## Example usage
 
@@ -47,7 +47,7 @@ resource "sysdig_secure_policy" "write_apt_database" {
 * `description` - (Required) The description of Secure policy.
 
 * `severity` - (Optional) The severity of Secure policy. The accepted values
-    are: 0 (High), 4 (Medium), 6 (Low) and 7 (Info). The default value is 4 (Medium).
+    are: 0, 1, 2, 3 (High), 4, 5 (Medium), 6 (Low) and 7 (Info). The default value is 4 (Medium).
 
 * `enabled` - (Optional) Will secure process with this rule?. By default this is true.
 
@@ -66,7 +66,8 @@ resource "sysdig_secure_policy" "write_apt_database" {
 The actions block is optional and supports:
 
 * `container` - (Optional) The action applied to container when this Policy is
-    triggered. Can be *stop* or *pause*.
+    triggered. Can be *stop*, *pause* or *kill*. If this is not specified,
+    no action will be applied at the container level.
 
 * `capture` - (Optional) Captures with Sysdig the stream of system calls:
     * `seconds_before_event` - (Required) Captures the system calls during the
@@ -86,3 +87,11 @@ The actions block is optional and supports:
 
 * `notification_channels` - (Optional) IDs of the notification channels to send alerts to
     when the policy is fired.
+
+## Import
+
+Secure runtime policies can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_secure_policy.example 12345
+```

@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	"github.com/draios/terraform-provider-sysdig/sysdig/monitor/model"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -18,6 +19,9 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 		UpdateContext: resourceSysdigDashboardUpdate,
 		ReadContext:   resourceSysdigDashboardRead,
 		DeleteContext: resourceSysdigDashboardDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -225,7 +229,7 @@ func panelsFromResourceData(data *schema.ResourceData) (panels []*model.Panels, 
 		case "number":
 			panelType = model.PanelTypeNumber
 		default:
-			panic("unreachable code")
+			return nil, fmt.Errorf("unsupported panel type %s", panelInfo["type"])
 		}
 
 		panel := model.NewPanel(panelInfo["name"].(string), panelInfo["description"].(string), panelType)
@@ -235,7 +239,11 @@ func panelsFromResourceData(data *schema.ResourceData) (panels []*model.Panels, 
 			return nil, err
 		}
 
-		queries := queriesFromResourceData(panelInfo, panel)
+		queries, err := queriesFromResourceData(panelInfo, panel)
+		if err != nil {
+			return nil, err
+		}
+
 		_, err = panel.AddQueries(queries...)
 		if err != nil {
 			return nil, err
@@ -246,7 +254,7 @@ func panelsFromResourceData(data *schema.ResourceData) (panels []*model.Panels, 
 	return
 }
 
-func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Panels) (newQueries []*model.AdvancedQueries) {
+func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Panels) (newQueries []*model.AdvancedQueries, err error) {
 	for _, queryItr := range panelInfo["query"].(*schema.Set).List() {
 		queryInfo := queryItr.(map[string]interface{})
 
@@ -266,7 +274,7 @@ func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Pane
 		case "time":
 			promqlQuery.WithTimeFormat()
 		default:
-			panic("unreachable code")
+			return nil, fmt.Errorf("unsupported query format unit: %s", queryInfo["unit"])
 		}
 
 		newQueries = append(newQueries, promqlQuery)
@@ -299,7 +307,7 @@ func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceDa
 			case model.FormatUnitTime:
 				unit = "time"
 			default:
-				panic("unreachable code")
+				return fmt.Errorf("unsupported query format unit: %s", query.Format.Unit)
 			}
 
 			queries = append(queries, map[string]interface{}{
@@ -323,7 +331,7 @@ func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceDa
 		case model.PanelTypeNumber:
 			panelType = "number"
 		default:
-			panic("unreachable code")
+			return fmt.Errorf("unsupported panel type %s", panel.Type)
 		}
 
 		panels = append(panels, map[string]interface{}{

@@ -12,16 +12,22 @@ import (
 )
 
 func resourceSysdigSecureRuleSyscall() *schema.Resource {
-	timeout := 30 * time.Second
+	timeout := 5 * time.Minute
 
 	return &schema.Resource{
 		CreateContext: resourceSysdigRuleSyscallCreate,
 		UpdateContext: resourceSysdigRuleSyscallUpdate,
 		ReadContext:   resourceSysdigRuleSyscallRead,
 		DeleteContext: resourceSysdigRuleSyscallDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
+			Update: schema.DefaultTimeout(timeout),
+			Read:   schema.DefaultTimeout(timeout),
+			Delete: schema.DefaultTimeout(timeout),
 		},
 
 		Schema: createRuleSchema(map[string]*schema.Schema{

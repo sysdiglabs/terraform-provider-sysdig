@@ -19,6 +19,9 @@ func resourceSysdigMonitorNotificationChannelVictorOps() *schema.Resource {
 		UpdateContext: resourceSysdigMonitorNotificationChannelVictorOpsUpdate,
 		ReadContext:   resourceSysdigMonitorNotificationChannelVictorOpsRead,
 		DeleteContext: resourceSysdigMonitorNotificationChannelVictorOpsDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

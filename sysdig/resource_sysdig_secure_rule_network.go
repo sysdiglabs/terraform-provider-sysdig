@@ -19,6 +19,9 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 		UpdateContext: resourceSysdigRuleNetworkUpdate,
 		ReadContext:   resourceSysdigRuleNetworkRead,
 		DeleteContext: resourceSysdigRuleNetworkDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -47,7 +50,7 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 							Default:  true,
 						},
 						"ports": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Required: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeInt,
@@ -67,7 +70,7 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 							Default:  true,
 						},
 						"ports": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Required: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeInt,
@@ -133,15 +136,31 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if len(rule.Details.TCPListenPorts.Items) > 0 {
+		tcpPorts := []int{}
+		for _, port := range rule.Details.TCPListenPorts.Items {
+			intPort, err := strconv.Atoi(port)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			tcpPorts = append(tcpPorts, intPort)
+		}
 		d.Set("tcp", []map[string]interface{}{{
 			"matching": rule.Details.TCPListenPorts.MatchItems,
-			"ports":    rule.Details.TCPListenPorts.Items,
+			"ports":    tcpPorts,
 		}})
 	}
 	if len(rule.Details.UDPListenPorts.Items) > 0 {
+		udpPorts := []int{}
+		for _, port := range rule.Details.UDPListenPorts.Items {
+			intPort, err := strconv.Atoi(port)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			udpPorts = append(udpPorts, intPort)
+		}
 		d.Set("udp", []map[string]interface{}{{
 			"matching": rule.Details.UDPListenPorts.MatchItems,
-			"ports":    rule.Details.UDPListenPorts.Items,
+			"ports":    udpPorts,
 		}})
 	}
 
@@ -200,23 +219,22 @@ func resourceSysdigRuleNetworkFromResourceData(d *schema.ResourceData) (rule sec
 	rule.Details.AllOutbound = d.Get("block_outbound").(bool)
 
 	rule.Details.TCPListenPorts.Items = []string{}
-	if tcpRules, ok := d.Get("tcp").([]interface{}); ok && len(tcpRules) > 0 {
+	if tcpRules := d.Get("tcp").([]interface{}); len(tcpRules) > 0 {
 		rule.Details.TCPListenPorts.MatchItems = d.Get("tcp.0.matching").(bool)
-		for _, port := range d.Get("tcp.0.ports").([]interface{}) {
-			if portStr, ok := port.(string); ok {
-				rule.Details.TCPListenPorts.Items = append(rule.Details.TCPListenPorts.Items, portStr)
-			}
+		for _, port := range d.Get("tcp.0.ports").(*schema.Set).List() {
+			portStr := port.(int)
+			rule.Details.TCPListenPorts.Items = append(rule.Details.TCPListenPorts.Items, strconv.Itoa(portStr))
 		}
 	}
 
 	rule.Details.UDPListenPorts.Items = []string{}
 	if udpRules, ok := d.Get("udp").([]interface{}); ok && len(udpRules) > 0 {
 		rule.Details.UDPListenPorts.MatchItems = d.Get("udp.0.matching").(bool)
-		for _, port := range d.Get("udp.0.ports").([]interface{}) {
-			if portStr, ok := port.(string); ok {
-				rule.Details.UDPListenPorts.Items = append(rule.Details.UDPListenPorts.Items, portStr)
-			}
+		for _, port := range d.Get("udp.0.ports").(*schema.Set).List() {
+			portStr := port.(int)
+			rule.Details.UDPListenPorts.Items = append(rule.Details.UDPListenPorts.Items, strconv.Itoa(portStr))
 		}
 	}
+
 	return
 }

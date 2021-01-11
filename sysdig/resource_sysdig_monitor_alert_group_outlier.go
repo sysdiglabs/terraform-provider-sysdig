@@ -17,6 +17,9 @@ func resourceSysdigMonitorAlertGroupOutlier() *schema.Resource {
 		UpdateContext: resourceSysdigAlertGroupOutlierUpdate,
 		ReadContext:   resourceSysdigAlertGroupOutlierRead,
 		DeleteContext: resourceSysdigAlertGroupOutlierDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

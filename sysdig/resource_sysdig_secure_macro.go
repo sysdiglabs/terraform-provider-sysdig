@@ -10,13 +10,16 @@ import (
 )
 
 func resourceSysdigSecureMacro() *schema.Resource {
-	timeout := 30 * time.Second
+	timeout := 5 * time.Minute
 
 	return &schema.Resource{
 		CreateContext: resourceSysdigMacroCreate,
 		UpdateContext: resourceSysdigMacroUpdate,
 		ReadContext:   resourceSysdigMacroRead,
 		DeleteContext: resourceSysdigMacroDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

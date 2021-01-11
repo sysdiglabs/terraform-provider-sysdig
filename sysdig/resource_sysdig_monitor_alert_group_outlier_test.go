@@ -28,6 +28,11 @@ func TestAccAlertGroupOutlier(t *testing.T) {
 			{
 				Config: alertGroupOutlierWithName(rText()),
 			},
+			{
+				ResourceName:      "sysdig_monitor_alert_group_outlier.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

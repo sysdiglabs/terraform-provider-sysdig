@@ -19,6 +19,9 @@ func resourceSysdigMonitorNotificationChannelSlack() *schema.Resource {
 		UpdateContext: resourceSysdigMonitorNotificationChannelSlackUpdate,
 		ReadContext:   resourceSysdigMonitorNotificationChannelSlackRead,
 		DeleteContext: resourceSysdigMonitorNotificationChannelSlackDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),

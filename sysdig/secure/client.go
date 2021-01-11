@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 type SysdigSecureClient interface {
@@ -49,7 +51,8 @@ func WithExtraHeaders(client SysdigSecureClient, extraHeaders map[string]string)
 }
 
 func NewSysdigSecureClient(sysdigSecureAPIToken string, url string, insecure bool) SysdigSecureClient {
-	httpClient := &http.Client{
+	httpClient := retryablehttp.NewClient()
+	httpClient.HTTPClient = &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
 			Proxy:           http.ProxyFromEnvironment,
@@ -59,7 +62,7 @@ func NewSysdigSecureClient(sysdigSecureAPIToken string, url string, insecure boo
 	return &sysdigSecureClient{
 		SysdigSecureAPIToken: sysdigSecureAPIToken,
 		URL:                  url,
-		httpClient:           httpClient,
+		httpClient:           httpClient.StandardClient(),
 	}
 }
 
@@ -84,6 +87,10 @@ func (client *sysdigSecureClient) doSysdigSecureRequest(ctx context.Context, met
 	out, _ := httputil.DumpRequestOut(request, true)
 	log.Printf("[DEBUG] %s", string(out))
 	response, err := client.httpClient.Do(request)
+	if err != nil {
+		log.Println(err.Error())
+		return response, err
+	}
 
 	out, _ = httputil.DumpResponse(response, true)
 	log.Printf("[DEBUG] %s", string(out))
