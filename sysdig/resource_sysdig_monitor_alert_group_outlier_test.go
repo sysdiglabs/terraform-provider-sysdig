@@ -15,7 +15,7 @@ import (
 func TestAccAlertGroupOutlier(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_MONITOR_API_TOKEN"); v == "" {
 				t.Fatal("SYSDIG_MONITOR_API_TOKEN must be set for acceptance tests")
