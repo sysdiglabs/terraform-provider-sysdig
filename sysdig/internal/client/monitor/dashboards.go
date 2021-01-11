@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/monitor/model"
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor/model"
 )
 
 func (client *sysdigMonitorClient) GetDashboardByID(ctx context.Context, ID int) (*model.Dashboard, error) {

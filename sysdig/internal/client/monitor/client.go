@@ -8,8 +8,9 @@ import (
 	"net/http"
 	"net/http/httputil"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/monitor/model"
 	"github.com/hashicorp/go-retryablehttp"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor/model"
 )
 
 type SysdigMonitorClient interface {
