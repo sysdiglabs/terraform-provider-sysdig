@@ -228,20 +228,20 @@ func (q *AdvancedQueries) WithTimeFormat() *AdvancedQueries {
 }
 
 type Panels struct {
-	ID                     int                 `json:"id"`
-	Name                   string              `json:"name"`
-	Description            string              `json:"description"`
-	AxesConfiguration      AxesConfiguration   `json:"axesConfiguration"`
-	LegendConfiguration    LegendConfiguration `json:"legendConfiguration"`
-	ApplyScopeToAll        bool                `json:"applyScopeToAll"`
-	ApplySegmentationToAll bool                `json:"applySegmentationToAll"`
-	AdvancedQueries        []*AdvancedQueries  `json:"advancedQueries"`
-	NumberThresholds       NumberThresholds    `json:"numberThresholds"`
-	MarkdownSource         interface{}         `json:"markdownSource"`
-	PanelTitleVisible      bool                `json:"panelTitleVisible"`
-	TextAutosized          bool                `json:"textAutosized"`
-	TransparentBackground  bool                `json:"transparentBackground"`
-	Type                   PanelType           `json:"type"`
+	ID                     int                  `json:"id"`
+	Name                   string               `json:"name"`
+	Description            string               `json:"description"`
+	AxesConfiguration      *AxesConfiguration   `json:"axesConfiguration,omitempty"`
+	LegendConfiguration    *LegendConfiguration `json:"legendConfiguration,omitempty"`
+	ApplyScopeToAll        bool                 `json:"applyScopeToAll,omitempty"`
+	ApplySegmentationToAll bool                 `json:"applySegmentationToAll,omitempty"`
+	AdvancedQueries        []*AdvancedQueries   `json:"advancedQueries,omitempty"`
+	NumberThresholds       *NumberThresholds    `json:"numberThresholds,omitempty"`
+	MarkdownSource         *string              `json:"markdownSource,omitempty"`
+	PanelTitleVisible      bool                 `json:"panelTitleVisible"`
+	TextAutosized          bool                 `json:"textAutosized"`
+	TransparentBackground  bool                 `json:"transparentBackground"`
+	Type                   PanelType            `json:"type"`
 	// Just a helper to the client, the actual field is in Dashboard
 	Layout *Layout `json:"-"`
 }
@@ -251,63 +251,8 @@ type PanelType string
 const (
 	PanelTypeTimechart PanelType = "advancedTimechart"
 	PanelTypeNumber    PanelType = "advancedNumber"
+	PanelTypeText      PanelType = "text"
 )
-
-func NewPanel(name, description string, panelType PanelType) *Panels {
-	newPanel := &Panels{
-		ID:                     0,
-		Name:                   name,
-		Description:            description,
-		Type:                   panelType,
-		ApplyScopeToAll:        false,
-		ApplySegmentationToAll: false,
-		AxesConfiguration: AxesConfiguration{
-			Bottom: Bottom{Enabled: true},
-			Left: Left{
-				Enabled:        true,
-				DisplayName:    nil,
-				Unit:           "auto",
-				DisplayFormat:  "auto",
-				Decimals:       "",
-				MinValue:       0,
-				MaxValue:       "",
-				MinInputFormat: "ns",
-				MaxInputFormat: "ns",
-				Scale:          "linear",
-			},
-			Right: Right{
-				Enabled:        true,
-				DisplayName:    nil,
-				Unit:           "auto",
-				DisplayFormat:  "auto",
-				Decimals:       "",
-				MinValue:       0,
-				MaxValue:       "",
-				MinInputFormat: "1",
-				MaxInputFormat: "1",
-				Scale:          "linear",
-			},
-		},
-		LegendConfiguration: LegendConfiguration{
-			Enabled:     true,
-			Position:    "right",
-			Layout:      "table",
-			ShowCurrent: true,
-			Width:       nil,
-			Height:      nil,
-		},
-		MarkdownSource:        nil,
-		PanelTitleVisible:     false,
-		TextAutosized:         false,
-		TransparentBackground: false,
-	}
-
-	if newPanel.Type == PanelTypeNumber {
-		newPanel.NumberThresholds.Values = []interface{}{} // These values must be not nil in case of type number
-		newPanel.NumberThresholds.Base.Severity = "none"
-	}
-	return newPanel
-}
 
 func (p *Panels) AddQueries(queries ...*AdvancedQueries) (*Panels, error) {
 	if p.Type == PanelTypeNumber && len(p.AdvancedQueries)+len(queries) > 1 {

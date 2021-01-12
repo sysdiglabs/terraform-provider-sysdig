@@ -16,43 +16,57 @@ Creates a Sysdig Monitor Dashboard using PromQL queries.
 
 ```hcl
 resource "sysdig_monitor_dashboard" "dashboard" {
-	name = "Example Dashboard"
-	description = "Example Dashboard description"
+  name        = "Example Dashboard"
+  description = "Example Dashboard description"
 
-	panel {
-		pos_x = 0
-		pos_y = 0
-		width = 12 # Maximum size: 24
-		height = 6
-		type = "timechart" # timechart or number
-		name = "Example panel"
-		description = "Description"
+  panel {
+    pos_x       = 0
+    pos_y       = 0
+    width       = 12 # Maximum size: 24
+    height      = 6
+    type        = "timechart" # timechart or number
+    name        = "Example panel"
+    description = "Description"
 
-		query {
-			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
-			unit = "percent"
-		}
-		query {
-			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
-			unit = "number"
-		}
-	}
+    query {
+      promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+      unit   = "percent"
+    }
+    query {
+      promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+      unit   = "number"
+    }
+  }
 
-	panel {
-		pos_x = 12
-		pos_y = 0
-		width = 12
-		height = 6
-		type = "number"
-		name = "example panel - 2"
-		description = "description of panel 2"
+  panel {
+    pos_x       = 12
+    pos_y       = 0
+    width       = 12
+    height      = 6
+    type        = "number"
+    name        = "example panel - 2"
+    description = "description of panel 2"
 
-		query {
-			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
-			unit = "time"
-		}
-	}
+    query {
+      promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+      unit   = "time"
+    }
+  }
+
+  panel {
+    pos_x                  = 12
+    pos_y                  = 12
+    width                  = 12
+    height                 = 6
+    type                   = "text"
+    name                   = "example panel - 2"
+    content                = "description of panel 2"
+    visible_title          = true
+    autosize_text          = true
+    transparent_background = true
+  }
 }
+
 ```
 
 ## Argument Reference
@@ -87,13 +101,25 @@ The following arguments are supported:
 
 * `description` - (Optional) Description of the panel.
 
-* `type` - (Required) Kind of panel, must be either `timechart` or `number`.
+* `type` - (Required) Kind of panel, must be either `timechart`, `number` or `text`.
 
-* `query` - (Required) The PromQL query that will show information in the panel. 
+* `query` - (Optional) The PromQL query that will show information in the panel. 
             If the type of the panel is `timechart`, then it can be specified multiple 
             times, to have multiple metrics in the same graph.
             If the type of the panel is `number` then only one can be specified.
+            This field is required if the panel type is `timechart` or `number`.
 
+* `content` - (Optional) This field is required if the panel type is `text`. It represents the 
+               text that will be displayed in the panel.
+
+* `visible_title` - (Optional) If true, the title of the panel will be displayed. Default: false.
+                    This field is ignored for all panel types except `text`.
+
+* `autosize_text` - (Optional) If true, the text will be autosized in the panel.
+                    This field is ignored for all panel types except `text`.
+  
+* `transparent_background` - (Optional) If true, the panel will have a transparent background.
+                             This field is ignored for all panel types except `text`.
 
 ### query 
 
@@ -124,6 +150,7 @@ $ terraform import sysdig_monitor_dashboard.example 12345
 Only dashboards that contain supported panels can be imported. Currently supported panel types are:
 - PromQL timecharts
 - PromQL numbers
+- Text
 
 Only dashboards that contain supported query types can be imported. Currently supported query types:
 - Percent

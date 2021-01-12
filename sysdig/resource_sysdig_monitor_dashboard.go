@@ -88,11 +88,30 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 						"type": {
 							Type:             schema.TypeString,
 							Required:         true,
-							ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"timechart", "number"}, false)),
+							ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"timechart", "number", "text"}, false)),
+						},
+						"content": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"visible_title": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"autosize_text": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"transparent_background": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
 						},
 						"query": {
 							Type:     schema.TypeSet,
-							Required: true,
+							Optional: true,
 							MinItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -224,29 +243,17 @@ func panelsFromResourceData(data *schema.ResourceData) (panels []*model.Panels, 
 	for _, panelItr := range data.Get("panel").(*schema.Set).List() {
 		panelInfo := panelItr.(map[string]interface{})
 
-		var panelType model.PanelType
+		var panel *model.Panels
 		switch panelInfo["type"].(string) {
 		case "timechart":
-			panelType = model.PanelTypeTimechart
+			panel, err = timechartPanelFromResourceData(panelInfo)
 		case "number":
-			panelType = model.PanelTypeNumber
+			panel, err = numberPanelFromResourceData(panelInfo)
+		case "text":
+			panel, err = textPanelFromResourceData(panelInfo)
 		default:
 			return nil, fmt.Errorf("unsupported panel type %s", panelInfo["type"])
 		}
-
-		panel := model.NewPanel(panelInfo["name"].(string), panelInfo["description"].(string), panelType)
-
-		_, err = panel.WithLayout(panelInfo["pos_x"].(int), panelInfo["pos_y"].(int), panelInfo["width"].(int), panelInfo["height"].(int))
-		if err != nil {
-			return nil, err
-		}
-
-		queries, err := queriesFromResourceData(panelInfo, panel)
-		if err != nil {
-			return nil, err
-		}
-
-		_, err = panel.AddQueries(queries...)
 		if err != nil {
 			return nil, err
 		}
@@ -254,6 +261,172 @@ func panelsFromResourceData(data *schema.ResourceData) (panels []*model.Panels, 
 		panels = append(panels, panel)
 	}
 	return
+}
+
+func timechartPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panels, error) {
+	panel := &model.Panels{
+		ID:                     0,
+		Name:                   panelInfo["name"].(string),
+		Description:            panelInfo["description"].(string),
+		Type:                   model.PanelTypeTimechart,
+		ApplyScopeToAll:        false,
+		ApplySegmentationToAll: false,
+		AxesConfiguration: &model.AxesConfiguration{
+			Bottom: model.Bottom{Enabled: true},
+			Left: model.Left{
+				Enabled:        true,
+				DisplayName:    nil,
+				Unit:           "auto",
+				DisplayFormat:  "auto",
+				Decimals:       "",
+				MinValue:       0,
+				MaxValue:       "",
+				MinInputFormat: "ns",
+				MaxInputFormat: "ns",
+				Scale:          "linear",
+			},
+			Right: model.Right{
+				Enabled:        true,
+				DisplayName:    nil,
+				Unit:           "auto",
+				DisplayFormat:  "auto",
+				Decimals:       "",
+				MinValue:       0,
+				MaxValue:       "",
+				MinInputFormat: "1",
+				MaxInputFormat: "1",
+				Scale:          "linear",
+			},
+		},
+		LegendConfiguration: &model.LegendConfiguration{
+			Enabled:     true,
+			Position:    "right",
+			Layout:      "table",
+			ShowCurrent: true,
+			Width:       nil,
+			Height:      nil,
+		},
+		MarkdownSource:        nil,
+		PanelTitleVisible:     false,
+		TextAutosized:         false,
+		TransparentBackground: false,
+	}
+
+	_, err := panel.WithLayout(panelInfo["pos_x"].(int), panelInfo["pos_y"].(int), panelInfo["width"].(int), panelInfo["height"].(int))
+	if err != nil {
+		return nil, err
+	}
+
+	queries, err := queriesFromResourceData(panelInfo, panel)
+	if err != nil {
+		return nil, err
+	}
+	if len(queries) == 0 {
+		return nil, fmt.Errorf("no query defined for timechart panel")
+	}
+
+	_, err = panel.AddQueries(queries...)
+	if err != nil {
+		return nil, err
+	}
+
+	return panel, nil
+}
+
+func numberPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panels, error) {
+	panel := &model.Panels{
+		ID:                     0,
+		Name:                   panelInfo["name"].(string),
+		Description:            panelInfo["description"].(string),
+		Type:                   model.PanelTypeNumber,
+		ApplyScopeToAll:        false,
+		ApplySegmentationToAll: false,
+		AxesConfiguration: &model.AxesConfiguration{
+			Bottom: model.Bottom{Enabled: true},
+			Left: model.Left{
+				Enabled:        true,
+				DisplayName:    nil,
+				Unit:           "auto",
+				DisplayFormat:  "auto",
+				Decimals:       "",
+				MinValue:       0,
+				MaxValue:       "",
+				MinInputFormat: "ns",
+				MaxInputFormat: "ns",
+				Scale:          "linear",
+			},
+			Right: model.Right{
+				Enabled:        true,
+				DisplayName:    nil,
+				Unit:           "auto",
+				DisplayFormat:  "auto",
+				Decimals:       "",
+				MinValue:       0,
+				MaxValue:       "",
+				MinInputFormat: "1",
+				MaxInputFormat: "1",
+				Scale:          "linear",
+			},
+		},
+		LegendConfiguration: &model.LegendConfiguration{
+			Enabled:     true,
+			Position:    "right",
+			Layout:      "table",
+			ShowCurrent: true,
+			Width:       nil,
+			Height:      nil,
+		},
+		MarkdownSource:        nil,
+		PanelTitleVisible:     false,
+		TextAutosized:         false,
+		TransparentBackground: false,
+		NumberThresholds: &model.NumberThresholds{
+			Values: []interface{}{}, // These values must be not nil in case of type number
+			Base: model.Base{
+				Severity: "none",
+			},
+		},
+	}
+
+	_, err := panel.WithLayout(panelInfo["pos_x"].(int), panelInfo["pos_y"].(int), panelInfo["width"].(int), panelInfo["height"].(int))
+	if err != nil {
+		return nil, err
+	}
+
+	queries, err := queriesFromResourceData(panelInfo, panel)
+	if err != nil {
+		return nil, err
+	}
+	if len(queries) == 0 {
+		return nil, fmt.Errorf("no query defined for number panel")
+	}
+
+	_, err = panel.AddQueries(queries...)
+	if err != nil {
+		return nil, err
+	}
+
+	return panel, nil
+}
+
+func textPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panels, error) {
+	content := panelInfo["content"].(string)
+	panel := &model.Panels{
+		ID:                    0,
+		Name:                  panelInfo["name"].(string),
+		Description:           "",
+		Type:                  model.PanelTypeText,
+		MarkdownSource:        &content,
+		PanelTitleVisible:     panelInfo["visible_title"].(bool),
+		TextAutosized:         panelInfo["autosize_text"].(bool),
+		TransparentBackground: panelInfo["transparent_background"].(bool),
+	}
+	_, err := panel.WithLayout(panelInfo["pos_x"].(int), panelInfo["pos_y"].(int), panelInfo["width"].(int), panelInfo["height"].(int))
+	if err != nil {
+		return nil, err
+	}
+
+	return panel, nil
 }
 
 func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Panels) (newQueries []*model.AdvancedQueries, err error) {
@@ -292,63 +465,118 @@ func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceDa
 
 	var panels []map[string]interface{}
 	for _, panel := range dashboard.Panels {
-		var queries []map[string]interface{}
-		for _, query := range panel.AdvancedQueries {
-			unit := ""
-			switch query.Format.Unit {
-			case model.FormatUnitPercentage:
-				unit = "percent"
-			case model.FormatUnitData:
-				unit = "data"
-			case model.FormatUnitDataRate:
-				unit = "data rate"
-			case model.FormatUnitNumber:
-				unit = "number"
-			case model.FormatUnitNumberRate:
-				unit = "number rate"
-			case model.FormatUnitTime:
-				unit = "time"
-			default:
-				return fmt.Errorf("unsupported query format unit: %s", query.Format.Unit)
-			}
-
-			queries = append(queries, map[string]interface{}{
-				"unit":   unit,
-				"promql": query.Query,
-			})
+		dPanel, err := panelToResourceData(panel, dashboard.Layout)
+		if err != nil {
+			return err
 		}
-
-		var panelLayout *model.Layout
-
-		for _, layout := range dashboard.Layout {
-			if layout.PanelID == panel.ID {
-				panelLayout = layout
-			}
-		}
-
-		var panelType string
-		switch panel.Type {
-		case model.PanelTypeTimechart:
-			panelType = "timechart"
-		case model.PanelTypeNumber:
-			panelType = "number"
-		default:
-			return fmt.Errorf("unsupported panel type %s", panel.Type)
-		}
-
-		panels = append(panels, map[string]interface{}{
-			"pos_x":       panelLayout.X,
-			"pos_y":       panelLayout.Y,
-			"width":       panelLayout.W,
-			"height":      panelLayout.H,
-			"name":        panel.Name,
-			"description": panel.Description,
-			"type":        panelType,
-			"query":       queries,
-		})
+		panels = append(panels, dPanel)
 	}
 	data.Set("panel", panels)
 	data.Set("version", dashboard.Version)
 
 	return nil
+}
+
+func panelToResourceData(panel *model.Panels, layout []*model.Layout) (map[string]interface{}, error) {
+	var panelLayout *model.Layout
+
+	for _, l := range layout {
+		if l.PanelID == panel.ID {
+			panelLayout = l
+		}
+	}
+	if panelLayout == nil {
+		return nil, fmt.Errorf("inconsistent layout for dashboard trying to find panel ID: %d", panel.ID)
+	}
+
+	switch panel.Type {
+	case model.PanelTypeTimechart:
+		return timechartPanelToResourceData(panel, panelLayout)
+	case model.PanelTypeNumber:
+		return numberPanelToResourceData(panel, panelLayout)
+	case model.PanelTypeText:
+		return textPanelToResourceData(panel, panelLayout)
+	default:
+		return nil, fmt.Errorf("unsupported panel type %s", panel.Type)
+	}
+}
+
+func timechartPanelToResourceData(panel *model.Panels, panelLayout *model.Layout) (map[string]interface{}, error) {
+	queries, err := queriesToResourceData(panel.AdvancedQueries)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"pos_x":       panelLayout.X,
+		"pos_y":       panelLayout.Y,
+		"width":       panelLayout.W,
+		"height":      panelLayout.H,
+		"name":        panel.Name,
+		"description": panel.Description,
+		"type":        "timechart",
+		"query":       queries,
+	}, nil
+}
+
+func numberPanelToResourceData(panel *model.Panels, panelLayout *model.Layout) (map[string]interface{}, error) {
+	queries, err := queriesToResourceData(panel.AdvancedQueries)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"pos_x":       panelLayout.X,
+		"pos_y":       panelLayout.Y,
+		"width":       panelLayout.W,
+		"height":      panelLayout.H,
+		"name":        panel.Name,
+		"description": panel.Description,
+		"type":        "number",
+		"query":       queries,
+	}, nil
+}
+
+func textPanelToResourceData(panel *model.Panels, panelLayout *model.Layout) (map[string]interface{}, error) {
+	return map[string]interface{}{
+		"pos_x":                  panelLayout.X,
+		"pos_y":                  panelLayout.Y,
+		"width":                  panelLayout.W,
+		"height":                 panelLayout.H,
+		"name":                   panel.Name,
+		"content":                panel.MarkdownSource,
+		"type":                   "text",
+		"visible_title":          panel.PanelTitleVisible,
+		"autosize_text":          panel.TextAutosized,
+		"transparent_background": panel.TransparentBackground,
+	}, nil
+}
+
+func queriesToResourceData(advancedQueries []*model.AdvancedQueries) ([]map[string]interface{}, error) {
+	var queries []map[string]interface{}
+	for _, query := range advancedQueries {
+		unit := ""
+		switch query.Format.Unit {
+		case model.FormatUnitPercentage:
+			unit = "percent"
+		case model.FormatUnitData:
+			unit = "data"
+		case model.FormatUnitDataRate:
+			unit = "data rate"
+		case model.FormatUnitNumber:
+			unit = "number"
+		case model.FormatUnitNumberRate:
+			unit = "number rate"
+		case model.FormatUnitTime:
+			unit = "time"
+		default:
+			return nil, fmt.Errorf("unsupported query format unit: %s", query.Format.Unit)
+		}
+
+		queries = append(queries, map[string]interface{}{
+			"unit":   unit,
+			"promql": query.Query,
+		})
+	}
+	return queries, nil
 }
