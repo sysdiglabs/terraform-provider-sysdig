@@ -237,7 +237,7 @@ type Panels struct {
 	ApplySegmentationToAll bool                 `json:"applySegmentationToAll,omitempty"`
 	AdvancedQueries        []*AdvancedQueries   `json:"advancedQueries,omitempty"`
 	NumberThresholds       *NumberThresholds    `json:"numberThresholds,omitempty"`
-	MarkdownSource         *string               `json:"markdownSource,omitempty"`
+	MarkdownSource         *string              `json:"markdownSource,omitempty"`
 	PanelTitleVisible      bool                 `json:"panelTitleVisible"`
 	TextAutosized          bool                 `json:"textAutosized"`
 	TransparentBackground  bool                 `json:"transparentBackground"`
@@ -245,8 +245,6 @@ type Panels struct {
 	// Just a helper to the client, the actual field is in Dashboard
 	Layout *Layout `json:"-"`
 }
-
-
 
 type PanelType string
 
