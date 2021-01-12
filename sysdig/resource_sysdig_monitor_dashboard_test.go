@@ -132,6 +132,19 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			unit = "time"
 		}
 	}
+
+	panel {
+		pos_x = 12
+		pos_y = 12
+		width = 12
+		height = 6
+		type = "text"
+		name = "example panel - 2"
+		content = "description of panel 2"
+		visible_title = true
+		autosize_text = true
+		transparent_background = true
+	}
 }
 `, name, name)
 }
