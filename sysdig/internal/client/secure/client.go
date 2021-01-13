@@ -48,6 +48,10 @@ type SysdigSecureClient interface {
 	DeleteVulnerabilityExceptionList(context.Context, string) error
 	UpdateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
 
+	CreateVulnerabilityException(context.Context, string, *VulnerabilityException) (*VulnerabilityException, error)
+	GetVulnerabilityExceptionByID(context.Context, string, string) (*VulnerabilityException, error)
+	DeleteVulnerabilityException(context.Context, string, string) error
+	UpdateVulnerabilityException(context.Context, string, *VulnerabilityException) (*VulnerabilityException, error)
 }
 
 func WithExtraHeaders(client SysdigSecureClient, extraHeaders map[string]string) SysdigSecureClient {
