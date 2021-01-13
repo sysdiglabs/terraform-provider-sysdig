@@ -102,12 +102,12 @@ func resourceSysdigUserUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 
-	u := userFromResourceData(d)
+	user := userFromResourceData(d)
 
-	u.Version = d.Get("version").(int)
-	u.ID, _ = strconv.Atoi(d.Id())
+	user.Version = d.Get("version").(int)
+	user.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateUser(ctx, u)
+	_, err = client.UpdateUser(ctx, user)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -130,8 +130,8 @@ func resourceSysdigUserDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func userFromResourceData(d *schema.ResourceData) (u common.User) {
-	u = common.User{
+func userFromResourceData(d *schema.ResourceData) (u *common.User) {
+	u = &common.User{
 		SystemRole: d.Get("system_role").(string),
 		Email:      d.Get("email").(string),
 		FirstName:  d.Get("first_name").(string),
