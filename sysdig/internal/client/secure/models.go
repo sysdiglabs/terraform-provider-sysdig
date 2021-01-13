@@ -307,3 +307,24 @@ func UsersListFromJSON(body []byte) []UsersList {
 type usersListWrapper struct {
 	UsersList []UsersList `json:"users"`
 }
+
+// -------- VulnerabilityExceptionList --------
+
+type VulnerabilityExceptionList struct {
+	ID      string `json:"id,omitempty"`
+	Version string `json:"version"`
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
+}
+
+func (l *VulnerabilityExceptionList) ToJSON() io.Reader {
+	payload, _ := json.Marshal(*l)
+	return bytes.NewBuffer(payload)
+}
+
+func VulnerabilityExceptionListFromJSON(body []byte) *VulnerabilityExceptionList {
+	var result VulnerabilityExceptionList
+	json.Unmarshal(body, &result)
+
+	return &result
+}

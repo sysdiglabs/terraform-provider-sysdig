@@ -68,6 +68,7 @@ func Provider() *schema.Provider {
 			"sysdig_secure_team":                           resourceSysdigSecureTeam(),
 			"sysdig_secure_list":                           resourceSysdigSecureList(),
 			"sysdig_secure_macro":                          resourceSysdigSecureMacro(),
+			"sysdig_secure_vulnerability_exception_list":   resourceSysdigSecureVulnerabilityExceptionList(),
 
 			"sysdig_monitor_alert_downtime":                 resourceSysdigMonitorAlertDowntime(),
 			"sysdig_monitor_alert_metric":                   resourceSysdigMonitorAlertMetric(),
