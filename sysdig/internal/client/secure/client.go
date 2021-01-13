@@ -42,6 +42,16 @@ type SysdigSecureClient interface {
 	GetMacroById(context.Context, int) (Macro, error)
 	DeleteMacro(context.Context, int) error
 	UpdateMacro(context.Context, Macro) (Macro, error)
+
+	CreateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
+	GetVulnerabilityExceptionListByID(context.Context, string) (*VulnerabilityExceptionList, error)
+	DeleteVulnerabilityExceptionList(context.Context, string) error
+	UpdateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
+
+	CreateVulnerabilityException(context.Context, string, *VulnerabilityException) (*VulnerabilityException, error)
+	GetVulnerabilityExceptionByID(context.Context, string, string) (*VulnerabilityException, error)
+	DeleteVulnerabilityException(context.Context, string, string) error
+	UpdateVulnerabilityException(context.Context, string, *VulnerabilityException) (*VulnerabilityException, error)
 }
 
 func WithExtraHeaders(client SysdigSecureClient, extraHeaders map[string]string) SysdigSecureClient {
