@@ -12,11 +12,12 @@ import (
 )
 
 type SysdigCommonClient interface {
-	CreateUser(context.Context, User) (User, error)
-	GetUserById(context.Context, int) (User, error)
+	CreateUser(context.Context, *User) (*User, error)
+	GetUserById(context.Context, int) (*User, error)
+	GetUserByEmail(context.Context, string) (*User, error)
 	DeleteUser(context.Context, int) error
-	UpdateUser(context.Context, User) (User, error)
-	GetCurrentUser(context.Context) (User, error)
+	UpdateUser(context.Context, *User) (*User, error)
+	GetCurrentUser(context.Context) (*User, error)
 }
 
 func WithExtraHeaders(client SysdigCommonClient, extraHeaders map[string]string) SysdigCommonClient {

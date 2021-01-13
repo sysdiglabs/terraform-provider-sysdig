@@ -2,13 +2,14 @@ package common
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
-func (client *sysdigCommonClient) GetUserById(ctx context.Context, id int) (u User, err error) {
+func (client *sysdigCommonClient) GetUserById(ctx context.Context, id int) (u *User, err error) {
 	response, err := client.doSysdigCommonRequest(ctx, http.MethodGet, client.GetUserUrl(id), nil)
 	if err != nil {
 		return
@@ -22,12 +23,43 @@ func (client *sysdigCommonClient) GetUserById(ctx context.Context, id int) (u Us
 		return
 	}
 
-	u = UserFromJSON(body)
-
-	return
+	user := UserFromJSON(body)
+	return &user, nil
 }
 
-func (client *sysdigCommonClient) CreateUser(ctx context.Context, uRequest User) (u User, err error) {
+func (client *sysdigCommonClient) GetUserByEmail(ctx context.Context, email string) (u *User, err error) {
+	response, err := client.doSysdigCommonRequest(ctx, http.MethodGet, client.GetUsersUrl(), nil)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	body, _ := ioutil.ReadAll(response.Body)
+
+	if response.StatusCode != http.StatusOK {
+		err = errors.New(response.Status)
+		return
+	}
+
+	var userList struct {
+		Users []User `json:"users"`
+	}
+
+	err = json.Unmarshal(body, &userList)
+	if err != nil {
+		return
+	}
+
+	for _, user := range userList.Users {
+		if user.Email == email {
+			return &user, nil
+		}
+	}
+
+	return nil, fmt.Errorf("user not found for the given email")
+}
+
+func (client *sysdigCommonClient) CreateUser(ctx context.Context, uRequest *User) (u *User, err error) {
 	response, err := client.doSysdigCommonRequest(ctx, http.MethodPost, client.GetUsersUrl(), uRequest.ToJSON())
 
 	if err != nil {
@@ -42,11 +74,11 @@ func (client *sysdigCommonClient) CreateUser(ctx context.Context, uRequest User)
 		return
 	}
 
-	u = UserFromJSON(body)
-	return
+	user := UserFromJSON(body)
+	return &user, nil
 }
 
-func (client *sysdigCommonClient) UpdateUser(ctx context.Context, uRequest User) (u User, err error) {
+func (client *sysdigCommonClient) UpdateUser(ctx context.Context, uRequest *User) (u *User, err error) {
 	response, err := client.doSysdigCommonRequest(ctx, http.MethodPut, client.GetUserUrl(uRequest.ID), uRequest.ToJSON())
 	if err != nil {
 		return
@@ -60,8 +92,8 @@ func (client *sysdigCommonClient) UpdateUser(ctx context.Context, uRequest User)
 		return
 	}
 
-	u = UserFromJSON(body)
-	return
+	user := UserFromJSON(body)
+	return &user, nil
 }
 
 func (client *sysdigCommonClient) DeleteUser(ctx context.Context, id int) error {
@@ -77,7 +109,7 @@ func (client *sysdigCommonClient) DeleteUser(ctx context.Context, id int) error 
 	return nil
 }
 
-func (client *sysdigCommonClient) GetCurrentUser(ctx context.Context) (u User, err error) {
+func (client *sysdigCommonClient) GetCurrentUser(ctx context.Context) (u *User, err error) {
 	response, err := client.doSysdigCommonRequest(ctx, http.MethodGet, client.GetCurrentUserUrl(), nil)
 	if err != nil {
 		return
@@ -90,8 +122,8 @@ func (client *sysdigCommonClient) GetCurrentUser(ctx context.Context) (u User, e
 	}
 	body, _ := ioutil.ReadAll(response.Body)
 
-	u = UserFromJSON(body)
-	return
+	user := UserFromJSON(body)
+	return &user, nil
 }
 
 func (client *sysdigCommonClient) GetUsersUrl() string {
