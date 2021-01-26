@@ -37,11 +37,11 @@ func (p *PolicyAssignmentBundle) ToJSON() io.Reader {
 }
 
 type PolicyAssignment struct {
-	ID         string      `json:"id"`
+	ID         string      `json:"id,omitempty"`
 	Policies   []string    `json:"policy_ids"`
 	Registry   string      `json:"registry"`
 	Repository string      `json:"repository"`
-	Whitelist  []string    `json:"whitelist_ids"`
+	Whitelist  []string    `json:"whitelist_ids,omitempty"`
 	Image      PolicyImage `json:"image"`
 	Name       string      `json:"name"`
 }

@@ -52,7 +52,7 @@ func Provider() *schema.Provider {
 			"sysdig_user": resourceSysdigUser(),
 
 			"sysdig_secure_policy":                         resourceSysdigSecurePolicy(),
-			"sysdig_secure_policy_assignments":             resourceSysdigSecurePolicyAssignmentBundle(),
+			"sysdig_secure_policy_assignments":             resourceSysdigSecurePolicyAssignments(),
 			"sysdig_secure_notification_channel_email":     resourceSysdigSecureNotificationChannelEmail(),
 			"sysdig_secure_notification_channel_sns":       resourceSysdigSecureNotificationChannelSNS(),
 			"sysdig_secure_notification_channel_opsgenie":  resourceSysdigSecureNotificationChannelOpsGenie(),
@@ -90,7 +90,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_notification_channel":         dataSourceSysdigSecureNotificationChannel(),
 			"sysdig_secure_vulnerability_exception_list": dataSourceSysdigSecureVulnerabilityExceptionList(),
-			"sysdig_secure_policy_assignment_bundle":     dataSourceSysdigSecurePolicyAssignmentBundle(),
+			"sysdig_secure_policy_assignments":           dataSourceSysdigSecurePolicyAssignments(),
 			"sysdig_current_user":                        dataSourceSysdigCurrentUser(),
 			"sysdig_user":                                dataSourceSysdigUser(),
 		},

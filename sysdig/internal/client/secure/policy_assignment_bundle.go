@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func (client *sysdigSecureClient) GetPolicyAssignmentBundleByName(ctx context.Context, name string) (*PolicyAssignmentBundle, error) {
+func (client *sysdigSecureClient) GetPolicyAssignments(ctx context.Context, name string) (*PolicyAssignmentBundle, error) {
 	response, err := client.doSysdigSecureRequest(ctx, http.MethodGet, client.policyAssignmentBundleURL(name), nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to find bundle %s: %s", name, err.Error())
@@ -32,7 +32,7 @@ func (client *sysdigSecureClient) GetPolicyAssignmentBundleByName(ctx context.Co
 	return &policyAssignmentBundle, nil
 }
 
-func (client *sysdigSecureClient) PutPolicyAssignmentBundle(ctx context.Context, bundle PolicyAssignmentBundle) (*PolicyAssignmentBundle, error) {
+func (client *sysdigSecureClient) PutPolicyAssignments(ctx context.Context, bundle PolicyAssignmentBundle) (*PolicyAssignmentBundle, error) {
 	response, err := client.doSysdigSecureRequest(ctx, http.MethodPut, client.policyAssignmentBundleURL(bundle.Id), bundle.ToJSON())
 	if err != nil {
 		return nil, fmt.Errorf("unable to create %s: %s", bundle.Id, err.Error())

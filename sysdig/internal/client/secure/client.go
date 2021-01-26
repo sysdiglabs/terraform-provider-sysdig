@@ -12,8 +12,8 @@ import (
 )
 
 type SysdigSecureClient interface {
-	PutPolicyAssignmentBundle(context.Context, PolicyAssignmentBundle) (*PolicyAssignmentBundle, error)
-	GetPolicyAssignmentBundleByName(context.Context, string) (*PolicyAssignmentBundle, error)
+	PutPolicyAssignments(context.Context, PolicyAssignmentBundle) (*PolicyAssignmentBundle, error)
+	GetPolicyAssignments(context.Context, string) (*PolicyAssignmentBundle, error)
 
 	CreatePolicy(context.Context, Policy) (Policy, error)
 	DeletePolicy(context.Context, int) error

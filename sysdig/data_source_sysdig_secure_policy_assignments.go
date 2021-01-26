@@ -4,18 +4,12 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceSysdigSecurePolicyAssignmentBundle() *schema.Resource {
+func dataSourceSysdigSecurePolicyAssignments() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceSysdigSecurePolicyAssignmentBundleRead,
+		ReadContext: dataSourceSysdigSecurePolicyAssignmentsRead,
 		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"default"}, false),
-			},
 			"policy_assignments": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -54,7 +48,7 @@ func dataSourceSysdigSecurePolicyAssignmentBundle() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecurePolicyAssignmentBundleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecurePolicyAssignmentsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diagz diag.Diagnostics
 
 	client, err := meta.(SysdigClients).sysdigSecureClient()
@@ -62,13 +56,15 @@ func dataSourceSysdigSecurePolicyAssignmentBundleRead(ctx context.Context, d *sc
 		return diag.FromErr(err)
 	}
 
-	name := d.Get("name").(string)
+	name := "default"
 
-	if d.Id() == "" {
-		d.SetId(name)
+	d.SetId(name)
+
+	providerBundle, err := client.GetPolicyAssignments(ctx, name)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	providerBundle, err := client.GetPolicyAssignmentBundleByName(ctx, name)
 	policyAssignments := make([]interface{}, len(providerBundle.Items), len(providerBundle.Items))
 
 	for i, item := range providerBundle.Items {

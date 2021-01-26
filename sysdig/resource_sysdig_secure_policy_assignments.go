@@ -5,18 +5,18 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/spf13/cast"
 	"time"
 )
 
-func resourceSysdigSecurePolicyAssignmentBundle() *schema.Resource {
+func resourceSysdigSecurePolicyAssignments() *schema.Resource {
 	timeout := 30 * time.Second
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigSecurePolicyAssignmentBundleCreate,
-		ReadContext:   resourceSysdigSecurePolicyAssignmentBundleRead,
-		UpdateContext: resourceSysdigSecurePolicyAssignmentBundleUpdate,
-		DeleteContext: resourceSysdigSecurePolicyAssignmentBundleDelete,
+		CreateContext: resourceSysdigSecurePolicyAssignmentsCreate,
+		ReadContext:   resourceSysdigSecurePolicyAssignmentsRead,
+		UpdateContext: resourceSysdigSecurePolicyAssignmentsUpdate,
+		DeleteContext: resourceSysdigSecurePolicyAssignmentsDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -29,17 +29,17 @@ func resourceSysdigSecurePolicyAssignmentBundle() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"default"}, false),
-			},
 			"policy_assignment": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Required: true,
+				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -75,15 +75,18 @@ func resourceSysdigSecurePolicyAssignmentBundle() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecurePolicyAssignmentBundleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePolicyAssignmentsDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return nil
 }
 
-func resourceSysdigSecurePolicyAssignmentBundleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePolicyAssignmentsUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	if d.HasChange("policy_assignment") {
+		return resourceSysdigSecurePolicyAssignmentsCreate(ctx, d, meta)
+	}
 	return nil
 }
 
-func resourceSysdigSecurePolicyAssignmentBundleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePolicyAssignmentsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diagz diag.Diagnostics
 
 	client, err := meta.(SysdigClients).sysdigSecureClient()
@@ -91,13 +94,14 @@ func resourceSysdigSecurePolicyAssignmentBundleRead(ctx context.Context, d *sche
 		return diag.FromErr(err)
 	}
 
-	name := d.Get("name").(string)
+	name := "default"
+	d.SetId(name) // only default is possible
 
-	if d.Id() == "" {
-		d.SetId(name)
+	providerBundle, err := client.GetPolicyAssignments(ctx, name)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	providerBundle, err := client.GetPolicyAssignmentBundleByName(ctx, name)
 	policyAssignments := make([]interface{}, len(providerBundle.Items), len(providerBundle.Items))
 
 	for i, item := range providerBundle.Items {
@@ -120,7 +124,6 @@ func resourceSysdigSecurePolicyAssignmentBundleRead(ctx context.Context, d *sche
 			whitelistIds = append(whitelistIds, item)
 		}
 		bundleItem["whitelist_ids"] = whitelistIds
-
 		bundleItem["tag"] = item.Image.Value
 
 		policyAssignments[i] = bundleItem
@@ -133,39 +136,65 @@ func resourceSysdigSecurePolicyAssignmentBundleRead(ctx context.Context, d *sche
 	return diagz
 }
 
-func resourceSysdigSecurePolicyAssignmentBundleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePolicyAssignmentsCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diagz diag.Diagnostics
-
-	items := d.Get("policy_assignment").([]interface{})
-	policyItems := []secure.PolicyAssignment{}
-
-	for _, item := range items {
-		i := item.(map[string]interface{})
-		policyItem := secure.PolicyAssignment{
-			ID: i["id"].(string),
-		}
-		policyItems = append(policyItems, policyItem)
-	}
-
-	name := d.Get("name").(string)
-
-	policyBundle := secure.PolicyAssignmentBundle{
-		Items: policyItems,
-		Id:    name,
-	}
 
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	_, err = client.PutPolicyAssignmentBundle(ctx, policyBundle)
+	// lookup existing to preserve `default` id
+	assignments, err := client.GetPolicyAssignments(ctx, "default")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	items := d.Get("policy_assignment").([]interface{})
+	policyItems := []secure.PolicyAssignment{}
+
+	for idx, item := range items {
+		i := item.(map[string]interface{})
+
+		var id, name string
+
+		if idx == len(items)-1 {
+			id = assignments.Items[len(assignments.Items)-1].ID
+			name = "default"
+		} else {
+			id = i["id"].(string)
+			name = ""
+		}
+
+		policyItem := secure.PolicyAssignment{
+			ID:         id,
+			Name:       name,
+			Whitelist:  cast.ToStringSlice(i["whitelist_ids"].(*schema.Set).List()),
+			Policies:   cast.ToStringSlice(i["policy_ids"].(*schema.Set).List()),
+			Registry:   i["registry"].(string),
+			Repository: i["repository"].(string),
+			Image: secure.PolicyImage{
+				Type:  "tag",
+				Value: i["tag"].(string),
+			},
+		}
+		policyItems = append(policyItems, policyItem)
+	}
+
+	name := "default"
+
+	policyBundle := secure.PolicyAssignmentBundle{
+		Items: policyItems,
+		Id:    name,
+	}
+
+	_, err = client.PutPolicyAssignments(ctx, policyBundle)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// be sure to read the resource back
-	resourceSysdigSecurePolicyAssignmentBundleRead(ctx, d, meta)
+	resourceSysdigSecurePolicyAssignmentsRead(ctx, d, meta)
 
 	return diagz
 }
