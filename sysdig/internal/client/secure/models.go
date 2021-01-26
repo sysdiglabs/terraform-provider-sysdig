@@ -21,6 +21,31 @@ type Policy struct {
 	NotificationChannelIds []int    `json:"notificationChannelIds"`
 }
 
+type PolicyImage struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
+type PolicyAssignmentBundle struct {
+	Id    string             `json:"policyBundleId"`
+	Items []PolicyAssignment `json:"items"`
+}
+
+func (p *PolicyAssignmentBundle) ToJSON() io.Reader {
+	payload, _ := json.Marshal(p)
+	return bytes.NewBuffer(payload)
+}
+
+type PolicyAssignment struct {
+	ID         string      `json:"id"`
+	Policies   []string    `json:"policy_ids"`
+	Registry   string      `json:"registry"`
+	Repository string      `json:"repository"`
+	Whitelist  []string    `json:"whitelist_ids"`
+	Image      PolicyImage `json:"image"`
+	Name       string      `json:"name"`
+}
+
 type Action struct {
 	AfterEventNs         int    `json:"afterEventNs,omitempty"`
 	BeforeEventNs        int    `json:"beforeEventNs,omitempty"`

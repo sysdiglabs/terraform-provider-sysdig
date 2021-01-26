@@ -12,6 +12,9 @@ import (
 )
 
 type SysdigSecureClient interface {
+	PutPolicyAssignmentBundle(context.Context, PolicyAssignmentBundle) (*PolicyAssignmentBundle, error)
+	GetPolicyAssignmentBundleByName(context.Context, string) (*PolicyAssignmentBundle, error)
+
 	CreatePolicy(context.Context, Policy) (Policy, error)
 	DeletePolicy(context.Context, int) error
 	UpdatePolicy(context.Context, Policy) (Policy, error)
@@ -45,6 +48,7 @@ type SysdigSecureClient interface {
 
 	CreateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
 	GetVulnerabilityExceptionListByID(context.Context, string) (*VulnerabilityExceptionList, error)
+	GetVulnerabilityExceptionListByName(context.Context, string) (*VulnerabilityExceptionList, error)
 	DeleteVulnerabilityExceptionList(context.Context, string) error
 	UpdateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
 
