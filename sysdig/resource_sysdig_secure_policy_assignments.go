@@ -29,6 +29,26 @@ func resourceSysdigSecurePolicyAssignments() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"default_policy_assignment": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"policy_ids": {
+							Type:     schema.TypeSet,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Optional: true,
+						},
+						"whitelist_ids": {
+							Type:     schema.TypeSet,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Optional: true,
+						},
+					},
+				},
+			},
 			"policy_assignment": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -103,8 +123,10 @@ func resourceSysdigSecurePolicyAssignmentsRead(ctx context.Context, d *schema.Re
 	}
 
 	policyAssignments := make([]interface{}, len(providerBundle.Items), len(providerBundle.Items))
+	defaultAssignment := make([]interface{}, 1, 1)
 
 	for i, item := range providerBundle.Items {
+
 		bundleItem := make(map[string]interface{})
 
 		bundleItem["registry"] = item.Registry
@@ -126,10 +148,24 @@ func resourceSysdigSecurePolicyAssignmentsRead(ctx context.Context, d *schema.Re
 		bundleItem["whitelist_ids"] = whitelistIds
 		bundleItem["tag"] = item.Image.Value
 
-		policyAssignments[i] = bundleItem
+		if i == len(providerBundle.Items)-1 {
+			// we are on the list item which must be default
+			defaultItem := make(map[string]interface{})
+			defaultItem["whitelist_ids"] = whitelistIds
+			defaultItem["policy_ids"] = policyIds
+
+			defaultAssignment[0] = defaultItem
+		} else {
+			policyAssignments[i] = bundleItem
+		}
+
 	}
 
 	if err = d.Set("policy_assignment", policyAssignments); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err = d.Set("default_policy_assignment", defaultAssignment); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -144,31 +180,15 @@ func resourceSysdigSecurePolicyAssignmentsCreate(ctx context.Context, d *schema.
 		return diag.FromErr(err)
 	}
 
-	// lookup existing to preserve `default` id
-	assignments, err := client.GetPolicyAssignments(ctx, "default")
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	items := d.Get("policy_assignment").([]interface{})
 	policyItems := []secure.PolicyAssignment{}
 
-	for idx, item := range items {
+	for _, item := range items {
 		i := item.(map[string]interface{})
 
-		var id, name string
-
-		if idx == len(items)-1 {
-			id = assignments.Items[len(assignments.Items)-1].ID
-			name = "default"
-		} else {
-			id = i["id"].(string)
-			name = ""
-		}
-
 		policyItem := secure.PolicyAssignment{
-			ID:         id,
-			Name:       name,
+			ID:         i["id"].(string),
+			Name:       "",
 			Whitelist:  cast.ToStringSlice(i["whitelist_ids"].(*schema.Set).List()),
 			Policies:   cast.ToStringSlice(i["policy_ids"].(*schema.Set).List()),
 			Registry:   i["registry"].(string),
@@ -180,6 +200,43 @@ func resourceSysdigSecurePolicyAssignmentsCreate(ctx context.Context, d *schema.
 		}
 		policyItems = append(policyItems, policyItem)
 	}
+
+	// handle default assignment
+	// lookup existing to preserve `default` id
+	assignments, err := client.GetPolicyAssignments(ctx, "default")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	var defaultWhitelistIds []string
+	var defaultPolicyIds []string
+	var defaultId string
+
+	if defaultItem, ok := d.GetOk("default_policy_assignment"); ok {
+		defaultItemL := defaultItem.([]interface{})[0].(map[string]interface{})
+		defaultWhitelistIds = cast.ToStringSlice(defaultItemL["whitelist_ids"].(*schema.Set).List())
+		defaultPolicyIds = cast.ToStringSlice(defaultItemL["policy_ids"].(*schema.Set).List())
+	} else {
+		defaultFromAPI := assignments.Items[len(assignments.Items)-1]
+
+		defaultWhitelistIds = defaultFromAPI.Whitelist
+		defaultPolicyIds = defaultFromAPI.Policies
+		defaultId = defaultFromAPI.ID
+	}
+
+	defaultPolicy := secure.PolicyAssignment{
+		ID:         defaultId,
+		Registry:   "*",
+		Repository: "*",
+		Image: secure.PolicyImage{
+			Type:  "tag",
+			Value: "*",
+		},
+		Whitelist: defaultWhitelistIds,
+		Policies:  defaultPolicyIds,
+	}
+
+	policyItems = append(policyItems, defaultPolicy)
 
 	name := "default"
 
