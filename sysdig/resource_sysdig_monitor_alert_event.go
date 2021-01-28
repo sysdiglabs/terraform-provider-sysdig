@@ -3,6 +3,7 @@ package sysdig
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -169,15 +170,24 @@ func eventAlertFromResourceData(data *schema.ResourceData) (alert *monitor.Alert
 	return
 }
 
+// https://regex101.com/r/mmpz0D/1
+var alertConditionRegex = regexp.MustCompile(`count\(customEvent\)\s?(?P<rel>[^\w])\s?(?P<count>\d+)`)
+
 func eventAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
 	if err != nil {
 		return
 	}
 
-	var event_rel string
-	var event_count int
-	_, err = fmt.Sscanf(alert.Condition, "count(customEvent) %s %d", &event_rel, &event_count)
+	relIndex := alertConditionRegex.SubexpIndex("rel")
+	countIndex := alertConditionRegex.SubexpIndex("count")
+	matches := alertConditionRegex.FindStringSubmatch(alert.Condition)
+	if matches == nil {
+		return fmt.Errorf("alert condition %s does not match expected expression %s", alert.Condition, alertConditionRegex.String())
+	}
+
+	event_rel := matches[relIndex]
+	event_count, err := strconv.Atoi(matches[countIndex])
 	if err != nil {
 		return
 	}
