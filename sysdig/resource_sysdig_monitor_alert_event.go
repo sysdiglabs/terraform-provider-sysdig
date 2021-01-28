@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -177,7 +178,7 @@ func eventAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (
 
 	var event_rel string
 	var event_count int
-	_, err = fmt.Sscanf(alert.Condition, "count(customEvent) %s %d", &event_rel, &event_count)
+	_, err = fmt.Sscanf(strings.ReplaceAll(alert.Condition, " ", ""), "count(customEvent)%s%d", &event_rel, &event_count)
 	if err != nil {
 		return
 	}
