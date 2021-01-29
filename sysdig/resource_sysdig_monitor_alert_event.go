@@ -170,8 +170,8 @@ func eventAlertFromResourceData(data *schema.ResourceData) (alert *monitor.Alert
 	return
 }
 
-// https://regex101.com/r/mmpz0D/1
-var alertConditionRegex = regexp.MustCompile(`count\(customEvent\)\s?(?P<rel>[^\w])\s?(?P<count>\d+)`)
+// fixed with https://regex101.com/r/79VIkC/1
+var alertConditionRegex = regexp.MustCompile(`count\(customEvent\)\s*(?P<rel>[^\w\s]+)\s*(?P<count>\d+)`)
 
 func eventAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
