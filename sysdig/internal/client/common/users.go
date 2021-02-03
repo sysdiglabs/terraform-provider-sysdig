@@ -60,7 +60,7 @@ func (client *sysdigCommonClient) GetUserByEmail(ctx context.Context, email stri
 }
 
 func (client *sysdigCommonClient) CreateUser(ctx context.Context, uRequest *User) (u *User, err error) {
-	response, err := client.doSysdigCommonRequest(ctx, http.MethodPost, client.GetUsersUrl(), uRequest.ToJSON())
+	response, err := client.doSysdigCommonRequest(ctx, http.MethodPost, client.CreateUsersUrl(), uRequest.ToJSON())
 
 	if err != nil {
 		return
@@ -124,6 +124,10 @@ func (client *sysdigCommonClient) GetCurrentUser(ctx context.Context) (u *User, 
 
 	user := UserFromJSON(body)
 	return &user, nil
+}
+
+func (client *sysdigCommonClient) CreateUsersUrl() string {
+	return fmt.Sprintf("%s/api/user/provisioning/", client.URL)
 }
 
 func (client *sysdigCommonClient) GetUsersUrl() string {

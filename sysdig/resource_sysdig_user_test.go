@@ -30,10 +30,10 @@ func TestAccUser(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: userWithName(rText()),
+				Config: userWithSystemRole(rText()),
 			},
 			{
-				Config: userWithSystemRole(rText()),
+				Config: userWithName(rText()),
 			},
 			{
 				Config: userWithoutSystemRole(rText()),
