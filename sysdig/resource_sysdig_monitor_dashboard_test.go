@@ -152,7 +152,6 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 `, name, name)
 }
 
-
 func multipleUpdatedPanelsDashboard(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_dashboard" "dashboard" {
