@@ -34,7 +34,7 @@ resource "sysdig_secure_policy" "unexpected_inbound_tcp_connection_traefik" {
 
 The following keys can be used to configure the provider.
 
-* `sysdig_monitor_api_token` - (Optional) The Sysdig Secure API token, it must be
+* `sysdig_monitor_api_token` - (Optional) The Sysdig Monitor API token, it must be
   present, but you can get it from the `SYSDIG_MONITOR_API_TOKEN` environment variable.
   Required if any `sysdig_monitor_*` resource or data source is used. 
 
@@ -42,7 +42,7 @@ The following keys can be used to configure the provider.
   present, but you can get it from the `SYSDIG_SECURE_API_TOKEN` environment variable.
   Required if any `sysdig_secure_*` resource or data source is used.
 
-* `sysdig_monitor_url` - (Optional) This is the target Sysdig Secure base API
+* `sysdig_monitor_url` - (Optional) This is the target Sysdig Monitor base API
   endpoint. It's intended to be used with OnPrem installations. By defaults it
   points to `https://app.sysdigcloud.com`, and notice that should not be ended
   with an slash. It can also be sourced from the `SYSDIG_MONITOR_URL` environment
