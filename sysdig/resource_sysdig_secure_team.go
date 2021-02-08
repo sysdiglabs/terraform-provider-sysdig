@@ -28,7 +28,7 @@ func resourceSysdigSecureTeam() *schema.Resource {
 			Create: schema.DefaultTimeout(timeout),
 			Update: schema.DefaultTimeout(timeout),
 			Read:   schema.DefaultTimeout(timeout),
-			Delete: schema.DefaultTimeout(5*time.Minute), // Removing the team is for some reason slower.
+			Delete: schema.DefaultTimeout(5 * time.Minute), // Removing the team is for some reason slower.
 		},
 
 		Schema: map[string]*schema.Schema{
