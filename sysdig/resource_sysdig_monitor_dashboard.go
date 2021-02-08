@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/spf13/cast"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor/model"
 )
@@ -227,7 +228,7 @@ func resourceSysdigDashboardDelete(ctx context.Context, data *schema.ResourceDat
 
 func dashboardFromResourceData(data *schema.ResourceData) (dashboard *model.Dashboard, err error) {
 	dashboard = model.NewDashboard(data.Get("name").(string), data.Get("description").(string)).AsPublic(data.Get("public").(bool))
-
+	dashboard.Version = cast.ToInt(data.Get("version"))
 	dashboard.PublicToken = data.Get("public_token").(string)
 
 	panels, err := panelsFromResourceData(data)
