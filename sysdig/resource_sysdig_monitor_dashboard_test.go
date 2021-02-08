@@ -41,6 +41,9 @@ func TestAccDashboard(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: multipleUpdatedPanelsDashboard(rText()),
+			},
 		},
 	})
 }
@@ -123,6 +126,62 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		pos_y = 0
 		width = 12
 		height = 6
+		type = "number"
+		name = "example panel - 2"
+		description = "description of panel 2"
+
+		query {
+			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+			unit = "time"
+		}
+	}
+
+	panel {
+		pos_x = 12
+		pos_y = 12
+		width = 12
+		height = 6
+		type = "text"
+		name = "example panel - 2"
+		content = "description of panel 2"
+		visible_title = true
+		autosize_text = true
+		transparent_background = true
+	}
+}
+`, name, name)
+}
+
+func multipleUpdatedPanelsDashboard(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_dashboard" "dashboard" {
+	name = "TERRAFORM TEST - METRIC %s"
+	description = "TERRAFORM TEST - METRIC %s"
+
+	panel {
+		pos_x = 0
+		pos_y = 0
+		width = 12 # Maximum size: 24
+		height = 6
+		type = "timechart"
+		name = "example panel"
+		description = "description"
+
+		query {
+			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+			unit = "percent"
+		}
+		query {
+			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+			unit = "number"
+		}
+	}
+
+	panel {
+		pos_x = 12
+		pos_y = 0
+		width = 12
+		height = 12
 		type = "number"
 		name = "example panel - 2"
 		description = "description of panel 2"
