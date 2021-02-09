@@ -68,11 +68,11 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 							ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"in", "notIn", "equals", "notEquals", "contains", "notContains", "startsWith"}, false)),
 						},
 						"value": {
-							Type:         schema.TypeList,
-							Elem:         &schema.Schema{
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
-							Optional:     true,
+							Optional: true,
 						},
 						"variable": {
 							Type:     schema.TypeString,
