@@ -102,6 +102,24 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 	name = "TERRAFORM TEST - METRIC %s"
 	description = "TERRAFORM TEST - METRIC %s"
 
+	scope {
+		metric = "agent.id"
+		comparator = "in"
+		value = ["foo", "bar"]
+		variable = "agent_id"
+	}
+
+	scope {
+		metric = "agent.name"
+		comparator = "equals"
+		value = ["name"]
+	}
+
+	scope {
+		metric = "kubernetes.namespace.name"
+		variable = "k8_ns"
+	}
+
 	panel {
 		pos_x = 0
 		pos_y = 0
@@ -116,7 +134,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			unit = "percent"
 		}
 		query {
-			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent{ns_name=$k8s_ns}[$__interval]))"
 			unit = "number"
 		}
 	}

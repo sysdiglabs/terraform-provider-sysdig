@@ -316,32 +316,42 @@ type TeamSharingOptions struct {
 	UserTeamsRole string        `json:"userTeamsRole"`
 	SelectedTeams []interface{} `json:"selectedTeams"`
 }
+
+type ScopeExpressionList struct {
+	Operand     string      `json:"operand"`
+	Operator    string      `json:"operator"`
+	DisplayName string      `json:"displayName"`
+	Value       []string    `json:"value"`
+	Descriptor  interface{} `json:"descriptor"`
+	IsVariable  bool        `json:"isVariable"`
+}
+
 type Dashboard struct {
-	Version                 int                  `json:"version,omitempty"`
-	CustomerID              interface{}          `json:"customerId"`
-	TeamID                  int                  `json:"teamId"`
-	Schema                  int                  `json:"schema"`
-	AutoCreated             bool                 `json:"autoCreated"`
-	PublicToken             string               `json:"publicToken"`
-	ScopeExpressionList     interface{}          `json:"scopeExpressionList"`
-	Layout                  []*Layout            `json:"layout"`
-	TeamScope               interface{}          `json:"teamScope"`
-	EventDisplaySettings    EventDisplaySettings `json:"eventDisplaySettings"`
-	ID                      int                  `json:"id,omitempty"`
-	Name                    string               `json:"name"`
-	Description             string               `json:"description"`
-	Username                string               `json:"username"`
-	Shared                  bool                 `json:"shared"`
-	SharingSettings         []interface{}        `json:"sharingSettings"`
-	Public                  bool                 `json:"public"`
-	Favorite                bool                 `json:"favorite"`
-	CreatedOn               int64                `json:"createdOn"`
-	ModifiedOn              int64                `json:"modifiedOn"`
-	Panels                  []*Panels            `json:"panels"`
-	TeamScopeExpressionList []interface{}        `json:"teamScopeExpressionList"`
-	CreatedOnDate           string               `json:"createdOnDate"`
-	ModifiedOnDate          string               `json:"modifiedOnDate"`
-	TeamSharingOptions      TeamSharingOptions   `json:"teamSharingOptions"`
+	Version                 int                    `json:"version,omitempty"`
+	CustomerID              interface{}            `json:"customerId"`
+	TeamID                  int                    `json:"teamId"`
+	Schema                  int                    `json:"schema"`
+	AutoCreated             bool                   `json:"autoCreated"`
+	PublicToken             string                 `json:"publicToken"`
+	ScopeExpressionList     []*ScopeExpressionList `json:"scopeExpressionList"`
+	Layout                  []*Layout              `json:"layout"`
+	TeamScope               interface{}            `json:"teamScope"`
+	EventDisplaySettings    EventDisplaySettings   `json:"eventDisplaySettings"`
+	ID                      int                    `json:"id,omitempty"`
+	Name                    string                 `json:"name"`
+	Description             string                 `json:"description"`
+	Username                string                 `json:"username"`
+	Shared                  bool                   `json:"shared"`
+	SharingSettings         []interface{}          `json:"sharingSettings"`
+	Public                  bool                   `json:"public"`
+	Favorite                bool                   `json:"favorite"`
+	CreatedOn               int64                  `json:"createdOn"`
+	ModifiedOn              int64                  `json:"modifiedOn"`
+	Panels                  []*Panels              `json:"panels"`
+	TeamScopeExpressionList []interface{}          `json:"teamScopeExpressionList"`
+	CreatedOnDate           string                 `json:"createdOnDate"`
+	ModifiedOnDate          string                 `json:"modifiedOnDate"`
+	TeamSharingOptions      TeamSharingOptions     `json:"teamSharingOptions"`
 }
 
 type dashboardWrapper struct {

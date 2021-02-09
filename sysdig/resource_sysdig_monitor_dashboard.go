@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -51,6 +52,34 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 				Type:         schema.TypeString,
 				ComputedWhen: []string{"public"},
 				Computed:     true,
+			},
+			"scope": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"metric": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"comparator": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"in", "notIn", "equals", "notEquals", "contains", "notContains", "startsWith"}, false)),
+						},
+						"value": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Optional: true,
+						},
+						"variable": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
 			},
 			"panel": {
 				Type:     schema.TypeSet,
@@ -235,6 +264,12 @@ func dashboardFromResourceData(data *schema.ResourceData) (dashboard *model.Dash
 	if err != nil {
 		return nil, err
 	}
+
+	scopes, err := scopeFromResourceData(data)
+	if err != nil {
+		return nil, err
+	}
+	dashboard.ScopeExpressionList = scopes
 
 	dashboard.AddPanels(panels...)
 	return dashboard, nil
@@ -473,9 +508,73 @@ func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceDa
 		panels = append(panels, dPanel)
 	}
 	data.Set("panel", panels)
+
+	var scopes []map[string]interface{}
+	for _, scope := range dashboard.ScopeExpressionList {
+		dScope, err := scopeToResourceData(scope)
+		if err != nil {
+			return err
+		}
+		scopes = append(scopes, dScope)
+	}
+	data.Set("scope", scopes)
+
 	data.Set("version", dashboard.Version)
 
 	return nil
+}
+
+func scopeToResourceData(scope *model.ScopeExpressionList) (map[string]interface{}, error) {
+	res := map[string]interface{}{
+		"metric": scope.Operand,
+	}
+
+	if len(scope.Value) > 0 {
+		res["value"] = scope.Value
+		res["comparator"] = scope.Operator
+	}
+
+	if scope.IsVariable && scope.DisplayName != "" {
+		res["variable"] = scope.DisplayName
+	}
+
+	return res, nil
+}
+
+func scopeFromResourceData(data *schema.ResourceData) ([]*model.ScopeExpressionList, error) {
+	scopes := []*model.ScopeExpressionList{}
+	for _, scopeItr := range data.Get("scope").(*schema.Set).List() {
+		scopeInfo := (scopeItr).(map[string]interface{})
+
+		scope := &model.ScopeExpressionList{}
+		scope.Operand = cast.ToString(scopeInfo["metric"])
+		scope.Value = []string{}
+		comparator := cast.ToString(scopeInfo["comparator"])
+		value := cast.ToStringSlice(scopeInfo["value"])
+		if comparator != "" {
+			scope.Operator = comparator
+			if len(value) == 0 {
+				return nil, errors.New(`"value" field is required if the comparator is set up`)
+			}
+			if scope.Operator != "in" && scope.Operator != "notIn" && len(value) > 1 {
+				return nil, errors.New(`"value" can only contain 1 value if the "comparator" is not "in" and "notIn"`)
+			}
+			scope.Value = value
+		}
+		variable := cast.ToString(scopeInfo["variable"])
+		if variable != "" {
+			scope.DisplayName = variable
+			scope.IsVariable = true
+			if scope.Operator == "" {
+				scope.Operator = "in"
+			}
+		} else if comparator == "" || len(value) == 0 {
+			return nil, errors.New(`"comparator" and "value" must be set if "variable" is not set`)
+		}
+
+		scopes = append(scopes, scope)
+	}
+	return scopes, nil
 }
 
 func panelToResourceData(panel *model.Panels, layout []*model.Layout) (map[string]interface{}, error) {

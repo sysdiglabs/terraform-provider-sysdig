@@ -37,8 +37,15 @@ func (client *sysdigSecureClient) CreateRule(ctx context.Context, rule Rule) (re
 }
 
 func (client *sysdigSecureClient) GetRuleByID(ctx context.Context, ruleID int) (result Rule, err error) {
-	response, _ := client.doSysdigSecureRequest(ctx, http.MethodGet, client.ruleURL(ruleID), nil)
-	body, _ := ioutil.ReadAll(response.Body)
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodGet, client.ruleURL(ruleID), nil)
+	if err != nil {
+		return
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return
+	}
 
 	if response.StatusCode != 200 {
 		return Rule{}, errors.New(string(body))
@@ -51,8 +58,14 @@ func (client *sysdigSecureClient) GetRuleByID(ctx context.Context, ruleID int) (
 }
 
 func (client *sysdigSecureClient) UpdateRule(ctx context.Context, rule Rule) (result Rule, err error) {
-	response, _ := client.doSysdigSecureRequest(ctx, http.MethodPut, client.ruleURL(rule.ID), rule.ToJSON())
-	body, _ := ioutil.ReadAll(response.Body)
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodPut, client.ruleURL(rule.ID), rule.ToJSON())
+	if err != nil {
+		return
+	}
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return
+	}
 
 	if response.StatusCode != http.StatusOK {
 		return Rule{}, errors.New(string(body))
