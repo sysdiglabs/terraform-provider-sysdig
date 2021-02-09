@@ -19,6 +19,18 @@ resource "sysdig_monitor_dashboard" "dashboard" {
   name        = "Example Dashboard"
   description = "Example Dashboard description"
 
+  scope {
+    metric     = "kubernetes.cluster.name"
+    comparator = "in"
+    value      = ["prod", "dev"]
+    variable   = "cluster_name"
+  }
+
+  scope {
+    metric   = "host.hostName"
+    variable = "hostname"
+  }
+
   panel {
     pos_x       = 0
     pos_y       = 0
@@ -29,7 +41,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
     description = "Description"
 
     query {
-      promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+      promql = "avg_over_time(sysdig_host_cpu_used_percent{host_name=$hostname}[$__interval])"
       unit   = "percent"
     }
     query {
@@ -77,8 +89,27 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 * `description` - (Optional) Description of the dashboard.
 
 * `public` - (Optional) Define if the dashboard can be accessible without requiring the user to be logged in.
+  
+* `scope` - (Optional) Define the scope of the dashboard and variables for these metrics.
 
 * `panel` - (Required) At least 1 panel is required to define a Dashboard.
+
+
+### scope
+
+Dashboard scope defines what data is valid for aggregation and display within the dashboard.
+See more info about how to [use the scope in a PromQL query](https://docs.sysdig.com/en/using-promql.html#UUID-2314cf2d-3466-d7a5-142a-30a9e63053d0_UUID-8dfed5eb-8c48-8f94-4e3a-61b051fb9b440) in the official documentation.
+
+The following arguments are supported to configure a scope:
+
+* `metric` - (Required) Metric to scope by, common examples are `host.hostName`, `kubernetes.namespace.name` or `kubernetes.cluster.name`, but you can use all the Sysdig-supported values shown in the UI. Note that kubernetes-related values only appear when Sysdig detects Kubernetes metadata.
+
+* `comparator` - (Optional) Operator to relate the metric with some value. It is only required if the value to filter by is set, or the variable field is not set. Valid values are: `in`, `notIn`, `equals`, `notEquals`, `contains`, `notContains` and `startsWith`.
+
+* `value` - (Optional) List of values to filter by, if comparator is set. If the comparator is not `in` or `notIn` the list must contain only 1 value.
+  
+* `variable` - (Optional) Assigns this metric to a value name and allows PromQL to reference it.
+
 
 ### panel
 
@@ -122,6 +153,13 @@ The following arguments are supported:
                              This field is ignored for all panel types except `text`.
 
 ### query 
+
+To scope a panel built from a PromQL query, you must use a scope variable within the query. The variable will take the value of the referenced scope parameter, and the PromQL panel will change accordingly.
+There are two predefined variables available:
+
+- `$__interval` represents the time interval defined based on the time range. This will help to adapt the time range for different operations, such as rate and avg_over_time, and prevent displaying empty graphs due to the change in the granularity of the data.
+
+- `$__range` represents the time interval defined for the dashboard. This is used to adapt operations like calculating average for a time frame selected.
 
 The following arguments are supported:
 
