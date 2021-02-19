@@ -88,11 +88,12 @@ func Provider() *schema.Provider {
 			"sysdig_monitor_team":                           resourceSysdigMonitorTeam(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"sysdig_secure_notification_channel":         dataSourceSysdigSecureNotificationChannel(),
-			"sysdig_secure_vulnerability_exception_list": dataSourceSysdigSecureVulnerabilityExceptionList(),
-			"sysdig_secure_policy_assignments":           dataSourceSysdigSecurePolicyAssignments(),
-			"sysdig_current_user":                        dataSourceSysdigCurrentUser(),
-			"sysdig_user":                                dataSourceSysdigUser(),
+			"sysdig_secure_notification_channel":          dataSourceSysdigSecureNotificationChannel(),
+			"sysdig_secure_vulnerability_exception_list":  dataSourceSysdigSecureVulnerabilityExceptionList(),
+			"sysdig_secure_vulnerability_exception_lists": dataSourceSysdigSecureVulnerabilityExceptionLists(),
+			"sysdig_secure_policy_assignments":            dataSourceSysdigSecurePolicyAssignments(),
+			"sysdig_current_user":                         dataSourceSysdigCurrentUser(),
+			"sysdig_user":                                 dataSourceSysdigUser(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

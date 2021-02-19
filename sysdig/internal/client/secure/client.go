@@ -49,6 +49,7 @@ type SysdigSecureClient interface {
 	CreateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
 	GetVulnerabilityExceptionListByID(context.Context, string) (*VulnerabilityExceptionList, error)
 	GetVulnerabilityExceptionListByName(context.Context, string) (*VulnerabilityExceptionList, error)
+	GetVulnerabilityExceptionLists(context.Context) ([]*VulnerabilityExceptionList, error)
 	DeleteVulnerabilityExceptionList(context.Context, string) error
 	UpdateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
 
