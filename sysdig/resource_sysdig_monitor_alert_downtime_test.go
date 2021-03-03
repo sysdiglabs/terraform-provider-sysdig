@@ -50,7 +50,7 @@ resource "sysdig_monitor_alert_downtime" "sample" {
 	scope = "kubernetes.cluster.name in (\"pulsar\")"
 	
 	trigger_after_minutes = 10
-	trigger_after_pct = 100
+	trigger_after_pct = 99
 
 	enabled = false
 
