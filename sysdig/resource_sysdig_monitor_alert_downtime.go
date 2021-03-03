@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/spf13/cast"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
@@ -139,7 +140,7 @@ func downtimeAlertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert
 	}
 
 	alert.SegmentCondition = &monitor.SegmentCondition{Type: "ANY"}
-	alert.Condition = fmt.Sprintf("avg(timeAvg(uptime)) <= %.2f", float64(1.0-(d.Get("trigger_after_pct").(int)/100)))
+	alert.Condition = fmt.Sprintf("avg(timeAvg(uptime)) <= %.2f", 1.0-(cast.ToFloat64(d.Get("trigger_after_pct"))/100.0))
 
 	entitiesRaw := d.Get("entities_to_monitor").([]interface{})
 	for _, entityRaw := range entitiesRaw {
@@ -156,7 +157,7 @@ func downtimeAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData
 	}
 
 	var trigger_after_pct float64
-	fmt.Sscanf(alert.Condition, "avg(timeAvg(uptime)) <= %.2f", &trigger_after_pct)
+	fmt.Sscanf(alert.Condition, "avg(timeAvg(uptime)) <= %f", &trigger_after_pct)
 	trigger_after_pct = (1 - trigger_after_pct) * 100
 
 	data.Set("trigger_after_pct", int(trigger_after_pct))
