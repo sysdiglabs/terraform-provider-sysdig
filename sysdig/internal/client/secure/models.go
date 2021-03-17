@@ -19,6 +19,7 @@ type Policy struct {
 	Scope                  string   `json:"scope,omitempty"`
 	Version                int      `json:"version,omitempty"`
 	NotificationChannelIds []int    `json:"notificationChannelIds"`
+	Type                   string   `json:"type"`
 }
 
 type Action struct {

@@ -54,6 +54,12 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"type": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "falco",
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit"}, false)),
+			},
 			"severity": {
 				Type:             schema.TypeInt,
 				Default:          4,
@@ -152,6 +158,12 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 	d.Set("version", policy.Version)
 	d.Set("severity", policy.Severity)
 
+	if policy.Type != "" {
+		d.Set("type", policy.Type)
+	} else {
+		d.Set("type", "falco")
+	}
+
 	actions := []map[string]interface{}{{}}
 	for _, action := range policy.Actions {
 		if action.Type != "POLICY_ACTION_CAPTURE" {
@@ -178,6 +190,7 @@ func policyFromResourceData(d *schema.ResourceData) secure.Policy {
 		Description: d.Get("description").(string),
 		Severity:    d.Get("severity").(int),
 		Enabled:     d.Get("enabled").(bool),
+		Type:        d.Get("type").(string),
 	}
 
 	scope := d.Get("scope").(string)
