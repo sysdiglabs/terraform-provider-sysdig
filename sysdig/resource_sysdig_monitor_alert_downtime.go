@@ -14,7 +14,7 @@ import (
 )
 
 func resourceSysdigMonitorAlertDowntime() *schema.Resource {
-	timeout := 30 * time.Second
+	timeout := 5 * time.Minute
 
 	return &schema.Resource{
 		CreateContext: resourceSysdigAlertDowntimeCreate,

@@ -12,7 +12,7 @@ import (
 )
 
 func resourceSysdigUser() *schema.Resource {
-	timeout := 30 * time.Second
+	timeout := 5 * time.Minute
 
 	return &schema.Resource{
 		CreateContext: resourceSysdigUserCreate,
