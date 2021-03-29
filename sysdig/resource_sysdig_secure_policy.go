@@ -27,7 +27,7 @@ var matchActions = map[string]string{
 }
 
 func resourceSysdigSecurePolicy() *schema.Resource {
-	timeout := 30 * time.Second
+	timeout := 5 * time.Minute
 
 	return &schema.Resource{
 		CreateContext: resourceSysdigPolicyCreate,
@@ -53,6 +53,12 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"type": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "falco",
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit"}, false)),
 			},
 			"severity": {
 				Type:             schema.TypeInt,
@@ -135,10 +141,47 @@ func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	d.SetId(strconv.Itoa(policy.ID))
-	d.Set("version", policy.Version)
+	policyToResourceData(&policy, d)
 
 	return nil
+}
+
+func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
+	if policy.ID != 0 {
+		d.SetId(strconv.Itoa(policy.ID))
+	}
+
+	d.Set("name", policy.Name)
+	d.Set("description", policy.Description)
+	d.Set("scope", policy.Scope)
+	d.Set("enabled", policy.Enabled)
+	d.Set("version", policy.Version)
+	d.Set("severity", policy.Severity)
+
+	if policy.Type != "" {
+		d.Set("type", policy.Type)
+	} else {
+		d.Set("type", "falco")
+	}
+
+	actions := []map[string]interface{}{{}}
+	for _, action := range policy.Actions {
+		if action.Type != "POLICY_ACTION_CAPTURE" {
+			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
+			actions[0]["container"] = strings.ToLower(action)
+			d.Set("actions", actions)
+			//d.Set("actions.0.container", strings.ToLower(action))
+		} else {
+			actions[0]["capture"] = []map[string]interface{}{{
+				"seconds_after_event":  action.AfterEventNs / 1000000000,
+				"seconds_before_event": action.BeforeEventNs / 1000000000,
+			}}
+			d.Set("actions", actions)
+		}
+	}
+
+	d.Set("notification_channels", policy.NotificationChannelIds)
+	d.Set("rule_names", policy.RuleNames)
 }
 
 func policyFromResourceData(d *schema.ResourceData) secure.Policy {
@@ -147,6 +190,7 @@ func policyFromResourceData(d *schema.ResourceData) secure.Policy {
 		Description: d.Get("description").(string),
 		Severity:    d.Get("severity").(int),
 		Enabled:     d.Get("enabled").(bool),
+		Type:        d.Get("type").(string),
 	}
 
 	scope := d.Get("scope").(string)
@@ -211,33 +255,10 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
+		return diag.FromErr(err)
 	}
 
-	d.Set("name", policy.Name)
-	d.Set("description", policy.Description)
-	d.Set("scope", policy.Scope)
-	d.Set("enabled", policy.Enabled)
-	d.Set("version", policy.Version)
-	d.Set("severity", policy.Severity)
-
-	actions := []map[string]interface{}{{}}
-	for _, action := range policy.Actions {
-		if action.Type != "POLICY_ACTION_CAPTURE" {
-			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
-			actions[0]["container"] = strings.ToLower(action)
-			d.Set("actions", actions)
-			//d.Set("actions.0.container", strings.ToLower(action))
-		} else {
-			actions[0]["capture"] = []map[string]interface{}{{
-				"seconds_after_event":  action.AfterEventNs / 1000000000,
-				"seconds_before_event": action.BeforeEventNs / 1000000000,
-			}}
-			d.Set("actions", actions)
-		}
-	}
-
-	d.Set("notification_channels", policy.NotificationChannelIds)
-	d.Set("rule_names", policy.RuleNames)
+	policyToResourceData(&policy, d)
 
 	return nil
 }
@@ -254,6 +275,7 @@ func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, met
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }
 

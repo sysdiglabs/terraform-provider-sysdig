@@ -22,7 +22,7 @@ const (
 )
 
 func dataSourceSysdigSecureNotificationChannel() *schema.Resource {
-	timeout := 30 * time.Second
+	timeout := 5 * time.Minute
 
 	return &schema.Resource{
 		ReadContext: dataSourceSysdigNotificationChannelRead,
