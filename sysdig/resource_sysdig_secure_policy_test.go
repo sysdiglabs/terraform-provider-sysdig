@@ -50,6 +50,9 @@ func TestAccPolicy(t *testing.T) {
 			{
 				Config: policiesWithKillAction(rText()),
 			},
+			{
+				Config: policiesForAWSCloudtrail(rText()),
+			},
 		},
 	})
 }
@@ -156,6 +159,16 @@ resource "sysdig_secure_policy" "sample" {
   actions {
     container = "kill"
   }
+}
+`, name, name)
+}
+
+func policiesForAWSCloudtrail(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_policy" "sample4" {
+  name = "TERRAFORM TEST 4 %s"
+  description = "TERRAFORM TEST %s"
+  type = "aws_cloudtrail"
 }
 `, name, name)
 }
