@@ -35,7 +35,7 @@ data "sysdig_current_user" "me" {
 
 ## Argument Reference
 
-* `name` - (Required) The name of the Secure Team. It must be unique.
+* `name` - (Required) The name of the Secure Team. It must be unique and must not exist in Monitor.
 
 * `description` - (Optional) A description of the team.
 
