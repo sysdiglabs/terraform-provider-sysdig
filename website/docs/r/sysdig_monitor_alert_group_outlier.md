@@ -77,6 +77,7 @@ is fired.
 In addition to all arguments above, the following attributes are exported, which are common to all the
 alerts in Sysdig Monitor:
 
+* `id` - ID of the alert created.
 * `version` - Current version of the resource in Sysdig Monitor.
 * `team` - Team ID that owns the alert.
 
