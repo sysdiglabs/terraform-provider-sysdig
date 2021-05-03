@@ -41,7 +41,15 @@ resource "sysdig_monitor_notification_channel_webhook" "sample-webhook" {
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
-  
+
+## Attributes Reference
+
+In addition to all arguments above, the following attributes are exported:
+
+* `id` - (Computed) The ID of the Notification Channel.
+
+* `version` - (Computed) The current version of the Notification Channel.
+
 ## Import
 
 Webhook notification channels for Monitor can be imported using the ID, e.g.

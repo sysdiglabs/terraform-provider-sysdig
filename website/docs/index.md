@@ -30,6 +30,18 @@ resource "sysdig_secure_policy" "unexpected_inbound_tcp_connection_traefik" {
 }
 ```
 
+## Example with extra headers
+
+```hcl
+provider "sysdig" {
+  sysdig_monitor_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  sysdig_secure_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  extra_headers = {
+    "Proxy-Authorization": "Basic xxxxxxxxxxxxxxxx"
+  }
+}
+```
+
 ## Configuration Reference
 
 The following keys can be used to configure the provider.
@@ -63,3 +75,6 @@ The following keys can be used to configure the provider.
   the use of invalid HTTPS certificates in the Secure API. It can be useful for 
   on-prem installations. It can also be sourced from the `SYSDIG_SECURE_INSECURE_TLS`
   environment variable. By default this is false.
+
+* `extra_headers` - (Optional) Defines extra HTTP headers that will be added to the client
+  while performing HTTP API calls.

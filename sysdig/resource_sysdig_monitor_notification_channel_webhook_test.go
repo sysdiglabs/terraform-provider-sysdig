@@ -44,7 +44,7 @@ func monitorNotificationChannelWebhookWithName(name string) string {
 resource "sysdig_monitor_notification_channel_webhook" "sample-webhook" {
 	name = "Example Channel %s - Webhook"
 	enabled = true
-	url = "localhost:8080"
+	url = "http://1.1.1.1:8080"
 	notify_when_ok = false
 	notify_when_resolved = false
 	send_test_notification = false

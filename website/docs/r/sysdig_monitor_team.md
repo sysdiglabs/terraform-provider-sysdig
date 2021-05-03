@@ -39,7 +39,7 @@ data "sysdig_current_user" "me" {
 
 ## Argument Reference
 
-* `name` - (Required) The name of the Monitor Team. It must be unique.
+* `name` - (Required) The name of the Monitor Team. It must be unique and must not exist in Secure.
 
 * `entrypoint` - (Required) Main entry point for the current team in the product. 
                  See the Entrypoint argument reference section for more information.
