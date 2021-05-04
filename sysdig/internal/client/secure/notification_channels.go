@@ -2,7 +2,6 @@ package secure
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -15,16 +14,15 @@ func (client *sysdigSecureClient) GetNotificationChannelById(ctx context.Context
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	nc = NotificationChannelFromJSON(body)
 
-	if nc.Version == 0 {
+	if nc.ID == 0 {
 		err = fmt.Errorf("NotificationChannel with ID: %d does not exists", id)
 		return
 	}
@@ -38,13 +36,12 @@ func (client *sysdigSecureClient) GetNotificationChannelByName(ctx context.Conte
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	ncList := NotificationChannelListFromJSON(body)
 
 	for _, channel := range ncList {
@@ -65,13 +62,12 @@ func (client *sysdigSecureClient) CreateNotificationChannel(ctx context.Context,
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	nc = NotificationChannelFromJSON(body)
 	return
 }
@@ -83,13 +79,12 @@ func (client *sysdigSecureClient) UpdateNotificationChannel(ctx context.Context,
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	nc = NotificationChannelFromJSON(body)
 	return
 }
@@ -102,7 +97,7 @@ func (client *sysdigSecureClient) DeleteNotificationChannel(ctx context.Context,
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return errors.New(response.Status)
+		return errorFromResponse(response)
 	}
 	return nil
 }

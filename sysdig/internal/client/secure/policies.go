@@ -2,7 +2,6 @@ package secure
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -13,17 +12,17 @@ func (client *sysdigSecureClient) CreatePolicy(ctx context.Context, policyReques
 	if err != nil {
 		return
 	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		err = errorFromResponse(response)
+		return
+	}
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
-
-	if response.StatusCode != 200 {
-		return Policy{}, errors.New(string(body))
-	}
-
-	defer response.Body.Close()
-
 	return PolicyFromJSON(body), nil
 }
 
@@ -33,8 +32,14 @@ func (client *sysdigSecureClient) policiesURL() string {
 
 func (client *sysdigSecureClient) DeletePolicy(ctx context.Context, policyID int) error {
 	response, err := client.doSysdigSecureRequest(ctx, http.MethodDelete, client.policyURL(policyID), nil)
-
+	if err != nil {
+		return err
+	}
 	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
+		return errorFromResponse(response)
+	}
 
 	return err
 }
@@ -48,17 +53,16 @@ func (client *sysdigSecureClient) UpdatePolicy(ctx context.Context, policyReques
 	if err != nil {
 		return
 	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return Policy{}, errorFromResponse(response)
+	}
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
-
-	if response.StatusCode != 200 {
-		return Policy{}, errors.New(string(body))
-	}
-
-	defer response.Body.Close()
 
 	return PolicyFromJSON(body), nil
 }
@@ -68,16 +72,15 @@ func (client *sysdigSecureClient) GetPolicyById(ctx context.Context, policyID in
 	if err != nil {
 		return
 	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return Policy{}, errorFromResponse(response)
+	}
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
-
-	if response.StatusCode != 200 {
-		return Policy{}, errors.New(string(body))
-	}
-
-	defer response.Body.Close()
-
 	return PolicyFromJSON(body), nil
 }

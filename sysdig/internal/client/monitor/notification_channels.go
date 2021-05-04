@@ -2,7 +2,6 @@ package monitor
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -15,13 +14,12 @@ func (client *sysdigMonitorClient) GetNotificationChannelById(ctx context.Contex
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	nc = NotificationChannelFromJSON(body)
 
 	if nc.Version == 0 {
@@ -41,7 +39,7 @@ func (client *sysdigMonitorClient) GetNotificationChannelByName(ctx context.Cont
 	body, _ := ioutil.ReadAll(response.Body)
 
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
@@ -65,13 +63,12 @@ func (client *sysdigMonitorClient) CreateNotificationChannel(ctx context.Context
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	nc = NotificationChannelFromJSON(body)
 	return
 }
@@ -83,13 +80,12 @@ func (client *sysdigMonitorClient) UpdateNotificationChannel(ctx context.Context
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	nc = NotificationChannelFromJSON(body)
 	return
 }
@@ -102,7 +98,7 @@ func (client *sysdigMonitorClient) DeleteNotificationChannel(ctx context.Context
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return errors.New(response.Status)
+		return errorFromResponse(response)
 	}
 	return nil
 }

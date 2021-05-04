@@ -2,7 +2,6 @@ package monitor
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -13,25 +12,30 @@ func (c *sysdigMonitorClient) CreateAlert(ctx context.Context, alert Alert) (cre
 	if err != nil {
 		return
 	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		err = errorFromResponse(response)
+		return
+	}
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
-
-	if response.StatusCode != 200 {
-		err = errors.New(string(body))
-		return
-	}
-
-	defer response.Body.Close()
-
 	return AlertFromJSON(body), nil
 }
 
 func (c *sysdigMonitorClient) DeleteAlert(ctx context.Context, alertID int) error {
 	response, err := c.doSysdigMonitorRequest(ctx, http.MethodDelete, c.alertURL(alertID), nil)
-
+	if err != nil {
+		return err
+	}
 	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
+		return errorFromResponse(response)
+	}
 
 	return err
 }
@@ -41,19 +45,17 @@ func (c *sysdigMonitorClient) UpdateAlert(ctx context.Context, alert Alert) (upd
 	if err != nil {
 		return
 	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		err = errorFromResponse(response)
+		return
+	}
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
-
-	if response.StatusCode != 200 {
-		err = errors.New(string(body))
-		return
-	}
-
-	defer response.Body.Close()
-
 	return AlertFromJSON(body), nil
 }
 
@@ -62,17 +64,17 @@ func (c *sysdigMonitorClient) GetAlertById(ctx context.Context, alertID int) (al
 	if err != nil {
 		return
 	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		err = errorFromResponse(response)
+		return
+	}
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
-
-	if response.StatusCode != 200 {
-		err = errors.New(string(body))
-		return
-	}
-
-	defer response.Body.Close()
 
 	return AlertFromJSON(body), nil
 }

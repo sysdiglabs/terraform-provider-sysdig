@@ -15,13 +15,12 @@ func (client *sysdigSecureClient) CreateMacro(ctx context.Context, macroRequest 
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	macro, err = MacroFromJSON(body)
 	return
 }
@@ -77,7 +76,7 @@ func (client *sysdigSecureClient) DeleteMacro(ctx context.Context, id int) error
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return errors.New(response.Status)
+		return errorFromResponse(response)
 	}
 	return nil
 }
