@@ -2,7 +2,6 @@ package secure
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -21,17 +20,16 @@ func (client *sysdigSecureClient) CreateRule(ctx context.Context, rule Rule) (re
 	if err != nil {
 		return
 	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return Rule{}, errorFromResponse(response)
+	}
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
-
-	if response.StatusCode != http.StatusOK {
-		return Rule{}, errors.New(string(body))
-	}
-
-	defer response.Body.Close()
-
 	result, err = RuleFromJSON(body)
 	return
 }
@@ -41,18 +39,16 @@ func (client *sysdigSecureClient) GetRuleByID(ctx context.Context, ruleID int) (
 	if err != nil {
 		return
 	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return Rule{}, errorFromResponse(response)
+	}
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
-
-	if response.StatusCode != 200 {
-		return Rule{}, errors.New(string(body))
-	}
-
-	defer response.Body.Close()
-
 	result, err = RuleFromJSON(body)
 	return
 }
@@ -62,25 +58,31 @@ func (client *sysdigSecureClient) UpdateRule(ctx context.Context, rule Rule) (re
 	if err != nil {
 		return
 	}
+
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return Rule{}, errorFromResponse(response)
+	}
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
-
-	if response.StatusCode != http.StatusOK {
-		return Rule{}, errors.New(string(body))
-	}
-
-	defer response.Body.Close()
-
 	result, err = RuleFromJSON(body)
 	return
 }
 
 func (client *sysdigSecureClient) DeleteRule(ctx context.Context, ruleID int) error {
 	response, err := client.doSysdigSecureRequest(ctx, http.MethodDelete, client.ruleURL(ruleID), nil)
-
+	if err != nil {
+		return err
+	}
 	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
+		return errorFromResponse(response)
+	}
 
 	return err
 }

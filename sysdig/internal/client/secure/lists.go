@@ -2,7 +2,6 @@ package secure
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -15,13 +14,12 @@ func (client *sysdigSecureClient) CreateList(ctx context.Context, listRequest Li
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	list, err = ListFromJSON(body)
 	return
 }
@@ -33,13 +31,12 @@ func (client *sysdigSecureClient) GetListById(ctx context.Context, id int) (list
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	list, err = ListFromJSON(body)
 	if err != nil {
 		return
@@ -59,13 +56,12 @@ func (client *sysdigSecureClient) UpdateList(ctx context.Context, listRequest Li
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	return ListFromJSON(body)
 }
 
@@ -77,7 +73,7 @@ func (client *sysdigSecureClient) DeleteList(ctx context.Context, id int) error 
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return errors.New(response.Status)
+		return errorFromResponse(response)
 	}
 	return nil
 }

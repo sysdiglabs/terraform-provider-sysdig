@@ -16,13 +16,12 @@ func (client *sysdigSecureClient) getUserIdbyEmail(ctx context.Context, userRole
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return nil, err
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	// Set User Id to UserRoles struct
 	usersList := UsersListFromJSON(body)
 	usersMap := make(map[string]int)
@@ -52,13 +51,12 @@ func (client *sysdigSecureClient) GetTeamById(ctx context.Context, id int) (t Te
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	t = TeamFromJSON(body)
 
 	return
@@ -78,13 +76,12 @@ func (client *sysdigSecureClient) CreateTeam(ctx context.Context, tRequest Team)
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	t = TeamFromJSON(body)
 	return
 }
@@ -102,13 +99,12 @@ func (client *sysdigSecureClient) UpdateTeam(ctx context.Context, tRequest Team)
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	t = TeamFromJSON(body)
 	return
 }
@@ -121,7 +117,7 @@ func (client *sysdigSecureClient) DeleteTeam(ctx context.Context, id int) error 
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return errors.New(response.Status)
+		return errorFromResponse(response)
 	}
 	return nil
 }

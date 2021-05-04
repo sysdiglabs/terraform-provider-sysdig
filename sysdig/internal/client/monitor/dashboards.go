@@ -10,76 +10,69 @@ import (
 )
 
 func (client *sysdigMonitorClient) GetDashboardByID(ctx context.Context, ID int) (*model.Dashboard, error) {
-	res, err := client.doSysdigMonitorRequest(ctx, http.MethodGet, client.getDashboardUrl(ID), nil)
+	response, err := client.doSysdigMonitorRequest(ctx, http.MethodGet, client.getDashboardUrl(ID), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	if response.StatusCode != http.StatusOK {
+		return nil, errorFromResponse(response)
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, nil
 	}
-
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(string(body))
-	}
-
 	return model.DashboardFromJSON(body), nil
 }
 
 func (client *sysdigMonitorClient) CreateDashboard(ctx context.Context, dashboard *model.Dashboard) (*model.Dashboard, error) {
-	res, err := client.doSysdigMonitorRequest(ctx, http.MethodPost, client.getDashboardsUrl(), dashboard.ToJSON())
+	response, err := client.doSysdigMonitorRequest(ctx, http.MethodPost, client.getDashboardsUrl(), dashboard.ToJSON())
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
+		return nil, errorFromResponse(response)
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
-
-	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf(string(body))
-	}
-
 	return model.DashboardFromJSON(body), nil
 }
 
 func (client *sysdigMonitorClient) UpdateDashboard(ctx context.Context, dashboard *model.Dashboard) (*model.Dashboard, error) {
-	res, err := client.doSysdigMonitorRequest(ctx, http.MethodPut, client.getDashboardUrl(dashboard.ID), dashboard.ToJSON())
+	response, err := client.doSysdigMonitorRequest(ctx, http.MethodPut, client.getDashboardUrl(dashboard.ID), dashboard.ToJSON())
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
+		return nil, errorFromResponse(response)
 	}
 
-	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf(string(body))
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
 	}
 
 	return model.DashboardFromJSON(body), nil
 }
 
 func (client *sysdigMonitorClient) DeleteDashboard(ctx context.Context, ID int) error {
-	res, err := client.doSysdigMonitorRequest(ctx, http.MethodDelete, client.getDashboardUrl(ID), nil)
+	response, err := client.doSysdigMonitorRequest(ctx, http.MethodDelete, client.getDashboardUrl(ID), nil)
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer response.Body.Close()
 
-	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusNoContent {
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return err
-		}
-
-		return fmt.Errorf(string(body))
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
+		return errorFromResponse(response)
 	}
 
 	return nil
