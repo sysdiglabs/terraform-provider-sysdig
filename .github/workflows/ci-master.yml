@@ -45,6 +45,9 @@ jobs:
         with:
           go-version: ^1.15
 
+      - name: Workaround Go 1.16 issue with go.sum dependencies
+        run: go env -w GOFLAGS=-mod=mod
+
       - name: Build project
         run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o terraform-provider-sysdig
 
@@ -68,6 +71,9 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+
+      - name: Workaround Go 1.16 issue with go.sum dependencies
+        run: go env -w GOFLAGS=-mod=mod
 
       - name: Get dependencies
         run: |

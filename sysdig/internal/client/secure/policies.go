@@ -14,7 +14,7 @@ func (client *sysdigSecureClient) CreatePolicy(ctx context.Context, policyReques
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		err = errorFromResponse(response)
 		return
 	}
@@ -55,7 +55,7 @@ func (client *sysdigSecureClient) UpdatePolicy(ctx context.Context, policyReques
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		return Policy{}, errorFromResponse(response)
 	}
 
@@ -74,7 +74,7 @@ func (client *sysdigSecureClient) GetPolicyById(ctx context.Context, policyID in
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		return Policy{}, errorFromResponse(response)
 	}
 

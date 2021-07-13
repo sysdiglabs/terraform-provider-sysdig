@@ -33,7 +33,7 @@ func (c *sysdigMonitorClient) DeleteAlert(ctx context.Context, alertID int) erro
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
 		return errorFromResponse(response)
 	}
 
@@ -47,7 +47,7 @@ func (c *sysdigMonitorClient) UpdateAlert(ctx context.Context, alert Alert) (upd
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		err = errorFromResponse(response)
 		return
 	}
@@ -66,7 +66,7 @@ func (c *sysdigMonitorClient) GetAlertById(ctx context.Context, alertID int) (al
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		err = errorFromResponse(response)
 		return
 	}

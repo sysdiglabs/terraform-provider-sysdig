@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -16,13 +15,12 @@ func (client *sysdigCommonClient) GetUserById(ctx context.Context, id int) (u *U
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	user := UserFromJSON(body)
 	return &user, nil
 }
@@ -34,10 +32,8 @@ func (client *sysdigCommonClient) GetUserByEmail(ctx context.Context, email stri
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
@@ -45,7 +41,7 @@ func (client *sysdigCommonClient) GetUserByEmail(ctx context.Context, email stri
 		Users []User `json:"users"`
 	}
 
-	err = json.Unmarshal(body, &userList)
+	err = json.NewDecoder(response.Body).Decode(&userList)
 	if err != nil {
 		return
 	}
@@ -67,13 +63,12 @@ func (client *sysdigCommonClient) CreateUser(ctx context.Context, uRequest *User
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	user := UserFromJSON(body)
 	return &user, nil
 }
@@ -85,13 +80,12 @@ func (client *sysdigCommonClient) UpdateUser(ctx context.Context, uRequest *User
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	user := UserFromJSON(body)
 	return &user, nil
 }
@@ -103,8 +97,8 @@ func (client *sysdigCommonClient) DeleteUser(ctx context.Context, id int) error 
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return errors.New(response.Status)
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
+		return errorFromResponse(response)
 	}
 	return nil
 }
@@ -117,11 +111,11 @@ func (client *sysdigCommonClient) GetCurrentUser(ctx context.Context) (u *User, 
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
-	body, _ := ioutil.ReadAll(response.Body)
 
+	body, _ := ioutil.ReadAll(response.Body)
 	user := UserFromJSON(body)
 	return &user, nil
 }

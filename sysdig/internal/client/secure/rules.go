@@ -41,7 +41,7 @@ func (client *sysdigSecureClient) GetRuleByID(ctx context.Context, ruleID int) (
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		return Rule{}, errorFromResponse(response)
 	}
 
