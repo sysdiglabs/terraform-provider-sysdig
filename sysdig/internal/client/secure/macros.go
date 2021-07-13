@@ -2,7 +2,6 @@ package secure
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -32,20 +31,19 @@ func (client *sysdigSecureClient) GetMacroById(ctx context.Context, id int) (mac
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	macro, err = MacroFromJSON(body)
 	if err != nil {
 		return
 	}
 
 	if macro.Version == 0 {
-		err = fmt.Errorf("Macro with ID: %d does not exists", id)
+		err = fmt.Errorf("macro with ID: %d does not exists", id)
 		return
 	}
 	return
@@ -58,13 +56,12 @@ func (client *sysdigSecureClient) UpdateMacro(ctx context.Context, macroRequest 
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	return MacroFromJSON(body)
 }
 
@@ -75,7 +72,7 @@ func (client *sysdigSecureClient) DeleteMacro(ctx context.Context, id int) error
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
 		return errorFromResponse(response)
 	}
 	return nil

@@ -16,13 +16,12 @@ func (client *sysdigMonitorClient) getUserIdbyEmail(ctx context.Context, userRol
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return nil, err
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	// Set User Id to UserRoles struct
 	usersList := UsersListFromJSON(body)
 	usersMap := make(map[string]int)
@@ -31,7 +30,6 @@ func (client *sysdigMonitorClient) getUserIdbyEmail(ctx context.Context, userRol
 	}
 
 	modifiedUserRoles := []UserRoles{}
-
 	for _, userRole := range userRoles {
 		ur := userRole
 		id, ok := usersMap[ur.Email]
@@ -52,13 +50,12 @@ func (client *sysdigMonitorClient) GetTeamById(ctx context.Context, id int) (t T
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	t = TeamFromJSON(body)
 
 	return
@@ -78,13 +75,12 @@ func (client *sysdigMonitorClient) CreateTeam(ctx context.Context, tRequest Team
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		err = errors.New(response.Status + " " + string(body))
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	t = TeamFromJSON(body)
 	return
 }
@@ -102,13 +98,12 @@ func (client *sysdigMonitorClient) UpdateTeam(ctx context.Context, tRequest Team
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
-
 	if response.StatusCode != http.StatusOK {
-		err = errors.New(response.Status)
+		err = errorFromResponse(response)
 		return
 	}
 
+	body, _ := ioutil.ReadAll(response.Body)
 	t = TeamFromJSON(body)
 	return
 }
@@ -120,7 +115,7 @@ func (client *sysdigMonitorClient) DeleteTeam(ctx context.Context, id int) error
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
 		return errorFromResponse(response)
 	}
 	return nil
