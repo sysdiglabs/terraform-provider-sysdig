@@ -149,11 +149,12 @@ type Details struct {
 	Syscalls *Syscalls `json:"syscalls,omitempty"`
 
 	// Falco
-	Append    *bool      `json:"append,omitempty"`
-	Source    string     `json:"source,omitempty"`
-	Output    string     `json:"output"`
-	Condition *Condition `json:"condition,omitempty"`
-	Priority  string     `json:"priority,omitempty"`
+	Append     *bool        `json:"append,omitempty"`
+	Source     string       `json:"source,omitempty"`
+	Output     string       `json:"output"`
+	Condition  *Condition   `json:"condition,omitempty"`
+	Priority   string       `json:"priority,omitempty"`
+	Exceptions []*Exception `json:"exceptions,omitempty"`
 
 	RuleType string `json:"ruleType"`
 }
@@ -195,6 +196,13 @@ type Syscalls struct {
 type Condition struct {
 	Condition  string        `json:"condition"`
 	Components []interface{} `json:"components"`
+}
+
+type Exception struct {
+	Name   string      `json:"name"`
+	Fields interface{} `json:"fields"`
+	Comps  interface{} `json:"comps"`
+	Values interface{} `json:"values,omitempty"`
 }
 
 func (r *Rule) ToJSON() io.Reader {

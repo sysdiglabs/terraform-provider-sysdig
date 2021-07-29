@@ -66,6 +66,9 @@ func TestAccRuleFalco(t *testing.T) {
 				Config:      ruleFalcoTerminalShellWithMissingSource(rText()),
 				ExpectError: regexp.MustCompile("source must be set when append = false"),
 			},
+			{
+				Config: ruleFalcoWithExceptions(rText()),
+			},
 		},
 	})
 }
@@ -145,4 +148,37 @@ resource "sysdig_secure_rule_falco" "terminal_shell_append" {
   condition = "and spawned_process and shell_procs and proc.tty != 0 and container_entrypoint"
   append = true
 }`)
+}
+
+func ruleFalcoWithExceptions(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role" {
+  name        = "TERRAFORM TEST %s - Attach to cluster-admin Role"
+  condition   = "kevt and clusterrolebinding and kcreate and ka.req.binding.role=cluster-admin"
+  description = "Detect any attempt to create a ClusterRoleBinding to the cluster-admin user"
+
+  output = "Cluster Role Binding to cluster-admin role (user=%%ka.user.name subject=%%ka.req.binding.subjects)"
+  tags   = ["NIST_800-53_AC-2(12)(a)", "NIST_800-53_AU-6(8)", "NIST_800-53_SI-7(11)", "k8s", "SOC2_CC6.3", "NIST_800-53_AC-3", "NIST_800-53", "NIST_800-53_AC-2d", "SOC2"]
+  source = "k8s_audit"
+
+  exceptions {
+   name = "subjects_with_in"
+   fields = ["ka.req.binding.subjects", "ka.req.binding.role"]
+   comps = ["in", "="]
+   values = jsonencode([ [["sysdig", "sysdiglabs"], "falco"] ])
+  }
+  exceptions {
+   name = "subjects_equal"
+   fields = ["ka.req.binding.subjects", "ka.req.binding.role"]
+   comps = ["=", "="]
+   values = jsonencode([ ["foo", "bar"] ])
+  }
+  exceptions {
+   name = "only_one_field"
+   fields = ["ka.req.binding.subjects"]
+   comps = ["in"]
+   values = jsonencode(["foo"])
+  }
+}
+`, name)
 }
