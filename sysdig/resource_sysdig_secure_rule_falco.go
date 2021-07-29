@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/spf13/cast"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
@@ -59,6 +61,32 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+			},
+			"exceptions": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"comps": {
+							Type:     schema.TypeList,
+							Required: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"values": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"fields": {
+							Type:     schema.TypeList,
+							Required: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
 			},
 		}),
 	}
@@ -191,6 +219,41 @@ func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) (secure.Rul
 	rule.Details.Condition = &secure.Condition{
 		Condition:  d.Get("condition").(string),
 		Components: []interface{}{},
+	}
+
+	if exceptionsField, ok := d.GetOk("exceptions"); ok {
+		falcoExceptions := []*secure.Exception{}
+		for _, exception := range exceptionsField.([]interface{}) {
+			exceptionMap := exception.(map[string]interface{})
+			newFalcoException := &secure.Exception{
+				Name: exceptionMap["name"].(string),
+			}
+
+			comps := cast.ToStringSlice(exceptionMap["comps"])
+			if len(comps) == 1 {
+				newFalcoException.Comps = comps[0]
+			}
+			if len(comps) > 1 {
+				newFalcoException.Comps = comps
+			}
+
+			values := cast.ToString(exceptionMap["values"])
+			err := json.Unmarshal([]byte(values), &newFalcoException.Values)
+			if err != nil {
+				return secure.Rule{}, err
+			}
+
+			fields := cast.ToStringSlice(exceptionMap["fields"])
+			if len(fields) == 1 {
+				newFalcoException.Fields = fields[0]
+			}
+			if len(fields) > 1 {
+				newFalcoException.Fields = fields
+			}
+
+			falcoExceptions = append(falcoExceptions, newFalcoException)
+		}
+		rule.Details.Exceptions = falcoExceptions
 	}
 
 	return rule, nil
