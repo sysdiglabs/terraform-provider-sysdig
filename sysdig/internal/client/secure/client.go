@@ -52,6 +52,11 @@ type SysdigSecureClient interface {
 	GetVulnerabilityExceptionByID(context.Context, string, string) (*VulnerabilityException, error)
 	DeleteVulnerabilityException(context.Context, string, string) error
 	UpdateVulnerabilityException(context.Context, string, *VulnerabilityException) (*VulnerabilityException, error)
+
+	CreateCloudAccount(context.Context, *CloudAccount) (*CloudAccount, error)
+	GetCloudAccountById(context.Context, string) (*CloudAccount, error)
+	DeleteCloudAccount(context.Context, string) error
+	UpdateCloudAccount(context.Context, string, *CloudAccount) (*CloudAccount, error)
 }
 
 func WithExtraHeaders(client SysdigSecureClient, extraHeaders map[string]string) SysdigSecureClient {

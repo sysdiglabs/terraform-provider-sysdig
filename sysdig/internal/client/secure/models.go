@@ -352,3 +352,25 @@ func VulnerabilityExceptionFromJSON(body []byte) *VulnerabilityException {
 
 	return &result
 }
+
+// -------- CloudAccount --------
+
+type CloudAccount struct {
+	AccountID     string `json:"accountId"`
+	Provider      string `json:"provider"`
+	Alias         string `json:"alias"`
+	RoleAvailable bool   `json:"roleAvailable"`
+	ExternalID    string `json:"external_id,omitempty"`
+}
+
+func (e *CloudAccount) ToJSON() io.Reader {
+	payload, _ := json.Marshal(*e)
+	return bytes.NewBuffer(payload)
+}
+
+func CloudAccountFromJSON(body []byte) *CloudAccount {
+	var result CloudAccount
+	json.Unmarshal(body, &result)
+
+	return &result
+}
