@@ -360,7 +360,7 @@ type CloudAccount struct {
 	Provider      string `json:"provider"`
 	Alias         string `json:"alias"`
 	RoleAvailable bool   `json:"roleAvailable"`
-	ExternalID    string `json:"external_id,omitempty"`
+	ExternalID    string `json:"externalId,omitempty"`
 }
 
 func (e *CloudAccount) ToJSON() io.Reader {
