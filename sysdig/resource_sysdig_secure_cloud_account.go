@@ -47,7 +47,7 @@ func resourceSysdigSecureCloudAccount() *schema.Resource {
 			},
 			"external_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 		},
 	}
