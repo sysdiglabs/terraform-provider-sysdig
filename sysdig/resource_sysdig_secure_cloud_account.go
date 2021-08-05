@@ -83,6 +83,7 @@ func resourceSysdigSecureCloudAccountRead(ctx context.Context, d *schema.Resourc
 
 	cloudAccount, err := client.GetCloudAccountById(ctx, d.Id())
 	if err != nil {
+		d.SetId("")
 		return diag.FromErr(err)
 	}
 
