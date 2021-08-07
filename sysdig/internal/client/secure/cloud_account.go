@@ -21,6 +21,10 @@ func (client *sysdigSecureClient) cloudAccountByIdURL(accountID string, includeE
 	return fmt.Sprintf("%s/api/cloud/v2/accounts/%s", client.URL, accountID)
 }
 
+func (client *sysdigSecureClient) trustedUserURL() string {
+	return fmt.Sprintf("%s/api/cloud/v2/trustedUser", client.URL)
+}
+
 func (client *sysdigSecureClient) CreateCloudAccount(ctx context.Context, cloudAccount *CloudAccount) (*CloudAccount, error) {
 	response, err := client.doSysdigSecureRequest(ctx, http.MethodPost, client.cloudAccountURL(true), cloudAccount.ToJSON())
 	if err != nil {
@@ -83,4 +87,23 @@ func (client *sysdigSecureClient) UpdateCloudAccount(ctx context.Context, accoun
 
 	bodyBytes, _ := ioutil.ReadAll(response.Body)
 	return CloudAccountFromJSON(bodyBytes), nil
+}
+
+func (client *sysdigSecureClient) GetTrustedCloudUser(ctx context.Context) (string, error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodGet, client.trustedUserURL(), nil)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return "", errorFromResponse(response)
+	}
+
+	bodyBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bodyBytes), nil
 }
