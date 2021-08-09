@@ -19,7 +19,7 @@ func dataSourceSysdigSecureTrustedCloudUser() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"provider": {
+			"cloud_provider": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -38,7 +38,7 @@ func dataSourceSysdigSecureTrustedCloudUserRead(ctx context.Context, d *schema.R
 		return diag.FromErr(err)
 	}
 
-	userArn, err := client.GetTrustedCloudUser(ctx, d.Get("provider").(string))
+	userArn, err := client.GetTrustedCloudUser(ctx, d.Get("cloud_provider").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}

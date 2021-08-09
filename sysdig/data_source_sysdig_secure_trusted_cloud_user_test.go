@@ -33,7 +33,7 @@ func TestAccTrustedCloudUserDataSource(t *testing.T) {
 func trustedUserDatasource() string {
 	return `
 data "sysdig_secure_trusted_cloud_user" "trusted_user" {
-	provider: "aws"
+	cloud_provider = "aws"
 }
 `
 }
