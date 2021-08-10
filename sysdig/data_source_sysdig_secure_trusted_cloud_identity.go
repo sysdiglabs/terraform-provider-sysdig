@@ -38,7 +38,7 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 		return diag.FromErr(err)
 	}
 
-	userArn, err := client.GetTrustedCloudUser(ctx, d.Get("cloud_provider").(string))
+	userArn, err := client.GetTrustedCloudIdentity(ctx, d.Get("cloud_provider").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
