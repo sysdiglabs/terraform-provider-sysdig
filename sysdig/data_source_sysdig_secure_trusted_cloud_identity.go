@@ -8,11 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceSysdigSecureTrustedCloudUser() *schema.Resource {
+func dataSourceSysdigSecureTrustedCloudIdentity() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		ReadContext: dataSourceSysdigSecureTrustedCloudUserRead,
+		ReadContext: dataSourceSysdigSecureTrustedCloudIdentityRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),
@@ -32,7 +32,7 @@ func dataSourceSysdigSecureTrustedCloudUser() *schema.Resource {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigSecureTrustedCloudUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
 		return diag.FromErr(err)

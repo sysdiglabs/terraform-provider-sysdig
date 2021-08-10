@@ -10,7 +10,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccTrustedCloudUserDataSource(t *testing.T) {
+func TestAccTrustedCloudIdentityDataSource(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -24,15 +24,15 @@ func TestAccTrustedCloudUserDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: trustedUserDatasource(),
+				Config: trustedIdentityDatasource(),
 			},
 		},
 	})
 }
 
-func trustedUserDatasource() string {
+func trustedIdentityDatasource() string {
 	return `
-data "sysdig_secure_trusted_cloud_user" "trusted_user" {
+data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {
 	cloud_provider = "aws"
 }
 `
