@@ -6,7 +6,7 @@ description: |-
   Retrieves information about the Sysdig Secure Trusted Cloud Identity
 ---
 
-# sysdig\_user
+# sysdig\_secure\_trusted_cloud_identity
 
 Retrieves information about the Sysdig Secure Trusted Cloud Identity
 
