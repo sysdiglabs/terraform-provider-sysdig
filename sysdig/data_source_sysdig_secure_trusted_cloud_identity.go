@@ -23,7 +23,7 @@ func dataSourceSysdigSecureTrustedCloudIdentity() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"arn": {
+			"identity": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -38,13 +38,13 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 		return diag.FromErr(err)
 	}
 
-	userArn, err := client.GetTrustedCloudIdentity(ctx, d.Get("cloud_provider").(string))
+	identity, err := client.GetTrustedCloudIdentity(ctx, d.Get("cloud_provider").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(userArn)
-	d.Set("arn", userArn)
+	d.SetId(identity)
+	d.Set("identity", identity)
 
 	return nil
 }
