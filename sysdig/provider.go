@@ -88,9 +88,10 @@ func Provider() *schema.Provider {
 			"sysdig_monitor_team":                           resourceSysdigMonitorTeam(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"sysdig_secure_notification_channel": dataSourceSysdigSecureNotificationChannel(),
-			"sysdig_current_user":                dataSourceSysdigCurrentUser(),
-			"sysdig_user":                        dataSourceSysdigUser(),
+			"sysdig_secure_trusted_cloud_identity": dataSourceSysdigSecureTrustedCloudIdentity(),
+			"sysdig_secure_notification_channel":   dataSourceSysdigSecureNotificationChannel(),
+			"sysdig_current_user":                  dataSourceSysdigCurrentUser(),
+			"sysdig_user":                          dataSourceSysdigUser(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
