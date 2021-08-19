@@ -7,6 +7,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceSysdigSecureCloudAccount() *schema.Resource {
@@ -33,8 +34,9 @@ func resourceSysdigSecureCloudAccount() *schema.Resource {
 				Required: true,
 			},
 			"cloud_provider": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"aws", "gcp", "azure"}, false),
 			},
 			"alias": {
 				Type:     schema.TypeString,

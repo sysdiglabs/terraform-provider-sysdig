@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceSysdigSecureTrustedCloudIdentity() *schema.Resource {
@@ -20,8 +21,9 @@ func dataSourceSysdigSecureTrustedCloudIdentity() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"cloud_provider": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"aws", "gcp", "azure"}, false),
 			},
 			"identity": {
 				Type:     schema.TypeString,
