@@ -2,6 +2,7 @@ package secure
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -89,7 +90,7 @@ func (client *sysdigSecureClient) UpdateCloudAccount(ctx context.Context, accoun
 	return CloudAccountFromJSON(bodyBytes), nil
 }
 
-func (client *sysdigSecureClient) GetTrustedCloudIdentity(ctx context.Context, provider string) (string, error) {
+func (client *sysdigSecureClient) GetTrustedCloudIdentity(ctx context.Context, provider string) (identity string, err error) {
 	response, err := client.doSysdigSecureRequest(ctx, http.MethodGet, client.trustedCloudIdentityURL(provider), nil)
 	if err != nil {
 		return "", err
@@ -105,5 +106,9 @@ func (client *sysdigSecureClient) GetTrustedCloudIdentity(ctx context.Context, p
 		return "", err
 	}
 
-	return string(bodyBytes), nil
+	if err := json.Unmarshal(bodyBytes, &identity); err != nil {
+		return "", err
+	}
+
+	return identity, nil
 }
