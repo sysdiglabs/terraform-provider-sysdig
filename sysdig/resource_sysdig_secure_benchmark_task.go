@@ -28,29 +28,34 @@ func resourceSysdigSecureBenchmarkTask() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"schema": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"scope": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"schedule": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
+				ForceNew: true,
 			},
 		},
 	}
