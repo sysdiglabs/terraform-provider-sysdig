@@ -382,3 +382,26 @@ func CloudAccountFromJSON(body []byte) *CloudAccount {
 
 	return &result
 }
+
+// -------- BenchmarkTask --------
+
+type BenchmarkTask struct {
+	ID       int    `json:"id,omitempty"`
+	Name     string `json:"name"`
+	Schema   string `json:"schema"`
+	Scope    string `json:"scope"`
+	Schedule string `json:"schedule"`
+	Enabled  bool   `json:"enabled"`
+}
+
+func (t *BenchmarkTask) ToJSON() io.Reader {
+	payload, _ := json.Marshal(*t)
+	return bytes.NewBuffer(payload)
+}
+
+func BenchmarkTaskFromJSON(body []byte) *BenchmarkTask {
+	var result BenchmarkTask
+	json.Unmarshal(body, &result)
+
+	return &result
+}
