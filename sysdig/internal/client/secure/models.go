@@ -385,6 +385,11 @@ func CloudAccountFromJSON(body []byte) *CloudAccount {
 
 // -------- BenchmarkTask --------
 
+var SupportedBenchmarkTaskSchemas = []string{
+	"aws_foundations_bench-1.3.0",
+	"gcp_foundations_bench-1.2.0",
+}
+
 type BenchmarkTask struct {
 	ID       int    `json:"id,omitempty"`
 	Name     string `json:"name"`

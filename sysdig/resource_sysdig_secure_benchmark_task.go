@@ -8,6 +8,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceSysdigSecureBenchmarkTask() *schema.Resource {
@@ -37,9 +38,10 @@ func resourceSysdigSecureBenchmarkTask() *schema.Resource {
 				ForceNew: true,
 			},
 			"schema": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice(secure.SupportedBenchmarkTaskSchemas, false),
 			},
 			"scope": {
 				Type:     schema.TypeString,
