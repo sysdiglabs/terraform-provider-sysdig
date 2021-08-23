@@ -59,7 +59,7 @@ resource "sysdig_secure_benchmark_task" "sample" {
   name     = "%s"
   schedule = "0 6 * * *"
   schema   = "aws_foundations_bench-1.3.0"
-  scope    = "aws.accountId = \"123456789012\" and aws.region in (\"us-east-1\", \"us-west-2\" \"eu-central-1\")"
+  scope    = "aws.accountId = \"123456789012\" and aws.region in (\"us-east-1\", \"us-west-2\", \"eu-central-1\")"
   enabled  = true
 }
 `, name)
