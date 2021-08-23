@@ -55,7 +55,7 @@ resource "sysdig_secure_benchmark_task" "sample" {
 
 func multiRegionSecureBenchmarkTaskWithName(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_benchmark_task" "sample" {
+resource "sysdig_secure_benchmark_task" "sample2" {
   name     = "%s"
   schedule = "0 6 * * *"
   schema   = "aws_foundations_bench-1.3.0"
