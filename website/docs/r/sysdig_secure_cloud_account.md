@@ -35,7 +35,7 @@ resource "sysdig_secure_cloud_account" "sample" {
 
 ## Import
 
-Secure Teams can be imported using the `account_id`, e.g.
+Secure Cloud Accounts can be imported using the `account_id`, e.g.
 
 ```
 $ terraform import sysdig_secure_cloud_account.sample 123456789012

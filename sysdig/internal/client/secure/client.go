@@ -58,6 +58,10 @@ type SysdigSecureClient interface {
 	DeleteCloudAccount(context.Context, string) error
 	UpdateCloudAccount(context.Context, string, *CloudAccount) (*CloudAccount, error)
 	GetTrustedCloudIdentity(context.Context, string) (string, error)
+
+	CreateBenchmarkTask(context.Context, *BenchmarkTask) (*BenchmarkTask, error)
+	GetBenchmarkTask(context.Context, string) (*BenchmarkTask, error)
+	DeleteBenchmarkTask(context.Context, string) error
 }
 
 func WithExtraHeaders(client SysdigSecureClient, extraHeaders map[string]string) SysdigSecureClient {

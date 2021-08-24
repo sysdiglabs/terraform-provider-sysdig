@@ -71,6 +71,7 @@ func Provider() *schema.Provider {
 			"sysdig_secure_vulnerability_exception":        resourceSysdigSecureVulnerabilityException(),
 			"sysdig_secure_vulnerability_exception_list":   resourceSysdigSecureVulnerabilityExceptionList(),
 			"sysdig_secure_cloud_account":                  resourceSysdigSecureCloudAccount(),
+			"sysdig_secure_benchmark_task":                 resourceSysdigSecureBenchmarkTask(),
 
 			"sysdig_monitor_alert_downtime":                 resourceSysdigMonitorAlertDowntime(),
 			"sysdig_monitor_alert_metric":                   resourceSysdigMonitorAlertMetric(),
