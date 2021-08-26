@@ -2,8 +2,10 @@ package sysdig
 
 import (
 	"context"
+	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws/arn"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -29,6 +31,14 @@ func dataSourceSysdigSecureTrustedCloudIdentity() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"aws_account_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"aws_role_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -47,6 +57,16 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 
 	d.SetId(identity)
 	d.Set("identity", identity)
+
+	// If identity is an ARN, attempt to extract certain fields
+	parsedArn, err := arn.Parse(identity)
+	if err == nil {
+		d.Set("aws_account_id", parsedArn.AccountID)
+
+		if parsedArn.Service == "iam" && strings.HasPrefix(parsedArn.Resource, "role/") {
+			d.Set("aws_role_name", strings.TrimPrefix(parsedArn.Resource, "role/"))
+		}
+	}
 
 	return nil
 }

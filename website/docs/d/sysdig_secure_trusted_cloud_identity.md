@@ -22,9 +22,13 @@ data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {
 
 ## Argument Reference
 
-* `cloud_provider` - (Required) The cloud provider in which the account exists. Currently supported providers are `aws`, `gcp` and `azure` 
+* `cloud_provider` - (Required) The cloud provider in which the trusted identity will be used. Currently supported providers are `aws`, `gcp` and `azure` 
 
 
 ## Attributes Reference
 
 * `identity` - Sysdig's identity (User/Role/etc) that should be used to create a trust relationship allowing Sysdig access to your cloud account.
+
+* `aws_account_id` - If `identity` is an AWS ARN, this attribute contains the AWS Account ID to which the ARN belongs, otherwise it contains the empty string.
+
+* `aws_role_name` - If `identity` is a AWS IAM Role ARN, this attribute contains the name of the role, otherwise it contains the empty string.
