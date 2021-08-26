@@ -17,6 +17,7 @@ func resourceSysdigSecureBenchmarkTask() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceSysdigSecureBenchmarkTaskCreate,
 		ReadContext:   resourceSysdigSecureBenchmarkTaskRead,
+		UpdateContext: resourceSysdigSecureBenchmarkTaskUpdate,
 		DeleteContext: resourceSysdigSecureBenchmarkTaskDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -57,7 +58,6 @@ func resourceSysdigSecureBenchmarkTask() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
-				ForceNew: true,
 			},
 		},
 	}
@@ -103,6 +103,25 @@ func resourceSysdigSecureBenchmarkTaskRead(ctx context.Context, d *schema.Resour
 	d.Set("scope", benchmarkTask.Scope)
 	d.Set("schedule", benchmarkTask.Schedule)
 	d.Set("enabled", benchmarkTask.Enabled)
+
+	return nil
+}
+
+func resourceSysdigSecureBenchmarkTaskUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(SysdigClients).sysdigSecureClient()
+	if err != nil {
+		d.SetId("")
+		return diag.FromErr(err)
+	}
+
+	enabled := d.Get("enabled").(bool)
+
+	if err := client.SetBenchmarkTaskEnabled(ctx, d.Id(), enabled); err != nil {
+		d.SetId("")
+		return diag.FromErr(err)
+	}
+
+	d.Set("enabled", enabled)
 
 	return nil
 }
