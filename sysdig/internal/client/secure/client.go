@@ -62,6 +62,7 @@ type SysdigSecureClient interface {
 	CreateBenchmarkTask(context.Context, *BenchmarkTask) (*BenchmarkTask, error)
 	GetBenchmarkTask(context.Context, string) (*BenchmarkTask, error)
 	DeleteBenchmarkTask(context.Context, string) error
+	SetBenchmarkTaskEnabled(context.Context, string, bool) error
 }
 
 func WithExtraHeaders(client SysdigSecureClient, extraHeaders map[string]string) SysdigSecureClient {

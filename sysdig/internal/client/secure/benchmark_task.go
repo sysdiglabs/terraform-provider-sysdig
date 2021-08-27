@@ -15,6 +15,15 @@ func (client *sysdigSecureClient) benchmarkTaskByIdURL(id string) string {
 	return fmt.Sprintf("%s/api/benchmarks/v2/tasks/%s", client.URL, id)
 }
 
+func (client *sysdigSecureClient) setBenchmarkTaskEnabledURL(id string, enabled bool) string {
+	if enabled {
+		return fmt.Sprintf("%s/api/benchmarks/v2/tasks/%s/enable", client.URL, id)
+
+	}
+
+	return fmt.Sprintf("%s/api/benchmarks/v2/tasks/%s/disable", client.URL, id)
+}
+
 func (client *sysdigSecureClient) CreateBenchmarkTask(ctx context.Context, task *BenchmarkTask) (*BenchmarkTask, error) {
 	response, err := client.doSysdigSecureRequest(ctx, http.MethodPost, client.createBenchmarkTaskURL(), task.ToJSON())
 	if err != nil {
@@ -58,6 +67,18 @@ func (client *sysdigSecureClient) DeleteBenchmarkTask(ctx context.Context, id st
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
+		return errorFromResponse(response)
+	}
+	return nil
+}
+
+func (client *sysdigSecureClient) SetBenchmarkTaskEnabled(ctx context.Context, id string, enabled bool) error {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodPut, client.setBenchmarkTaskEnabledURL(id, enabled), nil)
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode != http.StatusOK {
 		return errorFromResponse(response)
 	}
 	return nil
