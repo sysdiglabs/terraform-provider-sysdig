@@ -47,6 +47,11 @@ func resourceSysdigSecureCloudAccount() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"role_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "SysdigCloudBench",
+			},
 			"external_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -71,6 +76,7 @@ func resourceSysdigSecureCloudAccountCreate(ctx context.Context, d *schema.Resou
 	d.Set("cloud_provider", cloudAccount.Provider)
 	d.Set("alias", cloudAccount.Alias)
 	d.Set("role_enabled", cloudAccount.RoleAvailable)
+	d.Set("role_name", cloudAccount.RoleName)
 	d.Set("external_id", cloudAccount.ExternalID)
 
 	return nil
@@ -93,6 +99,7 @@ func resourceSysdigSecureCloudAccountRead(ctx context.Context, d *schema.Resourc
 	d.Set("cloud_provider", cloudAccount.Provider)
 	d.Set("alias", cloudAccount.Alias)
 	d.Set("role_enabled", cloudAccount.RoleAvailable)
+	d.Set("role_name", cloudAccount.RoleName)
 	d.Set("external_id", cloudAccount.ExternalID)
 
 	return nil
@@ -131,5 +138,6 @@ func cloudAccountFromResourceData(d *schema.ResourceData) *secure.CloudAccount {
 		Provider:      d.Get("cloud_provider").(string),
 		Alias:         d.Get("alias").(string),
 		RoleAvailable: d.Get("role_enabled").(bool),
+		RoleName:      d.Get("role_name").(string),
 	}
 }
