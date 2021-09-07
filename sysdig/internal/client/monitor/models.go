@@ -45,7 +45,7 @@ type alertWrapper struct {
 type Alert struct {
 	ID                     int                 `json:"id,omitempty"`
 	Version                int                 `json:"version,omitempty"`
-	Type                   string              `json:"type"` // computed MANUAL
+	Type                   string              `json:"type"` // default MANUAL
 	Name                   string              `json:"name"`
 	Description            string              `json:"description"`
 	Enabled                bool                `json:"enabled"`

@@ -105,6 +105,11 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 				},
 			},
 		},
+		"type": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Default:  "MANUAL",
+		},
 	}
 
 	for k, v := range original {
@@ -119,7 +124,7 @@ func alertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert, err er
 	trigger_after_minutes := time.Duration(d.Get("trigger_after_minutes").(int)) * time.Minute
 	alert = &monitor.Alert{
 		Name:                   d.Get("name").(string),
-		Type:                   "MANUAL",
+		Type:                   d.Get("type").(string),
 		Timespan:               int(trigger_after_minutes.Microseconds()),
 		SegmentBy:              []string{},
 		NotificationChannelIds: []int{},
@@ -200,6 +205,7 @@ func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err e
 	data.Set("team", alert.TeamID)
 	data.Set("enabled", alert.Enabled)
 	data.Set("severity", alert.Severity)
+	data.Set("type", alert.Type)
 
 	if len(alert.NotificationChannelIds) > 0 {
 		data.Set("notification_channels", alert.NotificationChannelIds)

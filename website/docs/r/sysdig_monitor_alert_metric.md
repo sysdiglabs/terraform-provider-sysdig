@@ -52,6 +52,7 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `renotification_minutes` - (Optional) Number of minutes for the alert to re-notify until the status is solved.
 * `capture` - (Optional) Enables the creation of a capture file of the syscalls during the event.
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
+* `type` - (Optional) Defaults to `MANUAL`
 
 ### `capture`
 
