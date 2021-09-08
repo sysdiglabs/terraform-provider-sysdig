@@ -34,7 +34,7 @@ resource "sysdig_secure_cloud_account" "sample" {
 
 * `role_enabled` - (Optional) Whether or not a role is provisioned withing this account, that Sysdig has permission to AssumeRole in order to run Benchmarks. Default: `false`.
 
-* `role_name` - (Optional) The name of the role Sysdig will have permission to AssumeRole if `role_enaled` is set to `true`. Default: `SysdigCloud`.
+* `role_name` - (Optional) The name of the role Sysdig will have permission to AssumeRole if `role_enaled` is set to `true`. Default: `SysdigCloudBench`.
 
 ## Import
 
