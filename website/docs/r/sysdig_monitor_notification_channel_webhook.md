@@ -42,6 +42,8 @@ resource "sysdig_monitor_notification_channel_webhook" "sample-webhook" {
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
 
+* `additional_headers` - (Optional) Key value list of custom headers.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
