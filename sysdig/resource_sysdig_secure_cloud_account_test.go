@@ -49,6 +49,7 @@ resource "sysdig_secure_cloud_account" "sample" {
   cloud_provider      = "aws"
   alias               = "%s"
   role_enabled        = "false"
+  role_name            = "CustomRoleName"
 }
 `, accountID, accountID)
 }
