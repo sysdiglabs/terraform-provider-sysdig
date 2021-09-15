@@ -388,6 +388,7 @@ func CloudAccountFromJSON(body []byte) *CloudAccount {
 var SupportedBenchmarkTaskSchemas = []string{
 	"aws_foundations_bench-1.3.0",
 	"gcp_foundations_bench-1.2.0",
+	"azure_foundations_bench-1.3.0",
 }
 
 type BenchmarkTask struct {
