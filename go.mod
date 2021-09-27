@@ -7,7 +7,9 @@ require (
 	cloud.google.com/go/storage v1.13.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
-	github.com/aws/aws-sdk-go v1.37.10 // indirect
+	github.com/aws/aws-sdk-go v1.37.10
+	github.com/falcosecurity/kilt/pkg v0.0.0-20210817131636-d0ea1236e9cf // indirect
+	github.com/falcosecurity/kilt/runtimes/cloudformation v0.0.0-20210817131636-d0ea1236e9cf
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
@@ -21,6 +23,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 	github.com/hashicorp/yamux v0.0.0-20210707203944-259a57b3608c // indirect
 	github.com/jmespath/go-jmespath v0.4.0
+	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/klauspost/compress v1.11.7 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
