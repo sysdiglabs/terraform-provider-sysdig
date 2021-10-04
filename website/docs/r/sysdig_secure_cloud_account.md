@@ -3,7 +3,7 @@ layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_cloud_account"
 sidebar_current: "docs-sysdig_secure_cloud_account"
 description: |-
-  Creates a Sysdig Secure Cloud Account.
+Creates a Sysdig Secure Cloud Account.
 ---
 
 # sysdig\_secure\_cloud_account
@@ -20,18 +20,21 @@ resource "sysdig_secure_cloud_account" "sample" {
   cloud_provider      = "aws"
   alias               = "prod"
   role_enabled        = "false"
+  role_name           = "CustomRoleName"
 }
 ```
 
 ## Argument Reference
 
-* `account_id` - (Required) The unique identifier of the cloud account. e.g. for AWS: `123456789012`, 
+* `account_id` - (Required) The unique identifier of the cloud account. e.g. for AWS: `123456789012`,
 
 * `cloud_provider` - (Required) The cloud provider in which the account exists. Currently supported providers are `aws`, `gcp` and `azure`
 
 * `alias` - (Optional) A human friendly alias for `account_id`.
 
-* `role_enabled` - (Optional) Whether or not a role with the name `SysdigCloud` is provisioned withing this account, that Sysdig has permission to AssumeRole in order to run Benchmarks. Default: `false`.
+* `role_enabled` - (Optional) Whether or not a role is provisioned withing this account, that Sysdig has permission to AssumeRole in order to run Benchmarks. Default: `false`.
+
+* `role_name` - (Optional) The name of the role Sysdig will have permission to AssumeRole if `role_enaled` is set to `true`. Default: `SysdigCloudBench`.
 
 ## Import
 

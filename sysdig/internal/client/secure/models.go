@@ -368,6 +368,7 @@ type CloudAccount struct {
 	Provider      string `json:"provider"`
 	Alias         string `json:"alias"`
 	RoleAvailable bool   `json:"roleAvailable"`
+	RoleName      string `json:"roleName"`
 	ExternalID    string `json:"externalId,omitempty"`
 }
 
@@ -388,6 +389,7 @@ func CloudAccountFromJSON(body []byte) *CloudAccount {
 var SupportedBenchmarkTaskSchemas = []string{
 	"aws_foundations_bench-1.3.0",
 	"gcp_foundations_bench-1.2.0",
+	"azure_foundations_bench-1.3.0",
 }
 
 type BenchmarkTask struct {
