@@ -31,12 +31,12 @@ func TestAccMonitorNotificationChannelWebhook(t *testing.T) {
 				Config: monitorNotificationChannelWebhookWithName(rText()),
 			},
 			{
-				Config: monitorNotificationChannelWebhookWithNameWithAdditionalheaders(rText()),
-			},
-			{
 				ResourceName:      "sysdig_monitor_notification_channel_webhook.sample-webhook",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: monitorNotificationChannelWebhookWithNameWithAdditionalheaders(rText()),
 			},
 		},
 	})
@@ -47,7 +47,7 @@ func monitorNotificationChannelWebhookWithName(name string) string {
 resource "sysdig_monitor_notification_channel_webhook" "sample-webhook" {
 	name = "Example Channel %s - Webhook"
 	enabled = true
-	url = "http://1.1.1.1:8080"
+	url = "https://example.com/"
 	notify_when_ok = false
 	notify_when_resolved = false
 	send_test_notification = false
@@ -59,7 +59,7 @@ func monitorNotificationChannelWebhookWithNameWithAdditionalheaders(name string)
 	resource "sysdig_monitor_notification_channel_webhook" "sample-webhook2" {
 		name = "Example Channel %s - Webhook With Additional Headers"
 		enabled = true
-		url = "http://1.1.1.1:8080"
+		url = "https://example.com/"
 		notify_when_ok = false
 		notify_when_resolved = false
 		send_test_notification = false
