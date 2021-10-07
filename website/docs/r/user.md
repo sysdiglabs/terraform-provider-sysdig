@@ -35,6 +35,10 @@ resource "sysdig_user" "foo-bar" {
 * `last_name` - (Optional) The last name of the user.
 
 
+## Attributes Reference
+
+No additional attributes are exported.
+
 ## Import
 
 Sysdig users can be imported using the ID, e.g.

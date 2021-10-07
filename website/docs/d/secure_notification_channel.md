@@ -26,6 +26,8 @@ data "sysdig_secure_notification_channel" "sample-email" {
 
 ## Attributes Reference
 
+In addition to all arguments above, the following attributes are exported:
+
 * `enabled` - If false, the channel will not emit notifications.
 
 * `type` - Will be one of the following:  "EMAIL", "SNS", "OPSGENIE", 

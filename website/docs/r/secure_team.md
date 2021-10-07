@@ -66,6 +66,10 @@ data "sysdig_current_user" "me" {
            Valid roles are: ROLE_TEAM_STANDARD, ROLE_TEAM_EDIT, ROLE_TEAM_READ, ROLE_TEAM_MANAGER.
            Default: ROLE_TEAM_STANDARD.
 
+## Attributes Reference
+
+No additional attributes are exported.
+
 ## Import
 
 Secure Teams can be imported using the ID, e.g.

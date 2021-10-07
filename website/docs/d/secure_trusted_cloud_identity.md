@@ -27,6 +27,8 @@ data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {
 
 ## Attributes Reference
 
+In addition to all arguments above, the following attributes are exported:
+
 * `identity` - Sysdig's identity (User/Role/etc) that should be used to create a trust relationship allowing Sysdig access to your cloud account.
 
 * `aws_account_id` - If `identity` is an AWS ARN, this attribute contains the AWS Account ID to which the ARN belongs, otherwise it contains the empty string.

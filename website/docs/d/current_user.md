@@ -21,6 +21,8 @@ data "sysdig_current_user" "me" {
 
 ## Attributes Reference
 
+In addition to all arguments above, the following attributes are exported:
+
 * `id` - The current user's ID.
 
 * `email` - The user email.

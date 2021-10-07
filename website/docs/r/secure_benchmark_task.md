@@ -36,6 +36,10 @@ resource "sysdig_secure_benchmark_task" "sample" {
 
 * `enabled` - (Optional) Whether or not this task should be enabled. Default: `true`.
 
+## Attributes Reference
+
+No additional attributes are exported.
+
 ## Import
 
 Secure Benchmark Tasks can be imported using the `id`, e.g.

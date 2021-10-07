@@ -37,6 +37,10 @@ resource "sysdig_secure_macro" "https_port" {
     The macros can only be extended once, for example if there is an existing macro called "foo", one can have another 
     append macro called "foo" but not a second one. By default this is false.
 
+## Attributes Reference
+
+No additional attributes are exported.
+
 ## Import
 
 Secure macros can be imported using the ID, e.g.

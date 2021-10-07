@@ -33,6 +33,10 @@ resource "sysdig_secure_list" "allowed_dev_files" {
     The rules can only be extended once, for example if there is an existing list called "foo", one can have another 
     append rule called "foo" but not a second one. By default this is false.
 
+## Attributes Reference
+
+No additional attributes are exported.
+
 ## Import
 
 Secure lists can be imported using the ID, e.g.

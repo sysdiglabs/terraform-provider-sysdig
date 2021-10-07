@@ -36,6 +36,10 @@ resource "sysdig_secure_cloud_account" "sample" {
 
 * `role_name` - (Optional) The name of the role Sysdig will have permission to AssumeRole if `role_enaled` is set to `true`. Default: `SysdigCloudBench`.
 
+## Attributes Reference
+
+No additional attributes are exported.
+
 ## Import
 
 Secure Cloud Accounts can be imported using the `account_id`, e.g.

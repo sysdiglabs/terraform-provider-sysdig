@@ -77,6 +77,8 @@ is fired.
 
 ## Attributes Reference
 
+In addition to all arguments above, the following attributes are exported:
+
 ### Common alert attributes
 
 In addition to all arguments above, the following attributes are exported, which are common to all the
