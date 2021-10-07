@@ -5,6 +5,9 @@ on:
     branches:
       - master
 
+env:
+  GO_VERSION: "^1.17"
+
 jobs:
   build-multiarch:
     name: Build
@@ -43,10 +46,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ^1.15
-
-      - name: Workaround Go 1.16 issue with go.sum dependencies
-        run: go env -w GOFLAGS=-mod=mod
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Build project
         run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o terraform-provider-sysdig
@@ -62,7 +62,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ^1.15
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Cache modules
         uses: actions/cache@v1
@@ -71,9 +71,6 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-
-      - name: Workaround Go 1.16 issue with go.sum dependencies
-        run: go env -w GOFLAGS=-mod=mod
 
       - name: Get dependencies
         run: |
