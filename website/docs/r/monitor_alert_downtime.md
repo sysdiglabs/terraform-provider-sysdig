@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Downtime Alert.
 ---
 
-# Resource: sysdig\_monitor\_alert\_downtime
+# Resource: sysdig_monitor_alert_downtime
 
 Creates a Sysdig Monitor Downtime Alert. Monitor any type of entity - host, container, process, service, etc - and alert when the entity goes down.
 

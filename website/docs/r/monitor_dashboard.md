@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Dashboard.
 ---
 
-# Resource: sysdig\_monitor\_dashboard
+# Resource: sysdig_monitor_dashboard
 
 Creates a Sysdig Monitor Dashboard using PromQL queries.
 

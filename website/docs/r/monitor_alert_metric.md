@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Metric Alert.
 ---
 
-# Resource: sysdig\_monitor\_alert\_metric
+# Resource: sysdig_monitor_alert_metric
 
 Creates a Sysdig Monitor Metric Alert. Monitor time-series metrics and alert if they violate user-defined thresholds.
 

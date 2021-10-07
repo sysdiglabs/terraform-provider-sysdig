@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Event Alert.
 ---
 
-# Resource: sysdig\_monitor\_alert\_event
+# Resource: sysdig_monitor_alert_event
 
 Creates a Sysdig Monitor Event Alert. Monitor occurrences of specific events, and alert if the total 
 number of occurrences violates a threshold. Useful for alerting on container, orchestration, and 

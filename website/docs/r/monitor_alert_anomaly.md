@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Anomaly Alert.
 ---
 
-# Resource: sysdig\_monitor\_alert\_anomaly
+# Resource: sysdig_monitor_alert_anomaly
 
 Creates a Sysdig Monitor Anomaly Alert. Monitor hosts based on their historical behaviors and alert when they deviate.
 

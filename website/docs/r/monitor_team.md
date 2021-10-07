@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Team.
 ---
 
-# Resource: sysdig\_monitor\_team
+# Resource: sysdig_monitor_team
 
 Creates a Sysdig Monitor Team.
 

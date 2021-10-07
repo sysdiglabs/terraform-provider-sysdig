@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Notification Channel of type Email.
 ---
 
-# Resource: sysdig\_secure\_notification_channel\_email
+# Resource: sysdig_secure_notification_channel_email
 
 Creates a Sysdig Secure Notification Channel of type Email.
 

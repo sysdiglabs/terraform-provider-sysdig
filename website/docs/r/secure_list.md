@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Falco List.
 ---
 
-# Resource: sysdig\_secure\_list
+# Resource: sysdig_secure_list
 
 Creates a Sysdig Secure Falco List.
 

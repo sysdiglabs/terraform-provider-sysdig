@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Notification Channel of type Amazon SNS.
 ---
 
-# Resource: sysdig\_secure\_notification\_channel\_sns
+# Resource: sysdig_secure_notification_channel_sns
 
 Creates a Sysdig Secure Notification Channel of type Amazon SNS.
 

@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Notification Channel of type Pagerduty.
 ---
 
-# Resource: sysdig\_monitor\_notification\_channel\_pagerduty
+# Resource: sysdig_monitor_notification_channel_pagerduty
 
 Creates a Sysdig Monitor Notification Channel of type Pagerduty.
 

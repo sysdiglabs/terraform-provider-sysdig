@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Notification Channel of type Pagerduty.
 ---
 
-# Resource: sysdig\_secure\_notification\_channel\_pagerduty
+# Resource: sysdig_secure_notification_channel_pagerduty
 
 Creates a Sysdig Secure Notification Channel of type Pagerduty.
 

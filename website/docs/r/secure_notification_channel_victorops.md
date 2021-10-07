@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Notification Channel of type VictorOps.
 ---
 
-# Resource: sysdig\_secure\_notification\_channel\_victorops
+# Resource: sysdig_secure_notification_channel_victorops
 
 Creates a Sysdig Secure Notification Channel of type VictorOps.
 

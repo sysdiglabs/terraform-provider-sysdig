@@ -6,7 +6,7 @@ description: |-
   Retrieves information about the user performing the API calls.
 ---
 
-# Data Source: sysdig\_current\_user
+# Data Source: sysdig_current_user
 
 Retrieves information about the current user performing the API calls.
 

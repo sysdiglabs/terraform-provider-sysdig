@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Network Rule.
 ---
 
-# Resource: sysdig\_secure\_rule\_network
+# Resource: sysdig_secure_rule_network
 
 Creates a Sysdig Secure Network Rule.
 

@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Notification Channel of type Slack.
 ---
 
-# Resource: sysdig\_monitor\_notification\_channel\_slack
+# Resource: sysdig_monitor_notification_channel_slack
 
 Creates a Sysdig Monitor Notification Channel of type Slack.
 

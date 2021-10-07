@@ -6,7 +6,7 @@ description: |-
   Retrieves information about a user from their email
 ---
 
-# Data Source: sysdig\_user
+# Data Source: sysdig_user
 
 Retrieves information about a user from their email
 

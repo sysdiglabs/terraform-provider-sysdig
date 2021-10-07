@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Cloud Account.
 ---
 
-# Resource: sysdig\_secure\_cloud_account
+# Resource: sysdig_secure_cloud_account
 
 Creates a Sysdig Secure Cloud Account.
 

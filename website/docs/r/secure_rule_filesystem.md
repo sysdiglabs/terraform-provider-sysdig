@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Filesystem Rule.
 ---
 
-# Resource: sysdig\_secure\_rule\_filesystem
+# Resource: sysdig_secure_rule_filesystem
 
 Creates a Sysdig Secure Filesystem Rule.
 

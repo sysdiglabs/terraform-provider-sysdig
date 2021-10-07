@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Process Rule.
 ---
 
-# Resource: sysdig\_secure\_rule\_process
+# Resource: sysdig_secure_rule_process
 
 Creates a Sysdig Secure Process Rule.
 

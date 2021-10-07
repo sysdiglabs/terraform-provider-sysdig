@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Container Rule.
 ---
 
-# Resource: sysdig\_secure\_rule\_container
+# Resource: sysdig_secure_rule_container
 
 Creates a Sysdig Secure Container Rule.
 

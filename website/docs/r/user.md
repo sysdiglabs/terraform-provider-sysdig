@@ -6,7 +6,7 @@ description: |-
   Creates a user in Sysdig.
 ---
 
-# Resource: sysdig\_user
+# Resource: sysdig_user
 
 Creates a user in Sysdig.
 

@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Benchmark Task.
 ---
 
-# Resource: sysdig\_secure\_benchmark_task
+# Resource: sysdig_secure_benchmark_task
 
 Creates a Sysdig Secure Benchmark Task.
 

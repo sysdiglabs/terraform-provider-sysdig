@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Team.
 ---
 
-# Resource: sysdig\_secure\_team
+# Resource: sysdig_secure_team
 
 Creates a Sysdig Secure Team.
 

@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Notification Channel of type Email.
 ---
 
-# Resource: sysdig\_monitor\_notification_channel\_email
+# Resource: sysdig_monitor_notification_channel_email
 
 Creates a Sysdig Monitor Notification Channel of type Email.
 

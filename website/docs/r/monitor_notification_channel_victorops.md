@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Notification Channel of type VictorOps.
 ---
 
-# Resource: sysdig\_monitor\_notification\_channel\_victorops
+# Resource: sysdig_monitor_notification_channel_victorops
 
 Creates a Sysdig Monitor Notification Channel of type VictorOps.
 

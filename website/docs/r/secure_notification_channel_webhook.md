@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Notification Channel of type Webhook.
 ---
 
-# Resource: sysdig\_secure\_notification\_channel\_webhook
+# Resource: sysdig_secure_notification_channel_webhook
 
 Creates a Sysdig Secure Notification Channel of type Webhook.
 

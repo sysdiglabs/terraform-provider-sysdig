@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Notification Channel of type OpsGenie.
 ---
 
-# Resource: sysdig\_monitor\_notification\_channel\_opsgenie
+# Resource: sysdig_monitor_notification_channel_opsgenie
 
 Creates a Sysdig Monitor Notification Channel of type OpsGenie.
 

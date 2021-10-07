@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor PromQL Alert.
 ---
 
-# Resource: sysdig\_monitor\_alert\_promql
+# Resource: sysdig_monitor_alert_promql
 
 Creates a Sysdig Monitor PromQL Alert. Monitor prometheus metrics and alert if they violate user-defined PromQL-based metric expression.
 

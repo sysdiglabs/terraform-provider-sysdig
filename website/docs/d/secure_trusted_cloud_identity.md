@@ -6,7 +6,7 @@ description: |-
   Retrieves information about the Sysdig Secure Trusted Cloud Identity
 ---
 
-# Data Source: sysdig\_secure\_trusted_cloud_identity
+# Data Source: sysdig_secure_trusted_cloud_identity
 
 Retrieves information about the Sysdig Secure Trusted Cloud Identity
 

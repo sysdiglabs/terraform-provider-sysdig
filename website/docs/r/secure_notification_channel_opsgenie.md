@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Notification Channel of type OpsGenie.
 ---
 
-# Resource: sysdig\_secure\_notification\_channel\_opsgenie
+# Resource: sysdig_secure_notification_channel_opsgenie
 
 Creates a Sysdig Secure Notification Channel of type OpsGenie.
 

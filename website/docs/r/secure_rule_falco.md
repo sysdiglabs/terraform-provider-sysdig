@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Falco Rule.
 ---
 
-# Resource: sysdig\_secure\_rule\_falco
+# Resource: sysdig_secure_rule_falco
 
 Creates a Sysdig Secure Falco Rule.
 

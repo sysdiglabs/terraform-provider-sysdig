@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Notification Channel of type Amazon SNS.
 ---
 
-# Resource: sysdig\_monitor\_notification\_channel\_sns
+# Resource: sysdig_monitor_notification_channel_sns
 
 Creates a Sysdig Monitor Notification Channel of type Amazon SNS.
 

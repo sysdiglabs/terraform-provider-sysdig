@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Falco Macro.
 ---
 
-# Resource: sysdig\_secure\_macro
+# Resource: sysdig_secure_macro
 
 Creates a Sysdig Secure Falco Macro.
 

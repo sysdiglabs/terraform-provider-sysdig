@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Notification Channel of type Webhook.
 ---
 
-# Resource: sysdig\_monitor\_notification\_channel\_webhook
+# Resource: sysdig_monitor_notification_channel_webhook
 
 Creates a Sysdig Monitor Notification Channel of type Webhook.
 

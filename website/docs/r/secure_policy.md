@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Policy.
 ---
 
-# Resource: sysdig\_secure\_policy
+# Resource: sysdig_secure_policy
 
 Creates a Sysdig Secure Policy.
 

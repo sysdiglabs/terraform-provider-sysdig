@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Notification Channel of type Slack.
 ---
 
-# Resource: sysdig\_secure\_notification\_channel\_slack
+# Resource: sysdig_secure_notification_channel_slack
 
 Creates a Sysdig Secure Notification Channel of type Slack.
 

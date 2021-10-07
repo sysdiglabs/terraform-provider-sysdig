@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Secure Syscall Rule.
 ---
 
-# Resource: sysdig\_secure\_rule\_syscall
+# Resource: sysdig_secure_rule_syscall
 
 Creates a Sysdig Secure Syscall Rule.
 

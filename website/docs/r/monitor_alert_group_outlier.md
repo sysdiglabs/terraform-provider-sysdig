@@ -6,7 +6,7 @@ description: |-
   Creates a Sysdig Monitor Group Outlier Alert.
 ---
 
-# Resource: sysdig\_monitor\_alert\_group\_outlier
+# Resource: sysdig_monitor_alert_group_outlier
 
 Creates a Sysdig Monitor Group Outlier Alert. Monitor a group of hosts and be notified when one acts differently from the rest.
 
