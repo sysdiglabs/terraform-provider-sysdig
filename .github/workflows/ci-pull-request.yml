@@ -5,6 +5,9 @@ on:
     branches:
       - master
 
+env:
+  GO_VERSION: "^1.17"
+
 jobs:
   build-multiarch:
     name: Build
@@ -43,7 +46,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ^1.17
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Build project
         run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o terraform-provider-sysdig
@@ -59,7 +62,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ^1.17
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Cache modules
         uses: actions/cache@v1

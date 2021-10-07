@@ -1,4 +1,4 @@
-name: Terraform Provider Docs check
+name: Terraform Provider Docs
 
 on:
   pull_request:
@@ -99,7 +99,7 @@ jobs:
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-pkg-mod-${{ hashFiles('go.sum') }}
-    - run: go install github.com/bflad/tfproviderdocs
+    - run: cd /tmp && go install github.com/bflad/tfproviderdocs
     - uses: actions/cache@v2
       timeout-minutes: 2
       with:
