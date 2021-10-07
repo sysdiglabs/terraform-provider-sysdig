@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_notification_channel_sns"
-sidebar_current: "docs-sysdig-secure-notification-channel-sns"
 description: |-
   Creates a Sysdig Secure Notification Channel of type Amazon SNS.
 ---
 
-# sysdig\_secure\_notification\_channel\_sns
+# Resource: sysdig\_secure\_notification\_channel\_sns
 
 Creates a Sysdig Secure Notification Channel of type Amazon SNS.
 

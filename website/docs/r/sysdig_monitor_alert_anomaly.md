@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_anomaly"
-sidebar_current: "docs-sysdig-monitor-alert-anomaly"
 description: |-
   Creates a Sysdig Monitor Anomaly Alert.
 ---
 
-# sysdig\_monitor\_alert\_anomaly
+# Resource: sysdig\_monitor\_alert\_anomaly
 
 Creates a Sysdig Monitor Anomaly Alert. Monitor hosts based on their historical behaviors and alert when they deviate.
 

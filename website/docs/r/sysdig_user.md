@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_user"
-sidebar_current: "docs-sysdig-user"
 description: |-
   Creates a user in Sysdig.
 ---
 
-# sysdig\_user
+# Resource: sysdig\_user
 
 Creates a user in Sysdig.
 

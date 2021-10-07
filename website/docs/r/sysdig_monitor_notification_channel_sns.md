@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_notification_channel_sns"
-sidebar_current: "docs-sysdig-monitor-notification-channel-sns"
 description: |-
   Creates a Sysdig Monitor Notification Channel of type Amazon SNS.
 ---
 
-# sysdig\_monitor\_notification\_channel\_sns
+# Resource: sysdig\_monitor\_notification\_channel\_sns
 
 Creates a Sysdig Monitor Notification Channel of type Amazon SNS.
 

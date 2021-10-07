@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_notification_channel_victorops"
-sidebar_current: "docs-sysdig-monitor-notification-channel-victorops"
 description: |-
   Creates a Sysdig Monitor Notification Channel of type VictorOps.
 ---
 
-# sysdig\_monitor\_notification\_channel\_victorops
+# Resource: sysdig\_monitor\_notification\_channel\_victorops
 
 Creates a Sysdig Monitor Notification Channel of type VictorOps.
 

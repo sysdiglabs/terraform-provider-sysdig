@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_promql"
-sidebar_current: "docs-sysdig-monitor-alert-promql"
 description: |-
   Creates a Sysdig Monitor PromQL Alert.
 ---
 
-# sysdig\_monitor\_alert\_promql
+# Resource: sysdig\_monitor\_alert\_promql
 
 Creates a Sysdig Monitor PromQL Alert. Monitor prometheus metrics and alert if they violate user-defined PromQL-based metric expression.
 

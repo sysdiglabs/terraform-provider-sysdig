@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_team"
-sidebar_current: "docs-sysdig-secure-team"
 description: |-
   Creates a Sysdig Secure Team.
 ---
 
-# sysdig\_secure\_team
+# Resource: sysdig\_secure\_team
 
 Creates a Sysdig Secure Team.
 

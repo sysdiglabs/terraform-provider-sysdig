@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_rule_process"
-sidebar_current: "docs-sysdig-secure-rule-process"
 description: |-
   Creates a Sysdig Secure Process Rule.
 ---
 
-# sysdig\_secure\_rule\_process
+# Resource: sysdig\_secure\_rule\_process
 
 Creates a Sysdig Secure Process Rule.
 

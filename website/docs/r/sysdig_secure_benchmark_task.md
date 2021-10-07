@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_benchmark_task"
-sidebar_current: "docs-sysdig_secure_benchmark_task"
 description: |-
   Creates a Sysdig Secure Benchmark Task.
 ---
 
-# sysdig\_secure\_benchmark_task
+# Resource: sysdig\_secure\_benchmark_task
 
 Creates a Sysdig Secure Benchmark Task.
 

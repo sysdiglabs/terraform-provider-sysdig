@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_rule_container"
-sidebar_current: "docs-sysdig-secure-rule-container"
 description: |-
   Creates a Sysdig Secure Container Rule.
 ---
 
-# sysdig\_secure\_rule\_container
+# Resource: sysdig\_secure\_rule\_container
 
 Creates a Sysdig Secure Container Rule.
 

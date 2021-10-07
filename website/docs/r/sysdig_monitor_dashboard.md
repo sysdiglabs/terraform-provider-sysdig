@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_dashboard"
-sidebar_current: "docs-sysdig-monitor-dashboard"
 description: |-
   Creates a Sysdig Monitor Dashboard.
 ---
 
-# sysdig\_monitor\_dashboard
+# Resource: sysdig\_monitor\_dashboard
 
 Creates a Sysdig Monitor Dashboard using PromQL queries.
 

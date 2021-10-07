@@ -1,7 +1,6 @@
 ---
 layout: "sysdig"
 page_title: "Provider: Sysdig"
-sidebar_current: "docs-sysdig-index"
 description: |-
   The Sysdig provider is used to interact with Sysdig products. The provider needs to be configured with proper API token before it can be used.
 ---

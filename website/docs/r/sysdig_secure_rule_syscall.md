@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_rule_syscall"
-sidebar_current: "docs-sysdig-secure-rule-syscall"
 description: |-
   Creates a Sysdig Secure Syscall Rule.
 ---
 
-# sysdig\_secure\_rule\_syscall
+# Resource: sysdig\_secure\_rule\_syscall
 
 Creates a Sysdig Secure Syscall Rule.
 

@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_notification_channel_email"
-sidebar_current: "docs-sysdig-secure-notification-channel-email"
 description: |-
   Creates a Sysdig Secure Notification Channel of type Email.
 ---
 
-# sysdig\_secure\_notification_channel\_email
+# Resource: sysdig\_secure\_notification_channel\_email
 
 Creates a Sysdig Secure Notification Channel of type Email.
 

@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_notification_channel_pagerduty"
-sidebar_current: "docs-sysdig-monitor-notification-channel-pagerduty"
 description: |-
   Creates a Sysdig Monitor Notification Channel of type Pagerduty.
 ---
 
-# sysdig\_monitor\_notification\_channel\_pagerduty
+# Resource: sysdig\_monitor\_notification\_channel\_pagerduty
 
 Creates a Sysdig Monitor Notification Channel of type Pagerduty.
 

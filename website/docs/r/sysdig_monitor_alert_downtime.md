@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_downtime"
-sidebar_current: "docs-sysdig-monitor-alert-downtime"
 description: |-
   Creates a Sysdig Monitor Downtime Alert.
 ---
 
-# sysdig\_monitor\_alert\_downtime
+# Resource: sysdig\_monitor\_alert\_downtime
 
 Creates a Sysdig Monitor Downtime Alert. Monitor any type of entity - host, container, process, service, etc - and alert when the entity goes down.
 

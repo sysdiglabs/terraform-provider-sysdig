@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_notification_channel_email"
-sidebar_current: "docs-sysdig-monitor-notification-channel-email"
 description: |-
   Creates a Sysdig Monitor Notification Channel of type Email.
 ---
 
-# sysdig\_monitor\_notification_channel\_email
+# Resource: sysdig\_monitor\_notification_channel\_email
 
 Creates a Sysdig Monitor Notification Channel of type Email.
 

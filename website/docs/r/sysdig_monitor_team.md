@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_team"
-sidebar_current: "docs-sysdig-monitor-team"
 description: |-
   Creates a Sysdig Monitor Team.
 ---
 
-# sysdig\_monitor\_team
+# Resource: sysdig\_monitor\_team
 
 Creates a Sysdig Monitor Team.
 

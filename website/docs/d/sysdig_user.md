@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_user"
-sidebar_current: "docs-sysdig-user-ds"
 description: |-
   Retrieves information about a user from their email
 ---
 
-# sysdig\_user
+# Data Source: sysdig\_user
 
 Retrieves information about a user from their email
 

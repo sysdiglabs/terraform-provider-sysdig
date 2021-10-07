@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_cloud_account"
-sidebar_current: "docs-sysdig_secure_cloud_account"
 description: |-
-Creates a Sysdig Secure Cloud Account.
+  Creates a Sysdig Secure Cloud Account.
 ---
 
-# sysdig\_secure\_cloud_account
+# Resource: sysdig\_secure\_cloud_account
 
 Creates a Sysdig Secure Cloud Account.
 

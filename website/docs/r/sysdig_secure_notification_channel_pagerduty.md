@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_notification_channel_pagerduty"
-sidebar_current: "docs-sysdig-secure-notification-channel-pagerduty"
 description: |-
   Creates a Sysdig Secure Notification Channel of type Pagerduty.
 ---
 
-# sysdig\_secure\_notification\_channel\_pagerduty
+# Resource: sysdig\_secure\_notification\_channel\_pagerduty
 
 Creates a Sysdig Secure Notification Channel of type Pagerduty.
 

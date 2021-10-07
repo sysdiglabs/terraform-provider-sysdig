@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_macro"
-sidebar_current: "docs-sysdig-secure-macro"
 description: |-
   Creates a Sysdig Secure Falco Macro.
 ---
 
-# sysdig\_secure\_macro
+# Resource: sysdig\_secure\_macro
 
 Creates a Sysdig Secure Falco Macro.
 

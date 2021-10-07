@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_rule_falco"
-sidebar_current: "docs-sysdig-secure-rule-falco"
 description: |-
   Creates a Sysdig Secure Falco Rule.
 ---
 
-# sysdig\_secure\_rule\_falco
+# Resource: sysdig\_secure\_rule\_falco
 
 Creates a Sysdig Secure Falco Rule.
 

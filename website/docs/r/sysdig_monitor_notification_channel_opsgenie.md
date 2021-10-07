@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_notification_channel"
-sidebar_current: "docs-sysdig-monitor-notification-channel"
 description: |-
   Creates a Sysdig Monitor Notification Channel of type OpsGenie.
 ---
 
-# sysdig\_monitor\_notification\_channel\_opsgenie
+# Resource: sysdig\_monitor\_notification\_channel\_opsgenie
 
 Creates a Sysdig Monitor Notification Channel of type OpsGenie.
 

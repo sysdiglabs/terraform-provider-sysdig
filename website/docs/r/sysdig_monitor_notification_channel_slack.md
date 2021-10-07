@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_notification_channel_slack"
-sidebar_current: "docs-sysdig-monitor-notification-channel-slack"
 description: |-
   Creates a Sysdig Monitor Notification Channel of type Slack.
 ---
 
-# sysdig\_monitor\_notification\_channel\_slack
+# Resource: sysdig\_monitor\_notification\_channel\_slack
 
 Creates a Sysdig Monitor Notification Channel of type Slack.
 

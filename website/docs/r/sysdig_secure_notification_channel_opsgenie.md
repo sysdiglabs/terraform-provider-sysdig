@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_notification_channel"
-sidebar_current: "docs-sysdig-secure-notification-channel"
 description: |-
   Creates a Sysdig Secure Notification Channel of type OpsGenie.
 ---
 
-# sysdig\_secure\_notification\_channel\_opsgenie
+# Resource: sysdig\_secure\_notification\_channel\_opsgenie
 
 Creates a Sysdig Secure Notification Channel of type OpsGenie.
 

@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_list"
-sidebar_current: "docs-sysdig-secure-list"
 description: |-
   Creates a Sysdig Secure Falco List.
 ---
 
-# sysdig\_secure\_list
+# Resource: sysdig\_secure\_list
 
 Creates a Sysdig Secure Falco List.
 

@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_notification_channel_victorops"
-sidebar_current: "docs-sysdig-secure-notification-channel-victorops"
 description: |-
   Creates a Sysdig Secure Notification Channel of type VictorOps.
 ---
 
-# sysdig\_secure\_notification\_channel\_victorops
+# Resource: sysdig\_secure\_notification\_channel\_victorops
 
 Creates a Sysdig Secure Notification Channel of type VictorOps.
 

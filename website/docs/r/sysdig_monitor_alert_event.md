@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_event"
-sidebar_current: "docs-sysdig-monitor-alert-event"
 description: |-
   Creates a Sysdig Monitor Event Alert.
 ---
 
-# sysdig\_monitor\_alert\_event
+# Resource: sysdig\_monitor\_alert\_event
 
 Creates a Sysdig Monitor Event Alert. Monitor occurrences of specific events, and alert if the total 
 number of occurrences violates a threshold. Useful for alerting on container, orchestration, and 

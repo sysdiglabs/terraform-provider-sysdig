@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_notification_channel_webhook"
-sidebar_current: "docs-sysdig-monitor-notification-channel-webhook"
 description: |-
   Creates a Sysdig Monitor Notification Channel of type Webhook.
 ---
 
-# sysdig\_monitor\_notification\_channel\_webhook
+# Resource: sysdig\_monitor\_notification\_channel\_webhook
 
 Creates a Sysdig Monitor Notification Channel of type Webhook.
 

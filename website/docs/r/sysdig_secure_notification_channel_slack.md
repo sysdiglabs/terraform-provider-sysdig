@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_notification_channel_slack"
-sidebar_current: "docs-sysdig-secure-notification-channel-slack"
 description: |-
   Creates a Sysdig Secure Notification Channel of type Slack.
 ---
 
-# sysdig\_secure\_notification\_channel\_slack
+# Resource: sysdig\_secure\_notification\_channel\_slack
 
 Creates a Sysdig Secure Notification Channel of type Slack.
 

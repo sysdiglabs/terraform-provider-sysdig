@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_metric"
-sidebar_current: "docs-sysdig-monitor-alert-metric"
 description: |-
   Creates a Sysdig Monitor Metric Alert.
 ---
 
-# sysdig\_monitor\_alert\_metric
+# Resource: sysdig\_monitor\_alert\_metric
 
 Creates a Sysdig Monitor Metric Alert. Monitor time-series metrics and alert if they violate user-defined thresholds.
 

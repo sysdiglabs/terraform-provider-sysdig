@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_current_user"
-sidebar_current: "docs-sysdig-current-user-ds"
 description: |-
   Retrieves information about the user performing the API calls.
 ---
 
-# sysdig\_current\_user
+# Data Source: sysdig\_current\_user
 
 Retrieves information about the current user performing the API calls.
 

@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_policy"
-sidebar_current: "docs-sysdig-secure-policy"
 description: |-
   Creates a Sysdig Secure Policy.
 ---
 
-# sysdig\_secure\_policy
+# Resource: sysdig\_secure\_policy
 
 Creates a Sysdig Secure Policy.
 

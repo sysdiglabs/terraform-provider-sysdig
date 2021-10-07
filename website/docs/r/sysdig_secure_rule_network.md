@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_rule_network"
-sidebar_current: "docs-sysdig-secure-rule-network"
 description: |-
   Creates a Sysdig Secure Network Rule.
 ---
 
-# sysdig\_secure\_rule\_network
+# Resource: sysdig\_secure\_rule\_network
 
 Creates a Sysdig Secure Network Rule.
 

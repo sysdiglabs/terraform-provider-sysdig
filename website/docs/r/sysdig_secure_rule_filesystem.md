@@ -1,12 +1,11 @@
 ---
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_rule_filesystem"
-sidebar_current: "docs-sysdig-secure-rule-filesystem"
 description: |-
   Creates a Sysdig Secure Filesystem Rule.
 ---
 
-# sysdig\_secure\_rule\_filesystem
+# Resource: sysdig\_secure\_rule\_filesystem
 
 Creates a Sysdig Secure Filesystem Rule.
 
