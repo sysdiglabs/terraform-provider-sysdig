@@ -14,7 +14,7 @@ Creates a Sysdig Secure Notification Channel of type Amazon SNS.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_notification_channel_sns" "sample-amazon-sns" {
 	name                    = "Example Channel - Amazon SNS"
 	enabled                 = true

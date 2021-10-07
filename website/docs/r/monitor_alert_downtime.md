@@ -14,7 +14,7 @@ Creates a Sysdig Monitor Downtime Alert. Monitor any type of entity - host, cont
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_monitor_alert_downtime" "sample" {
 	name = "[Kubernetes] Downtime Alert"
 	description = "Detects a downtime in the Kubernetes cluster"

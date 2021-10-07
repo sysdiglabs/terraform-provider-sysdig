@@ -14,7 +14,7 @@ Creates a Sysdig Secure Filesystem Rule.
 
 ## Example Usage
 
-```hcl
+```terraform
 
 resource "sysdig_secure_rule_filesystem"  "example" {
   name = "Apache writing to non allowed directory"

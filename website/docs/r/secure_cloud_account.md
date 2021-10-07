@@ -14,7 +14,7 @@ Creates a Sysdig Secure Cloud Account.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_cloud_account" "sample" {
   account_id          = "123456789012"
   cloud_provider      = "aws"

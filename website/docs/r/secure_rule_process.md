@@ -14,7 +14,7 @@ Creates a Sysdig Secure Process Rule.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_rule_process" "sample" {
   name = "Launch Suspicious Network Tool in Container" // ID
   description = "Detect network tools launched inside container"

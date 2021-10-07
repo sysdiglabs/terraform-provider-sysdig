@@ -14,7 +14,7 @@ Creates a Sysdig Secure Benchmark Task.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_benchmark_task" "sample" {
   name     = "My Benchmark Task"
   schedule = "0 6 * * *"

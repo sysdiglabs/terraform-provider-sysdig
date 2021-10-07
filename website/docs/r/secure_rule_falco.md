@@ -14,7 +14,7 @@ Creates a Sysdig Secure Falco Rule.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_rule_falco" "example" {
   name        = "Terminal shell in container" // ID
   description = "A shell was used as the entrypoint/exec point into a container with an attached terminal."

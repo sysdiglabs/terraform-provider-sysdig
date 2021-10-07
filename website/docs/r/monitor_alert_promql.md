@@ -14,7 +14,7 @@ Creates a Sysdig Monitor PromQL Alert. Monitor prometheus metrics and alert if t
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_monitor_alert_promql" "sample" {
 	name = "Elasticsearch JVM heap usage"
 	description = "A Kubernetes pod failed to restart"

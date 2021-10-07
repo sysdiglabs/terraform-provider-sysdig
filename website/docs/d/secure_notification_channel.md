@@ -14,7 +14,7 @@ Retrieves the information of an existing Sysdig Secure Notification Channel.
 
 ## Example Usage
 
-```hcl
+```terraform
 data "sysdig_secure_notification_channel" "sample-email" {
   name                 = "Example Channel - Email"
 }

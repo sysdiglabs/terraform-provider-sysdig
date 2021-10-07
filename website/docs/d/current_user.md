@@ -14,7 +14,7 @@ Retrieves information about the current user performing the API calls.
 
 ## Example Usage
 
-```hcl
+```terraform
 data "sysdig_current_user" "me" {
 }
 ```

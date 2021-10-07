@@ -14,7 +14,7 @@ Creates a Sysdig Secure Policy.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_policy" "write_apt_database" {
   name = "Write apt database"
   description = "an attempt to write to the dpkg database by any non-dpkg related program"

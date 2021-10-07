@@ -14,7 +14,7 @@ Creates a Sysdig Monitor Notification Channel of type OpsGenie.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_monitor_notification_channel_opsgenie" "sample-opsgenie" {
 	name                    = "Example Channel - OpsGenie"
 	enabled                 = true

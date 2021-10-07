@@ -14,7 +14,7 @@ Creates a Sysdig Monitor Team.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_monitor_team" "devops" {
   name = "Monitoring DevOps team"
 

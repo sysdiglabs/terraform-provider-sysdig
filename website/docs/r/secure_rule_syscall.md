@@ -14,7 +14,7 @@ Creates a Sysdig Secure Syscall Rule.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_rule_syscall" "foo" {
   name = "Unexpected mount syscall" // ID
   description = "Syscall 'mount' detected"

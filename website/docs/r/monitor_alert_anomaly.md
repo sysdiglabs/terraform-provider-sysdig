@@ -14,7 +14,7 @@ Creates a Sysdig Monitor Anomaly Alert. Monitor hosts based on their historical 
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_monitor_alert_anomaly" "sample" {
 	name = "[Kubernetes] Anomaly Detection Alert"
 	description = "Detects an anomaly in the cluster"

@@ -14,7 +14,7 @@ Creates a Sysdig Secure Team.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_team" "devops" {
   name = "DevOps team"
   

@@ -14,7 +14,7 @@ Retrieves information about a user from their email
 
 ## Example Usage
 
-```hcl
+```terraform
 data "sysdig_user" "user" {
 	email = "terraform-test+user@sysdig.com"
 }

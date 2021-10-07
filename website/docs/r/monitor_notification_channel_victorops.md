@@ -14,7 +14,7 @@ Creates a Sysdig Monitor Notification Channel of type VictorOps.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_monitor_notification_channel_victorops" "sample-victorops" {
 	name                    = "Example Channel - VictorOps"
 	enabled                 = true

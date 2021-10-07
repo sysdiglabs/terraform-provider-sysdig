@@ -14,7 +14,7 @@ Creates a Sysdig Secure Container Rule.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_rule_container" "sample" {
   name = "Nginx container spawned"
   description = "A container withthe nginx image spawned in the cluster."

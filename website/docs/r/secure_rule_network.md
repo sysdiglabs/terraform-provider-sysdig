@@ -14,7 +14,7 @@ Creates a Sysdig Secure Network Rule.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_rule_network" "example" {
   name = "Disallowed SSH Connection"
   description = "Detect any new ssh connection to a host other than those in an allowed group of hosts"

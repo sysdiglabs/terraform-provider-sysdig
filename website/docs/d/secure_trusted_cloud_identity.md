@@ -14,7 +14,7 @@ Retrieves information about the Sysdig Secure Trusted Cloud Identity
 
 ## Example Usage
 
-```hcl
+```terraform
 data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {
 	cloud_provider = "aws"
 }

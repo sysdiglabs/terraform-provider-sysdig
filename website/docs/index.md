@@ -16,7 +16,7 @@ Use the navigation to the left to read about the available resources.
 
 ## Example Usage
 
-```hcl
+```terraform
 // Configure the Sysdig provider
 provider "sysdig" {
   sysdig_monitor_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
@@ -31,7 +31,7 @@ resource "sysdig_secure_policy" "unexpected_inbound_tcp_connection_traefik" {
 
 ## Example with extra headers
 
-```hcl
+```terraform
 provider "sysdig" {
   sysdig_monitor_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
   sysdig_secure_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"

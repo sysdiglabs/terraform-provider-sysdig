@@ -14,7 +14,7 @@ Creates a Sysdig Monitor Notification Channel of type Email.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_monitor_notification_channel_email" "sample_email" {
 	name                    = "Example Channel - Email"
 	recipients              = ["foo@localhost.com", "bar@localhost.com"]

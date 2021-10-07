@@ -14,7 +14,7 @@ Creates a Sysdig Secure Falco Macro.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_macro" "http_port" {
   name = "web_port"
   condition = "fd.sport=80"

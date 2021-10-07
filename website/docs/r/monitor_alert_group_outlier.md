@@ -14,7 +14,7 @@ Creates a Sysdig Monitor Group Outlier Alert. Monitor a group of hosts and be no
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_monitor_alert_group_outlier" "sample" {
 	name = "[Kubernetes] A node is using more CPU than the rest"
 	description = "Monitors the cluster and checks when a node has more CPU usage than the others"

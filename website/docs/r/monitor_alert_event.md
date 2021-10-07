@@ -16,7 +16,7 @@ service events like restarts and deployments.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_monitor_alert_event" "sample" {
 	name = "[Kubernetes] Failed to pull image"
 	description = "A Kubernetes pod failed to pull an image from the registry"

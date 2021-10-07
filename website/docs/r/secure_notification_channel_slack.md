@@ -14,7 +14,7 @@ Creates a Sysdig Secure Notification Channel of type Slack.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_notification_channel_slack" "sample-slack" {
 	name                    = "Example Channel - Slack"
 	enabled                 = true

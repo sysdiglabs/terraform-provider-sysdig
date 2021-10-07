@@ -14,7 +14,7 @@ Creates a Sysdig Monitor Metric Alert. Monitor time-series metrics and alert if 
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_monitor_alert_metric" "sample" {
 	name = "[Kubernetes] CrashLoopBackOff"
 	description = "A Kubernetes pod failed to restart"

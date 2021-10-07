@@ -14,7 +14,7 @@ Creates a user in Sysdig.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_user" "foo-bar" {
   email = "foo.bar@sysdig.com"
   system_role = "ROLE_CUSTOMER"

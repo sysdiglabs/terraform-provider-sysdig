@@ -14,7 +14,7 @@ Creates a Sysdig Secure Falco List.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_list" "allowed_dev_files" {
   name = "allowed_dev_files"
   items = ["/dev/null", "/dev/stdin", "/dev/stdout", "/dev/stderr", "/dev/random", 

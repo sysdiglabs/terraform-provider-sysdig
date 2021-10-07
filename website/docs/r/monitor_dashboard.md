@@ -14,7 +14,7 @@ Creates a Sysdig Monitor Dashboard using PromQL queries.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_monitor_dashboard" "dashboard" {
   name        = "Example Dashboard"
   description = "Example Dashboard description"

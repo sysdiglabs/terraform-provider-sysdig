@@ -14,7 +14,7 @@ Creates a Sysdig Secure Notification Channel of type Webhook.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_secure_notification_channel_webhook" "sample-webhook" {
 	name                    = "Example Channel - Webhook"
 	enabled                 = true

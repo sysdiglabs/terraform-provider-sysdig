@@ -14,7 +14,7 @@ Creates a Sysdig Monitor Notification Channel of type Pagerduty.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "sysdig_monitor_notification_channel_pagerduty" "sample-pagerduty" {
 	name                    = "Example Channel - Pagerduty"
 	enabled                 = true
