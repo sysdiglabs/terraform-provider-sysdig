@@ -1,4 +1,5 @@
 ---
+subcategory: "Sysdig Platform"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_current_user"
 description: |-

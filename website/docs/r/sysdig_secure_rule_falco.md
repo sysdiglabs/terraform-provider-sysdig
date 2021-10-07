@@ -1,4 +1,5 @@
 ---
+subcategory: "Sysdig Secure"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_rule_falco"
 description: |-

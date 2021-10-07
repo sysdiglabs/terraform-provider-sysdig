@@ -1,4 +1,5 @@
 ---
+subcategory: "Sysdig Monitor"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_notification_channel_sns"
 description: |-
