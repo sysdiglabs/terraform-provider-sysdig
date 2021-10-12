@@ -70,6 +70,15 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 				d.Set("aws_role_name", strings.TrimPrefix(parsedArn.Resource, "role/"))
 			}
 		}
+	case "gcp":
+		parsedArn, err := arn.Parse(identity)
+		if err == nil {
+			d.Set("aws_account_id", parsedArn.AccountID)
+
+			if parsedArn.Service == "iam" && strings.HasPrefix(parsedArn.Resource, "role/") {
+				d.Set("aws_role_name", strings.TrimPrefix(parsedArn.Resource, "role/"))
+			}
+		}
 	case "azure":
 		// If identity is an Azure tenantID/clientID, separate into each part
 		tenantID, clientID, err := parseAzureCreds(identity)
