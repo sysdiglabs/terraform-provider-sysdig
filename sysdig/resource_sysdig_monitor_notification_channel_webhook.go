@@ -36,6 +36,10 @@ func resourceSysdigMonitorNotificationChannelWebhook() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"additional_headers": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 		}),
 	}
 }
@@ -131,6 +135,7 @@ func monitorNotificationChannelWebhookFromResourceData(d *schema.ResourceData) (
 
 	nc.Type = NOTIFICATION_CHANNEL_TYPE_WEBHOOK
 	nc.Options.Url = d.Get("url").(string)
+	nc.Options.AdditionalHeaders = d.Get("additional_headers").(map[string]interface{})
 	return
 }
 
@@ -141,5 +146,6 @@ func monitorNotificationChannelWebhookToResourceData(nc *monitor.NotificationCha
 	}
 
 	d.Set("url", nc.Options.Url)
+	d.Set("additional_headers", nc.Options.AdditionalHeaders)
 	return
 }

@@ -135,6 +135,7 @@ func monitorNotificationChannelOpsGenieFromResourceData(d *schema.ResourceData) 
 	nc.Type = NOTIFICATION_CHANNEL_TYPE_OPSGENIE
 	apiKey := d.Get("api_key").(string)
 	nc.Options.Url = fmt.Sprintf("https://api.opsgenie.com/v1/json/sysdigcloud?apiKey=%s", apiKey)
+	nc.Options.APIKey = apiKey
 	return
 }
 

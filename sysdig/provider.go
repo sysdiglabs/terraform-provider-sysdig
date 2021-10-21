@@ -78,6 +78,7 @@ func Provider() *schema.Provider {
 			"sysdig_monitor_alert_event":                    resourceSysdigMonitorAlertEvent(),
 			"sysdig_monitor_alert_anomaly":                  resourceSysdigMonitorAlertAnomaly(),
 			"sysdig_monitor_alert_group_outlier":            resourceSysdigMonitorAlertGroupOutlier(),
+			"sysdig_monitor_alert_promql":                   resourceSysdigMonitorAlertPromql(),
 			"sysdig_monitor_dashboard":                      resourceSysdigMonitorDashboard(),
 			"sysdig_monitor_notification_channel_email":     resourceSysdigMonitorNotificationChannelEmail(),
 			"sysdig_monitor_notification_channel_opsgenie":  resourceSysdigMonitorNotificationChannelOpsGenie(),
@@ -93,6 +94,8 @@ func Provider() *schema.Provider {
 			"sysdig_secure_notification_channel":   dataSourceSysdigSecureNotificationChannel(),
 			"sysdig_current_user":                  dataSourceSysdigCurrentUser(),
 			"sysdig_user":                          dataSourceSysdigUser(),
+
+			"sysdig_fargate_workload_agent": dataSourceSysdigFargateWorkloadAgent(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

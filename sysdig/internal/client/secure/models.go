@@ -68,7 +68,7 @@ func UserRulesFileFromJSON(body []byte) UserRulesFile {
 type NotificationChannelOptions struct {
 	EmailRecipients []string `json:"emailRecipients,omitempty"` // Type: email
 	SnsTopicARNs    []string `json:"snsTopicARNs,omitempty"`    // Type: SNS
-	APIKey          string   `json:"apiKey,omitempty"`          // Type: VictorOps
+	APIKey          string   `json:"apiKey,omitempty"`          // Type: VictorOps, OpsGenie
 	RoutingKey      string   `json:"routingKey,omitempty"`      // Type: VictorOps
 	Url             string   `json:"url,omitempty"`             // Type: OpsGenie, Webhook and Slack
 	Channel         string   `json:"channel,omitempty"`         // Type: Slack
