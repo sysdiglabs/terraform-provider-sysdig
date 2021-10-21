@@ -36,6 +36,9 @@ fmt:
 fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
 
+lint:
+	golangci-lint run --timeout 1h ./...
+
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
