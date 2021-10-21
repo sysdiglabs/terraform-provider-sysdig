@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -117,22 +118,84 @@ func dataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.Reso
 	}
 
 	d.SetId(strconv.Itoa(nc.ID))
-	d.Set("version", nc.Version)
-	d.Set("name", nc.Name)
-	d.Set("enabled", nc.Enabled)
-	d.Set("type", nc.Type)
-	d.Set("recipients", strings.Join(nc.Options.EmailRecipients, ","))
-	d.Set("topics", strings.Join(nc.Options.SnsTopicARNs, ","))
-	d.Set("api_key", nc.Options.APIKey)
-	d.Set("url", nc.Options.Url)
-	d.Set("channel", nc.Options.Channel)
-	d.Set("account", nc.Options.Account)
-	d.Set("service_key", nc.Options.ServiceKey)
-	d.Set("service_name", nc.Options.ServiceName)
-	d.Set("routing_key", nc.Options.RoutingKey)
-	d.Set("notify_when_ok", nc.Options.NotifyOnOk)
-	d.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
-	d.Set("send_test_notification", nc.Options.SendTestNotification)
+	err = d.Set("version", nc.Version)
+	if err != nil {
+		log.Println("error asigning 'version' to alert")
+	}
+	err = d.Set("name", nc.Name)
+	if err != nil {
+		log.Println("error asigning 'name' to alert")
+	}
+
+	err = d.Set("enabled", nc.Enabled)
+	if err != nil {
+		log.Println("error asigning 'enabled' to alert")
+	}
+
+	err = d.Set("type", nc.Type)
+	if err != nil {
+		log.Println("error asigning 'type' to alert")
+	}
+
+	err = d.Set("recipients", strings.Join(nc.Options.EmailRecipients, ","))
+	if err != nil {
+		log.Println("error asigning 'recipients' to alert")
+	}
+
+	err = d.Set("topics", strings.Join(nc.Options.SnsTopicARNs, ","))
+	if err != nil {
+		log.Println("error asigning 'topics' to alert")
+	}
+
+	err = d.Set("api_key", nc.Options.APIKey)
+	if err != nil {
+		log.Println("error asigning 'api_key' to alert")
+	}
+
+	err = d.Set("url", nc.Options.Url)
+	if err != nil {
+		log.Println("error asigning 'url' to alert")
+	}
+
+	err = d.Set("channel", nc.Options.Channel)
+	if err != nil {
+		log.Println("error asigning 'channel' to alert")
+	}
+
+	err = d.Set("account", nc.Options.Account)
+	if err != nil {
+		log.Println("error asigning 'account' to alert")
+	}
+
+	err = d.Set("service_key", nc.Options.ServiceKey)
+	if err != nil {
+		log.Println("error asigning 'service_key' to alert")
+	}
+
+	err = d.Set("service_name", nc.Options.ServiceName)
+	if err != nil {
+		log.Println("error asigning 'service_name' to alert")
+	}
+
+	err = d.Set("routing_key", nc.Options.RoutingKey)
+	if err != nil {
+		log.Println("error asigning 'routing_key' to alert")
+	}
+
+	err = d.Set("notify_when_ok", nc.Options.NotifyOnOk)
+	if err != nil {
+		log.Println("error asigning 'notify_when_ok' to alert")
+	}
+
+	err = d.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
+	if err != nil {
+		log.Println("error asigning 'notify_when_resolved' to alert")
+	}
+
+	err = d.Set("send_test_notification", nc.Options.SendTestNotification)
+	if err != nil {
+		log.Println("error asigning 'send_test_notification' to alert")
+	}
 
 	// When we receive a notification channel of type OpsGenie,
 	// the API sends us the URL, but we are configuring the API
@@ -147,8 +210,16 @@ func dataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.Reso
 			return diag.FromErr(err)
 		}
 		key := regex.FindStringSubmatch(nc.Options.Url)[1]
-		d.Set("api_key", key)
-		d.Set("url", "")
+		err = d.Set("api_key", key)
+		if err != nil {
+			log.Println("error asigning 'api_key' to alert")
+		}
+
+		err = d.Set("url", "")
+		if err != nil {
+			log.Println("error asigning 'url' to alert")
+		}
+
 	}
 	return nil
 }

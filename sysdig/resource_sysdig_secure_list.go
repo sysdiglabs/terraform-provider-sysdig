@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -70,7 +71,10 @@ func resourceSysdigListCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(strconv.Itoa(list.ID))
-	d.Set("version", list.Version)
+	err = d.Set("version", list.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 
 	return nil
 }
@@ -107,10 +111,25 @@ func resourceSysdigListRead(ctx context.Context, d *schema.ResourceData, meta in
 		d.SetId("")
 	}
 
-	d.Set("name", list.Name)
-	d.Set("version", list.Version)
-	d.Set("items", list.Items.Items)
-	d.Set("append", list.Append)
+	err = d.Set("name", list.Name)
+	if err != nil {
+		log.Println("error asigning 'name'")
+	}
+
+	err = d.Set("version", list.Version)
+	if err != nil {
+		log.Println("error asigning 'version'")
+	}
+
+	err = d.Set("items", list.Items.Items)
+	if err != nil {
+		log.Println("error asigning 'items'")
+	}
+
+	err = d.Set("append", list.Append)
+	if err != nil {
+		log.Println("error asigning 'append'")
+	}
 
 	return nil
 }

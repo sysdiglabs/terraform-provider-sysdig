@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strings"
 	"time"
 
@@ -56,7 +57,10 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 	}
 
 	d.SetId(identity)
-	d.Set("identity", identity)
+	err = d.Set("identity", identity)
+	if err != nil {
+		log.Println("error asigning 'identity' to alert")
+	}
 
 	provider := d.Get("cloud_provider")
 	switch provider {
@@ -64,18 +68,30 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 		// If identity is an ARN, attempt to extract certain fields
 		parsedArn, err := arn.Parse(identity)
 		if err == nil {
-			d.Set("aws_account_id", parsedArn.AccountID)
+			err = d.Set("aws_account_id", parsedArn.AccountID)
+			if err != nil {
+				log.Println("error asigning 'aws_account_id' to alert")
+			}
 
 			if parsedArn.Service == "iam" && strings.HasPrefix(parsedArn.Resource, "role/") {
-				d.Set("aws_role_name", strings.TrimPrefix(parsedArn.Resource, "role/"))
+				err = d.Set("aws_role_name", strings.TrimPrefix(parsedArn.Resource, "role/"))
+				if err != nil {
+					log.Println("error asigning 'aws_role_name' to alert")
+				}
 			}
 		}
 	case "azure":
 		// If identity is an Azure tenantID/clientID, separate into each part
 		tenantID, clientID, err := parseAzureCreds(identity)
 		if err == nil {
-			d.Set("azure_tenant_id", tenantID)
-			d.Set("azure_client_id", clientID)
+			err = d.Set("azure_tenant_id", tenantID)
+			if err != nil {
+				log.Println("error asigning 'azure_tenant_id' to alert")
+			}
+			err = d.Set("azure_client_id", clientID)
+			if err != nil {
+				log.Println("error asigning 'azure_client_id' to alert")
+			}
 		}
 	}
 	return nil

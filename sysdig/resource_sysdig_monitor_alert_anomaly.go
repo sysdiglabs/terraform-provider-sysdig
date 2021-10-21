@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -62,7 +63,11 @@ func resourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.Resource
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
-	data.Set("version", alertCreated.Version)
+	err = data.Set("version", alertCreated.Version)
+	if err != nil {
+		log.Println("error asigning 'version' to alert")
+	}
+
 	return nil
 }
 
@@ -160,16 +165,23 @@ func anomalyAlertFromResourceData(data *schema.ResourceData) (alert *monitor.Ale
 func anomalyAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
 	if err != nil {
-		return
+		return err
 	}
 
-	data.Set("multiple_alerts_by", alert.SegmentBy)
+	err = data.Set("multiple_alerts_by", alert.SegmentBy)
+	if err != nil {
+		return err
+	}
 
 	monitor_metrics := []string{}
+
 	for _, v := range alert.Monitor {
 		monitor_metrics = append(monitor_metrics, v.Metric)
 	}
-	data.Set("monitor", monitor_metrics)
+	err = data.Set("monitor", monitor_metrics)
+	if err != nil {
+		return err
+	}
 
 	return
 }

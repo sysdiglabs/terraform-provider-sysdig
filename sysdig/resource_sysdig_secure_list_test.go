@@ -71,13 +71,13 @@ resource "sysdig_secure_list" "sample" {
 }
 
 func listAppendToDefault() string {
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_secure_list" "sample2" {
   name = "allowed_k8s_nodes"
   items = ["foo", "bar"]
   append = true
 }
-`)
+`
 }
 
 func listWithList(name1, name2 string) string {

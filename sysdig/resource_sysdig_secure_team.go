@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -105,8 +106,10 @@ func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(strconv.Itoa(team.ID))
-	d.Set("version", team.Version)
-
+	err = d.Set("version", team.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 	return nil
 }
 
@@ -125,15 +128,50 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	d.Set("version", t.Version)
-	d.Set("theme", t.Theme)
-	d.Set("name", t.Name)
-	d.Set("description", t.Description)
-	d.Set("scope_by", t.ScopeBy)
-	d.Set("filter", t.Filter)
-	d.Set("use_sysdig_capture", t.CanUseSysdigCapture)
-	d.Set("default_team", t.DefaultTeam)
-	d.Set("user_roles", userSecureRolesToSet(t.UserRoles))
+	err = d.Set("version", t.Version)
+	if err != nil {
+		log.Println("error asigning 'version' to alert")
+	}
+
+	err = d.Set("theme", t.Theme)
+	if err != nil {
+		log.Println("error asigning 'theme' to alert")
+	}
+
+	err = d.Set("name", t.Name)
+	if err != nil {
+		log.Println("error asigning 'name' to alert")
+	}
+
+	err = d.Set("description", t.Description)
+	if err != nil {
+		log.Println("error asigning 'description' to alert")
+	}
+
+	err = d.Set("scope_by", t.ScopeBy)
+	if err != nil {
+		log.Println("error asigning 'scope_by' to alert")
+	}
+
+	err = d.Set("filter", t.Filter)
+	if err != nil {
+		log.Println("error asigning 'filter' to alert")
+	}
+
+	err = d.Set("use_sysdig_capture", t.CanUseSysdigCapture)
+	if err != nil {
+		log.Println("error asigning 'use_sysdig_capture' to alert")
+	}
+
+	err = d.Set("default_team", t.DefaultTeam)
+	if err != nil {
+		log.Println("error asigning 'default_team' to alert")
+	}
+
+	err = d.Set("user_roles", userSecureRolesToSet(t.UserRoles))
+	if err != nil {
+		log.Println("error asigning 'user_roles' to alert")
+	}
 
 	return nil
 }

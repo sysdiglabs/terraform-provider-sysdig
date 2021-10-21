@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -57,7 +58,10 @@ func resourceSysdigSecureNotificationChannelWebhookCreate(ctx context.Context, d
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	err = d.Set("version", notificationChannel.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 
 	return nil
 }
@@ -141,6 +145,10 @@ func secureNotificationChannelWebhookToResourceData(nc *secure.NotificationChann
 		return
 	}
 
-	d.Set("url", nc.Options.Url)
+	err = d.Set("url", nc.Options.Url)
+	if err != nil {
+		log.Println("error assigning 'url'")
+	}
+
 	return
 }

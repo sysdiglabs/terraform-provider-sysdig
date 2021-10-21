@@ -74,13 +74,13 @@ resource "sysdig_secure_macro" "sample" {
 }
 
 func macroAppendToDefault() string {
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_secure_macro" "sample2" {
   name = "container"
   condition = "and always_true"
   append = true
 }
-`)
+`
 }
 
 func macroWithMacro(name1, name2 string) string {

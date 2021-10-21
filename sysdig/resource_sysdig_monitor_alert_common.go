@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"errors"
+	"log"
 	"regexp"
 	"time"
 
@@ -91,7 +92,7 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 					"filename": {
 						Type:         schema.TypeString,
 						Required:     true,
-						ValidateFunc: validation.StringMatch(regexp.MustCompile(".*?\\.scap"), "the filename must end in .scap"),
+						ValidateFunc: validation.StringMatch(regexp.MustCompile(`.*?\\.scap`), "the filename must end in .scap"),
 					},
 					"duration": {
 						Type:     schema.TypeInt,
@@ -192,21 +193,52 @@ func alertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert, err er
 func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err error) {
 	trigger_after_minutes := time.Duration(alert.Timespan) * time.Microsecond
 
-	data.Set("version", alert.Version)
-	data.Set("name", alert.Name)
-	data.Set("description", alert.Description)
-	data.Set("scope", alert.Filter)
-	data.Set("trigger_after_minutes", int(trigger_after_minutes.Minutes()))
-	data.Set("team", alert.TeamID)
-	data.Set("enabled", alert.Enabled)
-	data.Set("severity", alert.Severity)
+	// note: didn't want to change current behaviour, error handing is set to avoid lint errors
+	err = data.Set("version", alert.Version)
+	if err != nil {
+		log.Println("error asigning 'version' to alert")
+	}
+	err = data.Set("name", alert.Name)
+	if err != nil {
+		log.Println("error asigning 'name' to alert")
+	}
+	err = data.Set("description", alert.Description)
+	if err != nil {
+		log.Println("error asigning 'description' to alert")
+	}
+	err = data.Set("scope", alert.Filter)
+	if err != nil {
+		log.Println("error asigning 'scope' to alert")
+	}
+	err = data.Set("trigger_after_minutes", int(trigger_after_minutes.Minutes()))
+	if err != nil {
+		log.Println("error asigning 'trigger_after_minutes' to alert")
+	}
+	err = data.Set("team", alert.TeamID)
+	if err != nil {
+		log.Println("error asigning 'team' to alert")
+	}
+	err = data.Set("enabled", alert.Enabled)
+	if err != nil {
+		log.Println("error asigning 'enabled' to alert")
+	}
+	err = data.Set("severity", alert.Severity)
+	if err != nil {
+		log.Println("error asigning 'severity' to alert")
+	}
 
 	if len(alert.NotificationChannelIds) > 0 {
-		data.Set("notification_channels", alert.NotificationChannelIds)
+		err = data.Set("notification_channels", alert.NotificationChannelIds)
+		if err != nil {
+			log.Println("error asigning 'notification_channels' to alert")
+		}
 	}
 
 	if alert.ReNotify {
-		data.Set("renotification_minutes", alert.ReNotifyMinutes)
+		err = data.Set("renotification_minutes", alert.ReNotifyMinutes)
+		if err != nil {
+			log.Println("error asigning 'renotification_minutes' to alert")
+		}
 	}
 
 	if alert.CustomNotification != nil &&
@@ -223,7 +255,10 @@ func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err e
 			customNotification["prepend"] = alert.CustomNotification.PrependText
 		}
 
-		data.Set("custom_notification", []interface{}{customNotification})
+		err = data.Set("custom_notification", []interface{}{customNotification})
+		if err != nil {
+			log.Println("error asigning 'custom_notification' to alert")
+		}
 	}
 
 	if alert.SysdigCapture != nil && alert.SysdigCapture.Enabled {
@@ -234,7 +269,10 @@ func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err e
 		if alert.SysdigCapture.Filters != "" {
 			capture["filters"] = alert.SysdigCapture.Filters
 		}
-		data.Set("capture", []interface{}{capture})
+		err = data.Set("capture", []interface{}{capture})
+		if err != nil {
+			log.Println("error asigning 'capture' to alert")
+		}
 	}
 
 	return

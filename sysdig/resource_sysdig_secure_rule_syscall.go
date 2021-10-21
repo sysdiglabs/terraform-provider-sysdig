@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -61,7 +62,10 @@ func resourceSysdigRuleSyscallCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
-	d.Set("version", rule.Version)
+	err = d.Set("version", rule.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 
 	return nil
 }
@@ -89,8 +93,15 @@ func resourceSysdigRuleSyscallRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	updateResourceDataForRule(d, rule)
-	d.Set("matching", rule.Details.Syscalls.MatchItems)
-	d.Set("syscalls", rule.Details.Syscalls.Items)
+	err = d.Set("matching", rule.Details.Syscalls.MatchItems)
+	if err != nil {
+		log.Println("error assigning 'matching'")
+	}
+
+	err = d.Set("syscalls", rule.Details.Syscalls.Items)
+	if err != nil {
+		log.Println("error assigning 'syscalls'")
+	}
 
 	return nil
 }

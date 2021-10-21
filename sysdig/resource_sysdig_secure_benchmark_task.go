@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -75,11 +76,30 @@ func resourceSysdigSecureBenchmarkTaskCreate(ctx context.Context, d *schema.Reso
 	}
 
 	d.SetId(strconv.Itoa(benchmarkTask.ID))
-	d.Set("name", benchmarkTask.Name)
-	d.Set("schema", benchmarkTask.Schema)
-	d.Set("scope", benchmarkTask.Scope)
-	d.Set("schedule", benchmarkTask.Schedule)
-	d.Set("enabled", benchmarkTask.Enabled)
+	err = d.Set("name", benchmarkTask.Name)
+	if err != nil {
+		log.Println("error asigning 'v' to alert")
+	}
+
+	err = d.Set("schema", benchmarkTask.Schema)
+	if err != nil {
+		log.Println("error asigning 'schema' to alert")
+	}
+
+	err = d.Set("scope", benchmarkTask.Scope)
+	if err != nil {
+		log.Println("error asigning 'scope' to alert")
+	}
+
+	err = d.Set("schedule", benchmarkTask.Schedule)
+	if err != nil {
+		log.Println("error asigning 'schedule' to alert")
+	}
+
+	err = d.Set("enabled", benchmarkTask.Enabled)
+	if err != nil {
+		log.Println("error asigning 'enabled' to alert")
+	}
 
 	return nil
 }
@@ -98,11 +118,30 @@ func resourceSysdigSecureBenchmarkTaskRead(ctx context.Context, d *schema.Resour
 	}
 
 	d.SetId(strconv.Itoa(benchmarkTask.ID))
-	d.Set("name", benchmarkTask.Name)
-	d.Set("schema", benchmarkTask.Schema)
-	d.Set("scope", benchmarkTask.Scope)
-	d.Set("schedule", benchmarkTask.Schedule)
-	d.Set("enabled", benchmarkTask.Enabled)
+	err = d.Set("name", benchmarkTask.Name)
+	if err != nil {
+		log.Println("error asigning 'name' to alert")
+	}
+
+	err = d.Set("schema", benchmarkTask.Schema)
+	if err != nil {
+		log.Println("error asigning 'schema' to alert")
+	}
+
+	err = d.Set("scope", benchmarkTask.Scope)
+	if err != nil {
+		log.Println("error asigning 'scope' to alert")
+	}
+
+	err = d.Set("schedule", benchmarkTask.Schedule)
+	if err != nil {
+		log.Println("error asigning 'schedule' to alert")
+	}
+
+	err = d.Set("enabled", benchmarkTask.Enabled)
+	if err != nil {
+		log.Println("error asigning 'enabled' to alert")
+	}
 
 	return nil
 }
@@ -121,8 +160,10 @@ func resourceSysdigSecureBenchmarkTaskUpdate(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	d.Set("enabled", enabled)
-
+	err = d.Set("enabled", enabled)
+	if err != nil {
+		log.Println("error asigning 'enabled' to alert")
+	}
 	return nil
 }
 

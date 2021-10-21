@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -109,7 +110,10 @@ func resourceSysdigRuleFalcoCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
-	d.Set("version", rule.Version)
+	err = d.Set("version", rule.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 
 	return nil
 }
@@ -137,12 +141,32 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	updateResourceDataForRule(d, rule)
-	d.Set("condition", rule.Details.Condition.Condition)
-	d.Set("output", rule.Details.Output)
-	d.Set("priority", strings.ToLower(rule.Details.Priority))
-	d.Set("source", rule.Details.Source)
+	err = d.Set("condition", rule.Details.Condition.Condition)
+	if err != nil {
+		log.Println("error assigning 'condition'")
+	}
+
+	err = d.Set("output", rule.Details.Output)
+	if err != nil {
+		log.Println("error assigning 'output'")
+	}
+
+	err = d.Set("priority", strings.ToLower(rule.Details.Priority))
+	if err != nil {
+		log.Println("error assigning 'priority'")
+	}
+
+	err = d.Set("source", rule.Details.Source)
+	if err != nil {
+		log.Println("error assigning 'source'")
+	}
+
 	if rule.Details.Append != nil {
-		d.Set("append", *rule.Details.Append)
+		err = d.Set("append", *rule.Details.Append)
+		if err != nil {
+			log.Println("error assigning 'append'")
+		}
+
 	}
 
 	return nil

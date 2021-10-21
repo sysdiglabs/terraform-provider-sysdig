@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -53,10 +54,22 @@ func dataSourceSysdigCurrentUserRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	d.SetId(strconv.Itoa(user.ID))
-	d.Set("email", user.Email)
-	d.Set("name", user.FirstName)
-	d.Set("last_name", user.LastName)
-	d.Set("system_role", user.SystemRole)
+	err = d.Set("email", user.Email)
+	if err != nil {
+		log.Println("error asigning 'email' to alert")
+	}
+	err = d.Set("name", user.FirstName)
+	if err != nil {
+		log.Println("error asigning 'name' to alert")
+	}
+	err = d.Set("last_name", user.LastName)
+	if err != nil {
+		log.Println("error asigning 'last_name' to alert")
+	}
+	err = d.Set("system_role", user.SystemRole)
+	if err != nil {
+		log.Println("error asigning 'system_role' to alert")
+	}
 
 	return nil
 }

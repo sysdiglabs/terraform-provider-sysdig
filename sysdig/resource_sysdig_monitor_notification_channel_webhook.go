@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -61,7 +62,10 @@ func resourceSysdigMonitorNotificationChannelWebhookCreate(ctx context.Context, 
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	err = d.Set("version", notificationChannel.Version)
+	if err != nil {
+		log.Println("error asigning 'version' to alert")
+	}
 
 	return nil
 }
@@ -145,7 +149,13 @@ func monitorNotificationChannelWebhookToResourceData(nc *monitor.NotificationCha
 		return
 	}
 
-	d.Set("url", nc.Options.Url)
-	d.Set("additional_headers", nc.Options.AdditionalHeaders)
+	err = d.Set("url", nc.Options.Url)
+	if err != nil {
+		log.Println("error asigning 'url' to alert")
+	}
+	err = d.Set("additional_headers", nc.Options.AdditionalHeaders)
+	if err != nil {
+		log.Println("error asigning 'additional_headers' to alert")
+	}
 	return
 }

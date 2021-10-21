@@ -142,12 +142,12 @@ resource "sysdig_secure_rule_falco" "kube_audit" {
 }
 
 func ruleFalcoTerminalShellWithAppend() string {
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_secure_rule_falco" "terminal_shell_append" {
   name = "Terminal shell in container" # Sysdig-provided
   condition = "and spawned_process and shell_procs and proc.tty != 0 and container_entrypoint"
   append = true
-}`)
+}`
 }
 
 func ruleFalcoWithExceptions(name string) string {

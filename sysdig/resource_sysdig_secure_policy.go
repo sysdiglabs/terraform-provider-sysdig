@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -13,18 +14,6 @@ import (
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
-
-var defaultMatchActions = map[string]string{
-	"accept": "DEFAULT_MATCH_EFFECT_ACCEPT",
-	"deny":   "DEFAULT_MATCH_EFFECT_DENY",
-	"none":   "DEFAULT_MATCH_EFFECT_NEXT",
-}
-
-var matchActions = map[string]string{
-	"accept": "MATCH_EFFECT_ACCEPT",
-	"deny":   "MATCH_EFFECT_DENY",
-	"none":   "MATCH_EFFECT_NEXT",
-}
 
 func resourceSysdigSecurePolicy() *schema.Resource {
 	timeout := 5 * time.Minute
@@ -151,17 +140,48 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 		d.SetId(strconv.Itoa(policy.ID))
 	}
 
-	d.Set("name", policy.Name)
-	d.Set("description", policy.Description)
-	d.Set("scope", policy.Scope)
-	d.Set("enabled", policy.Enabled)
-	d.Set("version", policy.Version)
-	d.Set("severity", policy.Severity)
+	err := d.Set("name", policy.Name)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
+
+	err = d.Set("description", policy.Description)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
+
+	err = d.Set("scope", policy.Scope)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
+
+	err = d.Set("enabled", policy.Enabled)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
+
+	err = d.Set("version", policy.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
+
+	err = d.Set("severity", policy.Severity)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 
 	if policy.Type != "" {
-		d.Set("type", policy.Type)
+		err = d.Set("type", policy.Type)
+		if err != nil {
+			log.Println("error assigning 'version'")
+		}
+
 	} else {
-		d.Set("type", "falco")
+		err = d.Set("type", "falco")
+		if err != nil {
+			log.Println("error assigning 'version'")
+		}
+
 	}
 
 	actions := []map[string]interface{}{{}}
@@ -169,19 +189,35 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 		if action.Type != "POLICY_ACTION_CAPTURE" {
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
 			actions[0]["container"] = strings.ToLower(action)
-			d.Set("actions", actions)
+			err = d.Set("actions", actions)
+			if err != nil {
+				log.Println("error assigning 'version'")
+			}
+
 			//d.Set("actions.0.container", strings.ToLower(action))
 		} else {
 			actions[0]["capture"] = []map[string]interface{}{{
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
 			}}
-			d.Set("actions", actions)
+			err = d.Set("actions", actions)
+			if err != nil {
+				log.Println("error assigning 'version'")
+			}
+
 		}
 	}
 
-	d.Set("notification_channels", policy.NotificationChannelIds)
-	d.Set("rule_names", policy.RuleNames)
+	err = d.Set("notification_channels", policy.NotificationChannelIds)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
+
+	err = d.Set("rule_names", policy.RuleNames)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
+
 }
 
 func policyFromResourceData(d *schema.ResourceData) secure.Policy {
