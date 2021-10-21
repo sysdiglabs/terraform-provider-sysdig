@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -132,7 +133,10 @@ func resourceSysdigMonitorTeamCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	d.SetId(strconv.Itoa(team.ID))
-	d.Set("version", team.Version)
+	err = d.Set("version", team.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 
 	return nil
 }
@@ -152,18 +156,65 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	d.Set("version", t.Version)
-	d.Set("theme", t.Theme)
-	d.Set("name", t.Name)
-	d.Set("description", t.Description)
-	d.Set("scope_by", t.Show)
-	d.Set("filter", t.Filter)
-	d.Set("can_use_sysdig_capture", t.CanUseSysdigCapture)
-	d.Set("can_see_infrastructure_events", t.CanUseCustomEvents)
-	d.Set("can_use_aws_data", t.CanUseAwsMetrics)
-	d.Set("default_team", t.DefaultTeam)
-	d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
-	d.Set("entrypoint", entrypointToSet(t.EntryPoint))
+	err = d.Set("version", t.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
+
+	err = d.Set("theme", t.Theme)
+	if err != nil {
+		log.Println("error assigning 'theme'")
+	}
+
+	err = d.Set("name", t.Name)
+	if err != nil {
+		log.Println("error assigning 'name'")
+	}
+
+	err = d.Set("description", t.Description)
+	if err != nil {
+		log.Println("error assigning 'description'")
+	}
+
+	err = d.Set("scope_by", t.Show)
+	if err != nil {
+		log.Println("error assigning 'scope_by'")
+	}
+
+	err = d.Set("filter", t.Filter)
+	if err != nil {
+		log.Println("error assigning 'filter'")
+	}
+
+	err = d.Set("can_use_sysdig_capture", t.CanUseSysdigCapture)
+	if err != nil {
+		log.Println("error assigning 'can_use_sysdig_capture'")
+	}
+
+	err = d.Set("can_see_infrastructure_events", t.CanUseCustomEvents)
+	if err != nil {
+		log.Println("error assigning 'can_see_infrastructure_events'")
+	}
+
+	err = d.Set("can_use_aws_data", t.CanUseAwsMetrics)
+	if err != nil {
+		log.Println("error assigning 'can_use_aws_data'")
+	}
+
+	err = d.Set("default_team", t.DefaultTeam)
+	if err != nil {
+		log.Println("error assigning 'default_team'")
+	}
+
+	err = d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
+	if err != nil {
+		log.Println("error assigning 'user_roles'")
+	}
+
+	err = d.Set("entrypoint", entrypointToSet(t.EntryPoint))
+	if err != nil {
+		log.Println("error assigning 'entrypoint'")
+	}
 
 	return nil
 }

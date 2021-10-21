@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -62,7 +63,10 @@ func resourceSysdigRuleContainerCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
-	d.Set("version", rule.Version)
+	err = d.Set("version", rule.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 
 	return nil
 }
@@ -90,8 +94,15 @@ func resourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	updateResourceDataForRule(d, rule)
-	d.Set("matching", rule.Details.Containers.MatchItems)
-	d.Set("containers", rule.Details.Containers.Items)
+	err = d.Set("matching", rule.Details.Containers.MatchItems)
+	if err != nil {
+		log.Println("error assigning 'matching'")
+	}
+
+	err = d.Set("containers", rule.Details.Containers.Items)
+	if err != nil {
+		log.Println("error assigning 'containers'")
+	}
 
 	return nil
 }

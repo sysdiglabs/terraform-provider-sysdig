@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -60,7 +61,10 @@ func resourceSysdigMonitorNotificationChannelSlackCreate(ctx context.Context, d 
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	err = d.Set("version", notificationChannel.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 
 	return nil
 }
@@ -145,7 +149,14 @@ func monitorNotificationChannelSlackToResourceData(nc *monitor.NotificationChann
 		return
 	}
 
-	d.Set("url", nc.Options.Url)
-	d.Set("channel", nc.Options.Channel)
+	err = d.Set("url", nc.Options.Url)
+	if err != nil {
+		log.Println("error assigning 'url'")
+	}
+
+	err = d.Set("channel", nc.Options.Channel)
+	if err != nil {
+		log.Println("error assigning 'channel'")
+	}
 	return
 }

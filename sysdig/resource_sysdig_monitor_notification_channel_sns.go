@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -58,7 +59,10 @@ func resourceSysdigMonitorNotificationChannelSNSCreate(ctx context.Context, d *s
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	err = d.Set("version", notificationChannel.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 
 	return nil
 }
@@ -142,6 +146,9 @@ func monitorNotificationChannelSNSToResourceData(nc *monitor.NotificationChannel
 		return
 	}
 
-	d.Set("topics", nc.Options.SnsTopicARNs)
+	err = d.Set("topics", nc.Options.SnsTopicARNs)
+	if err != nil {
+		log.Println("error assigning 'topics'")
+	}
 	return
 }

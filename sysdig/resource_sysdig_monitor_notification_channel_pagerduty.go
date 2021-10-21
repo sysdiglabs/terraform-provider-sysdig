@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -65,7 +66,10 @@ func resourceSysdigMonitorNotificationChannelPagerdutyCreate(ctx context.Context
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	err = d.Set("version", notificationChannel.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 
 	return nil
 }
@@ -152,8 +156,19 @@ func monitorNotificationChannelPagerdutyToResourceData(nc *monitor.NotificationC
 		return
 	}
 
-	d.Set("account", nc.Options.Account)
-	d.Set("service_key", nc.Options.ServiceKey)
-	d.Set("service_name", nc.Options.ServiceName)
+	err = d.Set("account", nc.Options.Account)
+	if err != nil {
+		log.Println("error assigning 'account'")
+	}
+
+	err = d.Set("service_key", nc.Options.ServiceKey)
+	if err != nil {
+		log.Println("error assigning 'service_key'")
+	}
+
+	err = d.Set("service_name", nc.Options.ServiceName)
+	if err != nil {
+		log.Println("error assigning 'service_name'")
+	}
 	return
 }

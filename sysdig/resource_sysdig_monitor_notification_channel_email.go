@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -59,7 +60,10 @@ func resourceSysdigMonitorNotificationChannelEmailCreate(ctx context.Context, d 
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	err = d.Set("version", notificationChannel.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 
 	return nil
 }
@@ -143,6 +147,9 @@ func monitorNotificationChannelEmailToResourceData(nc *monitor.NotificationChann
 		return
 	}
 
-	d.Set("recipients", nc.Options.EmailRecipients)
+	err = d.Set("recipients", nc.Options.EmailRecipients)
+	if err != nil {
+		log.Println("error assigning 'recipients'")
+	}
 	return
 }

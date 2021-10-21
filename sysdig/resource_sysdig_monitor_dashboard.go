@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -185,7 +186,10 @@ func resourceSysdigDashboardCreate(ctx context.Context, data *schema.ResourceDat
 	}
 
 	data.SetId(strconv.Itoa(dashboardCreated.ID))
-	data.Set("version", dashboardCreated.Version)
+	err = data.Set("version", dashboardCreated.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 	return nil
 }
 
@@ -494,10 +498,22 @@ func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Pane
 }
 
 func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceData) (err error) {
-	data.Set("name", dashboard.Name)
-	data.Set("description", dashboard.Description)
-	data.Set("public", dashboard.Public)
-	data.Set("public_token", dashboard.PublicToken)
+	err = data.Set("name", dashboard.Name)
+	if err != nil {
+		log.Println("error assigning 'name'")
+	}
+	err = data.Set("description", dashboard.Description)
+	if err != nil {
+		log.Println("error assigning 'description'")
+	}
+	err = data.Set("public", dashboard.Public)
+	if err != nil {
+		log.Println("error assigning 'public'")
+	}
+	err = data.Set("public_token", dashboard.PublicToken)
+	if err != nil {
+		log.Println("error assigning 'public_token'")
+	}
 
 	var panels []map[string]interface{}
 	for _, panel := range dashboard.Panels {
@@ -507,7 +523,10 @@ func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceDa
 		}
 		panels = append(panels, dPanel)
 	}
-	data.Set("panel", panels)
+	err = data.Set("panel", panels)
+	if err != nil {
+		log.Println("error assigning 'panel'")
+	}
 
 	var scopes []map[string]interface{}
 	for _, scope := range dashboard.ScopeExpressionList {
@@ -517,10 +536,15 @@ func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceDa
 		}
 		scopes = append(scopes, dScope)
 	}
-	data.Set("scope", scopes)
+	err = data.Set("scope", scopes)
+	if err != nil {
+		log.Println("error assigning 'scope'")
+	}
 
-	data.Set("version", dashboard.Version)
-
+	err = data.Set("version", dashboard.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 	return nil
 }
 

@@ -1,6 +1,8 @@
 package sysdig
 
 import (
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
@@ -59,11 +61,33 @@ func monitorNotificationChannelFromResourceData(d *schema.ResourceData) (nc moni
 }
 
 func monitorNotificationChannelToResourceData(nc *monitor.NotificationChannel, data *schema.ResourceData) (err error) {
-	data.Set("version", nc.Version)
-	data.Set("name", nc.Name)
-	data.Set("enabled", nc.Enabled)
-	data.Set("notify_when_ok", nc.Options.NotifyOnOk)
-	data.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
-	data.Set("send_test_notification", nc.Options.SendTestNotification)
+	err = data.Set("version", nc.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
+
+	err = data.Set("name", nc.Name)
+	if err != nil {
+		log.Println("error assigning 'name'")
+	}
+
+	err = data.Set("enabled", nc.Enabled)
+	if err != nil {
+		log.Println("error assigning 'enabled'")
+	}
+
+	err = data.Set("notify_when_ok", nc.Options.NotifyOnOk)
+	if err != nil {
+		log.Println("error assigning 'notify_when_ok'")
+	}
+	err = data.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
+	if err != nil {
+		log.Println("error assigning 'notify_when_resolved'")
+	}
+
+	err = data.Set("send_test_notification", nc.Options.SendTestNotification)
+	if err != nil {
+		log.Println("error assigning 'send_test_notification'")
+	}
 	return
 }

@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -57,7 +58,10 @@ func resourceSysdigAlertGroupOutlierCreate(ctx context.Context, data *schema.Res
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
-	data.Set("version", alertCreated.Version)
+	err = data.Set("version", alertCreated.Version)
+	if err != nil {
+		log.Println("error assigning 'version'")
+	}
 	return nil
 }
 
@@ -158,7 +162,10 @@ func groupOutlierAlertToResourceData(alert *monitor.Alert, data *schema.Resource
 	for _, v := range alert.Monitor {
 		monitor_metrics = append(monitor_metrics, v.Metric)
 	}
-	data.Set("monitor", monitor_metrics)
+	err = data.Set("monitor", monitor_metrics)
+	if err != nil {
+		log.Println("error assigning 'monitor'")
+	}
 
 	return
 }
