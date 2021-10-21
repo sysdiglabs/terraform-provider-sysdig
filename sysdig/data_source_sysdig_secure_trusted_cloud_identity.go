@@ -39,6 +39,14 @@ func dataSourceSysdigSecureTrustedCloudIdentity() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"azure_tenant_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"azure_client_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
