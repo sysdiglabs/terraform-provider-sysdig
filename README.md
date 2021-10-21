@@ -1,3 +1,8 @@
+<a href="https://terraform.io">
+    <img src="https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/main/.github/terraform_logo.svg" alt="Terraform logo" title="Terraform" align="right" height="50" />
+</a>
+
+
 Terraform Provider for Sysdig
 =============================
 
@@ -6,7 +11,6 @@ Terraform Provider for Sysdig
 - Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
 - [Blog on how to use this provider with Sysdig Secure](https://sysdig.com/blog/using-terraform-for-container-security-as-code/)
 
-<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
 Requirements
 ------------
@@ -29,7 +33,9 @@ Using the provider
 ----------------------
 If you're building the provider, follow the instructions to [install it as a plugin.](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) After placing it into your plugins directory,  run `terraform init` to initialize it.
 
-Developing the Provider
+---
+
+Contribute
 ---------------------------
 
 If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.13+ is *required*). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
@@ -54,3 +60,16 @@ If you want to execute the acceptance tests, you can run `make testacc`. Please 
 ```sh
 $ make testacc
 ```
+
+### Proposing PR's
+
+* on pull-requests some validations are enforced.
+  this can be prevented using [**pre-commit**](https://pre-commit.com)
+  * Defined in [`/.pre-commit-config.yaml`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.pre-commit-config.yaml)
+* for `testacc` some credentials are required, check [`/.envrc.template`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.envrc.template)
+
+
+### Release
+
+* Use **semver** for releases https://semver.org
+* To create a new release, create and push a new tag and it will be released  by [`/.github/workflows/release.yml`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.github/workflows/release.yml)
