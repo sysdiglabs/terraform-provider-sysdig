@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 )
 
 // -------- Alert --------
@@ -77,7 +78,10 @@ func (a *Alert) ToJSON() io.Reader {
 
 func AlertFromJSON(body []byte) Alert {
 	var result alertWrapper
-	json.Unmarshal(body, &result)
+	err := json.Unmarshal(body, &result)
+	if err != nil {
+		log.Println("error Unmarshalling")
+	}
 
 	return result.Alert
 }
@@ -126,7 +130,10 @@ func (t *Team) ToJSON() io.Reader {
 
 func TeamFromJSON(body []byte) Team {
 	var result teamWrapper
-	json.Unmarshal(body, &result)
+	err := json.Unmarshal(body, &result)
+	if err != nil {
+		log.Println("error Unmarshalling")
+	}
 
 	return result.Team
 }
@@ -143,7 +150,10 @@ type UsersList struct {
 
 func UsersListFromJSON(body []byte) []UsersList {
 	var result usersListWrapper
-	json.Unmarshal(body, &result)
+	err := json.Unmarshal(body, &result)
+	if err != nil {
+		log.Println("error Unmarshalling")
+	}
 
 	return result.UsersList
 }
@@ -187,14 +197,20 @@ func (n *NotificationChannel) ToJSON() io.Reader {
 
 func NotificationChannelFromJSON(body []byte) NotificationChannel {
 	var result notificationChannelWrapper
-	json.Unmarshal(body, &result)
+	err := json.Unmarshal(body, &result)
+	if err != nil {
+		log.Println("error Unmarshalling")
+	}
 
 	return result.NotificationChannel
 }
 
 func NotificationChannelListFromJSON(body []byte) []NotificationChannel {
 	var result notificationChannelListWrapper
-	json.Unmarshal(body, &result)
+	err := json.Unmarshal(body, &result)
+	if err != nil {
+		log.Println("error Unmarshalling")
+	}
 
 	return result.NotificationChannels
 }

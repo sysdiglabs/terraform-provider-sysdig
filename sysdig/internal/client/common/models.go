@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 )
 
 // -------- User --------
@@ -23,7 +24,10 @@ func (u *User) ToJSON() io.Reader {
 
 func UserFromJSON(body []byte) User {
 	var result userWrapper
-	json.Unmarshal(body, &result)
+	err := json.Unmarshal(body, &result)
+	if err != nil {
+		log.Println("error Unmarshalling")
+	}
 
 	return result.User
 }
