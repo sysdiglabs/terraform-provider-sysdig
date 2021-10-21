@@ -58,15 +58,25 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 	d.SetId(identity)
 	d.Set("identity", identity)
 
-	// If identity is an ARN, attempt to extract certain fields
-	parsedArn, err := arn.Parse(identity)
-	if err == nil {
-		d.Set("aws_account_id", parsedArn.AccountID)
+	provider := d.Get("cloud_provider")
+	switch provider {
+	case "aws", "gcp":
+		// If identity is an ARN, attempt to extract certain fields
+		parsedArn, err := arn.Parse(identity)
+		if err == nil {
+			d.Set("aws_account_id", parsedArn.AccountID)
 
-		if parsedArn.Service == "iam" && strings.HasPrefix(parsedArn.Resource, "role/") {
-			d.Set("aws_role_name", strings.TrimPrefix(parsedArn.Resource, "role/"))
+			if parsedArn.Service == "iam" && strings.HasPrefix(parsedArn.Resource, "role/") {
+				d.Set("aws_role_name", strings.TrimPrefix(parsedArn.Resource, "role/"))
+			}
+		}
+	case "azure":
+		// If identity is an Azure tenantID/clientID, separate into each part
+		tenantID, clientID, err := parseAzureCreds(identity)
+		if err == nil {
+			d.Set("azure_tenant_id", tenantID)
+			d.Set("azure_client_id", clientID)
 		}
 	}
-
 	return nil
 }

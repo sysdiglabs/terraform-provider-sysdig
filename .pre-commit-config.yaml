@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+    -   id: fmt
+        pass_filenames: false
+        name: fmt
+        entry: make fmt
+        language: system
+    -   id: fmtcheck
+        pass_filenames: false
+        name: fmtcheck
+        entry: make fmtcheck
+        language: system
+    -   id: lint
+        pass_filenames: false
+        name: lint
+        entry: make lint
+        language: system

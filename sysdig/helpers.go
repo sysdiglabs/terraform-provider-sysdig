@@ -1,7 +1,9 @@
 package sysdig
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -30,4 +32,13 @@ func validateDiagFunc(validateFunc func(interface{}, string) ([]string, []error)
 		}
 		return diags
 	}
+}
+
+// parseAzureCreds splits an Azure Trusted Identity into a tenantID and a clientID
+func parseAzureCreds(azureTrustedIdentity string) (tenantID string, clientID string, err error) {
+	tokens := strings.Split(azureTrustedIdentity, ":")
+	if len(tokens) != 2 {
+		return "", "", errors.New("Not a valid Azure Trusted Identity")
+	}
+	return tokens[0], tokens[1], nil
 }
