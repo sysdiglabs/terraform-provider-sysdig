@@ -165,23 +165,15 @@ func anomalyAlertFromResourceData(data *schema.ResourceData) (alert *monitor.Ale
 func anomalyAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
 	if err != nil {
-		return err
+		return
 	}
 
-	err = data.Set("multiple_alerts_by", alert.SegmentBy)
-	if err != nil {
-		return err
-	}
+	_ = data.Set("multiple_alerts_by", alert.SegmentBy)
 
 	monitor_metrics := []string{}
-
 	for _, v := range alert.Monitor {
 		monitor_metrics = append(monitor_metrics, v.Metric)
 	}
-	err = data.Set("monitor", monitor_metrics)
-	if err != nil {
-		return err
-	}
-
+	_ = data.Set("monitor", monitor_metrics)
 	return
 }

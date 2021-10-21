@@ -92,7 +92,7 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 					"filename": {
 						Type:         schema.TypeString,
 						Required:     true,
-						ValidateFunc: validation.StringMatch(regexp.MustCompile(`.*?\\.scap`), "the filename must end in .scap"),
+						ValidateFunc: validation.StringMatch(regexp.MustCompile(`.*?\.scap`), "the filename must end in .scap"),
 					},
 					"duration": {
 						Type:     schema.TypeInt,
