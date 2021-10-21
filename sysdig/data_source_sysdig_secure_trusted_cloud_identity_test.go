@@ -24,16 +24,38 @@ func TestAccTrustedCloudIdentityDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: trustedIdentityDatasource(),
+				Config: trustedIdentityDatasourceAWS(),
+			},
+			{
+				Config: trustedIdentityDatasourceGCP(),
+			},
+			{
+				Config: trustedIdentityDatasourceAzure(),
 			},
 		},
 	})
 }
 
-func trustedIdentityDatasource() string {
+func trustedIdentityDatasourceAWS() string {
 	return `
 data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {
 	cloud_provider = "aws"
+}
+`
+}
+
+func trustedIdentityDatasourceGCP() string {
+	return `
+data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {
+	cloud_provider = "gcp"
+}
+`
+}
+
+func trustedIdentityDatasourceAzure() string {
+	return `
+data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {
+	cloud_provider = "azure"
 }
 `
 }
