@@ -3,7 +3,6 @@ package sysdig
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -65,10 +64,8 @@ func resourceSysdigAlertDowntimeCreate(ctx context.Context, data *schema.Resourc
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
-	err = data.Set("version", alertCreated.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
+	_ = data.Set("version", alertCreated.Version)
+
 	return nil
 }
 
@@ -164,14 +161,8 @@ func downtimeAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData
 	fmt.Sscanf(alert.Condition, "avg(timeAvg(uptime)) <= %f", &trigger_after_pct)
 	trigger_after_pct = (1 - trigger_after_pct) * 100
 
-	err = data.Set("trigger_after_pct", int(trigger_after_pct))
-	if err != nil {
-		log.Println("error assigning 'trigger_after_pct'")
-	}
+	_ = data.Set("trigger_after_pct", int(trigger_after_pct))
+	_ = data.Set("entities_to_monitor", alert.SegmentBy)
 
-	err = data.Set("entities_to_monitor", alert.SegmentBy)
-	if err != nil {
-		log.Println("error assigning 'entities_to_monitor'")
-	}
 	return
 }

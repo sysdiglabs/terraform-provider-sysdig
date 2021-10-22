@@ -3,7 +3,6 @@ package sysdig
 import (
 	"context"
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 	"time"
@@ -76,11 +75,8 @@ func resourceSysdigAlertEventCreate(ctx context.Context, data *schema.ResourceDa
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
+	_ = data.Set("version", alertCreated.Version)
 
-	err = data.Set("version", alertCreated.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
 	return nil
 }
 
@@ -197,26 +193,11 @@ func eventAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (
 		return
 	}
 
-	err = data.Set("event_rel", event_rel)
-	if err != nil {
-		log.Println("error assigning 'event_rel'")
-	}
-	err = data.Set("event_count", event_count)
-	if err != nil {
-		log.Println("error assigning 'event_count'")
-	}
-	err = data.Set("event_name", alert.Criteria.Text)
-	if err != nil {
-		log.Println("error assigning 'event_name'")
-	}
-	err = data.Set("source", alert.Criteria.Source)
-	if err != nil {
-		log.Println("error assigning 'source'")
-	}
-	err = data.Set("multiple_alerts_by", alert.SegmentBy)
-	if err != nil {
-		log.Println("error assigning 'multiple_alerts_by'")
-	}
+	_ = data.Set("event_rel", event_rel)
+	_ = data.Set("event_count", event_count)
+	_ = data.Set("event_name", alert.Criteria.Text)
+	_ = data.Set("source", alert.Criteria.Source)
+	_ = data.Set("multiple_alerts_by", alert.SegmentBy)
 
 	return
 }

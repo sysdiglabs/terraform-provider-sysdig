@@ -1,8 +1,6 @@
 package sysdig
 
 import (
-	"log"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
@@ -61,24 +59,9 @@ func ruleFromResourceData(d *schema.ResourceData) secure.Rule {
 
 // Saves in the resource data the information from the common fields of the rule.
 func updateResourceDataForRule(d *schema.ResourceData, rule secure.Rule) {
-	err := d.Set("name", rule.Name)
-	if err != nil {
-		log.Println("error assigning 'name'")
-	}
-
-	err = d.Set("description", rule.Description)
-	if err != nil {
-		log.Println("error assigning 'description'")
-	}
-
-	err = d.Set("tags", rule.Tags)
-	if err != nil {
-		log.Println("error assigning 'tags'")
-	}
-
-	err = d.Set("version", rule.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
+	_ = d.Set("name", rule.Name)
+	_ = d.Set("description", rule.Description)
+	_ = d.Set("tags", rule.Tags)
+	_ = d.Set("version", rule.Version)
 
 }

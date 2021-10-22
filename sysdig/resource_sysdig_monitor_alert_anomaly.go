@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 
@@ -63,11 +62,7 @@ func resourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.Resource
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
-	err = data.Set("version", alertCreated.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
-
+	_ = data.Set("version", alertCreated.Version)
 	return nil
 }
 

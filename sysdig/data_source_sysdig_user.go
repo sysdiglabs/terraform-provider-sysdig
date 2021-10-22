@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 
@@ -58,25 +57,10 @@ func dataSourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(strconv.Itoa(u.ID))
-	err = d.Set("version", u.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
-
-	err = d.Set("system_role", u.SystemRole)
-	if err != nil {
-		log.Println("error assigning 'system_role'")
-	}
-
-	err = d.Set("first_name", u.FirstName)
-	if err != nil {
-		log.Println("error assigning 'first_name'")
-	}
-
-	err = d.Set("last_name", u.LastName)
-	if err != nil {
-		log.Println("error assigning 'last_name'")
-	}
+	_ = d.Set("version", u.Version)
+	_ = d.Set("system_role", u.SystemRole)
+	_ = d.Set("first_name", u.FirstName)
+	_ = d.Set("last_name", u.LastName)
 
 	return nil
 

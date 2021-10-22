@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -118,84 +117,22 @@ func dataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.Reso
 	}
 
 	d.SetId(strconv.Itoa(nc.ID))
-	err = d.Set("version", nc.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
-	err = d.Set("name", nc.Name)
-	if err != nil {
-		log.Println("error assigning 'name'")
-	}
-
-	err = d.Set("enabled", nc.Enabled)
-	if err != nil {
-		log.Println("error assigning 'enabled'")
-	}
-
-	err = d.Set("type", nc.Type)
-	if err != nil {
-		log.Println("error assigning 'type'")
-	}
-
-	err = d.Set("recipients", strings.Join(nc.Options.EmailRecipients, ","))
-	if err != nil {
-		log.Println("error assigning 'recipients'")
-	}
-
-	err = d.Set("topics", strings.Join(nc.Options.SnsTopicARNs, ","))
-	if err != nil {
-		log.Println("error assigning 'topics'")
-	}
-
-	err = d.Set("api_key", nc.Options.APIKey)
-	if err != nil {
-		log.Println("error assigning 'api_key'")
-	}
-
-	err = d.Set("url", nc.Options.Url)
-	if err != nil {
-		log.Println("error assigning 'url'")
-	}
-
-	err = d.Set("channel", nc.Options.Channel)
-	if err != nil {
-		log.Println("error assigning 'channel'")
-	}
-
-	err = d.Set("account", nc.Options.Account)
-	if err != nil {
-		log.Println("error assigning 'account'")
-	}
-
-	err = d.Set("service_key", nc.Options.ServiceKey)
-	if err != nil {
-		log.Println("error assigning 'service_key'")
-	}
-
-	err = d.Set("service_name", nc.Options.ServiceName)
-	if err != nil {
-		log.Println("error assigning 'service_name'")
-	}
-
-	err = d.Set("routing_key", nc.Options.RoutingKey)
-	if err != nil {
-		log.Println("error assigning 'routing_key'")
-	}
-
-	err = d.Set("notify_when_ok", nc.Options.NotifyOnOk)
-	if err != nil {
-		log.Println("error assigning 'notify_when_ok'")
-	}
-
-	err = d.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
-	if err != nil {
-		log.Println("error assigning 'notify_when_resolved'")
-	}
-
-	err = d.Set("send_test_notification", nc.Options.SendTestNotification)
-	if err != nil {
-		log.Println("error assigning 'send_test_notification'")
-	}
+	_ = d.Set("version", nc.Version)
+	_ = d.Set("name", nc.Name)
+	_ = d.Set("enabled", nc.Enabled)
+	_ = d.Set("type", nc.Type)
+	_ = d.Set("recipients", strings.Join(nc.Options.EmailRecipients, ","))
+	_ = d.Set("topics", strings.Join(nc.Options.SnsTopicARNs, ","))
+	_ = d.Set("api_key", nc.Options.APIKey)
+	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("channel", nc.Options.Channel)
+	_ = d.Set("account", nc.Options.Account)
+	_ = d.Set("service_key", nc.Options.ServiceKey)
+	_ = d.Set("service_name", nc.Options.ServiceName)
+	_ = d.Set("routing_key", nc.Options.RoutingKey)
+	_ = d.Set("notify_when_ok", nc.Options.NotifyOnOk)
+	_ = d.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
+	_ = d.Set("send_test_notification", nc.Options.SendTestNotification)
 
 	// When we receive a notification channel of type OpsGenie,
 	// the API sends us the URL, but we are configuring the API
@@ -210,15 +147,8 @@ func dataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.Reso
 			return diag.FromErr(err)
 		}
 		key := regex.FindStringSubmatch(nc.Options.Url)[1]
-		err = d.Set("api_key", key)
-		if err != nil {
-			log.Println("error assigning 'api_key'")
-		}
-
-		err = d.Set("url", "")
-		if err != nil {
-			log.Println("error assigning 'url'")
-		}
+		_ = d.Set("api_key", key)
+		_ = d.Set("url", "")
 
 	}
 	return nil

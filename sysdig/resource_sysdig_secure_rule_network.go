@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 
@@ -102,10 +101,7 @@ func resourceSysdigRuleNetworkCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
-	err = d.Set("version", rule.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
+	_ = d.Set("version", rule.Version)
 
 	return nil
 }
@@ -129,14 +125,9 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 	}
 	updateResourceDataForRule(d, rule)
 
-	err = d.Set("block_inbound", rule.Details.AllInbound)
-	if err != nil {
-		log.Println("error assigning 'block_inbound'")
-	}
-	err = d.Set("block_outbound", rule.Details.AllOutbound)
-	if err != nil {
-		log.Println("error assigning 'block_outbound'")
-	}
+	_ = d.Set("block_inbound", rule.Details.AllInbound)
+	_ = d.Set("block_outbound", rule.Details.AllOutbound)
+
 	if rule.Details.TCPListenPorts == nil {
 		return diag.Errorf("no tcpListenPorts for a filesystem rule")
 	}
@@ -154,13 +145,10 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 			}
 			tcpPorts = append(tcpPorts, intPort)
 		}
-		err = d.Set("tcp", []map[string]interface{}{{
+		_ = d.Set("tcp", []map[string]interface{}{{
 			"matching": rule.Details.TCPListenPorts.MatchItems,
 			"ports":    tcpPorts,
 		}})
-		if err != nil {
-			log.Println("error assigning 'tcp'")
-		}
 	}
 	if len(rule.Details.UDPListenPorts.Items) > 0 {
 		udpPorts := []int{}
@@ -171,13 +159,10 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 			}
 			udpPorts = append(udpPorts, intPort)
 		}
-		err = d.Set("udp", []map[string]interface{}{{
+		_ = d.Set("udp", []map[string]interface{}{{
 			"matching": rule.Details.UDPListenPorts.MatchItems,
 			"ports":    udpPorts,
 		}})
-		if err != nil {
-			log.Println("error assigning 'udp'")
-		}
 	}
 
 	return nil

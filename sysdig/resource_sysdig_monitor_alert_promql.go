@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 
@@ -57,10 +56,8 @@ func resourceSysdigAlertPromqlCreate(ctx context.Context, data *schema.ResourceD
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
-	err = data.Set("version", alertCreated.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
+	_ = data.Set("version", alertCreated.Version)
+
 	return nil
 }
 
@@ -149,10 +146,7 @@ func promqlAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) 
 		return
 	}
 
-	err = data.Set("promql", alert.Condition)
-	if err != nil {
-		log.Println("error assigning 'promql'")
-	}
+	_ = data.Set("promql", alert.Condition)
 
 	return
 }

@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 
@@ -62,10 +61,8 @@ func resourceSysdigAlertMetricCreate(ctx context.Context, data *schema.ResourceD
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
-	err = data.Set("version", alertCreated.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
+	_ = data.Set("version", alertCreated.Version)
+
 	return nil
 }
 
@@ -157,14 +154,8 @@ func metricAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) 
 		return
 	}
 
-	err = data.Set("metric", alert.Condition)
-	if err != nil {
-		log.Println("error assigning 'metric'")
-	}
-	err = data.Set("multiple_alerts_by", alert.SegmentBy)
-	if err != nil {
-		log.Println("error assigning 'multiple_alerts_by'")
-	}
+	_ = data.Set("metric", alert.Condition)
+	_ = data.Set("multiple_alerts_by", alert.SegmentBy)
 
 	return
 }

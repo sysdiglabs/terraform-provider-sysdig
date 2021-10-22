@@ -2,13 +2,13 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"time"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureCloudAccount() *schema.Resource {
@@ -73,30 +73,12 @@ func resourceSysdigSecureCloudAccountCreate(ctx context.Context, d *schema.Resou
 	}
 
 	d.SetId(cloudAccount.AccountID)
-	err = d.Set("account_id", cloudAccount.AccountID)
-	if err != nil {
-		log.Println("error assigning 'account_id'")
-	}
-	err = d.Set("cloud_provider", cloudAccount.Provider)
-	if err != nil {
-		log.Println("error assigning 'cloud_provider'")
-	}
-	err = d.Set("alias", cloudAccount.Alias)
-	if err != nil {
-		log.Println("error assigning 'alias'")
-	}
-	err = d.Set("role_enabled", cloudAccount.RoleAvailable)
-	if err != nil {
-		log.Println("error assigning 'role_enabled'")
-	}
-	err = d.Set("role_name", cloudAccount.RoleName)
-	if err != nil {
-		log.Println("error assigning 'role_name'")
-	}
-	err = d.Set("external_id", cloudAccount.ExternalID)
-	if err != nil {
-		log.Println("error assigning 'external_id'")
-	}
+	_ = d.Set("account_id", cloudAccount.AccountID)
+	_ = d.Set("cloud_provider", cloudAccount.Provider)
+	_ = d.Set("alias", cloudAccount.Alias)
+	_ = d.Set("role_enabled", cloudAccount.RoleAvailable)
+	_ = d.Set("role_name", cloudAccount.RoleName)
+	_ = d.Set("external_id", cloudAccount.ExternalID)
 
 	return nil
 }
@@ -114,35 +96,12 @@ func resourceSysdigSecureCloudAccountRead(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("account_id", cloudAccount.AccountID)
-	if err != nil {
-		log.Println("error assigning 'account_id'")
-	}
-
-	err = d.Set("cloud_provider", cloudAccount.Provider)
-	if err != nil {
-		log.Println("error assigning 'cloud_provider'")
-	}
-
-	err = d.Set("alias", cloudAccount.Alias)
-	if err != nil {
-		log.Println("error assigning 'alias'")
-	}
-
-	err = d.Set("role_enabled", cloudAccount.RoleAvailable)
-	if err != nil {
-		log.Println("error assigning 'role_enabled'")
-	}
-
-	err = d.Set("role_name", cloudAccount.RoleName)
-	if err != nil {
-		log.Println("error assigning 'role_name'")
-	}
-
-	err = d.Set("external_id", cloudAccount.ExternalID)
-	if err != nil {
-		log.Println("error assigning 'external_id'")
-	}
+	_ = d.Set("account_id", cloudAccount.AccountID)
+	_ = d.Set("cloud_provider", cloudAccount.Provider)
+	_ = d.Set("alias", cloudAccount.Alias)
+	_ = d.Set("role_enabled", cloudAccount.RoleAvailable)
+	_ = d.Set("role_name", cloudAccount.RoleName)
+	_ = d.Set("external_id", cloudAccount.ExternalID)
 
 	return nil
 }

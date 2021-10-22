@@ -3,7 +3,6 @@ package sysdig
 import (
 	"context"
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 	"time"
@@ -60,10 +59,7 @@ func resourceSysdigSecureNotificationChannelOpsGenieCreate(ctx context.Context, 
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	err = d.Set("version", notificationChannel.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
+	_ = d.Set("version", notificationChannel.Version)
 
 	return nil
 }
@@ -153,10 +149,7 @@ func secureNotificationChannelOpsGenieToResourceData(nc *secure.NotificationChan
 		return
 	}
 	key := regex.FindStringSubmatch(nc.Options.Url)[1]
-	err = d.Set("api_key", key)
-	if err != nil {
-		log.Println("error assigning 'api_key'")
-	}
+	_ = d.Set("api_key", key)
 
 	return
 }

@@ -2,14 +2,14 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureBenchmarkTask() *schema.Resource {
@@ -76,30 +76,11 @@ func resourceSysdigSecureBenchmarkTaskCreate(ctx context.Context, d *schema.Reso
 	}
 
 	d.SetId(strconv.Itoa(benchmarkTask.ID))
-	err = d.Set("name", benchmarkTask.Name)
-	if err != nil {
-		log.Println("error assigning 'v'")
-	}
-
-	err = d.Set("schema", benchmarkTask.Schema)
-	if err != nil {
-		log.Println("error assigning 'schema'")
-	}
-
-	err = d.Set("scope", benchmarkTask.Scope)
-	if err != nil {
-		log.Println("error assigning 'scope'")
-	}
-
-	err = d.Set("schedule", benchmarkTask.Schedule)
-	if err != nil {
-		log.Println("error assigning 'schedule'")
-	}
-
-	err = d.Set("enabled", benchmarkTask.Enabled)
-	if err != nil {
-		log.Println("error assigning 'enabled'")
-	}
+	_ = d.Set("name", benchmarkTask.Name)
+	_ = d.Set("schema", benchmarkTask.Schema)
+	_ = d.Set("scope", benchmarkTask.Scope)
+	_ = d.Set("schedule", benchmarkTask.Schedule)
+	_ = d.Set("enabled", benchmarkTask.Enabled)
 
 	return nil
 }
@@ -118,30 +99,11 @@ func resourceSysdigSecureBenchmarkTaskRead(ctx context.Context, d *schema.Resour
 	}
 
 	d.SetId(strconv.Itoa(benchmarkTask.ID))
-	err = d.Set("name", benchmarkTask.Name)
-	if err != nil {
-		log.Println("error assigning 'name'")
-	}
-
-	err = d.Set("schema", benchmarkTask.Schema)
-	if err != nil {
-		log.Println("error assigning 'schema'")
-	}
-
-	err = d.Set("scope", benchmarkTask.Scope)
-	if err != nil {
-		log.Println("error assigning 'scope'")
-	}
-
-	err = d.Set("schedule", benchmarkTask.Schedule)
-	if err != nil {
-		log.Println("error assigning 'schedule'")
-	}
-
-	err = d.Set("enabled", benchmarkTask.Enabled)
-	if err != nil {
-		log.Println("error assigning 'enabled'")
-	}
+	_ = d.Set("name", benchmarkTask.Name)
+	_ = d.Set("schema", benchmarkTask.Schema)
+	_ = d.Set("scope", benchmarkTask.Scope)
+	_ = d.Set("schedule", benchmarkTask.Schedule)
+	_ = d.Set("enabled", benchmarkTask.Enabled)
 
 	return nil
 }
@@ -160,10 +122,8 @@ func resourceSysdigSecureBenchmarkTaskUpdate(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("enabled", enabled)
-	if err != nil {
-		log.Println("error assigning 'enabled'")
-	}
+	_ = d.Set("enabled", enabled)
+
 	return nil
 }
 

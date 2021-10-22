@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 
@@ -67,10 +66,7 @@ func resourceSysdigMacroCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	d.SetId(strconv.Itoa(macro.ID))
-	err = d.Set("version", macro.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
+	_ = d.Set("version", macro.Version)
 
 	return nil
 }
@@ -107,22 +103,10 @@ func resourceSysdigMacroRead(ctx context.Context, d *schema.ResourceData, meta i
 		d.SetId("")
 	}
 
-	err = d.Set("name", macro.Name)
-	if err != nil {
-		log.Println("error assigning 'name'")
-	}
-	err = d.Set("version", macro.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
-	err = d.Set("condition", macro.Condition.Condition)
-	if err != nil {
-		log.Println("error assigning 'condition'")
-	}
-	err = d.Set("append", macro.Append)
-	if err != nil {
-		log.Println("error assigning 'append'")
-	}
+	_ = d.Set("name", macro.Name)
+	_ = d.Set("version", macro.Version)
+	_ = d.Set("condition", macro.Condition.Condition)
+	_ = d.Set("append", macro.Append)
 
 	return nil
 }

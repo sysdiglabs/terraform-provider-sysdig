@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/falcosecurity/kilt/runtimes/cloudformation/cfnpatcher"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -198,7 +199,7 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 
 	cdefChecksum := sha256.Sum256([]byte(containerDefinitions))
 	d.SetId(fmt.Sprintf("%x", cdefChecksum))
-	err = d.Set("output_container_definitions", *outputContainerDefinitions)
+	_ = d.Set("output_container_definitions", *outputContainerDefinitions)
 	if err != nil {
 		return diag.FromErr(err)
 	}

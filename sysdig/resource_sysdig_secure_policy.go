@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -140,47 +139,16 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 		d.SetId(strconv.Itoa(policy.ID))
 	}
 
-	err := d.Set("name", policy.Name)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
-
-	err = d.Set("description", policy.Description)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
-
-	err = d.Set("scope", policy.Scope)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
-
-	err = d.Set("enabled", policy.Enabled)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
-
-	err = d.Set("version", policy.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
-
-	err = d.Set("severity", policy.Severity)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
-
+	_ = d.Set("name", policy.Name)
+	_ = d.Set("description", policy.Description)
+	_ = d.Set("scope", policy.Scope)
+	_ = d.Set("enabled", policy.Enabled)
+	_ = d.Set("version", policy.Version)
+	_ = d.Set("severity", policy.Severity)
 	if policy.Type != "" {
-		err = d.Set("type", policy.Type)
-		if err != nil {
-			log.Println("error assigning 'version'")
-		}
-
+		_ = d.Set("type", policy.Type)
 	} else {
-		err = d.Set("type", "falco")
-		if err != nil {
-			log.Println("error assigning 'version'")
-		}
+		_ = d.Set("type", "falco")
 
 	}
 
@@ -189,34 +157,20 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 		if action.Type != "POLICY_ACTION_CAPTURE" {
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
 			actions[0]["container"] = strings.ToLower(action)
-			err = d.Set("actions", actions)
-			if err != nil {
-				log.Println("error assigning 'version'")
-			}
-
+			_ = d.Set("actions", actions)
 			//d.Set("actions.0.container", strings.ToLower(action))
 		} else {
 			actions[0]["capture"] = []map[string]interface{}{{
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
 			}}
-			err = d.Set("actions", actions)
-			if err != nil {
-				log.Println("error assigning 'version'")
-			}
-
+			_ = d.Set("actions", actions)
 		}
 	}
 
-	err = d.Set("notification_channels", policy.NotificationChannelIds)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
+	_ = d.Set("notification_channels", policy.NotificationChannelIds)
 
-	err = d.Set("rule_names", policy.RuleNames)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
+	_ = d.Set("rule_names", policy.RuleNames)
 
 }
 

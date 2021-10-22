@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 
@@ -62,10 +61,7 @@ func resourceSysdigSecureNotificationChannelVictorOpsCreate(ctx context.Context,
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	err = d.Set("version", notificationChannel.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
+	_ = d.Set("version", notificationChannel.Version)
 
 	return nil
 }
@@ -147,13 +143,8 @@ func secureNotificationChannelVictorOpsToResourceData(nc *secure.NotificationCha
 		return
 	}
 
-	err = d.Set("api_key", nc.Options.APIKey)
-	if err != nil {
-		log.Println("error assigning 'api_key'")
-	}
-	err = d.Set("routing_key", nc.Options.RoutingKey)
-	if err != nil {
-		log.Println("error assigning 'routing_key'")
-	}
+	_ = d.Set("api_key", nc.Options.APIKey)
+	_ = d.Set("routing_key", nc.Options.RoutingKey)
+
 	return
 }

@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 
@@ -94,10 +93,7 @@ func resourceSysdigRuleFilesystemCreate(ctx context.Context, d *schema.ResourceD
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
-	err = d.Set("version", rule.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
+	_ = d.Set("version", rule.Version)
 
 	return nil
 }
@@ -130,22 +126,18 @@ func resourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceDat
 	}
 
 	if len(rule.Details.ReadPaths.Items) > 0 {
-		err = d.Set("read_only", []map[string]interface{}{{
+		_ = d.Set("read_only", []map[string]interface{}{{
 			"matching": rule.Details.ReadPaths.MatchItems,
 			"paths":    rule.Details.ReadPaths.Items,
 		}})
-		if err != nil {
-			log.Println("error assigning 'read_only'")
-		}
+
 	}
 	if len(rule.Details.ReadWritePaths.Items) > 0 {
-		err = d.Set("read_write", []map[string]interface{}{{
+		_ = d.Set("read_write", []map[string]interface{}{{
 			"matching": rule.Details.ReadWritePaths.MatchItems,
 			"paths":    rule.Details.ReadWritePaths.Items,
 		}})
-		if err != nil {
-			log.Println("error assigning 'read_write'")
-		}
+
 	}
 
 	return nil

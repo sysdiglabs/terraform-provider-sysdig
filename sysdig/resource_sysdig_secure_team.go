@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 
@@ -106,10 +105,8 @@ func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(strconv.Itoa(team.ID))
-	err = d.Set("version", team.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
+	_ = d.Set("version", team.Version)
+
 	return nil
 }
 
@@ -128,50 +125,15 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("version", t.Version)
-	if err != nil {
-		log.Println("error assigning 'version'")
-	}
-
-	err = d.Set("theme", t.Theme)
-	if err != nil {
-		log.Println("error assigning 'theme'")
-	}
-
-	err = d.Set("name", t.Name)
-	if err != nil {
-		log.Println("error assigning 'name'")
-	}
-
-	err = d.Set("description", t.Description)
-	if err != nil {
-		log.Println("error assigning 'description'")
-	}
-
-	err = d.Set("scope_by", t.ScopeBy)
-	if err != nil {
-		log.Println("error assigning 'scope_by'")
-	}
-
-	err = d.Set("filter", t.Filter)
-	if err != nil {
-		log.Println("error assigning 'filter'")
-	}
-
-	err = d.Set("use_sysdig_capture", t.CanUseSysdigCapture)
-	if err != nil {
-		log.Println("error assigning 'use_sysdig_capture'")
-	}
-
-	err = d.Set("default_team", t.DefaultTeam)
-	if err != nil {
-		log.Println("error assigning 'default_team'")
-	}
-
-	err = d.Set("user_roles", userSecureRolesToSet(t.UserRoles))
-	if err != nil {
-		log.Println("error assigning 'user_roles'")
-	}
+	_ = d.Set("version", t.Version)
+	_ = d.Set("theme", t.Theme)
+	_ = d.Set("name", t.Name)
+	_ = d.Set("description", t.Description)
+	_ = d.Set("scope_by", t.ScopeBy)
+	_ = d.Set("filter", t.Filter)
+	_ = d.Set("use_sysdig_capture", t.CanUseSysdigCapture)
+	_ = d.Set("default_team", t.DefaultTeam)
+	_ = d.Set("user_roles", userSecureRolesToSet(t.UserRoles))
 
 	return nil
 }
