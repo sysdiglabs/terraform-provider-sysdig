@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 )
 
 type Layout struct {
@@ -397,10 +396,7 @@ func (db *Dashboard) AsPublic(value bool) *Dashboard {
 
 func DashboardFromJSON(body []byte) *Dashboard {
 	var result dashboardWrapper
-	err := json.Unmarshal(body, &result)
-	if err != nil {
-		log.Println("error Unmarshalling")
-	}
+	_ = json.Unmarshal(body, &result)
 
 	return result.Dashboard
 }
