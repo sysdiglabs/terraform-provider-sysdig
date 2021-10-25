@@ -61,7 +61,7 @@ func resourceSysdigSecureNotificationChannelVictorOpsCreate(ctx context.Context,
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	_ = d.Set("version", notificationChannel.Version)
 
 	return nil
 }
@@ -143,7 +143,8 @@ func secureNotificationChannelVictorOpsToResourceData(nc *secure.NotificationCha
 		return
 	}
 
-	d.Set("api_key", nc.Options.APIKey)
-	d.Set("routing_key", nc.Options.RoutingKey)
+	_ = d.Set("api_key", nc.Options.APIKey)
+	_ = d.Set("routing_key", nc.Options.RoutingKey)
+
 	return
 }

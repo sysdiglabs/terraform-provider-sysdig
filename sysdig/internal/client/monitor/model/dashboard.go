@@ -396,7 +396,7 @@ func (db *Dashboard) AsPublic(value bool) *Dashboard {
 
 func DashboardFromJSON(body []byte) *Dashboard {
 	var result dashboardWrapper
-	json.Unmarshal(body, &result)
+	_ = json.Unmarshal(body, &result)
 
 	return result.Dashboard
 }

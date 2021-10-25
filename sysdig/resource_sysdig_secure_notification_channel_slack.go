@@ -61,7 +61,7 @@ func resourceSysdigSecureNotificationChannelSlackCreate(ctx context.Context, d *
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	_ = d.Set("version", notificationChannel.Version)
 
 	return nil
 }
@@ -145,7 +145,8 @@ func secureNotificationChannelSlackToResourceData(nc *secure.NotificationChannel
 		return
 	}
 
-	d.Set("url", nc.Options.Url)
-	d.Set("channel", nc.Options.Channel)
+	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("channel", nc.Options.Channel)
+
 	return
 }

@@ -105,7 +105,7 @@ func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(strconv.Itoa(team.ID))
-	d.Set("version", team.Version)
+	_ = d.Set("version", team.Version)
 
 	return nil
 }
@@ -125,15 +125,15 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	d.Set("version", t.Version)
-	d.Set("theme", t.Theme)
-	d.Set("name", t.Name)
-	d.Set("description", t.Description)
-	d.Set("scope_by", t.ScopeBy)
-	d.Set("filter", t.Filter)
-	d.Set("use_sysdig_capture", t.CanUseSysdigCapture)
-	d.Set("default_team", t.DefaultTeam)
-	d.Set("user_roles", userSecureRolesToSet(t.UserRoles))
+	_ = d.Set("version", t.Version)
+	_ = d.Set("theme", t.Theme)
+	_ = d.Set("name", t.Name)
+	_ = d.Set("description", t.Description)
+	_ = d.Set("scope_by", t.ScopeBy)
+	_ = d.Set("filter", t.Filter)
+	_ = d.Set("use_sysdig_capture", t.CanUseSysdigCapture)
+	_ = d.Set("default_team", t.DefaultTeam)
+	_ = d.Set("user_roles", userSecureRolesToSet(t.UserRoles))
 
 	return nil
 }

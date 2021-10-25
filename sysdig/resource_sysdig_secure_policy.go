@@ -14,18 +14,6 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
-var defaultMatchActions = map[string]string{
-	"accept": "DEFAULT_MATCH_EFFECT_ACCEPT",
-	"deny":   "DEFAULT_MATCH_EFFECT_DENY",
-	"none":   "DEFAULT_MATCH_EFFECT_NEXT",
-}
-
-var matchActions = map[string]string{
-	"accept": "MATCH_EFFECT_ACCEPT",
-	"deny":   "MATCH_EFFECT_DENY",
-	"none":   "MATCH_EFFECT_NEXT",
-}
-
 func resourceSysdigSecurePolicy() *schema.Resource {
 	timeout := 5 * time.Minute
 
@@ -151,17 +139,17 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 		d.SetId(strconv.Itoa(policy.ID))
 	}
 
-	d.Set("name", policy.Name)
-	d.Set("description", policy.Description)
-	d.Set("scope", policy.Scope)
-	d.Set("enabled", policy.Enabled)
-	d.Set("version", policy.Version)
-	d.Set("severity", policy.Severity)
-
+	_ = d.Set("name", policy.Name)
+	_ = d.Set("description", policy.Description)
+	_ = d.Set("scope", policy.Scope)
+	_ = d.Set("enabled", policy.Enabled)
+	_ = d.Set("version", policy.Version)
+	_ = d.Set("severity", policy.Severity)
 	if policy.Type != "" {
-		d.Set("type", policy.Type)
+		_ = d.Set("type", policy.Type)
 	} else {
-		d.Set("type", "falco")
+		_ = d.Set("type", "falco")
+
 	}
 
 	actions := []map[string]interface{}{{}}
@@ -169,19 +157,21 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 		if action.Type != "POLICY_ACTION_CAPTURE" {
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
 			actions[0]["container"] = strings.ToLower(action)
-			d.Set("actions", actions)
+			_ = d.Set("actions", actions)
 			//d.Set("actions.0.container", strings.ToLower(action))
 		} else {
 			actions[0]["capture"] = []map[string]interface{}{{
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
 			}}
-			d.Set("actions", actions)
+			_ = d.Set("actions", actions)
 		}
 	}
 
-	d.Set("notification_channels", policy.NotificationChannelIds)
-	d.Set("rule_names", policy.RuleNames)
+	_ = d.Set("notification_channels", policy.NotificationChannelIds)
+
+	_ = d.Set("rule_names", policy.RuleNames)
+
 }
 
 func policyFromResourceData(d *schema.ResourceData) secure.Policy {

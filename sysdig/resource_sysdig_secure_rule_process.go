@@ -62,7 +62,7 @@ func resourceSysdigRuleProcessCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
-	d.Set("version", rule.Version)
+	_ = d.Set("version", rule.Version)
 
 	return nil
 }
@@ -90,8 +90,8 @@ func resourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	updateResourceDataForRule(d, rule)
-	d.Set("matching", rule.Details.Processes.MatchItems)
-	d.Set("processes", rule.Details.Processes.Items)
+	_ = d.Set("matching", rule.Details.Processes.MatchItems)
+	_ = d.Set("processes", rule.Details.Processes.Items)
 
 	return nil
 }

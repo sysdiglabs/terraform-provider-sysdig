@@ -2,8 +2,8 @@ repos:
   - repo: local
     hooks:
     -   id: fmt
-        pass_filenames: false
         name: fmt
+        pass_filenames: false
         entry: make fmt
         language: system
     -   id: fmtcheck
@@ -12,7 +12,23 @@ repos:
         entry: make fmtcheck
         language: system
     -   id: lint
-        pass_filenames: false
         name: lint
+        pass_filenames: false
         entry: make lint
         language: system
+#  -   id: test-compile
+#        name: test-compile
+#        pass_filenames: false
+#        entry: make test-compile
+#        language: system
+    -   id: test
+        name: test
+        pass_filenames: false
+        entry: make test
+        language: system
+    -   id: testacc
+        name: testacc
+        pass_filenames: false
+        entry: make testacc
+        language: system
+

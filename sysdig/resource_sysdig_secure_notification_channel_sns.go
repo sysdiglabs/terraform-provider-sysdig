@@ -59,7 +59,7 @@ func resourceSysdigSecureNotificationChannelSNSCreate(ctx context.Context, d *sc
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	_ = d.Set("version", notificationChannel.Version)
 
 	return nil
 }
@@ -142,6 +142,7 @@ func secureNotificationChannelSNSToResourceData(nc *secure.NotificationChannel, 
 		return
 	}
 
-	d.Set("topics", nc.Options.SnsTopicARNs)
+	_ = d.Set("topics", nc.Options.SnsTopicARNs)
+
 	return
 }

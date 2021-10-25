@@ -59,7 +59,7 @@ func resourceSysdigMonitorNotificationChannelEmailCreate(ctx context.Context, d 
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	_ = d.Set("version", notificationChannel.Version)
 
 	return nil
 }
@@ -143,6 +143,7 @@ func monitorNotificationChannelEmailToResourceData(nc *monitor.NotificationChann
 		return
 	}
 
-	d.Set("recipients", nc.Options.EmailRecipients)
+	_ = d.Set("recipients", nc.Options.EmailRecipients)
+
 	return
 }

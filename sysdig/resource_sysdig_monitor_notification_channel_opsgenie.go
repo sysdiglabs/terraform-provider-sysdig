@@ -59,7 +59,7 @@ func resourceSysdigMonitorNotificationChannelOpsGenieCreate(ctx context.Context,
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	_ = d.Set("version", notificationChannel.Version)
 
 	return nil
 }
@@ -151,6 +151,7 @@ func monitorNotificationChannelOpsGenieToResourceData(nc *monitor.NotificationCh
 	}
 
 	key := regex.FindStringSubmatch(nc.Options.Url)[1]
-	d.Set("api_key", key)
+	_ = d.Set("api_key", key)
+
 	return
 }

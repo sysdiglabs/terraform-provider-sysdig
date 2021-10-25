@@ -101,7 +101,7 @@ func resourceSysdigRuleNetworkCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
-	d.Set("version", rule.Version)
+	_ = d.Set("version", rule.Version)
 
 	return nil
 }
@@ -125,8 +125,8 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 	}
 	updateResourceDataForRule(d, rule)
 
-	d.Set("block_inbound", rule.Details.AllInbound)
-	d.Set("block_outbound", rule.Details.AllOutbound)
+	_ = d.Set("block_inbound", rule.Details.AllInbound)
+	_ = d.Set("block_outbound", rule.Details.AllOutbound)
 
 	if rule.Details.TCPListenPorts == nil {
 		return diag.Errorf("no tcpListenPorts for a filesystem rule")
@@ -145,7 +145,7 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 			}
 			tcpPorts = append(tcpPorts, intPort)
 		}
-		d.Set("tcp", []map[string]interface{}{{
+		_ = d.Set("tcp", []map[string]interface{}{{
 			"matching": rule.Details.TCPListenPorts.MatchItems,
 			"ports":    tcpPorts,
 		}})
@@ -159,7 +159,7 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 			}
 			udpPorts = append(udpPorts, intPort)
 		}
-		d.Set("udp", []map[string]interface{}{{
+		_ = d.Set("udp", []map[string]interface{}{{
 			"matching": rule.Details.UDPListenPorts.MatchItems,
 			"ports":    udpPorts,
 		}})

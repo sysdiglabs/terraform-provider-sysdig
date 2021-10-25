@@ -56,7 +56,8 @@ func resourceSysdigAlertPromqlCreate(ctx context.Context, data *schema.ResourceD
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
-	data.Set("version", alertCreated.Version)
+	_ = data.Set("version", alertCreated.Version)
+
 	return nil
 }
 
@@ -145,7 +146,7 @@ func promqlAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) 
 		return
 	}
 
-	data.Set("promql", alert.Condition)
+	_ = data.Set("promql", alert.Condition)
 
 	return
 }

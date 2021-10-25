@@ -132,7 +132,7 @@ func resourceSysdigMonitorTeamCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	d.SetId(strconv.Itoa(team.ID))
-	d.Set("version", team.Version)
+	_ = d.Set("version", team.Version)
 
 	return nil
 }
@@ -152,18 +152,18 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	d.Set("version", t.Version)
-	d.Set("theme", t.Theme)
-	d.Set("name", t.Name)
-	d.Set("description", t.Description)
-	d.Set("scope_by", t.Show)
-	d.Set("filter", t.Filter)
-	d.Set("can_use_sysdig_capture", t.CanUseSysdigCapture)
-	d.Set("can_see_infrastructure_events", t.CanUseCustomEvents)
-	d.Set("can_use_aws_data", t.CanUseAwsMetrics)
-	d.Set("default_team", t.DefaultTeam)
-	d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
-	d.Set("entrypoint", entrypointToSet(t.EntryPoint))
+	_ = d.Set("version", t.Version)
+	_ = d.Set("theme", t.Theme)
+	_ = d.Set("name", t.Name)
+	_ = d.Set("description", t.Description)
+	_ = d.Set("scope_by", t.Show)
+	_ = d.Set("filter", t.Filter)
+	_ = d.Set("can_use_sysdig_capture", t.CanUseSysdigCapture)
+	_ = d.Set("can_see_infrastructure_events", t.CanUseCustomEvents)
+	_ = d.Set("can_use_aws_data", t.CanUseAwsMetrics)
+	_ = d.Set("default_team", t.DefaultTeam)
+	_ = d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
+	_ = d.Set("entrypoint", entrypointToSet(t.EntryPoint))
 
 	return nil
 }

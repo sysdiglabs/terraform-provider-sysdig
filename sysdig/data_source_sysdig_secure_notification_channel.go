@@ -117,22 +117,22 @@ func dataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.Reso
 	}
 
 	d.SetId(strconv.Itoa(nc.ID))
-	d.Set("version", nc.Version)
-	d.Set("name", nc.Name)
-	d.Set("enabled", nc.Enabled)
-	d.Set("type", nc.Type)
-	d.Set("recipients", strings.Join(nc.Options.EmailRecipients, ","))
-	d.Set("topics", strings.Join(nc.Options.SnsTopicARNs, ","))
-	d.Set("api_key", nc.Options.APIKey)
-	d.Set("url", nc.Options.Url)
-	d.Set("channel", nc.Options.Channel)
-	d.Set("account", nc.Options.Account)
-	d.Set("service_key", nc.Options.ServiceKey)
-	d.Set("service_name", nc.Options.ServiceName)
-	d.Set("routing_key", nc.Options.RoutingKey)
-	d.Set("notify_when_ok", nc.Options.NotifyOnOk)
-	d.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
-	d.Set("send_test_notification", nc.Options.SendTestNotification)
+	_ = d.Set("version", nc.Version)
+	_ = d.Set("name", nc.Name)
+	_ = d.Set("enabled", nc.Enabled)
+	_ = d.Set("type", nc.Type)
+	_ = d.Set("recipients", strings.Join(nc.Options.EmailRecipients, ","))
+	_ = d.Set("topics", strings.Join(nc.Options.SnsTopicARNs, ","))
+	_ = d.Set("api_key", nc.Options.APIKey)
+	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("channel", nc.Options.Channel)
+	_ = d.Set("account", nc.Options.Account)
+	_ = d.Set("service_key", nc.Options.ServiceKey)
+	_ = d.Set("service_name", nc.Options.ServiceName)
+	_ = d.Set("routing_key", nc.Options.RoutingKey)
+	_ = d.Set("notify_when_ok", nc.Options.NotifyOnOk)
+	_ = d.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
+	_ = d.Set("send_test_notification", nc.Options.SendTestNotification)
 
 	// When we receive a notification channel of type OpsGenie,
 	// the API sends us the URL, but we are configuring the API
@@ -147,8 +147,9 @@ func dataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.Reso
 			return diag.FromErr(err)
 		}
 		key := regex.FindStringSubmatch(nc.Options.Url)[1]
-		d.Set("api_key", key)
-		d.Set("url", "")
+		_ = d.Set("api_key", key)
+		_ = d.Set("url", "")
+
 	}
 	return nil
 }

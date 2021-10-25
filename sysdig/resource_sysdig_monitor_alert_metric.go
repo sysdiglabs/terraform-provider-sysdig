@@ -61,7 +61,8 @@ func resourceSysdigAlertMetricCreate(ctx context.Context, data *schema.ResourceD
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
-	data.Set("version", alertCreated.Version)
+	_ = data.Set("version", alertCreated.Version)
+
 	return nil
 }
 
@@ -153,8 +154,8 @@ func metricAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) 
 		return
 	}
 
-	data.Set("metric", alert.Condition)
-	data.Set("multiple_alerts_by", alert.SegmentBy)
+	_ = data.Set("metric", alert.Condition)
+	_ = data.Set("multiple_alerts_by", alert.SegmentBy)
 
 	return
 }

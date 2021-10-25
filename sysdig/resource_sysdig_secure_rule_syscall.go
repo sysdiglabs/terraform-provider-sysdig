@@ -61,7 +61,7 @@ func resourceSysdigRuleSyscallCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
-	d.Set("version", rule.Version)
+	_ = d.Set("version", rule.Version)
 
 	return nil
 }
@@ -89,8 +89,8 @@ func resourceSysdigRuleSyscallRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	updateResourceDataForRule(d, rule)
-	d.Set("matching", rule.Details.Syscalls.MatchItems)
-	d.Set("syscalls", rule.Details.Syscalls.Items)
+	_ = d.Set("matching", rule.Details.Syscalls.MatchItems)
+	_ = d.Set("syscalls", rule.Details.Syscalls.Items)
 
 	return nil
 }

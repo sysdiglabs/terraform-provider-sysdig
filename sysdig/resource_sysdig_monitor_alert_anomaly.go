@@ -62,7 +62,7 @@ func resourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.Resource
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
-	data.Set("version", alertCreated.Version)
+	_ = data.Set("version", alertCreated.Version)
 	return nil
 }
 
@@ -163,13 +163,12 @@ func anomalyAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData)
 		return
 	}
 
-	data.Set("multiple_alerts_by", alert.SegmentBy)
+	_ = data.Set("multiple_alerts_by", alert.SegmentBy)
 
 	monitor_metrics := []string{}
 	for _, v := range alert.Monitor {
 		monitor_metrics = append(monitor_metrics, v.Metric)
 	}
-	data.Set("monitor", monitor_metrics)
-
+	_ = data.Set("monitor", monitor_metrics)
 	return
 }

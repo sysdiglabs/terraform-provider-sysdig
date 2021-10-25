@@ -53,10 +53,10 @@ func dataSourceSysdigCurrentUserRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	d.SetId(strconv.Itoa(user.ID))
-	d.Set("email", user.Email)
-	d.Set("name", user.FirstName)
-	d.Set("last_name", user.LastName)
-	d.Set("system_role", user.SystemRole)
+	_ = d.Set("email", user.Email)
+	_ = d.Set("name", user.FirstName)
+	_ = d.Set("last_name", user.LastName)
+	_ = d.Set("system_role", user.SystemRole)
 
 	return nil
 }

@@ -65,7 +65,7 @@ func resourceSysdigSecureNotificationChannelPagerdutyCreate(ctx context.Context,
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	_ = d.Set("version", notificationChannel.Version)
 
 	return nil
 }
@@ -151,8 +151,9 @@ func secureNotificationChannelPagerdutyToResourceData(nc *secure.NotificationCha
 		return
 	}
 
-	d.Set("account", nc.Options.Account)
-	d.Set("service_key", nc.Options.ServiceKey)
-	d.Set("service_name", nc.Options.ServiceName)
+	_ = d.Set("account", nc.Options.Account)
+	_ = d.Set("service_key", nc.Options.ServiceKey)
+	_ = d.Set("service_name", nc.Options.ServiceName)
+
 	return
 }

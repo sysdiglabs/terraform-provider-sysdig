@@ -59,8 +59,9 @@ func ruleFromResourceData(d *schema.ResourceData) secure.Rule {
 
 // Saves in the resource data the information from the common fields of the rule.
 func updateResourceDataForRule(d *schema.ResourceData, rule secure.Rule) {
-	d.Set("name", rule.Name)
-	d.Set("description", rule.Description)
-	d.Set("tags", rule.Tags)
-	d.Set("version", rule.Version)
+	_ = d.Set("name", rule.Name)
+	_ = d.Set("description", rule.Description)
+	_ = d.Set("tags", rule.Tags)
+	_ = d.Set("version", rule.Version)
+
 }

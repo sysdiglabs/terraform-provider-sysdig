@@ -1,0 +1,3 @@
+# prod/kubelab
+export SYSDIG_SECURE_API_TOKEN=
+export SYSDIG_MONITOR_API_TOKEN=

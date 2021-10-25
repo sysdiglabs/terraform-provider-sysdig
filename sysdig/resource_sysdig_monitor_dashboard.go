@@ -185,7 +185,8 @@ func resourceSysdigDashboardCreate(ctx context.Context, data *schema.ResourceDat
 	}
 
 	data.SetId(strconv.Itoa(dashboardCreated.ID))
-	data.Set("version", dashboardCreated.Version)
+	_ = data.Set("version", dashboardCreated.Version)
+
 	return nil
 }
 
@@ -494,10 +495,10 @@ func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Pane
 }
 
 func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceData) (err error) {
-	data.Set("name", dashboard.Name)
-	data.Set("description", dashboard.Description)
-	data.Set("public", dashboard.Public)
-	data.Set("public_token", dashboard.PublicToken)
+	_ = data.Set("name", dashboard.Name)
+	_ = data.Set("description", dashboard.Description)
+	_ = data.Set("public", dashboard.Public)
+	_ = data.Set("public_token", dashboard.PublicToken)
 
 	var panels []map[string]interface{}
 	for _, panel := range dashboard.Panels {
@@ -507,7 +508,7 @@ func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceDa
 		}
 		panels = append(panels, dPanel)
 	}
-	data.Set("panel", panels)
+	_ = data.Set("panel", panels)
 
 	var scopes []map[string]interface{}
 	for _, scope := range dashboard.ScopeExpressionList {
@@ -517,9 +518,8 @@ func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceDa
 		}
 		scopes = append(scopes, dScope)
 	}
-	data.Set("scope", scopes)
-
-	data.Set("version", dashboard.Version)
+	_ = data.Set("scope", scopes)
+	_ = data.Set("version", dashboard.Version)
 
 	return nil
 }

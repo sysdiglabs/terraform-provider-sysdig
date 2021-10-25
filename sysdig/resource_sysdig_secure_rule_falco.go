@@ -109,7 +109,7 @@ func resourceSysdigRuleFalcoCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
-	d.Set("version", rule.Version)
+	_ = d.Set("version", rule.Version)
 
 	return nil
 }
@@ -137,12 +137,12 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	updateResourceDataForRule(d, rule)
-	d.Set("condition", rule.Details.Condition.Condition)
-	d.Set("output", rule.Details.Output)
-	d.Set("priority", strings.ToLower(rule.Details.Priority))
-	d.Set("source", rule.Details.Source)
+	_ = d.Set("condition", rule.Details.Condition.Condition)
+	_ = d.Set("output", rule.Details.Output)
+	_ = d.Set("priority", strings.ToLower(rule.Details.Priority))
+	_ = d.Set("source", rule.Details.Source)
 	if rule.Details.Append != nil {
-		d.Set("append", *rule.Details.Append)
+		_ = d.Set("append", *rule.Details.Append)
 	}
 
 	return nil

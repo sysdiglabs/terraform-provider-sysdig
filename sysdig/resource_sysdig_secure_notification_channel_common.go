@@ -56,11 +56,12 @@ func secureNotificationChannelFromResourceData(d *schema.ResourceData) (nc secur
 }
 
 func secureNotificationChannelToResourceData(nc *secure.NotificationChannel, data *schema.ResourceData) (err error) {
-	data.Set("version", nc.Version)
-	data.Set("name", nc.Name)
-	data.Set("enabled", nc.Enabled)
-	data.Set("notify_when_ok", nc.Options.NotifyOnOk)
-	data.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
-	data.Set("send_test_notification", nc.Options.SendTestNotification)
+	_ = data.Set("version", nc.Version)
+	_ = data.Set("name", nc.Name)
+	_ = data.Set("enabled", nc.Enabled)
+	_ = data.Set("notify_when_ok", nc.Options.NotifyOnOk)
+	_ = data.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
+	_ = data.Set("send_test_notification", nc.Options.SendTestNotification)
+
 	return
 }

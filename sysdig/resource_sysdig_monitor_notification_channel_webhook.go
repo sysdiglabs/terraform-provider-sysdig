@@ -61,7 +61,7 @@ func resourceSysdigMonitorNotificationChannelWebhookCreate(ctx context.Context, 
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	_ = d.Set("version", notificationChannel.Version)
 
 	return nil
 }
@@ -145,7 +145,8 @@ func monitorNotificationChannelWebhookToResourceData(nc *monitor.NotificationCha
 		return
 	}
 
-	d.Set("url", nc.Options.Url)
-	d.Set("additional_headers", nc.Options.AdditionalHeaders)
+	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("additional_headers", nc.Options.AdditionalHeaders)
+
 	return
 }

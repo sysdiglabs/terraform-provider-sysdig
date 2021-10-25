@@ -75,7 +75,8 @@ func resourceSysdigAlertEventCreate(ctx context.Context, data *schema.ResourceDa
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
-	data.Set("version", alertCreated.Version)
+	_ = data.Set("version", alertCreated.Version)
+
 	return nil
 }
 
@@ -192,11 +193,11 @@ func eventAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (
 		return
 	}
 
-	data.Set("event_rel", event_rel)
-	data.Set("event_count", event_count)
-	data.Set("event_name", alert.Criteria.Text)
-	data.Set("source", alert.Criteria.Source)
-	data.Set("multiple_alerts_by", alert.SegmentBy)
+	_ = data.Set("event_rel", event_rel)
+	_ = data.Set("event_count", event_count)
+	_ = data.Set("event_name", alert.Criteria.Text)
+	_ = data.Set("source", alert.Criteria.Source)
+	_ = data.Set("multiple_alerts_by", alert.SegmentBy)
 
 	return
 }

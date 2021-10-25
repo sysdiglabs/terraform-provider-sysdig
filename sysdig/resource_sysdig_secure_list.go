@@ -70,7 +70,7 @@ func resourceSysdigListCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(strconv.Itoa(list.ID))
-	d.Set("version", list.Version)
+	_ = d.Set("version", list.Version)
 
 	return nil
 }
@@ -107,10 +107,10 @@ func resourceSysdigListRead(ctx context.Context, d *schema.ResourceData, meta in
 		d.SetId("")
 	}
 
-	d.Set("name", list.Name)
-	d.Set("version", list.Version)
-	d.Set("items", list.Items.Items)
-	d.Set("append", list.Append)
+	_ = d.Set("name", list.Name)
+	_ = d.Set("version", list.Version)
+	_ = d.Set("items", list.Items.Items)
+	_ = d.Set("append", list.Append)
 
 	return nil
 }

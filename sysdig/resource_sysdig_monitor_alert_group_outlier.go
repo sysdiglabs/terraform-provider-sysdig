@@ -57,7 +57,8 @@ func resourceSysdigAlertGroupOutlierCreate(ctx context.Context, data *schema.Res
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
-	data.Set("version", alertCreated.Version)
+	_ = data.Set("version", alertCreated.Version)
+
 	return nil
 }
 
@@ -158,7 +159,7 @@ func groupOutlierAlertToResourceData(alert *monitor.Alert, data *schema.Resource
 	for _, v := range alert.Monitor {
 		monitor_metrics = append(monitor_metrics, v.Metric)
 	}
-	data.Set("monitor", monitor_metrics)
+	_ = data.Set("monitor", monitor_metrics)
 
 	return
 }

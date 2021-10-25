@@ -35,7 +35,7 @@ func (policy *Policy) ToJSON() io.Reader {
 }
 
 func PolicyFromJSON(body []byte) (result Policy) {
-	json.Unmarshal(body, &result)
+	_ = json.Unmarshal(body, &result)
 
 	return result
 }
@@ -58,7 +58,7 @@ func (userRulesFile *UserRulesFile) ToJSON() io.Reader {
 
 func UserRulesFileFromJSON(body []byte) UserRulesFile {
 	var result userRulesFileWrapper
-	json.Unmarshal(body, &result)
+	_ = json.Unmarshal(body, &result)
 
 	return result.UserRulesFile
 }
@@ -97,14 +97,14 @@ func (n *NotificationChannel) ToJSON() io.Reader {
 
 func NotificationChannelFromJSON(body []byte) NotificationChannel {
 	var result notificationChannelWrapper
-	json.Unmarshal(body, &result)
+	_ = json.Unmarshal(body, &result)
 
 	return result.NotificationChannel
 }
 
 func NotificationChannelListFromJSON(body []byte) []NotificationChannel {
 	var result notificationChannelListWrapper
-	json.Unmarshal(body, &result)
+	_ = json.Unmarshal(body, &result)
 
 	return result.NotificationChannels
 }
@@ -291,7 +291,7 @@ func (t *Team) ToJSON() io.Reader {
 
 func TeamFromJSON(body []byte) Team {
 	var result teamWrapper
-	json.Unmarshal(body, &result)
+	_ = json.Unmarshal(body, &result)
 
 	return result.Team
 }
@@ -308,7 +308,7 @@ type UsersList struct {
 
 func UsersListFromJSON(body []byte) []UsersList {
 	var result usersListWrapper
-	json.Unmarshal(body, &result)
+	_ = json.Unmarshal(body, &result)
 
 	return result.UsersList
 }
@@ -333,7 +333,7 @@ func (l *VulnerabilityExceptionList) ToJSON() io.Reader {
 
 func VulnerabilityExceptionListFromJSON(body []byte) *VulnerabilityExceptionList {
 	var result VulnerabilityExceptionList
-	json.Unmarshal(body, &result)
+	_ = json.Unmarshal(body, &result)
 
 	return &result
 }
@@ -356,7 +356,7 @@ func (e *VulnerabilityException) ToJSON() io.Reader {
 
 func VulnerabilityExceptionFromJSON(body []byte) *VulnerabilityException {
 	var result VulnerabilityException
-	json.Unmarshal(body, &result)
+	_ = json.Unmarshal(body, &result)
 
 	return &result
 }
@@ -379,7 +379,7 @@ func (e *CloudAccount) ToJSON() io.Reader {
 
 func CloudAccountFromJSON(body []byte) *CloudAccount {
 	var result CloudAccount
-	json.Unmarshal(body, &result)
+	_ = json.Unmarshal(body, &result)
 
 	return &result
 }
@@ -408,7 +408,7 @@ func (t *BenchmarkTask) ToJSON() io.Reader {
 
 func BenchmarkTaskFromJSON(body []byte) *BenchmarkTask {
 	var result BenchmarkTask
-	json.Unmarshal(body, &result)
+	_ = json.Unmarshal(body, &result)
 
 	return &result
 }

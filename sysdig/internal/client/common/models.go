@@ -23,7 +23,7 @@ func (u *User) ToJSON() io.Reader {
 
 func UserFromJSON(body []byte) User {
 	var result userWrapper
-	json.Unmarshal(body, &result)
+	_ = json.Unmarshal(body, &result)
 
 	return result.User
 }

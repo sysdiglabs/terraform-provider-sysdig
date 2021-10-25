@@ -80,8 +80,8 @@ resource "sysdig_user" "sample" {
 }
 
 func userMinimumConfiguration() string {
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_user" "sample" {
   email      = "terraform-test+user@sysdig.com"
-}`)
+}`
 }

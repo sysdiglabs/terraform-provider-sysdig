@@ -66,7 +66,7 @@ func resourceSysdigMacroCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	d.SetId(strconv.Itoa(macro.ID))
-	d.Set("version", macro.Version)
+	_ = d.Set("version", macro.Version)
 
 	return nil
 }
@@ -103,10 +103,10 @@ func resourceSysdigMacroRead(ctx context.Context, d *schema.ResourceData, meta i
 		d.SetId("")
 	}
 
-	d.Set("name", macro.Name)
-	d.Set("version", macro.Version)
-	d.Set("condition", macro.Condition.Condition)
-	d.Set("append", macro.Append)
+	_ = d.Set("name", macro.Name)
+	_ = d.Set("version", macro.Version)
+	_ = d.Set("condition", macro.Condition.Condition)
+	_ = d.Set("append", macro.Append)
 
 	return nil
 }

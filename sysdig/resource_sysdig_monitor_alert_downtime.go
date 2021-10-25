@@ -64,7 +64,8 @@ func resourceSysdigAlertDowntimeCreate(ctx context.Context, data *schema.Resourc
 	}
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
-	data.Set("version", alertCreated.Version)
+	_ = data.Set("version", alertCreated.Version)
+
 	return nil
 }
 
@@ -160,8 +161,8 @@ func downtimeAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData
 	fmt.Sscanf(alert.Condition, "avg(timeAvg(uptime)) <= %f", &trigger_after_pct)
 	trigger_after_pct = (1 - trigger_after_pct) * 100
 
-	data.Set("trigger_after_pct", int(trigger_after_pct))
-	data.Set("entities_to_monitor", alert.SegmentBy)
+	_ = data.Set("trigger_after_pct", int(trigger_after_pct))
+	_ = data.Set("entities_to_monitor", alert.SegmentBy)
 
 	return
 }

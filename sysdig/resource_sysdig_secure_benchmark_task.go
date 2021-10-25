@@ -5,10 +5,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureBenchmarkTask() *schema.Resource {
@@ -75,11 +76,11 @@ func resourceSysdigSecureBenchmarkTaskCreate(ctx context.Context, d *schema.Reso
 	}
 
 	d.SetId(strconv.Itoa(benchmarkTask.ID))
-	d.Set("name", benchmarkTask.Name)
-	d.Set("schema", benchmarkTask.Schema)
-	d.Set("scope", benchmarkTask.Scope)
-	d.Set("schedule", benchmarkTask.Schedule)
-	d.Set("enabled", benchmarkTask.Enabled)
+	_ = d.Set("name", benchmarkTask.Name)
+	_ = d.Set("schema", benchmarkTask.Schema)
+	_ = d.Set("scope", benchmarkTask.Scope)
+	_ = d.Set("schedule", benchmarkTask.Schedule)
+	_ = d.Set("enabled", benchmarkTask.Enabled)
 
 	return nil
 }
@@ -98,11 +99,11 @@ func resourceSysdigSecureBenchmarkTaskRead(ctx context.Context, d *schema.Resour
 	}
 
 	d.SetId(strconv.Itoa(benchmarkTask.ID))
-	d.Set("name", benchmarkTask.Name)
-	d.Set("schema", benchmarkTask.Schema)
-	d.Set("scope", benchmarkTask.Scope)
-	d.Set("schedule", benchmarkTask.Schedule)
-	d.Set("enabled", benchmarkTask.Enabled)
+	_ = d.Set("name", benchmarkTask.Name)
+	_ = d.Set("schema", benchmarkTask.Schema)
+	_ = d.Set("scope", benchmarkTask.Scope)
+	_ = d.Set("schedule", benchmarkTask.Schedule)
+	_ = d.Set("enabled", benchmarkTask.Enabled)
 
 	return nil
 }
@@ -121,7 +122,7 @@ func resourceSysdigSecureBenchmarkTaskUpdate(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	d.Set("enabled", enabled)
+	_ = d.Set("enabled", enabled)
 
 	return nil
 }

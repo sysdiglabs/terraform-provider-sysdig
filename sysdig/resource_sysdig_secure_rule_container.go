@@ -62,7 +62,7 @@ func resourceSysdigRuleContainerCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	d.SetId(strconv.Itoa(rule.ID))
-	d.Set("version", rule.Version)
+	_ = d.Set("version", rule.Version)
 
 	return nil
 }
@@ -90,8 +90,8 @@ func resourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	updateResourceDataForRule(d, rule)
-	d.Set("matching", rule.Details.Containers.MatchItems)
-	d.Set("containers", rule.Details.Containers.Items)
+	_ = d.Set("matching", rule.Details.Containers.MatchItems)
+	_ = d.Set("containers", rule.Details.Containers.Items)
 
 	return nil
 }

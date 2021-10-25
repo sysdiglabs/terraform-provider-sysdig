@@ -67,7 +67,7 @@ func resourceSysdigUserCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(strconv.Itoa(user.ID))
-	d.Set("version", user.Version)
+	_ = d.Set("version", user.Version)
 
 	return nil
 }
@@ -87,11 +87,11 @@ func resourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(err)
 	}
 
-	d.Set("version", u.Version)
-	d.Set("system_role", u.SystemRole)
-	d.Set("email", u.Email)
-	d.Set("first_name", u.FirstName)
-	d.Set("last_name", u.LastName)
+	_ = d.Set("version", u.Version)
+	_ = d.Set("system_role", u.SystemRole)
+	_ = d.Set("email", u.Email)
+	_ = d.Set("first_name", u.FirstName)
+	_ = d.Set("last_name", u.LastName)
 
 	return nil
 }

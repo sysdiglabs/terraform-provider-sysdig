@@ -59,7 +59,7 @@ func resourceSysdigSecureNotificationChannelOpsGenieCreate(ctx context.Context, 
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	_ = d.Set("version", notificationChannel.Version)
 
 	return nil
 }
@@ -149,6 +149,7 @@ func secureNotificationChannelOpsGenieToResourceData(nc *secure.NotificationChan
 		return
 	}
 	key := regex.FindStringSubmatch(nc.Options.Url)[1]
-	d.Set("api_key", key)
+	_ = d.Set("api_key", key)
+
 	return
 }

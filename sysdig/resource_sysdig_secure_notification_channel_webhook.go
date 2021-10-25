@@ -57,7 +57,7 @@ func resourceSysdigSecureNotificationChannelWebhookCreate(ctx context.Context, d
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	d.Set("version", notificationChannel.Version)
+	_ = d.Set("version", notificationChannel.Version)
 
 	return nil
 }
@@ -141,6 +141,7 @@ func secureNotificationChannelWebhookToResourceData(nc *secure.NotificationChann
 		return
 	}
 
-	d.Set("url", nc.Options.Url)
+	_ = d.Set("url", nc.Options.Url)
+
 	return
 }

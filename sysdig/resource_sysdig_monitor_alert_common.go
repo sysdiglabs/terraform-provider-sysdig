@@ -91,7 +91,7 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 					"filename": {
 						Type:         schema.TypeString,
 						Required:     true,
-						ValidateFunc: validation.StringMatch(regexp.MustCompile(".*?\\.scap"), "the filename must end in .scap"),
+						ValidateFunc: validation.StringMatch(regexp.MustCompile(`.*?\.scap`), "the filename must end in .scap"),
 					},
 					"duration": {
 						Type:     schema.TypeInt,
@@ -192,21 +192,21 @@ func alertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert, err er
 func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err error) {
 	trigger_after_minutes := time.Duration(alert.Timespan) * time.Microsecond
 
-	data.Set("version", alert.Version)
-	data.Set("name", alert.Name)
-	data.Set("description", alert.Description)
-	data.Set("scope", alert.Filter)
-	data.Set("trigger_after_minutes", int(trigger_after_minutes.Minutes()))
-	data.Set("team", alert.TeamID)
-	data.Set("enabled", alert.Enabled)
-	data.Set("severity", alert.Severity)
+	_ = data.Set("version", alert.Version)
+	_ = data.Set("name", alert.Name)
+	_ = data.Set("description", alert.Description)
+	_ = data.Set("scope", alert.Filter)
+	_ = data.Set("trigger_after_minutes", int(trigger_after_minutes.Minutes()))
+	_ = data.Set("team", alert.TeamID)
+	_ = data.Set("enabled", alert.Enabled)
+	_ = data.Set("severity", alert.Severity)
 
 	if len(alert.NotificationChannelIds) > 0 {
-		data.Set("notification_channels", alert.NotificationChannelIds)
+		_ = data.Set("notification_channels", alert.NotificationChannelIds)
 	}
 
 	if alert.ReNotify {
-		data.Set("renotification_minutes", alert.ReNotifyMinutes)
+		_ = data.Set("renotification_minutes", alert.ReNotifyMinutes)
 	}
 
 	if alert.CustomNotification != nil &&
@@ -223,7 +223,7 @@ func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err e
 			customNotification["prepend"] = alert.CustomNotification.PrependText
 		}
 
-		data.Set("custom_notification", []interface{}{customNotification})
+		_ = data.Set("custom_notification", []interface{}{customNotification})
 	}
 
 	if alert.SysdigCapture != nil && alert.SysdigCapture.Enabled {
@@ -234,7 +234,7 @@ func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err e
 		if alert.SysdigCapture.Filters != "" {
 			capture["filters"] = alert.SysdigCapture.Filters
 		}
-		data.Set("capture", []interface{}{capture})
+		_ = data.Set("capture", []interface{}{capture})
 	}
 
 	return
