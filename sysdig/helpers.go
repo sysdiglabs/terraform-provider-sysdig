@@ -34,8 +34,8 @@ func validateDiagFunc(validateFunc func(interface{}, string) ([]string, []error)
 	}
 }
 
-// parseAzureCreds splits an Azure Trusted Identity into a tenantID and a clientID
-func parseAzureCreds(azureTrustedIdentity string) (tenantID string, clientID string, err error) {
+// parseAzureCreds splits an Azure Trusted Identity into a tenantID and a service principal ID
+func parseAzureCreds(azureTrustedIdentity string) (tenantID string, spID string, err error) {
 	tokens := strings.Split(azureTrustedIdentity, ":")
 	if len(tokens) != 2 {
 		return "", "", errors.New("Not a valid Azure Trusted Identity")
