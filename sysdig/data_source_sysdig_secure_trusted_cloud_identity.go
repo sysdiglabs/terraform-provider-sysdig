@@ -43,7 +43,7 @@ func dataSourceSysdigSecureTrustedCloudIdentity() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"azure_client_id": {
+			"azure_service_principal_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -79,10 +79,10 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 		}
 	case "azure":
 		// If identity is an Azure tenantID/clientID, separate into each part
-		tenantID, clientID, err := parseAzureCreds(identity)
+		tenantID, spID, err := parseAzureCreds(identity)
 		if err == nil {
 			_ = d.Set("azure_tenant_id", tenantID)
-			_ = d.Set("azure_client_id", clientID)
+			_ = d.Set("azure_service_principal_id", spID)
 
 		}
 	}

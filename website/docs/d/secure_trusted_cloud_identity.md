@@ -35,7 +35,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `aws_role_name` - If `identity` is a AWS IAM Role ARN, this attribute contains the name of the role, otherwise it contains the empty string. `cloud_provider` must be equal to `aws` or `gcp`.
 
-* `azure_tenant_id` - If `identity` contains credentials for an Azure Service Principal, this attribute contains its Tenant ID. `cloud_provider` must be equal to `azure`.
+* `azure_tenant_id` - If `identity` contains credentials for an Azure Service Principal, this attribute contains the service principal's Tenant ID. `cloud_provider` must be equal to `azure`.
 
-* `azure_client_id` - If `identity` contains credentials for an Azure Service Principal, this attribute contains its Client ID. `cloud_provider` must be equal to `azure`.
+* `azure_service_principal_id` - If `identity` contains credentials for an Azure Service Principal, this attribute contains the service principal's ID. `cloud_provider` must be equal to `azure`.
 
