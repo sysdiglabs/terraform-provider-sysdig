@@ -317,6 +317,16 @@ type TeamSharingOptions struct {
 	SelectedTeams []interface{} `json:"selectedTeams"`
 }
 
+type SharingOptions struct {
+	Member SharingMember `json:"member"`
+	Role   string        `json:"role"`
+}
+
+type SharingMember struct {
+	Type string `json:"type"`
+	ID   int    `json:"id"`
+}
+
 type ScopeExpressionList struct {
 	Operand     string      `json:"operand"`
 	Operator    string      `json:"operator"`
@@ -342,7 +352,7 @@ type Dashboard struct {
 	Description             string                 `json:"description"`
 	Username                string                 `json:"username"`
 	Shared                  bool                   `json:"shared"`
-	SharingSettings         []interface{}          `json:"sharingSettings"`
+	SharingSettings         []*SharingOptions      `json:"sharingSettings"`
 	Public                  bool                   `json:"public"`
 	Favorite                bool                   `json:"favorite"`
 	CreatedOn               int64                  `json:"createdOn"`
