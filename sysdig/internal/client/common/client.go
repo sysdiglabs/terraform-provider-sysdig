@@ -31,6 +31,7 @@ func NewSysdigCommonClient(sysdigAPIToken string, url string, insecure bool) Sys
 	client.HTTPClient = &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
+			Proxy:           http.ProxyFromEnvironment,
 		},
 	}
 
