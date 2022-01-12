@@ -8,20 +8,19 @@ import (
 )
 
 func (client *sysdigSecureClient) createBenchmarkTaskURL() string {
-	return fmt.Sprintf("%s/api/benchmarks/v2/tasks", client.URL)
+	return fmt.Sprintf("%s/api/compliance/v2/tasks", client.URL)
 }
 
 func (client *sysdigSecureClient) benchmarkTaskByIdURL(id string) string {
-	return fmt.Sprintf("%s/api/benchmarks/v2/tasks/%s", client.URL, id)
+	return fmt.Sprintf("%s/api/compliance/v2/tasks/%s", client.URL, id)
 }
 
 func (client *sysdigSecureClient) setBenchmarkTaskEnabledURL(id string, enabled bool) string {
 	if enabled {
-		return fmt.Sprintf("%s/api/benchmarks/v2/tasks/%s/enable", client.URL, id)
-
+		return fmt.Sprintf("%s/api/compliance/v2/tasks/%s/enable", client.URL, id)
 	}
 
-	return fmt.Sprintf("%s/api/benchmarks/v2/tasks/%s/disable", client.URL, id)
+	return fmt.Sprintf("%s/api/compliance/v2/tasks/%s/disable", client.URL, id)
 }
 
 func (client *sysdigSecureClient) CreateBenchmarkTask(ctx context.Context, task *BenchmarkTask) (*BenchmarkTask, error) {
