@@ -581,16 +581,18 @@ func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceDa
 		}
 		shares = append(shares, dShare)
 	}
+	_ = data.Set("share", shares)
+
 	return nil
 }
 
 func shareToResourceData(share *model.SharingOptions) (map[string]interface{}, error) {
 	res := map[string]interface{}{
 		"role": share.Role,
-		"member": map[string]interface{}{
+		"member": []map[string]interface{}{{
 			"type": share.Member.Type,
 			"id":   share.Member.ID,
-		},
+		}},
 	}
 	return res, nil
 }
