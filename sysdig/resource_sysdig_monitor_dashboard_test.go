@@ -52,7 +52,6 @@ func TestAccDashboard(t *testing.T) {
 						"member.#":      "1",
 						"role":          "ROLE_RESOURCE_EDIT",
 						"member.0.type": "TEAM",
-						"member.0.id":   "1234",
 					}),
 				),
 			},
@@ -240,6 +239,14 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 
 func sharedDashboard(name string) string {
 	return fmt.Sprintf(`
+resource "sysdig_monitor_team" "a_team" {
+  name      = "sample-%s"
+
+  entrypoint {
+	type = "Explore"
+  }
+}
+
 resource "sysdig_monitor_dashboard" "dashboard" {
 	name = "TERRAFORM TEST - METRIC %s"
 	description = "TERRAFORM TEST - METRIC %s"
@@ -258,13 +265,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			unit = "percent"
 		}
 	}
-        share {
-                role = "ROLE_RESOURCE_EDIT"
-                member {
-                        type = "TEAM"
-                        id = 1234
-                }
-       }
+	share {
+		role = "ROLE_RESOURCE_EDIT"
+		member {
+			type = "TEAM"
+			id = sysdig_monitor_team.a_team.id
+		}
+   }
 }
-`, name, name)
+`, name, name, name)
 }
