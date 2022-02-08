@@ -94,6 +94,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 
 * `panel` - (Required) At least 1 panel is required to define a Dashboard.
 
+* `share` - (Optional) Define sharing options for this dashboard.
 
 ### scope
 
@@ -152,7 +153,7 @@ The following arguments are supported:
 * `transparent_background` - (Optional) If true, the panel will have a transparent background.
                              This field is ignored for all panel types except `text`.
 
-### query 
+### query
 
 To scope a panel built from a PromQL query, you must use a scope variable within the query. The variable will take the value of the referenced scope parameter, and the PromQL panel will change accordingly.
 There are two predefined variables available:
@@ -168,6 +169,24 @@ The following arguments are supported:
              
 * `unit` - (Required) The type of metric for this query. Can be one of: `percent`, `data`, `data rate`, 
             `number`, `number rate`, `time`.
+
+
+### share
+
+A dashboard can be shared by creating one or more `share` blocks.
+
+The following arguments are supported:
+
+* `role` - (Required) The role to grant to the team.
+
+* `member` - (Required) The team with which to share the dashboard.
+
+   Nested scheme for `member`:
+
+   * `type`- (Required) Type of member.
+
+   * `id` - (Required) ID of member.
+
 
 ## Attributes Reference
 
