@@ -10,7 +10,7 @@ import (
 
 func (client *sysdigSecureClient) cloudAccountURL(includeExternalID bool) string {
 	if includeExternalID {
-		return fmt.Sprintf("%s/api/cloud/v2/accounts?includeExternalID=true", client.URL)
+		return fmt.Sprintf("%s/api/cloud/v2/accounts?includeExternalID=true&upsert=true", client.URL)
 	}
 	return fmt.Sprintf("%s/api/cloud/v2/accounts", client.URL)
 }
