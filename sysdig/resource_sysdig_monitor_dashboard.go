@@ -53,6 +53,35 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 				ComputedWhen: []string{"public"},
 				Computed:     true,
 			},
+			"share": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"member": {
+							Type:     schema.TypeSet,
+							MaxItems: 1,
+							Required: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"type": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"id": {
+										Type:     schema.TypeInt,
+										Required: true,
+									},
+								},
+							},
+						},
+						"role": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
 			"scope": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -273,7 +302,30 @@ func dashboardFromResourceData(data *schema.ResourceData) (dashboard *model.Dash
 	dashboard.ScopeExpressionList = scopes
 
 	dashboard.AddPanels(panels...)
+
+	shares, err := sharingFromResourceData(data)
+	if err != nil {
+		return nil, err
+	}
+	dashboard.SharingSettings = shares
+
 	return dashboard, nil
+}
+
+func sharingFromResourceData(data *schema.ResourceData) (sharingSettings []*model.SharingOptions, err error) {
+	for _, share := range data.Get("share").(*schema.Set).List() {
+		shareInfo := share.(map[string]interface{})
+		memberInfo := shareInfo["member"].(*schema.Set).List()[0].(map[string]interface{})
+		sharingSettings = append(sharingSettings,
+			&model.SharingOptions{
+				Member: model.SharingMember{
+					Type: memberInfo["type"].(string),
+					ID:   memberInfo["id"].(int),
+				},
+				Role: shareInfo["role"].(string),
+			})
+	}
+	return
 }
 
 func panelsFromResourceData(data *schema.ResourceData) (panels []*model.Panels, err error) {
@@ -521,7 +573,28 @@ func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceDa
 	_ = data.Set("scope", scopes)
 	_ = data.Set("version", dashboard.Version)
 
+	var shares []map[string]interface{}
+	for _, share := range dashboard.SharingSettings {
+		dShare, err := shareToResourceData(share)
+		if err != nil {
+			return err
+		}
+		shares = append(shares, dShare)
+	}
+	_ = data.Set("share", shares)
+
 	return nil
+}
+
+func shareToResourceData(share *model.SharingOptions) (map[string]interface{}, error) {
+	res := map[string]interface{}{
+		"role": share.Role,
+		"member": []map[string]interface{}{{
+			"type": share.Member.Type,
+			"id":   share.Member.ID,
+		}},
+	}
+	return res, nil
 }
 
 func scopeToResourceData(scope *model.ScopeExpressionList) (map[string]interface{}, error) {

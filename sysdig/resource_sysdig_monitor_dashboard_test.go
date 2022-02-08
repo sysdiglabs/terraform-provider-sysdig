@@ -44,6 +44,17 @@ func TestAccDashboard(t *testing.T) {
 			{
 				Config: multipleUpdatedPanelsDashboard(rText()),
 			},
+			{
+				Config: sharedDashboard(rText()),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sysdig_monitor_dashboard.dashboard", "share.#", "1"),
+					resource.TestCheckTypeSetElemNestedAttrs("sysdig_monitor_dashboard.dashboard", "share.*", map[string]string{
+						"member.#":      "1",
+						"role":          "ROLE_RESOURCE_EDIT",
+						"member.0.type": "TEAM",
+					}),
+				),
+			},
 		},
 	})
 }
@@ -224,4 +235,43 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 	}
 }
 `, name, name)
+}
+
+func sharedDashboard(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_team" "a_team" {
+  name      = "sample-%s"
+
+  entrypoint {
+	type = "Explore"
+  }
+}
+
+resource "sysdig_monitor_dashboard" "dashboard" {
+	name = "TERRAFORM TEST - METRIC %s"
+	description = "TERRAFORM TEST - METRIC %s"
+
+	panel {
+		pos_x = 0
+		pos_y = 0
+		width = 12 # Maximum size: 24
+		height = 6
+		type = "number"
+		name = "example panel"
+		description = "description"
+
+		query {
+			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+			unit = "percent"
+		}
+	}
+	share {
+		role = "ROLE_RESOURCE_EDIT"
+		member {
+			type = "TEAM"
+			id = sysdig_monitor_team.a_team.id
+		}
+   }
+}
+`, name, name, name)
 }
