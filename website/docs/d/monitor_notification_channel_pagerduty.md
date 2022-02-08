@@ -2,7 +2,8 @@
 subcategory: "Sysdig Monitor"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_notification_channel_pagerduty"
-description: |- Retrieves information about a Monitor notification channel of type Pagerduty
+description: |- 
+  Retrieves information about a Monitor notification channel of type Pagerduty
 ---
 
 # Data Source: sysdig_monitor_notification_channel_pagerduty
