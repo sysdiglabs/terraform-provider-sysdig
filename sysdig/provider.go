@@ -95,7 +95,9 @@ func Provider() *schema.Provider {
 			"sysdig_current_user":                  dataSourceSysdigCurrentUser(),
 			"sysdig_user":                          dataSourceSysdigUser(),
 
-			"sysdig_fargate_workload_agent": dataSourceSysdigFargateWorkloadAgent(),
+			"sysdig_fargate_workload_agent":                 dataSourceSysdigFargateWorkloadAgent(),
+			"sysdig_monitor_notification_channel_pagerduty": dataSourceSysdigMonitorNotificationChannelPagerduty(),
+			"sysdig_monitor_notification_channel_email":     dataSourceSysdigMonitorNotificationChannelEmail(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
