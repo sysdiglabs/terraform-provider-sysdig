@@ -30,6 +30,15 @@ func TestAccNotificationChannelPagerdutyDataSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: notificationChannelPagerduty(rText),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "name", "sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "name"),
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "account", "sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "account"),
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "service_key", "sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "service_key"),
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "service_name", "sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "service_name"),
+					resource.TestCheckResourceAttr("data.sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "account", "account"),
+					resource.TestCheckResourceAttr("data.sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "service_key", "XXXXXXXXXX"),
+					resource.TestCheckResourceAttr("data.sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "service_name", "sysdig"),
+				),
 			},
 		},
 	})

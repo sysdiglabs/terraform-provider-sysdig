@@ -30,6 +30,11 @@ func TestAccNotificationChannelEmailDataSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: notificationChannelEmail(rText),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_email.nc_email", "id", "sysdig_monitor_notification_channel_email.nc_email", "id"),
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_email.nc_email", "name", "sysdig_monitor_notification_channel_email.nc_email", "name"),
+					resource.TestCheckTypeSetElemAttr("data.sysdig_monitor_notification_channel_email.nc_email", "recipients.*", "root@localhost.com"),
+				),
 			},
 		},
 	})
