@@ -34,7 +34,7 @@ type sysdigClients struct {
 func (c *sysdigClients) GetSecureEndpoint() (string, error) {
 	endpoint := c.d.Get("sysdig_secure_url").(string)
 	if endpoint == "" {
-		return "", errors.New("sysdig_secure_url not provided")
+		return "", errors.New("GetSecureEndpoint, sysdig_secure_url not provided")
 	}
 	return endpoint, nil
 }
@@ -42,7 +42,7 @@ func (c *sysdigClients) GetSecureEndpoint() (string, error) {
 func (c *sysdigClients) GetSecureApiToken() (string, error) {
 	secureAPIToken := c.d.Get("sysdig_secure_api_token").(string)
 	if secureAPIToken == "" {
-		return "", errors.New("sysdig secure token not provided")
+		return "", errors.New("GetSecureApiToken, sysdig secure token not provided")
 	}
 	return secureAPIToken, nil
 }

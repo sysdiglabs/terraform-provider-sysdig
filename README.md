@@ -72,6 +72,11 @@ TL;DR;
 - With its [acceptance test](https://www.terraform.io/plugin/sdkv2/testing/acceptance-tests)
 - Add its documentation page on `./website/docs/`
 
+
+https://www.terraform.io/plugin
+https://www.hashicorp.com/blog/testing-hashicorp-terraform
+
+
 ### Proposing PR's
 
 * on pull-requests some validations are enforced.
