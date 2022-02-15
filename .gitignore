@@ -2,6 +2,7 @@
 *.exe
 .DS_Store
 .envrc
+.env
 example.tf
 terraform.tfplan
 terraform.tfstate

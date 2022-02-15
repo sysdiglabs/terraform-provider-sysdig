@@ -12,6 +12,9 @@ import (
 )
 
 type SysdigClients interface {
+	GetSecureEndpoint() (string, error)
+	GetSecureApiToken() (string, error)
+
 	sysdigMonitorClient() (monitor.SysdigMonitorClient, error)
 	sysdigSecureClient() (secure.SysdigSecureClient, error)
 	sysdigCommonClient() (common.SysdigCommonClient, error)
@@ -26,6 +29,22 @@ type sysdigClients struct {
 	monitorClient monitor.SysdigMonitorClient
 	secureClient  secure.SysdigSecureClient
 	commonClient  common.SysdigCommonClient
+}
+
+func (c *sysdigClients) GetSecureEndpoint() (string, error) {
+	endpoint := c.d.Get("sysdig_secure_url").(string)
+	if endpoint == "" {
+		return "", errors.New("sysdig_secure_url not provided")
+	}
+	return endpoint, nil
+}
+
+func (c *sysdigClients) GetSecureApiToken() (string, error) {
+	secureAPIToken := c.d.Get("sysdig_secure_api_token").(string)
+	if secureAPIToken == "" {
+		return "", errors.New("sysdig secure token not provided")
+	}
+	return secureAPIToken, nil
 }
 
 func (c *sysdigClients) sysdigMonitorClient() (m monitor.SysdigMonitorClient, err error) {

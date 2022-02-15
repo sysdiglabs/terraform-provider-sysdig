@@ -94,6 +94,7 @@ func Provider() *schema.Provider {
 			"sysdig_secure_notification_channel":   dataSourceSysdigSecureNotificationChannel(),
 			"sysdig_current_user":                  dataSourceSysdigCurrentUser(),
 			"sysdig_user":                          dataSourceSysdigUser(),
+			"sysdig_secure_connection":             dataSourceSysdigSecureConnection(),
 
 			"sysdig_fargate_workload_agent":                 dataSourceSysdigFargateWorkloadAgent(),
 			"sysdig_monitor_notification_channel_pagerduty": dataSourceSysdigMonitorNotificationChannelPagerduty(),
