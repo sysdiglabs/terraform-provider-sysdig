@@ -61,6 +61,30 @@ func (client *sysdigMonitorClient) GetTeamById(ctx context.Context, id int) (t T
 	return
 }
 
+func (client *sysdigMonitorClient) GetTeamByName(ctx context.Context, name string) (t Team, err error) {
+	response, err := client.doSysdigMonitorRequest(ctx, http.MethodGet, client.GetTeamsUrl(), nil)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		err = errorFromResponse(response)
+		return
+	}
+
+	body, _ := ioutil.ReadAll(response.Body)
+	teams := TeamListFromJSON(body)
+
+	for _, team := range teams {
+		if team.Name == name && team.Products[0] == "SDC" {
+			return team, nil
+		}
+	}
+	err = fmt.Errorf("Failed to find team %s", name)
+	return
+}
+
 func (client *sysdigMonitorClient) CreateTeam(ctx context.Context, tRequest Team) (t Team, err error) {
 	tRequest.UserRoles, err = client.getUserIdbyEmail(ctx, tRequest.UserRoles)
 	if err != nil {

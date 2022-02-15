@@ -255,3 +255,17 @@ func teamFromResourceData(d *schema.ResourceData) monitor.Team {
 
 	return t
 }
+
+func teamToResourceData(team *monitor.Team, data *schema.ResourceData) (err error) {
+	_ = data.Set("theme", team.Theme)
+	_ = data.Set("name", team.Name)
+	_ = data.Set("description", team.Description)
+	_ = data.Set("scope_by", team.Show)
+	_ = data.Set("filter", team.Filter)
+	_ = data.Set("can_use_sysdig_capture", team.CanUseSysdigCapture)
+	_ = data.Set("can_see_infrastructure_events", team.CanUseCustomEvents)
+	_ = data.Set("can_use_aws_data", team.CanUseAwsMetrics)
+	_ = data.Set("default_team", team.DefaultTeam)
+
+	return
+}

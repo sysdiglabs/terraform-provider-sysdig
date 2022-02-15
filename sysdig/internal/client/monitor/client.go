@@ -21,6 +21,7 @@ type SysdigMonitorClient interface {
 
 	CreateTeam(context.Context, Team) (Team, error)
 	GetTeamById(context.Context, int) (Team, error)
+	GetTeamByName(context.Context, string) (Team, error)
 	UpdateTeam(context.Context, Team) (Team, error)
 	DeleteTeam(context.Context, int) error
 

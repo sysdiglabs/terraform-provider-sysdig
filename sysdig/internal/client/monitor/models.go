@@ -135,6 +135,17 @@ type teamWrapper struct {
 	Team Team `json:"team"`
 }
 
+func TeamListFromJSON(body []byte) []Team {
+	var result teamListWrapper
+	_ = json.Unmarshal(body, &result)
+
+	return result.Teams
+}
+
+type teamListWrapper struct {
+	Teams []Team `json:"teams"`
+}
+
 // -------- UsersList --------
 type UsersList struct {
 	ID    int    `json:"id"`
