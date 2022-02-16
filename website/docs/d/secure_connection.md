@@ -1,9 +1,9 @@
 ---
-subcategory: "Sysdig Platform"
+subcategory: "Sysdig Secure"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_connection"
 description: |-
-  Provides secure connection details.
+  Provides Sysdig Secure connection details.
 ---
 
 # Data Source: sysdig_secure_connection
@@ -21,5 +21,5 @@ data "sysdig_secure_connection" "current" {
 
 The following attributes are exported:
 
-* `secure_url` - Sysdig Secure Endpoint URL basepath.
-* `secure_api_token` - Sysdig Api Token for authentication (Sensitive).
+* `secure_url` - Returns `sysdig_secure_url` provider configuration attribute
+* `secure_api_token` - Returns `sysdig_secure_api_token` provider configuration sensitive attribute
