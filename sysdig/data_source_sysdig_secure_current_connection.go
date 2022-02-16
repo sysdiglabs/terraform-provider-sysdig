@@ -15,12 +15,12 @@ func dataSourceSysdigSecureConnection() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"secure_url": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Compute:     true,
 				Description: "Sysdig Secure URL basepath to where backend requests will be sent",
 			},
 			"secure_api_token": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Compute:     true,
 				Sensitive:   true,
 				Description: "Sysdig Secure authentication api token",
 			},
