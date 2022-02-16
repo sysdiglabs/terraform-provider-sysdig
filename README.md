@@ -33,7 +33,6 @@ Using the provider
 ----------------------
 If you're building the provider, follow the instructions to [install it as a plugin.](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) After placing it into your plugins directory,  run `terraform init` to initialize it.
 
----
 
 Contribute
 ---------------------------
@@ -55,11 +54,28 @@ In order to test the provider, you can simply run `make test`.
 $ make test
 ```
 
-If you want to execute the acceptance tests, you can run `make testacc`. Please note that you need a token for Monitor and Secure, and since the acceptance tests create real infrastructure you should execute them in an environment where you can remove the resorces easily.
-
+If you want to execute the acceptance tests, you can run `make testacc`.
 ```sh
 $ make testacc
 ```
+
+<br/>:warning:Please note that you need a token for Monitor and Secure, and since the **acceptance tests create real infrastructure**
+you should execute them in an environment where you can remove the resorces easily.
+
+
+
+### Creating new resource / data sources
+
+TL;DR;
+- Create the resource/data source item
+- Add the created item into the `provider.go` resource or datasource map with its wiring
+- With its [acceptance test](https://www.terraform.io/plugin/sdkv2/testing/acceptance-tests)
+- Add its documentation page on `./website/docs/`
+
+
+https://www.terraform.io/plugin
+https://www.hashicorp.com/blog/testing-hashicorp-terraform
+
 
 ### Proposing PR's
 
