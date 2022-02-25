@@ -28,7 +28,7 @@ const agentinoKiltDefinition = `build {
             name: "SysdigInstrumentation"
             image: ${config.agent_image}
             volumes: ["/opt/draios"]
-            entry_point: ["/opt/draios/bin/waitforever"]
+            entry_point: ["/opt/draios/bin/logwriter"]
         }
     ]
 }`
