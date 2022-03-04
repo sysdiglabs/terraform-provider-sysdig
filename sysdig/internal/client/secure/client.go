@@ -73,12 +73,9 @@ func WithExtraHeaders(client SysdigSecureClient, extraHeaders map[string]string)
 
 func NewSysdigSecureClient(sysdigSecureAPIToken string, url string, insecure bool) SysdigSecureClient {
 	httpClient := retryablehttp.NewClient()
-	httpClient.HTTPClient = &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
-			Proxy:           http.ProxyFromEnvironment,
-		},
-	}
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: insecure}
+	httpClient.HTTPClient = &http.Client{Transport: transport}
 
 	return &sysdigSecureClient{
 		SysdigSecureAPIToken: sysdigSecureAPIToken,
