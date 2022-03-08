@@ -17,7 +17,7 @@ You can connect the Sysdig agent directly to a collector (using `collector_host`
 ## Example Usage
 
 ```terraform
-data "sysdig_fargate_workload_agent" "task_definition" {
+data "sysdig_fargate_workload_agent" "instrumented_containers" {
   container_definitions = "[]"
 
   image_auth_secret    = ""
