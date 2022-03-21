@@ -26,11 +26,11 @@ resource "sysdig_secure_benchmark_task" "sample" {
 
 ## Argument Reference
 
-* `name` - (Required) The unique identifier of the cloud account. e.g. for AWS: `123456789012`, 
+* `name` - (Required) The unique identifier of the cloud account. e.g. for AWS: `123456789012`,
 
 * `schedule` - (Required) The schedule (as a cron expression: [Minute Hour Day DayOfWeek DayOfMonth]) on which this task should be run. The schedule may not be more frequent than once per day.
 
-* `schema` - (Required) The identifier of the benchmark schema of which to run. Possible values are: `aws_foundations_bench-1.3.0`, `gcp_foundations_bench-1.2.0`, `azure_foundations_bench-1.3.0`.
+* `schema` - (Required) The identifier of the benchmark schema of which to run. Possible values are: `aws_foundations_bench-1.3.0`, `gcp_foundations_bench-1.2.0`, `azure_foundations_bench-1.3.0`, `docker_bench_security-1.2.0`, `linux_bench_cis-1.1.0`, `kube_bench_cis-1.5.1`, `kube_bench_cis-1.6.`, `kube_bench_cis-rh-1.1.0`, `kube_bench_eks-1.0.0`, `kube_bench_gke-1.0.0`, `kube_bench_rh-1.2.1`.
 
 * `scope` - (Required) The Sysdig scope expression on which to run this benchmark: e.g. `aws.accountId = \"123456789012\" and aws.region = \"us-west-2\"`. The labels available are `aws.accountId`, `aws.region`, `gcp.projectId` and `gcp.region`. Only the `=` and `and` operators are supported.
 

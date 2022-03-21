@@ -46,7 +46,7 @@ func secureBenchmarkTaskWithName(name string) string {
 resource "sysdig_secure_benchmark_task" "sample" {
   name     = "%s"
   schedule = "0 6 * * *"
-  schema   = "aws_foundations_bench-1.3.0"
+  schema   = "kube_bench_eks-1.0.0"
   scope    = "aws.accountId = \"123456789012\" and aws.region = \"us-west-2\""
   enabled  = true
 }
