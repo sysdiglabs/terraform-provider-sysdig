@@ -23,7 +23,11 @@ func errorFromResponse(response *http.Response) error {
 	}
 
 	if searchArray, ok := search.([]interface{}); ok {
-		return errors.New(strings.Join(cast.ToStringSlice(searchArray), ", "))
+		errorString := strings.Join(cast.ToStringSlice(searchArray), ", ")
+		if errorString == "" {
+			return errors.New(response.Status)
+		}
+		return errors.New(errorString)
 	}
 
 	toString := cast.ToString(search)
