@@ -17,7 +17,7 @@ func errorFromResponse(response *http.Response) error {
 		return errors.New(response.Status)
 	}
 
-	search, err := jmespath.Search("[message, errors[].[reason, message]][][] | join(', ', @)", data)
+	search, err := jmespath.Search("[error, message, errors[].[reason, message]][][] | join(', ', @)", data)
 	if err != nil {
 		return errors.New(response.Status)
 	}
@@ -26,5 +26,9 @@ func errorFromResponse(response *http.Response) error {
 		return errors.New(strings.Join(cast.ToStringSlice(searchArray), ", "))
 	}
 
-	return errors.New(cast.ToString(search))
+	toString := cast.ToString(search)
+	if toString == "" {
+		return errors.New(response.Status)
+	}
+	return errors.New(toString)
 }
