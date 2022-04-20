@@ -17,14 +17,22 @@ func errorFromResponse(response *http.Response) error {
 		return errors.New(response.Status)
 	}
 
-	search, err := jmespath.Search("[message, errors[].[reason, message]][][] | join(', ', @)", data)
+	search, err := jmespath.Search("[error, message, errors[].[reason, message]][][] | join(', ', @)", data)
 	if err != nil {
 		return errors.New(response.Status)
 	}
 
 	if searchArray, ok := search.([]interface{}); ok {
-		return errors.New(strings.Join(cast.ToStringSlice(searchArray), ", "))
+		errorString := strings.Join(cast.ToStringSlice(searchArray), ", ")
+		if errorString == "" {
+			return errors.New(response.Status)
+		}
+		return errors.New(errorString)
 	}
 
-	return errors.New(cast.ToString(search))
+	toString := cast.ToString(search)
+	if toString == "" {
+		return errors.New(response.Status)
+	}
+	return errors.New(toString)
 }
