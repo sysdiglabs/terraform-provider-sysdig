@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -93,6 +94,9 @@ func resourceSysdigSecureCloudAccountRead(ctx context.Context, d *schema.Resourc
 	cloudAccount, err := client.GetCloudAccountById(ctx, d.Id())
 	if err != nil {
 		d.SetId("")
+		if strings.Contains(err.Error(), "404") {
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -114,6 +118,9 @@ func resourceSysdigSecureCloudAccountUpdate(ctx context.Context, d *schema.Resou
 
 	_, err = client.UpdateCloudAccount(ctx, d.Id(), cloudAccountFromResourceData(d))
 	if err != nil {
+		if strings.Contains(err.Error(), "404") {
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -128,6 +135,9 @@ func resourceSysdigSecureCloudAccountDelete(ctx context.Context, d *schema.Resou
 
 	err = client.DeleteCloudAccount(ctx, d.Id())
 	if err != nil {
+		if strings.Contains(err.Error(), "404") {
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 	return nil

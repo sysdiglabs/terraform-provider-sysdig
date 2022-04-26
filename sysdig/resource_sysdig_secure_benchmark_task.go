@@ -3,6 +3,7 @@ package sysdig
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -95,6 +96,9 @@ func resourceSysdigSecureBenchmarkTaskRead(ctx context.Context, d *schema.Resour
 	benchmarkTask, err := client.GetBenchmarkTask(ctx, d.Id())
 	if err != nil {
 		d.SetId("")
+		if strings.Contains(err.Error(), "404") {
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -119,6 +123,9 @@ func resourceSysdigSecureBenchmarkTaskUpdate(ctx context.Context, d *schema.Reso
 
 	if err := client.SetBenchmarkTaskEnabled(ctx, d.Id(), enabled); err != nil {
 		d.SetId("")
+		if strings.Contains(err.Error(), "404") {
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -135,6 +142,10 @@ func resourceSysdigSecureBenchmarkTaskDelete(ctx context.Context, d *schema.Reso
 
 	err = client.DeleteBenchmarkTask(ctx, d.Id())
 	if err != nil {
+		d.SetId("")
+		if strings.Contains(err.Error(), "404") {
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 	return nil
