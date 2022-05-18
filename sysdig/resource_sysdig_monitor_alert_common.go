@@ -3,6 +3,7 @@ package sysdig
 import (
 	"errors"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -41,6 +42,17 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 		"version": {
 			Type:     schema.TypeInt,
 			Computed: true,
+		},
+		"group_name": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Default:  "",
+			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				if strings.ToLower(old) == strings.ToLower(new) {
+					return true
+				}
+				return false
+			},
 		},
 		"team": {
 			Type:     schema.TypeInt,
@@ -147,6 +159,9 @@ func alertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert, err er
 
 	if description, ok := d.GetOk("description"); ok {
 		alert.Description = description.(string)
+	}
+	if groupName, ok := d.GetOk("group_name"); ok {
+		alert.GroupName = strings.ToLower(groupName.(string))
 	}
 	if version, ok := d.GetOk("version"); ok {
 		alert.Version = version.(int)
