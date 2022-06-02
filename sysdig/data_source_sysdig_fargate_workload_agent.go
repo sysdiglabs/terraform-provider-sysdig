@@ -100,6 +100,7 @@ type cfnStack struct {
 	Resources map[string]cfnResource `json:"Resources"`
 }
 
+// PatchFargateTaskDefinition modifies the container definitions
 func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string, kiltConfig *cfnpatcher.Configuration) (patched *string, err error) {
 	var cdefs []map[string]interface{}
 	err = json.Unmarshal([]byte(containerDefinitions), &cdefs)
@@ -138,6 +139,9 @@ func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string
 			}
 		}
 	}()
+
+	// ECS JSON modifications
+	patchedStack, _ = terraformPreModifications(ctx, patchedStack)
 
 	patchedBytes, err := cfnpatcher.Patch(ctx, kiltConfig, patchedStack)
 	if err != nil {
