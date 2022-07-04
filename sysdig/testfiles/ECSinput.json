@@ -1,0 +1,30 @@
+[
+    {
+      "Environment": [
+        {
+          "name": "pmet",
+          "value": "temp"
+        },
+        {
+          "Name": "SYSDIG_ENDPOINT",
+          "Value": "value"
+        }
+      ],
+      "entryPoint": [
+        "watch",
+        "-n60",
+        "cat",
+        "/etc/shadow"
+      ],
+      "image": "quay.io/rehman0288/busyboxplus:latest",
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "test-log-group",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "name": "busybox"
+    }
+]
