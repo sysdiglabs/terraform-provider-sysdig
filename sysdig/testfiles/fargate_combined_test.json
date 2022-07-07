@@ -5,6 +5,11 @@
         "entryPoint": [
             "/bin/test"
         ],
+        "command": [
+            "test",
+            "--test-arg",
+            "test-arg-value"
+        ],
         "environment": [
             {
                 "name": "TMP",
