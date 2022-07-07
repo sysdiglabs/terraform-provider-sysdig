@@ -10,6 +10,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	testKiltDefinition = KiltRecipeConfig{
+		SysdigAccessKey:  "sysdig_access_key",
+		AgentImage:       "workload_agent_image",
+		OrchestratorHost: "orchestrator_host",
+		OrchestratorPort: "orchestrator_port",
+		CollectorHost:    "collector_host",
+		CollectorPort:    "collector_port",
+	}
+
+	testContainerDefinitionFiles = []string{
+		"fargate_entrypoint_test",
+		// "fargate_env_test",
+		// "fargate_cmd_test",
+		// "fargate_combined_test",
+	}
+)
+
 func TestECStransformation(t *testing.T) {
 	inputfile, err := ioutil.ReadFile("testfiles/ECSinput.json")
 
@@ -86,4 +104,23 @@ func TestECStransformation(t *testing.T) {
 	// Check if entryPoint key is correct
 	assert.Equal(t, expectedContainerDefinitions[0].EntryPoint, patchedContainerDefinitions[0].EntryPoint)
 	assert.Equal(t, patchedContainerDefinitions[0].EntryPoint2, "")
+}
+
+func TestTransform(t *testing.T) {
+	for _, testFile := range testContainerDefinitionFiles {
+		jsonConfig, _ := json.Marshal(testKiltDefinition)
+		kiltConfig := &cfnpatcher.Configuration{
+			Kilt:               agentinoKiltDefinition,
+			ImageAuthSecret:    "image_auth_secret",
+			OptIn:              false,
+			UseRepositoryHints: true,
+			RecipeConfig:       string(jsonConfig),
+		}
+
+		inputContainerDefinition, _ := ioutil.ReadFile("testfiles/" + testFile + ".json")
+		patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig)
+		expectedContainerDefinition, _ := ioutil.ReadFile("testfiles/" + testFile + "_expected.json")
+
+		assert.JSONEq(t, string(expectedContainerDefinition), *patched)
+	}
 }
