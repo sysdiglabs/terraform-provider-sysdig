@@ -11,6 +11,7 @@ package sysdig
 import (
 	"context"
 	"fmt"
+	"unicode"
 
 	"github.com/Jeffail/gabs/v2"
 	"github.com/rs/zerolog/log"
@@ -30,6 +31,28 @@ func GetValueFromTemplate(what *gabs.Container) (string, *gabs.Container) {
 		result = what.String()
 	}
 	return result, fallback
+}
+
+func capitalize(key string) string {
+	r := []rune(key)
+	r[0] = unicode.ToUpper(r[0])
+	return string(r)
+}
+
+// updateKey recursively capitalizes the first letter of each key in the input object
+func updateKeys(inputMap gabs.Container) {
+	// in this case, the object is probably an array
+	if len(inputMap.ChildrenMap()) == 0 {
+		for _, child := range inputMap.Children() {
+			updateKeys(*child)
+		}
+	} else {
+		for key, child := range inputMap.ChildrenMap() {
+			inputMap.Set(child.Data(), capitalize(key))
+			inputMap.Delete(key)
+			updateKeys(*child)
+		}
+	}
 }
 
 func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte, error) {
@@ -120,6 +143,21 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 				err = container.Delete("command")
 				if err != nil {
 					return nil, fmt.Errorf("could not delete command in the Container definition: %w", err)
+				}
+			}
+
+			if container.Exists("volumesFrom") {
+				updateKeys(*container.S("volumesFrom"))
+				passthrough, _ := GetValueFromTemplate(container.S("volumesFrom"))
+				parsedPassthrough, _ := gabs.ParseJSON([]byte(passthrough))
+				_, err = container.Set(parsedPassthrough, "VolumesFrom")
+				if err != nil {
+					return nil, fmt.Errorf("Could not update VolumesFrom field: %v", err)
+				}
+
+				err = container.Delete("volumesFrom")
+				if err != nil {
+					return nil, fmt.Errorf("could not delete volumesFrom in the Container definition: %w", err)
 				}
 			}
 		}

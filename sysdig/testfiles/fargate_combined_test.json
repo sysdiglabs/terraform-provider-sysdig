@@ -19,6 +19,12 @@
                 "name": "SYSDIG_CUSTOM",
                 "value": "custom"
             }
+        ],
+        "volumesFrom": [
+            {
+                "sourceContainer": "test_container",
+                "readOnly": true
+            }
         ]
     }
 ]
