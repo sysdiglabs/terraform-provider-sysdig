@@ -27,7 +27,7 @@ func GetValueFromTemplate(what *gabs.Container) (string, *gabs.Container) {
 		fallback = nil
 	default:
 		fallback = what
-		result = "placeholder: " + what.String()
+		result = what.String()
 	}
 	return result, fallback
 }
@@ -56,8 +56,8 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 				}
 			}
 
-			if container.Exists("Environment") {
-				for _, env := range container.S("Environment").Children() {
+			if container.Exists("environment") {
+				for _, env := range container.S("environment").Children() {
 					if env.Exists("name") {
 						name, _ := env.S("name").Data().(string)
 						err = env.Delete("name")
@@ -81,20 +81,45 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 						}
 					}
 				}
+
+				passthrough, _ := GetValueFromTemplate(container.S("environment"))
+				parsedPassthrough, _ := gabs.ParseJSON([]byte(passthrough))
+				_, err = container.Set(parsedPassthrough, "Environment")
+				if err != nil {
+					return nil, fmt.Errorf("Could not update Environment field: %v", err)
+				}
+
+				err = container.Delete("environment")
+				if err != nil {
+					return nil, fmt.Errorf("could not delete environment in the Container definition: %w", err)
+				}
 			}
 
 			if container.Exists("entryPoint") {
-				for _, arg := range container.S("entryPoint").Children() {
-					passthrough, _ := GetValueFromTemplate(arg)
-					err = container.ArrayAppend(passthrough, "EntryPoint")
-					if err != nil {
-						return nil, fmt.Errorf("Could not append entrypoint values to EntryPoint: %v", err)
-					}
+				passthrough, _ := GetValueFromTemplate(container.S("entryPoint"))
+				parsedPassthrough, _ := gabs.ParseJSON([]byte(passthrough))
+				_, err = container.Set(parsedPassthrough, "EntryPoint")
+				if err != nil {
+					return nil, fmt.Errorf("Could not update EntryPoint field: %v", err)
 				}
 
 				err = container.Delete("entryPoint")
 				if err != nil {
 					return nil, fmt.Errorf("could not delete entryPoint in the Container definition: %w", err)
+				}
+			}
+
+			if container.Exists("command") {
+				passthrough, _ := GetValueFromTemplate(container.S("command"))
+				parsedPassthrough, _ := gabs.ParseJSON([]byte(passthrough))
+				_, err = container.Set(parsedPassthrough, "Command")
+				if err != nil {
+					return nil, fmt.Errorf("Could not update Command field: %v", err)
+				}
+
+				err = container.Delete("command")
+				if err != nil {
+					return nil, fmt.Errorf("could not delete command in the Container definition: %w", err)
 				}
 			}
 		}
