@@ -160,6 +160,21 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 					return nil, fmt.Errorf("could not delete volumesFrom in the Container definition: %w", err)
 				}
 			}
+
+			if container.Exists("linuxParameters") {
+				updateKeys(*container.S("linuxParameters"))
+				passthrough, _ := GetValueFromTemplate(container.S("linuxParameters"))
+				parsedPassthrough, _ := gabs.ParseJSON([]byte(passthrough))
+				_, err = container.Set(parsedPassthrough, "LinuxParameters")
+				if err != nil {
+					return nil, fmt.Errorf("Could not update LinuxParameters field: %v", err)
+				}
+
+				err = container.Delete("linuxParameters")
+				if err != nil {
+					return nil, fmt.Errorf("could not delete linuxParameters in the Container definition: %w", err)
+				}
+			}
 		}
 	}
 

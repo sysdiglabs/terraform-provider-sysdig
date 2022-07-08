@@ -1,0 +1,16 @@
+[
+    {
+        "name": "test",
+        "image": "test_image:latest",
+        "entryPoint": [
+            "/bin/test"
+        ],
+        "linuxParameters": {
+            "capabilities": {
+                "drop": [
+                    "BLOCK_SUSPEND"
+                ]
+            }
+        }
+    }
+]

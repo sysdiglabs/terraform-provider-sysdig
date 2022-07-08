@@ -26,6 +26,7 @@ var (
 		"fargate_entrypoint_test",
 		"fargate_env_test",
 		"fargate_cmd_test",
+		"fargate_linuxparameters_test",
 		"fargate_combined_test",
 	}
 )
