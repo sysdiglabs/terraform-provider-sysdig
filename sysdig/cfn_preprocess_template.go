@@ -40,28 +40,36 @@ func capitalize(key string) string {
 }
 
 // updateKey recursively capitalizes the first letter of each key in the input object
-func updateKeys(inputMap gabs.Container) {
+func updateKeys(inputMap gabs.Container) error {
 	// in this case, the object is probably an array, so update each child
 	if len(inputMap.ChildrenMap()) == 0 {
 		for _, child := range inputMap.Children() {
-			updateKeys(*child)
+			err := updateKeys(*child)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		for key, child := range inputMap.ChildrenMap() {
 			_, err := inputMap.Set(child.Data(), capitalize(key))
 			if err != nil {
-				log.Error().Err(err).Msg("Failed to update key " + key)
+				return fmt.Errorf("failed to update new key %s", capitalize(key))
 			}
 
 			err = inputMap.Delete(key)
 			if err != nil {
-				log.Error().Err(err).Msg("Failed to update key " + key)
+				return fmt.Errorf("failed to delete old key %s" + key)
 			}
 
 			// recurse to update child's keys
-			updateKeys(*child)
+			err = updateKeys(*child)
+			if err != nil {
+				return err
+			}
 		}
 	}
+
+	return nil
 }
 
 func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte, error) {
@@ -156,32 +164,40 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 			}
 
 			if container.Exists("volumesFrom") {
-				updateKeys(*container.S("volumesFrom"))
+				err = updateKeys(*container.S("volumesFrom"))
+				if err != nil {
+					return nil, fmt.Errorf("could not update volumesFrom items: %v", err)
+				}
+
 				passthrough, _ := GetValueFromTemplate(container.S("volumesFrom"))
 				parsedPassthrough, _ := gabs.ParseJSON([]byte(passthrough))
 				_, err = container.Set(parsedPassthrough, "VolumesFrom")
 				if err != nil {
-					return nil, fmt.Errorf("Could not update VolumesFrom field: %v", err)
+					return nil, fmt.Errorf("could not update VolumesFrom field: %v", err)
 				}
 
 				err = container.Delete("volumesFrom")
 				if err != nil {
-					return nil, fmt.Errorf("could not delete volumesFrom in the Container definition: %w", err)
+					return nil, fmt.Errorf("could not delete volumesFrom in the container definition: %w", err)
 				}
 			}
 
 			if container.Exists("linuxParameters") {
-				updateKeys(*container.S("linuxParameters"))
+				err = updateKeys(*container.S("linuxParameters"))
+				if err != nil {
+					return nil, fmt.Errorf("could not update linuxParameters items: %v", err)
+				}
+
 				passthrough, _ := GetValueFromTemplate(container.S("linuxParameters"))
 				parsedPassthrough, _ := gabs.ParseJSON([]byte(passthrough))
 				_, err = container.Set(parsedPassthrough, "LinuxParameters")
 				if err != nil {
-					return nil, fmt.Errorf("Could not update LinuxParameters field: %v", err)
+					return nil, fmt.Errorf("could not update LinuxParameters field: %v", err)
 				}
 
 				err = container.Delete("linuxParameters")
 				if err != nil {
-					return nil, fmt.Errorf("could not delete linuxParameters in the Container definition: %w", err)
+					return nil, fmt.Errorf("could not delete linuxParameters in the COntainer definition: %w", err)
 				}
 			}
 		}
