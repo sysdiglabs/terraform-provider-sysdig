@@ -41,15 +41,24 @@ func capitalize(key string) string {
 
 // updateKey recursively capitalizes the first letter of each key in the input object
 func updateKeys(inputMap gabs.Container) {
-	// in this case, the object is probably an array
+	// in this case, the object is probably an array, so update each child
 	if len(inputMap.ChildrenMap()) == 0 {
 		for _, child := range inputMap.Children() {
 			updateKeys(*child)
 		}
 	} else {
 		for key, child := range inputMap.ChildrenMap() {
-			inputMap.Set(child.Data(), capitalize(key))
-			inputMap.Delete(key)
+			_, err := inputMap.Set(child.Data(), capitalize(key))
+			if err != nil {
+				log.Error().Err(err).Msg("Failed to update key " + key)
+			}
+
+			err = inputMap.Delete(key)
+			if err != nil {
+				log.Error().Err(err).Msg("Failed to update key " + key)
+			}
+
+			// recurse to update child's keys
 			updateKeys(*child)
 		}
 	}
@@ -63,9 +72,12 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 		return nil, err
 	}
 
+	l.Debug().Msg("starting terraformPreModifications")
+
 	// This code block is used when parsing ECS JSON format
 	for _, resource := range template.S("Resources").ChildrenMap() {
 		for _, container := range resource.S("Properties", "ContainerDefinitions").Children() {
+
 			if container.Exists("image") {
 				passthrough, _ := GetValueFromTemplate(container.S("image"))
 				_, err = container.Set(passthrough, "Image")
@@ -80,31 +92,7 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 			}
 
 			if container.Exists("environment") {
-				for _, env := range container.S("environment").Children() {
-					if env.Exists("name") {
-						name, _ := env.S("name").Data().(string)
-						err = env.Delete("name")
-						if err != nil {
-							return nil, fmt.Errorf("Could not delete \"name\" key in Environment: %v", err)
-						}
-						_, err = env.Set(name, "Name")
-						if err != nil {
-							return nil, fmt.Errorf("Could not assign \"Name\" key in Environment: %v", err)
-						}
-					}
-					if env.Exists("value") {
-						value, _ := env.S("value").Data().(string)
-						err = env.Delete("value")
-						if err != nil {
-							return nil, fmt.Errorf("Could not delete \"value\" key in Environment: %v", err)
-						}
-						_, err = env.Set(value, "Value")
-						if err != nil {
-							return nil, fmt.Errorf("Could not assign \"Value\" key in Environment: %v", err)
-						}
-					}
-				}
-
+				updateKeys(*container.S("environment"))
 				passthrough, _ := GetValueFromTemplate(container.S("environment"))
 				parsedPassthrough, _ := gabs.ParseJSON([]byte(passthrough))
 				_, err = container.Set(parsedPassthrough, "Environment")

@@ -141,7 +141,9 @@ func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string
 	}()
 
 	// ECS JSON modifications
+	fmt.Println("Prestack:" + string(patchedStack))
 	patchedStack, _ = terraformPreModifications(ctx, patchedStack)
+	fmt.Println("Poststack:" + string(patchedStack))
 
 	patchedBytes, err := cfnpatcher.Patch(ctx, kiltConfig, patchedStack)
 	if err != nil {
