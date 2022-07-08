@@ -72,12 +72,9 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 		return nil, err
 	}
 
-	l.Debug().Msg("starting terraformPreModifications")
-
 	// This code block is used when parsing ECS JSON format
 	for _, resource := range template.S("Resources").ChildrenMap() {
 		for _, container := range resource.S("Properties", "ContainerDefinitions").Children() {
-
 			if container.Exists("image") {
 				passthrough, _ := GetValueFromTemplate(container.S("image"))
 				_, err = container.Set(passthrough, "Image")
@@ -92,7 +89,31 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 			}
 
 			if container.Exists("environment") {
-				updateKeys(*container.S("environment"))
+				for _, env := range container.S("environment").Children() {
+					if env.Exists("name") {
+						name, _ := env.S("name").Data().(string)
+						err = env.Delete("name")
+						if err != nil {
+							return nil, fmt.Errorf("Could not delete \"name\" key in Environment: %v", err)
+						}
+						_, err = env.Set(name, "Name")
+						if err != nil {
+							return nil, fmt.Errorf("Could not assign \"Name\" key in Environment: %v", err)
+						}
+					}
+					if env.Exists("value") {
+						value, _ := env.S("value").Data().(string)
+						err = env.Delete("value")
+						if err != nil {
+							return nil, fmt.Errorf("Could not delete \"value\" key in Environment: %v", err)
+						}
+						_, err = env.Set(value, "Value")
+						if err != nil {
+							return nil, fmt.Errorf("Could not assign \"Value\" key in Environment: %v", err)
+						}
+					}
+				}
+
 				passthrough, _ := GetValueFromTemplate(container.S("environment"))
 				parsedPassthrough, _ := gabs.ParseJSON([]byte(passthrough))
 				_, err = container.Set(parsedPassthrough, "Environment")
