@@ -1,0 +1,30 @@
+[
+    {
+        "name": "test",
+        "image": "test_image:latest",
+        "entryPoint": [
+            "/bin/test"
+        ],
+        "command": [
+            "test",
+            "--test-arg",
+            "test-arg-value"
+        ],
+        "environment": [
+            {
+                "name": "TMP",
+                "value": "temporary"
+            },
+            {
+                "name": "SYSDIG_CUSTOM",
+                "value": "custom"
+            }
+        ],
+        "volumesFrom": [
+            {
+                "sourceContainer": "test_container",
+                "readOnly": true
+            }
+        ]
+    }
+]

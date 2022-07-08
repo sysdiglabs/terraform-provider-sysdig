@@ -1,0 +1,19 @@
+[
+    {
+        "name": "test",
+        "image": "test_image:latest",
+        "entryPoint": [
+            "/bin/test"
+        ],
+        "environment": [
+            {
+                "name": "TMP",
+                "value": "temporary"
+            },
+            {
+                "name": "SYSDIG_CUSTOM",
+                "value": "custom"
+            }
+        ]
+    }
+]

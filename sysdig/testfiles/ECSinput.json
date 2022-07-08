@@ -2,8 +2,8 @@
     {
       "Environment": [
         {
-          "name": "pmet",
-          "value": "temp"
+          "Name": "pmet",
+          "Value": "temp"
         },
         {
           "Name": "SYSDIG_ENDPOINT",
