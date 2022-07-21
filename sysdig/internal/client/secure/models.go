@@ -70,8 +70,8 @@ type NotificationChannelOptions struct {
 	SnsTopicARNs    []string `json:"snsTopicARNs,omitempty"`    // Type: SNS
 	APIKey          string   `json:"apiKey,omitempty"`          // Type: VictorOps, OpsGenie
 	RoutingKey      string   `json:"routingKey,omitempty"`      // Type: VictorOps
-	Url             string   `json:"url,omitempty"`             // Type: OpsGenie, Webhook and Slack
-	Channel         string   `json:"channel,omitempty"`         // Type: Slack
+	Url             string   `json:"url,omitempty"`             // Type: OpsGenie, Webhook, Teams and Slack
+	Channel         string   `json:"channel,omitempty"`         // Type: Teams and Slack
 	Account         string   `json:"account,omitempty"`         // Type: PagerDuty
 	ServiceKey      string   `json:"serviceKey,omitempty"`      // Type: PagerDuty
 	ServiceName     string   `json:"serviceName,omitempty"`     // Type: PagerDuty
