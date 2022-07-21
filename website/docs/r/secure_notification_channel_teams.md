@@ -18,7 +18,7 @@ Creates a Sysdig Secure Notification Channel of type Teams.
 resource "sysdig_secure_notification_channel_teams" "sample-teams" {
 	name                    = "Example Channel - Teams"
 	enabled                 = true
-	url                     = "https://.webhook.office.com/webhookb2/XXXXXXXXX/IncomingWebhook/XXXXXXXX/XXXXXXXXXX"
+	url                     = "https://webhook.office.com/webhookb2/XXXXXXXXX/IncomingWebhook/XXXXXXXX/XXXXXXXXXX"
 	channel                 = "Example Channel"
 	notify_when_ok          = false
 	notify_when_resolved    = false
