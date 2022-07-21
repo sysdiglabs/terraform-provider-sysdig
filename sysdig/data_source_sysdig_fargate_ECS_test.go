@@ -28,6 +28,7 @@ var (
 		"fargate_cmd_test",
 		"fargate_linuxparameters_test",
 		"fargate_combined_test",
+		"fargate_volumesfrom_test",
 	}
 )
 
