@@ -23,6 +23,10 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 			Type:     schema.TypeString,
 			Optional: true,
 		},
+		"group": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
 		"severity": {
 			Type:         schema.TypeInt,
 			Optional:     true,
@@ -148,6 +152,9 @@ func alertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert, err er
 	if description, ok := d.GetOk("description"); ok {
 		alert.Description = description.(string)
 	}
+	if group, ok := d.GetOk("group"); ok {
+		alert.Group = group.(string)
+	}
 	if version, ok := d.GetOk("version"); ok {
 		alert.Version = version.(int)
 	}
@@ -195,6 +202,7 @@ func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err e
 	_ = data.Set("version", alert.Version)
 	_ = data.Set("name", alert.Name)
 	_ = data.Set("description", alert.Description)
+	_ = data.Set("group", alert.Group)
 	_ = data.Set("scope", alert.Filter)
 	_ = data.Set("trigger_after_minutes", int(trigger_after_minutes.Minutes()))
 	_ = data.Set("team", alert.TeamID)
