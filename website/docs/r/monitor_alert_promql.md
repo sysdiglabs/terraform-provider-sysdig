@@ -33,6 +33,7 @@ These arguments are common to all alerts in Sysdig Monitor.
 
 * `name` - (Required) The name of the Monitor alert. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
+* `group` - (Optional) The group of Monitor alert.
 * `severity` - (Optional) Severity of the Monitor alert. It must be a value between 0 and 7,
                with 0 being the most critical and 7 the less critical. Defaults to 4.
 * `trigger_after_minutes` - (Required) Threshold of time for the status to stabilize until the alert is fired.

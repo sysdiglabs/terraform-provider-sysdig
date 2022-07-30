@@ -8,8 +8,8 @@ description: |-
 
 # Resource: sysdig_monitor_alert_event
 
-Creates a Sysdig Monitor Event Alert. Monitor occurrences of specific events, and alert if the total 
-number of occurrences violates a threshold. Useful for alerting on container, orchestration, and 
+Creates a Sysdig Monitor Event Alert. Monitor occurrences of specific events, and alert if the total
+number of occurrences violates a threshold. Useful for alerting on container, orchestration, and
 service events like restarts and deployments.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
@@ -28,7 +28,7 @@ resource "sysdig_monitor_alert_event" "sample" {
 	event_count = 0
 
 	multiple_alerts_by = ["kubernetes.pod.name"]
-	
+
 	trigger_after_minutes = 1
 }
 ```
@@ -41,10 +41,11 @@ These arguments are common to all alerts in Sysdig Monitor.
 
 * `name` - (Required) The name of the Monitor alert. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
+* `group` - (Optional) The group of Monitor alert.
 * `severity` - (Optional) Severity of the Monitor alert. It must be a value between 0 and 7,
                with 0 being the most critical and 7 the less critical. Defaults to 4.
 * `trigger_after_minutes` - (Required) Threshold of time for the status to stabilize until the alert is fired.
-* `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure. 
+* `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Defaults to true.
 * `notification_channels` - (Optional) List of notification channel IDs where an alert must be sent to once fired.
 * `renotification_minutes` - (Optional) Number of minutes for the alert to re-notify until the status is solved.
@@ -71,7 +72,7 @@ is fired.
 ### Event alert arguments
 
 * `event_name` - (Required) String that matches part of name, tag or the description of Sysdig Events.
-* `source` - (Required) Source of the event. It can be `docker` or `kubernetes`. 
+* `source` - (Required) Source of the event. It can be `docker` or `kubernetes`.
 * `event_rel` - (Required) Relationship of the event count. It can be `>`, `>=`, `<`, `<=`, `=` or `!=`.
 * `event_count` - (Required) Number of events to match with event_rel.
 * `multiple_alerts_by` - (Optional) List of segments to trigger a separate alert on. Example: `["kubernetes.cluster.name", "kubernetes.namespace.name"]`.  

@@ -21,7 +21,7 @@ resource "sysdig_monitor_alert_downtime" "sample" {
 	severity = 2
 
 	entities_to_monitor = ["kubernetes.namespace.name"]
-	
+
 	trigger_after_minutes = 10
 	trigger_after_pct = 100
 }
@@ -35,10 +35,11 @@ These arguments are common to all alerts in Sysdig Monitor.
 
 * `name` - (Required) The name of the Monitor alert. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
+* `group` - (Optional) The group of Monitor alert.
 * `severity` - (Optional) Severity of the Monitor alert. It must be a value between 0 and 7,
                with 0 being the most critical and 7 the less critical. Defaults to 4.
 * `trigger_after_minutes` - (Required) Threshold of time for the status to stabilize until the alert is fired.
-* `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure. 
+* `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Defaults to true.
 * `notification_channels` - (Optional) List of notification channel IDs where an alert must be sent to once fired.
 * `renotification_minutes` - (Optional) Number of minutes for the alert to re-notify until the status is solved.
