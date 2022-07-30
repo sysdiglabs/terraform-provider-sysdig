@@ -48,7 +48,7 @@ type Alert struct {
 	Type                   string              `json:"type"` // computed MANUAL
 	Name                   string              `json:"name"`
 	Description            string              `json:"description"`
-	Group                  string              `json:"groupName"`
+	Group                  string              `json:"groupName,omitempty"`
 	Enabled                bool                `json:"enabled"`
 	NotificationChannelIds []int               `json:"notificationChannelIds"`
 	Filter                 string              `json:"filter"`
