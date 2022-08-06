@@ -30,6 +30,7 @@ require (
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/rs/zerolog v1.26.1 // indirect
 	github.com/spf13/cast v1.4.1
+	github.com/stretchr/testify v1.7.0
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
 	golang.org/x/net v0.0.0-20220111093109-d55c255bac03 // indirect

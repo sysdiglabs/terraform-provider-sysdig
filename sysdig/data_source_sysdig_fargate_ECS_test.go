@@ -20,6 +20,7 @@ var (
 		OrchestratorPort: "orchestrator_port",
 		CollectorHost:    "collector_host",
 		CollectorPort:    "collector_port",
+		SysdigLogging:    "sysdig_logging",
 	}
 
 	testContainerDefinitionFiles = []string{
@@ -67,6 +68,7 @@ func TestECStransformation(t *testing.T) {
 		OrchestratorPort: "orchestrator_port",
 		CollectorHost:    "collector_host",
 		CollectorPort:    "collector_port",
+		SysdigLogging:    "sysdig_logging",
 	}
 
 	jsonConf, err := json.Marshal(&recipeConfig)

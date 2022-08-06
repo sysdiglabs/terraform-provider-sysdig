@@ -21,7 +21,7 @@ const agentinoKiltDefinition = `build {
         "SYSDIG_COLLECTOR": ${config.collector_host}
         "SYSDIG_COLLECTOR_PORT": ${config.collector_port}
         "SYSDIG_ACCESS_KEY": ${config.sysdig_access_key}
-        "SYSDIG_LOGGING": ""
+        "SYSDIG_LOGGING": ${config.sysdig_logging}
     }
     mount: [
         {
@@ -76,6 +76,11 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 			"collector_port": {
 				Type:        schema.TypeString,
 				Description: "the collector port to connect to",
+				Optional:    true,
+			},
+			"sysdig_logging": {
+				Type:        schema.TypeString,
+				Description: "the instrumentation logging level",
 				Optional:    true,
 			},
 			"output_container_definitions": {
@@ -169,6 +174,7 @@ type KiltRecipeConfig struct {
 	OrchestratorPort string `json:"orchestrator_port"`
 	CollectorHost    string `json:"collector_host"`
 	CollectorPort    string `json:"collector_port"`
+	SysdigLogging    string `json:"sysdig_logging"`
 }
 
 func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -179,6 +185,7 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 		OrchestratorPort: d.Get("orchestrator_port").(string),
 		CollectorHost:    d.Get("collector_host").(string),
 		CollectorPort:    d.Get("collector_port").(string),
+		SysdigLogging:    d.Get("sysdig_logging").(string),
 	}
 
 	jsonConf, err := json.Marshal(&recipeConfig)
