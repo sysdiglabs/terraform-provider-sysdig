@@ -39,6 +39,7 @@ data "sysdig_fargate_workload_agent" "instrumented_containers" {
 * `orchestrator_port` - (Optional) The orchestrator port to connect to.
 * `collector_host` - (Optional) The collector host to connect to.
 * `collector_port` - (Optional) The collector port to connect to.
+* `sysdig_logging` - (Optional) The instrumentation logging level: `trace`, `debug`, `info`, `warning`, `error`, `silent`.
 
 
 ## Attributes Reference
