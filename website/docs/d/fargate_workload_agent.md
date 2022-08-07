@@ -43,6 +43,7 @@ data "sysdig_fargate_workload_agent" "instrumented_containers" {
   * `group` - The name of the existing log group for instrumentation logs
   * `stream_prefix` - Prefix for the instrumentation log stream
   * `region` - The AWS region where the target log group resides
+* `sysdig_logging` - (Optional) The instrumentation logging level: `trace`, `debug`, `info`, `warning`, `error`, `silent`.
 
 
 ## Attributes Reference
