@@ -60,13 +60,14 @@
         "RepositoryCredentials": {
             "CredentialsParameter": "image_auth_secret"
         },
-        "logConfiguration": {
-            "logDriver": "awslogs",
-            "options": {
+        "LogConfiguration": {
+            "LogDriver": "awslogs",
+            "Options": {
                 "awslogs-group": "test_log_group",
                 "awslogs-stream-prefix": "test_prefix",
                 "awslogs-region": "test_region"
-            }
+            },
+            "SecretOptions": null
         }
     }
 ]

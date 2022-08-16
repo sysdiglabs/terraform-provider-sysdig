@@ -82,7 +82,7 @@ func TestECStransformation(t *testing.T) {
 		RecipeConfig:       string(jsonConf),
 	}
 
-	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig)
+	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig, nil)
 	if err != nil {
 		t.Fatalf("Cannot execute PatchFargateTaskDefinition : %v", err.Error())
 	}
@@ -144,7 +144,7 @@ func TestTransform(t *testing.T) {
 			}
 
 			inputContainerDefinition, _ := ioutil.ReadFile("testfiles/" + testName + ".json")
-			patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig)
+			patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, nil)
 			expectedContainerDefinition, _ := ioutil.ReadFile("testfiles/" + testName + "_expected.json")
 
 			sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
