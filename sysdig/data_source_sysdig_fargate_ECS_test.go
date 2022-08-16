@@ -151,3 +151,26 @@ func TestTransform(t *testing.T) {
 		})
 	}
 }
+
+func TestLogGroup(t *testing.T) {
+	jsonConfig, _ := json.Marshal(testKiltDefinition)
+	kiltConfig := &cfnpatcher.Configuration{
+		Kilt:               agentinoKiltDefinition,
+		ImageAuthSecret:    "image_auth_secret",
+		OptIn:              false,
+		UseRepositoryHints: true,
+		RecipeConfig:       string(jsonConfig),
+	}
+
+	logConfig := map[string]interface{}{
+		"group":         "test_log_group",
+		"stream_prefix": "test_prefix",
+		"region":        "test_region",
+	}
+
+	inputContainerDefinition, _ := ioutil.ReadFile("testfiles/fargate_log_group.json")
+	patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, logConfig)
+	expectedContainerDefinition, _ := ioutil.ReadFile("testfiles/fargate_log_group_expected.json")
+
+	sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
+}
