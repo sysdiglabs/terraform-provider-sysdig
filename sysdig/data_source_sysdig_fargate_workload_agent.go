@@ -78,6 +78,31 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 				Description: "the collector port to connect to",
 				Optional:    true,
 			},
+			"log_configuration": {
+				Type:        schema.TypeSet,
+				MaxItems:    1,
+				Description: "configuration for instrumentation logs using the awslogs driver",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"group": {
+							Type:        schema.TypeString,
+							Description: "The log group where the awslogs driver will send log streams",
+							Required:    true,
+						},
+						"stream_prefix": {
+							Type:        schema.TypeString,
+							Description: "Prefix for the instrumentation log stream",
+							Required:    true,
+						},
+						"region": {
+							Type:        schema.TypeString,
+							Description: "Region for the log group",
+							Required:    true,
+						},
+					},
+				},
+			},
 			"output_container_definitions": {
 				Type:     schema.TypeString,
 				Computed: true,
