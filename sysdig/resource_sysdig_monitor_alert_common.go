@@ -212,6 +212,7 @@ func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err e
 	_ = data.Set("description", alert.Description)
 	_ = data.Set("scope", alert.Filter)
 	_ = data.Set("trigger_after_minutes", int(trigger_after_minutes.Minutes()))
+	_ = data.Set("group_name", alert.GroupName)
 	_ = data.Set("team", alert.TeamID)
 	_ = data.Set("enabled", alert.Enabled)
 	_ = data.Set("severity", alert.Severity)
