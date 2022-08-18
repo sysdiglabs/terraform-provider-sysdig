@@ -1,0 +1,20 @@
+[
+    {
+        "name": "test",
+        "image": "test_image:latest",
+        "entryPoint": [
+            "/bin/test"
+        ],
+        "command": [
+            "test",
+            "--test-arg",
+            "test-arg-value"
+        ],
+        "volumesFrom": [
+            {
+                "sourceContainer": "test_container",
+                "readOnly": true
+            }
+        ]
+    }
+]
