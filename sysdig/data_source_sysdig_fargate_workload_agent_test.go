@@ -34,6 +34,7 @@ data "sysdig_fargate_workload_agent" "test" {
 	collector_port = 1234
 	sysdig_access_key = "abcdef"
 	workload_agent_image = "busybox"
+	sysdig_logging = "info"
 }
 `
 }
