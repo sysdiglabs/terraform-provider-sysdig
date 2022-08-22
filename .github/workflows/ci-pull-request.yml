@@ -75,6 +75,7 @@ jobs:
       - name: Get dependencies
         run: |
           go get -u -v github.com/onsi/ginkgo/ginkgo
+          go mod tidy
 
       - name: Test
         run: make test
