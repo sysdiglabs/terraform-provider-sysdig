@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -21,7 +21,7 @@ func (client *sysdigSecureClient) getUserIdbyEmail(ctx context.Context, userRole
 		return nil, err
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	// Set User Id to UserRoles struct
 	usersList := UsersListFromJSON(body)
 	usersMap := make(map[string]int)
@@ -56,7 +56,7 @@ func (client *sysdigSecureClient) GetTeamById(ctx context.Context, id int) (t Te
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	t = TeamFromJSON(body)
 
 	return
@@ -81,7 +81,7 @@ func (client *sysdigSecureClient) CreateTeam(ctx context.Context, tRequest Team)
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	t = TeamFromJSON(body)
 	return
 }
@@ -104,7 +104,7 @@ func (client *sysdigSecureClient) UpdateTeam(ctx context.Context, tRequest Team)
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	t = TeamFromJSON(body)
 	return
 }

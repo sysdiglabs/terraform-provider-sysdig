@@ -3,7 +3,7 @@ package secure
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ func (client *sysdigSecureClient) CreatePolicy(ctx context.Context, policyReques
 		return
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
@@ -59,7 +59,7 @@ func (client *sysdigSecureClient) UpdatePolicy(ctx context.Context, policyReques
 		return Policy{}, errorFromResponse(response)
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
@@ -78,7 +78,7 @@ func (client *sysdigSecureClient) GetPolicyById(ctx context.Context, policyID in
 		return Policy{}, errorFromResponse(response)
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return
 	}

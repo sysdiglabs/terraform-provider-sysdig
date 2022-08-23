@@ -3,7 +3,7 @@ package monitor
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor/model"
@@ -20,7 +20,7 @@ func (client *sysdigMonitorClient) GetDashboardByID(ctx context.Context, ID int)
 		return nil, errorFromResponse(response)
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, nil
 	}
@@ -38,7 +38,7 @@ func (client *sysdigMonitorClient) CreateDashboard(ctx context.Context, dashboar
 		return nil, errorFromResponse(response)
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (client *sysdigMonitorClient) UpdateDashboard(ctx context.Context, dashboar
 		return nil, errorFromResponse(response)
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}

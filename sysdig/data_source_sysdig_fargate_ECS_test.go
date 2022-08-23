@@ -3,7 +3,7 @@ package sysdig
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"sort"
 	"testing"
 
@@ -55,7 +55,7 @@ func sortAndCompare(t *testing.T, expected []byte, actual []byte) {
 }
 
 func TestECStransformation(t *testing.T) {
-	inputfile, err := ioutil.ReadFile("testfiles/ECSinput.json")
+	inputfile, err := os.ReadFile("testfiles/ECSinput.json")
 
 	if err != nil {
 		t.Fatalf("Cannot find testfiles/ECSinput.json")
@@ -89,7 +89,7 @@ func TestECStransformation(t *testing.T) {
 		t.Fatalf("Cannot execute PatchFargateTaskDefinition : %v", err.Error())
 	}
 
-	expectedOutput, err := ioutil.ReadFile("testfiles/ECSInstrumented.json")
+	expectedOutput, err := os.ReadFile("testfiles/ECSInstrumented.json")
 	if err != nil {
 		t.Fatalf("Cannot find testfiles/ECSinput.json")
 	}
@@ -145,9 +145,9 @@ func TestTransform(t *testing.T) {
 				RecipeConfig:       string(jsonConfig),
 			}
 
-			inputContainerDefinition, _ := ioutil.ReadFile("testfiles/" + testName + ".json")
+			inputContainerDefinition, _ := os.ReadFile("testfiles/" + testName + ".json")
 			patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, nil)
-			expectedContainerDefinition, _ := ioutil.ReadFile("testfiles/" + testName + "_expected.json")
+			expectedContainerDefinition, _ := os.ReadFile("testfiles/" + testName + "_expected.json")
 
 			sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
 		})
@@ -170,9 +170,9 @@ func TestLogGroup(t *testing.T) {
 		"region":        "test_region",
 	}
 
-	inputContainerDefinition, _ := ioutil.ReadFile("testfiles/fargate_log_group.json")
+	inputContainerDefinition, _ := os.ReadFile("testfiles/fargate_log_group.json")
 	patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, logConfig)
-	expectedContainerDefinition, _ := ioutil.ReadFile("testfiles/fargate_log_group_expected.json")
+	expectedContainerDefinition, _ := os.ReadFile("testfiles/fargate_log_group_expected.json")
 
 	sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
 }

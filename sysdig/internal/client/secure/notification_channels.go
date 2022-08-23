@@ -3,7 +3,7 @@ package secure
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ func (client *sysdigSecureClient) GetNotificationChannelById(ctx context.Context
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	nc = NotificationChannelFromJSON(body)
 
 	if nc.ID == 0 {
@@ -41,7 +41,7 @@ func (client *sysdigSecureClient) GetNotificationChannelByName(ctx context.Conte
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	ncList := NotificationChannelListFromJSON(body)
 
 	for _, channel := range ncList {
@@ -67,7 +67,7 @@ func (client *sysdigSecureClient) CreateNotificationChannel(ctx context.Context,
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	nc = NotificationChannelFromJSON(body)
 	return
 }
@@ -84,7 +84,7 @@ func (client *sysdigSecureClient) UpdateNotificationChannel(ctx context.Context,
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	nc = NotificationChannelFromJSON(body)
 	return
 }

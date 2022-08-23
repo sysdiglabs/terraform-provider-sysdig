@@ -3,7 +3,7 @@ package monitor
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ func (client *sysdigMonitorClient) GetNotificationChannelById(ctx context.Contex
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	nc = NotificationChannelFromJSON(body)
 
 	if nc.Version == 0 {
@@ -36,7 +36,7 @@ func (client *sysdigMonitorClient) GetNotificationChannelByName(ctx context.Cont
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 
 	if response.StatusCode != http.StatusOK {
 		err = errorFromResponse(response)
@@ -68,7 +68,7 @@ func (client *sysdigMonitorClient) CreateNotificationChannel(ctx context.Context
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	nc = NotificationChannelFromJSON(body)
 	return
 }
@@ -85,7 +85,7 @@ func (client *sysdigMonitorClient) UpdateNotificationChannel(ctx context.Context
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	nc = NotificationChannelFromJSON(body)
 	return
 }

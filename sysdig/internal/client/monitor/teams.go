@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -21,7 +21,7 @@ func (client *sysdigMonitorClient) getUserIdbyEmail(ctx context.Context, userRol
 		return nil, err
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	// Set User Id to UserRoles struct
 	usersList := UsersListFromJSON(body)
 	usersMap := make(map[string]int)
@@ -55,7 +55,7 @@ func (client *sysdigMonitorClient) GetTeamById(ctx context.Context, id int) (t T
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	t = TeamFromJSON(body)
 
 	return
@@ -80,7 +80,7 @@ func (client *sysdigMonitorClient) CreateTeam(ctx context.Context, tRequest Team
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	t = TeamFromJSON(body)
 	return
 }
@@ -103,7 +103,7 @@ func (client *sysdigMonitorClient) UpdateTeam(ctx context.Context, tRequest Team
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	t = TeamFromJSON(body)
 	return
 }
