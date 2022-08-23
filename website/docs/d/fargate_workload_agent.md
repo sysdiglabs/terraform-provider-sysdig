@@ -39,6 +39,11 @@ data "sysdig_fargate_workload_agent" "instrumented_containers" {
 * `orchestrator_port` - (Optional) The orchestrator port to connect to.
 * `collector_host` - (Optional) The collector host to connect to.
 * `collector_port` - (Optional) The collector port to connect to.
+* `log_configuration` - (Optional) Configuration for the awslogs driver on the instrumentation container. All three values must be specified if instrumentation logging is desired:
+  * `group` - The name of the existing log group for instrumentation logs
+  * `stream_prefix` - Prefix for the instrumentation log stream
+  * `region` - The AWS region where the target log group resides
+* `sysdig_logging` - (Optional) The instrumentation logging level: `trace`, `debug`, `info`, `warning`, `error`, `silent`.
 
 
 ## Attributes Reference

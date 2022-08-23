@@ -7,6 +7,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Jeffail/gabs/v2"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/falcosecurity/kilt/runtimes/cloudformation/cfnpatcher"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,7 +24,7 @@ const agentinoKiltDefinition = `build {
         "SYSDIG_COLLECTOR": ${config.collector_host}
         "SYSDIG_COLLECTOR_PORT": ${config.collector_port}
         "SYSDIG_ACCESS_KEY": ${config.sysdig_access_key}
-        "SYSDIG_LOGGING": ""
+        "SYSDIG_LOGGING": ${config.sysdig_logging}
     }
     mount: [
         {
@@ -78,6 +81,36 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 				Description: "the collector port to connect to",
 				Optional:    true,
 			},
+			"log_configuration": {
+				Type:        schema.TypeSet,
+				MaxItems:    1,
+				Description: "configuration for instrumentation logs using the awslogs driver",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"group": {
+							Type:        schema.TypeString,
+							Description: "The log group where the awslogs driver will send log streams",
+							Required:    true,
+						},
+						"stream_prefix": {
+							Type:        schema.TypeString,
+							Description: "Prefix for the instrumentation log stream",
+							Required:    true,
+						},
+						"region": {
+							Type:        schema.TypeString,
+							Description: "Region for the log group",
+							Required:    true,
+						},
+					},
+				},
+			},
+			"sysdig_logging": {
+				Type:        schema.TypeString,
+				Description: "the instrumentation logging level",
+				Optional:    true,
+			},
 			"output_container_definitions": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -100,8 +133,45 @@ type cfnStack struct {
 	Resources map[string]cfnResource `json:"Resources"`
 }
 
+// fargatePostKiltModifications performs any additional changes needed after
+// Kilt has applied it's transformations
+func fargatePostKiltModifications(patchedBytes []byte, logConfig map[string]interface{}) ([]byte, error) {
+	if len(logConfig) == 0 {
+		// no log configuration provided, nothing to do
+		return patchedBytes, nil
+	}
+
+	containers, err := gabs.ParseJSON(patchedBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse containers for post-processing: %s", err)
+	}
+
+	for _, container := range containers.Children() {
+		containerName, ok := container.Search("Name").Data().(string)
+		if !ok || containerName != "SysdigInstrumentation" {
+			// not the instrumentation container, skip it
+			continue
+		}
+
+		awsLogConfig := &ecs.LogConfiguration{
+			LogDriver: aws.String("awslogs"),
+			Options: map[string]*string{
+				"awslogs-group":         aws.String(logConfig["group"].(string)),
+				"awslogs-stream-prefix": aws.String(logConfig["stream_prefix"].(string)),
+				"awslogs-region":        aws.String(logConfig["region"].(string)),
+			},
+		}
+		_, err = container.Set(awsLogConfig, "LogConfiguration")
+		if err != nil {
+			return nil, fmt.Errorf("failed to set log configuration: %s", err)
+		}
+	}
+
+	return containers.Bytes(), nil
+}
+
 // PatchFargateTaskDefinition modifies the container definitions
-func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string, kiltConfig *cfnpatcher.Configuration) (patched *string, err error) {
+func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string, kiltConfig *cfnpatcher.Configuration, logConfig map[string]interface{}) (patched *string, err error) {
 	var cdefs []map[string]interface{}
 	err = json.Unmarshal([]byte(containerDefinitions), &cdefs)
 	if err != nil {
@@ -158,6 +228,8 @@ func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string
 		return nil, err
 	}
 
+	patchedBytes, err = fargatePostKiltModifications(patchedBytes, logConfig)
+
 	patchedString := string(patchedBytes)
 	return &patchedString, nil
 }
@@ -169,6 +241,7 @@ type KiltRecipeConfig struct {
 	OrchestratorPort string `json:"orchestrator_port"`
 	CollectorHost    string `json:"collector_host"`
 	CollectorPort    string `json:"collector_port"`
+	SysdigLogging    string `json:"sysdig_logging"`
 }
 
 func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -179,6 +252,7 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 		OrchestratorPort: d.Get("orchestrator_port").(string),
 		CollectorHost:    d.Get("collector_host").(string),
 		CollectorPort:    d.Get("collector_port").(string),
+		SysdigLogging:    d.Get("sysdig_logging").(string),
 	}
 
 	jsonConf, err := json.Marshal(&recipeConfig)
@@ -196,7 +270,12 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 
 	containerDefinitions := d.Get("container_definitions").(string)
 
-	outputContainerDefinitions, err := patchFargateTaskDefinition(ctx, containerDefinitions, kiltConfig)
+	logConfig := map[string]interface{}{}
+	if logConfiguration := d.Get("log_configuration").(*schema.Set).List(); len(logConfiguration) > 0 {
+		logConfig = logConfiguration[0].(map[string]interface{})
+	}
+
+	outputContainerDefinitions, err := patchFargateTaskDefinition(ctx, containerDefinitions, kiltConfig, logConfig)
 	if err != nil {
 		return diag.Errorf("Error applying configuration patch: %v", err.Error())
 	}
