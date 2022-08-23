@@ -46,7 +46,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Default:          "falco",
-				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit", "aws_cloudtrail"}, false)),
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs"}, false)),
 			},
 			"severity": {
 				Type:             schema.TypeInt,

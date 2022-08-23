@@ -3,7 +3,7 @@ package secure
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -35,7 +35,7 @@ func (client *sysdigSecureClient) CreateBenchmarkTask(ctx context.Context, task 
 		return nil, err
 	}
 
-	bodyBytes, _ := ioutil.ReadAll(response.Body)
+	bodyBytes, _ := io.ReadAll(response.Body)
 	return BenchmarkTaskFromJSON(bodyBytes), nil
 }
 
@@ -50,7 +50,7 @@ func (client *sysdigSecureClient) GetBenchmarkTask(ctx context.Context, id strin
 		return nil, errorFromResponse(response)
 	}
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
+	bodyBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}

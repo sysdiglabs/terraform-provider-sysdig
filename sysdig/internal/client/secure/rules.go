@@ -3,7 +3,7 @@ package secure
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -26,7 +26,7 @@ func (client *sysdigSecureClient) CreateRule(ctx context.Context, rule Rule) (re
 		return Rule{}, errorFromResponse(response)
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
@@ -45,7 +45,7 @@ func (client *sysdigSecureClient) GetRuleByID(ctx context.Context, ruleID int) (
 		return Rule{}, errorFromResponse(response)
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
@@ -65,7 +65,7 @@ func (client *sysdigSecureClient) UpdateRule(ctx context.Context, rule Rule) (re
 		return Rule{}, errorFromResponse(response)
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return
 	}

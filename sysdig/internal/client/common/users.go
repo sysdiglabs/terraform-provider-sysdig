@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -20,7 +20,7 @@ func (client *sysdigCommonClient) GetUserById(ctx context.Context, id int) (u *U
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	user := UserFromJSON(body)
 	return &user, nil
 }
@@ -68,7 +68,7 @@ func (client *sysdigCommonClient) CreateUser(ctx context.Context, uRequest *User
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	user := UserFromJSON(body)
 	return &user, nil
 }
@@ -85,7 +85,7 @@ func (client *sysdigCommonClient) UpdateUser(ctx context.Context, uRequest *User
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	user := UserFromJSON(body)
 	return &user, nil
 }
@@ -115,7 +115,7 @@ func (client *sysdigCommonClient) GetCurrentUser(ctx context.Context) (u *User, 
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	user := UserFromJSON(body)
 	return &user, nil
 }
