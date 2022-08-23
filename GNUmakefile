@@ -1,6 +1,5 @@
 SWEEP?=us-east-1,us-west-2
 TEST?=./...
-GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 PKG_NAME=sysdig
 WEBSITE_REPO=github.com/hashicorp/terraform-website
 VERSION=$(shell [ ! -z `git tag -l --contains HEAD` ] && git tag -l --contains HEAD || git rev-parse --short HEAD)
@@ -31,7 +30,9 @@ vet:
 	fi
 
 fmt:
-	gofmt -w $(GOFMT_FILES)
+	go install mvdan.cc/gofumpt@latest
+	go fmt ./...
+	gofumpt -w ./
 
 fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"

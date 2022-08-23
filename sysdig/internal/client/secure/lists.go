@@ -3,7 +3,7 @@ package secure
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ func (client *sysdigSecureClient) CreateList(ctx context.Context, listRequest Li
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	list, err = ListFromJSON(body)
 	return
 }
@@ -36,7 +36,7 @@ func (client *sysdigSecureClient) GetListById(ctx context.Context, id int) (list
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	list, err = ListFromJSON(body)
 	if err != nil {
 		return
@@ -61,7 +61,7 @@ func (client *sysdigSecureClient) UpdateList(ctx context.Context, listRequest Li
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	return ListFromJSON(body)
 }
 

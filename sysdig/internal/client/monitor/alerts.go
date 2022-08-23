@@ -3,7 +3,7 @@ package monitor
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ func (c *sysdigMonitorClient) CreateAlert(ctx context.Context, alert Alert) (cre
 		return
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
@@ -52,7 +52,7 @@ func (c *sysdigMonitorClient) UpdateAlert(ctx context.Context, alert Alert) (upd
 		return
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
@@ -71,7 +71,7 @@ func (c *sysdigMonitorClient) GetAlertById(ctx context.Context, alertID int) (al
 		return
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return
 	}

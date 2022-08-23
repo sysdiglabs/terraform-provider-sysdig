@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -38,7 +38,7 @@ func (client *sysdigSecureClient) CreateCloudAccount(ctx context.Context, cloudA
 		return nil, err
 	}
 
-	bodyBytes, _ := ioutil.ReadAll(response.Body)
+	bodyBytes, _ := io.ReadAll(response.Body)
 	return CloudAccountFromJSON(bodyBytes), nil
 }
 
@@ -53,7 +53,7 @@ func (client *sysdigSecureClient) GetCloudAccountById(ctx context.Context, accou
 		return nil, errorFromResponse(response)
 	}
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
+	bodyBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (client *sysdigSecureClient) UpdateCloudAccount(ctx context.Context, accoun
 		return nil, err
 	}
 
-	bodyBytes, _ := ioutil.ReadAll(response.Body)
+	bodyBytes, _ := io.ReadAll(response.Body)
 	return CloudAccountFromJSON(bodyBytes), nil
 }
 
@@ -101,7 +101,7 @@ func (client *sysdigSecureClient) GetTrustedCloudIdentity(ctx context.Context, p
 		return "", errorFromResponse(response)
 	}
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
+	bodyBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return "", err
 	}
