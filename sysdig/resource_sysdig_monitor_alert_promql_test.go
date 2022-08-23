@@ -31,6 +31,9 @@ func TestAccAlertPromql(t *testing.T) {
 				Config: alertPromqlWithName(rText()),
 			},
 			{
+				Config: alertPromqlWithGroupName(rText()),
+			},
+			{
 				ResourceName:      "sysdig_monitor_alert_promql.sample",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -46,6 +49,22 @@ resource "sysdig_monitor_alert_promql" "sample" {
 	description = "TERRAFORM TEST - PROMQL %s"
 	severity = 3
 
+	promql = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
+
+	trigger_after_minutes = 10
+
+	enabled = false
+}
+`, name, name)
+}
+
+func alertPromqlWithGroupName(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_promql" "sample" {
+	name = "TERRAFORM TEST - PROMQL %s"
+	description = "TERRAFORM TEST - PROMQL %s"
+	severity = 3
+	group_name = "sample_group_name"
 	promql = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
 
 	trigger_after_minutes = 10
