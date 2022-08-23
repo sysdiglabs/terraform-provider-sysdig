@@ -20,6 +20,7 @@ var (
 		OrchestratorPort: "orchestrator_port",
 		CollectorHost:    "collector_host",
 		CollectorPort:    "collector_port",
+		SysdigLogging:    "sysdig_logging",
 	}
 
 	testContainerDefinitionFiles = []string{
@@ -67,6 +68,7 @@ func TestECStransformation(t *testing.T) {
 		OrchestratorPort: "orchestrator_port",
 		CollectorHost:    "collector_host",
 		CollectorPort:    "collector_port",
+		SysdigLogging:    "sysdig_logging",
 	}
 
 	jsonConf, err := json.Marshal(&recipeConfig)
@@ -82,7 +84,7 @@ func TestECStransformation(t *testing.T) {
 		RecipeConfig:       string(jsonConf),
 	}
 
-	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig)
+	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig, nil)
 	if err != nil {
 		t.Fatalf("Cannot execute PatchFargateTaskDefinition : %v", err.Error())
 	}
@@ -144,10 +146,33 @@ func TestTransform(t *testing.T) {
 			}
 
 			inputContainerDefinition, _ := ioutil.ReadFile("testfiles/" + testName + ".json")
-			patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig)
+			patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, nil)
 			expectedContainerDefinition, _ := ioutil.ReadFile("testfiles/" + testName + "_expected.json")
 
 			sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
 		})
 	}
+}
+
+func TestLogGroup(t *testing.T) {
+	jsonConfig, _ := json.Marshal(testKiltDefinition)
+	kiltConfig := &cfnpatcher.Configuration{
+		Kilt:               agentinoKiltDefinition,
+		ImageAuthSecret:    "image_auth_secret",
+		OptIn:              false,
+		UseRepositoryHints: true,
+		RecipeConfig:       string(jsonConfig),
+	}
+
+	logConfig := map[string]interface{}{
+		"group":         "test_log_group",
+		"stream_prefix": "test_prefix",
+		"region":        "test_region",
+	}
+
+	inputContainerDefinition, _ := ioutil.ReadFile("testfiles/fargate_log_group.json")
+	patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, logConfig)
+	expectedContainerDefinition, _ := ioutil.ReadFile("testfiles/fargate_log_group_expected.json")
+
+	sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
 }

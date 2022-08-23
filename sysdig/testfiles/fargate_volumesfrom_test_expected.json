@@ -30,7 +30,7 @@
             },
             {
                 "Name": "SYSDIG_LOGGING",
-                "Value": ""
+                "Value": "sysdig_logging"
             },
             {
                 "Name": "SYSDIG_ORCHESTRATOR",
