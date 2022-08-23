@@ -53,6 +53,12 @@ func TestAccPolicy(t *testing.T) {
 			{
 				Config: policiesForAWSCloudtrail(rText()),
 			},
+			{
+				Config: policiesForGCPAuditLog(rText()),
+			},
+			{
+				Config: policiesForAzurePlatformlogs(rText()),
+			},
 		},
 	})
 }
@@ -169,6 +175,26 @@ resource "sysdig_secure_policy" "sample4" {
   name = "TERRAFORM TEST 4 %s"
   description = "TERRAFORM TEST %s"
   type = "aws_cloudtrail"
+}
+`, name, name)
+}
+
+func policiesForGCPAuditLog(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_policy" "sample5" {
+  name = "TERRAFORM TEST %s"
+  description = "TERRAFORM TEST %s"
+  type = "gcp_auditlog"
+}
+`, name, name)
+}
+
+func policiesForAzurePlatformlogs(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_policy" "sample6" {
+  name = "TERRAFORM TEST %s"
+  description = "TERRAFORM TEST %s"
+  type = "azure_platformlogs"
 }
 `, name, name)
 }
