@@ -46,7 +46,7 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 		"group_name": {
 			Type:     schema.TypeString,
 			Optional: true,
-			Default:  "",
+			Default:  "default",
 			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 				return strings.ToLower(old) == strings.ToLower(new)
 			},
