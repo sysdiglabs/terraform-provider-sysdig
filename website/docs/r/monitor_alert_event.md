@@ -46,6 +46,7 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `trigger_after_minutes` - (Required) Threshold of time for the status to stabilize until the alert is fired.
 * `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure. 
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Defaults to true.
+* `group_name` - (Optional) Lowercase string to group alerts in the UI
 * `notification_channels` - (Optional) List of notification channel IDs where an alert must be sent to once fired.
 * `renotification_minutes` - (Optional) Number of minutes for the alert to re-notify until the status is solved.
 * `capture` - (Optional) Enables the creation of a capture file of the syscalls during the event.
