@@ -55,9 +55,40 @@ $ make test
 ```
 
 If you want to execute the acceptance tests, you can run `make testacc`.
+
 ```sh
 $ make testacc
 ```
+
+To use the local provider you just built, get it installed in your machine with:
+
+```sh
+$ make install
+```
+
+That will add the provider to the terraform plugins dir. Then just set `source` and `version` values appropiately:
+
+```
+provider "aws" {
+  region = my_region
+}
+
+terraform {
+  required_providers {
+    sysdig = {
+      source = "local/sysdiglabs/sysdig"
+      version = "~> 1.0.0"
+    }
+  }
+}
+```
+
+To uninstall the plugin:
+
+```
+$ make uninstall
+```
+
 
 <br/>:warning:Please note that you need a token for Monitor and Secure, and since the **acceptance tests create real infrastructure**
 you should execute them in an environment where you can remove the resorces easily.
