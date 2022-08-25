@@ -37,6 +37,7 @@ These arguments are common to all alerts in Sysdig Monitor.
                with 0 being the most critical and 7 the less critical. Defaults to 4.
 * `trigger_after_minutes` - (Required) Threshold of time for the status to stabilize until the alert is fired.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Defaults to true.
+* `group_name` - (Optional) Lowercase string to group alerts in the UI
 * `notification_channels` - (Optional) List of notification channel IDs where an alert must be sent to once fired.
 * `renotification_minutes` - (Optional) Number of minutes for the alert to re-notify until the status is solved.
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.

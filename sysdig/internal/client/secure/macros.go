@@ -3,7 +3,7 @@ package secure
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ func (client *sysdigSecureClient) CreateMacro(ctx context.Context, macroRequest 
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	macro, err = MacroFromJSON(body)
 	return
 }
@@ -36,7 +36,7 @@ func (client *sysdigSecureClient) GetMacroById(ctx context.Context, id int) (mac
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	macro, err = MacroFromJSON(body)
 	if err != nil {
 		return
@@ -61,7 +61,7 @@ func (client *sysdigSecureClient) UpdateMacro(ctx context.Context, macroRequest 
 		return
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	return MacroFromJSON(body)
 }
 
