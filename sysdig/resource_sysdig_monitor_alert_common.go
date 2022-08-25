@@ -48,7 +48,7 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 			Optional: true,
 			Default:  "default",
 			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-				return strings.ToLower(old) == strings.ToLower(new)
+				return strings.EqualFold(old, new)
 			},
 		},
 		"team": {
