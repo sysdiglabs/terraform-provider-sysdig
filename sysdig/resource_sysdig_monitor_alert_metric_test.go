@@ -31,6 +31,9 @@ func TestAccAlertMetric(t *testing.T) {
 				Config: alertMetricWithName(rText()),
 			},
 			{
+				Config: alertMetricWithGroupName(rText()),
+			},
+			{
 				Config: alertMetricWithoutScopeWithName(rText()),
 			},
 			{
@@ -57,6 +60,30 @@ resource "sysdig_monitor_alert_metric" "sample" {
 	
 	trigger_after_minutes = 10
 
+	enabled = false
+
+	multiple_alerts_by = ["kubernetes.deployment.name"]
+
+	capture {
+		filename = "TERRAFORM_TEST.scap"
+		duration = 15
+	}
+}
+`, name, name)
+}
+
+func alertMetricWithGroupName(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_metric" "sample" {
+	name = "TERRAFORM TEST - METRIC %s"
+	description = "TERRAFORM TEST - METRIC %s"
+	severity = 3
+
+	metric = "avg(avg(cpu.used.percent)) > 50"
+	scope = "agent.id in (\"foo\")"
+	
+	trigger_after_minutes = 10
+	group_name = "sample_group_name"
 	enabled = false
 
 	multiple_alerts_by = ["kubernetes.deployment.name"]

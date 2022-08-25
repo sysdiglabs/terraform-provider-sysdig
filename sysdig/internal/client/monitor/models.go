@@ -49,6 +49,7 @@ type Alert struct {
 	Name                   string              `json:"name"`
 	Description            string              `json:"description"`
 	Enabled                bool                `json:"enabled"`
+	GroupName              string              `json:"groupName,omitempty"`
 	NotificationChannelIds []int               `json:"notificationChannelIds"`
 	Filter                 string              `json:"filter"`
 	Severity               int                 `json:"severity"` // 6 == INFO, 4 == LOW, 2 == MEDIUM, 0 == HIGH // NOT USED
