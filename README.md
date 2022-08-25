@@ -70,7 +70,7 @@ That will add the provider to the terraform plugins dir. Then just set `source` 
 
 ```
 provider "aws" {
-  region = "us-east-1"
+  region = my_region
 }
 
 terraform {
