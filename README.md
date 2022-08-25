@@ -89,3 +89,4 @@ https://www.hashicorp.com/blog/testing-hashicorp-terraform
 
 * Use **semver** for releases https://semver.org
 * To create a new release, create and push a new tag and it will be released  by [`/.github/workflows/release.yml`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.github/workflows/release.yml)
+* Notify Sysdig teams on our internal #release-announcements slack channel and optionally in #terraform-provider
