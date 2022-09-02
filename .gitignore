@@ -41,3 +41,4 @@ website/vendor
 # Binaries
 terraform-provider-sysdig
 oanc
+.vscode/settings.json

@@ -19,6 +19,11 @@ type SysdigMonitorClient interface {
 	UpdateAlert(context.Context, Alert) (Alert, error)
 	GetAlertById(context.Context, int) (Alert, error)
 
+	CreateAlertV2Prometheus(context.Context, AlertV2Prometheus) (AlertV2Prometheus, error)
+	DeleteAlertV2Prometheus(context.Context, int) error
+	UpdateAlertV2Prometheus(context.Context, AlertV2Prometheus) (AlertV2Prometheus, error)
+	GetAlertV2PrometheusById(context.Context, int) (AlertV2Prometheus, error)
+
 	CreateTeam(context.Context, Team) (Team, error)
 	GetTeamById(context.Context, int) (Team, error)
 	UpdateTeam(context.Context, Team) (Team, error)
