@@ -5,10 +5,26 @@ WEBSITE_REPO=github.com/hashicorp/terraform-website
 VERSION=$(shell [ ! -z `git tag -l --contains HEAD` ] && git tag -l --contains HEAD || git rev-parse --short HEAD)
 GOPATH=$(shell go env GOPATH)
 
+TERRAFORM_PLUGIN_ROOT_DIR=$(HOME)/.terraform.d/plugins
+TERRAFORM_PROVIDER_REFERENCE_NAME=local
+TERRAFORM_PROVIDER_NAME=sysdiglabs/$(PKG_NAME)
+TERRAFORM_PROVIDER_DEV_VERSION=1.0.0
+TERRAFORM_PLATFORM=$(shell terraform version -json | jq -r .platform)
+TERRAFORM_SYSDIG_PLUGIN_DIR=$(TERRAFORM_PLUGIN_ROOT_DIR)/$(TERRAFORM_PROVIDER_REFERENCE_NAME)/$(TERRAFORM_PROVIDER_NAME)/$(TERRAFORM_PROVIDER_DEV_VERSION)/$(TERRAFORM_PLATFORM)
+
 default: build
 
 build: fmtcheck
 	go install
+
+install: fmtcheck
+	go build -o terraform-provider-sysdig
+	mkdir -p $(TERRAFORM_SYSDIG_PLUGIN_DIR)
+	cp terraform-provider-sysdig $(TERRAFORM_SYSDIG_PLUGIN_DIR)/terraform-provider-sysdig
+
+uninstall:
+	rm -rf $(TERRAFORM_SYSDIG_PLUGIN_DIR)
+
 
 sweep:
 	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
