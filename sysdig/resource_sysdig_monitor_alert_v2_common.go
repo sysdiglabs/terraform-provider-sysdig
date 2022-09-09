@@ -75,7 +75,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 					},
 					"type": {
 						Type:     schema.TypeString,
-						Optional: true,
+						Required: true,
 					},
 					"renotify_every_minutes": {
 						Type:     schema.TypeInt,
