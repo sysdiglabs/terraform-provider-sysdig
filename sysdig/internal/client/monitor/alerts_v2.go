@@ -114,5 +114,5 @@ func (c *sysdigMonitorClient) getAlertV2ById(ctx context.Context, alertID int) (
 	}
 
 	body, err := io.ReadAll(response.Body)
-	return body, nil
+	return body, err
 }
