@@ -8,7 +8,7 @@ description: |-
 
 # Resource: sysdig_monitor_alert_v2_prometheus
 
-Creates a Sysdig Monitor Prometheus Alert. Monitor prometheus metrics and alert if they violate user-defined PromQL-based metric expression.
+Creates a Sysdig Monitor Prometheus Alert. The notification is triggered on the user-defined PromQL expression.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
@@ -21,6 +21,11 @@ resource "sysdig_monitor_alert_v2_prometheus" "sample" {
 	severity = high
 	query = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
 	trigger_after_minutes = 10
+	notification_channels {
+		id = <your-notification-channel-id>
+    type = "EMAIL""
+    renotify_every_minutes = 5
+	}
 }
 ```
 
@@ -38,6 +43,7 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Defaults to true.
 * `notification_channels` - (Optional) List of notification channel configuration
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
+* `capture` - (Optional) Allows to define a configuration to trigger a Sysdig Capture.
 
 ### `notification_channels` - 
 
@@ -45,15 +51,15 @@ By defining this field, the user can choose to which notification channels send 
 
 It is a list of objects with the following fields:
 * `id` - (Required) The ID of the notification channel
-* `renotify_every_minutes`: (Optional, Default=10) the amount of minutes to wait before re sending the notification to this channel
-* `enabled` - (Optional, Default=true) wether to enable or disable this channel
+* `type` - (Required) The type of the notification channel
+* `renotify_every_minutes`: (Optional) the amount of minutes to wait before re sending the notification to this channel
 
 ### `custom_notification`
 
 By defining this field, the user can modify the title and the body of the message sent when the alert
 is fired.
 
-* `title` - (Required) Sets the title of the alert. It is commonly defined as `{{__alert_name__}} is {{__alert_status__}}`.
+* `subject` - (Required) Sets the title of the alert. It is commonly defined as `{{__alert_name__}} is {{__alert_status__}}`.
 * `prepend` - (Optional) Text to add before the alert template.
 * `append` - (Optional) Text to add after the alert template.
 
