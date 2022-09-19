@@ -46,7 +46,7 @@ data "sysdig_current_user" "me" {
 
 * `description` - (Optional) A description of the team.
 
-* `theme` - (Optional) Colour of the team. Default: "#73A1F7".
+* `theme` - (Optional) Colour of the team. Default: "#05C391".
 
 * `scope_by` - (Optional) Scope for the team. Default: "container".
 
