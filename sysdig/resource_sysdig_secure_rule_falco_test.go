@@ -69,6 +69,9 @@ func TestAccRuleFalco(t *testing.T) {
 			{
 				Config: ruleFalcoWithExceptions(rText()),
 			},
+			{
+				Config: existingFalcoRuleWithExceptions(rText()),
+			},
 		},
 	})
 }
@@ -181,4 +184,22 @@ resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role" {
   }
 }
 `, name)
+}
+
+func existingFalcoRuleWithExceptions(name string) string {
+
+	return fmt.Sprintf(`
+
+resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role" {
+    name      = "TERRAFORM TEST %s - Attach to cluster-admin Role"
+    append    = true
+
+    exceptions {
+        name = "target_name"
+        fields = ["ka.target.name"]
+        comps = ["in"]
+        values = jsonencode(["foo"])
+   }
+    }
+}`, name)
 }

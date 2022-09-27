@@ -132,8 +132,15 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 		d.SetId("")
 	}
 
-	if rule.Details.Condition == nil {
-		return diag.Errorf("no condition data for a falco rule")
+	appending := false
+	if rule.Details.Append != nil && *(rule.Details.Append) != true {
+		appending = true
+	}
+
+	if appending {
+		if rule.Details.Condition == nil {
+			return diag.Errorf("no condition data for a falco rule")
+		}
 	}
 
 	updateResourceDataForRule(d, rule)
