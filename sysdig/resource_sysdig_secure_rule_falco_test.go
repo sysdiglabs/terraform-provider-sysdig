@@ -190,8 +190,8 @@ func existingFalcoRuleWithExceptions(name string) string {
 
 	return fmt.Sprintf(`
 
-resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role" {
-    name      = "TERRAFORM TEST %s - Attach to cluster-admin Role"
+resource "sysdig_secure_rule_falco" "System procs" {
+    name      = System procs network activity
     append    = true
 
     exceptions {
