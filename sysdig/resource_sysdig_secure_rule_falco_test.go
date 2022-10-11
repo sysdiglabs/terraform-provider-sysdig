@@ -188,10 +188,10 @@ resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role" {
 
 func existingFalcoRuleWithExceptions(name string) string {
 
-	return `
+	return fmt.Sprintf(`
 
-resource "sysdig_secure_rule_falco" "System_procs" {
-    name      = "System procs network activity"
+resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role_exceptions" {
+    name        = "TERRAFORM TEST %s - Attach to cluster-admin Role"
     append    = true
 
     exceptions {
@@ -200,5 +200,5 @@ resource "sysdig_secure_rule_falco" "System_procs" {
         comps = ["in"]
         values = jsonencode(["foo"])
    }
-}`
+}`, name)
 }
