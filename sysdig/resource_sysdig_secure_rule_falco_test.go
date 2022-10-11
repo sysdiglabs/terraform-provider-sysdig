@@ -191,7 +191,7 @@ func existingFalcoRuleWithExceptions(name string) string {
 	return `
 
 resource "sysdig_secure_rule_falco" "System procs" {
-    name      = System procs network activity
+    name      = "System procs network activity"
     append    = true
 
     exceptions {
@@ -200,5 +200,5 @@ resource "sysdig_secure_rule_falco" "System procs" {
         comps = ["in"]
         values = jsonencode(["foo"])
    }
-    }`
+}`
 }
