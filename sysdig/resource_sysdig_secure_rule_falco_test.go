@@ -18,6 +18,7 @@ func TestAccRuleFalco(t *testing.T) {
 
 	ruleRandomImmutableText := rText()
 
+	randomText := rText()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -67,10 +68,10 @@ func TestAccRuleFalco(t *testing.T) {
 				ExpectError: regexp.MustCompile("source must be set when append = false"),
 			},
 			{
-				Config: ruleFalcoWithExceptions(rText()),
+				Config: ruleFalcoWithExceptions(randomText),
 			},
 			{
-				Config: existingFalcoRuleWithExceptions(rText()),
+				Config: existingFalcoRuleWithExceptions(randomText),
 			},
 		},
 	})
