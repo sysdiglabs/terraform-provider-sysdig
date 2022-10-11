@@ -188,7 +188,7 @@ resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role" {
 
 func existingFalcoRuleWithExceptions(name string) string {
 
-	return fmt.Sprintf(`
+	return fmt.Printf(`
 
 resource "sysdig_secure_rule_falco" "System procs" {
     name      = System procs network activity
@@ -201,5 +201,5 @@ resource "sysdig_secure_rule_falco" "System procs" {
         values = jsonencode(["foo"])
    }
     }
-}`, name)
+}`)
 }
