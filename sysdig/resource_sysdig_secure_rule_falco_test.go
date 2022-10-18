@@ -189,7 +189,7 @@ resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role" {
 
 func existingFalcoRuleWithExceptions(name string) string {
 
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role_exceptions" {
     name = "Terminal shell in container" # Sysdig-provided
     append    = true
@@ -200,5 +200,5 @@ resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role_exceptions" {
         comps = ["in"]
         values = jsonencode(["sh"])
    }
-}`)
+}`
 }
