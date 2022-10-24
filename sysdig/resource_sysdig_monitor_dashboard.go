@@ -191,7 +191,7 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 											Schema: map[string]*schema.Schema{
 												"display_name": {
 													Type:     schema.TypeString,
-													Required: true,
+													Optional: true,
 												},
 												"time_series_display_name_template": {
 													Type:     schema.TypeString,
