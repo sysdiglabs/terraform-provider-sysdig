@@ -200,7 +200,7 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 												"type": {
 													Type:             schema.TypeString,
 													Required:         true,
-													ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"lines", "stacked area", "stacked bars"}, false)),
+													ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"lines", "stackedArea", "stackedBar"}, false)),
 												},
 											},
 										},
@@ -782,16 +782,10 @@ func queriesToResourceData(advancedQueries []*model.AdvancedQueries) ([]map[stri
 			return nil, fmt.Errorf("unsupported query format unit: %s", query.Format.Unit)
 		}
 
-		if query.DisplayInfo == (model.DisplayInfo{}) {
+		if query.DisplayInfo.DisplayName == "" && query.DisplayInfo.TimeSeriesDisplayNameTemplate == "" {
 			queries = append(queries, map[string]interface{}{
 				"unit":   unit,
-				"promql": query.Query,
-				"display_info": []map[string]interface{}{{
-					"display_name":                      "",
-					"time_series_display_name_template": "",
-					"type":                              "lines",
-				}},
-			})
+				"promql": query.Query})
 		} else {
 			queries = append(queries, map[string]interface{}{
 				"unit":   unit,
