@@ -170,13 +170,15 @@ type AdvancedQueries struct {
 	ParentPanel *Panels     `json:"-"`
 }
 
-func NewPromqlQuery(query string, parentPanel *Panels) *AdvancedQueries {
+func NewPromqlQuery(query string, parentPanel *Panels, displayInfo DisplayInfo) *AdvancedQueries {
 	newQuery := &AdvancedQueries{
 		Enabled: true,
 		DisplayInfo: DisplayInfo{
-			DisplayName:                   "",
-			TimeSeriesDisplayNameTemplate: "",
-			Type:                          "lines",
+			DisplayName:                   displayInfo.DisplayName,
+			TimeSeriesDisplayNameTemplate: displayInfo.TimeSeriesDisplayNameTemplate,
+			Type:                          displayInfo.Type,
+			//Color:                         displayInfo.Color,
+			//LineWidth:                     displayInfo.LineWidth,
 		},
 		Format:      newPercentFormat(),
 		Query:       query,
