@@ -177,8 +177,6 @@ func NewPromqlQuery(query string, parentPanel *Panels, displayInfo DisplayInfo) 
 			DisplayName:                   displayInfo.DisplayName,
 			TimeSeriesDisplayNameTemplate: displayInfo.TimeSeriesDisplayNameTemplate,
 			Type:                          displayInfo.Type,
-			//Color:                         displayInfo.Color,
-			//LineWidth:                     displayInfo.LineWidth,
 		},
 		Format:      newPercentFormat(),
 		Query:       query,
