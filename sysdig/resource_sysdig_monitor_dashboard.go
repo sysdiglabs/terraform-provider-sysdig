@@ -274,7 +274,6 @@ func resourceSysdigDashboardRead(ctx context.Context, data *schema.ResourceData,
 	}
 
 	dashboard, err := client.GetDashboardByID(ctx, id)
-
 	if err != nil {
 		data.SetId("")
 		return nil
@@ -785,7 +784,8 @@ func queriesToResourceData(advancedQueries []*model.AdvancedQueries) ([]map[stri
 		if query.DisplayInfo.DisplayName == "" && query.DisplayInfo.TimeSeriesDisplayNameTemplate == "" {
 			queries = append(queries, map[string]interface{}{
 				"unit":   unit,
-				"promql": query.Query})
+				"promql": query.Query,
+			})
 		} else {
 			queries = append(queries, map[string]interface{}{
 				"unit":   unit,
