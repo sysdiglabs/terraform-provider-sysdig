@@ -38,7 +38,7 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 		Schema: createRuleSchema(map[string]*schema.Schema{
 			"condition": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"output": {
 				Type:     schema.TypeString,
@@ -132,7 +132,12 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 		d.SetId("")
 	}
 
-	if rule.Details.Append != nil && !(*(rule.Details.Append)) {
+	appending := false
+	if rule.Details.Append != nil && *(rule.Details.Append) != true {
+		appending = true
+	}
+
+	if appending {
 		if rule.Details.Condition == nil {
 			return diag.Errorf("no condition data for a falco rule")
 		}
