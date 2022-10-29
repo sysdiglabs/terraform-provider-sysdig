@@ -107,6 +107,10 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 										Required:         true,
 										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
 									},
+									"filename": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
 								},
 							},
 						},
@@ -152,20 +156,24 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 
 	}
 
-	actions := []map[string]interface{}{{}}
+	actions := make([]map[string]interface{}, len(policy.Actions))
+	i := 0
 	for _, action := range policy.Actions {
+		actions[i] = make(map[string]interface{}, 0)
 		if action.Type != "POLICY_ACTION_CAPTURE" {
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
-			actions[0]["container"] = strings.ToLower(action)
+			actions[i]["container"] = strings.ToLower(action)
 			_ = d.Set("actions", actions)
 			//d.Set("actions.0.container", strings.ToLower(action))
 		} else {
-			actions[0]["capture"] = []map[string]interface{}{{
+			actions[i]["capture"] = []map[string]interface{}{{
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
+				"filename":             action.Filename,
 			}}
 			_ = d.Set("actions", actions)
 		}
+		i++
 	}
 
 	_ = d.Set("notification_channels", policy.NotificationChannelIds)
@@ -215,21 +223,30 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 		return
 	}
 
-	containerAction := d.Get("actions.0.container").(string)
-	if containerAction != "" {
+	if containerAction := d.Get("actions.0.container").(string); len(containerAction) > 0 {
 		containerAction = strings.ToUpper("POLICY_ACTION_" + containerAction)
-
+		policy.Actions = append(policy.Actions, secure.Action{Type: containerAction})
+	} else if containerAction := d.Get("actions.1.container").(string); len(containerAction) > 0 {
+		containerAction = strings.ToUpper("POLICY_ACTION_" + containerAction)
 		policy.Actions = append(policy.Actions, secure.Action{Type: containerAction})
 	}
 
+	actionBase := ""
 	if captureAction := d.Get("actions.0.capture").([]interface{}); len(captureAction) > 0 {
-		afterEventNs := d.Get("actions.0.capture.0.seconds_after_event").(int) * 1000000000
-		beforeEventNs := d.Get("actions.0.capture.0.seconds_before_event").(int) * 1000000000
+		actionBase = "actions.0"
+	} else if captureAction := d.Get("actions.1.capture").([]interface{}); len(captureAction) > 0 {
+		actionBase = "actions.1"
+	}
+	if actionBase != "" {
+		afterEventNs := d.Get(actionBase+".capture.0.seconds_after_event").(int) * 1000000000
+		beforeEventNs := d.Get(actionBase+".capture.0.seconds_before_event").(int) * 1000000000
+		filename := d.Get(actionBase + ".capture.0.filename").(string)
 		policy.Actions = append(policy.Actions, secure.Action{
 			Type:                 "POLICY_ACTION_CAPTURE",
 			IsLimitedToContainer: false,
 			AfterEventNs:         afterEventNs,
 			BeforeEventNs:        beforeEventNs,
+			Filename:             filename,
 		})
 	}
 }
