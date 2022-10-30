@@ -107,7 +107,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 										Required:         true,
 										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
 									},
-									"filename": {
+									"name": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
@@ -153,7 +153,6 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 		_ = d.Set("type", policy.Type)
 	} else {
 		_ = d.Set("type", "falco")
-
 	}
 
 	actions := make([]map[string]interface{}, len(policy.Actions))
@@ -164,12 +163,12 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
 			actions[i]["container"] = strings.ToLower(action)
 			_ = d.Set("actions", actions)
-			//d.Set("actions.0.container", strings.ToLower(action))
+			// d.Set("actions.0.container", strings.ToLower(action))
 		} else {
 			actions[i]["capture"] = []map[string]interface{}{{
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
-				"filename":             action.Filename,
+				"name":                 action.Name,
 			}}
 			_ = d.Set("actions", actions)
 		}
@@ -179,7 +178,6 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 	_ = d.Set("notification_channels", policy.NotificationChannelIds)
 
 	_ = d.Set("rule_names", policy.RuleNames)
-
 }
 
 func policyFromResourceData(d *schema.ResourceData) secure.Policy {
@@ -240,13 +238,13 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 	if actionBase != "" {
 		afterEventNs := d.Get(actionBase+".capture.0.seconds_after_event").(int) * 1000000000
 		beforeEventNs := d.Get(actionBase+".capture.0.seconds_before_event").(int) * 1000000000
-		filename := d.Get(actionBase + ".capture.0.filename").(string)
+		name := d.Get(actionBase + ".capture.0.name").(string)
 		policy.Actions = append(policy.Actions, secure.Action{
 			Type:                 "POLICY_ACTION_CAPTURE",
 			IsLimitedToContainer: false,
 			AfterEventNs:         afterEventNs,
 			BeforeEventNs:        beforeEventNs,
-			Filename:             filename,
+			Name:                 name,
 		})
 	}
 }
@@ -259,7 +257,6 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	id, _ := strconv.Atoi(d.Id())
 	policy, err := client.GetPolicyById(ctx, id)
-
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
