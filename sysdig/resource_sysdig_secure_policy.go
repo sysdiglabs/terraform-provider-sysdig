@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -221,32 +222,47 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 		return
 	}
 
-	if containerAction := d.Get("actions.0.container").(string); len(containerAction) > 0 {
-		containerAction = strings.ToUpper("POLICY_ACTION_" + containerAction)
-		policy.Actions = append(policy.Actions, secure.Action{Type: containerAction})
-	} else if containerAction := d.Get("actions.1.container").(string); len(containerAction) > 0 {
-		containerAction = strings.ToUpper("POLICY_ACTION_" + containerAction)
-		policy.Actions = append(policy.Actions, secure.Action{Type: containerAction})
+	for _, action := range actions {
+
+		switch v := action.(type) {
+
+		case string:
+			fmt.Printf("type = string\n")
+		default:
+			fmt.Printf("type = unknown: %v\n", v)
+		}
 	}
 
-	actionBase := ""
-	if captureAction := d.Get("actions.0.capture").([]interface{}); len(captureAction) > 0 {
-		actionBase = "actions.0"
-	} else if captureAction := d.Get("actions.1.capture").([]interface{}); len(captureAction) > 0 {
-		actionBase = "actions.1"
-	}
-	if actionBase != "" {
-		afterEventNs := d.Get(actionBase+".capture.0.seconds_after_event").(int) * 1000000000
-		beforeEventNs := d.Get(actionBase+".capture.0.seconds_before_event").(int) * 1000000000
-		name := d.Get(actionBase + ".capture.0.name").(string)
-		policy.Actions = append(policy.Actions, secure.Action{
-			Type:                 "POLICY_ACTION_CAPTURE",
-			IsLimitedToContainer: false,
-			AfterEventNs:         afterEventNs,
-			BeforeEventNs:        beforeEventNs,
-			Name:                 name,
-		})
-	}
+	/*
+			if containerAction := d.Get("actions.0.container").(string); len(containerAction) > 0 {
+				containerAction = strings.ToUpper("POLICY_ACTION_" + containerAction)
+				policy.Actions = append(policy.Actions, secure.Action{Type: containerAction})
+			} else if containerAction := d.Get("actions.1.container").(string); len(containerAction) > 0 {
+				containerAction = strings.ToUpper("POLICY_ACTION_" + containerAction)
+				policy.Actions = append(policy.Actions, secure.Action{Type: containerAction})
+			}
+
+			}
+			actionBase := ""
+		if captureAction := d.Get("actions.0.capture").([]interface{}); len(captureAction) > 0 {
+			actionBase = "actions.0"
+		} else if captureAction := d.Get("actions.1.capture").([]interface{}); len(captureAction) > 0 {
+			actionBase = "actions.1"
+		}
+		if actionBase != "" {
+			afterEventNs := d.Get(actionBase+".capture.0.seconds_after_event").(int) * 1000000000
+			beforeEventNs := d.Get(actionBase+".capture.0.seconds_before_event").(int) * 1000000000
+			name := d.Get(actionBase + ".capture.0.name").(string)
+			policy.Actions = append(policy.Actions, secure.Action{
+				Type:                 "POLICY_ACTION_CAPTURE",
+				IsLimitedToContainer: false,
+				AfterEventNs:         afterEventNs,
+				BeforeEventNs:        beforeEventNs,
+				Name:                 name,
+			})
+		}
+
+	*/
 }
 
 func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
