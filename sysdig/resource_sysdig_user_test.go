@@ -123,39 +123,3 @@ resource "sysdig_user" "sample" {
   email      = "terraform-test+user@sysdig.com"
 }`
 }
-
-func testAccUserResourceDestroy(s *terraform.State) error {
-	// retrieve the connection established in Provider configuration
-
-	conn := testAccProvider.Meta().(*ExampleClient)
-
-	// loop through the resources in state, verifying each widget
-	// is destroyed
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "example_widget" {
-			continue
-		}
-
-		// Retrieve our widget by referencing it's state ID for API lookup
-		request := &example.DescribeWidgets{
-			IDs: []string{rs.Primary.ID},
-		}
-
-		response, err := conn.DescribeWidgets(request)
-		if err == nil {
-			if len(response.Widgets) > 0 && *response.Widgets[0].ID == rs.Primary.ID {
-				return fmt.Errorf("Widget (%s) still exists.", rs.Primary.ID)
-			}
-
-			return nil
-		}
-
-		// If the error is equivalent to 404 not found, the widget is destroyed.
-		// Otherwise return the error
-		if !strings.Contains(err.Error(), "Widget not found") {
-			return err
-		}
-	}
-
-	return nil
-}
