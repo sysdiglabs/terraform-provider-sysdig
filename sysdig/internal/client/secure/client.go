@@ -42,6 +42,7 @@ type SysdigSecureClient interface {
 	GetMacroById(context.Context, int) (Macro, error)
 	DeleteMacro(context.Context, int) error
 	UpdateMacro(context.Context, Macro) (Macro, error)
+	GetMacroSummaries(context.Context) (*[]ElementSummary, error)
 
 	CreateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
 	GetVulnerabilityExceptionListByID(context.Context, string) (*VulnerabilityExceptionList, error)

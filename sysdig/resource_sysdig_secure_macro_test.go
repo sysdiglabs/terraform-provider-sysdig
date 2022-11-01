@@ -1,8 +1,12 @@
 package sysdig_test
 
 import (
+	"context"
 	"fmt"
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 	"os"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -11,6 +15,44 @@ import (
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
+
+func init() {
+	resource.AddTestSweepers("sysdig_macros", &resource.Sweeper{
+		Name: "sysdig_macros",
+
+		F: func(region string) error {
+			apiToken := os.Getenv("SYSDIG_SECURE_API_TOKEN")
+			secureURL := os.Getenv("SYSDIG_SECURE_URL")
+			secureTLS := os.Getenv("SYSDIG_SECURE_INSECURE_TLS")
+			isSecure, err := strconv.ParseBool(secureTLS)
+			if err != nil {
+				return err
+			}
+			secureClient := secure.NewSysdigSecureClient(
+				apiToken, secureURL, isSecure)
+
+			ctx := context.Background()
+			summaries, err := secureClient.GetMacroSummaries(ctx)
+
+			if err != nil {
+				return err
+			}
+
+			if summaries != nil {
+				for _, summary := range *summaries {
+					if strings.Contains(summary.Name, "terraform_test_") {
+						for _, id := range summary.Ids {
+							secureClient.DeleteMacro(ctx, id)
+						}
+					}
+
+				}
+			}
+			return nil
+
+		},
+	})
+}
 
 func TestAccMacro(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }

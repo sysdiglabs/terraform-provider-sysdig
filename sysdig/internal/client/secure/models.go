@@ -262,6 +262,30 @@ func MacroFromJSON(body []byte) (macro Macro, err error) {
 	return
 }
 
+// -------- Summaries -------
+
+type PublishedBy struct {
+	Origin    int    `json:"origin"`
+	VersionId string `json:"versionId"`
+}
+
+type ElementSummary struct {
+	Ids          []int          `json:"ids"`
+	Name         string         `json:"name"`
+	PublishedBys []*PublishedBy `json:"publishedBys"`
+	UsedCount    int            `json:"usedCount"` // not populated in monitor
+	ModifiedOn   int64          `json:"modifiedOn"`
+}
+
+func MacroSummariesFromJSON(body []byte) (*[]ElementSummary, error) {
+	summaries := make([]ElementSummary, 0)
+
+	if err := json.Unmarshal(body, &summaries); err != nil {
+		return nil, err
+	}
+	return &summaries, nil
+}
+
 // -------- Team --------
 type Team struct {
 	ID                  int         `json:"id,omitempty"`

@@ -78,10 +78,28 @@ func (client *sysdigSecureClient) DeleteMacro(ctx context.Context, id int) error
 	return nil
 }
 
+func (client *sysdigSecureClient) GetMacroSummaries(ctx context.Context) (*[]ElementSummary, error) {
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodGet, client.GetMacroSummaryUrl(), nil)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
+		return nil, errorFromResponse(response)
+	}
+	body, _ := io.ReadAll(response.Body)
+	return MacroSummariesFromJSON(body)
+
+}
+
 func (client *sysdigSecureClient) GetMacrosUrl() string {
 	return fmt.Sprintf("%s/api/secure/falco/macros", client.URL)
 }
 
 func (client *sysdigSecureClient) GetMacroUrl(id int) string {
 	return fmt.Sprintf("%s/api/secure/falco/macros/%d", client.URL, id)
+}
+func (client *sysdigSecureClient) GetMacroSummaryUrl() string {
+	return fmt.Sprintf("%s/api/secure/falco/macros/summaries", client.URL)
 }
