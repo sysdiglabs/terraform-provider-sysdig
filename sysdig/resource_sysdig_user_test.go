@@ -23,9 +23,13 @@ func init() {
 			apiToken := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
 			monitorURL := os.Getenv("SYSDIG_MONITOR_URL")
 			monitorTLS := os.Getenv("SYSDIG_MONITOR_INSECURE_TLS")
-			isSecure, err := strconv.ParseBool(monitorTLS)
-			if err != nil {
-				return err
+			isSecure := false
+			var err error
+			if len(monitorTLS) > 0 {
+				isSecure, err = strconv.ParseBool(monitorTLS)
+				if err != nil {
+					return err
+				}
 			}
 			commonClient := common.NewSysdigCommonClient(
 				apiToken, monitorURL, isSecure)

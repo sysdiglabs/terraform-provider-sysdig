@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -17,17 +18,22 @@ import (
 )
 
 func init() {
-	resource.AddTestSweepers("sysdig_macros", &resource.Sweeper{
-		Name: "sysdig_macros",
+	resource.AddTestSweepers("sysdig_secure_macro", &resource.Sweeper{
+		Name: "sysdig_secure_macro",
 
 		F: func(region string) error {
 			apiToken := os.Getenv("SYSDIG_SECURE_API_TOKEN")
 			secureURL := os.Getenv("SYSDIG_SECURE_URL")
 			secureTLS := os.Getenv("SYSDIG_SECURE_INSECURE_TLS")
-			isSecure, err := strconv.ParseBool(secureTLS)
-			if err != nil {
-				return err
+			isSecure := false
+			var err error
+			if len(secureTLS) > 0 {
+				isSecure, err = strconv.ParseBool(secureTLS)
+				if err != nil {
+					return err
+				}
 			}
+			log.Print("Macro Sweeper")
 			secureClient := secure.NewSysdigSecureClient(
 				apiToken, secureURL, isSecure)
 
@@ -38,10 +44,14 @@ func init() {
 				return err
 			}
 
+			log.Printf("summaries = %v\n", summaries)
+
 			if summaries != nil {
+
 				for _, summary := range *summaries {
 					if strings.Contains(summary.Name, "terraform_test_") ||
 						strings.Contains(summary.Name, "container") {
+						log.Printf("element name = %v\n", summary.Name)
 						for _, id := range summary.Ids {
 							err := secureClient.DeleteMacro(ctx, id)
 							_ = err

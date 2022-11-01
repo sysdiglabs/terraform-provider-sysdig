@@ -125,7 +125,7 @@ func (client *sysdigCommonClient) CreateUsersUrl() string {
 }
 
 func (client *sysdigCommonClient) GetUsersUrl() string {
-	return fmt.Sprintf("%s/api/users", client.URL)
+	return fmt.Sprintf("%s/api/users/", client.URL)
 }
 
 func (client *sysdigCommonClient) GetUserUrl(id int) string {
