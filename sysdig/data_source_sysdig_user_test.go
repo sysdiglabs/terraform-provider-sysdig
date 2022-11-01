@@ -1,7 +1,10 @@
 package sysdig_test
 
 import (
+	"context"
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/common"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -9,6 +12,38 @@ import (
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
+
+func init() {
+	resource.AddTestSweepers("sysdig_data_user", &resource.Sweeper{
+		Name: "sysdig_data_user",
+
+		F: func(region string) error {
+			apiToken := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
+			monitorURL := os.Getenv("SYSDIG_MONITOR_URL")
+			monitorTLS := os.Getenv("SYSDIG_MONITOR_INSECURE_TLS")
+			isSecure, err := strconv.ParseBool(monitorTLS)
+			if err != nil {
+				return err
+			}
+			commonClient := common.NewSysdigCommonClient(
+				apiToken, monitorURL, isSecure)
+
+			ctx := context.Background()
+			user, err := commonClient.GetUserByEmail(ctx, "terraform-test+user@sysdig.com")
+
+			if err != nil {
+				return err
+			}
+
+			err = commonClient.DeleteUser(ctx, user.ID)
+			if err != nil {
+				return err
+			}
+			return nil
+
+		},
+	})
+}
 
 func TestAccDataUser(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
