@@ -40,9 +40,11 @@ func init() {
 
 			if summaries != nil {
 				for _, summary := range *summaries {
-					if strings.Contains(summary.Name, "terraform_test_") {
+					if strings.Contains(summary.Name, "terraform_test_") ||
+						strings.Contains(summary.Name, "container") {
 						for _, id := range summary.Ids {
-							secureClient.DeleteMacro(ctx, id)
+							err := secureClient.DeleteMacro(ctx, id)
+							_ = err
 						}
 					}
 
