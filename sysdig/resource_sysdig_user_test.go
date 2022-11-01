@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/common"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"os"
 	"strconv"
 	"testing"
