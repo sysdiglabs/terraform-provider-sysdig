@@ -14,4 +14,3 @@ func TestMain(m *testing.M) {
 	provider = sysdig.Provider()
 	resource.TestMain(m)
 }
-
