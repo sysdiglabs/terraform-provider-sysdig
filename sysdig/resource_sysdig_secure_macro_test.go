@@ -40,6 +40,7 @@ func init() {
 			ctx := context.Background()
 			summaries, err := secureClient.GetMacroSummaries(ctx)
 
+			log.Printf("err = %v\n", err)
 			if err != nil {
 				return err
 			}

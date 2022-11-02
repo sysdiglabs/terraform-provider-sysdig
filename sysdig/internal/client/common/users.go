@@ -34,7 +34,7 @@ func (client *sysdigCommonClient) GetUserByEmail(ctx context.Context, email stri
 
 	if response.StatusCode != http.StatusOK {
 		err = errorFromResponse(response)
-		return
+		return nil, err
 	}
 
 	var userList struct {
@@ -43,7 +43,7 @@ func (client *sysdigCommonClient) GetUserByEmail(ctx context.Context, email stri
 
 	err = json.NewDecoder(response.Body).Decode(&userList)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	for _, user := range userList.Users {

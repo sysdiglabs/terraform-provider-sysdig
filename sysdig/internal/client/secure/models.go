@@ -265,7 +265,7 @@ func MacroFromJSON(body []byte) (macro Macro, err error) {
 // -------- Summaries -------
 
 type PublishedBy struct {
-	Origin    int    `json:"origin"`
+	Origin    string `json:"origin"`
 	VersionId string `json:"versionId"`
 }
 
