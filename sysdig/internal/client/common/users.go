@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 func (client *sysdigCommonClient) GetUserById(ctx context.Context, id int) (u *User, err error) {
@@ -26,33 +27,29 @@ func (client *sysdigCommonClient) GetUserById(ctx context.Context, id int) (u *U
 }
 
 func (client *sysdigCommonClient) GetUserByEmail(ctx context.Context, email string) (u *User, err error) {
-	response, err := client.doSysdigCommonRequest(ctx, http.MethodGet, client.GetUsersUrl(), nil)
+	urlString := fmt.Sprintf("%s%s", client.GetUsersUrl(), url.PathEscape(email))
+
+	response, err := client.doSysdigCommonRequest(ctx, http.MethodGet, urlString, nil)
 	if err != nil {
-		return
+		return nil, err
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode == http.StatusNotFound {
+		return nil, nil
+	}
 	if response.StatusCode != http.StatusOK {
 		err = errorFromResponse(response)
 		return nil, err
 	}
 
-	var userList struct {
-		Users []User `json:"users"`
-	}
-
-	err = json.NewDecoder(response.Body).Decode(&userList)
+	var user User
+	err = json.NewDecoder(response.Body).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
+	return &user, nil
 
-	for _, user := range userList.Users {
-		if user.Email == email {
-			return &user, nil
-		}
-	}
-
-	return nil, fmt.Errorf("user not found for the given email")
 }
 
 func (client *sysdigCommonClient) CreateUser(ctx context.Context, uRequest *User) (u *User, err error) {
