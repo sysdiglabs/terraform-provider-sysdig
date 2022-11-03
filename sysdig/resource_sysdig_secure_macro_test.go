@@ -51,7 +51,7 @@ func init() {
 
 				for _, summary := range *summaries {
 					if strings.Contains(summary.Name, "terraform_test_") ||
-						strings.Contains(summary.Name, "container") {
+						summary.Name == "container" {
 						log.Printf("element name = %v\n", summary.Name)
 						for _, id := range summary.Ids {
 							err := secureClient.DeleteMacro(ctx, id)
