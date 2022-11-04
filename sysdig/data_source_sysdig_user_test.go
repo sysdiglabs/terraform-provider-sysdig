@@ -36,9 +36,9 @@ func init() {
 			ctx := context.Background()
 			user, err := commonClient.GetUserByEmail(ctx, "terraform-test+user@sysdig.com")
 
-                        if err != nil {
-                                return err
-                        }
+			if err != nil {
+				return err
+			}
 			if user == nil {
 				return nil
 			}
