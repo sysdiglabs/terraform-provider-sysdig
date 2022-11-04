@@ -109,7 +109,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 									},
 									"name": {
 										Type:     schema.TypeString,
-										Required: true,
+										Optional: true,
 									},
 								},
 							},
@@ -231,6 +231,9 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 		afterEventNs := d.Get("actions.0.capture.0.seconds_after_event").(int) * 1000000000
 		beforeEventNs := d.Get("actions.0.capture.0.seconds_before_event").(int) * 1000000000
 		name := d.Get("actions.0.capture.0.name").(string)
+                if len(name) <= 0 {
+                        name = "capturefile"
+                }
 		policy.Actions = append(policy.Actions, secure.Action{
 			Type:                 "POLICY_ACTION_CAPTURE",
 			IsLimitedToContainer: false,
