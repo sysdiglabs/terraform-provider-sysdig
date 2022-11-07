@@ -82,6 +82,10 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 					Type: schema.TypeInt,
 				},
 			},
+			"runbook": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"actions": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -145,6 +149,7 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 	_ = d.Set("enabled", policy.Enabled)
 	_ = d.Set("version", policy.Version)
 	_ = d.Set("severity", policy.Severity)
+	_ = d.Set("runbook", policy.Runbook)
 	if policy.Type != "" {
 		_ = d.Set("type", policy.Type)
 	} else {
@@ -181,6 +186,7 @@ func policyFromResourceData(d *schema.ResourceData) secure.Policy {
 		Severity:    d.Get("severity").(int),
 		Enabled:     d.Get("enabled").(bool),
 		Type:        d.Get("type").(string),
+		Runbook:     d.Get("runbook").(string),
 	}
 
 	scope := d.Get("scope").(string)
