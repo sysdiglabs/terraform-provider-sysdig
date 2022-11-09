@@ -18,6 +18,7 @@ func TestAccRuleFalco(t *testing.T) {
 
 	ruleRandomImmutableText := rText()
 
+	randomText := rText()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -67,7 +68,10 @@ func TestAccRuleFalco(t *testing.T) {
 				ExpectError: regexp.MustCompile("source must be set when append = false"),
 			},
 			{
-				Config: ruleFalcoWithExceptions(rText()),
+				Config: ruleFalcoWithExceptions(randomText),
+			},
+			{
+				Config: existingFalcoRuleWithExceptions(randomText),
 			},
 		},
 	})
@@ -181,4 +185,20 @@ resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role" {
   }
 }
 `, name)
+}
+
+func existingFalcoRuleWithExceptions(name string) string {
+
+	return `
+resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role_exceptions" {
+    name = "Terminal shell in container" # Sysdig-provided
+    append    = true
+
+    exceptions {
+        name = "proc_name"
+        fields = ["proc.name"]
+        comps = ["in"]
+        values = jsonencode(["sh"])
+   }
+}`
 }
