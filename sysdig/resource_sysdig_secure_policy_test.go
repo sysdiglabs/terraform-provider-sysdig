@@ -59,9 +59,6 @@ func TestAccPolicy(t *testing.T) {
 			{
 				Config: policiesForAzurePlatformlogs(rText()),
 			},
-			{
-				Config: policyWithRunbook(rText()),
-			},
 		},
 	})
 }
@@ -77,6 +74,7 @@ resource "sysdig_secure_policy" "sample" {
   severity = 4
   scope = "container.id != \"\""
   rule_names = [sysdig_secure_rule_falco.terminal_shell.name]
+  runbook = "https://sysdig.com"
 
   actions {
     container = "stop"
@@ -126,16 +124,6 @@ func policyWithMinimumConfiguration(name string) string {
 resource "sysdig_secure_policy" "sample4" {
   name = "TERRAFORM TEST 4 %s"
   description = "TERRAFORM TEST %s"
-}
-`, name, name)
-}
-
-func policyWithRunbook(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_secure_policy" "sample4" {
-  name = "TERRAFORM TEST 4 %s"
-  description = "TERRAFORM TEST %s"
-  runbook = "https://sysdig.com"
 }
 `, name, name)
 }

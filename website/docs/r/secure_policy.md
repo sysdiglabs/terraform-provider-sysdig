@@ -20,7 +20,8 @@ resource "sysdig_secure_policy" "write_apt_database" {
   description = "an attempt to write to the dpkg database by any non-dpkg related program"
   severity = 4
   enabled = true
-
+  runbook = "https://runbook.com
+  
   // Scope selection
   scope = "container.id != \"\""
 
@@ -53,6 +54,7 @@ resource "sysdig_secure_policy" "write_apt_database" {
 
 * `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`, `aws_cloudtrail`. By default it is `falco`.
 
+* `runbook` - (Optional) Specifies a runbook url 
 - - -
 
 ### Scope selection
