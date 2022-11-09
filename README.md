@@ -128,3 +128,9 @@ github/workflows/release.yml`](https://github.com/sysdiglabs/terraform-provider-
 * Review Released Draft Note, and make it as clear as possible.
 * Notify Sysdig teams on our internal #release-announcements slack channel and optionally in #terraform-provider
 
+Mange takk!
+
+![giphy](https://user-images.githubusercontent.com/1073243/200767344-7435f322-24c0-44d2-ac56-468791c84ca5.gif)
+
+
+
