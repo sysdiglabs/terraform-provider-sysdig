@@ -4,6 +4,8 @@
 # compliance
 *benchmark* @haresh-suresh  @nkraemer-sysdig 
 
-# Monitor dashboard
 
-**monitor*dashboard* @brokenpip3
+# monitor
+*monitor*dashboard* @brokenpip3
+*monitor*alert* @arturodilecce
+
