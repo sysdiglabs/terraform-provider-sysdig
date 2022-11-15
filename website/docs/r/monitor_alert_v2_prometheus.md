@@ -16,16 +16,16 @@ Creates a Sysdig Monitor Prometheus Alert. The notification is triggered on the 
 
 ```terraform
 resource "sysdig_monitor_alert_v2_prometheus" "sample" {
-	name = "Elasticsearch JVM heap usage"
-	description = "A Kubernetes pod failed to restart"
-	severity = high
-	query = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
-	trigger_after_minutes = 10
-	notification_channels {
-		id = <your-notification-channel-id>
-    type = "EMAIL""
+  name = "Elasticsearch JVM heap usage"
+  description = "Elasticsearch JVM heap used over attention threshold"
+  severity = high
+  query = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
+  trigger_after_minutes = 10
+  notification_channels {
+    id = <your-notification-channel-id>
+    type = "EMAIL"
     renotify_every_minutes = 5
-	}
+  }
 }
 ```
 
@@ -43,9 +43,8 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Defaults to true.
 * `notification_channels` - (Optional) List of notification channel configuration
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
-* `capture` - (Optional) Allows to define a configuration to trigger a Sysdig Capture.
 
-### `notification_channels` - 
+### `notification_channels`
 
 By defining this field, the user can choose to which notification channels send the events when the alert fires. 
 
@@ -79,7 +78,6 @@ alerts in Sysdig Monitor:
 * `id` - ID of the alert created.
 * `version` - Current version of the resource in Sysdig Monitor.
 * `team` - Team ID that owns the alert.
-
 
 ## Import
 
