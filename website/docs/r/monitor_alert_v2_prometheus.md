@@ -59,7 +59,7 @@ It is a list of objects with the following fields:
 By defining this field, the user can modify the title and the body of the message sent when the alert
 is fired.
 
-* `subject` - (Required) Sets the title of the alert. It is commonly defined as `{{__alert_name__}} is {{__alert_status__}}`.
+* `subject` - (Optional) Sets the title of the alert.
 * `prepend` - (Optional) Text to add before the alert template.
 * `append` - (Optional) Text to add after the alert template.
 

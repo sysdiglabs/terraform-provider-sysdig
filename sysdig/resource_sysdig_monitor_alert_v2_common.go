@@ -11,8 +11,6 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
-const defaultAlertV2Title = "{{__alert_name__}} is {{__alert_status__}}"
-
 func minutesToSeconds(minutes int) (seconds int) {
 	durationMinutes := time.Duration(minutes) * time.Minute
 	return int(durationMinutes.Seconds())
@@ -92,7 +90,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 				Schema: map[string]*schema.Schema{
 					"subject": {
 						Type:     schema.TypeString,
-						Required: true,
+						Optional: true,
 					},
 					"prepend": {
 						Type:     schema.TypeString,
@@ -195,21 +193,17 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) (alert *monitor.AlertV2Com
 		alert.NotificationChannelConfigList = &channels
 	}
 
+	customNotification := monitor.CustomNotificationTemplateV2{}
 	if attr, ok := d.GetOk("custom_notification"); ok && attr != nil {
-		customNotification := monitor.CustomNotificationTemplateV2{}
-
 		if len(attr.([]interface{})) > 0 {
 			m := attr.([]interface{})[0].(map[string]interface{})
 
 			customNotification.Subject = m["subject"].(string)
 			customNotification.AppendText = m["append"].(string)
 			customNotification.PrependText = m["prepend"].(string)
-		} else {
-			customNotification.Subject = defaultAlertV2Title
 		}
-
-		alert.CustomNotificationTemplate = &customNotification
 	}
+	alert.CustomNotificationTemplate = &customNotification
 
 	if attr, ok := d.GetOk("capture"); ok && attr != nil {
 		capture := monitor.CaptureConfigV2{}
@@ -263,7 +257,7 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Comm
 		_ = d.Set("notification_channels", notificationChannels)
 	}
 
-	if alert.CustomNotificationTemplate != nil && !(alert.CustomNotificationTemplate.Subject == defaultAlertV2Title &&
+	if alert.CustomNotificationTemplate != nil && !(alert.CustomNotificationTemplate.Subject == "" &&
 		alert.CustomNotificationTemplate.AppendText == "" &&
 		alert.CustomNotificationTemplate.PrependText == "") {
 		customNotification := map[string]interface{}{}
