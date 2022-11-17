@@ -56,7 +56,7 @@ func (c *sysdigMonitorClient) DeleteAlertV2Prometheus(ctx context.Context, alert
 // helpers
 
 func (c *sysdigMonitorClient) createAlertV2(ctx context.Context, alertJson io.Reader) (responseBody []byte, err error) {
-	response, err := c.doSysdigMonitorRequest(ctx, http.MethodPost, fmt.Sprintf("%s/create", c.alertsV2URL()), alertJson)
+	response, err := c.doSysdigMonitorRequest(ctx, http.MethodPost, c.alertsV2URL(), alertJson)
 	if err != nil {
 		return
 	}
