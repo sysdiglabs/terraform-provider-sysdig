@@ -53,7 +53,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 		"enabled": {
 			Type:     schema.TypeBool,
 			Optional: true,
-			Computed: true,
+			Default:  true,
 		},
 		"team": {
 			Type:     schema.TypeInt,
