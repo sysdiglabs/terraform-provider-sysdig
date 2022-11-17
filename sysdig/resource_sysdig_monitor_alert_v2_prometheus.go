@@ -47,7 +47,10 @@ func resourceSysdigMonitorAlertV2PrometheusCreate(ctx context.Context, d *schema
 		return diag.FromErr(err)
 	}
 
-	a := buildAlertV2PrometheusStruct(d)
+	a, err := buildAlertV2PrometheusStruct(ctx, d, client)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	aCreated, err := client.CreateAlertV2Prometheus(ctx, *a)
 	if err != nil {
@@ -96,7 +99,10 @@ func resourceSysdigMonitorAlertV2PrometheusUpdate(ctx context.Context, d *schema
 		return diag.FromErr(err)
 	}
 
-	a := buildAlertV2PrometheusStruct(d)
+	a, err := buildAlertV2PrometheusStruct(ctx, d, client)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	a.ID, _ = strconv.Atoi(d.Id())
 
@@ -136,18 +142,21 @@ func resourceSysdigMonitorAlertV2PrometheusDelete(ctx context.Context, d *schema
 // 	return nil
 // }
 
-func buildAlertV2PrometheusStruct(d *schema.ResourceData) (alert *monitor.AlertV2Prometheus) {
-	alertV2Common := buildAlertV2CommonStruct(d)
+func buildAlertV2PrometheusStruct(ctx context.Context, d *schema.ResourceData, client monitor.SysdigMonitorClient) (*monitor.AlertV2Prometheus, error) {
+	alertV2Common, err := buildAlertV2CommonStruct(ctx, d, client)
+	if err != nil {
+		return nil, err
+	}
 	alertV2Common.Type = monitor.AlertV2AlertType_Prometheus
 
 	config := &monitor.AlertV2ConfigPrometheus{}
 	config.Query = d.Get("query").(string)
 
-	alert = &monitor.AlertV2Prometheus{
+	alert := &monitor.AlertV2Prometheus{
 		AlertV2Common: *alertV2Common,
 		Config:        config,
 	}
-	return
+	return alert, nil
 }
 
 func updateAlertV2PrometheusState(d *schema.ResourceData, alert *monitor.AlertV2Prometheus) (err error) {

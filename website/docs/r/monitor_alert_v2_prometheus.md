@@ -23,7 +23,6 @@ resource "sysdig_monitor_alert_v2_prometheus" "sample" {
 	trigger_after_minutes = 10
 	notification_channels {
 		id = <your-notification-channel-id>
-    type = "EMAIL""
     renotify_every_minutes = 5
 	}
 }
@@ -51,7 +50,6 @@ By defining this field, the user can choose to which notification channels send 
 
 It is a list of objects with the following fields:
 * `id` - (Required) The ID of the notification channel
-* `type` - (Required) The type of the notification channel
 * `renotify_every_minutes`: (Optional) the amount of minutes to wait before re sending the notification to this channel
 
 ### `custom_notification`

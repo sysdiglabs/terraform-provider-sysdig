@@ -1,6 +1,8 @@
 package sysdig
 
 import (
+	"context"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -72,8 +74,9 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 						Required: true,
 					},
 					"type": {
-						Type:     schema.TypeString,
-						Required: true,
+						Type:       schema.TypeString,
+						Optional:   true, //for retro compatibility, content will be discarded, remove this is the next major release
+						Deprecated: "no need to define \"type\" attribute anymore, please remove it",
 					},
 					"renotify_every_minutes": {
 						Type:     schema.TypeInt,
@@ -145,9 +148,9 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 	return alertSchema
 }
 
-func buildAlertV2CommonStruct(d *schema.ResourceData) (alert *monitor.AlertV2Common) {
+func buildAlertV2CommonStruct(ctx context.Context, d *schema.ResourceData, client monitor.SysdigMonitorClient) (*monitor.AlertV2Common, error) {
 
-	alert = &monitor.AlertV2Common{
+	alert := &monitor.AlertV2Common{
 		Name:        d.Get("name").(string),
 		Type:        "MANUAL",
 		DurationSec: minutesToSeconds(d.Get("trigger_after_minutes").(int)),
@@ -176,9 +179,14 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) (alert *monitor.AlertV2Com
 
 		for _, channel := range attr.(*schema.Set).List() {
 			channelMap := channel.(map[string]interface{})
+			channelID := channelMap["id"].(int)
+			nc, err := client.GetNotificationChannelById(ctx, channelID)
+			if err != nil {
+				return nil, fmt.Errorf("error getting info for notification channel %d: %w", channelID, err)
+			}
 			newChannel := monitor.NotificationChannelConfigV2{
-				ChannelID: channelMap["id"].(int),
-				Type:      channelMap["type"].(string),
+				ChannelID: channelID,
+				Type:      nc.Type,
 			}
 
 			if renotifyEveryMinutes, ok := channelMap["renotify_every_minutes"]; ok {
@@ -221,7 +229,7 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) (alert *monitor.AlertV2Com
 		alert.CaptureConfig = &capture
 	}
 
-	return
+	return alert, nil
 }
 
 func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Common) (err error) {
@@ -242,8 +250,7 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Comm
 		var notificationChannels []interface{}
 		for _, ncc := range *alert.NotificationChannelConfigList {
 			config := map[string]interface{}{
-				"id":   ncc.ChannelID,
-				"type": ncc.Type,
+				"id": ncc.ChannelID,
 			}
 
 			if ncc.Options != nil {
