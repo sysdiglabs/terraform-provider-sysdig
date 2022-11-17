@@ -111,13 +111,11 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 				Schema: map[string]*schema.Schema{
 					"duration_seconds": {
 						Type:     schema.TypeInt,
-						Required: false,
 						Optional: true,
 						Default:  15,
 					},
 					"storage": {
 						Type:     schema.TypeString,
-						Optional: false,
 						Required: true,
 					},
 					"filename": {
