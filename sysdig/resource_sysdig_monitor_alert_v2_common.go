@@ -33,7 +33,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 		"severity": {
 			Type:         schema.TypeString,
 			Optional:     true,
-			Default:      4,
+			Default:      monitor.AlertV2Severity_Low,
 			ValidateFunc: validation.StringInSlice(monitor.AlertV2Severity_Values(), true),
 		},
 		"trigger_after_minutes": {
