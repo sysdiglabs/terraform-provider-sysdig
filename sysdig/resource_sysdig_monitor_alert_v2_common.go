@@ -83,6 +83,16 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 						Optional: true,
 						Default:  0,
 					},
+					"main_threshold": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						Default:  true,
+					},
+					"warning_threshold": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						Default:  false,
+					},
 				},
 			},
 		},
@@ -191,10 +201,23 @@ func buildAlertV2CommonStruct(ctx context.Context, d *schema.ResourceData, clien
 			}
 
 			if renotifyEveryMinutes, ok := channelMap["renotify_every_minutes"]; ok {
-				newChannel.OverrideOptions = &monitor.NotificationChannelOptionsV2{
-					ReNotifyEverySec: minutesToSeconds(renotifyEveryMinutes.(int)),
+				m := renotifyEveryMinutes.(int)
+				if m != 0 {
+					s := minutesToSeconds(m)
+					newChannel.OverrideOptions.ReNotifyEverySec = &s
 				}
 			}
+
+			newChannel.OverrideOptions.Thresholds = []string{}
+			main_threshold := channelMap["main_threshold"].(bool)
+			if main_threshold {
+				newChannel.OverrideOptions.Thresholds = append(newChannel.OverrideOptions.Thresholds, "MAIN")
+			}
+			warning_threshold := channelMap["warning_threshold"].(bool)
+			if warning_threshold {
+				newChannel.OverrideOptions.Thresholds = append(newChannel.OverrideOptions.Thresholds, "WARNING")
+			}
+
 			channels = append(channels, newChannel)
 		}
 		alert.NotificationChannelConfigList = &channels
@@ -254,9 +277,29 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Comm
 				"id": ncc.ChannelID,
 			}
 
-			if ncc.OverrideOptions != nil {
-				config["renotify_every_minutes"] = secondsToMinutes(ncc.OverrideOptions.ReNotifyEverySec)
+			if ncc.OverrideOptions.ReNotifyEverySec != nil {
+				config["renotify_every_minutes"] = secondsToMinutes(*ncc.OverrideOptions.ReNotifyEverySec)
+			} else {
+				config["renotify_every_minutes"] = 0
 			}
+
+			if ncc.OverrideOptions.Thresholds != nil {
+				config["main_threshold"] = false
+				config["warning_threshold"] = false
+				for _, t := range ncc.OverrideOptions.Thresholds {
+					if t == "MAIN" {
+						config["main_threshold"] = true
+					}
+					if t == "WARNING" {
+						config["warning_threshold"] = true
+					}
+				}
+			} else {
+				// defaults
+				config["main_threshold"] = true
+				config["warning_threshold"] = false
+			}
+
 			notificationChannels = append(notificationChannels, config)
 		}
 

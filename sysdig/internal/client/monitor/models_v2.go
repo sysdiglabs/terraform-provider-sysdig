@@ -127,20 +127,20 @@ type ScopeExpressionOperator struct {
 
 type NotificationChannelConfigV2 struct {
 	// Type can be one of EMAIL, SNS, SLACK, PAGER_DUTY, VICTOROPS, OPSGENIE, WEBHOOK, IBM_FUNCTION, MS_TEAMS, TEAM_EMAIL, IBM_EVENT_NOTIFICATIONS, PROMETHEUS_ALERT_MANAGER
-	ChannelID       int                           `json:"channelId,omitempty"`
-	Type            string                        `json:"type,omitempty"`
-	Name            string                        `json:"nam,omitempty"`
-	Enabled         bool                          `json:"enabled,omitempty"`
-	OverrideOptions *NotificationChannelOptionsV2 `json:"overrideOptions,omitempty"`
+	ChannelID       int                          `json:"channelId,omitempty"`
+	Type            string                       `json:"type,omitempty"`
+	Name            string                       `json:"nam,omitempty"`
+	Enabled         bool                         `json:"enabled,omitempty"`
+	OverrideOptions NotificationChannelOptionsV2 `json:"overrideOptions"`
 }
 
 type NotificationChannelOptionsV2 struct {
 	// commons
 	NotifyOnAcknowledge        bool                          `json:"notifyOnAcknowledge,omitempty"`
 	NotifyOnResolve            bool                          `json:"notifyOnResolve,omitempty"`
-	ReNotifyEverySec           int                           `json:"reNotifyEverySec,omitempty"`
+	ReNotifyEverySec           *int                          `json:"reNotifyEverySec"` // must send null to remove this opt
 	CustomNotificationTemplate *CustomNotificationTemplateV2 `json:"customNotificationTemplate,omitempty"`
-	Thresholds                 []string                      `json:"thresholds,omitempty"`
+	Thresholds                 []string                      `json:"thresholds"` //Set of thresholds the notification channel will be used for. Possible values [MAIN, WARNING]
 }
 
 type CustomNotificationTemplateV2 struct {
