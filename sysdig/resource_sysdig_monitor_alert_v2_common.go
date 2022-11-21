@@ -191,7 +191,7 @@ func buildAlertV2CommonStruct(ctx context.Context, d *schema.ResourceData, clien
 			}
 
 			if renotifyEveryMinutes, ok := channelMap["renotify_every_minutes"]; ok {
-				newChannel.Options = &monitor.NotificationChannelOptionsV2{
+				newChannel.OverrideOptions = &monitor.NotificationChannelOptionsV2{
 					ReNotifyEverySec: minutesToSeconds(renotifyEveryMinutes.(int)),
 				}
 			}
@@ -254,8 +254,8 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Comm
 				"id": ncc.ChannelID,
 			}
 
-			if ncc.Options != nil {
-				config["renotify_every_minutes"] = secondsToMinutes(ncc.Options.ReNotifyEverySec)
+			if ncc.OverrideOptions != nil {
+				config["renotify_every_minutes"] = secondsToMinutes(ncc.OverrideOptions.ReNotifyEverySec)
 			}
 			notificationChannels = append(notificationChannels, config)
 		}
