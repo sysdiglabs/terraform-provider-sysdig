@@ -43,6 +43,7 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `notification_channels` - (Optional) List of notification channel configuration
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
 * `capture` - (Optional) Allows to define a configuration to trigger a Sysdig Capture.
+* `link` - (Optional) List of links to add to notifications
 
 ### `notification_channels` - 
 
@@ -60,6 +61,14 @@ is fired.
 * `subject` - (Optional) Sets the title of the alert.
 * `prepend` - (Optional) Text to add before the alert template.
 * `append` - (Optional) Text to add after the alert template.
+
+### `link`
+
+By defining this field, the user can add link to notificatons.
+
+* `type` - (Required) Type of link. Must be `runbook`, for generic links, or `dashboard`, for internal links to existing dashboards
+* `href` - (Optional) When using `runbook` type, url of the external resource
+* `id` - (Optional) When using `dashboard` type, dasboard id
 
 ### Prometheus alert arguments
 

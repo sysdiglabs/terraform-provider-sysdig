@@ -63,7 +63,6 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 			Type:     schema.TypeInt,
 			Computed: true,
 		},
-
 		"notification_channels": {
 			Type:     schema.TypeSet,
 			Optional: true,
@@ -146,6 +145,27 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 						Type:     schema.TypeBool,
 						Optional: true,
 						Default:  true,
+					},
+				},
+			},
+		},
+		"link": {
+			Type:     schema.TypeSet,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"type": {
+						Type:         schema.TypeString,
+						Required:     true,
+						ValidateFunc: validation.StringInSlice([]string{"runbook", "dashboard"}, true),
+					},
+					"href": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"id": {
+						Type:     schema.TypeString,
+						Optional: true,
 					},
 				},
 			},
@@ -253,6 +273,18 @@ func buildAlertV2CommonStruct(ctx context.Context, d *schema.ResourceData, clien
 		alert.CaptureConfig = &capture
 	}
 
+	alert.Links = []monitor.AlertLinkV2{}
+	if attr, ok := d.GetOk("link"); ok && attr != nil {
+		for _, link := range attr.(*schema.Set).List() {
+			linkMap := link.(map[string]interface{})
+			alert.Links = append(alert.Links, monitor.AlertLinkV2{
+				Type: linkMap["type"].(string),
+				Href: linkMap["href"].(string),
+				ID:   linkMap["id"].(string), //TODO(dbonf) if referencing a non existing dashboard, API will silently fail (status code: 200) not saving the link, add validation?
+			})
+		}
+	}
+
 	return alert, nil
 }
 
@@ -327,6 +359,18 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Comm
 		}
 
 		_ = d.Set("capture", []interface{}{capture})
+	}
+
+	if alert.Links != nil {
+		var links []interface{}
+		for _, link := range alert.Links {
+			links = append(links, map[string]interface{}{
+				"type": link.Type,
+				"href": link.Href,
+				"id":   link.ID,
+			})
+		}
+		_ = d.Set("link", links)
 	}
 
 	return nil

@@ -56,7 +56,7 @@ type AlertV2Common struct {
 	NotificationChannelConfigList *[]NotificationChannelConfigV2 `json:"notificationChannelConfigList,omitempty"`
 	CustomNotificationTemplate    *CustomNotificationTemplateV2  `json:"customNotificationTemplate,omitempty"`
 	CaptureConfig                 *CaptureConfigV2               `json:"captureConfig,omitempty"`
-	Links                         *[]AlertLinkV2                 `json:"links,omitempty"`
+	Links                         []AlertLinkV2                  `json:"links"`
 }
 
 type AlertV2ConfigPrometheus struct {
@@ -166,8 +166,7 @@ func AlertLinkV2Type_Values() []string {
 }
 
 type AlertLinkV2 struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
-	ID   string `json:"id"`
-	Href string `json:"href"`
+	Type string `json:"type,omitempty"`
+	ID   string `json:"id,omitempty"`
+	Href string `json:"href,omitempty"`
 }
