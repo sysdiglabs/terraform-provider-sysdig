@@ -16,15 +16,15 @@ Creates a Sysdig Monitor Prometheus Alert. The notification is triggered on the 
 
 ```terraform
 resource "sysdig_monitor_alert_v2_prometheus" "sample" {
-	name = "Elasticsearch JVM heap usage"
-	description = "A Kubernetes pod failed to restart"
-	severity = high
-	query = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
-	trigger_after_minutes = 10
-	notification_channels {
-		id = <your-notification-channel-id>
+  name = "Elasticsearch JVM heap usage"
+  description = "Elasticsearch JVM heap used over attention threshold"
+  severity = high
+  query = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
+  trigger_after_minutes = 10
+  notification_channels {
+    id = <your-notification-channel-id>
     renotify_every_minutes = 5
-	}
+  }
 }
 ```
 
@@ -37,12 +37,11 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `name` - (Required) The name of the Monitor alert. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
 * `trigger_after_minutes` - (Required) Threshold of time for the status to stabilize until the alert is fired.
-* `group` - (Optional) Lowercase string to group alerts in the UI
+* `group` - (Optional) Lowercase string to group alerts in the UI.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Defaults to true.
-* `notification_channels` - (Optional) List of notification channel configuration
+* `notification_channels` - (Optional) List of notification channel configuration.
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
-* `capture` - (Optional) Allows to define a configuration to trigger a Sysdig Capture.
 * `link` - (Optional) List of links to add to notifications
 
 ### `notification_channels` - 
@@ -50,8 +49,8 @@ These arguments are common to all alerts in Sysdig Monitor.
 By defining this field, the user can choose to which notification channels send the events when the alert fires. 
 
 It is a list of objects with the following fields:
-* `id` - (Required) The ID of the notification channel
-* `renotify_every_minutes`: (Optional) the amount of minutes to wait before re sending the notification to this channel
+* `id` - (Required) The ID of the notification channel.
+* `renotify_every_minutes`: (Optional) the amount of minutes to wait before re sending the notification to this channel. `0` means no renotifiacation enabled.
 
 ### `custom_notification`
 
@@ -66,9 +65,9 @@ is fired.
 
 By defining this field, the user can add link to notificatons.
 
-* `type` - (Required) Type of link. Must be `runbook`, for generic links, or `dashboard`, for internal links to existing dashboards
-* `href` - (Optional) When using `runbook` type, url of the external resource
-* `id` - (Optional) When using `dashboard` type, dasboard id
+* `type` - (Required) Type of link. Must be `runbook`, for generic links, or `dashboard`, for internal links to existing dashboards.
+* `href` - (Optional) When using `runbook` type, url of the external resource.
+* `id` - (Optional) When using `dashboard` type, dasboard id.
 
 ### Prometheus alert arguments
 
@@ -86,7 +85,6 @@ alerts in Sysdig Monitor:
 * `id` - ID of the alert created.
 * `version` - Current version of the resource in Sysdig Monitor.
 * `team` - Team ID that owns the alert.
-
 
 ## Import
 
