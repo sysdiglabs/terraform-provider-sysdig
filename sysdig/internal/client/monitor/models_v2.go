@@ -59,6 +59,7 @@ type AlertV2Common struct {
 	Links                         []AlertLinkV2                  `json:"links"`
 }
 
+// Prometheus
 type AlertV2ConfigPrometheus struct {
 	Query string `json:"query"`
 }
@@ -84,19 +85,48 @@ func AlertV2PrometheusFromJSON(body []byte) AlertV2Prometheus {
 	return result.Alert
 }
 
+// Event
+type AlertV2ConfigEvent struct {
+	Scope                    *AlertScopeV2            `json:"scope,omitempty"`
+	SegmentBy                []AlertLabelDescriptorV2 `json:"segmentBy"`
+	ConditionOperator        string                   `json:"conditionOperator"`
+	Threshold                float64                  `json:"threshold"`
+	WarningConditionOperator string                   `json:"warningConditionOperator,omitempty"`
+	WarningThreshold         *float64                 `json:"warningThreshold,omitempty"`
+
+	Filter string   `json:"filter"`
+	Tags   []string `json:"tags"`
+}
+
+type AlertV2Event struct {
+	AlertV2Common
+	Config *AlertV2ConfigEvent `json:"config"`
+}
+
+func (a *AlertV2Event) ToJSON() io.Reader {
+	data := struct {
+		Alert AlertV2Event `json:"alert"`
+	}{Alert: *a}
+	payload, _ := json.Marshal(data)
+	return bytes.NewBuffer(payload)
+}
+
+func AlertV2EventFromJSON(body []byte) AlertV2Event {
+	var result struct {
+		Alert AlertV2Event
+	}
+	_ = json.Unmarshal(body, &result)
+	return result.Alert
+}
+
 // AlertScopeV2
 type AlertScopeV2 struct {
-	Expressions []ScopeExpressionV2 `json:"expressions"`
+	Expressions []ScopeExpressionV2 `json:"expressions,omitempty"`
 }
 
 type AlertLabelDescriptorV2 struct {
 	ID       string `json:"id"`
 	PublicID string `json:"publicId"`
-}
-
-type NotificationGroupingConditionV2 struct {
-	Type  string  `json:"type"`
-	Value float64 `json:"value"`
 }
 
 type AlertMetricDescriptorV2 struct {
@@ -116,13 +146,10 @@ type Aggregation struct {
 }
 
 type ScopeExpressionV2 struct {
-	Operand    string                  `json:"operand"`
-	Descriptor AlertLabelDescriptorV2  `json:"descriptor"`
-	Operator   ScopeExpressionOperator `json:"operator"`
-	Value      []string                `json:"value"`
-}
-
-type ScopeExpressionOperator struct {
+	Operand    string                 `json:"operand"`    // old dot notation, e.g. "kubernetes.cluster.name"
+	Descriptor AlertLabelDescriptorV2 `json:"descriptor"` // discarded by the backend in put/post
+	Operator   string                 `json:"operator"`
+	Value      []string               `json:"value"`
 }
 
 type NotificationChannelConfigV2 struct {
@@ -169,4 +196,11 @@ type AlertLinkV2 struct {
 	Type string `json:"type,omitempty"`
 	ID   string `json:"id,omitempty"`
 	Href string `json:"href,omitempty"`
+}
+
+type LabelDescriptorV3 struct {
+	LabelDescriptor struct {
+		ID       string `json:"id"`
+		PublicID string `json:"publicId"`
+	} `json:"labelDescriptor"`
 }
