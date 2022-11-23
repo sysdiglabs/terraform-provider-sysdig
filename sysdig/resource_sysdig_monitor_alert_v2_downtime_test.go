@@ -67,7 +67,7 @@ func alertV2DowntimeWithGroupBy(name string) string {
 	return fmt.Sprintf(`
 	resource "sysdig_monitor_alert_v2_downtime" "sample" {
 
-		name = "TERRAFORM TEST - METRICV2 %s"
+		name = "TERRAFORM TEST - DOWNTIMEV2 %s"
 		metric = "sysdig_container_up"
 		threshold = 75
 		group_by = ["kube_cluster_name", "kube_pod_name", "cloud_provider_tag_Owner",]

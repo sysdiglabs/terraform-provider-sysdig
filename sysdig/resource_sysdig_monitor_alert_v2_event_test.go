@@ -28,10 +28,16 @@ func TestAccAlertV2Event(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: alertV2EventWithName(rText()),
+				Config: alertV2Event(rText()),
 			},
 			{
-				Config: alertV2EventWithGroupBy(rText()),
+				Config: alertV2EventWithSources(rText()),
+			},
+			{
+				Config: alertV2EventWithScrambledSources(rText()),
+			},
+			{
+				Config: alertV2EventWithWarningThreshold(rText()),
 			},
 			{
 				ResourceName:      "sysdig_monitor_alert_v2_event.sample",
@@ -42,13 +48,80 @@ func TestAccAlertV2Event(t *testing.T) {
 	})
 }
 
-func alertV2EventWithName(name string) string {
+func alertV2Event(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_event" "sample" {
+
+	name = "TERRAFORM TEST - EVENTV2 %s"
+	filter = "xxx"
+	op = ">="
+	threshold = 50
+
+	scope {
+		label = "kube_cluster_name"
+		op = "in"
+		values = ["thom-cluster1", "demo-env-prom"]
+	}
+
+	trigger_after_minutes = 15
+
+}
+
+`, name)
+}
+
+func alertV2EventWithSources(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_alert_v2_event" "sample" {
 
 	name = "TERRAFORM TEST - EVENTV2 %s"
 	filter = "xxx"
 	sources = ["kubernetes", "zup", "fix"]
+	op = ">="
+	threshold = 50
+
+	scope {
+		label = "kube_cluster_name"
+		op = "in"
+		values = ["thom-cluster1", "demo-env-prom"]
+	}
+
+	trigger_after_minutes = 15
+
+}
+
+`, name)
+}
+
+func alertV2EventWithScrambledSources(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_event" "sample" {
+
+	name = "TERRAFORM TEST - EVENTV2 %s"
+	filter = "xxx"
+	sources = ["kubernetes", "fix", "zup"]
+	op = ">="
+	threshold = 50
+
+	scope {
+		label = "kube_cluster_name"
+		op = "in"
+		values = ["thom-cluster1", "demo-env-prom"]
+	}
+
+	trigger_after_minutes = 15
+
+}
+
+`, name)
+}
+
+func alertV2EventWithWarningThreshold(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_event" "sample" {
+
+	name = "TERRAFORM TEST - EVENTV2 %s"
+	filter = "xxx"
 	op = ">="
 	threshold = 50
 	warning_threshold = 20
@@ -64,29 +137,4 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
 }
 
 `, name)
-}
-
-func alertV2EventWithGroupBy(name string) string {
-	return fmt.Sprintf(`
-	resource "sysdig_monitor_alert_v2_event" "sample" {
-
-		name = "TERRAFORM TEST - EVENTV2 %s"
-		filter = "xxx"
-		sources = ["kubernetes", "zup", "fix"]
-		op = ">="
-		threshold = 50
-		warning_threshold = 20
-		group_by = ["kube_cluster_name", "kube_pod_name", "cloud_provider_tag_Owner",]
-	
-		scope {
-			label = "kube_cluster_name"
-			op = "in"
-			values = ["thom-cluster1", "demo-env-prom"]
-		}
-	
-		trigger_after_minutes = 15
-	
-	}
-	
-	`, name)
 }
