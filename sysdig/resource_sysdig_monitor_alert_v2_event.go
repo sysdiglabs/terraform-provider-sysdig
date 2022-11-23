@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -33,35 +32,7 @@ func resourceSysdigMonitorAlertV2Event() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 
-		Schema: createAlertV2Schema(map[string]*schema.Schema{
-			"scope": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"label": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringDoesNotContainAny("."),
-						},
-						"op": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"equals", "notEquals", "in", "notIn", "contains", "notContains", "startsWith"}, false),
-						},
-						"values": {
-							Type:     schema.TypeList,
-							Required: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-					},
-				},
-			},
-			"group_by": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
+		Schema: createScopedSegmentedAlertV2Schema(createAlertV2Schema(map[string]*schema.Schema{
 			"op": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -75,7 +46,6 @@ func resourceSysdigMonitorAlertV2Event() *schema.Resource {
 				Type:     schema.TypeFloat,
 				Optional: true,
 			},
-
 			"filter": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -85,7 +55,7 @@ func resourceSysdigMonitorAlertV2Event() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-		}),
+		})),
 	}
 }
 
@@ -194,48 +164,9 @@ func buildAlertV2EventStruct(ctx context.Context, d *schema.ResourceData, client
 	alertV2Common.Type = monitor.AlertV2AlertType_Event
 	config := &monitor.AlertV2ConfigEvent{}
 
-	//scope
-	expressions := make([]monitor.ScopeExpressionV2, 0)
-	for _, scope := range d.Get("scope").(*schema.Set).List() {
-		scopeMap := scope.(map[string]interface{})
-		operator := scopeMap["op"].(string)
-		value := make([]string, 0)
-		for _, v := range scopeMap["values"].([]interface{}) {
-			value = append(value, v.(string))
-		}
-		label := scopeMap["label"].(string)
-		labelDescriptorV3, err := client.GetLabelDescriptor(ctx, label)
-		if err != nil {
-			return nil, fmt.Errorf("error getting descriptor for label %s: %w", label, err)
-		}
-		operand := labelDescriptorV3.LabelDescriptor.ID
-		expressions = append(expressions, monitor.ScopeExpressionV2{
-			Operand:  operand,
-			Operator: operator,
-			Value:    value,
-		})
-	}
-	if len(expressions) > 0 {
-		config.Scope = &monitor.AlertScopeV2{
-			Expressions: expressions,
-		}
-	}
-
-	//SegmentBy
-	config.SegmentBy = make([]monitor.AlertLabelDescriptorV2, 0)
-	labels, ok := d.GetOk("group_by")
-	if ok {
-		for _, l := range labels.([]interface{}) {
-			label := l.(string)
-			labelDescriptorV3, err := client.GetLabelDescriptor(ctx, label)
-			if err != nil {
-				return nil, fmt.Errorf("error getting descriptor for label %s: %w", label, err)
-			}
-			config.SegmentBy = append(config.SegmentBy, monitor.AlertLabelDescriptorV2{
-				ID:       labelDescriptorV3.LabelDescriptor.ID,
-				PublicID: labelDescriptorV3.LabelDescriptor.PublicID,
-			})
-		}
+	err = buildScopedSegmentedConfigStruct(ctx, d, client, &config.ScopedSegmentedConfig)
+	if err != nil {
+		return nil, err
 	}
 
 	//ConditionOperator
@@ -277,31 +208,9 @@ func updateAlertV2EventState(d *schema.ResourceData, alert *monitor.AlertV2Event
 		return err
 	}
 
-	if alert.Config.Scope != nil && len(alert.Config.Scope.Expressions) > 0 {
-		var scope []interface{}
-		for _, e := range alert.Config.Scope.Expressions {
-			// operand possibly holds the old dot notation, we want "label" to be in public notation
-			// if the label does not yet exist the descriptor will be empty, use what's in the operand
-			label := e.Descriptor.PublicID
-			if label == "" {
-				label = e.Operand
-			}
-			config := map[string]interface{}{
-				"label":  label,
-				"op":     e.Operator,
-				"values": e.Value,
-			}
-			scope = append(scope, config)
-		}
-		_ = d.Set("scope", scope)
-	}
-
-	if len(alert.Config.SegmentBy) > 0 {
-		groups := make([]string, 0)
-		for _, s := range alert.Config.SegmentBy {
-			groups = append(groups, s.PublicID)
-		}
-		_ = d.Set("group_by", groups)
+	err = updateScopedSegmentedConfigState(d, &alert.Config.ScopedSegmentedConfig)
+	if err != nil {
+		return err
 	}
 
 	_ = d.Set("op", alert.Config.ConditionOperator)

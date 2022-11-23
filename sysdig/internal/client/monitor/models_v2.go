@@ -59,6 +59,11 @@ type AlertV2Common struct {
 	Links                         []AlertLinkV2                  `json:"links"`
 }
 
+type ScopedSegmentedConfig struct {
+	Scope     *AlertScopeV2            `json:"scope,omitempty"`
+	SegmentBy []AlertLabelDescriptorV2 `json:"segmentBy"`
+}
+
 // Prometheus
 type AlertV2ConfigPrometheus struct {
 	Query string `json:"query"`
@@ -87,12 +92,12 @@ func AlertV2PrometheusFromJSON(body []byte) AlertV2Prometheus {
 
 // Event
 type AlertV2ConfigEvent struct {
-	Scope                    *AlertScopeV2            `json:"scope,omitempty"`
-	SegmentBy                []AlertLabelDescriptorV2 `json:"segmentBy"`
-	ConditionOperator        string                   `json:"conditionOperator"`
-	Threshold                float64                  `json:"threshold"`
-	WarningConditionOperator string                   `json:"warningConditionOperator,omitempty"`
-	WarningThreshold         *float64                 `json:"warningThreshold,omitempty"`
+	ScopedSegmentedConfig
+
+	ConditionOperator        string   `json:"conditionOperator"`
+	Threshold                float64  `json:"threshold"`
+	WarningConditionOperator string   `json:"warningConditionOperator,omitempty"`
+	WarningThreshold         *float64 `json:"warningThreshold,omitempty"`
 
 	Filter string   `json:"filter"`
 	Tags   []string `json:"tags"`

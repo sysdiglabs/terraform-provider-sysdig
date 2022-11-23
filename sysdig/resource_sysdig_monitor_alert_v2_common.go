@@ -376,3 +376,122 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Comm
 
 	return nil
 }
+
+func createScopedSegmentedAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.Schema {
+	sysdigAlertSchema := map[string]*schema.Schema{
+		"scope": {
+			Type:     schema.TypeSet,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"label": {
+						Type:         schema.TypeString,
+						Required:     true,
+						ValidateFunc: validation.StringDoesNotContainAny("."),
+					},
+					"op": {
+						Type:         schema.TypeString,
+						Required:     true,
+						ValidateFunc: validation.StringInSlice([]string{"equals", "notEquals", "in", "notIn", "contains", "notContains", "startsWith"}, false),
+					},
+					"values": {
+						Type:     schema.TypeList,
+						Required: true,
+						Elem:     &schema.Schema{Type: schema.TypeString},
+					},
+				},
+			},
+		},
+		"group_by": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+		}}
+
+	for k, v := range original {
+		sysdigAlertSchema[k] = v
+	}
+
+	return sysdigAlertSchema
+}
+
+func buildScopedSegmentedConfigStruct(ctx context.Context, d *schema.ResourceData, client monitor.SysdigMonitorClient, config *monitor.ScopedSegmentedConfig) error {
+
+	//scope
+	expressions := make([]monitor.ScopeExpressionV2, 0)
+	for _, scope := range d.Get("scope").(*schema.Set).List() {
+		scopeMap := scope.(map[string]interface{})
+		operator := scopeMap["op"].(string)
+		value := make([]string, 0)
+		for _, v := range scopeMap["values"].([]interface{}) {
+			value = append(value, v.(string))
+		}
+		label := scopeMap["label"].(string)
+		labelDescriptorV3, err := client.GetLabelDescriptor(ctx, label)
+		if err != nil {
+			return fmt.Errorf("error getting descriptor for label %s: %w", label, err)
+		}
+		operand := labelDescriptorV3.LabelDescriptor.ID
+		expressions = append(expressions, monitor.ScopeExpressionV2{
+			Operand:  operand,
+			Operator: operator,
+			Value:    value,
+		})
+	}
+	if len(expressions) > 0 {
+		config.Scope = &monitor.AlertScopeV2{
+			Expressions: expressions,
+		}
+	}
+
+	//SegmentBy
+	config.SegmentBy = make([]monitor.AlertLabelDescriptorV2, 0)
+	labels, ok := d.GetOk("group_by")
+	if ok {
+		for _, l := range labels.([]interface{}) {
+			label := l.(string)
+			labelDescriptorV3, err := client.GetLabelDescriptor(ctx, label)
+			if err != nil {
+				return fmt.Errorf("error getting descriptor for label %s: %w", label, err)
+			}
+			config.SegmentBy = append(config.SegmentBy, monitor.AlertLabelDescriptorV2{
+				ID:       labelDescriptorV3.LabelDescriptor.ID,
+				PublicID: labelDescriptorV3.LabelDescriptor.PublicID,
+			})
+		}
+	}
+
+	return nil
+}
+
+func updateScopedSegmentedConfigState(d *schema.ResourceData, config *monitor.ScopedSegmentedConfig) error {
+
+	if config.Scope != nil && len(config.Scope.Expressions) > 0 {
+		var scope []interface{}
+		for _, e := range config.Scope.Expressions {
+			// operand possibly holds the old dot notation, we want "label" to be in public notation
+			// if the label does not yet exist the descriptor will be empty, use what's in the operand
+			label := e.Descriptor.PublicID
+			if label == "" {
+				label = e.Operand
+			}
+			config := map[string]interface{}{
+				"label":  label,
+				"op":     e.Operator,
+				"values": e.Value,
+			}
+			scope = append(scope, config)
+		}
+		_ = d.Set("scope", scope)
+	}
+
+	if len(config.SegmentBy) > 0 {
+		groups := make([]string, 0)
+		for _, s := range config.SegmentBy {
+			groups = append(groups, s.PublicID)
+		}
+		_ = d.Set("group_by", groups)
+	}
+
+	return nil
+}
