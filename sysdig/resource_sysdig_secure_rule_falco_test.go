@@ -71,7 +71,17 @@ func TestAccRuleFalco(t *testing.T) {
 				Config: ruleFalcoWithExceptions(randomText),
 			},
 			{
+				ResourceName:      "sysdig_secure_rule_falco.falco_rule_with_exceptions",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: existingFalcoRuleWithExceptions(randomText),
+			},
+			{
+				ResourceName:      "sysdig_secure_rule_falco.attach_to_cluster_admin_role_exceptions",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -156,7 +166,7 @@ resource "sysdig_secure_rule_falco" "terminal_shell_append" {
 
 func ruleFalcoWithExceptions(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role" {
+resource "sysdig_secure_rule_falco" "falco_rule_with_exceptions" {
   name        = "TERRAFORM TEST %s - Attach to cluster-admin Role"
   condition   = "kevt and clusterrolebinding and kcreate and ka.req.binding.role=cluster-admin"
   description = "Detect any attempt to create a ClusterRoleBinding to the cluster-admin user"
