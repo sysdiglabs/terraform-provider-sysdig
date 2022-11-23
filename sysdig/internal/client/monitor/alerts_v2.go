@@ -140,6 +140,46 @@ func (c *sysdigMonitorClient) DeleteAlertV2Metric(ctx context.Context, alertID i
 	return c.deleteAlertV2(ctx, alertID)
 }
 
+// downtime
+
+func (c *sysdigMonitorClient) CreateAlertV2Downtime(ctx context.Context, alert AlertV2Downtime) (createdAlert AlertV2Downtime, err error) {
+	body, err := c.createAlertV2(ctx, alert.ToJSON())
+	if err != nil {
+		return
+	}
+	createdAlert = AlertV2DowntimeFromJSON(body)
+
+	// this fixes the APIs bug of not setting the default group on the response of the create method
+	if createdAlert.Group == "" {
+		createdAlert.Group = "default"
+	}
+	return
+}
+
+func (c *sysdigMonitorClient) UpdateAlertV2Downtime(ctx context.Context, alert AlertV2Downtime) (updatedAlert AlertV2Downtime, err error) {
+	body, err := c.updateAlertV2(ctx, alert.ID, alert.ToJSON())
+	if err != nil {
+		return
+	}
+
+	updatedAlert = AlertV2DowntimeFromJSON(body)
+	return
+}
+
+func (c *sysdigMonitorClient) GetAlertV2DowntimeById(ctx context.Context, alertID int) (alert AlertV2Downtime, err error) {
+	body, err := c.getAlertV2ById(ctx, alertID)
+	if err != nil {
+		return
+	}
+
+	alert = AlertV2DowntimeFromJSON(body)
+	return
+}
+
+func (c *sysdigMonitorClient) DeleteAlertV2Downtime(ctx context.Context, alertID int) (err error) {
+	return c.deleteAlertV2(ctx, alertID)
+}
+
 // helpers
 
 func (c *sysdigMonitorClient) createAlertV2(ctx context.Context, alertJson io.Reader) (responseBody []byte, err error) {

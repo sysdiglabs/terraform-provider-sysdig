@@ -160,6 +160,40 @@ func AlertV2MetricFromJSON(body []byte) AlertV2Metric {
 	return result.Alert
 }
 
+// Downtime
+type AlertV2ConfigDowntime struct {
+	ScopedSegmentedConfig
+
+	ConditionOperator string  `json:"conditionOperator"`
+	Threshold         float64 `json:"threshold"`
+
+	GroupAggregation string                 `json:"groupAggregation"`
+	TimeAggregation  string                 `json:"timeAggregation"`
+	Metric           AlertLabelDescriptorV2 `json:"metric"`
+	NoDataBehaviour  string                 `json:"noDataBehaviour"`
+}
+
+type AlertV2Downtime struct {
+	AlertV2Common
+	Config *AlertV2ConfigDowntime `json:"config"`
+}
+
+func (a *AlertV2Downtime) ToJSON() io.Reader {
+	data := struct {
+		Alert AlertV2Downtime `json:"alert"`
+	}{Alert: *a}
+	payload, _ := json.Marshal(data)
+	return bytes.NewBuffer(payload)
+}
+
+func AlertV2DowntimeFromJSON(body []byte) AlertV2Downtime {
+	var result struct {
+		Alert AlertV2Downtime
+	}
+	_ = json.Unmarshal(body, &result)
+	return result.Alert
+}
+
 // AlertScopeV2
 type AlertScopeV2 struct {
 	Expressions []ScopeExpressionV2 `json:"expressions,omitempty"`
