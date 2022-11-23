@@ -80,6 +80,7 @@ func Provider() *schema.Provider {
 			"sysdig_monitor_alert_group_outlier":            resourceSysdigMonitorAlertGroupOutlier(),
 			"sysdig_monitor_alert_promql":                   resourceSysdigMonitorAlertPromql(),
 			"sysdig_monitor_alert_v2_event":                 resourceSysdigMonitorAlertV2Event(),
+			"sysdig_monitor_alert_v2_metric":                resourceSysdigMonitorAlertV2Metric(),
 			"sysdig_monitor_alert_v2_prometheus":            resourceSysdigMonitorAlertV2Prometheus(),
 			"sysdig_monitor_dashboard":                      resourceSysdigMonitorDashboard(),
 			"sysdig_monitor_notification_channel_email":     resourceSysdigMonitorNotificationChannelEmail(),

@@ -124,6 +124,42 @@ func AlertV2EventFromJSON(body []byte) AlertV2Event {
 	return result.Alert
 }
 
+// Metric
+type AlertV2ConfigMetric struct {
+	ScopedSegmentedConfig
+
+	ConditionOperator        string   `json:"conditionOperator"`
+	Threshold                float64  `json:"threshold"`
+	WarningConditionOperator string   `json:"warningConditionOperator,omitempty"`
+	WarningThreshold         *float64 `json:"warningThreshold,omitempty"`
+
+	GroupAggregation string                 `json:"groupAggregation"`
+	TimeAggregation  string                 `json:"timeAggregation"`
+	Metric           AlertLabelDescriptorV2 `json:"metric"`
+	NoDataBehaviour  string                 `json:"noDataBehaviour"`
+}
+
+type AlertV2Metric struct {
+	AlertV2Common
+	Config *AlertV2ConfigMetric `json:"config"`
+}
+
+func (a *AlertV2Metric) ToJSON() io.Reader {
+	data := struct {
+		Alert AlertV2Metric `json:"alert"`
+	}{Alert: *a}
+	payload, _ := json.Marshal(data)
+	return bytes.NewBuffer(payload)
+}
+
+func AlertV2MetricFromJSON(body []byte) AlertV2Metric {
+	var result struct {
+		Alert AlertV2Metric
+	}
+	_ = json.Unmarshal(body, &result)
+	return result.Alert
+}
+
 // AlertScopeV2
 type AlertScopeV2 struct {
 	Expressions []ScopeExpressionV2 `json:"expressions,omitempty"`

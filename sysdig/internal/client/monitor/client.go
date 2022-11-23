@@ -29,6 +29,11 @@ type SysdigMonitorClient interface {
 	UpdateAlertV2Event(context.Context, AlertV2Event) (AlertV2Event, error)
 	GetAlertV2EventById(context.Context, int) (AlertV2Event, error)
 
+	CreateAlertV2Metric(context.Context, AlertV2Metric) (AlertV2Metric, error)
+	DeleteAlertV2Metric(context.Context, int) error
+	UpdateAlertV2Metric(context.Context, AlertV2Metric) (AlertV2Metric, error)
+	GetAlertV2MetricById(context.Context, int) (AlertV2Metric, error)
+
 	GetLabelDescriptor(ctx context.Context, label string) (LabelDescriptorV3, error)
 
 	CreateTeam(context.Context, Team) (Team, error)
