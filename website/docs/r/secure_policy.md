@@ -76,6 +76,7 @@ The actions block is optional and supports:
     amount of seconds before the policy was triggered.
     * `seconds_after_event` - (Required) Captures the system calls for the amount
     of seconds after the policy was triggered.
+    * `name` - (Optional) The name of the capture file
 
 - - -
 
