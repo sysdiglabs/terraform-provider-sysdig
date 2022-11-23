@@ -6,6 +6,7 @@
 
 # monitor
 *monitor*alert* @arturodilecce
+*monitor*dashboard* @brokenpip3
 
 # policies/rules
-*secure*policy* @sysdiglabs/team-secure-detection
+*secure*policy* @team-secure-detection
