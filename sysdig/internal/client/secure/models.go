@@ -26,6 +26,7 @@ type Policy struct {
 type Action struct {
 	AfterEventNs         int    `json:"afterEventNs,omitempty"`
 	BeforeEventNs        int    `json:"beforeEventNs,omitempty"`
+	Name                 string `json:"name,omitempty"`
 	IsLimitedToContainer bool   `json:"isLimitedToContainer"`
 	Type                 string `json:"type"`
 }

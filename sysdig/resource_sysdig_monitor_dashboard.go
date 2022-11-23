@@ -183,6 +183,28 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 										Required:         true,
 										ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"percent", "data", "data rate", "number", "number rate", "time"}, false)),
 									},
+									"display_info": {
+										Type:     schema.TypeSet,
+										Optional: true,
+										MinItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"display_name": {
+													Type:     schema.TypeString,
+													Optional: true,
+												},
+												"time_series_display_name_template": {
+													Type:     schema.TypeString,
+													Required: true,
+												},
+												"type": {
+													Type:             schema.TypeString,
+													Required:         true,
+													ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"lines", "stackedArea", "stackedBar"}, false)),
+												},
+											},
+										},
+									},
 								},
 							},
 						},
@@ -252,7 +274,6 @@ func resourceSysdigDashboardRead(ctx context.Context, data *schema.ResourceData,
 	}
 
 	dashboard, err := client.GetDashboardByID(ctx, id)
-
 	if err != nil {
 		data.SetId("")
 		return nil
@@ -519,10 +540,24 @@ func textPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panels,
 }
 
 func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Panels) (newQueries []*model.AdvancedQueries, err error) {
+	var display model.DisplayInfo
+
 	for _, queryItr := range panelInfo["query"].(*schema.Set).List() {
 		queryInfo := queryItr.(map[string]interface{})
 
-		promqlQuery := model.NewPromqlQuery(queryInfo["promql"].(string), panel)
+		displayInfo := queryInfo["display_info"].(*schema.Set).List()
+		if len(displayInfo) > 0 {
+			dip := displayInfo[0].(map[string]interface{})
+			display.DisplayName = dip["display_name"].(string)
+			display.TimeSeriesDisplayNameTemplate = dip["time_series_display_name_template"].(string)
+			display.Type = dip["type"].(string)
+		} else {
+			display.DisplayName = ""
+			display.TimeSeriesDisplayNameTemplate = ""
+			display.Type = "lines"
+		}
+
+		promqlQuery := model.NewPromqlQuery(queryInfo["promql"].(string), panel, display)
 
 		switch queryInfo["unit"].(string) {
 		case "percent":
@@ -746,10 +781,22 @@ func queriesToResourceData(advancedQueries []*model.AdvancedQueries) ([]map[stri
 			return nil, fmt.Errorf("unsupported query format unit: %s", query.Format.Unit)
 		}
 
-		queries = append(queries, map[string]interface{}{
-			"unit":   unit,
-			"promql": query.Query,
-		})
+		if query.DisplayInfo.DisplayName == "" && query.DisplayInfo.TimeSeriesDisplayNameTemplate == "" {
+			queries = append(queries, map[string]interface{}{
+				"unit":   unit,
+				"promql": query.Query,
+			})
+		} else {
+			queries = append(queries, map[string]interface{}{
+				"unit":   unit,
+				"promql": query.Query,
+				"display_info": []map[string]interface{}{{
+					"display_name":                      query.DisplayInfo.DisplayName,
+					"time_series_display_name_template": query.DisplayInfo.TimeSeriesDisplayNameTemplate,
+					"type":                              query.DisplayInfo.Type,
+				}},
+			})
+		}
 	}
 	return queries, nil
 }

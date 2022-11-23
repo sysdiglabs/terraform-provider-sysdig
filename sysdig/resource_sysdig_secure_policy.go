@@ -111,6 +111,11 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 										Required:         true,
 										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
 									},
+									"name": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
 								},
 							},
 						},
@@ -168,6 +173,7 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 			actions[0]["capture"] = []map[string]interface{}{{
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
+				"name":                 action.Name,
 			}}
 			_ = d.Set("actions", actions)
 		}
@@ -231,11 +237,13 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 	if captureAction := d.Get("actions.0.capture").([]interface{}); len(captureAction) > 0 {
 		afterEventNs := d.Get("actions.0.capture.0.seconds_after_event").(int) * 1000000000
 		beforeEventNs := d.Get("actions.0.capture.0.seconds_before_event").(int) * 1000000000
+		name := d.Get("actions.0.capture.0.name").(string)
 		policy.Actions = append(policy.Actions, secure.Action{
 			Type:                 "POLICY_ACTION_CAPTURE",
 			IsLimitedToContainer: false,
 			AfterEventNs:         afterEventNs,
 			BeforeEventNs:        beforeEventNs,
+			Name:                 name,
 		})
 	}
 }

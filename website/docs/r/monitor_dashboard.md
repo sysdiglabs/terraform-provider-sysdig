@@ -47,6 +47,11 @@ resource "sysdig_monitor_dashboard" "dashboard" {
     query {
       promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
       unit   = "number"
+      display_info {
+        display_name                      = "ct_name"
+        time_series_display_name_template = "{{container_name}}"
+        type                              = "lines"
+      }
     }
   }
 
@@ -166,9 +171,19 @@ The following arguments are supported:
 
 * `promql` - (Required) The PromQL query. Must be a valid PromQL query with existing
              metrics in Sysdig Monitor.
-             
+
 * `unit` - (Required) The type of metric for this query. Can be one of: `percent`, `data`, `data rate`, 
             `number`, `number rate`, `time`.
+
+* `display_info` - (Optional) Configure the time series display visualization for the selected query.
+
+  Nested scheme for `display_info`:
+
+  * `display_name` - (Optional) Configure the query display name summary, the text will appears as a title for the legend.
+
+  * `time_series_display_name_template` - (Required) Configure the display name of the time series for the query using text and any label values returned with the metric. For example: `CPU usage % for {{host}}`.
+
+  * `type` - (Required) Configure the visualization type in the timechart, can be `lines`, `stackedArea`, `stackedBar`
 
 
 ### share
