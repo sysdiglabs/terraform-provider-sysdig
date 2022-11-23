@@ -74,6 +74,7 @@ resource "sysdig_secure_policy" "sample" {
   severity = 4
   scope = "container.id != \"\""
   rule_names = [sysdig_secure_rule_falco.terminal_shell.name]
+  runbook = "https://sysdig.com"
 
   actions {
     container = "stop"
