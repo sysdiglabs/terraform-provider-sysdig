@@ -152,7 +152,7 @@ type CustomNotificationTemplateV2 struct {
 type CaptureConfigV2 struct {
 	DurationSec int    `json:"durationSec"`
 	Storage     string `json:"storage"`
-	Filter      string `json:"filter,omitempty"`
+	Filter      string `json:"filter"`
 	FileName    string `json:"fileName"`
 	Enabled     bool   `json:"enabled"`
 }

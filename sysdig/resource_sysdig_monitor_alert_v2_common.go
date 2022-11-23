@@ -129,12 +129,13 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 					},
 					"storage": {
 						Type:     schema.TypeString,
-						Required: true,
+						Optional: true,
+						Default:  "",
 					},
 					"filename": {
 						Type:         schema.TypeString,
 						Required:     true,
-						ValidateFunc: validation.StringMatch(regexp.MustCompile(monitor.AlertV2CaptureFilenameRegexp), "the filename must end in .scap"),
+						ValidateFunc: validation.StringMatch(regexp.MustCompile(monitor.AlertV2CaptureFilenameRegexp), "the filename must end in .scap"), //otherwise the api will silently add .scap at the end
 					},
 					"filter": {
 						Type:     schema.TypeString,
