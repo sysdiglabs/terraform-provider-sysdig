@@ -50,10 +50,10 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `trigger_after_minutes` - (Required) Threshold of time for the status to stabilize until the alert is fired.
 * `group` - (Optional) Lowercase string to group alerts in the UI.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
-* `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Defaults to true.
+* `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.
 * `notification_channels` - (Optional) List of notification channel configuration
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
-* `link` - (Optional) List of links to add to notifications
+* `link` - (Optional) List of links to add to notifications.
 
 ### `notification_channels`
 
