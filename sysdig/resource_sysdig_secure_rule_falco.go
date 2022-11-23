@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -146,8 +147,53 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 	if rule.Details.Append != nil {
 		_ = d.Set("append", *rule.Details.Append)
 	}
+	if err := updateResourceDataExceptions(d, rule.Details.Exceptions); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
+}
+
+func updateResourceDataExceptions(d *schema.ResourceData, ruleExceptions []*secure.Exception) error {
+	exceptions := make([]any, 0, len(ruleExceptions))
+	for _, exception := range ruleExceptions {
+		valuesData, err := json.Marshal(exception.Values)
+		if err != nil {
+			return fmt.Errorf("error marshalling exception values '%+v': %s", exception.Values, err)
+		}
+		fields, err := fieldOrCompsToStringSlice(exception.Fields)
+		if err != nil {
+			return fmt.Errorf("error converting exception fields '%+v': %s", exception.Fields, err)
+		}
+		comps, err := fieldOrCompsToStringSlice(exception.Comps)
+		if err != nil {
+			return fmt.Errorf("error converting exception comps '%+v': %s", exception.Comps, err)
+		}
+
+		exceptions = append(exceptions, map[string]any{
+			"name":   exception.Name,
+			"comps":  comps,
+			"values": string(valuesData),
+			"fields": fields,
+		})
+	}
+	_ = d.Set("exceptions", exceptions)
+	return nil
+}
+
+func fieldOrCompsToStringSlice(fields any) ([]string, error) {
+	elements := []string{}
+	switch t := fields.(type) {
+	case []interface{}:
+		for _, field := range t {
+			elements = append(elements, field.(string))
+		}
+	case string:
+		elements = append(elements, t)
+	default:
+		return nil, fmt.Errorf("unexpected type: %T", t)
+	}
+	return elements, nil
 }
 
 func resourceSysdigRuleFalcoUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
