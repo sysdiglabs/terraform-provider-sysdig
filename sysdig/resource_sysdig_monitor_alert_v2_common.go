@@ -45,7 +45,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 		"group": {
 			Type:     schema.TypeString,
 			Optional: true,
-			Computed: true,
+			Default:  "default",
 			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 				return strings.EqualFold(old, new)
 			},

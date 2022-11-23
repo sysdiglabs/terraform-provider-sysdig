@@ -27,12 +27,8 @@ func (c *sysdigMonitorClient) CreateAlertV2Prometheus(ctx context.Context, alert
 	if err != nil {
 		return
 	}
-	createdAlert = AlertV2PrometheusFromJSON(body)
 
-	// this fixes the APIs bug of not setting the default group on the response of the create method
-	if createdAlert.Group == "" {
-		createdAlert.Group = "default"
-	}
+	createdAlert = AlertV2PrometheusFromJSON(body)
 	return
 }
 
@@ -67,12 +63,8 @@ func (c *sysdigMonitorClient) CreateAlertV2Event(ctx context.Context, alert Aler
 	if err != nil {
 		return
 	}
-	createdAlert = AlertV2EventFromJSON(body)
 
-	// this fixes the APIs bug of not setting the default group on the response of the create method
-	if createdAlert.Group == "" {
-		createdAlert.Group = "default"
-	}
+	createdAlert = AlertV2EventFromJSON(body)
 	return
 }
 
@@ -107,12 +99,8 @@ func (c *sysdigMonitorClient) CreateAlertV2Metric(ctx context.Context, alert Ale
 	if err != nil {
 		return
 	}
-	createdAlert = AlertV2MetricFromJSON(body)
 
-	// this fixes the APIs bug of not setting the default group on the response of the create method
-	if createdAlert.Group == "" {
-		createdAlert.Group = "default"
-	}
+	createdAlert = AlertV2MetricFromJSON(body)
 	return
 }
 
@@ -147,12 +135,8 @@ func (c *sysdigMonitorClient) CreateAlertV2Downtime(ctx context.Context, alert A
 	if err != nil {
 		return
 	}
-	createdAlert = AlertV2DowntimeFromJSON(body)
 
-	// this fixes the APIs bug of not setting the default group on the response of the create method
-	if createdAlert.Group == "" {
-		createdAlert.Group = "default"
-	}
+	createdAlert = AlertV2DowntimeFromJSON(body)
 	return
 }
 
