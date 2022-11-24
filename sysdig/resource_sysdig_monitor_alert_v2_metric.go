@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -202,12 +201,8 @@ func buildAlertV2MetricStruct(ctx context.Context, d *schema.ResourceData, clien
 
 	//Metric
 	metric := d.Get("metric").(string)
-	labelDescriptorV3, err := client.GetLabelDescriptor(ctx, metric)
-	if err != nil {
-		return nil, fmt.Errorf("error getting descriptor for label %s: %w", metric, err)
-	}
-	config.Metric.ID = labelDescriptorV3.LabelDescriptor.ID
-	config.Metric.PublicID = labelDescriptorV3.LabelDescriptor.PublicID
+	config.Metric.ID = metric
+	config.Metric.PublicID = metric
 
 	config.NoDataBehaviour = d.Get("no_data_behaviour").(string)
 
