@@ -193,6 +193,11 @@ resource "sysdig_secure_rule_falco" "falco_rule_with_exceptions" {
    comps = ["in"]
    values = jsonencode(["foo"])
   }
+  exceptions {
+   name = "only_one_field_without_comps"
+   fields = ["ka.req.binding.subjects"]
+   values = jsonencode(["foo"])
+  }
 }
 `, name)
 }

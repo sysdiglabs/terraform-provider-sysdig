@@ -74,7 +74,7 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 						},
 						"comps": {
 							Type:     schema.TypeList,
-							Required: true,
+							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"values": {
@@ -190,6 +190,8 @@ func fieldOrCompsToStringSlice(fields any) ([]string, error) {
 		}
 	case string:
 		elements = append(elements, t)
+	case nil:
+		// do nothing
 	default:
 		return nil, fmt.Errorf("unexpected type: %T", t)
 	}
