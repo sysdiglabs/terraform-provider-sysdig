@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -43,8 +44,9 @@ func resourceSysdigMonitorAlertV2Metric() *schema.Resource {
 				Required: true,
 			},
 			"warning_threshold": {
-				Type:     schema.TypeFloat,
+				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 			"metric": {
 				Type:     schema.TypeString,
@@ -188,7 +190,11 @@ func buildAlertV2MetricStruct(ctx context.Context, d *schema.ResourceData, clien
 
 	//WarningThreshold
 	if warningThreshold, ok := d.GetOk("warning_threshold"); ok {
-		wt := warningThreshold.(float64)
+		wts := warningThreshold.(string)
+		wt, err := strconv.ParseFloat(wts, 64)
+		if err != nil {
+			return nil, fmt.Errorf("cannot convert warning_threshold to a number: %w", err)
+		}
 		config.WarningThreshold = &wt
 		config.WarningConditionOperator = config.ConditionOperator
 	}
@@ -229,7 +235,7 @@ func updateAlertV2MetricState(d *schema.ResourceData, alert *monitor.AlertV2Metr
 	_ = d.Set("threshold", alert.Config.Threshold)
 
 	if alert.Config.WarningThreshold != nil {
-		_ = d.Set("warning_threshold", alert.Config.WarningThreshold)
+		_ = d.Set("warning_threshold", fmt.Sprintf("%v", *alert.Config.WarningThreshold))
 	}
 
 	_ = d.Set("time_aggregation", alert.Config.TimeAggregation)
