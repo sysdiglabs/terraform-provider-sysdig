@@ -431,7 +431,7 @@ func buildScopedSegmentedConfigStruct(ctx context.Context, d *schema.ResourceDat
 		if err != nil {
 			return fmt.Errorf("error getting descriptor for label %s: %w", label, err)
 		}
-		operand := labelDescriptorV3.LabelDescriptor.ID
+		operand := labelDescriptorV3.ID
 		expressions = append(expressions, monitor.ScopeExpressionV2{
 			Operand:  operand,
 			Operator: operator,
@@ -455,8 +455,8 @@ func buildScopedSegmentedConfigStruct(ctx context.Context, d *schema.ResourceDat
 				return fmt.Errorf("error getting descriptor for label %s: %w", label, err)
 			}
 			config.SegmentBy = append(config.SegmentBy, monitor.AlertLabelDescriptorV2{
-				ID:       labelDescriptorV3.LabelDescriptor.ID,
-				PublicID: labelDescriptorV3.LabelDescriptor.PublicID,
+				ID:       labelDescriptorV3.ID,
+				PublicID: labelDescriptorV3.PublicID,
 			})
 		}
 	}

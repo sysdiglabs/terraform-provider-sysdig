@@ -274,8 +274,8 @@ type AlertLinkV2 struct {
 }
 
 type LabelDescriptorV3 struct {
-	LabelDescriptor struct {
-		ID       string `json:"id"`
-		PublicID string `json:"publicId"`
-	} `json:"labelDescriptor"`
+	ID         string `json:"id"`
+	PublicID   string `json:"publicId"`
+	CanGroupBy bool   `json:"canGroupBy,omitempty"`
+	Documented bool   `json:"documented,omitempty"`
 }

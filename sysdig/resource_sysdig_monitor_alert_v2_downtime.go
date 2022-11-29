@@ -176,8 +176,8 @@ func buildAlertV2DowntimeStruct(ctx context.Context, d *schema.ResourceData, cli
 	if err != nil {
 		return nil, fmt.Errorf("error getting descriptor for label %s: %w", metric, err)
 	}
-	config.Metric.ID = labelDescriptorV3.LabelDescriptor.ID
-	config.Metric.PublicID = labelDescriptorV3.LabelDescriptor.PublicID
+	config.Metric.ID = labelDescriptorV3.ID
+	config.Metric.PublicID = labelDescriptorV3.PublicID
 
 	config.NoDataBehaviour = "DO_NOTHING"
 

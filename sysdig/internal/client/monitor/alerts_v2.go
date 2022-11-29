@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"sync"
 )
 
 func (c *sysdigMonitorClient) alertsV2URL() string {
@@ -16,8 +18,12 @@ func (c *sysdigMonitorClient) alertV2URL(alertID int) string {
 	return fmt.Sprintf("%s/api/v2/alerts/%d", c.URL, alertID)
 }
 
-func (c *sysdigMonitorClient) labelDescriptorURL(label string) string {
+func (c *sysdigMonitorClient) labelsDescriptorsV3URL(label string) string {
 	return fmt.Sprintf("%s/api/v3/labels/descriptors/%s", c.URL, label)
+}
+
+func (c *sysdigMonitorClient) labelsV3URL() string {
+	return fmt.Sprintf("%s/api/v3/labels/?limit=6000", c.URL) //6000 is the maximum number of labels a customer can have
 }
 
 // prometheus
@@ -228,30 +234,98 @@ func (c *sysdigMonitorClient) getAlertV2ById(ctx context.Context, alertID int) (
 	return body, err
 }
 
-func (c *sysdigMonitorClient) GetLabelDescriptor(ctx context.Context, label string) (LabelDescriptorV3, error) {
-	var alertDescriptior LabelDescriptorV3
-
-	// always returns 200, even if the label does not exist
-	response, err := c.doSysdigMonitorRequest(ctx, http.MethodGet, c.labelDescriptorURL(label), nil)
+// buildLabelDescriptor gets the descriptor of a label in public notation from the v3/labels/descriptors api
+// this is not a general solution to get the descriptor for a public notation label since custom labels will not be properly translated
+// e.g. the public notation cloud_provider_tag_k8s_io_role_master will not be translated to the correct cloudProvider.tag.k8s.io/role/master id
+func (c *sysdigMonitorClient) buildLabelDescriptor(ctx context.Context, label string) (LabelDescriptorV3, error) {
+	// always returns 200, even if the label does not exist for the customer
+	response, err := c.doSysdigMonitorRequest(ctx, http.MethodGet, c.labelsDescriptorsV3URL(label), nil)
 	if err != nil {
-		return alertDescriptior, err
+		return LabelDescriptorV3{}, err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		err = errorFromResponse(response)
-		return alertDescriptior, err
+		return LabelDescriptorV3{}, err
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return alertDescriptior, err
+		return LabelDescriptorV3{}, err
 	}
 
-	err = json.Unmarshal(body, &alertDescriptior)
+	var labelsDescriptorsV3result struct {
+		LabelDescriptorV3 `json:"labelDescriptor"`
+	}
+
+	err = json.Unmarshal(body, &labelsDescriptorsV3result)
 	if err != nil {
-		return alertDescriptior, err
+		return LabelDescriptorV3{}, err
 	}
 
-	return alertDescriptior, nil
+	return labelsDescriptorsV3result.LabelDescriptorV3, nil
+}
+
+func (c *sysdigMonitorClient) getLabels(ctx context.Context, label string) ([]LabelDescriptorV3, error) {
+
+	var labelsResp struct {
+		AllLabels []LabelDescriptorV3 `json:"allLabels"`
+	}
+
+	response, err := c.doSysdigMonitorRequest(ctx, http.MethodGet, c.labelsV3URL(), nil)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		err = errorFromResponse(response)
+		return nil, err
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(body, &labelsResp)
+	return labelsResp.AllLabels, err
+
+}
+
+var labelCache struct {
+	sync.Mutex
+
+	labels []LabelDescriptorV3
+}
+
+// GetLabel gets the descriptor from a label in public notation
+func (c *sysdigMonitorClient) GetLabelDescriptor(ctx context.Context, label string) (LabelDescriptorV3, error) {
+	var alertDescriptior LabelDescriptorV3
+
+	labelCache.Lock()
+	defer labelCache.Unlock()
+
+	if len(labelCache.labels) == 0 {
+		log.Printf("[DEBUG] GetLabel for %s: fetching all labels", label)
+		labelDescriptors, err := c.getLabels(ctx, label)
+		if err != nil {
+			return alertDescriptior, err
+		}
+		labelCache.labels = labelDescriptors
+	} else {
+		log.Printf("[DEBUG] GetLabel for %s: using cached labels", label)
+	}
+
+	for _, l := range labelCache.labels {
+		if l.PublicID == label {
+			return l, nil
+		}
+	}
+
+	// if the label did not exist, build the descriptor from /v3/labels/descriptor
+	log.Printf("[DEBUG] GetLabel for %s: not found in existing customer labels", label)
+	return c.buildLabelDescriptor(ctx, label)
+
 }
