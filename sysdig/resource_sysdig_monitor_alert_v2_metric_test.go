@@ -83,7 +83,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	metric = "sysdig_container_cpu_used_percent"
 	group_aggregation = "avg"
 	time_aggregation = "avg"
-	op = ">="
+	operator = ">="
 	threshold = 50
 	trigger_after_minutes = 15
 
@@ -99,17 +99,17 @@ func alertV2MetricWithScope(name string) string {
 		metric = "sysdig_container_cpu_used_percent"
 		group_aggregation = "avg"
 		time_aggregation = "avg"
-		op = ">="
+		operator = ">="
 		threshold = 50
 		trigger_after_minutes = 15
 		scope {
 			label = "kube_cluster_name"
-			op = "in"
+			operator = "in"
 			values = ["thom-cluster1", "demo-env-prom"]
 		}
 		scope {
 			label = "kube_cluster_name"
-			op = "equals"
+			operator = "equals"
 			values = ["thom-cluster3"]
 		}
 
@@ -125,7 +125,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	metric = "sysdig_container_cpu_used_percent"
 	group_aggregation = "avg"
 	time_aggregation = "avg"
-	op = ">="
+	operator = ">="
 	threshold = 50
 	trigger_after_minutes = 15
 	no_data_behaviour = "TRIGGER"
@@ -142,7 +142,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	metric = "sysdig_container_cpu_used_percent" 
 	group_aggregation = "avg"
 	time_aggregation = "avg"
-	op = ">="
+	operator = ">="
 	threshold = 50
 	trigger_after_minutes = 15
 	enabled = false
@@ -165,7 +165,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	metric = "sysdig_container_cpu_used_percent"
 	group_aggregation = "avg"
 	time_aggregation = "avg"
-	op = ">="
+	operator = ">="
 	threshold = 50
 	trigger_after_minutes = 15
 	description = "description"
@@ -182,7 +182,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	metric = "sysdig_container_cpu_used_percent"
 	group_aggregation = "avg"
 	time_aggregation = "avg"
-	op = ">="
+	operator = ">="
 	threshold = 50
 	trigger_after_minutes = 15
 	severity = "high"
@@ -199,7 +199,7 @@ func alertV2MetricWithGroupBy(name string) string {
 		metric = "sysdig_container_cpu_used_percent"
 		group_aggregation = "avg"
 		time_aggregation = "avg"
-		op = ">="
+		operator = ">="
 		threshold = 50
 		trigger_after_minutes = 15
 		group_by = ["kube_cluster_name", "kube_pod_name", "cloud_provider_tag_Owner",]
@@ -216,7 +216,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	metric = "sysdig_container_cpu_used_percent"
 	group_aggregation = "avg"
 	time_aggregation = "avg"
-	op = ">="
+	operator = ">="
 	threshold = 50
 	trigger_after_minutes = 15
 	group = "customgroup"
@@ -233,7 +233,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	metric = "sysdig_container_cpu_used_percent"
 	group_aggregation = "avg"
 	time_aggregation = "avg"
-	op = ">="
+	operator = ">="
 	threshold = 50
 	trigger_after_minutes = 15
 	custom_notification {
@@ -254,7 +254,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	metric = "sysdig_container_cpu_used_percent"
 	group_aggregation = "avg"
 	time_aggregation = "avg"
-	op = ">="
+	operator = ">="
 	threshold = 50
 	trigger_after_minutes = 15
 	capture {
@@ -272,7 +272,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	metric = "sysdig_container_cpu_used_percent"
 	group_aggregation = "avg"
 	time_aggregation = "avg"
-	op = ">="
+	operator = ">="
 	threshold = 50
 	trigger_after_minutes = 15
 	link {
@@ -295,7 +295,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	metric = "sysdig_container_cpu_used_percent" 
 	group_aggregation = "avg"
 	time_aggregation = "avg"
-	op = ">="
+	operator = ">="
 	threshold = 50
 	trigger_after_minutes = 15
 	enabled = false
@@ -312,7 +312,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	metric = "sysdig_container_cpu_used_percent" 
 	group_aggregation = "avg"
 	time_aggregation = "avg"
-	op = ">="
+	operator = ">="
 	threshold = 50
 	trigger_after_minutes = 15
 	enabled = false

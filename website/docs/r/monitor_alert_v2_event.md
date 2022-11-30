@@ -24,19 +24,19 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
   severity = "high"
   filter = "Failed to pull image"
   sources = ["kubernetes"]
-  op = ">"
+  operator = ">"
   threshold = 0
   group_by = ["kube_pod_name"]
 
   scope {
     label = "kube_cluster_name"
-    op = "in"
+    operator = "in"
     values = ["my_cluster_1", "my_cluster_2"]
   }
 
   scope {
     label = "kube_deployment_name"
-    op = "equals"
+    operator = "equals"
     values = ["my_deployment"]
   }
 
@@ -108,7 +108,7 @@ Enables the creation of a capture file of the syscalls during the event.
 
 * `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure. Can be repeated.
 * `group_by` - (Optional) List of segments to trigger a separate alert on. Example: `["kube_cluster_name", "kube_pod_name"]`.
-* `op` - (Required) Condition operator of the event count. It can be `>`, `>=`, `<`, `<=`, `=` or `!=`.
+* `operator` - (Required) Condition operator of the event count. It can be `>`, `>=`, `<`, `<=`, `=` or `!=`.
 * `threshold` - (Required) Number of events to match with `op`.
 * `warning_threshold` - (Optional) Number of events to match with `op` to trigger a warning alert. Must be a number lower than `threshold`.
 * `filter` - (Required) String that matches part of name, tag or the description of Sysdig Events.
@@ -117,7 +117,7 @@ Enables the creation of a capture file of the syscalls during the event.
 ### `scope`
 
 * `label` - (Required) Label in prometheus notation to select a part of the infrastructure.
-* `op` - (Required) Operator to match the label. It can be `equals`, `notEquals`, `in`, `notIn`, `contains`, `notContains`, `startsWith`.
+* `operator` - (Required) Operator to match the label. It can be `equals`, `notEquals`, `in`, `notIn`, `contains`, `notContains`, `startsWith`.
 * `values` - (Required) List of values to match the scope.
 
 ## Attributes Reference

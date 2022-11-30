@@ -52,7 +52,7 @@ resource "sysdig_monitor_alert_v2_downtime" "sample" {
 
 	scope {
 		label = "kube_cluster_name"
-		op = "in"
+		operator = "in"
 		values = ["thom-cluster1", "demo-env-prom"]
 	}
 
@@ -74,7 +74,7 @@ func alertV2DowntimeWithGroupBy(name string) string {
 	
 		scope {
 			label = "kube_cluster_name"
-			op = "in"
+			operator = "in"
 			values = ["thom-cluster1", "demo-env-prom"]
 		}
 	

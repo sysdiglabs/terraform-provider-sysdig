@@ -25,7 +25,7 @@ resource "sysdig_monitor_alert_v2_downtime" "sample" {
 
   scope {
     label = "host_hostname"
-    op = "in"
+    operator = "in"
     values = ["my-cluster-1", "my-server-2"]
   }
 
@@ -100,7 +100,7 @@ Enables the creation of a capture file of the syscalls during the event.
 ### `scope`
 
 * `label` - (Required) Label in prometheus notation to select a part of the infrastructure.
-* `op` - (Required) Operator to match the label. It can be `equals`, `notEquals`, `in`, `notIn`, `contains`, `notContains`, `startsWith`.
+* `operator` - (Required) Operator to match the label. It can be `equals`, `notEquals`, `in`, `notIn`, `contains`, `notContains`, `startsWith`.
 * `values` - (Required) List of values to match the scope.
 
 ## Attributes Reference

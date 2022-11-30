@@ -22,19 +22,19 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
   metric = "sysdig_container_cpu_used_percent"
   group_aggregation = "avg"
   time_aggregation = "avg"
-  op = ">"
+  operator = ">"
   threshold = 75
   group_by = ["kube_pod_name"]
 
   scope {
     label = "kube_cluster_name"
-    op = "in"
+    operator = "in"
     values = ["my_cluster_1", "my_cluster_2"]
   }
 
   scope {
     label = "kube_deployment_name"
-    op = "equals"
+    operator = "equals"
     values = ["my_deployment"]
   }
 
@@ -109,7 +109,7 @@ Enables the creation of a capture file of the syscalls during the event.
 * `metric` - (Required) Metric the alert will act upon.
 * `time_aggregation` - (Required) time aggregation function for data. It can be `avg`, `timeAvg`, `sum`, `min`, `max`.
 * `group_aggregation` - (Required) group aggregation function for data. It can be `avg`, `sum`, `min`, `max`.
-* `op` - (Required) Operator for the condition to alert on. It can be `>`, `>=`, `<`, `<=`, `=` or `!=`.
+* `operator` - (Required) Operator for the condition to alert on. It can be `>`, `>=`, `<`, `<=`, `=` or `!=`.
 * `threshold` - (Required) Threshold used together with `op` to trigger the alert if crossed.
 * `warning_threshold` - (Optional) Warning threshold used together with `op` to trigger the alert if crossed. Must be a number lower than `threshold`.
 * `no_data_behaviour` - (Optional) behaviour in case of missing data. Can be `DO_NOTHING`, i.e. ignore, or `TRIGGER`, i.e. notify on main threshold. Default: `DO_NOTHING`.
@@ -117,7 +117,7 @@ Enables the creation of a capture file of the syscalls during the event.
 ### `scope`
 
 * `label` - (Required) Label in prometheus notation to select a part of the infrastructure.
-* `op` - (Required) Operator to match the label. It can be `equals`, `notEquals`, `in`, `notIn`, `contains`, `notContains`, `startsWith`.
+* `operator` - (Required) Operator to match the label. It can be `equals`, `notEquals`, `in`, `notIn`, `contains`, `notContains`, `startsWith`.
 * `values` - (Required) List of values to match the scope.
 
 ## Attributes Reference

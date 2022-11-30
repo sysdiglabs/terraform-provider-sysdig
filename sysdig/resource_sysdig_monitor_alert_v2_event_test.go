@@ -54,12 +54,12 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
 
 	name = "TERRAFORM TEST - EVENTV2 %s"
 	filter = "xxx"
-	op = ">="
+	operator = ">="
 	threshold = 50
 
 	scope {
 		label = "kube_cluster_name"
-		op = "in"
+		operator = "in"
 		values = ["thom-cluster1", "demo-env-prom"]
 	}
 
@@ -77,12 +77,12 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
 	name = "TERRAFORM TEST - EVENTV2 %s"
 	filter = "xxx"
 	sources = ["kubernetes", "zup", "fix"]
-	op = ">="
+	operator = ">="
 	threshold = 50
 
 	scope {
 		label = "kube_cluster_name"
-		op = "in"
+		operator = "in"
 		values = ["thom-cluster1", "demo-env-prom"]
 	}
 
@@ -100,12 +100,12 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
 	name = "TERRAFORM TEST - EVENTV2 %s"
 	filter = "xxx"
 	sources = ["kubernetes", "fix", "zup"]
-	op = ">="
+	operator = ">="
 	threshold = 50
 
 	scope {
 		label = "kube_cluster_name"
-		op = "in"
+		operator = "in"
 		values = ["thom-cluster1", "demo-env-prom"]
 	}
 
@@ -122,13 +122,13 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
 
 	name = "TERRAFORM TEST - EVENTV2 %s"
 	filter = "xxx"
-	op = ">="
+	operator = ">="
 	threshold = 50
 	warning_threshold = 20
 
 	scope {
 		label = "kube_cluster_name"
-		op = "in"
+		operator = "in"
 		values = ["thom-cluster1", "demo-env-prom"]
 	}
 

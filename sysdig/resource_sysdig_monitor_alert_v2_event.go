@@ -34,7 +34,7 @@ func resourceSysdigMonitorAlertV2Event() *schema.Resource {
 		},
 
 		Schema: createScopedSegmentedAlertV2Schema(createAlertV2Schema(map[string]*schema.Schema{
-			"op": {
+			"operator": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{">", ">=", "<", "<=", "=", "!="}, false),
@@ -172,7 +172,7 @@ func buildAlertV2EventStruct(ctx context.Context, d *schema.ResourceData, client
 	}
 
 	//ConditionOperator
-	config.ConditionOperator = d.Get("op").(string)
+	config.ConditionOperator = d.Get("operator").(string)
 
 	//threshold
 	config.Threshold = d.Get("threshold").(float64)
@@ -219,7 +219,7 @@ func updateAlertV2EventState(d *schema.ResourceData, alert *monitor.AlertV2Event
 		return err
 	}
 
-	_ = d.Set("op", alert.Config.ConditionOperator)
+	_ = d.Set("operator", alert.Config.ConditionOperator)
 
 	_ = d.Set("threshold", alert.Config.Threshold)
 

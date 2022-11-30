@@ -389,7 +389,7 @@ func createScopedSegmentedAlertV2Schema(original map[string]*schema.Schema) map[
 						Required:     true,
 						ValidateFunc: validation.StringDoesNotContainAny("."),
 					},
-					"op": {
+					"operator": {
 						Type:         schema.TypeString,
 						Required:     true,
 						ValidateFunc: validation.StringInSlice([]string{"equals", "notEquals", "in", "notIn", "contains", "notContains", "startsWith"}, false),
@@ -421,7 +421,7 @@ func buildScopedSegmentedConfigStruct(ctx context.Context, d *schema.ResourceDat
 	expressions := make([]monitor.ScopeExpressionV2, 0)
 	for _, scope := range d.Get("scope").(*schema.Set).List() {
 		scopeMap := scope.(map[string]interface{})
-		operator := scopeMap["op"].(string)
+		operator := scopeMap["operator"].(string)
 		value := make([]string, 0)
 		for _, v := range scopeMap["values"].([]interface{}) {
 			value = append(value, v.(string))
@@ -476,9 +476,9 @@ func updateScopedSegmentedConfigState(d *schema.ResourceData, config *monitor.Sc
 				label = e.Operand
 			}
 			config := map[string]interface{}{
-				"label":  label,
-				"op":     e.Operator,
-				"values": e.Value,
+				"label":    label,
+				"operator": e.Operator,
+				"values":   e.Value,
 			}
 			scope = append(scope, config)
 		}
