@@ -58,6 +58,10 @@ func resourceSysdigSecureCloudAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"workload_identity_account_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 		},
 	}
 }
@@ -80,6 +84,7 @@ func resourceSysdigSecureCloudAccountCreate(ctx context.Context, d *schema.Resou
 	_ = d.Set("role_enabled", cloudAccount.RoleAvailable)
 	_ = d.Set("role_name", cloudAccount.RoleName)
 	_ = d.Set("external_id", cloudAccount.ExternalID)
+	_ = d.Set("workload_identity_account_id", cloudAccount.WorkLoadIdentityAccountID)
 
 	return nil
 }
@@ -106,6 +111,7 @@ func resourceSysdigSecureCloudAccountRead(ctx context.Context, d *schema.Resourc
 	_ = d.Set("role_enabled", cloudAccount.RoleAvailable)
 	_ = d.Set("role_name", cloudAccount.RoleName)
 	_ = d.Set("external_id", cloudAccount.ExternalID)
+	_ = d.Set("workload_identity_account_id", cloudAccount.WorkLoadIdentityAccountID)
 
 	return nil
 }
