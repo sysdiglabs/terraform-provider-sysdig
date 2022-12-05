@@ -372,7 +372,7 @@ type CloudAccount struct {
 	RoleAvailable             bool   `json:"roleAvailable"`
 	RoleName                  string `json:"roleName"`
 	ExternalID                string `json:"externalId,omitempty"`
-	WorkLoadIdentityAccountID string `json:"workLoadIdentityAccountID"`
+	WorkLoadIdentityAccountID string `json:"workLoadIdentityAccountId"`
 }
 
 func (e *CloudAccount) ToJSON() io.Reader {
