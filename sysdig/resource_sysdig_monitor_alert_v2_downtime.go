@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -172,12 +171,8 @@ func buildAlertV2DowntimeStruct(ctx context.Context, d *schema.ResourceData, cli
 
 	//Downtime
 	metric := d.Get("metric").(string)
-	labelDescriptorV3, err := client.GetLabelDescriptor(ctx, metric)
-	if err != nil {
-		return nil, fmt.Errorf("error getting descriptor for label %s: %w", metric, err)
-	}
-	config.Metric.ID = labelDescriptorV3.ID
-	config.Metric.PublicID = labelDescriptorV3.PublicID
+	config.Metric.ID = metric
+	config.Metric.PublicID = metric
 
 	config.NoDataBehaviour = "DO_NOTHING"
 
