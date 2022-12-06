@@ -43,20 +43,20 @@ func AlertV2Severity_Values() []string {
 
 // AlertV2
 type AlertV2Common struct {
-	ID                            int                            `json:"id,omitempty"`
-	Version                       int                            `json:"version,omitempty"`
-	Name                          string                         `json:"name"`
-	Description                   string                         `json:"description,omitempty"`
-	DurationSec                   int                            `json:"durationSec"`
-	Type                          string                         `json:"type"`
-	Group                         string                         `json:"group,omitempty"`
-	Severity                      string                         `json:"severity"`
-	TeamID                        int                            `json:"teamId,omitempty"`
-	Enabled                       bool                           `json:"enabled"`
-	NotificationChannelConfigList *[]NotificationChannelConfigV2 `json:"notificationChannelConfigList,omitempty"`
-	CustomNotificationTemplate    *CustomNotificationTemplateV2  `json:"customNotificationTemplate,omitempty"`
-	CaptureConfig                 *CaptureConfigV2               `json:"captureConfig,omitempty"`
-	Links                         []AlertLinkV2                  `json:"links"`
+	ID                            int                           `json:"id,omitempty"`
+	Version                       int                           `json:"version,omitempty"`
+	Name                          string                        `json:"name"`
+	Description                   string                        `json:"description,omitempty"`
+	DurationSec                   int                           `json:"durationSec"`
+	Type                          string                        `json:"type"`
+	Group                         string                        `json:"group,omitempty"`
+	Severity                      string                        `json:"severity"`
+	TeamID                        int                           `json:"teamId,omitempty"`
+	Enabled                       bool                          `json:"enabled"`
+	NotificationChannelConfigList []NotificationChannelConfigV2 `json:"notificationChannelConfigList"`
+	CustomNotificationTemplate    *CustomNotificationTemplateV2 `json:"customNotificationTemplate,omitempty"`
+	CaptureConfig                 *CaptureConfigV2              `json:"captureConfig,omitempty"`
+	Links                         []AlertLinkV2                 `json:"links"`
 }
 
 type ScopedSegmentedConfig struct {
@@ -71,7 +71,7 @@ type AlertV2ConfigPrometheus struct {
 
 type AlertV2Prometheus struct {
 	AlertV2Common
-	Config *AlertV2ConfigPrometheus `json:"config"`
+	Config AlertV2ConfigPrometheus `json:"config"`
 }
 
 func (a *AlertV2Prometheus) ToJSON() io.Reader {
@@ -105,7 +105,7 @@ type AlertV2ConfigEvent struct {
 
 type AlertV2Event struct {
 	AlertV2Common
-	Config *AlertV2ConfigEvent `json:"config"`
+	Config AlertV2ConfigEvent `json:"config"`
 }
 
 func (a *AlertV2Event) ToJSON() io.Reader {
@@ -141,7 +141,7 @@ type AlertV2ConfigMetric struct {
 
 type AlertV2Metric struct {
 	AlertV2Common
-	Config *AlertV2ConfigMetric `json:"config"`
+	Config AlertV2ConfigMetric `json:"config"`
 }
 
 func (a *AlertV2Metric) ToJSON() io.Reader {
@@ -175,7 +175,7 @@ type AlertV2ConfigDowntime struct {
 
 type AlertV2Downtime struct {
 	AlertV2Common
-	Config *AlertV2ConfigDowntime `json:"config"`
+	Config AlertV2ConfigDowntime `json:"config"`
 }
 
 func (a *AlertV2Downtime) ToJSON() io.Reader {

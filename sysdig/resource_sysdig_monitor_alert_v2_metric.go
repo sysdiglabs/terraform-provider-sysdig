@@ -175,7 +175,7 @@ func buildAlertV2MetricStruct(ctx context.Context, d *schema.ResourceData, clien
 		return nil, err
 	}
 	alertV2Common.Type = monitor.AlertV2AlertType_Manual
-	config := &monitor.AlertV2ConfigMetric{}
+	config := monitor.AlertV2ConfigMetric{}
 
 	err = buildScopedSegmentedConfigStruct(ctx, d, client, &config.ScopedSegmentedConfig)
 	if err != nil {

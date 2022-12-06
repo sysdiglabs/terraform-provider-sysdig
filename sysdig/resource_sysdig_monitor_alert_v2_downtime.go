@@ -150,7 +150,7 @@ func buildAlertV2DowntimeStruct(ctx context.Context, d *schema.ResourceData, cli
 		return nil, err
 	}
 	alertV2Common.Type = monitor.AlertV2AlertType_Manual
-	config := &monitor.AlertV2ConfigDowntime{}
+	config := monitor.AlertV2ConfigDowntime{}
 
 	err = buildScopedSegmentedConfigStruct(ctx, d, client, &config.ScopedSegmentedConfig)
 	if err != nil {

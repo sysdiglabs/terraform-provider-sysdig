@@ -205,7 +205,7 @@ func buildAlertV2CommonStruct(ctx context.Context, d *schema.ResourceData, clien
 		alert.TeamID = team.(int)
 	}
 
-	alert.NotificationChannelConfigList = &[]monitor.NotificationChannelConfigV2{}
+	alert.NotificationChannelConfigList = []monitor.NotificationChannelConfigV2{}
 	if attr, ok := d.GetOk("notification_channels"); ok && attr != nil {
 		channels := []monitor.NotificationChannelConfigV2{}
 
@@ -241,7 +241,7 @@ func buildAlertV2CommonStruct(ctx context.Context, d *schema.ResourceData, clien
 
 			channels = append(channels, newChannel)
 		}
-		alert.NotificationChannelConfigList = &channels
+		alert.NotificationChannelConfigList = channels
 	}
 
 	customNotification := monitor.CustomNotificationTemplateV2{}
@@ -303,41 +303,38 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Comm
 	_ = d.Set("team", alert.TeamID)
 	_ = d.Set("version", alert.Version)
 
-	if alert.NotificationChannelConfigList != nil {
-		var notificationChannels []interface{}
-		for _, ncc := range *alert.NotificationChannelConfigList {
-			config := map[string]interface{}{
-				"id": ncc.ChannelID,
-			}
-
-			if ncc.OverrideOptions.ReNotifyEverySec != nil {
-				config["renotify_every_minutes"] = secondsToMinutes(*ncc.OverrideOptions.ReNotifyEverySec)
-			} else {
-				config["renotify_every_minutes"] = 0
-			}
-
-			if ncc.OverrideOptions.Thresholds != nil {
-				config["main_threshold"] = false
-				config["warning_threshold"] = false
-				for _, t := range ncc.OverrideOptions.Thresholds {
-					if t == "MAIN" {
-						config["main_threshold"] = true
-					}
-					if t == "WARNING" {
-						config["warning_threshold"] = true
-					}
-				}
-			} else {
-				// defaults
-				config["main_threshold"] = true
-				config["warning_threshold"] = false
-			}
-
-			notificationChannels = append(notificationChannels, config)
+	var notificationChannels []interface{}
+	for _, ncc := range alert.NotificationChannelConfigList {
+		config := map[string]interface{}{
+			"id": ncc.ChannelID,
 		}
 
-		_ = d.Set("notification_channels", notificationChannels)
+		if ncc.OverrideOptions.ReNotifyEverySec != nil {
+			config["renotify_every_minutes"] = secondsToMinutes(*ncc.OverrideOptions.ReNotifyEverySec)
+		} else {
+			config["renotify_every_minutes"] = 0
+		}
+
+		if ncc.OverrideOptions.Thresholds != nil {
+			config["main_threshold"] = false
+			config["warning_threshold"] = false
+			for _, t := range ncc.OverrideOptions.Thresholds {
+				if t == "MAIN" {
+					config["main_threshold"] = true
+				}
+				if t == "WARNING" {
+					config["warning_threshold"] = true
+				}
+			}
+		} else {
+			// defaults
+			config["main_threshold"] = true
+			config["warning_threshold"] = false
+		}
+
+		notificationChannels = append(notificationChannels, config)
 	}
+	_ = d.Set("notification_channels", notificationChannels)
 
 	if alert.CustomNotificationTemplate != nil && !(alert.CustomNotificationTemplate.Subject == "" &&
 		alert.CustomNotificationTemplate.AppendText == "" &&

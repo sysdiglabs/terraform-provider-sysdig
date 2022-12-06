@@ -149,7 +149,7 @@ func buildAlertV2PrometheusStruct(ctx context.Context, d *schema.ResourceData, c
 	}
 	alertV2Common.Type = monitor.AlertV2AlertType_Prometheus
 
-	config := &monitor.AlertV2ConfigPrometheus{}
+	config := monitor.AlertV2ConfigPrometheus{}
 	config.Query = d.Get("query").(string)
 
 	alert := &monitor.AlertV2Prometheus{

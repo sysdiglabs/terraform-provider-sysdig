@@ -164,7 +164,7 @@ func buildAlertV2EventStruct(ctx context.Context, d *schema.ResourceData, client
 		return nil, err
 	}
 	alertV2Common.Type = monitor.AlertV2AlertType_Event
-	config := &monitor.AlertV2ConfigEvent{}
+	config := monitor.AlertV2ConfigEvent{}
 
 	err = buildScopedSegmentedConfigStruct(ctx, d, client, &config.ScopedSegmentedConfig)
 	if err != nil {
