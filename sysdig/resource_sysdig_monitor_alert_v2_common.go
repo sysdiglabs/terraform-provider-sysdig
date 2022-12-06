@@ -455,8 +455,7 @@ func buildScopedSegmentedConfigStruct(ctx context.Context, d *schema.ResourceDat
 				return fmt.Errorf("error getting descriptor for label %s: %w", label, err)
 			}
 			config.SegmentBy = append(config.SegmentBy, monitor.AlertLabelDescriptorV2{
-				ID:       labelDescriptorV3.ID,
-				PublicID: labelDescriptorV3.PublicID,
+				ID: labelDescriptorV3.ID,
 			})
 		}
 	}
@@ -471,9 +470,9 @@ func updateScopedSegmentedConfigState(d *schema.ResourceData, config *monitor.Sc
 		for _, e := range config.Scope.Expressions {
 			// operand possibly holds the old dot notation, we want "label" to be in public notation
 			// if the label does not yet exist the descriptor will be empty, use what's in the operand
-			label := e.Descriptor.PublicID
-			if label == "" {
-				label = e.Operand
+			label := e.Operand
+			if e.Descriptor != nil && e.Descriptor.PublicID != "" {
+				label = e.Descriptor.PublicID
 			}
 			config := map[string]interface{}{
 				"label":    label,

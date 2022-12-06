@@ -172,7 +172,6 @@ func buildAlertV2DowntimeStruct(ctx context.Context, d *schema.ResourceData, cli
 	//Downtime
 	metric := d.Get("metric").(string)
 	config.Metric.ID = metric
-	config.Metric.PublicID = metric
 
 	config.NoDataBehaviour = "DO_NOTHING"
 
@@ -196,7 +195,7 @@ func updateAlertV2DowntimeState(d *schema.ResourceData, alert *monitor.AlertV2Do
 
 	_ = d.Set("threshold", (1-alert.Config.Threshold)*100)
 
-	_ = d.Set("metric", alert.Config.Metric.PublicID)
+	_ = d.Set("metric", alert.Config.Metric.ID)
 
 	return nil
 }

@@ -201,7 +201,7 @@ type AlertScopeV2 struct {
 
 type AlertLabelDescriptorV2 struct {
 	ID       string `json:"id"`
-	PublicID string `json:"publicId"`
+	PublicID string `json:"publicId,omitempty"` //if passed empty in SegmentBy in put/posts will trigger an error 500
 }
 
 type AlertMetricDescriptorV2 struct {
@@ -221,10 +221,10 @@ type Aggregation struct {
 }
 
 type ScopeExpressionV2 struct {
-	Operand    string                 `json:"operand"`    // old dot notation, e.g. "kubernetes.cluster.name"
-	Descriptor AlertLabelDescriptorV2 `json:"descriptor"` // discarded by the backend in put/post
-	Operator   string                 `json:"operator"`
-	Value      []string               `json:"value"`
+	Operand    string                  `json:"operand"` // old dot notation, e.g. "kubernetes.cluster.name"
+	Descriptor *AlertLabelDescriptorV2 `json:"descriptor,omitempty"`
+	Operator   string                  `json:"operator"`
+	Value      []string                `json:"value"`
 }
 
 type NotificationChannelConfigV2 struct {

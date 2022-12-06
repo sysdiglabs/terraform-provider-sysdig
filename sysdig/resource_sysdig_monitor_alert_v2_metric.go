@@ -208,7 +208,6 @@ func buildAlertV2MetricStruct(ctx context.Context, d *schema.ResourceData, clien
 	//Metric
 	metric := d.Get("metric").(string)
 	config.Metric.ID = metric
-	config.Metric.PublicID = metric
 
 	config.NoDataBehaviour = d.Get("no_data_behaviour").(string)
 
@@ -242,7 +241,7 @@ func updateAlertV2MetricState(d *schema.ResourceData, alert *monitor.AlertV2Metr
 
 	_ = d.Set("group_aggregation", alert.Config.GroupAggregation)
 
-	_ = d.Set("metric", alert.Config.Metric.PublicID)
+	_ = d.Set("metric", alert.Config.Metric.ID)
 
 	_ = d.Set("no_data_behaviour", alert.Config.NoDataBehaviour)
 
