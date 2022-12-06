@@ -67,7 +67,7 @@ func resourceSysdigMonitorAlertV2EventCreate(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	a, err := buildAlertV2EventStruct(ctx, d, client)
+	a, err := buildAlertV2EventStruct(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -119,7 +119,7 @@ func resourceSysdigMonitorAlertV2EventUpdate(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	a, err := buildAlertV2EventStruct(ctx, d, client)
+	a, err := buildAlertV2EventStruct(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -158,18 +158,12 @@ func resourceSysdigMonitorAlertV2EventDelete(ctx context.Context, d *schema.Reso
 	return nil
 }
 
-func buildAlertV2EventStruct(ctx context.Context, d *schema.ResourceData, client monitor.SysdigMonitorClient) (*monitor.AlertV2Event, error) {
-	alertV2Common, err := buildAlertV2CommonStruct(ctx, d, client)
-	if err != nil {
-		return nil, err
-	}
+func buildAlertV2EventStruct(d *schema.ResourceData) (*monitor.AlertV2Event, error) {
+	alertV2Common := buildAlertV2CommonStruct(d)
 	alertV2Common.Type = monitor.AlertV2AlertType_Event
 	config := monitor.AlertV2ConfigEvent{}
 
-	err = buildScopedSegmentedConfigStruct(ctx, d, client, &config.ScopedSegmentedConfig)
-	if err != nil {
-		return nil, err
-	}
+	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
 
 	//ConditionOperator
 	config.ConditionOperator = d.Get("operator").(string)

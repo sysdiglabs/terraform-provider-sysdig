@@ -26,9 +26,49 @@ func (c *sysdigMonitorClient) labelsV3URL() string {
 	return fmt.Sprintf("%s/api/v3/labels/?limit=6000", c.URL) //6000 is the maximum number of labels a customer can have
 }
 
+func (c *sysdigMonitorClient) addNotificationChannelType(ctx context.Context, notificationChannelConfigList []NotificationChannelConfigV2) error {
+	// on put/posts the api wants the type of the channel even if it can be inferred
+	for i, n := range notificationChannelConfigList {
+		nc, err := c.GetNotificationChannelById(ctx, n.ChannelID)
+		if err != nil {
+			return fmt.Errorf("error getting info for notification channel %d: %w", n.ChannelID, err)
+		}
+		notificationChannelConfigList[i].Type = nc.Type
+	}
+	return nil
+}
+
+func (c *sysdigMonitorClient) translateScopeSegmentLabels(ctx context.Context, scopedSegmentedConfig *ScopedSegmentedConfig) error {
+	// the operand of the scope must be in dot notation
+	if scopedSegmentedConfig.Scope != nil {
+		for i, e := range scopedSegmentedConfig.Scope.Expressions {
+			labelDescriptorV3, err := c.GetLabelDescriptor(ctx, e.Operand)
+			if err != nil {
+				return fmt.Errorf("error getting descriptor for label %s: %w", e.Operand, err)
+			}
+			scopedSegmentedConfig.Scope.Expressions[i].Operand = labelDescriptorV3.ID
+		}
+	}
+
+	// the label descriptor id must be in dot notation
+	for i, d := range scopedSegmentedConfig.SegmentBy {
+		labelDescriptorV3, err := c.GetLabelDescriptor(ctx, d.ID)
+		if err != nil {
+			return fmt.Errorf("error getting descriptor for label %s: %w", d.ID, err)
+		}
+		scopedSegmentedConfig.SegmentBy[i].ID = labelDescriptorV3.ID
+	}
+
+	return nil
+}
+
 // prometheus
 
 func (c *sysdigMonitorClient) CreateAlertV2Prometheus(ctx context.Context, alert AlertV2Prometheus) (createdAlert AlertV2Prometheus, err error) {
+	if err = c.addNotificationChannelType(ctx, alert.NotificationChannelConfigList); err != nil {
+		return
+	}
+
 	body, err := c.createAlertV2(ctx, alert.ToJSON())
 	if err != nil {
 		return
@@ -39,6 +79,10 @@ func (c *sysdigMonitorClient) CreateAlertV2Prometheus(ctx context.Context, alert
 }
 
 func (c *sysdigMonitorClient) UpdateAlertV2Prometheus(ctx context.Context, alert AlertV2Prometheus) (updatedAlert AlertV2Prometheus, err error) {
+	if err = c.addNotificationChannelType(ctx, alert.NotificationChannelConfigList); err != nil {
+		return
+	}
+
 	body, err := c.updateAlertV2(ctx, alert.ID, alert.ToJSON())
 	if err != nil {
 		return
@@ -65,6 +109,14 @@ func (c *sysdigMonitorClient) DeleteAlertV2Prometheus(ctx context.Context, alert
 // event
 
 func (c *sysdigMonitorClient) CreateAlertV2Event(ctx context.Context, alert AlertV2Event) (createdAlert AlertV2Event, err error) {
+	if err = c.addNotificationChannelType(ctx, alert.NotificationChannelConfigList); err != nil {
+		return
+	}
+
+	if err = c.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig); err != nil {
+		return
+	}
+
 	body, err := c.createAlertV2(ctx, alert.ToJSON())
 	if err != nil {
 		return
@@ -75,6 +127,14 @@ func (c *sysdigMonitorClient) CreateAlertV2Event(ctx context.Context, alert Aler
 }
 
 func (c *sysdigMonitorClient) UpdateAlertV2Event(ctx context.Context, alert AlertV2Event) (updatedAlert AlertV2Event, err error) {
+	if err = c.addNotificationChannelType(ctx, alert.NotificationChannelConfigList); err != nil {
+		return
+	}
+
+	if err = c.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig); err != nil {
+		return
+	}
+
 	body, err := c.updateAlertV2(ctx, alert.ID, alert.ToJSON())
 	if err != nil {
 		return
@@ -101,6 +161,14 @@ func (c *sysdigMonitorClient) DeleteAlertV2Event(ctx context.Context, alertID in
 // metric
 
 func (c *sysdigMonitorClient) CreateAlertV2Metric(ctx context.Context, alert AlertV2Metric) (createdAlert AlertV2Metric, err error) {
+	if err = c.addNotificationChannelType(ctx, alert.NotificationChannelConfigList); err != nil {
+		return
+	}
+
+	if err = c.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig); err != nil {
+		return
+	}
+
 	body, err := c.createAlertV2(ctx, alert.ToJSON())
 	if err != nil {
 		return
@@ -111,6 +179,14 @@ func (c *sysdigMonitorClient) CreateAlertV2Metric(ctx context.Context, alert Ale
 }
 
 func (c *sysdigMonitorClient) UpdateAlertV2Metric(ctx context.Context, alert AlertV2Metric) (updatedAlert AlertV2Metric, err error) {
+	if err = c.addNotificationChannelType(ctx, alert.NotificationChannelConfigList); err != nil {
+		return
+	}
+
+	if err = c.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig); err != nil {
+		return
+	}
+
 	body, err := c.updateAlertV2(ctx, alert.ID, alert.ToJSON())
 	if err != nil {
 		return
@@ -137,6 +213,14 @@ func (c *sysdigMonitorClient) DeleteAlertV2Metric(ctx context.Context, alertID i
 // downtime
 
 func (c *sysdigMonitorClient) CreateAlertV2Downtime(ctx context.Context, alert AlertV2Downtime) (createdAlert AlertV2Downtime, err error) {
+	if err = c.addNotificationChannelType(ctx, alert.NotificationChannelConfigList); err != nil {
+		return
+	}
+
+	if err = c.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig); err != nil {
+		return
+	}
+
 	body, err := c.createAlertV2(ctx, alert.ToJSON())
 	if err != nil {
 		return
@@ -147,6 +231,14 @@ func (c *sysdigMonitorClient) CreateAlertV2Downtime(ctx context.Context, alert A
 }
 
 func (c *sysdigMonitorClient) UpdateAlertV2Downtime(ctx context.Context, alert AlertV2Downtime) (updatedAlert AlertV2Downtime, err error) {
+	if err = c.addNotificationChannelType(ctx, alert.NotificationChannelConfigList); err != nil {
+		return
+	}
+
+	if err = c.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig); err != nil {
+		return
+	}
+
 	body, err := c.updateAlertV2(ctx, alert.ID, alert.ToJSON())
 	if err != nil {
 		return

@@ -1,8 +1,6 @@
 package sysdig
 
 import (
-	"context"
-	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -180,7 +178,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 	return alertSchema
 }
 
-func buildAlertV2CommonStruct(ctx context.Context, d *schema.ResourceData, client monitor.SysdigMonitorClient) (*monitor.AlertV2Common, error) {
+func buildAlertV2CommonStruct(d *schema.ResourceData) *monitor.AlertV2Common {
 
 	alert := &monitor.AlertV2Common{
 		Name:        d.Get("name").(string),
@@ -211,14 +209,9 @@ func buildAlertV2CommonStruct(ctx context.Context, d *schema.ResourceData, clien
 
 		for _, channel := range attr.(*schema.Set).List() {
 			channelMap := channel.(map[string]interface{})
-			channelID := channelMap["id"].(int)
-			nc, err := client.GetNotificationChannelById(ctx, channelID)
-			if err != nil {
-				return nil, fmt.Errorf("error getting info for notification channel %d: %w", channelID, err)
-			}
 			newChannel := monitor.NotificationChannelConfigV2{
-				ChannelID: channelID,
-				Type:      nc.Type,
+				ChannelID: channelMap["id"].(int),
+				//Type: will be added by the sysdig client before the put/post
 			}
 
 			if renotifyEveryMinutes, ok := channelMap["renotify_every_minutes"]; ok {
@@ -286,7 +279,7 @@ func buildAlertV2CommonStruct(ctx context.Context, d *schema.ResourceData, clien
 		}
 	}
 
-	return alert, nil
+	return alert
 }
 
 func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Common) (err error) {
@@ -412,25 +405,20 @@ func createScopedSegmentedAlertV2Schema(original map[string]*schema.Schema) map[
 	return sysdigAlertSchema
 }
 
-func buildScopedSegmentedConfigStruct(ctx context.Context, d *schema.ResourceData, client monitor.SysdigMonitorClient, config *monitor.ScopedSegmentedConfig) error {
+func buildScopedSegmentedConfigStruct(d *schema.ResourceData, config *monitor.ScopedSegmentedConfig) {
 
 	//scope
 	expressions := make([]monitor.ScopeExpressionV2, 0)
 	for _, scope := range d.Get("scope").(*schema.Set).List() {
 		scopeMap := scope.(map[string]interface{})
 		operator := scopeMap["operator"].(string)
+		operand := scopeMap["label"].(string)
 		value := make([]string, 0)
 		for _, v := range scopeMap["values"].([]interface{}) {
 			value = append(value, v.(string))
 		}
-		label := scopeMap["label"].(string)
-		labelDescriptorV3, err := client.GetLabelDescriptor(ctx, label)
-		if err != nil {
-			return fmt.Errorf("error getting descriptor for label %s: %w", label, err)
-		}
-		operand := labelDescriptorV3.ID
 		expressions = append(expressions, monitor.ScopeExpressionV2{
-			Operand:  operand,
+			Operand:  operand, //the sysdig client will rewrite this to be in dot notation
 			Operator: operator,
 			Value:    value,
 		})
@@ -446,18 +434,11 @@ func buildScopedSegmentedConfigStruct(ctx context.Context, d *schema.ResourceDat
 	labels, ok := d.GetOk("group_by")
 	if ok {
 		for _, l := range labels.([]interface{}) {
-			label := l.(string)
-			labelDescriptorV3, err := client.GetLabelDescriptor(ctx, label)
-			if err != nil {
-				return fmt.Errorf("error getting descriptor for label %s: %w", label, err)
-			}
 			config.SegmentBy = append(config.SegmentBy, monitor.AlertLabelDescriptorV2{
-				ID: labelDescriptorV3.ID,
+				ID: l.(string), //the sysdig client will rewrite this to be in dot notation
 			})
 		}
 	}
-
-	return nil
 }
 
 func updateScopedSegmentedConfigState(d *schema.ResourceData, config *monitor.ScopedSegmentedConfig) error {
