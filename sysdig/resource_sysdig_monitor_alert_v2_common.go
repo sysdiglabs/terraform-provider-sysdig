@@ -158,7 +158,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 					"type": {
 						Type:         schema.TypeString,
 						Required:     true,
-						ValidateFunc: validation.StringInSlice([]string{"runbook", "dashboard"}, true),
+						ValidateFunc: validation.StringInSlice(monitor.AlertLinkV2Type_Values(), true),
 					},
 					"href": {
 						Type:     schema.TypeString,
