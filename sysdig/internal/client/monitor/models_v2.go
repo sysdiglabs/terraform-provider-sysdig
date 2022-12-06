@@ -133,10 +133,10 @@ type AlertV2ConfigMetric struct {
 	WarningConditionOperator string   `json:"warningConditionOperator,omitempty"`
 	WarningThreshold         *float64 `json:"warningThreshold,omitempty"`
 
-	GroupAggregation string                 `json:"groupAggregation"`
-	TimeAggregation  string                 `json:"timeAggregation"`
-	Metric           AlertLabelDescriptorV2 `json:"metric"`
-	NoDataBehaviour  string                 `json:"noDataBehaviour"`
+	GroupAggregation string                  `json:"groupAggregation"`
+	TimeAggregation  string                  `json:"timeAggregation"`
+	Metric           AlertMetricDescriptorV2 `json:"metric"`
+	NoDataBehaviour  string                  `json:"noDataBehaviour"`
 }
 
 type AlertV2Metric struct {
@@ -167,10 +167,10 @@ type AlertV2ConfigDowntime struct {
 	ConditionOperator string  `json:"conditionOperator"`
 	Threshold         float64 `json:"threshold"`
 
-	GroupAggregation string                 `json:"groupAggregation"`
-	TimeAggregation  string                 `json:"timeAggregation"`
-	Metric           AlertLabelDescriptorV2 `json:"metric"`
-	NoDataBehaviour  string                 `json:"noDataBehaviour"`
+	GroupAggregation string                  `json:"groupAggregation"`
+	TimeAggregation  string                  `json:"timeAggregation"`
+	Metric           AlertMetricDescriptorV2 `json:"metric"`
+	NoDataBehaviour  string                  `json:"noDataBehaviour"`
 }
 
 type AlertV2Downtime struct {
@@ -205,19 +205,7 @@ type AlertLabelDescriptorV2 struct {
 }
 
 type AlertMetricDescriptorV2 struct {
-	ID                string        `json:"id"`
-	PublicID          string        `json:"publicId"`
-	MetricType        string        `json:"metricType"`
-	Type              string        `json:"type"`
-	Scale             float64       `json:"scale"`
-	GroupAggregations []Aggregation `json:"groupAggregations"`
-	TimeAggregations  []Aggregation `json:"timeAggregations"`
-}
-
-type Aggregation struct {
-	ID               int         `json:"id"`
-	Percentile       bool        `json:"percentile"`
-	AggregationValue interface{} `json:"aggregationValue"`
+	ID string `json:"id"`
 }
 
 type ScopeExpressionV2 struct {
@@ -274,8 +262,6 @@ type AlertLinkV2 struct {
 }
 
 type LabelDescriptorV3 struct {
-	ID         string `json:"id"`
-	PublicID   string `json:"publicId"`
-	CanGroupBy bool   `json:"canGroupBy,omitempty"`
-	Documented bool   `json:"documented,omitempty"`
+	ID       string `json:"id"`
+	PublicID string `json:"publicId"`
 }
