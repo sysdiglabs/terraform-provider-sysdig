@@ -60,7 +60,7 @@ func resourceSysdigSecureCloudAccount() *schema.Resource {
 			},
 			"workload_identity_account_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 		},
 	}
@@ -151,10 +151,11 @@ func resourceSysdigSecureCloudAccountDelete(ctx context.Context, d *schema.Resou
 
 func cloudAccountFromResourceData(d *schema.ResourceData) *secure.CloudAccount {
 	return &secure.CloudAccount{
-		AccountID:     d.Get("account_id").(string),
-		Provider:      d.Get("cloud_provider").(string),
-		Alias:         d.Get("alias").(string),
-		RoleAvailable: d.Get("role_enabled").(bool),
-		RoleName:      d.Get("role_name").(string),
+		AccountID:                 d.Get("account_id").(string),
+		Provider:                  d.Get("cloud_provider").(string),
+		Alias:                     d.Get("alias").(string),
+		RoleAvailable:             d.Get("role_enabled").(bool),
+		RoleName:                  d.Get("role_name").(string),
+		WorkLoadIdentityAccountID: d.Get("workload_identity_account_id").(string),
 	}
 }

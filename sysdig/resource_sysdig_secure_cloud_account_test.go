@@ -34,6 +34,9 @@ func TestAccSecureCloudAccount(t *testing.T) {
 				Config: secureCloudAccountMinimumConfiguration(accID),
 			},
 			{
+				Config: secureCloudAccountWithWID(accID),
+			},
+			{
 				ResourceName:      "sysdig_secure_cloud_account.sample",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -60,4 +63,17 @@ resource "sysdig_secure_cloud_account" "sample" {
   account_id      = "sample-%s"
   cloud_provider  = "aws"
 }`, accountID)
+}
+
+func secureCloudAccountWithWID(accountID string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_cloud_account" "sample" {
+  account_id          = "sample-%s"
+  cloud_provider      = "aws"
+  alias               = "%s"
+  role_enabled        = "false"
+  role_name            = "CustomRoleName"
+  workload_identity_account_id = "wid-1"
+}
+`, accountID, accountID)
 }
