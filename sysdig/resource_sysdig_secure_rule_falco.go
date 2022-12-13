@@ -128,7 +128,6 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	rule, err := client.GetRuleByID(ctx, id)
-
 	if err != nil {
 		d.SetId("")
 	}
@@ -140,7 +139,9 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	updateResourceDataForRule(d, rule)
-	_ = d.Set("condition", rule.Details.Condition.Condition)
+	if rule.Details.Condition != nil {
+		_ = d.Set("condition", rule.Details.Condition.Condition)
+	}
 	_ = d.Set("output", rule.Details.Output)
 	_ = d.Set("priority", strings.ToLower(rule.Details.Priority))
 	_ = d.Set("source", rule.Details.Source)
@@ -157,6 +158,9 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 func updateResourceDataExceptions(d *schema.ResourceData, ruleExceptions []*secure.Exception) error {
 	exceptions := make([]any, 0, len(ruleExceptions))
 	for _, exception := range ruleExceptions {
+		if exception == nil {
+			return fmt.Errorf("exception is nil")
+		}
 		valuesData, err := json.Marshal(exception.Values)
 		if err != nil {
 			return fmt.Errorf("error marshalling exception values '%+v': %s", exception.Values, err)
