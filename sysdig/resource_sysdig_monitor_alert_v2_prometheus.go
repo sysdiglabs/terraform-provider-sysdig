@@ -136,18 +136,18 @@ func resourceSysdigMonitorAlertV2PrometheusDelete(ctx context.Context, d *schema
 // 	return nil
 // }
 
-func buildAlertV2PrometheusStruct(d *schema.ResourceData) (alert *monitor.AlertV2Prometheus) {
+func buildAlertV2PrometheusStruct(d *schema.ResourceData) *monitor.AlertV2Prometheus {
 	alertV2Common := buildAlertV2CommonStruct(d)
 	alertV2Common.Type = monitor.AlertV2AlertType_Prometheus
 
-	config := &monitor.AlertV2ConfigPrometheus{}
+	config := monitor.AlertV2ConfigPrometheus{}
 	config.Query = d.Get("query").(string)
 
-	alert = &monitor.AlertV2Prometheus{
+	alert := &monitor.AlertV2Prometheus{
 		AlertV2Common: *alertV2Common,
 		Config:        config,
 	}
-	return
+	return alert
 }
 
 func updateAlertV2PrometheusState(d *schema.ResourceData, alert *monitor.AlertV2Prometheus) (err error) {

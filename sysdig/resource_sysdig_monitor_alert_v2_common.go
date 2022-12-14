@@ -11,8 +11,6 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
-const defaultAlertV2Title = "{{__alert_name__}} is {{__alert_status__}}"
-
 func minutesToSeconds(minutes int) (seconds int) {
 	durationMinutes := time.Duration(minutes) * time.Minute
 	return int(durationMinutes.Seconds())
@@ -35,7 +33,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 		"severity": {
 			Type:         schema.TypeString,
 			Optional:     true,
-			Default:      4,
+			Default:      monitor.AlertV2Severity_Low,
 			ValidateFunc: validation.StringInSlice(monitor.AlertV2Severity_Values(), true),
 		},
 		"trigger_after_minutes": {
@@ -45,7 +43,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 		"group": {
 			Type:     schema.TypeString,
 			Optional: true,
-			Computed: true,
+			Default:  "default",
 			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 				return strings.EqualFold(old, new)
 			},
@@ -53,7 +51,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 		"enabled": {
 			Type:     schema.TypeBool,
 			Optional: true,
-			Computed: true,
+			Default:  true,
 		},
 		"team": {
 			Type:     schema.TypeInt,
@@ -63,7 +61,6 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 			Type:     schema.TypeInt,
 			Computed: true,
 		},
-
 		"notification_channels": {
 			Type:     schema.TypeSet,
 			Optional: true,
@@ -74,12 +71,24 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 						Required: true,
 					},
 					"type": {
-						Type:     schema.TypeString,
-						Required: true,
+						Type:       schema.TypeString,
+						Optional:   true, //for retro compatibility, content will be discarded, remove this is the next major release
+						Deprecated: "no need to define \"type\" attribute anymore, please remove it",
 					},
 					"renotify_every_minutes": {
 						Type:     schema.TypeInt,
 						Optional: true,
+						Default:  0,
+					},
+					"main_threshold": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						Default:  true,
+					},
+					"warning_threshold": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						Default:  false,
 					},
 				},
 			},
@@ -92,7 +101,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 				Schema: map[string]*schema.Schema{
 					"subject": {
 						Type:     schema.TypeString,
-						Required: true,
+						Optional: true,
 					},
 					"prepend": {
 						Type:     schema.TypeString,
@@ -113,19 +122,18 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 				Schema: map[string]*schema.Schema{
 					"duration_seconds": {
 						Type:     schema.TypeInt,
-						Required: false,
 						Optional: true,
 						Default:  15,
 					},
 					"storage": {
 						Type:     schema.TypeString,
-						Optional: false,
-						Required: true,
+						Optional: true,
+						Default:  "",
 					},
 					"filename": {
 						Type:         schema.TypeString,
 						Required:     true,
-						ValidateFunc: validation.StringMatch(regexp.MustCompile(monitor.AlertV2CaptureFilenameRegexp), "the filename must end in .scap"),
+						ValidateFunc: validation.StringMatch(regexp.MustCompile(monitor.AlertV2CaptureFilenameRegexp), "the filename must end in .scap"), //otherwise the api will silently add .scap at the end
 					},
 					"filter": {
 						Type:     schema.TypeString,
@@ -140,6 +148,27 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 				},
 			},
 		},
+		"link": {
+			Type:     schema.TypeSet,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"type": {
+						Type:         schema.TypeString,
+						Required:     true,
+						ValidateFunc: validation.StringInSlice(monitor.AlertLinkV2Type_Values(), true),
+					},
+					"href": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"id": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+				},
+			},
+		},
 	}
 
 	for k, v := range original {
@@ -149,9 +178,9 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 	return alertSchema
 }
 
-func buildAlertV2CommonStruct(d *schema.ResourceData) (alert *monitor.AlertV2Common) {
+func buildAlertV2CommonStruct(d *schema.ResourceData) *monitor.AlertV2Common {
 
-	alert = &monitor.AlertV2Common{
+	alert := &monitor.AlertV2Common{
 		Name:        d.Get("name").(string),
 		Type:        "MANUAL",
 		DurationSec: minutesToSeconds(d.Get("trigger_after_minutes").(int)),
@@ -174,7 +203,7 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) (alert *monitor.AlertV2Com
 		alert.TeamID = team.(int)
 	}
 
-	alert.NotificationChannelConfigList = &[]monitor.NotificationChannelConfigV2{}
+	alert.NotificationChannelConfigList = []monitor.NotificationChannelConfigV2{}
 	if attr, ok := d.GetOk("notification_channels"); ok && attr != nil {
 		channels := []monitor.NotificationChannelConfigV2{}
 
@@ -182,34 +211,43 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) (alert *monitor.AlertV2Com
 			channelMap := channel.(map[string]interface{})
 			newChannel := monitor.NotificationChannelConfigV2{
 				ChannelID: channelMap["id"].(int),
-				Type:      channelMap["type"].(string),
+				//Type: will be added by the sysdig client before the put/post
 			}
 
 			if renotifyEveryMinutes, ok := channelMap["renotify_every_minutes"]; ok {
-				newChannel.Options = &monitor.NotificationChannelOptionsV2{
-					ReNotifyEverySec: minutesToSeconds(renotifyEveryMinutes.(int)),
+				m := renotifyEveryMinutes.(int)
+				if m != 0 {
+					s := minutesToSeconds(m)
+					newChannel.OverrideOptions.ReNotifyEverySec = &s
 				}
 			}
+
+			newChannel.OverrideOptions.Thresholds = []string{}
+			main_threshold := channelMap["main_threshold"].(bool)
+			if main_threshold {
+				newChannel.OverrideOptions.Thresholds = append(newChannel.OverrideOptions.Thresholds, "MAIN")
+			}
+			warning_threshold := channelMap["warning_threshold"].(bool)
+			if warning_threshold {
+				newChannel.OverrideOptions.Thresholds = append(newChannel.OverrideOptions.Thresholds, "WARNING")
+			}
+
 			channels = append(channels, newChannel)
 		}
-		alert.NotificationChannelConfigList = &channels
+		alert.NotificationChannelConfigList = channels
 	}
 
+	customNotification := monitor.CustomNotificationTemplateV2{}
 	if attr, ok := d.GetOk("custom_notification"); ok && attr != nil {
-		customNotification := monitor.CustomNotificationTemplateV2{}
-
 		if len(attr.([]interface{})) > 0 {
 			m := attr.([]interface{})[0].(map[string]interface{})
 
 			customNotification.Subject = m["subject"].(string)
 			customNotification.AppendText = m["append"].(string)
 			customNotification.PrependText = m["prepend"].(string)
-		} else {
-			customNotification.Subject = defaultAlertV2Title
 		}
-
-		alert.CustomNotificationTemplate = &customNotification
 	}
+	alert.CustomNotificationTemplate = &customNotification
 
 	if attr, ok := d.GetOk("capture"); ok && attr != nil {
 		capture := monitor.CaptureConfigV2{}
@@ -229,7 +267,19 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) (alert *monitor.AlertV2Com
 		alert.CaptureConfig = &capture
 	}
 
-	return
+	alert.Links = []monitor.AlertLinkV2{}
+	if attr, ok := d.GetOk("link"); ok && attr != nil {
+		for _, link := range attr.(*schema.Set).List() {
+			linkMap := link.(map[string]interface{})
+			alert.Links = append(alert.Links, monitor.AlertLinkV2{
+				Type: linkMap["type"].(string),
+				Href: linkMap["href"].(string),
+				ID:   linkMap["id"].(string), //TODO(dbonf) if referencing a non existing dashboard, API will silently fail (status code: 200) not saving the link, add validation?
+			})
+		}
+	}
+
+	return alert
 }
 
 func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Common) (err error) {
@@ -246,24 +296,40 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Comm
 	_ = d.Set("team", alert.TeamID)
 	_ = d.Set("version", alert.Version)
 
-	if alert.NotificationChannelConfigList != nil {
-		var notificationChannels []interface{}
-		for _, ncc := range *alert.NotificationChannelConfigList {
-			config := map[string]interface{}{
-				"id":   ncc.ChannelID,
-				"type": ncc.Type,
-			}
-
-			if ncc.Options != nil {
-				config["renotify_every_minutes"] = secondsToMinutes(ncc.Options.ReNotifyEverySec)
-			}
-			notificationChannels = append(notificationChannels, config)
+	var notificationChannels []interface{}
+	for _, ncc := range alert.NotificationChannelConfigList {
+		config := map[string]interface{}{
+			"id": ncc.ChannelID,
 		}
 
-		_ = d.Set("notification_channels", notificationChannels)
-	}
+		if ncc.OverrideOptions.ReNotifyEverySec != nil {
+			config["renotify_every_minutes"] = secondsToMinutes(*ncc.OverrideOptions.ReNotifyEverySec)
+		} else {
+			config["renotify_every_minutes"] = 0
+		}
 
-	if alert.CustomNotificationTemplate != nil && !(alert.CustomNotificationTemplate.Subject == defaultAlertV2Title &&
+		if ncc.OverrideOptions.Thresholds != nil {
+			config["main_threshold"] = false
+			config["warning_threshold"] = false
+			for _, t := range ncc.OverrideOptions.Thresholds {
+				if t == "MAIN" {
+					config["main_threshold"] = true
+				}
+				if t == "WARNING" {
+					config["warning_threshold"] = true
+				}
+			}
+		} else {
+			// defaults
+			config["main_threshold"] = true
+			config["warning_threshold"] = false
+		}
+
+		notificationChannels = append(notificationChannels, config)
+	}
+	_ = d.Set("notification_channels", notificationChannels)
+
+	if alert.CustomNotificationTemplate != nil && !(alert.CustomNotificationTemplate.Subject == "" &&
 		alert.CustomNotificationTemplate.AppendText == "" &&
 		alert.CustomNotificationTemplate.PrependText == "") {
 		customNotification := map[string]interface{}{}
@@ -284,6 +350,124 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Comm
 		}
 
 		_ = d.Set("capture", []interface{}{capture})
+	}
+
+	if alert.Links != nil {
+		var links []interface{}
+		for _, link := range alert.Links {
+			links = append(links, map[string]interface{}{
+				"type": link.Type,
+				"href": link.Href,
+				"id":   link.ID,
+			})
+		}
+		_ = d.Set("link", links)
+	}
+
+	return nil
+}
+
+func createScopedSegmentedAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.Schema {
+	sysdigAlertSchema := map[string]*schema.Schema{
+		"scope": {
+			Type:     schema.TypeSet,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"label": {
+						Type:         schema.TypeString,
+						Required:     true,
+						ValidateFunc: validation.StringDoesNotContainAny("."),
+					},
+					"operator": {
+						Type:         schema.TypeString,
+						Required:     true,
+						ValidateFunc: validation.StringInSlice([]string{"equals", "notEquals", "in", "notIn", "contains", "notContains", "startsWith"}, false),
+					},
+					"values": {
+						Type:     schema.TypeList,
+						Required: true,
+						Elem:     &schema.Schema{Type: schema.TypeString},
+					},
+				},
+			},
+		},
+		"group_by": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+		}}
+
+	for k, v := range original {
+		sysdigAlertSchema[k] = v
+	}
+
+	return sysdigAlertSchema
+}
+
+func buildScopedSegmentedConfigStruct(d *schema.ResourceData, config *monitor.ScopedSegmentedConfig) {
+
+	//scope
+	expressions := make([]monitor.ScopeExpressionV2, 0)
+	for _, scope := range d.Get("scope").(*schema.Set).List() {
+		scopeMap := scope.(map[string]interface{})
+		operator := scopeMap["operator"].(string)
+		operand := scopeMap["label"].(string)
+		value := make([]string, 0)
+		for _, v := range scopeMap["values"].([]interface{}) {
+			value = append(value, v.(string))
+		}
+		expressions = append(expressions, monitor.ScopeExpressionV2{
+			Operand:  operand, //the sysdig client will rewrite this to be in dot notation
+			Operator: operator,
+			Value:    value,
+		})
+	}
+	if len(expressions) > 0 {
+		config.Scope = &monitor.AlertScopeV2{
+			Expressions: expressions,
+		}
+	}
+
+	//SegmentBy
+	config.SegmentBy = make([]monitor.AlertLabelDescriptorV2, 0)
+	labels, ok := d.GetOk("group_by")
+	if ok {
+		for _, l := range labels.([]interface{}) {
+			config.SegmentBy = append(config.SegmentBy, monitor.AlertLabelDescriptorV2{
+				ID: l.(string), //the sysdig client will rewrite this to be in dot notation
+			})
+		}
+	}
+}
+
+func updateScopedSegmentedConfigState(d *schema.ResourceData, config *monitor.ScopedSegmentedConfig) error {
+
+	if config.Scope != nil && len(config.Scope.Expressions) > 0 {
+		var scope []interface{}
+		for _, e := range config.Scope.Expressions {
+			// operand possibly holds the old dot notation, we want "label" to be in public notation
+			// if the label does not yet exist the descriptor will be empty, use what's in the operand
+			label := e.Operand
+			if e.Descriptor != nil && e.Descriptor.PublicID != "" {
+				label = e.Descriptor.PublicID
+			}
+			config := map[string]interface{}{
+				"label":    label,
+				"operator": e.Operator,
+				"values":   e.Value,
+			}
+			scope = append(scope, config)
+		}
+		_ = d.Set("scope", scope)
+	}
+
+	if len(config.SegmentBy) > 0 {
+		groups := make([]string, 0)
+		for _, s := range config.SegmentBy {
+			groups = append(groups, s.PublicID)
+		}
+		_ = d.Set("group_by", groups)
 	}
 
 	return nil
