@@ -15,10 +15,11 @@ func resourceSysdigMonitorAlertGroupOutlier() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigAlertGroupOutlierCreate,
-		UpdateContext: resourceSysdigAlertGroupOutlierUpdate,
-		ReadContext:   resourceSysdigAlertGroupOutlierRead,
-		DeleteContext: resourceSysdigAlertGroupOutlierDelete,
+		DeprecationMessage: "Group Outlier Alerts have been deprecated, \"sysdig_monitor_alert_group_outlier\" will be removed in future releases",
+		CreateContext:      resourceSysdigAlertGroupOutlierCreate,
+		UpdateContext:      resourceSysdigAlertGroupOutlierUpdate,
+		ReadContext:        resourceSysdigAlertGroupOutlierRead,
+		DeleteContext:      resourceSysdigAlertGroupOutlierDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
