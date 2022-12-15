@@ -73,7 +73,7 @@ resource "sysdig_secure_cloud_account" "sample" {
   alias               = "%s"
   role_enabled        = "false"
   role_name            = "CustomRoleName"
-  workload_identity_account_id = "wid-1"
+  workload_identity_account_id = "%s"
 }
-`, accountID, accountID)
+`, accountID, accountID, accountID)
 }
