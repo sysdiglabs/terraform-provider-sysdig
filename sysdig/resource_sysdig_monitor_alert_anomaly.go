@@ -15,10 +15,11 @@ func resourceSysdigMonitorAlertAnomaly() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigAlertAnomalyCreate,
-		UpdateContext: resourceSysdigAlertAnomalyUpdate,
-		ReadContext:   resourceSysdigAlertAnomalyRead,
-		DeleteContext: resourceSysdigAlertAnomalyDelete,
+		DeprecationMessage: "Anomaly Detection Alerts have been deprecated, \"sysdig_monitor_alert_anomaly\" will be removed in future releases",
+		CreateContext:      resourceSysdigAlertAnomalyCreate,
+		UpdateContext:      resourceSysdigAlertAnomalyUpdate,
+		ReadContext:        resourceSysdigAlertAnomalyRead,
+		DeleteContext:      resourceSysdigAlertAnomalyDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

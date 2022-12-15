@@ -10,6 +10,8 @@ description: |-
 
 Creates a Sysdig Monitor Group Outlier Alert. Monitor a group of hosts and be notified when one acts differently from the rest.
 
+~> **Deprecation Notice:** Group Outlier Alerts have been deprecated in Sysdig Monitor, `sysdig_monitor_alert_group_outlier` will be removed in future releases, consider rewriting the resource as a promql alert.
+
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
