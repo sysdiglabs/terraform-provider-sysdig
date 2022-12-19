@@ -98,7 +98,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 						},
 						"capture": {
 							Type:     schema.TypeList,
-							Required: true,
+							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"seconds_after_event": {
@@ -113,7 +113,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 									},
 									"name": {
 										Type:     schema.TypeString,
-										Optional: true,
+										Required: true,
 										Computed: true,
 									},
 								},
