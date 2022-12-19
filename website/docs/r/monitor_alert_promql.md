@@ -17,7 +17,7 @@ Creates a Sysdig Monitor PromQL Alert. Monitor prometheus metrics and alert if t
 ```terraform
 resource "sysdig_monitor_alert_promql" "sample" {
 	name = "Elasticsearch JVM heap usage"
-	description = "A Kubernetes pod failed to restart"
+	description = "Elasticsearch JVM heap used over attention threshold"
 	severity = 6
 
 	promql = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"

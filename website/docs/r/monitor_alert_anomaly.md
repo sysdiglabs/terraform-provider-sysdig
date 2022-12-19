@@ -10,6 +10,8 @@ description: |-
 
 Creates a Sysdig Monitor Anomaly Alert. Monitor hosts based on their historical behaviors and alert when they deviate.
 
+~> **Deprecation Notice:** Anomaly Detection Alerts have been deprecated in Sysdig Monitor, `sysdig_monitor_alert_anomaly` will be removed in future releases, consider rewriting the resource as a promql alert.
+
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
