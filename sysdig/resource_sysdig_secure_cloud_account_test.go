@@ -69,11 +69,11 @@ func secureCloudAccountWithWID(accountID string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_account" "sample" {
   account_id          = "sample-%s"
-  cloud_provider      = "aws"
+  cloud_provider      = "gcp"
   alias               = "%s"
   role_enabled        = "false"
   role_name            = "CustomRoleName"
-  workload_identity_account_id = "%s"
+  workload_identity_account_id = "sample-%s"
 }
 `, accountID, accountID, accountID)
 }
