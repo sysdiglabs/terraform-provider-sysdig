@@ -145,6 +145,7 @@ resource "sysdig_secure_policy" "sample_%d" {
     capture {
       seconds_before_event = 5
       seconds_after_event = 10
+      name = "testcapture"
     }
   }
 }
