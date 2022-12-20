@@ -113,8 +113,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 									},
 									"name": {
 										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
+										Required: true,
 									},
 								},
 							},
