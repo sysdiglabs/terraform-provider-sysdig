@@ -1,31 +1,42 @@
 ---
 subcategory: "Sysdig Monitor"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_monitor_alert_v2_prometheus"
+page_title: "Sysdig: sysdig_monitor_alert_v2_downtime"
 description: |-
-  Creates a Sysdig Monitor PromQL Alert with AlertV2 API.
+  Creates a Sysdig Monitor Downtime Alert with AlertV2 API.
 ---
 
-# Resource: sysdig_monitor_alert_v2_prometheus
+# Resource: sysdig_monitor_alert_v2_downtime
 
-Creates a Sysdig Monitor Prometheus Alert. The notification is triggered on the user-defined PromQL expression.
+Creates a Sysdig Monitor Downtime Alert. Monitor any type of entity - host, container, process - and alert when the entity goes down.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
 ```terraform
-resource "sysdig_monitor_alert_v2_prometheus" "sample" {
-  name = "Elasticsearch JVM heap usage"
-  description = "Elasticsearch JVM heap used over attention threshold"
-  severity = high
-  query = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
-  trigger_after_minutes = 10
-  notification_channels {
-    id = <your-notification-channel-id>
-    renotify_every_minutes = 5
+resource "sysdig_monitor_alert_v2_downtime" "sample" {
+
+  name = "process down"
+  severity = "high"
+  metric = "sysdig_program_up"
+  threshold = 75
+  group_by = ["host_hostname", "program_name"]
+
+  scope {
+    label = "host_hostname"
+    operator = "in"
+    values = ["my-cluster-1", "my-server-2"]
   }
+
+  notification_channels {
+    id = 1234
+  }
+
+  trigger_after_minutes = 10
+
 }
+
 ```
 
 ## Argument Reference
@@ -40,17 +51,17 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `group` - (Optional) Lowercase string to group alerts in the UI.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.
-* `notification_channels` - (Optional) List of notification channel configuration.
+* `notification_channels` - (Optional) List of notification channel configuration
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
 * `link` - (Optional) List of links to add to notifications.
 
-### `notification_channels` - 
+### `notification_channels`
 
 By defining this field, the user can choose to which notification channels send the events when the alert fires. 
 
 It is a list of objects with the following fields:
 * `id` - (Required) The ID of the notification channel.
-* `renotify_every_minutes`: (Optional) the amount of minutes to wait before re sending the notification to this channel. `0` means no renotifiacation enabled.
+* `renotify_every_minutes`: (Optional) the amount of minutes to wait before re sending the notification to this channel. `0` means no renotifiacation enabled. Default: `0`.
 
 ### `custom_notification`
 
@@ -69,9 +80,28 @@ By defining this field, the user can add link to notificatons.
 * `href` - (Optional) When using `runbook` type, url of the external resource.
 * `id` - (Optional) When using `dashboard` type, dasboard id.
 
-### Prometheus alert arguments
+### `capture`
 
-* `query` - (Required) PromQL-based metric expression to alert on. Example: `histogram_quantile(0.99, rate(etcd_http_successful_duration_seconds_bucket[5m]) > 0.15` or `predict_linear(sysdig_fs_free_bytes{fstype!~"tmpfs"}[1h], 24*3600) < 10000000000`.
+Enables the creation of a capture file of the syscalls during the event.
+
+* `filename` - (Required) Defines the name of the capture file. Must have `.scap` suffix.
+* `duration_seconds` - (Optional) Time frame of the capture. Default: `15`.
+* `storage` - (Optional) Custom bucket where to save the capture.
+* `filter` - (Optional) Additional filter to apply to the capture. For example: `proc.name contains nginx`.
+* `enabled` - (Optional) Wether to enable captures. Default: `true`.
+
+### Downtime alert arguments
+
+* `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure. Can be repeated.
+* `group_by` - (Optional) List of segments to trigger a separate alert on. Example: `["kube_cluster_name", "kube_pod_name"]`.
+* `metric` - (Required) Metric the alert will act upon. Can be: `sysdig_container_up`, `sysdig_program_up`, `sysdig_host_up`.
+* `threshold` - (Required) Below of this percentage of downtime the alert will be triggered. Defaults to 100.
+
+### `scope`
+
+* `label` - (Required) Label in prometheus notation to select a part of the infrastructure.
+* `operator` - (Required) Operator to match the label. It can be `equals`, `notEquals`, `in`, `notIn`, `contains`, `notContains`, `startsWith`.
+* `values` - (Required) List of values to match the scope.
 
 ## Attributes Reference
 
@@ -91,5 +121,5 @@ alerts in Sysdig Monitor:
 Prometheus Monitor alerts can be imported using the alert ID, e.g.
 
 ```
-$ terraform import sysdig_monitor_alert_v2_prometheus.example 12345
+$ terraform import sysdig_monitor_alert_v2_downtime.example 12345
 ```

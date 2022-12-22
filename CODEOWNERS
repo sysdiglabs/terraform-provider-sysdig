@@ -5,8 +5,8 @@
 *benchmark* @haresh-suresh  @nkraemer-sysdig 
 
 # monitor
-*monitor*alert* @arturodilecce
+*monitor*alert* @arturodilecce @dbonf
 *monitor*dashboard* @brokenpip3
 
 # policies/rules
-*secure*policy* @jacklongsd @kmvachhani @rbaderts
+*secure*policy* @jacklongsd @kmvachhani @ben-m-lucas
