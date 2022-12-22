@@ -27,7 +27,7 @@ func (client *sysdigSecureClient) trustedCloudIdentityURL(provider string) strin
 }
 
 func (client *sysdigSecureClient) CreateCloudAccount(ctx context.Context, cloudAccount *CloudAccount) (*CloudAccount, error) {
-	response, err := client.doSysdigSecureRequest(ctx, http.MethodPost, client.cloudAccountURL(true), cloudAccount.ToJSON())
+	response, err := client.doSysdigSecureRequest(ctx, http.MethodPost, client.cloudAccountURL(false), cloudAccount.ToJSON())
 	if err != nil {
 		return nil, err
 	}
