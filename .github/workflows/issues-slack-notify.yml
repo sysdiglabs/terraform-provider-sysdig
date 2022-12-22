@@ -11,9 +11,16 @@ jobs:
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_CHANNEL: ws-cloudnative-internal
+          SLACK_CHANNEL: ws-cloudnative-alerts
           SLACK_ICON: https://github.com/fluidicon.png
-          SLACK_MESSAGE: 'An issue has been opened in Terraform Sysdig Provider repository'
-          SLACK_TITLE: Issue Created
-          SLACK_USERNAME: gitHub
+          SLACK_MESSAGE: 'Terraform Provider'
+          SLACK_TITLE: A new issue was created
+          SLACK_USERNAME: terraform-provider-sysdig
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          MSG_MINIMAL: true
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: message,author,ref
+        env:
+          SLACK_WEBHOOK_URL: {{ secrets.SLACK_WEBHOOK }}

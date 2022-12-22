@@ -48,7 +48,14 @@ jobs:
         env:
           SLACK_CHANNEL: ws-cloudnative-alerts
           SLACK_ICON: https://github.com/fluidicon.png
-          SLACK_MESSAGE: 'Terraform Provider Regression Test Failed'
-          SLACK_TITLE: Terraform Provider - Regression Test Failed
-          SLACK_USERNAME: gitHub
+          SLACK_MESSAGE: 'Terraform Provider'
+          SLACK_TITLE: Regression Test Failed
+          SLACK_USERNAME: terraform-provider-sysdig
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          MSG_MINIMAL: true
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,action,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
