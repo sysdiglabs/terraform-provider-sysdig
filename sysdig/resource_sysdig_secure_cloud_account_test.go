@@ -58,7 +58,7 @@ func TestAccSecureCloudAccount(t *testing.T) {
 func secureCloudAccountWithID(accountID string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_account" "sample-1" {
-  account_id          = "sample-%s"
+  account_id          = "sample1-%s"
   cloud_provider      = "aws"
   alias               = "%s"
   role_enabled        = "false"
@@ -70,7 +70,7 @@ resource "sysdig_secure_cloud_account" "sample-1" {
 func secureCloudAccountMinimumConfiguration(accountID string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_account" "sample-2" {
-  account_id      = "sample-%s"
+  account_id      = "sample2-%s"
   cloud_provider  = "aws"
 }`, accountID)
 }
@@ -78,12 +78,12 @@ resource "sysdig_secure_cloud_account" "sample-2" {
 func secureCloudAccountWithWID(accountID string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_account" "sample-3" {
-  account_id          = "sample-%s"
-  cloud_provider      = "aws"
+  account_id          = "sample3-%s"
+  cloud_provider      = "gcp"
   alias               = "%s"
   role_enabled        = "false"
   role_name            = "CustomRoleName"
-  workload_identity_account_id = "sample-%s"
+  workload_identity_account_id = "sample3-%s"
 }
 `, accountID, accountID, accountID)
 }
