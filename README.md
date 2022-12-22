@@ -27,8 +27,8 @@
 #### Requirements
 
 - [Terraform](https://www.terraform.io/downloads.html) > 0.12.x
-- [Go](https://golang.org/doc/install) > Go version specified in [go.mod](./go.mod) file (to build the provider plugin)
-  - If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine. You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+- [Go](https://golang.org/doc/install) > Go version specified in [go.mod](./go.mod#L3)
+  - Correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
 ### Develop
 
