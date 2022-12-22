@@ -3,23 +3,26 @@
 </a>
 
 
-Terraform Provider for Sysdig
-=============================
+# Terraform Provider for Sysdig
+
 
 - **[Terraform Registry - Sysdig Provider Docs](https://registry.terraform.io/providers/sysdiglabs/sysdig/latest/docs)**
 - [Blog on how to use this provider with Sysdig Secure](https://sysdig.com/blog/using-terraform-for-container-security-as-code/)
 - Terraform
-  - Website: https://www.terraform.io
+  - Website https://www.terraform.io
   - Mailing list on  [Google Groups](http://groups.google.com/group/terraform-tool)
   - [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
 
 
+# Contribute
 
-Contribute
----------------------------
+- [Initial Setup](#initial-setup)
+- [Proposing PR's](#proposing-prs)
+- [Release](#release)
 
+## Initial Setup
 
-### - Building
+### Building
 
 #### Requirements
 
@@ -28,7 +31,7 @@ Contribute
   - If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine 
     (version 1.15+ is *required*). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
-#### - Developing
+### Develop
 
 First **clone** source repository to: `$GOPATH/src/github.com/draios/terraform-provider-sysdig`
 
@@ -38,6 +41,7 @@ $ cd terraform-provider-sysdig
 $ make build
 ```
 
+### Compile
 
 To **compile** the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
@@ -48,18 +52,26 @@ $ $GOPATH/bin/terraform-provider-sysdig
 ...
 ```
 
+### Tests
 In order to **test** the provider, you can simply run `make test`.
 
 ```sh
 $ make test
 ```
 
+### Acceptance Tests
+
 If you want to execute the **acceptance tests**, you can run `make testacc`.
+- Follow [Terraform acceptance test guideliness](https://www.terraform.io/plugin/sdkv2/testing/acceptance-tests)
+- Please note that you need a token for Monitor and Secure, and since the **acceptance tests create real infrastructure**
+you should execute them in an environment where you can remove the resorces easily.
+- Acceptance tests are launched in Sysdig production environment
 
 ```sh
 $ make testacc
 ```
 
+### Install (local)
 To use the local provider you just built, follow the instructions to [**install** it as a plugin.](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) in your machine with:
 
 ```sh
@@ -89,17 +101,12 @@ To uninstall the plugin:
 $ make uninstall
 ```
 
-<br/>:warning:Please note that you need a token for Monitor and Secure, and since the **acceptance tests create real infrastructure**
-you should execute them in an environment where you can remove the resorces easily.
-
-
-
-### - Creating new resource / data sources
+### Creating new resource / data sources
 
 TL;DR;
 - Create the resource/data source item
 - Add the created item into the `provider.go` resource or datasource map with its wiring
-- With its [acceptance **test**](https://www.terraform.io/plugin/sdkv2/testing/acceptance-tests)
+- With its [acceptance **test**](#acceptance-tests)
 - Add its **documentation** page on `./website/docs/`
 
 
@@ -108,7 +115,7 @@ Interesting resources
 - https://www.hashicorp.com/blog/testing-hashicorp-terraform
 
 
-### - Proposing PR's
+## Proposing PR's
 
 * if it's your first time, validate you're taking into account every aspect of the [`./github/pull_request_template`](.github/pull_request_template.md)
 * on pull-requests some validations are enforced.
@@ -118,7 +125,7 @@ Interesting resources
 * for Acceptance Tests `testacc` some credentials are required, check [`/.envrc.template`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.envrc.template)
 
 
-### -  Release
+## Release
 
 To create a new release, create and push a new **tag**, and it will be released  following [`/.
 github/workflows/release.yml`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.github/workflows/release.yml).
