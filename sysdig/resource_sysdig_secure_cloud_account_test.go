@@ -37,7 +37,17 @@ func TestAccSecureCloudAccount(t *testing.T) {
 				Config: secureCloudAccountWithWID(accID),
 			},
 			{
-				ResourceName:      "sysdig_secure_cloud_account.sample",
+				ResourceName:      "sysdig_secure_cloud_account.sample-1",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "sysdig_secure_cloud_account.sample-2",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "sysdig_secure_cloud_account.sample-3",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -47,7 +57,7 @@ func TestAccSecureCloudAccount(t *testing.T) {
 
 func secureCloudAccountWithID(accountID string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_cloud_account" "sample" {
+resource "sysdig_secure_cloud_account" "sample-1" {
   account_id          = "sample-%s"
   cloud_provider      = "aws"
   alias               = "%s"
@@ -59,7 +69,7 @@ resource "sysdig_secure_cloud_account" "sample" {
 
 func secureCloudAccountMinimumConfiguration(accountID string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_cloud_account" "sample" {
+resource "sysdig_secure_cloud_account" "sample-2" {
   account_id      = "sample-%s"
   cloud_provider  = "aws"
 }`, accountID)
@@ -67,7 +77,7 @@ resource "sysdig_secure_cloud_account" "sample" {
 
 func secureCloudAccountWithWID(accountID string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_cloud_account" "sample" {
+resource "sysdig_secure_cloud_account" "sample-3" {
   account_id          = "sample-%s"
   cloud_provider      = "aws"
   alias               = "%s"
