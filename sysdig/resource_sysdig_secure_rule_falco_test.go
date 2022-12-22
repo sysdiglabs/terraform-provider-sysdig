@@ -213,7 +213,7 @@ resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role_exceptions" {
         name = "proc_name"
         fields = ["proc.name"]
         comps = ["in"]
-        values = jsonencode(["sh"])
+        values = jsonencode([["sh"]])
    }
 }`
 }
