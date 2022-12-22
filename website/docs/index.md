@@ -21,6 +21,19 @@ Use the navigation to the left to read about the available resources.
 
 ## Example Usage
 
+Include a `providers` block to declare the requirement of the `sysdig` provider:
+
+```terraform
+terraform {
+  required_providers {
+    sysdig = {
+      source = "sysdiglabs/sysdig"
+      version = ">=0.5"
+    }
+  }
+}
+```
+
 ### Monitor Authentication
 
 ```terraform
