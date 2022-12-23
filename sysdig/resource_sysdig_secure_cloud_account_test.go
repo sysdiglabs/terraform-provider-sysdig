@@ -33,9 +33,9 @@ func TestAccSecureCloudAccount(t *testing.T) {
 			{
 				Config: secureCloudAccountMinimumConfiguration(accID),
 			},
-			{
-				Config: secureCloudAccountWithWID(accID),
-			},
+			//{
+			//	Config: secureCloudAccountWithWID(accID),
+			//},
 			{
 				ResourceName:      "sysdig_secure_cloud_account.sample-1",
 				ImportState:       true,
