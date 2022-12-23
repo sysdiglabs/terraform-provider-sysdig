@@ -284,10 +284,7 @@ func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) (secure.Rul
 			}
 
 			comps := cast.ToStringSlice(exceptionMap["comps"])
-			if len(comps) == 1 {
-				newFalcoException.Comps = comps[0]
-			}
-			if len(comps) > 1 {
+			if len(comps) >= 1 {
 				newFalcoException.Comps = comps
 			}
 
@@ -298,10 +295,7 @@ func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) (secure.Rul
 			}
 
 			fields := cast.ToStringSlice(exceptionMap["fields"])
-			if len(fields) == 1 {
-				newFalcoException.Fields = fields[0]
-			}
-			if len(fields) > 1 {
+			if len(fields) >= 1 {
 				newFalcoException.Fields = fields
 			}
 
