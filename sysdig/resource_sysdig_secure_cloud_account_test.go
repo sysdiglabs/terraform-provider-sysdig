@@ -80,8 +80,9 @@ func secureCloudAccountWithWID(accountID string) string {
 resource "sysdig_secure_cloud_account" "sample-3" {
   account_id          = "sample3-%s"
   cloud_provider      = "gcp"
-  alias               = "%s"
+  role_enabled        = "false"
+  role_name            = "CustomRoleName"
   workload_identity_account_id = "sample3-%s"
 }
-`, accountID, accountID, accountID)
+`, accountID, accountID)
 }
