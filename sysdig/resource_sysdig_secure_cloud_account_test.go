@@ -33,32 +33,19 @@ func TestAccSecureCloudAccount(t *testing.T) {
 			{
 				Config: secureCloudAccountMinimumConfiguration(accID),
 			},
-			//{
-			//	Config: secureCloudAccountWithWID(accID),
-			//},
 			{
-				ResourceName:      "sysdig_secure_cloud_account.sample-1",
+				ResourceName:      "sysdig_secure_cloud_account.sample",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				ResourceName:      "sysdig_secure_cloud_account.sample-2",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			//{
-			//	ResourceName:      "sysdig_secure_cloud_account.sample-3",
-			//	ImportState:       true,
-			//	ImportStateVerify: true,
-			//},
 		},
 	})
 }
 
 func secureCloudAccountWithID(accountID string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_cloud_account" "sample-1" {
-  account_id          = "sample1-%s"
+resource "sysdig_secure_cloud_account" "sample" {
+  account_id          = "sample-%s"
   cloud_provider      = "aws"
   alias               = "%s"
   role_enabled        = "false"
@@ -69,20 +56,8 @@ resource "sysdig_secure_cloud_account" "sample-1" {
 
 func secureCloudAccountMinimumConfiguration(accountID string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_cloud_account" "sample-2" {
-  account_id      = "sample2-%s"
+resource "sysdig_secure_cloud_account" "sample" {
+  account_id      = "sample-%s"
   cloud_provider  = "aws"
 }`, accountID)
 }
-
-//func secureCloudAccountWithWID(accountID string) string {
-//	return fmt.Sprintf(`
-//resource "sysdig_secure_cloud_account" "sample-3" {
-//  account_id          = "sample3-%s"
-//  cloud_provider      = "gcp"
-//  role_enabled        = "false"
-//  role_name            = "CustomRoleName"
-//  workload_identity_account_id = "sample3-%s"
-//}
-//`, accountID, accountID)
-//}
