@@ -52,7 +52,7 @@ resource "sysdig_secure_cloud_account" "sample" {
   role_name            = "CustomRoleName"
   workload_identity_account_id = "sample-%s"
 }
-`, accountID, accountID)
+`, accountID, accountID, accountID)
 }
 
 func secureCloudAccountMinimumConfiguration(accountID string) string {
