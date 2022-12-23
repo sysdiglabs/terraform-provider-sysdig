@@ -30,7 +30,7 @@ resource "sysdig_secure_rule_falco" "example" {
     name   = "proc_names"
     fields = ["proc.name"]
     comps  = ["in"]
-    values = jsonencode(["python", "python2", "python3"]) # If only one element is provided, do not specify it a list of lists.
+    values = jsonencode([[["python", "python2", "python3"]]]) # If only one element is provided, it should still needs to be specified as a list of lists.
   }
 
   exceptions {

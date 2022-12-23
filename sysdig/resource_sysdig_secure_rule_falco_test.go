@@ -191,12 +191,12 @@ resource "sysdig_secure_rule_falco" "falco_rule_with_exceptions" {
    name = "only_one_field"
    fields = ["ka.req.binding.subjects"]
    comps = ["in"]
-   values = jsonencode(["foo"])
+   values = jsonencode([["foo"]])
   }
   exceptions {
    name = "only_one_field_without_comps"
    fields = ["ka.req.binding.subjects"]
-   values = jsonencode(["foo"])
+   values = jsonencode([["foo"]])
   }
 }
 `, name)
@@ -213,7 +213,7 @@ resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role_exceptions" {
         name = "proc_name"
         fields = ["proc.name"]
         comps = ["in"]
-        values = jsonencode(["sh"])
+        values = jsonencode([["sh"]])
    }
 }`
 }
