@@ -46,11 +46,11 @@ func TestAccSecureCloudAccount(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				ResourceName:      "sysdig_secure_cloud_account.sample-3",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
+			//{
+			//	ResourceName:      "sysdig_secure_cloud_account.sample-3",
+			//	ImportState:       true,
+			//	ImportStateVerify: true,
+			//},
 		},
 	})
 }
@@ -75,14 +75,14 @@ resource "sysdig_secure_cloud_account" "sample-2" {
 }`, accountID)
 }
 
-func secureCloudAccountWithWID(accountID string) string {
-	return fmt.Sprintf(`
-resource "sysdig_secure_cloud_account" "sample-3" {
-  account_id          = "sample3-%s"
-  cloud_provider      = "gcp"
-  role_enabled        = "false"
-  role_name            = "CustomRoleName"
-  workload_identity_account_id = "sample3-%s"
-}
-`, accountID, accountID)
-}
+//func secureCloudAccountWithWID(accountID string) string {
+//	return fmt.Sprintf(`
+//resource "sysdig_secure_cloud_account" "sample-3" {
+//  account_id          = "sample3-%s"
+//  cloud_provider      = "gcp"
+//  role_enabled        = "false"
+//  role_name            = "CustomRoleName"
+//  workload_identity_account_id = "sample3-%s"
+//}
+//`, accountID, accountID)
+//}
