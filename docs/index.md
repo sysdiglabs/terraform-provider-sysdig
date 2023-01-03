@@ -1,3 +1,6 @@
+
+> ⚠️ content deprecated, use https://docs.sysdig.com/en/docs/developer-tools/terraform-provider/
+
 # Terraform Provider for Sysdig
 
 ## Introduction

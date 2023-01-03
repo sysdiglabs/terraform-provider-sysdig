@@ -126,3 +126,26 @@ When Secure resources are to be created, this authentication must be in place.
 ###  Others
 * `extra_headers` - (Optional) Defines extra HTTP headers that will be added to the client
   while performing HTTP API calls.
+
+## Troubleshooting
+
+If you get a:
+
+```
+panic: Invalid diagnostic: empty summary. This is always a bug in the provider implementation
+```
+
+Please check:
+
+If you are using a monitor resource those variables should be correctly set:
+```
+sysdig_monitor_url = "https://app.sysdigcloud.com"
+sysdig_monitor_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+```
+If you are using a secure resource those variables should be correctly set:
+```
+sysdig_secure_url="https://secure.sysdig.com"
+sysdig_secure_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+```
+Ensure for both url variables your region is correctly set.
+For more info on regions [check here](https://docs.sysdig.com/en/docs/administration/saas-regions-and-ip-ranges/).
