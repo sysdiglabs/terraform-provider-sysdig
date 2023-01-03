@@ -3,6 +3,7 @@ name: Scheduled Backend - Regresion Test
 on:
   schedule:
     - cron: "0 11 * * *"
+  workflow_dispatch:
 
 env:
   GO_VERSION: "^1.19"         # any 1.x version, see go.mod file for minimum
@@ -38,7 +39,8 @@ jobs:
           SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
 
   slackNotification:
-    if: failure()
+    needs: test
+    if: needs.test.result == 'failed'
     name: Slack Notification
     runs-on: ubuntu-latest
     steps:
