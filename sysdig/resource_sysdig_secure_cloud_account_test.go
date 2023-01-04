@@ -61,3 +61,43 @@ resource "sysdig_secure_cloud_account" "sample" {
   cloud_provider  = "aws"
 }`, accountID)
 }
+
+func TestAccSecureCloudAccountWID(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+	accID := rText()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: secureCloudAccountWithWID(accID),
+			},
+			{
+				ResourceName:      "sysdig_secure_cloud_account.sample-1",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func secureCloudAccountWithWID(accountID string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_cloud_account" "sample-1" {
+  account_id          = "sample-1-%s"
+  cloud_provider      = "aws"
+  alias               = "%s"
+  role_enabled        = "false"
+  role_name            = "CustomRoleName"
+  workload_identity_account_id = "sample-1-%s"
+}
+`, accountID, accountID, accountID)
+}

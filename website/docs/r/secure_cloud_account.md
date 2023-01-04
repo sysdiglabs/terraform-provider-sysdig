@@ -21,6 +21,7 @@ resource "sysdig_secure_cloud_account" "sample" {
   alias               = "prod"
   role_enabled        = "false"
   role_name           = "CustomRoleName"
+  workload_identity_account_id = "457345678065"
 }
 ```
 
@@ -35,6 +36,8 @@ resource "sysdig_secure_cloud_account" "sample" {
 * `role_enabled` - (Optional) Whether or not a role is provisioned withing this account, that Sysdig has permission to AssumeRole in order to run Benchmarks. Default: `false`.
 
 * `role_name` - (Optional) The name of the role Sysdig will have permission to AssumeRole if `role_enaled` is set to `true`. Default: `SysdigCloudBench`.
+
+* `workload_identity_account_id` - (Optional) For GCP only. The account id in which workload identity is present for this account in gcp org.
 
 ## Attributes Reference
 
