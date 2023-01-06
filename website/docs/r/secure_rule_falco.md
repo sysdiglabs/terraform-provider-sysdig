@@ -81,7 +81,7 @@ For more information about the syntax of the exceptions, check the [official Fal
 Supported fields for exceptions:
 
 * `name` - (Required) The name of the exception. Only used to provide a handy name, and to potentially link together values in a later rule that has `append = true`.
-* `fields` - (Required) Contains one or more fields that will extract a value from the syscall/k8s_audit events.
+* `fields` - (Optional) Contains one or more fields that will extract a value from the syscall/k8s_audit events.
 * `comps` - (Optional) Contains comparison operators that align 1-1 with the items in the fields property.
 * `values` - (Optional) Contains tuples of values. Each item in the tuple should align 1-1 with the corresponding field
   and comparison operator. Since the value can be a string, a list of strings or a list of a list of strings, the value
