@@ -205,7 +205,6 @@ type Exception struct {
 	Fields interface{} `json:"fields,omitempty"`
 	Comps  interface{} `json:"comps,omitempty"`
 	Values interface{} `json:"values,omitempty"`
-	Value  interface{} `json:"value,omitempty"`
 }
 
 func (r *Rule) ToJSON() io.Reader {

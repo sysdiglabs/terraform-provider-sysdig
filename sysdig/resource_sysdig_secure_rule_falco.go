@@ -79,11 +79,7 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 						},
 						"values": {
 							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"value": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 						},
 						"fields": {
 							Type:     schema.TypeList,
@@ -298,20 +294,9 @@ func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) (secure.Rul
 			}
 
 			values := cast.ToString(exceptionMap["values"])
-			if values != "" {
-				err := json.Unmarshal([]byte(values), &newFalcoException.Values)
-				if err != nil {
-					return secure.Rule{}, err
-				}
-			} else if newFalcoException.Fields != nil && newFalcoException.Comps != nil {
-				return secure.Rule{}, errors.New("values is required on an exception when fields and comps are set")
-			}
-
-			value := cast.ToString(exceptionMap["value"])
-			newFalcoException.Value = value
-
-			if newFalcoException.Fields == nil && newFalcoException.Comps == nil && value == "" {
-				return secure.Rule{}, errors.New("value is required on an exception when fields and comps are not set")
+			err := json.Unmarshal([]byte(values), &newFalcoException.Values)
+			if err != nil {
+				return secure.Rule{}, err
 			}
 
 			falcoExceptions = append(falcoExceptions, newFalcoException)
