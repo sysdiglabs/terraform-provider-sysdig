@@ -51,6 +51,11 @@ resource "sysdig_secure_rule_falco" "example" {
       [["java"], "sdjagent.jar"]
     ])
   }
+
+  exceptions {
+    name   = "image_suffix"
+    value = "secure-inline-scan" # Example of an exception with just a name/value pair
+  }
 }
 ```
 
@@ -76,9 +81,14 @@ For more information about the syntax of the exceptions, check the [official Fal
 Supported fields for exceptions:
 
 * `name` - (Required) The name of the exception. Only used to provide a handy name, and to potentially link together values in a later rule that has `append = true`.
-* `fields` - (Required) Contains one or more fields that will extract a value from the syscall/k8s_audit events.
+* `fields` - (Optional) Contains one or more fields that will extract a value from the syscall/k8s_audit events.
 * `comps` - (Optional) Contains comparison operators that align 1-1 with the items in the fields property.
-* `values` - (Required) Contains tuples of values. Each item in the tuple should align 1-1 with the corresponding field and comparison operator. Since the value can be a string, a list of strings or a list of a list of strings, the value of this field must be supplied in JSON format. You can use the default `jsonencode` function to provide this value. See the usage example on the top.
+* `values` - (Optional) Contains tuples of values. Each item in the tuple should align 1-1 with the corresponding field
+  and comparison operator. Since the value can be a string, a list of strings or a list of a list of strings, the value
+  of this field must be supplied in JSON format. You can use the default `jsonencode` function to provide this value.
+  See the usage example on the top. **Required** if `fields` and `comps` are set.
+* `value` - (Optional) Contains the single value used when exception is a name/value pair. **Required** if `fields` and
+  `comps` are not set
 
 ## Attributes Reference
 
