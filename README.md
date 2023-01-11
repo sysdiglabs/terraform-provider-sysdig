@@ -121,7 +121,7 @@ Interesting resources
   - Defined in [`/.pre-commit-config.yaml`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.pre-commit-config.yaml)
   - You can work on this before even pushing to remote, using [**pre-commit**](https://pre-commit.com) plugin
   
-* for the PR title use [conventional commit format](https://www.conventionalcommits.org/en/v1.0.0/) so when the branch is squashed to main branch it follos a convention
+* for the PR title use [conventional commit format](https://www.conventionalcommits.org/en/v1.0.0/) so when the branch is squashed to main branch it follows a convention
 * for Acceptance Tests `testacc` some credentials are required, check [`/.envrc.template`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.envrc.template)
 
 
