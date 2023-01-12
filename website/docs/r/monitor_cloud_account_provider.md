@@ -32,3 +32,7 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `integration_type` - (Required) Type of cloud integration. Only `API` is currently supported.
 * `account_id` - (Required) The GCP project id for the project that will be monitored.
 * `additional_options` - (Optional) The private key generated when creating a new GCP service account key. Must be in JSON format and base64 encoded.
+
+## Attributes Reference
+
+No additional attributes are exported.
