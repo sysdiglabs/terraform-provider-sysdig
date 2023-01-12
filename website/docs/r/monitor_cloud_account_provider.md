@@ -3,7 +3,7 @@ subcategory: "Sysdig Monitor"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_cloud_account_provider"
 description: |-
-Creates a Sysdig Monitor cloud provider integration
+  Creates a Sysdig Monitor cloud provider integration
 ---
 
 # Resource: sysdig_monitor_cloud_account_provider
