@@ -64,7 +64,7 @@ If you want to execute the **acceptance tests**, you can run `make testacc`.
 - Follow [Terraform acceptance test guideliness](https://www.terraform.io/plugin/sdkv2/testing/acceptance-tests)
 - Please note that you need a token for Sysdig Monitor and another one for Sysdig Secure, and since the **acceptance tests create real infrastructure**
 you should execute them in an environment where you can remove the resources easily.
-- Acceptance tests are launched in Sysdig production environment
+- Acceptance tests are launched in [Sysdig production `+kubelab` test environment](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.github/workflows/ci-pull-request.yml#L82-L83)
 
 ```sh
 $ make testacc
@@ -121,6 +121,7 @@ Interesting resources
   - Defined in [`/.pre-commit-config.yaml`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.pre-commit-config.yaml)
   - You can work on this before even pushing to remote, using [**pre-commit**](https://pre-commit.com) plugin
   
+* for the PR title use [conventional commit format](https://www.conventionalcommits.org/en/v1.0.0/) so when the branch is squashed to main branch it follows a convention
 * for Acceptance Tests `testacc` some credentials are required, check [`/.envrc.template`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.envrc.template)
 
 

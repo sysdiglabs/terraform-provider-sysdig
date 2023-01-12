@@ -40,7 +40,7 @@ jobs:
 
   slackNotification:
     needs: test
-    if: needs.test.result == 'failed'
+    if: ${{ failure() }}
     name: Slack Notification
     runs-on: ubuntu-latest
     steps:

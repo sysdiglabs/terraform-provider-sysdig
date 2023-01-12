@@ -202,8 +202,8 @@ type Condition struct {
 
 type Exception struct {
 	Name   string      `json:"name"`
-	Fields interface{} `json:"fields"`
-	Comps  interface{} `json:"comps"`
+	Fields interface{} `json:"fields,omitempty"`
+	Comps  interface{} `json:"comps,omitempty"`
 	Values interface{} `json:"values,omitempty"`
 }
 
@@ -366,13 +366,14 @@ func VulnerabilityExceptionFromJSON(body []byte) *VulnerabilityException {
 // -------- CloudAccount --------
 
 type CloudAccount struct {
-	AccountID                 string `json:"accountId"`
-	Provider                  string `json:"provider"`
-	Alias                     string `json:"alias"`
-	RoleAvailable             bool   `json:"roleAvailable"`
-	RoleName                  string `json:"roleName"`
-	ExternalID                string `json:"externalId,omitempty"`
-	WorkLoadIdentityAccountID string `json:"workloadIdentityAccountId,omitempty"`
+	AccountID                    string `json:"accountId"`
+	Provider                     string `json:"provider"`
+	Alias                        string `json:"alias"`
+	RoleAvailable                bool   `json:"roleAvailable"`
+	RoleName                     string `json:"roleName"`
+	ExternalID                   string `json:"externalId,omitempty"`
+	WorkLoadIdentityAccountID    string `json:"workloadIdentityAccountId,omitempty"`
+	WorkLoadIdentityAccountAlias string `json:"workLoadIdentityAccountAlias,omitempty"`
 }
 
 func (e *CloudAccount) ToJSON() io.Reader {
