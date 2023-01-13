@@ -35,7 +35,7 @@ func Provider() *schema.Provider {
 			"sysdig_monitor_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_MONITOR_URL", "https://.sysdigcloud.com"),
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_MONITOR_URL", "https://app.sysdigcloud.com"),
 			},
 			"sysdig_monitor_insecure_tls": {
 				Type:        schema.TypeBool,

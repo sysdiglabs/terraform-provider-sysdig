@@ -57,10 +57,10 @@ type SysdigMonitorClient interface {
 	UpdateDashboard(context.Context, *model.Dashboard) (*model.Dashboard, error)
 	DeleteDashboard(context.Context, int) error
 
-	GetCustomerProviderKeyById(context.Context, int) (*CustomerProviderKey, error)
-	CreateCustomerProviderKey(context.Context, *CustomerProviderKey) (*CustomerProviderKey, error)
-	UpdateCustomerProviderKey(context.Context, int, *CustomerProviderKey) (*CustomerProviderKey, error)
-	DeleteCustomerProviderKeyById(context.Context, int) error
+	GetCloudAccountById(context.Context, int) (*CloudAccount, error)
+	CreateCloudAccount(context.Context, *CloudAccount) (*CloudAccount, error)
+	UpdateCloudAccount(context.Context, int, *CloudAccount) (*CloudAccount, error)
+	DeleteCloudAccountById(context.Context, int) error
 }
 
 func WithExtraHeaders(client SysdigMonitorClient, extraHeaders map[string]string) SysdigMonitorClient {

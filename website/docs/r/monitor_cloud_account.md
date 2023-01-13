@@ -18,7 +18,7 @@ Creates a Sysdig Monitor Cloud Account for monitoring cloud resources.
 resource "sysdig_monitor_cloud_account" "sample" {
   cloud_provider = "GCP"
   integration_type = "API"
-  account_id = "A60E650B-B24F-4934-867A-45D5F0DB814E"
+  account_id = "gcp_project_id"
 }
 ```
 

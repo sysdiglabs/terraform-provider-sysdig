@@ -53,14 +53,14 @@ func resourceSysdigMonitorCloudAccountCreate(ctx context.Context, data *schema.R
 		return diag.FromErr(err)
 	}
 
-	provider := providerFromResourceData(data)
+	cloudAccount := monitorCloudAccountFromResourceData(data)
 
-	providerCreated, err := client.CreateCustomerProviderKey(ctx, &provider)
+	cloudAccountCreated, err := client.CreateCloudAccount(ctx, &cloudAccount)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	data.SetId(strconv.Itoa(providerCreated.Id))
+	data.SetId(strconv.Itoa(cloudAccountCreated.Id))
 
 	return nil
 }
@@ -76,7 +76,7 @@ func resourceSysdigMonitorCloudAccountDelete(ctx context.Context, data *schema.R
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteCustomerProviderKeyById(ctx, id)
+	err = client.DeleteCloudAccountById(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -95,12 +95,12 @@ func resourceSysdigMonitorCloudAccountRead(ctx context.Context, data *schema.Res
 		return diag.FromErr(err)
 	}
 
-	provider, err := client.GetCustomerProviderKeyById(ctx, id)
+	cloudAccount, err := client.GetCloudAccountById(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = providerToResourceData(data, provider)
+	err = monitorCloudAccountToResourceData(data, cloudAccount)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -114,14 +114,14 @@ func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.R
 		return diag.FromErr(err)
 	}
 
-	provider := providerFromResourceData(data)
+	cloudAccount := monitorCloudAccountFromResourceData(data)
 
 	id, err := strconv.Atoi(data.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	_, err = client.UpdateCustomerProviderKey(ctx, id, &provider)
+	_, err = client.UpdateCloudAccount(ctx, id, &cloudAccount)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -129,34 +129,34 @@ func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.R
 	return nil
 }
 
-func providerFromResourceData(data *schema.ResourceData) monitor.CustomerProviderKey {
-	return monitor.CustomerProviderKey{
+func monitorCloudAccountFromResourceData(data *schema.ResourceData) monitor.CloudAccount {
+	return monitor.CloudAccount{
 		Platform:          data.Get("cloud_provider").(string),
 		IntegrationType:   data.Get("integration_type").(string),
 		AdditionalOptions: data.Get("additional_options").(string),
-		Credentials: monitor.CustomerProviderCredentials{
+		Credentials: monitor.CloudAccountCredentials{
 			AccountId: data.Get("account_id").(string),
 		},
 	}
 }
 
-func providerToResourceData(data *schema.ResourceData, provider *monitor.CustomerProviderKey) error {
-	err := data.Set("cloud_provider", provider.Platform)
+func monitorCloudAccountToResourceData(data *schema.ResourceData, cloudAccount *monitor.CloudAccount) error {
+	err := data.Set("cloud_provider", cloudAccount.Platform)
 	if err != nil {
 		return err
 	}
 
-	err = data.Set("integration_type", provider.IntegrationType)
+	err = data.Set("integration_type", cloudAccount.IntegrationType)
 	if err != nil {
 		return err
 	}
 
-	err = data.Set("additional_options", provider.AdditionalOptions)
+	err = data.Set("additional_options", cloudAccount.AdditionalOptions)
 	if err != nil {
 		return err
 	}
 
-	err = data.Set("account_id", provider.Credentials.AccountId)
+	err = data.Set("account_id", cloudAccount.Credentials.AccountId)
 	if err != nil {
 		return err
 	}

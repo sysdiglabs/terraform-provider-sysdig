@@ -14,30 +14,30 @@ type CustomNotification struct {
 	AppendText     string `json:"appendText,omitempty"`
 }
 
-type CustomerProviderCredentials struct {
+type CloudAccountCredentials struct {
 	AccountId string `json:"accountId"`
 }
 
-type CustomerProviderKey struct {
-	Id                int                         `json:"id"`
-	Platform          string                      `json:"platform"`
-	IntegrationType   string                      `json:"integrationType"`
-	Credentials       CustomerProviderCredentials `json:"credentials"`
-	AdditionalOptions string                      `json:"additionalOptions"`
+type CloudAccount struct {
+	Id                int                     `json:"id"`
+	Platform          string                  `json:"platform"`
+	IntegrationType   string                  `json:"integrationType"`
+	Credentials       CloudAccountCredentials `json:"credentials"`
+	AdditionalOptions string                  `json:"additionalOptions"`
 }
 
-type customerProviderKeyWrapper struct {
-	ProviderInfo CustomerProviderKey `json:"provider"`
+type cloudAccountWrapper struct {
+	CloudAccount CloudAccount `json:"provider"`
 }
 
-func CustomerProviderKeyFromJSON(body []byte) *CustomerProviderKey {
-	var result customerProviderKeyWrapper
+func CloudAccountFromJSON(body []byte) *CloudAccount {
+	var result cloudAccountWrapper
 	_ = json.Unmarshal(body, &result)
 
-	return &result.ProviderInfo
+	return &result.CloudAccount
 }
 
-func CustomerProviderKeyToJSON(providerInfo *CustomerProviderKey) io.Reader {
+func CloudAccountToJSON(providerInfo *CloudAccount) io.Reader {
 	payload, _ := json.Marshal(*providerInfo)
 	return bytes.NewBuffer(payload)
 }

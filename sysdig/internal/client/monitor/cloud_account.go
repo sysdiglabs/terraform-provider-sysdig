@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (client *sysdigMonitorClient) GetCustomerProviderKeyById(ctx context.Context, id int) (*CustomerProviderKey, error) {
+func (client *sysdigMonitorClient) GetCloudAccountById(ctx context.Context, id int) (*CloudAccount, error) {
 	response, err := client.doSysdigMonitorRequest(ctx, http.MethodGet, client.getProviderUrl(id), nil)
 	if err != nil {
 		return nil, err
@@ -22,11 +22,11 @@ func (client *sysdigMonitorClient) GetCustomerProviderKeyById(ctx context.Contex
 	if err != nil {
 		return nil, err
 	}
-	return CustomerProviderKeyFromJSON(body), nil
+	return CloudAccountFromJSON(body), nil
 }
 
-func (client *sysdigMonitorClient) CreateCustomerProviderKey(ctx context.Context, provider *CustomerProviderKey) (*CustomerProviderKey, error) {
-	response, err := client.doSysdigMonitorRequest(ctx, http.MethodPost, client.getProvidersUrl(), CustomerProviderKeyToJSON(provider))
+func (client *sysdigMonitorClient) CreateCloudAccount(ctx context.Context, provider *CloudAccount) (*CloudAccount, error) {
+	response, err := client.doSysdigMonitorRequest(ctx, http.MethodPost, client.getProvidersUrl(), CloudAccountToJSON(provider))
 	if err != nil {
 		return nil, err
 	}
@@ -40,11 +40,11 @@ func (client *sysdigMonitorClient) CreateCustomerProviderKey(ctx context.Context
 	if err != nil {
 		return nil, err
 	}
-	return CustomerProviderKeyFromJSON(body), nil
+	return CloudAccountFromJSON(body), nil
 }
 
-func (client *sysdigMonitorClient) UpdateCustomerProviderKey(ctx context.Context, id int, provider *CustomerProviderKey) (*CustomerProviderKey, error) {
-	response, err := client.doSysdigMonitorRequest(ctx, http.MethodPut, client.getProviderUrl(id), CustomerProviderKeyToJSON(provider))
+func (client *sysdigMonitorClient) UpdateCloudAccount(ctx context.Context, id int, provider *CloudAccount) (*CloudAccount, error) {
+	response, err := client.doSysdigMonitorRequest(ctx, http.MethodPut, client.getProviderUrl(id), CloudAccountToJSON(provider))
 	if err != nil {
 		return nil, err
 	}
@@ -58,10 +58,10 @@ func (client *sysdigMonitorClient) UpdateCustomerProviderKey(ctx context.Context
 	if err != nil {
 		return nil, err
 	}
-	return CustomerProviderKeyFromJSON(body), nil
+	return CloudAccountFromJSON(body), nil
 }
 
-func (client *sysdigMonitorClient) DeleteCustomerProviderKeyById(ctx context.Context, id int) error {
+func (client *sysdigMonitorClient) DeleteCloudAccountById(ctx context.Context, id int) error {
 	response, err := client.doSysdigMonitorRequest(ctx, http.MethodDelete, client.getProviderUrl(id), nil)
 	if err != nil {
 		return err
