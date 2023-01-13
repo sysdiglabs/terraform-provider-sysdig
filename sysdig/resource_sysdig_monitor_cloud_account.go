@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-func resourceSysdigMonitorCloudAccountProvider() *schema.Resource {
+func resourceSysdigMonitorCloudAccount() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigCloudAccountProviderCreate,
-		DeleteContext: resourceSysdigCloudAccountProviderDelete,
-		ReadContext:   resourceSysdigCloudAccountProviderRead,
-		UpdateContext: resourceSysdigCloudAccountProviderUpdate,
+		CreateContext: resourceSysdigMonitorCloudAccountCreate,
+		DeleteContext: resourceSysdigMonitorCloudAccountDelete,
+		ReadContext:   resourceSysdigMonitorCloudAccountRead,
+		UpdateContext: resourceSysdigMonitorCloudAccountUpdate,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -27,7 +27,7 @@ func resourceSysdigMonitorCloudAccountProvider() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 		Schema: map[string]*schema.Schema{
-			"platform": {
+			"cloud_provider": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -47,7 +47,7 @@ func resourceSysdigMonitorCloudAccountProvider() *schema.Resource {
 	}
 }
 
-func resourceSysdigCloudAccountProviderCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorCloudAccountCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
 	client, err := i.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return diag.FromErr(err)
@@ -65,7 +65,7 @@ func resourceSysdigCloudAccountProviderCreate(ctx context.Context, data *schema.
 	return nil
 }
 
-func resourceSysdigCloudAccountProviderDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorCloudAccountDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
 	client, err := i.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return diag.FromErr(err)
@@ -84,7 +84,7 @@ func resourceSysdigCloudAccountProviderDelete(ctx context.Context, data *schema.
 	return nil
 }
 
-func resourceSysdigCloudAccountProviderRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorCloudAccountRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
 	client, err := i.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return diag.FromErr(err)
@@ -108,7 +108,7 @@ func resourceSysdigCloudAccountProviderRead(ctx context.Context, data *schema.Re
 	return nil
 }
 
-func resourceSysdigCloudAccountProviderUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
 	client, err := i.(SysdigClients).sysdigMonitorClient()
 	if err != nil {
 		return diag.FromErr(err)
@@ -131,7 +131,7 @@ func resourceSysdigCloudAccountProviderUpdate(ctx context.Context, data *schema.
 
 func providerFromResourceData(data *schema.ResourceData) monitor.CustomerProviderKey {
 	return monitor.CustomerProviderKey{
-		Platform:          data.Get("platform").(string),
+		Platform:          data.Get("cloud_provider").(string),
 		IntegrationType:   data.Get("integration_type").(string),
 		AdditionalOptions: data.Get("additional_options").(string),
 		Credentials: monitor.CustomerProviderCredentials{
@@ -141,7 +141,7 @@ func providerFromResourceData(data *schema.ResourceData) monitor.CustomerProvide
 }
 
 func providerToResourceData(data *schema.ResourceData, provider *monitor.CustomerProviderKey) error {
-	err := data.Set("platform", provider.Platform)
+	err := data.Set("cloud_provider", provider.Platform)
 	if err != nil {
 		return err
 	}

@@ -35,7 +35,7 @@ func Provider() *schema.Provider {
 			"sysdig_monitor_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_MONITOR_URL", "https://app.sysdigcloud.com"),
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_MONITOR_URL", "https://.sysdigcloud.com"),
 			},
 			"sysdig_monitor_insecure_tls": {
 				Type:        schema.TypeBool,
@@ -92,7 +92,7 @@ func Provider() *schema.Provider {
 			"sysdig_monitor_notification_channel_victorops": resourceSysdigMonitorNotificationChannelVictorOps(),
 			"sysdig_monitor_notification_channel_webhook":   resourceSysdigMonitorNotificationChannelWebhook(),
 			"sysdig_monitor_team":                           resourceSysdigMonitorTeam(),
-			"sysdig_monitor_cloud_account_provider":         resourceSysdigMonitorCloudAccountProvider(),
+			"sysdig_monitor_cloud_account":                  resourceSysdigMonitorCloudAccount(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_trusted_cloud_identity": dataSourceSysdigSecureTrustedCloudIdentity(),

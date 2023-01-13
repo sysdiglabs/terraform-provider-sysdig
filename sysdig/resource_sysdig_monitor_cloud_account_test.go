@@ -32,7 +32,7 @@ func TestCustomerProviderKeys(t *testing.T) {
 				Config: monitorCustomerProviderKeyAdditionalOptions(accountId, rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_cloud_account_provider.provider",
+				ResourceName:      "sysdig_monitor_cloud_account.provider",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -42,8 +42,8 @@ func TestCustomerProviderKeys(t *testing.T) {
 
 func monitorCustomerProviderKey(rText string) string {
 	return fmt.Sprintf(`
-resource "sysdig_monitor_cloud_account_provider" "provider" {
-  platform = "GCP"
+resource "sysdig_monitor_cloud_account" "provider" {
+  cloud_provider = "GCP"
   integration_type = "API"
   account_id = "sample-%s"
 }
@@ -52,8 +52,8 @@ resource "sysdig_monitor_cloud_account_provider" "provider" {
 
 func monitorCustomerProviderKeyAdditionalOptions(accountId string, rText string) string {
 	return fmt.Sprintf(`
-resource "sysdig_monitor_cloud_account_provider" "provider" {
-  platform = "Azure"
+resource "sysdig_monitor_cloud_account" "provider" {
+  cloud_provider = "Azure"
   integration_type = "Metrics Streams"
   account_id = "sample-%s"
   additional_options = "%s"
