@@ -24,10 +24,6 @@ resource "sysdig_monitor_cloud_account" "sample" {
 
 ## Argument Reference
 
-### Common alert arguments
-
-These arguments are common to all alerts in Sysdig Monitor.
-
 * `cloud_provider` - (Required) Cloud platform that will be monitored. Only `GCP` is currently supported.
 * `integration_type` - (Required) Type of cloud integration. Only `API` is currently supported.
 * `account_id` - (Required) The GCP project id for the project that will be monitored.
