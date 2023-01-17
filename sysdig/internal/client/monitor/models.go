@@ -14,6 +14,34 @@ type CustomNotification struct {
 	AppendText     string `json:"appendText,omitempty"`
 }
 
+type CloudAccountCredentials struct {
+	AccountId string `json:"accountId"`
+}
+
+type CloudAccount struct {
+	Id                int                     `json:"id"`
+	Platform          string                  `json:"platform"`
+	IntegrationType   string                  `json:"integrationType"`
+	Credentials       CloudAccountCredentials `json:"credentials"`
+	AdditionalOptions string                  `json:"additionalOptions"`
+}
+
+type cloudAccountWrapper struct {
+	CloudAccount CloudAccount `json:"provider"`
+}
+
+func CloudAccountFromJSON(body []byte) *CloudAccount {
+	var result cloudAccountWrapper
+	_ = json.Unmarshal(body, &result)
+
+	return &result.CloudAccount
+}
+
+func CloudAccountToJSON(providerInfo *CloudAccount) io.Reader {
+	payload, _ := json.Marshal(*providerInfo)
+	return bytes.NewBuffer(payload)
+}
+
 type SysdigCapture struct {
 	Name       string      `json:"name"`
 	Filters    string      `json:"filters,omitempty"`
