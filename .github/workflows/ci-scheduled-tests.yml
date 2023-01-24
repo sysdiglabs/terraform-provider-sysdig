@@ -62,6 +62,8 @@ jobs:
           status: 'Failure'
           channel: ' #ws-cloudnative-alerts'
           author_name: github-action
+          title: 'Terraform Provider'
+          text: 'Regression Test Failed, please take a look if you are a codeowner'
           fields: repo,workflow
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
