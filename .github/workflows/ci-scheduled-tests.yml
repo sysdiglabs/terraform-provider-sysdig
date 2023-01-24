@@ -49,15 +49,19 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: ws-cloudnative-alerts
-          SLACK_ICON: https://github.com/fluidicon.png
+          SLACK_ICON: ':bell:'
+          SLACK_COLOR: '#ff0000'
           SLACK_MESSAGE: 'Terraform Provider'
-          SLACK_TITLE: Regression Test Failed
+          SLACK_TITLE: 'Regression Test Failed, please take a look if you are a codeowner'
           SLACK_USERNAME: terraform-provider-sysdig
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           MSG_MINIMAL: true
+      # https://github.com/8398a7/action-slack/blob/master/docs/content/usage/with.md
       - uses: 8398a7/action-slack@v3
         with:
-          status: ${{ job.status }}
-          fields: repo,message,action,workflow,job,took
+          status: 'Failure'
+          channel: ' #ws-cloudnative-alerts'
+          author_name: github-action
+          fields: repo,workflow
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
