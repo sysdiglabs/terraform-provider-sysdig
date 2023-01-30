@@ -416,3 +416,37 @@ func BenchmarkTaskFromJSON(body []byte) *BenchmarkTask {
 
 	return &result
 }
+
+// -------- Scanning Policies --------
+type ScanningPolicy struct {
+	ID             string         `json:"id,omitempty"`
+	Version        string         `json:"version,omitempty"`
+	Name           string         `json:"name"`
+	Comment        string         `json:"comment"`
+	IsDefault      bool           `json:"isDefault,omitempty"`
+	PolicyBundleId string         `json:"policyBundleId,omitempty"`
+	Rules          []ScanningGate `json:"rules"`
+}
+
+type ScanningGate struct {
+	ID      string              `json:"id,omitempty"`
+	Gate    string              `json:"gate"`
+	Trigger string              `json:"trigger"`
+	Action  string              `json:"action"`
+	Params  []ScanningGateParam `json:"params"`
+}
+
+type ScanningGateParam struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+func (policy *ScanningPolicy) ToJSON() io.Reader {
+	payload, _ := json.Marshal(policy)
+	return bytes.NewBuffer(payload)
+}
+
+func ScanningPolicyFromJSON(body []byte) (result ScanningPolicy) {
+	_ = json.Unmarshal(body, &result)
+	return result
+}
