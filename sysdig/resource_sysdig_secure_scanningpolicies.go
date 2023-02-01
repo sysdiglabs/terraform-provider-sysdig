@@ -45,8 +45,7 @@ func resourceSysdigSecureScanningPolicy() *schema.Resource {
 			},
 			"isdefault": {
 				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"version": {
 				Type:     schema.TypeString,
@@ -123,7 +122,6 @@ func resourceSysdigScanningPolicyCreate(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-// TODO
 func resourceSysdigScanningPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
