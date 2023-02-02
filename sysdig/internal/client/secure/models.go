@@ -450,3 +450,34 @@ func ScanningPolicyFromJSON(body []byte) (result ScanningPolicy) {
 	_ = json.Unmarshal(body, &result)
 	return result
 }
+
+// -------- Scanning Policy Assignments --------
+type ScanningPolicyAssignmentList struct {
+	Items          []ScanningPolicyAssignment `json:"items"`
+	PolicyBundleId string                     `json:"policyBundleId"`
+}
+
+type ScanningPolicyAssignment struct {
+	ID           string                        `json:"id,omitempty"`
+	Name         string                        `json:"name"`
+	Registry     string                        `json:"registry"`
+	Repository   string                        `json:"repository"`
+	Image        ScanningPolicyAssignmentImage `json:"image"`
+	PolicyIDs    []string                      `json:"policy_ids"`
+	WhitelistIDs []string                      `json:"whitelist_ids"`
+}
+
+type ScanningPolicyAssignmentImage struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
+func (policy *ScanningPolicyAssignmentList) ToJSON() io.Reader {
+	payload, _ := json.Marshal(policy)
+	return bytes.NewBuffer(payload)
+}
+
+func ScanningPolicyAssignmentFromJSON(body []byte) (result ScanningPolicyAssignmentList) {
+	_ = json.Unmarshal(body, &result)
+	return result
+}

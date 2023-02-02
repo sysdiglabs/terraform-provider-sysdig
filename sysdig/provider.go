@@ -73,6 +73,7 @@ func Provider() *schema.Provider {
 			"sysdig_secure_cloud_account":                  resourceSysdigSecureCloudAccount(),
 			"sysdig_secure_benchmark_task":                 resourceSysdigSecureBenchmarkTask(),
 			"sysdig_secure_scanning_policy":                resourceSysdigSecureScanningPolicy(),
+			"sysdig_secure_scanning_policy_assignment":     resourceSysdigSecureScanningPolicyAssignment(),
 
 			"sysdig_monitor_alert_downtime":                 resourceSysdigMonitorAlertDowntime(),
 			"sysdig_monitor_alert_metric":                   resourceSysdigMonitorAlertMetric(),
