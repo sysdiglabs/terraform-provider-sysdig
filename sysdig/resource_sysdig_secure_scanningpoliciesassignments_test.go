@@ -13,6 +13,7 @@ import (
 
 func TestAccScanningPolicyAssignment(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+	rText2 := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -27,7 +28,7 @@ func TestAccScanningPolicyAssignment(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: scanningPolicyAssignmentWithoutName(),
+				Config: scanningPolicyAssignmentWithoutName(rText()),
 			},
 			{
 				ResourceName:      "sysdig_secure_scanning_policy_assignment.sample",
@@ -35,13 +36,16 @@ func TestAccScanningPolicyAssignment(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: scanningPolicyAssignmentWithName(rText()),
+				Config: scanningPolicyAssignmentWithName(rText2()),
 			},
+			// {
+			// 	Config: scanningPolicyAssignmentWithWhitelistIDs(rText()),
+			// },
 		},
 	})
 }
 
-func scanningPolicyAssignmentWithoutName() string {
+func scanningPolicyAssignmentWithoutName(name string) string {
 	return fmt.Sprintf(`
 %s
 resource "sysdig_secure_scanning_policy_assignment" "sample" {
@@ -56,13 +60,13 @@ resource "sysdig_secure_scanning_policy_assignment" "sample" {
     policy_ids = [sysdig_secure_scanning_policy.sample.id]
   }
 }
-`, scanningPolicyWithName("sample"))
+`, scanningPolicyWithName(name))
 }
 
 func scanningPolicyAssignmentWithName(name string) string {
 	return fmt.Sprintf(`
 %s
-resource "sysdig_secure_scanning_policy_assignment" "sample" {
+resource "sysdig_secure_scanning_policy_assignment" "sample_2" {
   items {
     name = "example %s"
     image {
@@ -87,14 +91,14 @@ resource "sysdig_secure_scanning_policy_assignment" "sample" {
     policy_ids = ["default"]
   }
 }
-`, scanningPolicyWithName("sample"), name)
+`, scanningPolicyWithName(name), name)
 }
 
 func scanningPolicyAssignmentWithWhitelistIDs(name string) string {
 	return fmt.Sprintf(`
 %s
 %s
-resource "sysdig_secure_scanning_policy_assignment" "sample" {
+resource "sysdig_secure_scanning_policy_assignment" "sample_3" {
   items {
     name = "example %s"
     image {
@@ -117,8 +121,8 @@ resource "sysdig_secure_scanning_policy_assignment" "sample" {
     repository = "*"
 
     policy_ids = ["default"]
-	whitelist_ids = []
+	  whitelist_ids = [sysdig_secure_vulnerability_exception_list.sample.id]
   }
 }
-`, scanningPolicyWithName("sample"), vulnerabilityException(name), name)
+`, scanningPolicyWithName(name), vulnerabilityException(name), name)
 }
