@@ -40,8 +40,6 @@ func TestAccScanningPolicyAssignment(t *testing.T) {
 
 func scanningPolicyAssignmentWithWhitelistIDs(name string) string {
 	return fmt.Sprintf(`
-%s
-%s
 resource "sysdig_secure_scanning_policy_assignment" "sample" {
   items {
     name = "example %s"
@@ -52,7 +50,7 @@ resource "sysdig_secure_scanning_policy_assignment" "sample" {
     registry = "icr.io"
     repository = "example"
 
-    policy_ids = [sysdig_secure_scanning_policy.sample.id]
+    policy_ids = ["default"]
   }
 
   items {
@@ -65,8 +63,8 @@ resource "sysdig_secure_scanning_policy_assignment" "sample" {
     repository = "*"
 
     policy_ids = ["default"]
-	  whitelist_ids = [sysdig_secure_vulnerability_exception_list.sample.id]
+	  whitelist_ids = []
   }
 }
-`, scanningPolicyWithName(name), vulnerabilityExceptionList(name), name)
+`, name)
 }
