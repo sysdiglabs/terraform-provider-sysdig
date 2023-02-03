@@ -34,9 +34,6 @@ func TestAccScanningPolicy(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// {
-			// 	Config: scanningPolicyWithoutRules(rText()),
-			// },
 		},
 	})
 }
