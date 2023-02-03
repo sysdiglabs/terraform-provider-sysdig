@@ -27,7 +27,8 @@ func TestAccScanningPolicyAssignment(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: scanningPolicyAssignmentWithWhitelistIDs(rText()),
+				Config:             scanningPolicyAssignmentWithWhitelistIDs(rText()),
+				ExpectNonEmptyPlan: true,
 			},
 			{
 				ResourceName:      "sysdig_secure_scanning_policy_assignment.sample",
