@@ -12,7 +12,7 @@ func (client *sysdigSecureClient) scanningPoliciesURL() string {
 }
 
 func (client *sysdigSecureClient) scanningPolicyAssignmentURL() string {
-	return fmt.Sprintf("%s/api/scanning/v1/mappings", client.URL)
+	return fmt.Sprintf("%s/api/scanning/v1/mappings?bundleId=default", client.URL)
 }
 
 func (client *sysdigSecureClient) scanningPolicyURL(scanningPolicyId string) string {

@@ -46,7 +46,6 @@ func scanningPolicyAssignmentWithoutName() string {
 %s
 resource "sysdig_secure_scanning_policy_assignment" "sample" {
   items {
-    name = ""
     image {
       type = "tag"
       value = "*"
