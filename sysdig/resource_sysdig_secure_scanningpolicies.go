@@ -131,7 +131,6 @@ func resourceSysdigScanningPolicyUpdate(ctx context.Context, d *schema.ResourceD
 	scanningPolicy := scanningPolicyFromResourceData(d)
 	id, _ := d.Get("id").(string)
 	scanningPolicy.ID = id
-	fmt.Println(scanningPolicy)
 	_, err = client.UpdateScanningPolicyById(ctx, scanningPolicy)
 	if err != nil {
 		return diag.FromErr(err)
