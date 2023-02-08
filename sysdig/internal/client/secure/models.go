@@ -77,6 +77,7 @@ type NotificationChannelOptions struct {
 	Account         string   `json:"account,omitempty"`         // Type: PagerDuty
 	ServiceKey      string   `json:"serviceKey,omitempty"`      // Type: PagerDuty
 	ServiceName     string   `json:"serviceName,omitempty"`     // Type: PagerDuty
+	Region          string   `json:"region,omitempty"`          // Type: OpsGenie
 
 	NotifyOnOk           bool `json:"notifyOnOk"`
 	NotifyOnResolve      bool `json:"notifyOnResolve"`
