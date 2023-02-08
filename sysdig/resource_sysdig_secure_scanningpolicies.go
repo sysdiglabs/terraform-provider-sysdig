@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
