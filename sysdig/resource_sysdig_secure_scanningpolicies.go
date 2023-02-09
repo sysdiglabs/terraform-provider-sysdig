@@ -128,7 +128,7 @@ func resourceSysdigScanningPolicyUpdate(ctx context.Context, d *schema.ResourceD
 	}
 
 	scanningPolicy := scanningPolicyFromResourceData(d)
-	id, _ := d.Get("id").(string)
+	id := d.Get("id").(string)
 	scanningPolicy.ID = id
 	_, err = client.UpdateScanningPolicyById(ctx, scanningPolicy)
 	if err != nil {
@@ -144,7 +144,7 @@ func resourceSysdigScanningPolicyRead(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	id, _ := d.Get("id").(string)
+	id := d.Get("id").(string)
 	scanningPolicy, err := client.GetScanningPolicyById(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
@@ -161,7 +161,7 @@ func resourceSysdigScanningPolicyDelete(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	id, _ := d.Get("id").(string)
+	id := d.Get("id").(string)
 	err = client.DeleteScanningPolicyById(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
