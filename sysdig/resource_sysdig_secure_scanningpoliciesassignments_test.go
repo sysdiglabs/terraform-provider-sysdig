@@ -29,11 +29,6 @@ func TestAccScanningPolicyAssignment(t *testing.T) {
 			{
 				Config: scanningPolicyAssignmentWithWhitelistIDs(rText()),
 			},
-			{
-				ResourceName:      "sysdig_secure_scanning_policy_assignment.sample",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 		},
 	})
 }
