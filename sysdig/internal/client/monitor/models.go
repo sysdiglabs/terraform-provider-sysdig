@@ -194,6 +194,7 @@ type NotificationChannelOptions struct {
 	ServiceKey        string                 `json:"serviceKey,omitempty"`        // Type: PagerDuty
 	ServiceName       string                 `json:"serviceName,omitempty"`       // Type: PagerDuty
 	AdditionalHeaders map[string]interface{} `json:"additionalHeaders,omitempty"` // Type: Webhook
+	Region            string                 `json:"region,omitempty"`            // Type: OpsGenie
 
 	NotifyOnOk           bool `json:"notifyOnOk"`
 	NotifyOnResolve      bool `json:"notifyOnResolve"`

@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
-	"fmt"
-	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
@@ -37,6 +36,12 @@ func resourceSysdigSecureNotificationChannelOpsGenie() *schema.Resource {
 			"api_key": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"region": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "US",
+				ValidateFunc: validation.StringInSlice([]string{"US", "EU"}, false),
 			},
 		}),
 	}
@@ -133,8 +138,8 @@ func secureNotificationChannelOpsGenieFromResourceData(d *schema.ResourceData) (
 
 	nc.Type = NOTIFICATION_CHANNEL_TYPE_OPSGENIE
 	apiKey := d.Get("api_key").(string)
-	nc.Options.Url = fmt.Sprintf("https://api.opsgenie.com/v1/json/sysdigcloud?apiKey=%s", apiKey)
 	nc.Options.APIKey = apiKey
+	nc.Options.Region = d.Get("region").(string)
 	return
 }
 
@@ -144,12 +149,8 @@ func secureNotificationChannelOpsGenieToResourceData(nc *secure.NotificationChan
 		return
 	}
 
-	regex, err := regexp.Compile("apiKey=(.*)?$")
-	if err != nil {
-		return
-	}
-	key := regex.FindStringSubmatch(nc.Options.Url)[1]
-	_ = d.Set("api_key", key)
+	_ = d.Set("api_key", nc.Options.APIKey)
+	_ = d.Set("region", nc.Options.Region)
 
 	return
 }
