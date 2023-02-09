@@ -38,6 +38,14 @@ func TestAccMonitorNotificationChannelOpsGenie(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: monitorNotificationChannelOpsGenieWithNameAndRegion(rText()),
+			},
+			{
+				ResourceName:      "sysdig_monitor_notification_channel_opsgenie.sample-opsgenie-2",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -50,5 +58,17 @@ resource "sysdig_monitor_notification_channel_opsgenie" "sample-opsgenie" {
 	api_key = "2349324-342354353-5324-23"
 	notify_when_ok = false
 	notify_when_resolved = false
+}`, name)
+}
+
+func monitorNotificationChannelOpsGenieWithNameAndRegion(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_notification_channel_opsgenie" "sample-opsgenie-2" {
+	name = "Example Channel %s - OpsGenie - 2"
+	enabled = true
+	api_key = "2349324-342354353-5324-23"
+	notify_when_ok = false
+	notify_when_resolved = false
+	region = "EU"
 }`, name)
 }
