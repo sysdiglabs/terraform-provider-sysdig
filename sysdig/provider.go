@@ -49,7 +49,8 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"sysdig_user": resourceSysdigUser(),
+			"sysdig_user":          resourceSysdigUser(),
+			"sysdig_group_mapping": resourceSysdigGroupMapping(),
 
 			"sysdig_secure_policy":                         resourceSysdigSecurePolicy(),
 			"sysdig_secure_notification_channel_email":     resourceSysdigSecureNotificationChannelEmail(),

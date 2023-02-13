@@ -6,6 +6,24 @@ import (
 	"io"
 )
 
+// -------- Group mapping --------
+type TeamMap struct {
+	AllTeams bool  `json:"allTeams"`
+	TeamIDs  []int `json:"teamIds"`
+}
+
+type GroupMapping struct {
+	ID        int      `json:"id,omitempty"`
+	GroupName string   `json:"groupName,omitempty"`
+	Role      string   `json:"role,omitempty"`
+	TeamMap   *TeamMap `json:"teamMap,omitempty"`
+}
+
+func (gm *GroupMapping) ToJSON() io.Reader {
+	payload, _ := json.Marshal(*gm)
+	return bytes.NewBuffer(payload)
+}
+
 // -------- User --------
 type User struct {
 	ID         int    `json:"id,omitempty"`
