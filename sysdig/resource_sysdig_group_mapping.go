@@ -95,6 +95,8 @@ func resourceSysdigGroupMappingCreate(ctx context.Context, d *schema.ResourceDat
 
 	d.SetId(strconv.Itoa(groupMapping.ID))
 
+	resourceSysdigGroupMappingRead(ctx, d, m)
+
 	return nil
 }
 
@@ -117,6 +119,8 @@ func resourceSysdigGroupMappingUpdate(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	resourceSysdigGroupMappingRead(ctx, d, m)
 
 	return nil
 }
