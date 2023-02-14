@@ -17,7 +17,9 @@ func resourceSysdigGroupMapping() *schema.Resource {
 		CreateContext: resourceSysdigGroupMappingCreate,
 		UpdateContext: resourceSysdigGroupMappingUpdate,
 		DeleteContext: resourceSysdigGroupMappingDelete,
-
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
 			Update: schema.DefaultTimeout(timeout),
@@ -47,7 +49,7 @@ func resourceSysdigGroupMapping() *schema.Resource {
 						},
 						"team_ids": {
 							Type:     schema.TypeList,
-							Required: true,
+							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeInt},
 						},
 					},
