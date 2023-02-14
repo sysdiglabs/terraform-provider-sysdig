@@ -3,21 +3,28 @@ package common
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 )
 
+var GroupMappingNotFound = errors.New("group mapping not found")
+
 func (client *sysdigCommonClient) CreateGroupMapping(ctx context.Context, request *GroupMapping) (*GroupMapping, error) {
-	response, err := client.doSysdigCommonRequest(ctx, http.MethodPost, client.CreateGroupMappingUrl(), request.ToJSON())
+	payload, err := request.ToJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := client.doSysdigCommonRequest(ctx, http.MethodPost, client.CreateGroupMappingUrl(), payload)
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		err = errorFromResponse(response)
-		return nil, err
+		return nil, errorFromResponse(response)
 	}
 
 	body, err := io.ReadAll(response.Body)
@@ -35,15 +42,19 @@ func (client *sysdigCommonClient) CreateGroupMapping(ctx context.Context, reques
 }
 
 func (client *sysdigCommonClient) UpdateGroupMapping(ctx context.Context, request *GroupMapping, id int) (*GroupMapping, error) {
-	response, err := client.doSysdigCommonRequest(ctx, http.MethodPut, client.UpdateGroupMappingUrl(id), request.ToJSON())
+	payload, err := request.ToJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := client.doSysdigCommonRequest(ctx, http.MethodPut, client.UpdateGroupMappingUrl(id), payload)
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		err = errorFromResponse(response)
-		return nil, err
+		return nil, errorFromResponse(response)
 	}
 
 	body, err := io.ReadAll(response.Body)
@@ -81,8 +92,10 @@ func (client *sysdigCommonClient) GetGroupMapping(ctx context.Context, id int) (
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		err = errorFromResponse(response)
-		return nil, err
+		if response.StatusCode == http.StatusNotFound {
+			return nil, GroupMappingNotFound
+		}
+		return nil, errorFromResponse(response)
 	}
 
 	body, err := io.ReadAll(response.Body)

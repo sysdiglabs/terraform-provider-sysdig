@@ -19,9 +19,12 @@ type GroupMapping struct {
 	TeamMap   *TeamMap `json:"teamMap,omitempty"`
 }
 
-func (gm *GroupMapping) ToJSON() io.Reader {
-	payload, _ := json.Marshal(*gm)
-	return bytes.NewBuffer(payload)
+func (gm *GroupMapping) ToJSON() (io.Reader, error) {
+	payload, err := json.Marshal(*gm)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewBuffer(payload), nil
 }
 
 // -------- User --------

@@ -26,7 +26,6 @@ func resourceSysdigGroupMapping() *schema.Resource {
 			Read:   schema.DefaultTimeout(timeout),
 			Delete: schema.DefaultTimeout(timeout),
 		},
-
 		Schema: map[string]*schema.Schema{
 			"group_name": {
 				Type:     schema.TypeString,
@@ -50,7 +49,9 @@ func resourceSysdigGroupMapping() *schema.Resource {
 						"team_ids": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Elem:     &schema.Schema{Type: schema.TypeInt},
+							Elem: &schema.Schema{
+								Type: schema.TypeInt,
+							},
 						},
 					},
 				},
@@ -72,8 +73,11 @@ func resourceSysdigGroupMappingRead(ctx context.Context, d *schema.ResourceData,
 
 	groupMapping, err := client.GetGroupMapping(ctx, id)
 	if err != nil {
-		d.SetId("")
-		return nil
+		if err == common.GroupMappingNotFound {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
 	}
 
 	groupMappingToResourceData(groupMapping, d)
@@ -176,9 +180,18 @@ func teamMapToResourceData(teamMap *common.TeamMap) map[string]interface{} {
 }
 
 func groupMappingToResourceData(groupMapping *common.GroupMapping, d *schema.ResourceData) error {
-	_ = d.Set("group_name", groupMapping.GroupName)
-	_ = d.Set("role", groupMapping.Role)
-	_ = d.Set("team_map", []map[string]interface{}{teamMapToResourceData(groupMapping.TeamMap)})
+	err := d.Set("group_name", groupMapping.GroupName)
+	if err != nil {
+		return err
+	}
+	err = d.Set("role", groupMapping.Role)
+	if err != nil {
+		return err
+	}
+	err = d.Set("team_map", []map[string]interface{}{teamMapToResourceData(groupMapping.TeamMap)})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
