@@ -3,17 +3,23 @@ package sysdig_test
 import (
 	"fmt"
 	"github.com/draios/terraform-provider-sysdig/sysdig"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"os"
 	"testing"
 )
 
 func TestAccGroupMapping(t *testing.T) {
-	groupMapping1 := randomText()
-	groupMapping2 := randomText()
+	groupMapping1 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	groupMapping2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: preCheckMonitorToken(t),
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_MONITOR_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_MONITOR_API_TOKEN must be set for acceptance tests")
+			}
+		},
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -91,7 +97,7 @@ resource "sysdig_group_mapping" "all_teams" {
 func groupMappingSingleTeam(groupName string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team" "single_team" {
-  name      = "%s-team-test"
+  name      = "%[1]s-team-test"
 
   entrypoint {
 	type = "Explore"
@@ -99,12 +105,12 @@ resource "sysdig_monitor_team" "single_team" {
 }
 
 resource "sysdig_group_mapping" "single_team" {
-  group_name = "%s"
+  group_name = "%[1]s"
   role = "ROLE_TEAM_STANDARD"
 
   team_map {
     team_ids = [sysdig_monitor_team.single_team.id]
   }
 }
-`, groupName, groupName)
+`, groupName)
 }
