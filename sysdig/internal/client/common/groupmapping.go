@@ -91,6 +91,7 @@ func (client *sysdigCommonClient) GetGroupMapping(ctx context.Context, id int) (
 		return nil, err
 	}
 	defer response.Body.Close()
+
 	if response.StatusCode != http.StatusOK {
 		if response.StatusCode == http.StatusNotFound {
 			return nil, GroupMappingNotFound
