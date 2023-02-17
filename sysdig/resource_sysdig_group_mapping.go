@@ -22,7 +22,6 @@ func resourceSysdigSecureGroupMapping() *schema.Resource {
 	})
 }
 
-// resourceSysdigMonitorAlertDowntime
 func resourceSysdigGroupMapping(gm GetGroupMapper) *schema.Resource {
 	timeout := 5 * time.Minute
 
