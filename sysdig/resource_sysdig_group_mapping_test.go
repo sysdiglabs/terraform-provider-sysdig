@@ -24,12 +24,12 @@ func TestAccGroupMapping(t *testing.T) {
 				Config: groupMappingAllTeams(groupMapping1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"sysdig_group_mapping.all_teams_test",
+						"sysdig_group_mapping.all_teams",
 						"group_name",
 						groupMapping1,
 					),
 					resource.TestCheckResourceAttr(
-						"sysdig_group_mapping.all_teams_test",
+						"sysdig_group_mapping.all_teams",
 						"team_map.0.all_teams",
 						"true",
 					),
@@ -39,7 +39,7 @@ func TestAccGroupMapping(t *testing.T) {
 				Config: groupMappingUpdateAllTeamsGroupName(groupMapping1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"sysdig_group_mapping.all_teams_test",
+						"sysdig_group_mapping.all_teams",
 						"group_name",
 						fmt.Sprintf("%s-updated", groupMapping1),
 					),
@@ -49,14 +49,14 @@ func TestAccGroupMapping(t *testing.T) {
 				Config: groupMappingSingleTeam(groupMapping2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"sysdig_group_mapping.single_team_test",
+						"sysdig_group_mapping.single_team",
 						"team_map.0.team_ids.#",
 						"1",
 					),
 				),
 			},
 			{
-				ResourceName:      "sysdig_group_mapping.single_team_test",
+				ResourceName:      "sysdig_group_mapping.single_team",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -66,7 +66,7 @@ func TestAccGroupMapping(t *testing.T) {
 
 func groupMappingAllTeams(groupName string) string {
 	return fmt.Sprintf(`
-resource "sysdig_group_mapping" "all_teams_test" {
+resource "sysdig_group_mapping" "all_teams" {
   group_name = "%s"
   role = "ROLE_TEAM_STANDARD"
   team_map {
@@ -78,7 +78,7 @@ resource "sysdig_group_mapping" "all_teams_test" {
 
 func groupMappingUpdateAllTeamsGroupName(groupName string) string {
 	return fmt.Sprintf(`
-resource "sysdig_group_mapping" "all_teams_test" {
+resource "sysdig_group_mapping" "all_teams" {
   group_name = "%s-updated"
   role = "ROLE_TEAM_STANDARD"
   team_map {
@@ -90,7 +90,7 @@ resource "sysdig_group_mapping" "all_teams_test" {
 
 func groupMappingSingleTeam(groupName string) string {
 	return fmt.Sprintf(`
-resource "sysdig_monitor_team" "single_team_test" {
+resource "sysdig_monitor_team" "single_team" {
   name      = "%s-team-test"
 
   entrypoint {
@@ -98,12 +98,12 @@ resource "sysdig_monitor_team" "single_team_test" {
   }
 }
 
-resource "sysdig_group_mapping" "single_team_test" {
+resource "sysdig_group_mapping" "single_team" {
   group_name = "%s"
   role = "ROLE_TEAM_STANDARD"
 
   team_map {
-    team_ids = [sysdig_monitor_team.single_team_test.id]
+    team_ids = [sysdig_monitor_team.single_team.id]
   }
 }
 `, groupName, groupName)
