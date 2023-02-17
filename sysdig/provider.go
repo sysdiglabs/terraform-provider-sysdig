@@ -49,8 +49,7 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"sysdig_user":          resourceSysdigUser(),
-			"sysdig_group_mapping": resourceSysdigGroupMapping(),
+			"sysdig_user": resourceSysdigUser(),
 
 			"sysdig_secure_policy":                         resourceSysdigSecurePolicy(),
 			"sysdig_secure_notification_channel_email":     resourceSysdigSecureNotificationChannelEmail(),
@@ -73,6 +72,7 @@ func Provider() *schema.Provider {
 			"sysdig_secure_vulnerability_exception_list":   resourceSysdigSecureVulnerabilityExceptionList(),
 			"sysdig_secure_cloud_account":                  resourceSysdigSecureCloudAccount(),
 			"sysdig_secure_benchmark_task":                 resourceSysdigSecureBenchmarkTask(),
+			"sysdig_secure_group_mapping":                  resourceSysdigSecureGroupMapping(),
 
 			"sysdig_monitor_alert_downtime":                 resourceSysdigMonitorAlertDowntime(),
 			"sysdig_monitor_alert_metric":                   resourceSysdigMonitorAlertMetric(),
@@ -94,6 +94,7 @@ func Provider() *schema.Provider {
 			"sysdig_monitor_notification_channel_webhook":   resourceSysdigMonitorNotificationChannelWebhook(),
 			"sysdig_monitor_team":                           resourceSysdigMonitorTeam(),
 			"sysdig_monitor_cloud_account":                  resourceSysdigMonitorCloudAccount(),
+			"sysdig_monitor_group_mapping":                  resourceSysdigMonitorGroupMapping(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_trusted_cloud_identity": dataSourceSysdigSecureTrustedCloudIdentity(),

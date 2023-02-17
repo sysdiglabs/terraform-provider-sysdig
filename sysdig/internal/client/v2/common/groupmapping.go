@@ -11,20 +11,27 @@ import (
 
 var GroupMappingNotFound = errors.New("group mapping not found")
 
-func (client *sysdigCommonClient) CreateGroupMapping(ctx context.Context, request *GroupMapping) (*GroupMapping, error) {
+type GroupMapper interface {
+	CreateGroupMapping(ctx context.Context, request *GroupMapping) (*GroupMapping, error)
+	UpdateGroupMapping(ctx context.Context, request *GroupMapping, id int) (*GroupMapping, error)
+	DeleteGroupMapping(ctx context.Context, id int) error
+	GetGroupMapping(ctx context.Context, id int) (*GroupMapping, error)
+}
+
+func (client *Client) CreateGroupMapping(ctx context.Context, request *GroupMapping) (*GroupMapping, error) {
 	payload, err := request.ToJSON()
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.doSysdigCommonRequest(ctx, http.MethodPost, client.CreateGroupMappingUrl(), payload)
+	response, err := client.DoSysdigRequest(ctx, http.MethodPost, client.CreateGroupMappingUrl(), payload)
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, errorFromResponse(response)
+		return nil, ErrorFromResponse(response)
 	}
 
 	body, err := io.ReadAll(response.Body)
@@ -41,20 +48,20 @@ func (client *sysdigCommonClient) CreateGroupMapping(ctx context.Context, reques
 	return &groupMapping, nil
 }
 
-func (client *sysdigCommonClient) UpdateGroupMapping(ctx context.Context, request *GroupMapping, id int) (*GroupMapping, error) {
+func (client *Client) UpdateGroupMapping(ctx context.Context, request *GroupMapping, id int) (*GroupMapping, error) {
 	payload, err := request.ToJSON()
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.doSysdigCommonRequest(ctx, http.MethodPut, client.UpdateGroupMappingUrl(id), payload)
+	response, err := client.DoSysdigRequest(ctx, http.MethodPut, client.UpdateGroupMappingUrl(id), payload)
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, errorFromResponse(response)
+		return nil, ErrorFromResponse(response)
 	}
 
 	body, err := io.ReadAll(response.Body)
@@ -71,22 +78,22 @@ func (client *sysdigCommonClient) UpdateGroupMapping(ctx context.Context, reques
 	return &groupMapping, nil
 }
 
-func (client *sysdigCommonClient) DeleteGroupMapping(ctx context.Context, id int) error {
-	response, err := client.doSysdigCommonRequest(ctx, http.MethodDelete, client.DeleteGroupMappingUrl(id), nil)
+func (client *Client) DeleteGroupMapping(ctx context.Context, id int) error {
+	response, err := client.DoSysdigRequest(ctx, http.MethodDelete, client.DeleteGroupMappingUrl(id), nil)
 	if err != nil {
 		return err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return errorFromResponse(response)
+		return ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *sysdigCommonClient) GetGroupMapping(ctx context.Context, id int) (*GroupMapping, error) {
-	response, err := client.doSysdigCommonRequest(ctx, http.MethodGet, client.GetGroupMappingUrl(id), nil)
+func (client *Client) GetGroupMapping(ctx context.Context, id int) (*GroupMapping, error) {
+	response, err := client.DoSysdigRequest(ctx, http.MethodGet, client.GetGroupMappingUrl(id), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +103,7 @@ func (client *sysdigCommonClient) GetGroupMapping(ctx context.Context, id int) (
 		if response.StatusCode == http.StatusNotFound {
 			return nil, GroupMappingNotFound
 		}
-		return nil, errorFromResponse(response)
+		return nil, ErrorFromResponse(response)
 	}
 
 	body, err := io.ReadAll(response.Body)
@@ -112,19 +119,18 @@ func (client *sysdigCommonClient) GetGroupMapping(ctx context.Context, id int) (
 
 	return &groupMapping, nil
 }
-
-func (client *sysdigCommonClient) GetGroupMappingUrl(id int) string {
+func (client *Client) GetGroupMappingUrl(id int) string {
 	return fmt.Sprintf("%s/api/groupmappings/%d", client.URL, id)
 }
 
-func (client *sysdigCommonClient) CreateGroupMappingUrl() string {
+func (client *Client) CreateGroupMappingUrl() string {
 	return fmt.Sprintf("%s/api/groupmappings", client.URL)
 }
 
-func (client *sysdigCommonClient) UpdateGroupMappingUrl(id int) string {
+func (client *Client) UpdateGroupMappingUrl(id int) string {
 	return fmt.Sprintf("%s/api/groupmappings/%d", client.URL, id)
 }
 
-func (client *sysdigCommonClient) DeleteGroupMappingUrl(id int) string {
+func (client *Client) DeleteGroupMappingUrl(id int) string {
 	return fmt.Sprintf("%s/api/groupmappings/%d", client.URL, id)
 }

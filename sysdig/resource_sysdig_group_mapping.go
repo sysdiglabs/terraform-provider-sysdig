@@ -2,21 +2,35 @@ package sysdig
 
 import (
 	"context"
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/common"
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/common"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strconv"
 	"time"
 )
 
-func resourceSysdigGroupMapping() *schema.Resource {
+type GetGroupMapper func(c SysdigClients) (common.GroupMapper, error)
+
+func resourceSysdigMonitorGroupMapping() *schema.Resource {
+	return resourceSysdigGroupMapping(func(c SysdigClients) (common.GroupMapper, error) {
+		return c.sysdigMonitorV2Client()
+	})
+}
+func resourceSysdigSecureGroupMapping() *schema.Resource {
+	return resourceSysdigGroupMapping(func(c SysdigClients) (common.GroupMapper, error) {
+		return c.sysdigSecureV2Client()
+	})
+}
+
+// resourceSysdigMonitorAlertDowntime
+func resourceSysdigGroupMapping(gm GetGroupMapper) *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		ReadContext:   resourceSysdigGroupMappingRead,
-		CreateContext: resourceSysdigGroupMappingCreate,
-		UpdateContext: resourceSysdigGroupMappingUpdate,
-		DeleteContext: resourceSysdigGroupMappingDelete,
+		ReadContext:   resourceSysdigGroupMappingRead(gm),
+		CreateContext: resourceSysdigGroupMappingCreate(gm),
+		UpdateContext: resourceSysdigGroupMappingUpdate(gm),
+		DeleteContext: resourceSysdigGroupMappingDelete(gm),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -60,94 +74,102 @@ func resourceSysdigGroupMapping() *schema.Resource {
 	}
 }
 
-func resourceSysdigGroupMappingRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client, err := m.(SysdigClients).sysdigCommonClient()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	groupMapping, err := client.GetGroupMapping(ctx, id)
-	if err != nil {
-		if err == common.GroupMappingNotFound {
-			d.SetId("")
-			return nil
+func resourceSysdigGroupMappingRead(getGroupMapper GetGroupMapper) schema.ReadContextFunc {
+	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+		id, err := strconv.Atoi(d.Id())
+		if err != nil {
+			return diag.FromErr(err)
 		}
-		return diag.FromErr(err)
+
+		gm, err := getGroupMapper(m.(SysdigClients))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		groupMapping, err := gm.GetGroupMapping(ctx, id)
+		if err != nil {
+			if err == common.GroupMappingNotFound {
+				d.SetId("")
+				return nil
+			}
+			return diag.FromErr(err)
+		}
+
+		groupMappingToResourceData(groupMapping, d)
+
+		return nil
 	}
-
-	groupMappingToResourceData(groupMapping, d)
-
-	return nil
 }
 
-func resourceSysdigGroupMappingCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var err error
+func resourceSysdigGroupMappingCreate(getGroupMapper GetGroupMapper) schema.CreateContextFunc {
+	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+		var err error
 
-	client, err := m.(SysdigClients).sysdigCommonClient()
-	if err != nil {
-		return diag.FromErr(err)
+		gm, err := getGroupMapper(m.(SysdigClients))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		groupMapping := groupMappingFromResourceData(d)
+		groupMapping, err = gm.CreateGroupMapping(ctx, groupMapping)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		d.SetId(strconv.Itoa(groupMapping.ID))
+
+		resourceSysdigGroupMappingRead(getGroupMapper)(ctx, d, m)
+
+		return nil
 	}
-
-	groupMapping := groupMappingFromResourceData(d)
-	groupMapping, err = client.CreateGroupMapping(ctx, groupMapping)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId(strconv.Itoa(groupMapping.ID))
-
-	resourceSysdigGroupMappingRead(ctx, d, m)
-
-	return nil
 }
 
-func resourceSysdigGroupMappingUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var err error
+func resourceSysdigGroupMappingUpdate(getGroupMapper GetGroupMapper) schema.UpdateContextFunc {
+	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+		var err error
 
-	client, err := m.(SysdigClients).sysdigCommonClient()
-	if err != nil {
-		return diag.FromErr(err)
+		gm, err := getGroupMapper(m.(SysdigClients))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		groupMapping := groupMappingFromResourceData(d)
+		id, err := strconv.Atoi(d.Id())
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		groupMapping.ID = id
+		groupMapping, err = gm.UpdateGroupMapping(ctx, groupMapping, id)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		resourceSysdigGroupMappingRead(getGroupMapper)(ctx, d, m)
+
+		return nil
 	}
-
-	groupMapping := groupMappingFromResourceData(d)
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	groupMapping.ID = id
-	groupMapping, err = client.UpdateGroupMapping(ctx, groupMapping, id)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	resourceSysdigGroupMappingRead(ctx, d, m)
-
-	return nil
 }
 
-func resourceSysdigGroupMappingDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client, err := m.(SysdigClients).sysdigCommonClient()
-	if err != nil {
-		return diag.FromErr(err)
-	}
+func resourceSysdigGroupMappingDelete(getGroupMapper GetGroupMapper) schema.DeleteContextFunc {
+	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+		id, err := strconv.Atoi(d.Id())
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
+		gm, err := getGroupMapper(m.(SysdigClients))
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-	err = client.DeleteGroupMapping(ctx, id)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+		err = gm.DeleteGroupMapping(ctx, id)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-	return nil
+		return nil
+	}
 }
 
 func groupMappingFromResourceData(d *schema.ResourceData) *common.GroupMapping {
