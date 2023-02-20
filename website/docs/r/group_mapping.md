@@ -50,7 +50,7 @@ No additional attributes are exported.
 
 ## Import
 
-Sysdig users can be imported using the ID, e.g.
+Sysdig group mapping can be imported using the ID, e.g.
 
 ```
 $ terraform import sysdig_group_mapping.my_group 24267
