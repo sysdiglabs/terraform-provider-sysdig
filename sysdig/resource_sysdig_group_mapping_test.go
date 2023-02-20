@@ -11,13 +11,16 @@ import (
 )
 
 func TestAccGroupMapping(t *testing.T) {
-	groupMapping1 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	groupMapping2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	groupAllTeams := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	groupMonitor := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	groupSecure := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_MONITOR_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN must be set for acceptance tests")
+			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
+			secure := os.Getenv("SYSDIG_SECURE_API_TOKEN")
+			if monitor == "" || secure == "" {
+				t.Fatal("SYSDIG_MONITOR_API_TOKEN and SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
 			}
 		},
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -27,12 +30,12 @@ func TestAccGroupMapping(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: groupMappingAllTeams(groupMapping1),
+				Config: groupMappingAllTeams(groupAllTeams),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"sysdig_group_mapping.all_teams",
 						"group_name",
-						groupMapping1,
+						groupAllTeams,
 					),
 					resource.TestCheckResourceAttr(
 						"sysdig_group_mapping.all_teams",
@@ -42,27 +45,42 @@ func TestAccGroupMapping(t *testing.T) {
 				),
 			},
 			{
-				Config: groupMappingUpdateAllTeamsGroupName(groupMapping1),
+				Config: groupMappingUpdateAllTeamsGroupName(groupAllTeams),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"sysdig_group_mapping.all_teams",
 						"group_name",
-						fmt.Sprintf("%s-updated", groupMapping1),
+						fmt.Sprintf("%s-updated", groupAllTeams),
 					),
 				),
 			},
 			{
-				Config: groupMappingSingleTeam(groupMapping2),
+				Config: groupMappingMonitorTeam(groupMonitor),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"sysdig_group_mapping.single_team",
+						fmt.Sprintf("sysdig_group_mapping.group_monitor_%s", groupMonitor),
 						"team_map.0.team_ids.#",
 						"1",
 					),
 				),
 			},
 			{
-				ResourceName:      "sysdig_group_mapping.single_team",
+				ResourceName:      fmt.Sprintf("sysdig_group_mapping.group_monitor_%s", groupMonitor),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: groupMappingSecureTeam(groupSecure),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						fmt.Sprintf("sysdig_group_mapping.group_secure_%s", groupSecure),
+						"team_map.0.team_ids.#",
+						"1",
+					),
+				),
+			},
+			{
+				ResourceName:      fmt.Sprintf("sysdig_group_mapping.group_secure_%s", groupSecure),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -94,22 +112,39 @@ resource "sysdig_group_mapping" "all_teams" {
 `, groupName)
 }
 
-func groupMappingSingleTeam(groupName string) string {
+func groupMappingMonitorTeam(groupName string) string {
 	return fmt.Sprintf(`
-resource "sysdig_monitor_team" "single_team" {
-  name      = "%[1]s-team-test"
+resource "sysdig_monitor_team" "team_%[1]s" {
+  name      = "%[1]s-team-monitor"
 
   entrypoint {
 	type = "Explore"
   }
 }
 
-resource "sysdig_group_mapping" "single_team" {
+resource "sysdig_group_mapping" "group_monitor_%[1]s" {
   group_name = "%[1]s"
   role = "ROLE_TEAM_STANDARD"
 
   team_map {
-    team_ids = [sysdig_monitor_team.single_team.id]
+    team_ids = [sysdig_monitor_team.team_%[1]s.id]
+  }
+}
+`, groupName)
+}
+
+func groupMappingSecureTeam(groupName string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_team" "team_%[1]s" {
+  name      = "%[1]s-team-secure"
+}
+
+resource "sysdig_group_mapping" "group_secure_%[1]s" {
+  group_name = "%[1]s"
+  role = "ROLE_TEAM_STANDARD"
+
+  team_map {
+    team_ids = [sysdig_secure_team.team_%[1]s.id]
   }
 }
 `, groupName)
