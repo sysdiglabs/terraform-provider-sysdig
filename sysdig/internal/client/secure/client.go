@@ -63,6 +63,15 @@ type SysdigSecureClient interface {
 	GetBenchmarkTask(context.Context, string) (*BenchmarkTask, error)
 	DeleteBenchmarkTask(context.Context, string) error
 	SetBenchmarkTaskEnabled(context.Context, string, bool) error
+
+	CreateScanningPolicy(context.Context, ScanningPolicy) (ScanningPolicy, error)
+	GetScanningPolicyById(context.Context, string) (ScanningPolicy, error)
+	DeleteScanningPolicyById(context.Context, string) error
+	UpdateScanningPolicyById(context.Context, ScanningPolicy) (ScanningPolicy, error)
+
+	CreateScanningPolicyAssignmentList(context.Context, ScanningPolicyAssignmentList) (ScanningPolicyAssignmentList, error)
+	GetScanningPolicyAssignmentList(context.Context) (ScanningPolicyAssignmentList, error)
+	DeleteScanningPolicyAssignmentList(context.Context, ScanningPolicyAssignmentList) error
 }
 
 func WithExtraHeaders(client SysdigSecureClient, extraHeaders map[string]string) SysdigSecureClient {
