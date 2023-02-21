@@ -3,7 +3,7 @@ subcategory: "Sysdig Platform"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_group_mapping"
 description: |-
-Creates a group mapping in Sysdig.
+  Creates a group mapping in Sysdig.
 ---
 
 # Resource: sysdig_group_mapping
