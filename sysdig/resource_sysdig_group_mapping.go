@@ -80,7 +80,10 @@ func resourceSysdigGroupMappingRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	groupMappingToResourceData(groupMapping, d)
+	err = groupMappingToResourceData(groupMapping, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -121,7 +124,7 @@ func resourceSysdigGroupMappingUpdate(ctx context.Context, d *schema.ResourceDat
 	}
 
 	groupMapping.ID = id
-	groupMapping, err = client.UpdateGroupMapping(ctx, groupMapping, id)
+	_, err = client.UpdateGroupMapping(ctx, groupMapping, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
