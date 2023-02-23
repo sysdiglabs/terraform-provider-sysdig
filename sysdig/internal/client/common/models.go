@@ -13,10 +13,11 @@ type TeamMap struct {
 }
 
 type GroupMapping struct {
-	ID        int      `json:"id,omitempty"`
-	GroupName string   `json:"groupName,omitempty"`
-	Role      string   `json:"role,omitempty"`
-	TeamMap   *TeamMap `json:"teamMap,omitempty"`
+	ID         int      `json:"id,omitempty"`
+	GroupName  string   `json:"groupName,omitempty"`
+	Role       string   `json:"role,omitempty"`
+	SystemRole string   `json:"systemRole,omitempty"`
+	TeamMap    *TeamMap `json:"teamMap,omitempty"`
 }
 
 func (gm *GroupMapping) ToJSON() (io.Reader, error) {

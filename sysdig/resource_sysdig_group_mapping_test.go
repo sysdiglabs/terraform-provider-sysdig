@@ -93,6 +93,8 @@ func groupMappingAllTeams(groupName string) string {
 resource "sysdig_group_mapping" "all_teams" {
   group_name = "%s"
   role = "ROLE_TEAM_STANDARD"
+  system_role = "ROLE_USER"
+
   team_map {
     all_teams = true
   }
@@ -105,6 +107,8 @@ func groupMappingUpdateAllTeamsGroupName(groupName string) string {
 resource "sysdig_group_mapping" "all_teams" {
   group_name = "%s-updated"
   role = "ROLE_TEAM_STANDARD"
+  system_role = "ROLE_USER"
+
   team_map {
     all_teams = true
   }

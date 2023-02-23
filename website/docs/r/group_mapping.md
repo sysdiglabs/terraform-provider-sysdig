@@ -18,6 +18,7 @@ Creates a group mapping in Sysdig.
 resource "sysdig_group_mapping" "my_group" {
   group_name = "my-group"
   role = "ROLE_TEAM_STANDARD"
+  system_role = "ROLE_USER"
 
   team_map {
     all_teams = false
@@ -32,6 +33,8 @@ resource "sysdig_group_mapping" "my_group" {
 * `group_name` - (Required) The group name to be mapped.
 
 * `role` - (Required) The role that is assigned to the users. It can be a standard role or a custom team role ID.
+
+* `system_role` (Optional) The system role that is assigned to the users.
 
 * `team_map` - (Required) Block to define team mapping.
 

@@ -35,6 +35,11 @@ func resourceSysdigGroupMapping() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"system_role": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"team_map": {
 				Type:     schema.TypeSet,
 				Required: true,
@@ -155,9 +160,10 @@ func resourceSysdigGroupMappingDelete(ctx context.Context, d *schema.ResourceDat
 
 func groupMappingFromResourceData(d *schema.ResourceData) *common.GroupMapping {
 	return &common.GroupMapping{
-		GroupName: d.Get("group_name").(string),
-		Role:      d.Get("role").(string),
-		TeamMap:   teamMapFromResourceData(d),
+		GroupName:  d.Get("group_name").(string),
+		Role:       d.Get("role").(string),
+		SystemRole: d.Get("system_role").(string),
+		TeamMap:    teamMapFromResourceData(d),
 	}
 }
 
@@ -188,6 +194,10 @@ func groupMappingToResourceData(groupMapping *common.GroupMapping, d *schema.Res
 		return err
 	}
 	err = d.Set("role", groupMapping.Role)
+	if err != nil {
+		return err
+	}
+	err = d.Set("system_role", groupMapping.SystemRole)
 	if err != nil {
 		return err
 	}
