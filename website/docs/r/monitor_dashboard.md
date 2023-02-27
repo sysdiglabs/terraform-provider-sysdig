@@ -40,10 +40,18 @@ resource "sysdig_monitor_dashboard" "dashboard" {
     name        = "Example panel"
     description = "Description"
 
+    legend {
+      enabled = true
+      layout = "table"
+      position = "bottom"
+      show_current = true
+    }
+
     query {
       promql = "avg_over_time(sysdig_host_cpu_used_percent{host_name=$hostname}[$__interval])"
       unit   = "percent"
     }
+
     query {
       promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
       unit   = "number"
@@ -157,6 +165,20 @@ The following arguments are supported:
   
 * `transparent_background` - (Optional) If true, the panel will have a transparent background.
                              This field is ignored for all panel types except `text`.
+
+### legend
+
+Legend block is used to configure legend on panel.
+
+The following arguments are supported:
+
+* `enabled` - (Optional) Whether to display the legend for the panel. Default: true.
+
+* `layout` - (Required) Legend display layout. Can be one of: `table`, `inline`.
+
+* `position` - (Required) Positioning of the legend related to the panel data. Can be one of: `bottom`, `right`.
+
+* `show_current` - (Required) Whether to display the most recent datapoint value in the legend.
 
 ### query
 
