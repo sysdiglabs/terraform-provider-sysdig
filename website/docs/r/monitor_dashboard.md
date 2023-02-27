@@ -168,7 +168,7 @@ The following arguments are supported:
 
 ### legend
 
-Legend block is used to configure legend on panel.
+Legend block is used to configure legend on the panel.
 
 The following arguments are supported:
 
