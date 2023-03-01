@@ -155,6 +155,34 @@ resource "sysdig_secure_rule_falco" "kube_audit" {
 }`, name, name)
 }
 
+func ruleFalcoGcpAuditlog(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "gcp_audit" {
+  name = "TERRAFORM TEST %s - GCP Audit"
+  description = "TERRAFORM TEST %s"
+  tags = ["gcp"]
+
+  condition = "gcp.serviceName"
+  output = "GCP Audit Event received (%%gcp.serviceName, %%gcp.methodName)"
+  priority = "debug"
+  source = "gcp_auditlog" // syscall or k8s_audit
+}`, name, name)
+}
+
+func ruleFalcoAzureAuditlog(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "azure_audit" {
+  name = "TERRAFORM TEST %s - Azure Audit"
+  description = "TERRAFORM TEST %s"
+  tags = ["azure"]
+
+  condition = "jevt.value[/operationName] = "DeleteBlob""
+  output = "GCP Audit Event received (%%jevt.value[/operationName])"
+  priority = "debug"
+  source = "azure_platformlogs" // syscall or k8s_audit
+}`, name, name)
+}
+
 func ruleFalcoTerminalShellWithAppend() string {
 	return `
 resource "sysdig_secure_rule_falco" "terminal_shell_append" {
