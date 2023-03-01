@@ -56,7 +56,7 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Default:          "",
-				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"syscall", "k8s_audit", "aws_cloudtrail"}, false)),
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"syscall", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs"}, false)),
 			},
 			"append": {
 				Type:     schema.TypeBool,

@@ -23,7 +23,7 @@ resource "sysdig_secure_rule_falco" "example" {
   condition = "spawned_process and container and shell_procs and proc.tty != 0 and container_entrypoint"
   output    = "A shell was spawned in a container with an attached terminal (user=%user.name %container.info shell=%proc.name parent=%proc.pname cmdline=%proc.cmdline terminal=%proc.tty container_id=%container.id image=%container.image.repository)"
   priority  = "notice"
-  source    = "syscall" // syscall or k8s_audit
+  source    = "syscall" // syscall or k8s_audit/syscall, k8s_audit, aws_cloudtrail, gcp_auditlog or azure_platformlogs
 
 
   exceptions {
@@ -64,7 +64,7 @@ The following arguments are supported:
 * `condition` - (Required) A [Falco condition](https://falco.org/docs/rules/) is simply a Boolean predicate on Sysdig events expressed using the Sysdig [filter syntax](http://www.sysdig.org/wiki/sysdig-user-guide/#filtering) and macro terms. 
 * `output` - (Optional) Add additional information to each Falco notification's output. Required if append is false.
 * `priority` - (Optional) The priority of the Falco rule. It can be: "emergency", "alert", "critical", "error", "warning", "notice", "info" or "debug". By default is "warning".
-* `source` - (Optional) The source of the event. It can be either "syscall", "k8s_audit" or "aws_cloudtrail". Required if append is false.
+* `source` - (Optional) The source of the event. It can be either "syscall", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", or "azure_platformlogs". Required if append is false.
 * `exceptions` - (Optional) The exceptions key is a list of identifier plus list of tuples of filtercheck fields. See below for details.
 * `append` - (Optional) This indicates that the rule being created appends the condition to an existing Sysdig-provided rule. By default this is false. Appending to user-created rules is not supported by the API.
 
