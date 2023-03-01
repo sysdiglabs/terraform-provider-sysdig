@@ -23,7 +23,7 @@ resource "sysdig_secure_rule_falco" "example" {
   condition = "spawned_process and container and shell_procs and proc.tty != 0 and container_entrypoint"
   output    = "A shell was spawned in a container with an attached terminal (user=%user.name %container.info shell=%proc.name parent=%proc.pname cmdline=%proc.cmdline terminal=%proc.tty container_id=%container.id image=%container.image.repository)"
   priority  = "notice"
-  source    = "syscall" // syscall or k8s_audit/syscall, k8s_audit, aws_cloudtrail, gcp_auditlog or azure_platformlogs
+  source    = "syscall" // syscall, k8s_audit, aws_cloudtrail, gcp_auditlog or azure_platformlogs
 
 
   exceptions {
