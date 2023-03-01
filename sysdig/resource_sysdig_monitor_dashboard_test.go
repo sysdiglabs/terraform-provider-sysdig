@@ -58,6 +58,68 @@ func TestAccDashboard(t *testing.T) {
 			{
 				Config: multiplePanelsDashboardWithDisplayInfo(rText()),
 			},
+			{
+				Config: timeChartDashboardWithLegend(
+					rText(),
+					"true",
+					"true",
+					"bottom",
+					"inline",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard",
+						"panel.0.legend.0.enabled",
+						"true",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard",
+						"panel.0.legend.0.show_current",
+						"true",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard",
+						"panel.0.legend.0.layout",
+						"inline",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard",
+						"panel.0.legend.0.position",
+						"bottom",
+					),
+				),
+			},
+			{
+				Config: timeChartDashboardWithLegend(
+					rText(),
+					"false",
+					"false",
+					"right",
+					"table",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard",
+						"panel.0.legend.0.enabled",
+						"false",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard",
+						"panel.0.legend.0.show_current",
+						"false",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard",
+						"panel.0.legend.0.layout",
+						"table",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard",
+						"panel.0.legend.0.position",
+						"right",
+					),
+				),
+			},
 		},
 	})
 }
@@ -76,6 +138,12 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		type = "timechart"
 		name = "example panel"
 		description = "description"
+
+        legend {
+            show_current = true
+            position = "bottom"
+            layout = "inline"
+        }
 
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
@@ -143,6 +211,12 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		name = "example panel"
 		description = "description"
 
+        legend {
+            show_current = true
+            position = "bottom"
+            layout = "inline"
+        }
+
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
@@ -198,6 +272,12 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		type = "timechart"
 		name = "example panel"
 		description = "description"
+
+        legend {
+            show_current = true
+            position = "bottom"
+            layout = "inline"
+        }
 
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
@@ -312,6 +392,12 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		name = "example panel"
 		description = "description"
 
+        legend {
+            show_current = true
+            position = "bottom"
+            layout = "inline"
+        }
+
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
@@ -360,4 +446,66 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 	}
 }
 `, name, name)
+}
+
+func timeChartDashboardWithLegend(name, enabled, showCurrent, position, layout string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_dashboard" "dashboard" {
+	name = "TERRAFORM TEST - METRIC %[1]s"
+	description = "TERRAFORM TEST - METRIC %[1]s"
+
+	scope {
+		metric = "agent.id"
+		comparator = "in"
+		value = ["foo", "bar"]
+		variable = "agent_id"
+	}
+
+	scope {
+		metric = "agent.name"
+		comparator = "equals"
+		value = ["name"]
+	}
+
+	scope {
+		metric = "kubernetes.namespace.name"
+		variable = "k8_ns"
+	}
+
+	panel {
+		pos_x = 0
+		pos_y = 0
+		width = 12 # Maximum size: 24
+		height = 6
+		type = "timechart"
+		name = "example panel"
+		description = "description"
+        
+        legend {
+            enabled = %[2]s
+            show_current = %[3]s
+            position = "%[4]s"
+            layout = "%[5]s"
+        }
+
+		query {
+			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+			unit = "percent"
+			display_info {
+				display_name                      = "hostname"
+				time_series_display_name_template = "{{host_hostname}}"
+				type                              = "lines"
+			}
+		}
+		query {
+			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent{ns_name=$k8s_ns}[$__interval]))"
+			unit = "number"
+			display_info {
+				time_series_display_name_template = "{{host_hostname}}"
+				type                              = "stackedArea"
+			}
+		}
+	}
+}
+`, name, enabled, showCurrent, position, layout)
 }
