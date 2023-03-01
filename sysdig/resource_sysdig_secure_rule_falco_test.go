@@ -177,7 +177,7 @@ resource "sysdig_secure_rule_falco" "azure_audit" {
   tags = ["azure"]
 
   condition = "jevt.value[/operationName] = "DeleteBlob""
-  output = "GCP Audit Event received (%%jevt.value[/operationName])"
+  output = "Azure Audit Event received (%%jevt.value[/operationName])"
   priority = "debug"
   source = "azure_platformlogs" // syscall or k8s_audit
 }`, name, name)
