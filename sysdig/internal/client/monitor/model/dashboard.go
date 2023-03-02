@@ -103,100 +103,95 @@ type Format struct {
 	NullValueDisplayMode *string    `json:"nullValueDisplayMode"`
 }
 
-func newPercentFormat() Format {
-	inputFormat := "0-100"
-	displayFormat := "auto"
-	decimals := 0
-	yAxis := "auto"
-	nullValueDisplayMode := "nullGap"
-	return Format{
-		Unit:                 FormatUnitPercentage,
+func NewFormat(
+	unit FormatUnit,
+	inputFormat string,
+	displayFormat string,
+	decimals int,
+	yAxis string,
+	minInterval string,
+	nullValueDisplayMode string) *Format {
+	return &Format{
+		Unit:                 unit,
 		InputFormat:          &inputFormat,
 		DisplayFormat:        &displayFormat,
 		Decimals:             &decimals,
 		YAxis:                &yAxis,
+		MinInterval:          &minInterval,
 		NullValueDisplayMode: &nullValueDisplayMode,
 	}
+}
+
+func newPercentFormat() Format {
+	return *NewFormat(
+		FormatUnitPercentage,
+		"0-100",
+		"auto",
+		0,
+		"auto",
+		"",
+		"nullGap",
+	)
 }
 
 func newDataFormat() Format {
-	inputFormat := "B"
-	displayFormat := "auto"
-	decimals := 0
-	yAxis := "auto"
-	nullValueDisplayMode := "nullGap"
-	return Format{
-		Unit:                 FormatUnitData,
-		InputFormat:          &inputFormat,
-		DisplayFormat:        &displayFormat,
-		Decimals:             &decimals,
-		YAxis:                &yAxis,
-		NullValueDisplayMode: &nullValueDisplayMode,
-	}
+	return *NewFormat(
+		FormatUnitData,
+		"B",
+		"auto",
+		0,
+		"auto",
+		"",
+		"nullGap",
+	)
 }
 
 func newDataRateFormat() Format {
-	inputFormat := "B/s"
-	displayFormat := "auto"
-	decimals := 0
-	yAxis := "auto"
-	nullValueDisplayMode := "nullGap"
-	return Format{
-		Unit:                 FormatUnitDataRate,
-		InputFormat:          &inputFormat,
-		DisplayFormat:        &displayFormat,
-		Decimals:             &decimals,
-		YAxis:                &yAxis,
-		NullValueDisplayMode: &nullValueDisplayMode,
-	}
+	return *NewFormat(
+		FormatUnitDataRate,
+		"B/s",
+		"auto",
+		0,
+		"auto",
+		"",
+		"nullGap",
+	)
 }
 
 func newNumberFormat() Format {
-	inputFormat := "1"
-	displayFormat := "auto"
-	decimals := 0
-	yAxis := "auto"
-	nullValueDisplayMode := "nullGap"
-	return Format{
-		Unit:                 FormatUnitNumber,
-		InputFormat:          &inputFormat,
-		DisplayFormat:        &displayFormat,
-		Decimals:             &decimals,
-		YAxis:                &yAxis,
-		NullValueDisplayMode: &nullValueDisplayMode,
-	}
+	return *NewFormat(
+		FormatUnitNumber,
+		"1",
+		"auto",
+		0,
+		"auto",
+		"",
+		"nullGap",
+	)
 }
 
 func newNumberRateFormat() Format {
-	inputFormat := "/s"
-	displayFormat := "auto"
-	decimals := 0
-	yAxis := "auto"
-	nullValueDisplayMode := "nullGap"
-	return Format{
-		Unit:                 FormatUnitNumberRate,
-		InputFormat:          &inputFormat,
-		DisplayFormat:        &displayFormat,
-		Decimals:             &decimals,
-		YAxis:                &yAxis,
-		NullValueDisplayMode: &nullValueDisplayMode,
-	}
+	return *NewFormat(
+		FormatUnitNumberRate,
+		"/s",
+		"auto",
+		0,
+		"auto",
+		"",
+		"nullGap",
+	)
 }
 
 func newTimeFormat() Format {
-	inputFormat := "ns"
-	displayFormat := "auto"
-	decimals := 0
-	yAxis := "auto"
-	nullValueDisplayMode := "nullGap"
-	return Format{
-		Unit:                 FormatUnitTime,
-		InputFormat:          &inputFormat,
-		DisplayFormat:        &displayFormat,
-		Decimals:             &decimals,
-		YAxis:                &yAxis,
-		NullValueDisplayMode: &nullValueDisplayMode,
-	}
+	return *NewFormat(
+		FormatUnitTime,
+		"ns",
+		"auto",
+		0,
+		"auto",
+		"",
+		"nullGap",
+	)
 }
 
 type AdvancedQueries struct {
