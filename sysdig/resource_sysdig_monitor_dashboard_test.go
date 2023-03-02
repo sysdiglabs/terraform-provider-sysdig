@@ -148,6 +148,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
+
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 	}
 }
@@ -172,6 +179,13 @@ resource "sysdig_monitor_dashboard" "dashboard_2" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
+            
+			format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 	}
 }
@@ -220,10 +234,24 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
+
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent{ns_name=$k8s_ns}[$__interval]))"
 			unit = "number"
+
+            format {
+                display_format = "auto"
+                input_format = "1"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 	}
 
@@ -239,6 +267,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "time"
+
+            format {
+                display_format = "auto"
+                input_format = "ns"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 	}
 
@@ -282,10 +317,24 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
+
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "number"
+
+            format {
+                display_format = "auto"
+                input_format = "1"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 	}
 
@@ -301,6 +350,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "time"
+            
+			format {
+                display_format = "auto"
+                input_format = "ns"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 	}
 
@@ -346,6 +402,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
+
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 	}
 	share {
@@ -406,6 +469,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 				time_series_display_name_template = "{{host_hostname}}"
 				type                              = "lines"
 			}
+
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent{ns_name=$k8s_ns}[$__interval]))"
@@ -414,6 +484,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 				time_series_display_name_template = "{{host_hostname}}"
 				type                              = "stackedArea"
 			}
+
+            format {
+                display_format = "auto"
+                input_format = "1"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 	}
 
@@ -429,6 +506,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "time"
+            
+			format {
+                display_format = "auto"
+                input_format = "ns"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 	}
 
@@ -496,14 +580,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 				time_series_display_name_template = "{{host_hostname}}"
 				type                              = "lines"
 			}
-		}
-		query {
-			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent{ns_name=$k8s_ns}[$__interval]))"
-			unit = "number"
-			display_info {
-				time_series_display_name_template = "{{host_hostname}}"
-				type                              = "stackedArea"
-			}
+            
+			format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 	}
 }

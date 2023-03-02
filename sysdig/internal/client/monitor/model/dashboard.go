@@ -94,70 +94,108 @@ const (
 )
 
 type Format struct {
-	Unit          FormatUnit  `json:"unit"`
-	InputFormat   string      `json:"inputFormat"`
-	DisplayFormat string      `json:"displayFormat"`
-	Decimals      interface{} `json:"decimals"`
-	YAxis         string      `json:"yAxis"`
+	Unit                 FormatUnit `json:"unit"`
+	InputFormat          *string    `json:"inputFormat"`
+	DisplayFormat        *string    `json:"displayFormat"`
+	Decimals             *int       `json:"decimals"`
+	YAxis                *string    `json:"yAxis"`
+	MinInterval          *string    `json:"minInterval"`
+	NullValueDisplayMode *string    `json:"nullValueDisplayMode"`
 }
 
 func newPercentFormat() Format {
+	inputFormat := "0-100"
+	displayFormat := "auto"
+	decimals := 0
+	yAxis := "auto"
+	nullValueDisplayMode := "nullGap"
 	return Format{
-		Unit:          FormatUnitPercentage,
-		InputFormat:   "0-100",
-		DisplayFormat: "auto",
-		Decimals:      nil,
-		YAxis:         "auto",
+		Unit:                 FormatUnitPercentage,
+		InputFormat:          &inputFormat,
+		DisplayFormat:        &displayFormat,
+		Decimals:             &decimals,
+		YAxis:                &yAxis,
+		NullValueDisplayMode: &nullValueDisplayMode,
 	}
 }
 
 func newDataFormat() Format {
+	inputFormat := "B"
+	displayFormat := "auto"
+	decimals := 0
+	yAxis := "auto"
+	nullValueDisplayMode := "nullGap"
 	return Format{
-		Unit:          FormatUnitData,
-		InputFormat:   "B",
-		DisplayFormat: "auto",
-		Decimals:      nil,
-		YAxis:         "auto",
+		Unit:                 FormatUnitData,
+		InputFormat:          &inputFormat,
+		DisplayFormat:        &displayFormat,
+		Decimals:             &decimals,
+		YAxis:                &yAxis,
+		NullValueDisplayMode: &nullValueDisplayMode,
 	}
 }
 
 func newDataRateFormat() Format {
+	inputFormat := "B/s"
+	displayFormat := "auto"
+	decimals := 0
+	yAxis := "auto"
+	nullValueDisplayMode := "nullGap"
 	return Format{
-		Unit:          FormatUnitDataRate,
-		InputFormat:   "B/s",
-		DisplayFormat: "auto",
-		Decimals:      nil,
-		YAxis:         "auto",
+		Unit:                 FormatUnitDataRate,
+		InputFormat:          &inputFormat,
+		DisplayFormat:        &displayFormat,
+		Decimals:             &decimals,
+		YAxis:                &yAxis,
+		NullValueDisplayMode: &nullValueDisplayMode,
 	}
 }
 
 func newNumberFormat() Format {
+	inputFormat := "1"
+	displayFormat := "auto"
+	decimals := 0
+	yAxis := "auto"
+	nullValueDisplayMode := "nullGap"
 	return Format{
-		Unit:          FormatUnitNumber,
-		InputFormat:   "1",
-		DisplayFormat: "auto",
-		Decimals:      nil,
-		YAxis:         "auto",
+		Unit:                 FormatUnitNumber,
+		InputFormat:          &inputFormat,
+		DisplayFormat:        &displayFormat,
+		Decimals:             &decimals,
+		YAxis:                &yAxis,
+		NullValueDisplayMode: &nullValueDisplayMode,
 	}
 }
 
 func newNumberRateFormat() Format {
+	inputFormat := "/s"
+	displayFormat := "auto"
+	decimals := 0
+	yAxis := "auto"
+	nullValueDisplayMode := "nullGap"
 	return Format{
-		Unit:          FormatUnitNumberRate,
-		InputFormat:   "/s",
-		DisplayFormat: "auto",
-		Decimals:      nil,
-		YAxis:         "auto",
+		Unit:                 FormatUnitNumberRate,
+		InputFormat:          &inputFormat,
+		DisplayFormat:        &displayFormat,
+		Decimals:             &decimals,
+		YAxis:                &yAxis,
+		NullValueDisplayMode: &nullValueDisplayMode,
 	}
 }
 
 func newTimeFormat() Format {
+	inputFormat := "ns"
+	displayFormat := "auto"
+	decimals := 0
+	yAxis := "auto"
+	nullValueDisplayMode := "nullGap"
 	return Format{
-		Unit:          FormatUnitTime,
-		InputFormat:   "ns",
-		DisplayFormat: "auto",
-		Decimals:      nil,
-		YAxis:         "auto",
+		Unit:                 FormatUnitTime,
+		InputFormat:          &inputFormat,
+		DisplayFormat:        &displayFormat,
+		Decimals:             &decimals,
+		YAxis:                &yAxis,
+		NullValueDisplayMode: &nullValueDisplayMode,
 	}
 }
 
@@ -197,33 +235,73 @@ func (q *AdvancedQueries) Enable(val bool) *AdvancedQueries {
 	return q
 }
 
-func (q *AdvancedQueries) WithPercentFormat() *AdvancedQueries {
+func (q *AdvancedQueries) updateFormat(f *Format) {
+	if f == nil {
+		return
+	}
+
+	if f.Unit != "" {
+		q.Format.Unit = f.Unit
+	}
+
+	if f.DisplayFormat != nil {
+		q.Format.DisplayFormat = f.DisplayFormat
+	}
+
+	if f.InputFormat != nil {
+		q.Format.InputFormat = f.InputFormat
+	}
+
+	if f.Decimals != nil {
+		q.Format.Decimals = f.Decimals
+	}
+
+	if f.YAxis != nil {
+		q.Format.YAxis = f.YAxis
+	}
+
+	if f.NullValueDisplayMode != nil {
+		q.Format.NullValueDisplayMode = f.NullValueDisplayMode
+	}
+
+	if f.MinInterval != nil {
+		q.Format.MinInterval = f.MinInterval
+	}
+}
+
+func (q *AdvancedQueries) WithPercentFormat(f *Format) *AdvancedQueries {
 	q.Format = newPercentFormat()
+	q.updateFormat(f)
 	return q
 }
 
-func (q *AdvancedQueries) WithDataFormat() *AdvancedQueries {
+func (q *AdvancedQueries) WithDataFormat(f *Format) *AdvancedQueries {
 	q.Format = newDataFormat()
+	q.updateFormat(f)
 	return q
 }
 
-func (q *AdvancedQueries) WithDataRateFormat() *AdvancedQueries {
+func (q *AdvancedQueries) WithDataRateFormat(f *Format) *AdvancedQueries {
 	q.Format = newDataRateFormat()
+	q.updateFormat(f)
 	return q
 }
 
-func (q *AdvancedQueries) WithNumberFormat() *AdvancedQueries {
+func (q *AdvancedQueries) WithNumberFormat(f *Format) *AdvancedQueries {
 	q.Format = newNumberFormat()
+	q.updateFormat(f)
 	return q
 }
 
-func (q *AdvancedQueries) WithNumberRateFormat() *AdvancedQueries {
+func (q *AdvancedQueries) WithNumberRateFormat(f *Format) *AdvancedQueries {
 	q.Format = newNumberRateFormat()
+	q.updateFormat(f)
 	return q
 }
 
-func (q *AdvancedQueries) WithTimeFormat() *AdvancedQueries {
+func (q *AdvancedQueries) WithTimeFormat(f *Format) *AdvancedQueries {
 	q.Format = newTimeFormat()
+	q.updateFormat(f)
 	return q
 }
 
