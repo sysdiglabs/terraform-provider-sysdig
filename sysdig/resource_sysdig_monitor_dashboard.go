@@ -208,6 +208,32 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 								},
 							},
 						},
+						"legend": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  true,
+									},
+									"show_current": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+									"position": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"layout": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -373,6 +399,31 @@ func panelsFromResourceData(data *schema.ResourceData) (panels []*model.Panels, 
 	return
 }
 
+func legendFromResourceData(data interface{}) *model.LegendConfiguration {
+	defaultLegend := &model.LegendConfiguration{
+		Position: "bottom",
+		Layout:   "table",
+	}
+
+	if data == nil {
+		return defaultLegend
+	}
+
+	legendList := data.(*schema.Set).List()
+
+	if len(legendList) == 0 {
+		return defaultLegend
+	}
+
+	legend := legendList[0].(map[string]interface{})
+	return &model.LegendConfiguration{
+		Enabled:     legend["enabled"].(bool),
+		Position:    legend["position"].(string),
+		Layout:      legend["layout"].(string),
+		ShowCurrent: legend["show_current"].(bool),
+	}
+}
+
 func timechartPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panels, error) {
 	panel := &model.Panels{
 		ID:                     0,
@@ -408,14 +459,7 @@ func timechartPanelFromResourceData(panelInfo map[string]interface{}) (*model.Pa
 				Scale:          "linear",
 			},
 		},
-		LegendConfiguration: &model.LegendConfiguration{
-			Enabled:     true,
-			Position:    "right",
-			Layout:      "table",
-			ShowCurrent: true,
-			Width:       nil,
-			Height:      nil,
-		},
+		LegendConfiguration:   legendFromResourceData(panelInfo["legend"]),
 		MarkdownSource:        nil,
 		PanelTitleVisible:     false,
 		TextAutosized:         false,
@@ -724,7 +768,19 @@ func timechartPanelToResourceData(panel *model.Panels, panelLayout *model.Layout
 		"description": panel.Description,
 		"type":        "timechart",
 		"query":       queries,
+		"legend": []map[string]interface{}{
+			legendConfigurationToResourceData(panel.LegendConfiguration),
+		},
 	}, nil
+}
+
+func legendConfigurationToResourceData(legend *model.LegendConfiguration) map[string]interface{} {
+	return map[string]interface{}{
+		"enabled":      legend.Enabled,
+		"show_current": legend.ShowCurrent,
+		"position":     legend.Position,
+		"layout":       legend.Layout,
+	}
 }
 
 func numberPanelToResourceData(panel *model.Panels, panelLayout *model.Layout) (map[string]interface{}, error) {
