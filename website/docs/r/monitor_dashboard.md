@@ -50,6 +50,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
     query {
       promql = "avg_over_time(sysdig_host_cpu_used_percent{host_name=$hostname}[$__interval])"
       unit   = "percent"
+      format {
+        decimals                = 0
+        display_format          = "auto"
+        input_format            = "0-100"
+        null_value_display_mode = "nullGap"
+        y_axis                  = "auto"
+      }
     }
 
     query {
@@ -59,6 +66,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
         display_name                      = "ct_name"
         time_series_display_name_template = "{{container_name}}"
         type                              = "lines"
+      }
+      format {
+        decimals                = 0
+        display_format          = "auto"
+        input_format            = "1"
+        null_value_display_mode = "nullGap"
+        y_axis                  = "auto"
       }
     }
   }
@@ -75,6 +89,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
     query {
       promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
       unit   = "time"
+      format {
+        decimals                = 0
+        display_format          = "auto"
+        input_format            = "ns"
+        null_value_display_mode = "nullGap"
+        y_axis                  = "auto"
+      }
     }
   }
 
