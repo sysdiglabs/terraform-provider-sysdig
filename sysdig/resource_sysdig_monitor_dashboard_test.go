@@ -385,7 +385,7 @@ resource "sysdig_monitor_dashboard" "dashboard_2" {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
             
-			format {
+            format {
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
@@ -556,7 +556,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "time"
             
-			format {
+            format {
                 display_format = "auto"
                 input_format = "ns"
                 y_axis = "auto"
