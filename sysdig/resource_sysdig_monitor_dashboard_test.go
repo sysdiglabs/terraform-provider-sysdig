@@ -358,7 +358,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
-				null_value_display_mode = "nullGap"
+                null_value_display_mode = "nullGap"
             }
 		}
 	}
@@ -389,7 +389,7 @@ resource "sysdig_monitor_dashboard" "dashboard_2" {
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
-				null_value_display_mode = "nullGap"
+                null_value_display_mode = "nullGap"
             }
 		}
 	}
@@ -444,7 +444,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
-				null_value_display_mode = "nullGap"
+                null_value_display_mode = "nullGap"
             }
 		}
 		query {
@@ -477,7 +477,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
                 display_format = "auto"
                 input_format = "ns"
                 y_axis = "auto"
-				null_value_display_mode = "nullGap"
+                null_value_display_mode = "nullGap"
             }
 		}
 	}
@@ -527,7 +527,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
-				null_value_display_mode = "nullGap"
+                null_value_display_mode = "nullGap"
             }
 		}
 		query {
@@ -538,7 +538,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
                 display_format = "auto"
                 input_format = "1"
                 y_axis = "auto"
-				null_value_display_mode = "nullGap"
+                null_value_display_mode = "nullGap"
             }
 		}
 	}
@@ -560,7 +560,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
                 display_format = "auto"
                 input_format = "ns"
                 y_axis = "auto"
-				null_value_display_mode = "nullGap"
+                null_value_display_mode = "nullGap"
             }
 		}
 	}
@@ -612,7 +612,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
-				null_value_display_mode = "nullGap"
+                null_value_display_mode = "nullGap"
             }
 		}
 	}
@@ -679,7 +679,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
-				null_value_display_mode = "nullGap"
+                null_value_display_mode = "nullGap"
             }
 		}
 		query {
@@ -694,7 +694,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
                 display_format = "auto"
                 input_format = "1"
                 y_axis = "auto"
-				null_value_display_mode = "nullGap"
+                null_value_display_mode = "nullGap"
             }
 		}
 	}
@@ -712,11 +712,11 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "time"
             
-			format {
+            format {
                 display_format = "auto"
                 input_format = "ns"
                 y_axis = "auto"
-				null_value_display_mode = "nullGap"
+                null_value_display_mode = "nullGap"
             }
 		}
 	}
@@ -786,11 +786,11 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 				type                              = "lines"
 			}
             
-			format {
+            format {
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
-				null_value_display_mode = "nullGap"
+                null_value_display_mode = "nullGap"
             }
 		}
 	}
@@ -822,13 +822,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "%[2]s"
             
-			format {
+            format {
                 display_format = "%[3]s"
                 input_format = "%[4]s"
                 y_axis = "%[5]s"
-				null_value_display_mode = "%[6]s"
-				decimals = %[7]d
-				min_interval = "%[8]s"
+                null_value_display_mode = "%[6]s"
+                decimals = %[7]d
+                min_interval = "%[8]s"
             }
 		}
 	}
