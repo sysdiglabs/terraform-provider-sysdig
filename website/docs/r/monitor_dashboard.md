@@ -207,7 +207,15 @@ The following arguments are supported:
 
   * `type` - (Required) Configure the visualization type in the timechart, can be `lines`, `stackedArea`, `stackedBar`
 
-
+* `format` - (Optional) Configure query formatting. It's optional due to backward compatibility. If no format block is provided, default one will be used.
+  
+  Nested scheme for `format`:
+  * `input_format` - (Required) Input data format, must match the selected input unit. 'auto' is not allowed except for dashboard libraries. For example: `MiB`
+  * `display_format` - (Required) Overrides display data format, must match the selected input unit. 'auto' is allowed and default. For example: `KiB`
+  * `y_axis` - (Required) Selects which YAxis to be used for displaying over a timechart.
+  * `decimals` - (Optional) Max number of decimals to be displayed for each datapoint.
+  * `null_value_display_mode` - (Optional) Defines the timechart behavior for missing data points. For example: `nullGap` 
+  * `min_interval` - (Optional) Minimum interval to be used as a replacement of the $__interval variable in PromQL queries. For example: `60s`
 ### share
 
 A dashboard can be shared by creating one or more `share` blocks.
