@@ -18,6 +18,11 @@ type SysdigCommonClient interface {
 	DeleteUser(context.Context, int) error
 	UpdateUser(context.Context, *User) (*User, error)
 	GetCurrentUser(context.Context) (*User, error)
+
+	CreateGroupMapping(ctx context.Context, request *GroupMapping) (*GroupMapping, error)
+	UpdateGroupMapping(ctx context.Context, request *GroupMapping, id int) (*GroupMapping, error)
+	DeleteGroupMapping(ctx context.Context, id int) error
+	GetGroupMapping(ctx context.Context, id int) (*GroupMapping, error)
 }
 
 func WithExtraHeaders(client SysdigCommonClient, extraHeaders map[string]string) SysdigCommonClient {
