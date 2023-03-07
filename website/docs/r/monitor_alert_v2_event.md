@@ -8,8 +8,8 @@ description: |-
 
 # Resource: sysdig_monitor_alert_v2_event
 
-Creates a Sysdig Monitor Event Alert. Monitor occurrences of specific events, and alert if the total 
-number of occurrences violates a threshold. Useful for alerting on container, orchestration, and 
+Creates a Sysdig Monitor Event Alert. Monitor occurrences of specific events, and alert if the total
+number of occurrences violates a threshold. Useful for alerting on container, orchestration, and
 service events like restarts and deployments.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
@@ -69,13 +69,14 @@ These arguments are common to all alerts in Sysdig Monitor.
 
 ### `notification_channels`
 
-By defining this field, the user can choose to which notification channels send the events when the alert fires. 
+By defining this field, the user can choose to which notification channels send the events when the alert fires.
 
 It is a list of objects with the following fields:
 * `id` - (Required) The ID of the notification channel.
-* `renotify_every_minutes`: (Optional) the amount of minutes to wait before re sending the notification to this channel. `0` means no renotifiacation enabled. Default: `0`.
-* `main_threshold`: (Optional) Whether this notification channel is used for the main threshold of the alert. Default: `true`.
-* `warning_threshold`: (Optional) Whether this notification channel is used for the warning threshold of the alert. Default: `false`.
+* `renotify_every_minutes` - (Optional) the amount of minutes to wait before re sending the notification to this channel. `0` means no renotifiacation enabled. Default: `0`.
+* `notify_on_resolve` - (Optional) Wether to send a notification when the alert is resolved. Default: `true`.
+* `main_threshold` - (Optional) Whether this notification channel is used for the main threshold of the alert. Default: `true`.
+* `warning_threshold` - (Optional) Whether this notification channel is used for the warning threshold of the alert. Default: `false`.
 
 ### `custom_notification`
 
