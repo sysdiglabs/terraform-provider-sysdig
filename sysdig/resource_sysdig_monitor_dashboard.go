@@ -183,6 +183,39 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 										Required:         true,
 										ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"percent", "data", "data rate", "number", "number rate", "time"}, false)),
 									},
+									"format": {
+										Type:     schema.TypeSet,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"decimals": {
+													Type:     schema.TypeInt,
+													Optional: true,
+												},
+												"display_format": {
+													Type:     schema.TypeString,
+													Required: true,
+												},
+												"input_format": {
+													Type:     schema.TypeString,
+													Required: true,
+												},
+												"min_interval": {
+													Type:     schema.TypeString,
+													Optional: true,
+												},
+												"null_value_display_mode": {
+													Type:     schema.TypeString,
+													Optional: true,
+												},
+												"y_axis": {
+													Type:     schema.TypeString,
+													Required: true,
+												},
+											},
+										},
+									},
 									"display_info": {
 										Type:     schema.TypeSet,
 										Optional: true,
@@ -583,6 +616,48 @@ func textPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panels,
 	return panel, nil
 }
 
+func formatFromResourceData(queryInfo map[string]interface{}) *model.Format {
+	formatData, ok := queryInfo["format"]
+	if !ok {
+		return nil
+	}
+
+	formatSet := formatData.(*schema.Set).List()
+
+	if len(formatSet) == 0 {
+		return nil
+	}
+
+	fields := formatSet[0].(map[string]interface{})
+	format := &model.Format{}
+
+	if inputFormat, ok := fields["input_format"].(string); ok {
+		format.InputFormat = &inputFormat
+	}
+
+	if displayFormat, ok := fields["display_format"].(string); ok {
+		format.DisplayFormat = &displayFormat
+	}
+
+	if decimals, ok := fields["decimals"].(int); ok {
+		format.Decimals = &decimals
+	}
+
+	if yAxis, ok := fields["y_axis"].(string); ok {
+		format.YAxis = &yAxis
+	}
+
+	if nullValue, ok := fields["null_value_display_mode"].(string); ok {
+		format.NullValueDisplayMode = &nullValue
+	}
+
+	if minInterval, ok := fields["min_interval"].(string); ok {
+		format.MinInterval = &minInterval
+	}
+
+	return format
+}
+
 func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Panels) (newQueries []*model.AdvancedQueries, err error) {
 	var display model.DisplayInfo
 
@@ -603,19 +678,21 @@ func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Pane
 
 		promqlQuery := model.NewPromqlQuery(queryInfo["promql"].(string), panel, display)
 
+		format := formatFromResourceData(queryInfo)
+
 		switch queryInfo["unit"].(string) {
 		case "percent":
-			promqlQuery.WithPercentFormat()
+			promqlQuery.WithPercentFormat(format)
 		case "data":
-			promqlQuery.WithDataFormat()
+			promqlQuery.WithDataFormat(format)
 		case "data rate":
-			promqlQuery.WithDataRateFormat()
+			promqlQuery.WithDataRateFormat(format)
 		case "number":
-			promqlQuery.WithNumberFormat()
+			promqlQuery.WithNumberFormat(format)
 		case "number rate":
-			promqlQuery.WithNumberRateFormat()
+			promqlQuery.WithNumberRateFormat(format)
 		case "time":
-			promqlQuery.WithTimeFormat()
+			promqlQuery.WithTimeFormat(format)
 		default:
 			return nil, fmt.Errorf("unsupported query format unit: %s", queryInfo["unit"])
 		}
@@ -837,22 +914,29 @@ func queriesToResourceData(advancedQueries []*model.AdvancedQueries) ([]map[stri
 			return nil, fmt.Errorf("unsupported query format unit: %s", query.Format.Unit)
 		}
 
-		if query.DisplayInfo.DisplayName == "" && query.DisplayInfo.TimeSeriesDisplayNameTemplate == "" {
-			queries = append(queries, map[string]interface{}{
-				"unit":   unit,
-				"promql": query.Query,
-			})
-		} else {
-			queries = append(queries, map[string]interface{}{
-				"unit":   unit,
-				"promql": query.Query,
-				"display_info": []map[string]interface{}{{
-					"display_name":                      query.DisplayInfo.DisplayName,
-					"time_series_display_name_template": query.DisplayInfo.TimeSeriesDisplayNameTemplate,
-					"type":                              query.DisplayInfo.Type,
-				}},
-			})
+		q := map[string]interface{}{
+			"unit":   unit,
+			"promql": query.Query,
 		}
+
+		if query.DisplayInfo.DisplayName != "" || query.DisplayInfo.TimeSeriesDisplayNameTemplate != "" {
+			q["display_info"] = []map[string]interface{}{{
+				"display_name":                      query.DisplayInfo.DisplayName,
+				"time_series_display_name_template": query.DisplayInfo.TimeSeriesDisplayNameTemplate,
+				"type":                              query.DisplayInfo.Type,
+			}}
+		}
+
+		q["format"] = []map[string]interface{}{{
+			"decimals":                query.Format.Decimals,
+			"display_format":          query.Format.DisplayFormat,
+			"input_format":            query.Format.InputFormat,
+			"min_interval":            query.Format.MinInterval,
+			"null_value_display_mode": query.Format.NullValueDisplayMode,
+			"y_axis":                  query.Format.YAxis,
+		}}
+
+		queries = append(queries, q)
 	}
 	return queries, nil
 }

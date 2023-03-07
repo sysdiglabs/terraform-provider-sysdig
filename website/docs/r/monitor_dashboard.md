@@ -50,6 +50,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
     query {
       promql = "avg_over_time(sysdig_host_cpu_used_percent{host_name=$hostname}[$__interval])"
       unit   = "percent"
+      format {
+        decimals                = 0
+        display_format          = "auto"
+        input_format            = "0-100"
+        null_value_display_mode = "nullGap"
+        y_axis                  = "auto"
+      }
     }
 
     query {
@@ -59,6 +66,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
         display_name                      = "ct_name"
         time_series_display_name_template = "{{container_name}}"
         type                              = "lines"
+      }
+      format {
+        decimals                = 0
+        display_format          = "auto"
+        input_format            = "1"
+        null_value_display_mode = "nullGap"
+        y_axis                  = "auto"
       }
     }
   }
@@ -75,6 +89,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
     query {
       promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
       unit   = "time"
+      format {
+        decimals                = 0
+        display_format          = "auto"
+        input_format            = "ns"
+        null_value_display_mode = "nullGap"
+        y_axis                  = "auto"
+      }
     }
   }
 
@@ -207,7 +228,15 @@ The following arguments are supported:
 
   * `type` - (Required) Configure the visualization type in the timechart, can be `lines`, `stackedArea`, `stackedBar`
 
-
+* `format` - (Optional) Configure query formatting. It's optional due to backward compatibility. If no format block is provided, default one will be used.
+  
+  Nested scheme for `format`:
+  * `input_format` - (Required) Input data format, must match the selected input unit. 'auto' is not allowed except for dashboard libraries. For example: `MiB`
+  * `display_format` - (Required) Overrides display data format, must match the selected input unit. 'auto' is allowed and default. For example: `KiB`
+  * `y_axis` - (Required) Selects which YAxis to be used for displaying over a timechart.
+  * `decimals` - (Optional) Max number of decimals to be displayed for each datapoint.
+  * `null_value_display_mode` - (Optional) Defines the timechart behavior for missing data points. For example: `nullGap` 
+  * `min_interval` - (Optional) Minimum interval to be used as a replacement of the $__interval variable in PromQL queries. For example: `60s`
 ### share
 
 A dashboard can be shared by creating one or more `share` blocks.

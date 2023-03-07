@@ -2,6 +2,7 @@ package sysdig_test
 
 import (
 	"fmt"
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor/model"
 	"os"
 	"testing"
 
@@ -120,6 +121,210 @@ func TestAccDashboard(t *testing.T) {
 					),
 				),
 			},
+			{
+				Config: dashboardWithQueryFormat(rText(), *model.NewFormat(
+					"number",
+					"K",
+					"K",
+					1,
+					"left",
+					"10s",
+					"nullGap",
+				)),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.unit", string(model.FormatUnitNumber),
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.input_format", "K",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.display_format", "K",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.decimals", "1",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.y_axis", "left",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.min_interval", "10s",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.null_value_display_mode", "nullGap",
+					),
+				),
+			},
+			{
+				Config: dashboardWithQueryFormat(rText(), *model.NewFormat(
+					"percent",
+					"0-100",
+					"0-100",
+					0,
+					"right",
+					"20s",
+					"connectSolid",
+				)),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.unit", "percent",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.input_format", "0-100",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.display_format", "0-100",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.decimals", "0",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.y_axis", "right",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.min_interval", "20s",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.null_value_display_mode", "connectSolid",
+					),
+				),
+			},
+			{
+				Config: dashboardWithQueryFormat(rText(), *model.NewFormat(
+					"data",
+					"B",
+					"B",
+					2,
+					"left",
+					"1d",
+					"nullZero",
+				)),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.unit", "data",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.input_format", "B",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.display_format", "B",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.decimals", "2",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.y_axis", "left",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.min_interval", "1d",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.null_value_display_mode", "nullZero",
+					),
+				),
+			},
+			{
+				Config: dashboardWithQueryFormat(rText(), *model.NewFormat(
+					"data rate",
+					"B/s",
+					"B/s",
+					2,
+					"left",
+					"1d",
+					"nullGap",
+				)),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.unit", "data rate",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.input_format", "B/s",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.display_format", "B/s",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.decimals", "2",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.y_axis", "left",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.min_interval", "1d",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.null_value_display_mode", "nullGap",
+					),
+				),
+			},
+			{
+				Config: dashboardWithQueryFormat(rText(), *model.NewFormat(
+					"number rate",
+					"/s",
+					"/s",
+					1,
+					"right",
+					"10m",
+					"connectDotted",
+				)),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.unit", "number rate",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.input_format", "/s",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.display_format", "/s",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.decimals", "1",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.y_axis", "right",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.min_interval", "10m",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.null_value_display_mode", "connectDotted",
+					),
+				),
+			},
+			{
+				Config: dashboardWithQueryFormat(rText(), *model.NewFormat(
+					"time",
+					"ns",
+					"ms",
+					1,
+					"right",
+					"10m",
+					"connectDotted",
+				)),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.unit", "time",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.input_format", "ns",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.display_format", "ms",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.decimals", "1",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.y_axis", "right",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.min_interval", "10m",
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.null_value_display_mode", "connectDotted",
+					),
+				),
+			},
 		},
 	})
 }
@@ -148,6 +353,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
+
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
 		}
 	}
 }
@@ -172,6 +384,13 @@ resource "sysdig_monitor_dashboard" "dashboard_2" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
+            
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
 		}
 	}
 }
@@ -220,10 +439,24 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
+
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
 		}
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent{ns_name=$k8s_ns}[$__interval]))"
 			unit = "number"
+
+            format {
+                display_format = "auto"
+                input_format = "1"
+                y_axis = "auto"
+				null_value_display_mode = "nullGap"
+            }
 		}
 	}
 
@@ -239,6 +472,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "time"
+
+            format {
+                display_format = "auto"
+                input_format = "ns"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
 		}
 	}
 
@@ -282,10 +522,24 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
+
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
 		}
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "number"
+
+            format {
+                display_format = "auto"
+                input_format = "1"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
 		}
 	}
 
@@ -301,6 +555,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "time"
+            
+            format {
+                display_format = "auto"
+                input_format = "ns"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
 		}
 	}
 
@@ -346,6 +607,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
+
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
 		}
 	}
 	share {
@@ -406,6 +674,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 				time_series_display_name_template = "{{host_hostname}}"
 				type                              = "lines"
 			}
+
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
 		}
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent{ns_name=$k8s_ns}[$__interval]))"
@@ -414,6 +689,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 				time_series_display_name_template = "{{host_hostname}}"
 				type                              = "stackedArea"
 			}
+
+            format {
+                display_format = "auto"
+                input_format = "1"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
 		}
 	}
 
@@ -429,6 +711,13 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "time"
+            
+            format {
+                display_format = "auto"
+                input_format = "ns"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
 		}
 	}
 
@@ -496,16 +785,62 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 				time_series_display_name_template = "{{host_hostname}}"
 				type                              = "lines"
 			}
-		}
-		query {
-			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent{ns_name=$k8s_ns}[$__interval]))"
-			unit = "number"
-			display_info {
-				time_series_display_name_template = "{{host_hostname}}"
-				type                              = "stackedArea"
-			}
+            
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
 		}
 	}
 }
 `, name, enabled, showCurrent, position, layout)
+}
+
+func dashboardWithQueryFormat(name string, format model.Format) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_dashboard" "dashboard" {
+	name = "TERRAFORM TEST - METRIC %[1]s"
+
+	panel {
+		pos_x = 0
+		pos_y = 0
+		width = 12 # Maximum size: 24
+		height = 6
+		type = "timechart"
+		name = "example panel"
+		description = "description"
+
+        legend {
+            show_current = true
+            position = "bottom"
+            layout = "inline"
+        }
+
+		query {
+			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+			unit = "%[2]s"
+            
+            format {
+                display_format = "%[3]s"
+                input_format = "%[4]s"
+                y_axis = "%[5]s"
+                null_value_display_mode = "%[6]s"
+                decimals = %[7]d
+                min_interval = "%[8]s"
+            }
+		}
+	}
+}
+`,
+		name,
+		format.Unit,
+		*format.DisplayFormat,
+		*format.InputFormat,
+		*format.YAxis,
+		*format.NullValueDisplayMode,
+		*format.Decimals,
+		*format.MinInterval,
+	)
 }
