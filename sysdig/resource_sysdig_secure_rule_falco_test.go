@@ -51,13 +51,13 @@ func TestAccRuleFalco(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: ruleFalcoKubeAudit(rText()),
-			},
-			{
 				Config: ruleFalcoGcpAuditlog(rText()),
 			},
 			{
 				Config: ruleFalcoAzureAuditlog(rText()),
+			},
+			{
+				Config: ruleFalcoKubeAudit(rText()),
 			},
 			{
 				ResourceName:      "sysdig_secure_rule_falco.kube_audit",
@@ -168,7 +168,7 @@ resource "sysdig_secure_rule_falco" "gcp_audit" {
   description = "TERRAFORM TEST %[1]s"
   tags = ["gcp"]
 
-  condition = "gcp.serviceName"
+  condition = "gcp.serviceName=\"compute.googleapis.com\" and gcp.methodName endswith \".compute.instances.setMetadata\""
   output = "GCP Audit Event received (%%gcp.serviceName, %%gcp.methodName)"
   priority = "debug"
   source = "gcp_auditlog"
@@ -182,7 +182,7 @@ resource "sysdig_secure_rule_falco" "azure_audit" {
   description = "TERRAFORM TEST %[1]s"
   tags = ["azure"]
 
-  condition = "jevt.value[/operationName] = "DeleteBlob""
+  condition = "jevt.value[/operationName] = \"DeleteBlob\""
   output = "Azure Audit Event received (%%jevt.value[/operationName])"
   priority = "debug"
   source = "azure_platformlogs"
