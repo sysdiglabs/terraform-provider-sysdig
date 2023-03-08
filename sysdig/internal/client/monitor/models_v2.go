@@ -227,7 +227,7 @@ type NotificationChannelConfigV2 struct {
 type NotificationChannelOptionsV2 struct {
 	// commons
 	NotifyOnAcknowledge        bool                          `json:"notifyOnAcknowledge,omitempty"`
-	NotifyOnResolve            bool                          `json:"notifyOnResolve,omitempty"`
+	NotifyOnResolve            bool                          `json:"notifyOnResolve"`
 	ReNotifyEverySec           *int                          `json:"reNotifyEverySec"` // must send null to remove this opt
 	CustomNotificationTemplate *CustomNotificationTemplateV2 `json:"customNotificationTemplate,omitempty"`
 	Thresholds                 []string                      `json:"thresholds"` //Set of thresholds the notification channel will be used for. Possible values [MAIN, WARNING]

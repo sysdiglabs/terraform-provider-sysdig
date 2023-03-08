@@ -73,12 +73,18 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 					"type": {
 						Type:       schema.TypeString,
 						Optional:   true, //for retro compatibility, content will be discarded, remove this is the next major release
+						Default:    "",
 						Deprecated: "no need to define \"type\" attribute anymore, please remove it",
 					},
 					"renotify_every_minutes": {
 						Type:     schema.TypeInt,
 						Optional: true,
 						Default:  0,
+					},
+					"notify_on_resolve": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						Default:  true,
 					},
 					"main_threshold": {
 						Type:     schema.TypeBool,
@@ -222,6 +228,8 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *monitor.AlertV2Common {
 				}
 			}
 
+			newChannel.OverrideOptions.NotifyOnResolve = channelMap["notify_on_resolve"].(bool)
+
 			newChannel.OverrideOptions.Thresholds = []string{}
 			main_threshold := channelMap["main_threshold"].(bool)
 			if main_threshold {
@@ -299,7 +307,8 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Comm
 	var notificationChannels []interface{}
 	for _, ncc := range alert.NotificationChannelConfigList {
 		config := map[string]interface{}{
-			"id": ncc.ChannelID,
+			"id":                ncc.ChannelID,
+			"notify_on_resolve": ncc.OverrideOptions.NotifyOnResolve,
 		}
 
 		if ncc.OverrideOptions.ReNotifyEverySec != nil {

@@ -139,7 +139,7 @@ func alertV2MetricWithNotificationChannels(name string) string {
 resource "sysdig_monitor_alert_v2_metric" "sample" {
 
 	name = "TERRAFORM TEST - METRICV2 %s"
-	metric = "sysdig_container_cpu_used_percent" 
+	metric = "sysdig_container_cpu_used_percent"
 	group_aggregation = "avg"
 	time_aggregation = "avg"
 	operator = ">="
@@ -148,6 +148,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	enabled = false
 	notification_channels {
 		id = 47160
+		notify_on_resolve = false
 	}
 	notification_channels {
 		id = 47163
@@ -203,8 +204,8 @@ func alertV2MetricWithGroupBy(name string) string {
 		threshold = 50
 		trigger_after_minutes = 15
 		group_by = ["kube_cluster_name", "kube_pod_name", "cloud_provider_tag_Owner",]
-	
-	}	
+
+	}
 	`, name)
 }
 
@@ -292,7 +293,7 @@ func alertV2MetricWithEnabled(name string) string {
 resource "sysdig_monitor_alert_v2_metric" "sample" {
 
 	name = "TERRAFORM TEST - METRICV2 %s"
-	metric = "sysdig_container_cpu_used_percent" 
+	metric = "sysdig_container_cpu_used_percent"
 	group_aggregation = "avg"
 	time_aggregation = "avg"
 	operator = ">="
@@ -309,7 +310,7 @@ func alertV2MetricWithWarningThreshold(name string) string {
 resource "sysdig_monitor_alert_v2_metric" "sample" {
 
 	name = "TERRAFORM TEST - METRICV2 %s"
-	metric = "sysdig_container_cpu_used_percent" 
+	metric = "sysdig_container_cpu_used_percent"
 	group_aggregation = "avg"
 	time_aggregation = "avg"
 	operator = ">="
