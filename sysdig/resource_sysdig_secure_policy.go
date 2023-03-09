@@ -248,6 +248,7 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 }
 
 func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	const policyNotFound = "failed to find a policy with that ID"
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
 		return diag.FromErr(err)
@@ -258,7 +259,9 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		return diag.FromErr(err)
+		if !strings.Contains(err.Error(), policyNotFound) {
+			return diag.FromErr(err)
+		}
 	}
 
 	policyToResourceData(&policy, d)
