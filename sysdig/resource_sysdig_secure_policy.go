@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -248,18 +249,17 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 }
 
 func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	const policyNotFound = "failed to find a policy with that ID"
 	client, err := meta.(SysdigClients).sysdigSecureClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	policy, err := client.GetPolicyById(ctx, id)
+	policy, err, statusCode := client.GetPolicyById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
-		if !strings.Contains(err.Error(), policyNotFound) {
+		if statusCode == http.StatusNotFound {
 			return diag.FromErr(err)
 		}
 	}
