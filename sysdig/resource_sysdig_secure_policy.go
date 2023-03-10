@@ -255,7 +255,7 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	policy, err, statusCode := client.GetPolicyById(ctx, id)
+	policy, statusCode, err := client.GetPolicyById(ctx, id)
 
 	if err != nil {
 		d.SetId("")

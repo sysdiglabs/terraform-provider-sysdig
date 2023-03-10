@@ -67,7 +67,7 @@ func (client *sysdigSecureClient) UpdatePolicy(ctx context.Context, policyReques
 	return PolicyFromJSON(body), nil
 }
 
-func (client *sysdigSecureClient) GetPolicyById(ctx context.Context, policyID int) (policy Policy, err error, statusCode int) {
+func (client *sysdigSecureClient) GetPolicyById(ctx context.Context, policyID int) (policy Policy, statusCode int, err error) {
 	response, err := client.doSysdigSecureRequest(ctx, http.MethodGet, client.policyURL(policyID), nil)
 	if err != nil {
 		return
@@ -75,12 +75,12 @@ func (client *sysdigSecureClient) GetPolicyById(ctx context.Context, policyID in
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return Policy{}, errorFromResponse(response), response.StatusCode
+		return Policy{}, response.StatusCode, errorFromResponse(response)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
-	return PolicyFromJSON(body), nil, http.StatusOK
+	return PolicyFromJSON(body), http.StatusOK, nil
 }
