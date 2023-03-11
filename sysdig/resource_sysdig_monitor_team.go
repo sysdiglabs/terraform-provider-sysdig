@@ -249,6 +249,7 @@ func teamFromResourceData(d *schema.ResourceData) common.Team {
 	}
 	t.UserRoles = userRoles
 
+	t.EntryPoint = &common.EntryPoint{}
 	t.EntryPoint.Module = d.Get("entrypoint.0.type").(string)
 	if val, ok := d.GetOk("entrypoint.0.selection"); ok {
 		t.EntryPoint.Selection = val.(string)
