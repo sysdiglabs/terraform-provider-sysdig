@@ -15,10 +15,10 @@ type Team struct {
 	Products            []string    `json:"products,omitempty"`
 	Show                string      `json:"show,omitempty"`
 	Immutable           bool        `json:"immutable,omitempty"`
-	CanUseSysdigCapture bool        `json:"canUseSysdigCapture,omitempty"`
-	CanUseCustomEvents  bool        `json:"canUseCustomEvents,omitempty"`
-	CanUseAwsMetrics    bool        `json:"canUseAwsMetrics,omitempty"`
-	CanUseBeaconMetrics bool        `json:"canUseBeaconMetrics,omitempty"`
+	CanUseSysdigCapture bool        `json:"canUseSysdigCapture"`
+	CanUseCustomEvents  bool        `json:"canUseCustomEvents"`
+	CanUseAwsMetrics    bool        `json:"canUseAwsMetrics"`
+	CanUseBeaconMetrics bool        `json:"canUseBeaconMetrics"`
 	UserCount           int         `json:"userCount,omitempty"`
 	Filter              string      `json:"filter,omitempty"`
 	DefaultTeam         bool        `json:"default,omitempty"`
