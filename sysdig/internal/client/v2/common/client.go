@@ -97,6 +97,7 @@ func (client *Client) DoSysdigRequest(ctx context.Context, method string, url st
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(string(out))
 
 	log.Printf("[DEBUG] %s", string(out))
 	response, err := client.httpClient.Do(request)
@@ -109,7 +110,7 @@ func (client *Client) DoSysdigRequest(ctx context.Context, method string, url st
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println(string(out))
 	log.Printf("[DEBUG] %s", string(out))
 	return response, err
 }

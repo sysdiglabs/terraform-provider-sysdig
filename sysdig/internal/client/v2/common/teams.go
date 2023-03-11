@@ -95,7 +95,7 @@ func (client *Client) CreateTeam(ctx context.Context, team Team) (Team, error) {
 	}
 
 	origin := "SYSDIG"
-	team.Origin = &origin
+	team.Origin = origin
 	payload, err := Marshal(team)
 	if err != nil {
 		return Team{}, err
@@ -137,7 +137,7 @@ func (client *Client) UpdateTeam(ctx context.Context, team Team) (Team, error) {
 		return Team{}, err
 	}
 
-	response, err := client.DoSysdigRequest(ctx, http.MethodPut, client.GetTeamURL(*team.ID), payload)
+	response, err := client.DoSysdigRequest(ctx, http.MethodPut, client.GetTeamURL(team.ID), payload)
 	if err != nil {
 		return Team{}, err
 	}
