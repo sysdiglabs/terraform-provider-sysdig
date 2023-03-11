@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
+	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/common"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorTeam() *schema.Resource {
@@ -119,12 +118,13 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 }
 
 func resourceSysdigMonitorTeamCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := meta.(SysdigClients).sysdigMonitorClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	team := teamFromResourceData(d)
+	team.Products = []string{"SDC"}
 
 	team, err = client.CreateTeam(ctx, team)
 	if err != nil {
@@ -139,7 +139,7 @@ func resourceSysdigMonitorTeamCreate(ctx context.Context, d *schema.ResourceData
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := meta.(SysdigClients).sysdigMonitorClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -163,12 +163,12 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 	_ = d.Set("can_use_aws_data", t.CanUseAwsMetrics)
 	_ = d.Set("default_team", t.DefaultTeam)
 	_ = d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
-	_ = d.Set("entrypoint", entrypointToSet(t.EntryPoint))
+	_ = d.Set("entrypoint", entrypointToSet(*t.EntryPoint))
 
 	return nil
 }
 
-func userMonitorRolesToSet(userRoles []monitor.UserRoles) (res []map[string]interface{}) {
+func userMonitorRolesToSet(userRoles []common.UserRoles) (res []map[string]interface{}) {
 	for _, role := range userRoles {
 		if role.Admin { // Admins are added by default, so skip them
 			continue
@@ -183,7 +183,7 @@ func userMonitorRolesToSet(userRoles []monitor.UserRoles) (res []map[string]inte
 	return
 }
 
-func entrypointToSet(entrypoint monitor.EntryPoint) (res []map[string]interface{}) {
+func entrypointToSet(entrypoint common.EntryPoint) (res []map[string]interface{}) {
 	entrypointMap := map[string]interface{}{
 		"type":      entrypoint.Module,
 		"selection": entrypoint.Selection,
@@ -192,12 +192,13 @@ func entrypointToSet(entrypoint monitor.EntryPoint) (res []map[string]interface{
 }
 
 func resourceSysdigMonitorTeamUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := meta.(SysdigClients).sysdigMonitorClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	t := teamFromResourceData(d)
+	t.Products = []string{"SDC"}
 
 	t.Version = d.Get("version").(int)
 	t.ID, _ = strconv.Atoi(d.Id())
@@ -225,8 +226,8 @@ func resourceSysdigMonitorTeamDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func teamFromResourceData(d *schema.ResourceData) monitor.Team {
-	t := monitor.Team{
+func teamFromResourceData(d *schema.ResourceData) common.Team {
+	t := common.Team{
 		Theme:               d.Get("theme").(string),
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
@@ -238,10 +239,10 @@ func teamFromResourceData(d *schema.ResourceData) monitor.Team {
 		DefaultTeam:         d.Get("default_team").(bool),
 	}
 
-	userRoles := []monitor.UserRoles{}
+	userRoles := make([]common.UserRoles, 0)
 	for _, userRole := range d.Get("user_roles").(*schema.Set).List() {
 		ur := userRole.(map[string]interface{})
-		userRoles = append(userRoles, monitor.UserRoles{
+		userRoles = append(userRoles, common.UserRoles{
 			Email: ur["email"].(string),
 			Role:  ur["role"].(string),
 		})
