@@ -42,11 +42,6 @@ type SysdigMonitorClient interface {
 
 	GetLabelDescriptor(ctx context.Context, label string) (LabelDescriptorV3, error)
 
-	CreateTeam(context.Context, Team) (Team, error)
-	GetTeamById(context.Context, int) (Team, error)
-	UpdateTeam(context.Context, Team) (Team, error)
-	DeleteTeam(context.Context, int) error
-
 	CreateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
 	GetNotificationChannelById(context.Context, int) (NotificationChannel, error)
 	GetNotificationChannelByName(context.Context, string) (NotificationChannel, error)
