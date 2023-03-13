@@ -188,13 +188,14 @@ func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData,
 }
 
 func secureTeamFromResourceData(d *schema.ResourceData) common.Team {
+	canUseSysdigCapture := d.Get("use_sysdig_capture").(bool)
 	t := common.Team{
 		Theme:               d.Get("theme").(string),
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
 		Show:                d.Get("scope_by").(string),
 		Filter:              d.Get("filter").(string),
-		CanUseSysdigCapture: d.Get("use_sysdig_capture").(bool),
+		CanUseSysdigCapture: &canUseSysdigCapture,
 		DefaultTeam:         d.Get("default_team").(bool),
 	}
 

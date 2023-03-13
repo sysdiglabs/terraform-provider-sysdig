@@ -227,15 +227,19 @@ func resourceSysdigMonitorTeamDelete(ctx context.Context, d *schema.ResourceData
 }
 
 func teamFromResourceData(d *schema.ResourceData) common.Team {
+	canUseSysdigCapture := d.Get("can_use_sysdig_capture").(bool)
+	canUseCustomEvents := d.Get("can_see_infrastructure_events").(bool)
+	canUseAwsMetrics := d.Get("can_use_aws_data").(bool)
+
 	t := common.Team{
 		Theme:               d.Get("theme").(string),
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
 		Show:                d.Get("scope_by").(string),
 		Filter:              d.Get("filter").(string),
-		CanUseSysdigCapture: d.Get("can_use_sysdig_capture").(bool),
-		CanUseCustomEvents:  d.Get("can_see_infrastructure_events").(bool),
-		CanUseAwsMetrics:    d.Get("can_use_aws_data").(bool),
+		CanUseSysdigCapture: &canUseSysdigCapture,
+		CanUseCustomEvents:  &canUseCustomEvents,
+		CanUseAwsMetrics:    &canUseAwsMetrics,
 		DefaultTeam:         d.Get("default_team").(bool),
 	}
 

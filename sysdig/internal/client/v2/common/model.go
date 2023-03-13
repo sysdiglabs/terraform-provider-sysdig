@@ -2,23 +2,23 @@ package common
 
 type Team struct {
 	UserRoles           []UserRoles `json:"userRoles,omitempty"`
-	Description         string      `json:"description,omitempty"`
-	Name                string      `json:"name,omitempty"`
+	Description         string      `json:"description"`
+	Name                string      `json:"name"`
 	ID                  int         `json:"id,omitempty"`
 	Version             int         `json:"version,omitempty"`
 	Origin              string      `json:"origin,omitempty"`
 	LastUpdated         int64       `json:"lastUpdated,omitempty"`
 	EntryPoint          *EntryPoint `json:"entryPoint,omitempty"`
-	Theme               string      `json:"theme,omitempty"`
+	Theme               string      `json:"theme"`
 	CustomerID          int         `json:"customerId,omitempty"`
 	DateCreated         int64       `json:"dateCreated,omitempty"`
 	Products            []string    `json:"products,omitempty"`
 	Show                string      `json:"show,omitempty"`
 	Immutable           bool        `json:"immutable,omitempty"`
-	CanUseSysdigCapture bool        `json:"canUseSysdigCapture"`
-	CanUseCustomEvents  bool        `json:"canUseCustomEvents"`
-	CanUseAwsMetrics    bool        `json:"canUseAwsMetrics"`
-	CanUseBeaconMetrics bool        `json:"canUseBeaconMetrics"`
+	CanUseSysdigCapture *bool       `json:"canUseSysdigCapture,omitempty"`
+	CanUseCustomEvents  *bool       `json:"canUseCustomEvents,omitempty"`
+	CanUseAwsMetrics    *bool       `json:"canUseAwsMetrics,omitempty"`
+	CanUseBeaconMetrics *bool       `json:"canUseBeaconMetrics,omitempty"`
 	UserCount           int         `json:"userCount,omitempty"`
 	Filter              string      `json:"filter,omitempty"`
 	DefaultTeam         bool        `json:"default,omitempty"`
