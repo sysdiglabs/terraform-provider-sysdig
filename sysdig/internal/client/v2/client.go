@@ -103,6 +103,12 @@ func newClient(opts ...ClientOption) *Client {
 }
 
 func (client *Client) request(request *http.Request) (*http.Response, error) {
+	if client.config.extraHeaders != nil {
+		for key, value := range client.config.extraHeaders {
+			request.Header.Set(key, value)
+		}
+	}
+
 	out, err := httputil.DumpRequestOut(request, true)
 	if err != nil {
 		return nil, err
@@ -133,11 +139,6 @@ func (client *Client) doSysdigRequest(ctx context.Context, method string, url st
 	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", client.config.token))
 	request.Header.Set("Content-Type", "application/json")
 
-	if client.config.extraHeaders != nil {
-		for key, value := range client.config.extraHeaders {
-			request.Header.Set(key, value)
-		}
-	}
 	return client.request(request)
 }
 

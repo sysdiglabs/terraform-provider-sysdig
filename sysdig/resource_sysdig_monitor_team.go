@@ -212,7 +212,7 @@ func resourceSysdigMonitorTeamUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceSysdigMonitorTeamDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := meta.(SysdigClients).sysdigMonitorClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
