@@ -163,7 +163,7 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 	_ = d.Set("can_use_aws_data", t.CanUseAwsMetrics)
 	_ = d.Set("default_team", t.DefaultTeam)
 	_ = d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
-	_ = d.Set("entrypoint", entrypointToSet(*t.EntryPoint))
+	_ = d.Set("entrypoint", entrypointToSet(t.EntryPoint))
 
 	return nil
 }
@@ -183,7 +183,11 @@ func userMonitorRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface
 	return
 }
 
-func entrypointToSet(entrypoint v2.EntryPoint) (res []map[string]interface{}) {
+func entrypointToSet(entrypoint *v2.EntryPoint) (res []map[string]interface{}) {
+	if entrypoint == nil {
+		return
+	}
+
 	entrypointMap := map[string]interface{}{
 		"type":      entrypoint.Module,
 		"selection": entrypoint.Selection,
