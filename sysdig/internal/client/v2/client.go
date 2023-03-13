@@ -38,12 +38,10 @@ type Client struct {
 }
 
 type config struct {
-	url              string
-	token            string
-	insecure         bool
-	headers          map[string]string
-	extraHeaders     map[string]string
-	useSysdigRequest bool
+	url          string
+	token        string
+	insecure     bool
+	extraHeaders map[string]string
 }
 
 type ClientOption func(c *config)
