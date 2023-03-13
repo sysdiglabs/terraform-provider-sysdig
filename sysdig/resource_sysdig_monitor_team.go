@@ -230,7 +230,7 @@ func teamFromResourceData(d *schema.ResourceData) v2.Team {
 	canUseSysdigCapture := d.Get("can_use_sysdig_capture").(bool)
 	canUseCustomEvents := d.Get("can_see_infrastructure_events").(bool)
 	canUseAwsMetrics := d.Get("can_use_aws_data").(bool)
-
+	canUseBeaconMetrics := false
 	t := v2.Team{
 		Theme:               d.Get("theme").(string),
 		Name:                d.Get("name").(string),
@@ -240,6 +240,7 @@ func teamFromResourceData(d *schema.ResourceData) v2.Team {
 		CanUseSysdigCapture: &canUseSysdigCapture,
 		CanUseCustomEvents:  &canUseCustomEvents,
 		CanUseAwsMetrics:    &canUseAwsMetrics,
+		CanUseBeaconMetrics: &canUseBeaconMetrics,
 		DefaultTeam:         d.Get("default_team").(bool),
 	}
 
