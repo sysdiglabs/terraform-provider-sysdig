@@ -2,7 +2,7 @@ package sysdig
 
 import (
 	"context"
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/common"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
@@ -138,7 +138,7 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func userSecureRolesToSet(userRoles []common.UserRoles) (res []map[string]interface{}) {
+func userSecureRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface{}) {
 	for _, role := range userRoles {
 		if role.Admin {
 			continue // Admins are added by default, so skip them
@@ -187,9 +187,9 @@ func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func secureTeamFromResourceData(d *schema.ResourceData) common.Team {
+func secureTeamFromResourceData(d *schema.ResourceData) v2.Team {
 	canUseSysdigCapture := d.Get("use_sysdig_capture").(bool)
-	t := common.Team{
+	t := v2.Team{
 		Theme:               d.Get("theme").(string),
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
@@ -199,10 +199,10 @@ func secureTeamFromResourceData(d *schema.ResourceData) common.Team {
 		DefaultTeam:         d.Get("default_team").(bool),
 	}
 
-	userRoles := []common.UserRoles{}
+	userRoles := make([]v2.UserRoles, 0)
 	for _, userRole := range d.Get("user_roles").(*schema.Set).List() {
 		ur := userRole.(map[string]interface{})
-		userRoles = append(userRoles, common.UserRoles{
+		userRoles = append(userRoles, v2.UserRoles{
 			Email: ur["email"].(string),
 			Role:  ur["role"].(string),
 		})

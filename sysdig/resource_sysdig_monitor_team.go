@@ -2,7 +2,7 @@ package sysdig
 
 import (
 	"context"
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/common"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
@@ -168,7 +168,7 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func userMonitorRolesToSet(userRoles []common.UserRoles) (res []map[string]interface{}) {
+func userMonitorRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface{}) {
 	for _, role := range userRoles {
 		if role.Admin { // Admins are added by default, so skip them
 			continue
@@ -183,7 +183,7 @@ func userMonitorRolesToSet(userRoles []common.UserRoles) (res []map[string]inter
 	return
 }
 
-func entrypointToSet(entrypoint common.EntryPoint) (res []map[string]interface{}) {
+func entrypointToSet(entrypoint v2.EntryPoint) (res []map[string]interface{}) {
 	entrypointMap := map[string]interface{}{
 		"type":      entrypoint.Module,
 		"selection": entrypoint.Selection,
@@ -226,12 +226,12 @@ func resourceSysdigMonitorTeamDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func teamFromResourceData(d *schema.ResourceData) common.Team {
+func teamFromResourceData(d *schema.ResourceData) v2.Team {
 	canUseSysdigCapture := d.Get("can_use_sysdig_capture").(bool)
 	canUseCustomEvents := d.Get("can_see_infrastructure_events").(bool)
 	canUseAwsMetrics := d.Get("can_use_aws_data").(bool)
 
-	t := common.Team{
+	t := v2.Team{
 		Theme:               d.Get("theme").(string),
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
@@ -243,17 +243,17 @@ func teamFromResourceData(d *schema.ResourceData) common.Team {
 		DefaultTeam:         d.Get("default_team").(bool),
 	}
 
-	userRoles := make([]common.UserRoles, 0)
+	userRoles := make([]v2.UserRoles, 0)
 	for _, userRole := range d.Get("user_roles").(*schema.Set).List() {
 		ur := userRole.(map[string]interface{})
-		userRoles = append(userRoles, common.UserRoles{
+		userRoles = append(userRoles, v2.UserRoles{
 			Email: ur["email"].(string),
 			Role:  ur["role"].(string),
 		})
 	}
 	t.UserRoles = userRoles
 
-	t.EntryPoint = &common.EntryPoint{}
+	t.EntryPoint = &v2.EntryPoint{}
 	t.EntryPoint.Module = d.Get("entrypoint.0.type").(string)
 	if val, ok := d.GetOk("entrypoint.0.selection"); ok {
 		t.EntryPoint.Selection = val.(string)

@@ -1,4 +1,4 @@
-package common
+package v2
 
 import (
 	"bytes"
@@ -21,17 +21,29 @@ type Common interface {
 	TeamInterface
 }
 
+type Monitor interface {
+	Common
+}
+
+type Secure interface {
+	Common
+}
+
+type RequestFunc func(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error)
+
 type Client struct {
 	config     *config
 	httpClient *http.Client
+	DoRequest  RequestFunc
 }
 
 type config struct {
-	url          string
-	token        string
-	insecure     bool
-	headers      map[string]string
-	extraHeaders map[string]string
+	url              string
+	token            string
+	insecure         bool
+	headers          map[string]string
+	extraHeaders     map[string]string
+	useSysdigRequest bool
 }
 
 type ClientOption func(c *config)
@@ -60,7 +72,15 @@ func WithExtraHeaders(headers map[string]string) ClientOption {
 	}
 }
 
-func NewClient(opts ...ClientOption) *Client {
+func NewMonitor(opts ...ClientOption) Monitor {
+	return newClient(opts...)
+}
+
+func NewSecure(opts ...ClientOption) Secure {
+	return newClient(opts...)
+}
+
+func newClient(opts ...ClientOption) *Client {
 	cfg := &config{}
 	for _, opt := range opts {
 		opt(cfg)
@@ -71,28 +91,18 @@ func NewClient(opts ...ClientOption) *Client {
 	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: cfg.insecure}
 	httpClient.HTTPClient = &http.Client{Transport: transport}
 
-	return &Client{
+	c := &Client{
 		config:     cfg,
 		httpClient: httpClient.StandardClient(),
 	}
+
+	// default to sysdig request
+	c.DoRequest = c.doSysdigRequest
+
+	return c
 }
 
-func (client *Client) DoSysdigRequest(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {
-	request, err := http.NewRequest(method, url, payload)
-	if err != nil {
-		return nil, err
-	}
-
-	request = request.WithContext(ctx)
-	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", client.config.token))
-	request.Header.Set("Content-Type", "application/json")
-
-	if client.config.extraHeaders != nil {
-		for key, value := range client.config.extraHeaders {
-			request.Header.Set(key, value)
-		}
-	}
-
+func (client *Client) request(request *http.Request) (*http.Response, error) {
 	out, err := httputil.DumpRequestOut(request, true)
 	if err != nil {
 		return nil, err
@@ -111,6 +121,24 @@ func (client *Client) DoSysdigRequest(ctx context.Context, method string, url st
 	}
 	log.Printf("[DEBUG] %s", string(out))
 	return response, err
+}
+
+func (client *Client) doSysdigRequest(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {
+	request, err := http.NewRequest(method, url, payload)
+	if err != nil {
+		return nil, err
+	}
+
+	request = request.WithContext(ctx)
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", client.config.token))
+	request.Header.Set("Content-Type", "application/json")
+
+	if client.config.extraHeaders != nil {
+		for key, value := range client.config.extraHeaders {
+			request.Header.Set(key, value)
+		}
+	}
+	return client.request(request)
 }
 
 func (client *Client) ErrorFromResponse(response *http.Response) error {

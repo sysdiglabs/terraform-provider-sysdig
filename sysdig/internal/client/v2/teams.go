@@ -1,4 +1,4 @@
-package common
+package v2
 
 import (
 	"context"
@@ -22,7 +22,7 @@ type TeamInterface interface {
 }
 
 func (client *Client) GetUserIDByEmail(ctx context.Context, userRoles []UserRoles) ([]UserRoles, error) {
-	response, err := client.DoSysdigRequest(ctx, http.MethodGet, client.GetUsersLightURL(), nil)
+	response, err := client.DoRequest(ctx, http.MethodGet, client.GetUsersLightURL(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (client *Client) GetUserIDByEmail(ctx context.Context, userRoles []UserRole
 }
 
 func (client *Client) GetTeamById(ctx context.Context, id int) (Team, error) {
-	response, err := client.DoSysdigRequest(ctx, http.MethodGet, client.GetTeamURL(id), nil)
+	response, err := client.DoRequest(ctx, http.MethodGet, client.GetTeamURL(id), nil)
 	if err != nil {
 		return Team{}, err
 	}
@@ -101,7 +101,7 @@ func (client *Client) CreateTeam(ctx context.Context, team Team) (Team, error) {
 		return Team{}, err
 	}
 
-	response, err := client.DoSysdigRequest(ctx, http.MethodPost, client.GetTeamsURL(), payload)
+	response, err := client.DoRequest(ctx, http.MethodPost, client.GetTeamsURL(), payload)
 	if err != nil {
 		return Team{}, err
 	}
@@ -137,7 +137,7 @@ func (client *Client) UpdateTeam(ctx context.Context, team Team) (Team, error) {
 		return Team{}, err
 	}
 
-	response, err := client.DoSysdigRequest(ctx, http.MethodPut, client.GetTeamURL(team.ID), payload)
+	response, err := client.DoRequest(ctx, http.MethodPut, client.GetTeamURL(team.ID), payload)
 	if err != nil {
 		return Team{}, err
 	}
@@ -161,7 +161,7 @@ func (client *Client) UpdateTeam(ctx context.Context, team Team) (Team, error) {
 }
 
 func (client *Client) DeleteTeam(ctx context.Context, id int) error {
-	response, err := client.DoSysdigRequest(ctx, http.MethodDelete, client.GetTeamURL(id), nil)
+	response, err := client.DoRequest(ctx, http.MethodDelete, client.GetTeamURL(id), nil)
 	if err != nil {
 		return err
 	}
