@@ -3,7 +3,6 @@ package monitor
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -100,7 +99,6 @@ func (client *sysdigMonitorClient) doSysdigMonitorRequest(ctx context.Context, m
 	}
 
 	out, _ := httputil.DumpRequestOut(request, true)
-	fmt.Println(string(out))
 	log.Printf("[DEBUG] %s", string(out))
 
 	response, err := client.httpClient.Do(request)
