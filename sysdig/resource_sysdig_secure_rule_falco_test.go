@@ -51,6 +51,12 @@ func TestAccRuleFalco(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
+				Config: ruleFalcoGcpAuditlog(rText()),
+			},
+			{
+				Config: ruleFalcoAzureAuditlog(rText()),
+			},
+			{
 				Config: ruleFalcoKubeAudit(rText()),
 			},
 			{
@@ -153,6 +159,34 @@ resource "sysdig_secure_rule_falco" "kube_audit" {
   priority = "debug"
   source = "k8s_audit" // syscall or k8s_audit
 }`, name, name)
+}
+
+func ruleFalcoGcpAuditlog(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "gcp_audit" {
+  name = "TERRAFORM TEST %[1]s - GCP Audit"
+  description = "TERRAFORM TEST %[1]s"
+  tags = ["gcp"]
+
+  condition = "gcp.serviceName=\"compute.googleapis.com\" and gcp.methodName endswith \".compute.instances.setMetadata\""
+  output = "GCP Audit Event received (%%gcp.serviceName, %%gcp.methodName)"
+  priority = "debug"
+  source = "gcp_auditlog"
+}`, name)
+}
+
+func ruleFalcoAzureAuditlog(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "azure_audit" {
+  name = "TERRAFORM TEST %[1]s - Azure Audit"
+  description = "TERRAFORM TEST %[1]s"
+  tags = ["azure"]
+
+  condition = "jevt.value[/operationName] = \"DeleteBlob\""
+  output = "Azure Audit Event received (%%jevt.value[/operationName])"
+  priority = "debug"
+  source = "azure_platformlogs"
+}`, name)
 }
 
 func ruleFalcoTerminalShellWithAppend() string {
