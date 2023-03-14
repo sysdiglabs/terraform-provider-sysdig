@@ -15,7 +15,7 @@ type SysdigSecureClient interface {
 	CreatePolicy(context.Context, Policy) (Policy, error)
 	DeletePolicy(context.Context, int) error
 	UpdatePolicy(context.Context, Policy) (Policy, error)
-	GetPolicyById(context.Context, int) (Policy, error)
+	GetPolicyById(context.Context, int) (Policy, int, error)
 
 	CreateRule(context.Context, Rule) (Rule, error)
 	GetRuleByID(context.Context, int) (Rule, error)
