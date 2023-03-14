@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -254,11 +255,13 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	policy, err := client.GetPolicyById(ctx, id)
+	policy, statusCode, err := client.GetPolicyById(ctx, id)
 
 	if err != nil {
 		d.SetId("")
-		return diag.FromErr(err)
+		if statusCode == http.StatusNotFound {
+			return diag.FromErr(err)
+		}
 	}
 
 	policyToResourceData(&policy, d)
