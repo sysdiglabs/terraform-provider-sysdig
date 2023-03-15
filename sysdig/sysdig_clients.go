@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"errors"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -11,6 +12,11 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
+var (
+	errMonitorTokenMissing = errors.New("sysdig monitor token not provided")
+	errSecureTokenMissing  = errors.New("sysdig secure token not provided")
+)
+
 type SysdigClients interface {
 	GetSecureEndpoint() (string, error)
 	GetSecureApiToken() (string, error)
@@ -18,6 +24,10 @@ type SysdigClients interface {
 	sysdigMonitorClient() (monitor.SysdigMonitorClient, error)
 	sysdigSecureClient() (secure.SysdigSecureClient, error)
 	sysdigCommonClient() (common.SysdigCommonClient, error)
+
+	// v2
+	sysdigMonitorClientV2() (v2.Monitor, error)
+	sysdigSecureClientV2() (v2.Secure, error)
 }
 
 type sysdigClients struct {
@@ -29,6 +39,12 @@ type sysdigClients struct {
 	monitorClient monitor.SysdigMonitorClient
 	secureClient  secure.SysdigSecureClient
 	commonClient  common.SysdigCommonClient
+
+	// v2
+	onceMonitorV2   sync.Once
+	onceSecureV2    sync.Once
+	monitorClientV2 v2.Monitor
+	secureClientV2  v2.Secure
 }
 
 func (c *sysdigClients) GetSecureEndpoint() (string, error) {
@@ -76,6 +92,27 @@ func (c *sysdigClients) sysdigMonitorClient() (m monitor.SysdigMonitorClient, er
 	return c.monitorClient, nil
 }
 
+func (c *sysdigClients) sysdigMonitorClientV2() (v2.Monitor, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	monitorAPIToken := c.d.Get("sysdig_monitor_api_token").(string)
+	if monitorAPIToken == "" {
+		return nil, errMonitorTokenMissing
+	}
+
+	c.onceMonitorV2.Do(func() {
+		c.monitorClientV2 = v2.NewMonitor(
+			v2.WithToken(monitorAPIToken),
+			v2.WithURL(c.d.Get("sysdig_monitor_url").(string)),
+			v2.WithInsecure(c.d.Get("sysdig_monitor_insecure_tls").(bool)),
+			v2.WithExtraHeaders(getExtraHeaders(c.d)),
+		)
+	})
+
+	return c.monitorClientV2, nil
+}
+
 func (c *sysdigClients) sysdigSecureClient() (s secure.SysdigSecureClient, err error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -103,6 +140,27 @@ func (c *sysdigClients) sysdigSecureClient() (s secure.SysdigSecureClient, err e
 	})
 
 	return c.secureClient, nil
+}
+
+func (c *sysdigClients) sysdigSecureClientV2() (v2.Secure, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	secureAPIToken := c.d.Get("sysdig_secure_api_token").(string)
+	if secureAPIToken == "" {
+		return nil, errSecureTokenMissing
+	}
+
+	c.onceSecureV2.Do(func() {
+		c.secureClientV2 = v2.NewSecure(
+			v2.WithToken(secureAPIToken),
+			v2.WithURL(c.d.Get("sysdig_secure_url").(string)),
+			v2.WithInsecure(c.d.Get("sysdig_secure_insecure_tls").(bool)),
+			v2.WithExtraHeaders(getExtraHeaders(c.d)),
+		)
+	})
+
+	return c.secureClientV2, nil
 }
 
 func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err error) {
@@ -143,4 +201,16 @@ func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err 
 	})
 
 	return c.commonClient, nil
+}
+
+func getExtraHeaders(d *schema.ResourceData) map[string]string {
+	if headers, ok := d.GetOk("extra_headers"); ok {
+		extraHeaders := headers.(map[string]interface{})
+		extraHeadersTransformed := map[string]string{}
+		for key := range extraHeaders {
+			extraHeadersTransformed[key] = extraHeaders[key].(string)
+		}
+		return extraHeadersTransformed
+	}
+	return nil
 }

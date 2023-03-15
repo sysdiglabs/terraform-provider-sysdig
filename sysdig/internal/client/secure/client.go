@@ -28,11 +28,6 @@ type SysdigSecureClient interface {
 	DeleteNotificationChannel(context.Context, int) error
 	UpdateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
 
-	CreateTeam(context.Context, Team) (Team, error)
-	GetTeamById(context.Context, int) (Team, error)
-	DeleteTeam(context.Context, int) error
-	UpdateTeam(context.Context, Team) (Team, error)
-
 	CreateList(context.Context, List) (List, error)
 	GetListById(context.Context, int) (List, error)
 	DeleteList(context.Context, int) error

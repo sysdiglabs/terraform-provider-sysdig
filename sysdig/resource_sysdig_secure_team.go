@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureTeam() *schema.Resource {
@@ -92,12 +91,13 @@ func resourceSysdigSecureTeam() *schema.Resource {
 }
 
 func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := meta.(SysdigClients).sysdigSecureClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	team := secureTeamFromResourceData(d)
+	team.Products = []string{"SDS"}
 
 	team, err = client.CreateTeam(ctx, team)
 	if err != nil {
@@ -112,7 +112,7 @@ func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData,
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := meta.(SysdigClients).sysdigSecureClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -129,7 +129,7 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 	_ = d.Set("theme", t.Theme)
 	_ = d.Set("name", t.Name)
 	_ = d.Set("description", t.Description)
-	_ = d.Set("scope_by", t.ScopeBy)
+	_ = d.Set("scope_by", t.Show)
 	_ = d.Set("filter", t.Filter)
 	_ = d.Set("use_sysdig_capture", t.CanUseSysdigCapture)
 	_ = d.Set("default_team", t.DefaultTeam)
@@ -138,7 +138,7 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func userSecureRolesToSet(userRoles []secure.UserRoles) (res []map[string]interface{}) {
+func userSecureRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface{}) {
 	for _, role := range userRoles {
 		if role.Admin {
 			continue // Admins are added by default, so skip them
@@ -153,12 +153,13 @@ func userSecureRolesToSet(userRoles []secure.UserRoles) (res []map[string]interf
 }
 
 func resourceSysdigSecureTeamUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := meta.(SysdigClients).sysdigSecureClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	t := secureTeamFromResourceData(d)
+	t.Products = []string{"SDS"}
 
 	t.Version = d.Get("version").(int)
 	t.ID, _ = strconv.Atoi(d.Id())
@@ -172,7 +173,7 @@ func resourceSysdigSecureTeamUpdate(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := meta.(SysdigClients).sysdigSecureClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -186,21 +187,22 @@ func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func secureTeamFromResourceData(d *schema.ResourceData) secure.Team {
-	t := secure.Team{
+func secureTeamFromResourceData(d *schema.ResourceData) v2.Team {
+	canUseSysdigCapture := d.Get("use_sysdig_capture").(bool)
+	t := v2.Team{
 		Theme:               d.Get("theme").(string),
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
-		ScopeBy:             d.Get("scope_by").(string),
+		Show:                d.Get("scope_by").(string),
 		Filter:              d.Get("filter").(string),
-		CanUseSysdigCapture: d.Get("use_sysdig_capture").(bool),
+		CanUseSysdigCapture: &canUseSysdigCapture,
 		DefaultTeam:         d.Get("default_team").(bool),
 	}
 
-	userRoles := []secure.UserRoles{}
+	userRoles := make([]v2.UserRoles, 0)
 	for _, userRole := range d.Get("user_roles").(*schema.Set).List() {
 		ur := userRole.(map[string]interface{})
-		userRoles = append(userRoles, secure.UserRoles{
+		userRoles = append(userRoles, v2.UserRoles{
 			Email: ur["email"].(string),
 			Role:  ur["role"].(string),
 		})
