@@ -18,14 +18,6 @@ const (
 	IBMAPIKeyGrantType    = "urn:ibm:params:oauth:grant-type:apikey"
 )
 
-type IBMMonitor interface {
-	Monitor
-}
-
-type IBMSecure interface {
-	Secure
-}
-
 type IBMAccessToken string
 type UnixTimestamp int64
 
@@ -107,10 +99,10 @@ func newIBMClient(opts ...ClientOption) *Client {
 	}
 }
 
-func NewIBMMonitor(opts ...ClientOption) IBMMonitor {
+func NewIBMMonitor(opts ...ClientOption) Monitor {
 	return newIBMClient(opts...)
 }
 
-func NewIBMSecure(opts ...ClientOption) IBMSecure {
+func NewIBMSecure(opts ...ClientOption) Secure {
 	return newIBMClient(opts...)
 }
