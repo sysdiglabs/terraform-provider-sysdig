@@ -84,6 +84,7 @@ func (ir *IBMRequest) Request(ctx context.Context, method string, url string, pa
 	}
 	r.Header.Set(IBMInstanceIDHeader, ir.config.ibmInstanceID)
 	r.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", token))
+	r.Header.Set(ContentTypeHeader, ContentTypeJSON)
 
 	return request(ir.httpClient, ir.config, r)
 }

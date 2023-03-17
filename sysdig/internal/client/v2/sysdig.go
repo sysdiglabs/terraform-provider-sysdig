@@ -25,11 +25,11 @@ func (sr *SysdigRequest) Request(ctx context.Context, method string, url string,
 	return request(sr.httpClient, sr.config, r)
 }
 
-func NewMonitor(opts ...ClientOption) Monitor {
+func NewSysdigMonitor(opts ...ClientOption) Monitor {
 	return newSysdigClient(opts...)
 }
 
-func NewSecure(opts ...ClientOption) Secure {
+func NewSysdigSecure(opts ...ClientOption) Secure {
 	return newSysdigClient(opts...)
 }
 
