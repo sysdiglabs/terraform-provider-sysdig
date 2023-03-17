@@ -17,9 +17,11 @@ import (
 )
 
 const (
-	AuthorizationHeader = "Authorization"
-	ContentTypeHeader   = "Content-Type"
-	ContentTypeJSON     = "application/json"
+	SysdigTeamIDHeader        = "SysdigTeamID"
+	AuthorizationHeader       = "Authorization"
+	ContentTypeHeader         = "Content-Type"
+	ContentTypeJSON           = "application/json"
+	ContentTypeFormURLEncoded = "x-www-form-urlencoded"
 )
 
 type Common interface {

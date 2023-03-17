@@ -1,10 +1,14 @@
 package v2
 
 type config struct {
-	url          string
-	token        string
-	insecure     bool
-	extraHeaders map[string]string
+	url           string
+	token         string
+	insecure      bool
+	extraHeaders  map[string]string
+	teamID        string
+	ibmInstanceID string
+	ibmAPIKey     string
+	ibmIamURL     string
 }
 
 type ClientOption func(c *config)
@@ -30,6 +34,30 @@ func WithInsecure(insecure bool) ClientOption {
 func WithExtraHeaders(headers map[string]string) ClientOption {
 	return func(c *config) {
 		c.extraHeaders = headers
+	}
+}
+
+func WithTeamID(teamID string) ClientOption {
+	return func(c *config) {
+		c.teamID = teamID
+	}
+}
+
+func WithIBMInstanceID(instanceID string) ClientOption {
+	return func(c *config) {
+		c.ibmInstanceID = instanceID
+	}
+}
+
+func WithIBMAPIKey(key string) ClientOption {
+	return func(c *config) {
+		c.ibmAPIKey = key
+	}
+}
+
+func WithIBMIamURL(url string) ClientOption {
+	return func(c *config) {
+		c.ibmIamURL = url
 	}
 }
 
