@@ -12,17 +12,17 @@ type SysdigRequest struct {
 	httpClient *http.Client
 }
 
-func (client *SysdigRequest) Request(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {
+func (sr *SysdigRequest) Request(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {
 	r, err := http.NewRequest(method, url, payload)
 	if err != nil {
 		return nil, err
 	}
 
 	r = r.WithContext(ctx)
-	r.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", client.config.token))
+	r.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", sr.config.token))
 	r.Header.Set(ContentTypeHeader, ContentTypeJSON)
 
-	return request(client.httpClient, client.config, r)
+	return request(sr.httpClient, sr.config, r)
 }
 
 func NewMonitor(opts ...ClientOption) Monitor {
