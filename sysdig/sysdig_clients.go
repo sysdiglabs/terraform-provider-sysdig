@@ -12,11 +12,6 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
-var (
-	errMonitorTokenMissing = errors.New("sysdig monitor token not provided")
-	errSecureTokenMissing  = errors.New("sysdig secure token not provided")
-)
-
 type SysdigClients interface {
 	GetSecureEndpoint() (string, error)
 	GetSecureApiToken() (string, error)
