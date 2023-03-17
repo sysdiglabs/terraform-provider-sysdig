@@ -1,7 +1,9 @@
 package v2
 
 import (
+	"encoding/json"
 	"io"
+	"net/http"
 	"strings"
 	"testing"
 )
@@ -47,5 +49,43 @@ func TestUnmarshal(t *testing.T) {
 
 	if expected != unmarshalled {
 		t.Errorf("expected %v, got %v", expected, unmarshalled)
+	}
+}
+
+func TestClient_ErrorFromResponse(t *testing.T) {
+	type Error struct {
+		Reason  string `json:"reason"`
+		Message string `json:"message"`
+	}
+
+	type Errors struct {
+		Errors []Error `json:"errors"`
+	}
+
+	given := Errors{
+		Errors: []Error{
+			{
+				Reason:  "error1",
+				Message: "message1",
+			},
+			{
+				Reason:  "error2",
+				Message: "message2",
+			},
+		},
+	}
+	expected := "error1, message1, error2, message2"
+	c := Client{}
+	payload, err := json.Marshal(given)
+	if err != nil {
+		t.Errorf("failed to marshal errors, %v", err)
+	}
+
+	resp := &http.Response{
+		Body: io.NopCloser(strings.NewReader(string(payload))),
+	}
+	err = c.ErrorFromResponse(resp)
+	if err.Error() != expected {
+		t.Errorf("expected err %v, got %v", expected, err)
 	}
 }
