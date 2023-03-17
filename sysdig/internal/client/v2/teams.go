@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -22,7 +21,7 @@ type TeamInterface interface {
 }
 
 func (client *Client) GetUserIDByEmail(ctx context.Context, userRoles []UserRoles) ([]UserRoles, error) {
-	response, err := client.DoRequest(ctx, http.MethodGet, client.GetUsersLightURL(), nil)
+	response, err := client.requester.Request(ctx, http.MethodGet, client.GetUsersLightURL(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -33,12 +32,7 @@ func (client *Client) GetUserIDByEmail(ctx context.Context, userRoles []UserRole
 		return nil, err
 	}
 
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	wrapper, err := Unmarshal[usersListWrapper](body)
+	wrapper, err := Unmarshal[usersListWrapper](response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +57,7 @@ func (client *Client) GetUserIDByEmail(ctx context.Context, userRoles []UserRole
 }
 
 func (client *Client) GetTeamById(ctx context.Context, id int) (Team, error) {
-	response, err := client.DoRequest(ctx, http.MethodGet, client.GetTeamURL(id), nil)
+	response, err := client.requester.Request(ctx, http.MethodGet, client.GetTeamURL(id), nil)
 	if err != nil {
 		return Team{}, err
 	}
@@ -73,12 +67,7 @@ func (client *Client) GetTeamById(ctx context.Context, id int) (Team, error) {
 		return Team{}, client.ErrorFromResponse(response)
 	}
 
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return Team{}, err
-	}
-
-	wrapper, err := Unmarshal[teamWrapper](body)
+	wrapper, err := Unmarshal[teamWrapper](response.Body)
 	if err != nil {
 		return Team{}, client.ErrorFromResponse(response)
 	}
@@ -101,7 +90,7 @@ func (client *Client) CreateTeam(ctx context.Context, team Team) (Team, error) {
 		return Team{}, err
 	}
 
-	response, err := client.DoRequest(ctx, http.MethodPost, client.GetTeamsURL(), payload)
+	response, err := client.requester.Request(ctx, http.MethodPost, client.GetTeamsURL(), payload)
 	if err != nil {
 		return Team{}, err
 	}
@@ -111,12 +100,7 @@ func (client *Client) CreateTeam(ctx context.Context, team Team) (Team, error) {
 		return Team{}, client.ErrorFromResponse(response)
 	}
 
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return Team{}, err
-	}
-
-	wrapper, err := Unmarshal[teamWrapper](body)
+	wrapper, err := Unmarshal[teamWrapper](response.Body)
 	if err != nil {
 		return Team{}, err
 	}
@@ -137,7 +121,7 @@ func (client *Client) UpdateTeam(ctx context.Context, team Team) (Team, error) {
 		return Team{}, err
 	}
 
-	response, err := client.DoRequest(ctx, http.MethodPut, client.GetTeamURL(team.ID), payload)
+	response, err := client.requester.Request(ctx, http.MethodPut, client.GetTeamURL(team.ID), payload)
 	if err != nil {
 		return Team{}, err
 	}
@@ -147,12 +131,7 @@ func (client *Client) UpdateTeam(ctx context.Context, team Team) (Team, error) {
 		return Team{}, client.ErrorFromResponse(response)
 	}
 
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return Team{}, err
-	}
-
-	wrapper, err := Unmarshal[teamWrapper](body)
+	wrapper, err := Unmarshal[teamWrapper](response.Body)
 	if err != nil {
 		return Team{}, err
 	}
@@ -161,7 +140,7 @@ func (client *Client) UpdateTeam(ctx context.Context, team Team) (Team, error) {
 }
 
 func (client *Client) DeleteTeam(ctx context.Context, id int) error {
-	response, err := client.DoRequest(ctx, http.MethodDelete, client.GetTeamURL(id), nil)
+	response, err := client.requester.Request(ctx, http.MethodDelete, client.GetTeamURL(id), nil)
 	if err != nil {
 		return err
 	}
