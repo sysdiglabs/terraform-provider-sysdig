@@ -28,14 +28,6 @@ type Common interface {
 	TeamInterface
 }
 
-type Monitor interface {
-	Common
-}
-
-type Secure interface {
-	Common
-}
-
 type Requester interface {
 	Request(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error)
 }

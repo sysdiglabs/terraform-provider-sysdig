@@ -21,8 +21,10 @@ type SysdigClients interface {
 	sysdigCommonClient() (common.SysdigCommonClient, error)
 
 	// v2
-	sysdigMonitorClientV2() (v2.Monitor, error)
-	sysdigSecureClientV2() (v2.Secure, error)
+	sysdigMonitorClientV2() (v2.SysdigMonitor, error)
+	sysdigSecureClientV2() (v2.SysdigSecure, error)
+	ibmMonitorClient() (v2.IBMMonitor, error)
+	ibmSecureClient() (v2.IBMSecure, error)
 }
 
 type sysdigClients struct {
@@ -36,53 +38,10 @@ type sysdigClients struct {
 	commonClient  common.SysdigCommonClient
 
 	// v2
-	monitorClientV2 v2.Monitor
-	secureClientV2  v2.Secure
-}
-
-func (c *sysdigClients) GetSecureEndpoint() (string, error) {
-	endpoint := c.d.Get("sysdig_secure_url").(string)
-	if endpoint == "" {
-		return "", errors.New("GetSecureEndpoint, sysdig_secure_url not provided")
-	}
-	return endpoint, nil
-}
-
-func (c *sysdigClients) GetSecureApiToken() (string, error) {
-	secureAPIToken := c.d.Get("sysdig_secure_api_token").(string)
-	if secureAPIToken == "" {
-		return "", errors.New("GetSecureApiToken, sysdig secure token not provided")
-	}
-	return secureAPIToken, nil
-}
-
-func (c *sysdigClients) sysdigMonitorClient() (m monitor.SysdigMonitorClient, err error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	monitorAPIToken := c.d.Get("sysdig_monitor_api_token").(string)
-	if monitorAPIToken == "" {
-		err = errors.New("sysdig monitor token not provided")
-		return
-	}
-
-	c.onceMonitor.Do(func() {
-		c.monitorClient = monitor.NewSysdigMonitorClient(
-			monitorAPIToken,
-			c.d.Get("sysdig_monitor_url").(string),
-			c.d.Get("sysdig_monitor_insecure_tls").(bool),
-		)
-
-		if headers, ok := c.d.GetOk("extra_headers"); ok {
-			extraHeaders := headers.(map[string]interface{})
-			extraHeadersTransformed := map[string]string{}
-			for key := range extraHeaders {
-				extraHeadersTransformed[key] = extraHeaders[key].(string)
-			}
-			c.monitorClient = monitor.WithExtraHeaders(c.monitorClient, extraHeadersTransformed)
-		}
-	})
-
-	return c.monitorClient, nil
+	monitorClientV2  v2.SysdigMonitor
+	secureClientV2   v2.SysdigSecure
+	monitorIBMClient v2.IBMMonitor
+	secureIBMClient  v2.IBMMonitor
 }
 
 type globalVariables struct {
@@ -214,81 +173,72 @@ func getIBMSecureVariables(data *schema.ResourceData) (*ibmVariables, error) {
 	}, nil
 }
 
-func newSysdigMonitor(data *schema.ResourceData) (v2.Monitor, error) {
-	vars, err := getSysdigMonitorVariables(data)
-	if err != nil {
-		return nil, err
+func (c *sysdigClients) GetSecureEndpoint() (string, error) {
+	endpoint := c.d.Get("sysdig_secure_url").(string)
+	if endpoint == "" {
+		return "", errors.New("GetSecureEndpoint, sysdig_secure_url not provided")
 	}
-	return v2.NewSysdigMonitor(
-		v2.WithToken(vars.token),
-		v2.WithURL(vars.apiURL),
-		v2.WithInsecure(vars.insecure),
-		v2.WithExtraHeaders(vars.extraHeaders),
-	), nil
+	return endpoint, nil
 }
 
-func newSysdigSecure(data *schema.ResourceData) (v2.Secure, error) {
-	vars, err := getSysdigSecureVariables(data)
-	if err != nil {
-		return nil, err
+func (c *sysdigClients) GetSecureApiToken() (string, error) {
+	secureAPIToken := c.d.Get("sysdig_secure_api_token").(string)
+	if secureAPIToken == "" {
+		return "", errors.New("GetSecureApiToken, sysdig secure token not provided")
 	}
-	return v2.NewSysdigSecure(
-		v2.WithToken(vars.token),
-		v2.WithURL(vars.apiURL),
-		v2.WithInsecure(vars.insecure),
-		v2.WithExtraHeaders(vars.extraHeaders),
-	), nil
+	return secureAPIToken, nil
 }
 
-func newIBMMonitor(data *schema.ResourceData) (v2.Monitor, error) {
-	vars, err := getIBMMonitorVariables(data)
-	if err != nil {
-		return nil, err
-	}
-
-	return v2.NewIBMMonitor(
-		v2.WithURL(vars.apiURL),
-		v2.WithIBMIamURL(vars.iamURL),
-		v2.WithIBMInstanceID(vars.instanceID),
-		v2.WithIBMAPIKey(vars.apiKey),
-		v2.WithInsecure(vars.insecure),
-	), nil
-}
-
-func newIBMSecure(data *schema.ResourceData) (v2.Secure, error) {
-	vars, err := getIBMSecureVariables(data)
-	if err != nil {
-		return nil, err
-	}
-
-	return v2.NewIBMSecure(
-		v2.WithURL(vars.apiURL),
-		v2.WithIBMIamURL(vars.iamURL),
-		v2.WithIBMInstanceID(vars.instanceID),
-		v2.WithIBMAPIKey(vars.apiKey),
-		v2.WithInsecure(vars.insecure),
-	), nil
-}
-
-func (c *sysdigClients) sysdigMonitorClientV2() (v2.Monitor, error) {
+func (c *sysdigClients) sysdigMonitorClient() (m monitor.SysdigMonitorClient, err error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	var err error
+	monitorAPIToken := c.d.Get("sysdig_monitor_api_token").(string)
+	if monitorAPIToken == "" {
+		err = errors.New("sysdig monitor token not provided")
+		return
+	}
 
-	// return if already initialized
+	c.onceMonitor.Do(func() {
+		c.monitorClient = monitor.NewSysdigMonitorClient(
+			monitorAPIToken,
+			c.d.Get("sysdig_monitor_url").(string),
+			c.d.Get("sysdig_monitor_insecure_tls").(bool),
+		)
+
+		if headers, ok := c.d.GetOk("extra_headers"); ok {
+			extraHeaders := headers.(map[string]interface{})
+			extraHeadersTransformed := map[string]string{}
+			for key := range extraHeaders {
+				extraHeadersTransformed[key] = extraHeaders[key].(string)
+			}
+			c.monitorClient = monitor.WithExtraHeaders(c.monitorClient, extraHeadersTransformed)
+		}
+	})
+
+	return c.monitorClient, nil
+}
+
+func (c *sysdigClients) sysdigMonitorClientV2() (v2.SysdigMonitor, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	if c.monitorClientV2 != nil {
 		return c.monitorClientV2, nil
 	}
 
-	// try to initialize IBM client
-	c.monitorClientV2, err = newIBMMonitor(c.d)
-	if err == nil {
-		return c.monitorClientV2, nil
+	vars, err := getSysdigMonitorVariables(c.d)
+	if err != nil {
+		return nil, err
 	}
 
-	// initialize sysdig client
-	c.monitorClientV2, err = newSysdigMonitor(c.d)
-	return c.monitorClientV2, err
+	c.monitorClientV2 = v2.NewSysdigMonitor(
+		v2.WithToken(vars.token),
+		v2.WithURL(vars.apiURL),
+		v2.WithInsecure(vars.insecure),
+		v2.WithExtraHeaders(vars.extraHeaders),
+	)
+
+	return c.monitorClientV2, nil
 }
 
 func (c *sysdigClients) sysdigSecureClient() (s secure.SysdigSecureClient, err error) {
@@ -320,25 +270,75 @@ func (c *sysdigClients) sysdigSecureClient() (s secure.SysdigSecureClient, err e
 	return c.secureClient, nil
 }
 
-func (c *sysdigClients) sysdigSecureClientV2() (v2.Secure, error) {
+func (c *sysdigClients) sysdigSecureClientV2() (v2.SysdigSecure, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	var err error
 
-	// return if already initialized
 	if c.secureClientV2 != nil {
 		return c.secureClientV2, nil
 	}
 
-	// try to initialize IBM client
-	c.secureClientV2, err = newIBMSecure(c.d)
-	if err == nil {
-		return c.secureClientV2, nil
+	vars, err := getSysdigSecureVariables(c.d)
+	if err != nil {
+		return nil, err
 	}
 
-	// initialize sysdig client
-	c.secureClientV2, err = newSysdigSecure(c.d)
-	return c.secureClientV2, err
+	c.secureClientV2 = v2.NewSysdigSecure(
+		v2.WithToken(vars.token),
+		v2.WithURL(vars.apiURL),
+		v2.WithInsecure(vars.insecure),
+		v2.WithExtraHeaders(vars.extraHeaders),
+	)
+
+	return c.secureClientV2, nil
+}
+
+func (c *sysdigClients) ibmMonitorClient() (v2.IBMMonitor, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if c.monitorIBMClient != nil {
+		return c.monitorIBMClient, nil
+	}
+
+	vars, err := getIBMMonitorVariables(c.d)
+	if err != nil {
+		return nil, err
+	}
+
+	c.monitorIBMClient = v2.NewIBMMonitor(
+		v2.WithURL(vars.apiURL),
+		v2.WithIBMIamURL(vars.iamURL),
+		v2.WithIBMInstanceID(vars.instanceID),
+		v2.WithIBMAPIKey(vars.apiKey),
+		v2.WithInsecure(vars.insecure),
+	)
+
+	return c.monitorIBMClient, nil
+}
+
+func (c *sysdigClients) ibmSecureClient() (v2.IBMSecure, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if c.secureIBMClient != nil {
+		return c.secureIBMClient, nil
+	}
+
+	vars, err := getIBMSecureVariables(c.d)
+	if err != nil {
+		return nil, err
+	}
+
+	c.secureIBMClient = v2.NewIBMSecure(
+		v2.WithURL(vars.apiURL),
+		v2.WithIBMIamURL(vars.iamURL),
+		v2.WithIBMInstanceID(vars.instanceID),
+		v2.WithIBMAPIKey(vars.apiKey),
+		v2.WithInsecure(vars.insecure),
+	)
+
+	return c.secureIBMClient, nil
 }
 
 func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err error) {

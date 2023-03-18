@@ -12,6 +12,18 @@ type SysdigRequest struct {
 	httpClient *http.Client
 }
 
+type SysdigCommon interface {
+	Common
+}
+
+type SysdigMonitor interface {
+	SysdigCommon
+}
+
+type SysdigSecure interface {
+	SysdigCommon
+}
+
 func (sr *SysdigRequest) Request(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {
 	r, err := http.NewRequest(method, url, payload)
 	if err != nil {
@@ -25,11 +37,11 @@ func (sr *SysdigRequest) Request(ctx context.Context, method string, url string,
 	return request(sr.httpClient, sr.config, r)
 }
 
-func NewSysdigMonitor(opts ...ClientOption) Monitor {
+func NewSysdigMonitor(opts ...ClientOption) SysdigMonitor {
 	return newSysdigClient(opts...)
 }
 
-func NewSysdigSecure(opts ...ClientOption) Secure {
+func NewSysdigSecure(opts ...ClientOption) SysdigSecure {
 	return newSysdigClient(opts...)
 }
 
