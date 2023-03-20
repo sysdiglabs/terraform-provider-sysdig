@@ -1,5 +1,3 @@
-//go:build sysdig
-
 package sysdig
 
 import (

@@ -81,10 +81,6 @@ jobs:
         env:
           SYSDIG_MONITOR_API_TOKEN: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
           SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
-          SYSDIG_IBM_MONITOR_ENDPOINT: ${{ secrets.TERRAFORM_IBM_MONITOR_ENDPOINT  }}
-          SYSDIG_IBM_IAM_ENDPOINT: ${{ secrets.TERRAFORM_IBM_IAM_ENDPOINT  }}
-          SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_INSTANCE_ID  }}
-          SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY  }}
 
   lint:
     name: Lint
