@@ -8,9 +8,7 @@ import (
 )
 
 func Provider() *schema.Provider {
-	undocumentedCodeMsg := `You are using undocumented provider argument which can change in future releases. 
-Argument is under development and can change in the future, please do not use it.
-`
+	undocumentedCodeMsg := "You are using undocumented provider argument which can change in future releases. Please do not use it."
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"sysdig_secure_api_token": {
