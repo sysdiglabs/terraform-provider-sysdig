@@ -125,7 +125,7 @@ type notificationChannelWrapper struct {
 type Rule struct {
 	ID          int      `json:"id,omitempty"`
 	Name        string   `json:"name"`
-	Description string   `json:"description"`
+	Description string   `json:"description,omitempty"`
 	Tags        []string `json:"tags"`
 	Details     Details  `json:"details"`
 	Version     int      `json:"version,omitempty"`
@@ -154,7 +154,7 @@ type Details struct {
 	// Falco
 	Append     *bool        `json:"append,omitempty"`
 	Source     string       `json:"source,omitempty"`
-	Output     string       `json:"output"`
+	Output     string       `json:"output,omitempty"`
 	Condition  *Condition   `json:"condition,omitempty"`
 	Priority   string       `json:"priority,omitempty"`
 	Exceptions []*Exception `json:"exceptions,omitempty"`
