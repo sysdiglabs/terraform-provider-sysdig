@@ -8,6 +8,9 @@ import (
 )
 
 func Provider() *schema.Provider {
+	undocumentedCodeMsg := `You are using undocumented provider argument which can change in future releases. 
+Argument is under development and can change in the future, please do not use it.
+`
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"sysdig_secure_api_token": {
@@ -48,29 +51,41 @@ func Provider() *schema.Provider {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"ibm_monitor_url": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_URL", nil),
+				Deprecated:  undocumentedCodeMsg,
 			},
 			"ibm_monitor_iam_url": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_IAM_URL", nil),
+				Deprecated:  undocumentedCodeMsg,
 			},
 			"ibm_monitor_instance_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_INSTANCE_ID", nil),
+				Deprecated:  undocumentedCodeMsg,
 			},
 			"ibm_monitor_api_key": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_API_KEY", nil),
+				Deprecated:  undocumentedCodeMsg,
 			},
 			"ibm_monitor_insecure_tls": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_INSECURE_TLS", false),
+				Deprecated:  undocumentedCodeMsg,
 			},
 			"ibm_monitor_team_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_TEAM_ID", false),
+				Deprecated:  undocumentedCodeMsg,
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
