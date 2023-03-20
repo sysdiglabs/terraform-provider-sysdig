@@ -75,14 +75,13 @@ func Provider() *schema.Provider {
 			"ibm_monitor_insecure_tls": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
-				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_INSECURE_TLS", false),
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_INSECURE_TLS", nil),
 				Deprecated:  undocumentedCodeMsg,
 			},
 			"ibm_monitor_team_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_TEAM_ID", false),
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_TEAM_ID", nil),
 				Deprecated:  undocumentedCodeMsg,
 			},
 		},
