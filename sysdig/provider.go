@@ -72,31 +72,6 @@ func Provider() *schema.Provider {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"ibm_secure_url": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"ibm_secure_iam_url": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"ibm_secure_instance_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"ibm_secure_api_key": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"ibm_secure_insecure_tls": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"ibm_secure_team_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"sysdig_user":          resourceSysdigUser(),

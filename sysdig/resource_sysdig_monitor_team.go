@@ -117,8 +117,26 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 	}
 }
 
+func getMonitorTeamsClient(c SysdigClients) (v2.TeamInterface, error) {
+	var client v2.TeamInterface
+	var err error
+	switch c.GetClientType() {
+	case IBMMonitor:
+		client, err = c.ibmMonitorClient()
+		if err != nil {
+			return nil, err
+		}
+	default:
+		client, err = c.sysdigMonitorClientV2()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
+}
+
 func resourceSysdigMonitorTeamCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClientV2()
+	client, err := getMonitorTeamsClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -139,7 +157,7 @@ func resourceSysdigMonitorTeamCreate(ctx context.Context, d *schema.ResourceData
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClientV2()
+	client, err := getMonitorTeamsClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -196,7 +214,7 @@ func entrypointToSet(entrypoint *v2.EntryPoint) (res []map[string]interface{}) {
 }
 
 func resourceSysdigMonitorTeamUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClientV2()
+	client, err := getMonitorTeamsClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -216,7 +234,7 @@ func resourceSysdigMonitorTeamUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceSysdigMonitorTeamDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClientV2()
+	client, err := getMonitorTeamsClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -13,6 +13,7 @@ import (
 )
 
 type SysdigClients interface {
+	GetClientType() ClientType
 	GetSecureEndpoint() (string, error)
 	GetSecureApiToken() (string, error)
 
@@ -25,6 +26,31 @@ type SysdigClients interface {
 	sysdigSecureClientV2() (v2.SysdigSecure, error)
 	ibmMonitorClient() (v2.IBMMonitor, error)
 	ibmSecureClient() (v2.IBMSecure, error)
+}
+
+type ClientType int
+
+const (
+	SysdigMonitor ClientType = iota
+	SysdigSecure
+	IBMMonitor
+	IBMSecure
+)
+
+func (c *sysdigClients) GetClientType() ClientType {
+	if _, err := getIBMMonitorVariables(c.d); err == nil {
+		return IBMMonitor
+	}
+
+	if _, err := getIBMSecureVariables(c.d); err == nil {
+		return IBMSecure
+	}
+
+	if _, err := getSysdigMonitorVariables(c.d); err == nil {
+		return SysdigMonitor
+	}
+
+	return SysdigSecure
 }
 
 type sysdigClients struct {
