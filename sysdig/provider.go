@@ -8,6 +8,7 @@ import (
 )
 
 func Provider() *schema.Provider {
+	undocumentedCodeMsg := "You are using undocumented provider argument which can change in future releases. Please do not use it."
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"sysdig_secure_api_token": {
@@ -46,6 +47,78 @@ func Provider() *schema.Provider {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"ibm_monitor_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_URL", nil),
+				Deprecated:  undocumentedCodeMsg,
+			},
+			"ibm_monitor_iam_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_IAM_URL", nil),
+				Deprecated:  undocumentedCodeMsg,
+			},
+			"ibm_monitor_instance_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_INSTANCE_ID", nil),
+				Deprecated:  undocumentedCodeMsg,
+			},
+			"ibm_monitor_api_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_API_KEY", nil),
+				Deprecated:  undocumentedCodeMsg,
+			},
+			"ibm_monitor_insecure_tls": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_INSECURE_TLS", nil),
+				Deprecated:  undocumentedCodeMsg,
+			},
+			"ibm_monitor_team_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_TEAM_ID", nil),
+				Deprecated:  undocumentedCodeMsg,
+			},
+			"ibm_secure_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_SECURE_URL", nil),
+				Deprecated:  undocumentedCodeMsg,
+			},
+			"ibm_secure_iam_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_SECURE_IAM_URL", nil),
+				Deprecated:  undocumentedCodeMsg,
+			},
+			"ibm_secure_instance_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_SECURE_INSTANCE_ID", nil),
+				Deprecated:  undocumentedCodeMsg,
+			},
+			"ibm_secure_api_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_SECURE_API_KEY", nil),
+				Deprecated:  undocumentedCodeMsg,
+			},
+			"ibm_secure_insecure_tls": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_SECURE_INSECURE_TLS", nil),
+				Deprecated:  undocumentedCodeMsg,
+			},
+			"ibm_secure_team_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_SECURE_TEAM_ID", nil),
+				Deprecated:  undocumentedCodeMsg,
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
