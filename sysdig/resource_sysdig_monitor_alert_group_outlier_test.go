@@ -1,3 +1,5 @@
+//go:build sysdig
+
 package sysdig_test
 
 import (
