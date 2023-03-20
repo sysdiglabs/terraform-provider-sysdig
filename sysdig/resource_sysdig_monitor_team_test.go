@@ -1,3 +1,5 @@
+//go:build sysdig || ibm
+
 package sysdig_test
 
 import (

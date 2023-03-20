@@ -35,6 +35,7 @@ test: fmtcheck
 
 testacc: fmtcheck
 	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m -race
+	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=sysdig -timeout 120m -race
 
 vet:
 	@echo "go vet ."
