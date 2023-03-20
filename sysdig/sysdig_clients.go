@@ -37,22 +37,6 @@ const (
 	IBMSecure
 )
 
-func (c *sysdigClients) GetClientType() ClientType {
-	if _, err := getIBMMonitorVariables(c.d); err == nil {
-		return IBMMonitor
-	}
-
-	if _, err := getIBMSecureVariables(c.d); err == nil {
-		return IBMSecure
-	}
-
-	if _, err := getSysdigMonitorVariables(c.d); err == nil {
-		return SysdigMonitor
-	}
-
-	return SysdigSecure
-}
-
 type sysdigClients struct {
 	d             *schema.ResourceData
 	mu            sync.Mutex
@@ -405,6 +389,22 @@ func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err 
 	})
 
 	return c.commonClient, nil
+}
+
+func (c *sysdigClients) GetClientType() ClientType {
+	if _, err := getIBMMonitorVariables(c.d); err == nil {
+		return IBMMonitor
+	}
+
+	if _, err := getIBMSecureVariables(c.d); err == nil {
+		return IBMSecure
+	}
+
+	if _, err := getSysdigMonitorVariables(c.d); err == nil {
+		return SysdigMonitor
+	}
+
+	return SysdigSecure
 }
 
 func getExtraHeaders(d *schema.ResourceData) map[string]string {
