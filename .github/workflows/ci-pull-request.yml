@@ -110,8 +110,8 @@ jobs:
         env:
           SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
           SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_INSTANCE_ID }}
-          TERRAFORM_IBM_MONITOR_ENDPOINT: "https://us-south.monitoring.test.cloud.ibm.com"
-          TERRAFORM_IBM_IAM_ENDPOINT: "https://iam.test.cloud.ibm.com"
+          SYSDIG_IBM_MONITOR_ENDPOINT: "https://us-south.monitoring.test.cloud.ibm.com"
+          SYSDIG_IBM_MONITOR_IAM_ENDPOINT: "https://iam.test.cloud.ibm.com"
 
   lint:
     name: Lint
