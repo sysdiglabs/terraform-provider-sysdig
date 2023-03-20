@@ -53,8 +53,8 @@ jobs:
       - name: Build project
         run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o terraform-provider-sysdig
 
-  test:
-    name: Test
+  test-sysdig:
+    name: Test Sysdig
     runs-on: ubuntu-latest
 
     steps:
@@ -81,6 +81,37 @@ jobs:
         env:
           SYSDIG_MONITOR_API_TOKEN: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
           SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
+
+  test-ibm:
+    name: Test IBM
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+          cache: true
+
+      - name: Get dependencies
+        run: |
+          go install github.com/onsi/ginkgo/v2/ginkgo@latest
+          go mod tidy
+
+      - name: Test
+        run: make test
+
+      - name: Acceptance tests
+        run: make testacc-ibm
+        env:
+          SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
+          SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_INSTANCE_ID }}
+          TERRAFORM_IBM_MONITOR_ENDPOINT: "https://us-south.monitoring.test.cloud.ibm.com"
+          TERRAFORM_IBM_IAM_ENDPOINT: "https://iam.test.cloud.ibm.com"
 
   lint:
     name: Lint

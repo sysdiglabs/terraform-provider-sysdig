@@ -36,6 +36,10 @@ test: fmtcheck
 testacc: fmtcheck
 	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=tf_acc_sysdig -timeout 120m -race
 
+testacc-ibm: fmtcheck
+	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=tf_acc_ibm -timeout 120m -race
+
+
 vet:
 	@echo "go vet ."
 	@go vet $$(go list ./... | grep -v vendor/) ; if [ $$? -eq 1 ]; then \
