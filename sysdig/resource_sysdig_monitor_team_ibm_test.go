@@ -3,6 +3,7 @@
 package sysdig_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
