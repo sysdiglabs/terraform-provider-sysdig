@@ -37,7 +37,7 @@ testacc: fmtcheck
 	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=tf_acc_sysdig -timeout 120m -race
 
 testacc-ibm: fmtcheck
-	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=tf_acc_ibm -timeout 120m -race
+	CGO_ENABLED=1 TF_LOG_PROVIDER=DEBUG TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=tf_acc_ibm -timeout 120m -race
 
 
 vet:
