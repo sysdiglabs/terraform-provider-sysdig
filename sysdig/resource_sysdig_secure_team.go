@@ -92,23 +92,19 @@ func resourceSysdigSecureTeam() *schema.Resource {
 
 func getSecureTeamClient(c SysdigClients) (v2.TeamInterface, error) {
 	var client v2.TeamInterface
-	client, err := c.ibmSecureClient()
-	if err != nil {
-		return nil, err
+	var err error
+	switch c.GetClientType() {
+	case IBMSecure:
+		client, err = c.ibmSecureClient()
+		if err != nil {
+			return nil, err
+		}
+	default:
+		client, err = c.sysdigSecureClientV2()
+		if err != nil {
+			return nil, err
+		}
 	}
-	//var err error
-	//switch c.GetClientType() {
-	//case IBMSecure:
-	//	client, err = c.ibmSecureClient()
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//default:
-	//	client, err = c.sysdigSecureClientV2()
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
 	return client, nil
 }
 
