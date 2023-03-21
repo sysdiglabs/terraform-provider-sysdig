@@ -3,6 +3,7 @@
 package sysdig_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -29,10 +30,10 @@ func TestAccMonitorIBMTeam(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: monitorTeamMinimumConfiguration(rText()),
+				Config: monitorIBMTeamMinimumConfiguration(rText()),
 			},
 			{
-				Config: monitorTeamWithName(rText()),
+				Config: monitorIBMTeamWithName(rText()),
 			},
 			{
 				ResourceName:      "sysdig_monitor_team.sample",
@@ -43,7 +44,7 @@ func TestAccMonitorIBMTeam(t *testing.T) {
 	})
 }
 
-func monitorTeamMinimumConfiguration(name string) string {
+func monitorIBMTeamMinimumConfiguration(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team" "sample" {
   name      = "sample-%s"
@@ -54,7 +55,7 @@ resource "sysdig_monitor_team" "sample" {
 }`, name)
 }
 
-func monitorTeamWithName(name string) string {
+func monitorIBMTeamWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team" "sample" {
   name               = "sample-%s"
