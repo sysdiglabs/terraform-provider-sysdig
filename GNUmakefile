@@ -36,8 +36,8 @@ test: fmtcheck
 testacc: fmtcheck
 	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m -race 2>&1 | tee testacc-output.txt
 
-junit-report:
-	@go get github.com/jstemmer/go-junit-report/v2@latest
+junit-report: testacc
+	@go install github.com/jstemmer/go-junit-report/v2@latest
 	@go-junit-report -in testacc-output.txt -out junit-report.xml
 
 vet:
