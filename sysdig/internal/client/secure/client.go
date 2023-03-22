@@ -54,11 +54,6 @@ type SysdigSecureClient interface {
 	UpdateCloudAccount(context.Context, string, *CloudAccount) (*CloudAccount, error)
 	GetTrustedCloudIdentity(context.Context, string) (string, error)
 
-	CreateBenchmarkTask(context.Context, *BenchmarkTask) (*BenchmarkTask, error)
-	GetBenchmarkTask(context.Context, string) (*BenchmarkTask, error)
-	DeleteBenchmarkTask(context.Context, string) error
-	SetBenchmarkTaskEnabled(context.Context, string, bool) error
-
 	CreateScanningPolicy(context.Context, ScanningPolicy) (ScanningPolicy, error)
 	GetScanningPolicyById(context.Context, string) (ScanningPolicy, error)
 	DeleteScanningPolicyById(context.Context, string) error
