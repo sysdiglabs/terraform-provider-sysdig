@@ -104,7 +104,7 @@ resource "sysdig_secure_rule_falco" "terminal_shell" {
   output = "A shell was spawned in a container with an attached terminal (user=%%user.name %%container.info shell=%%proc.name parent=%%proc.pname cmdline=%%proc.cmdline terminal=%%proc.tty container_id=%%container.id image=%%container.image.repository)"
   priority = "notice"
   source = "syscall" // syscall or k8s_audit
-}`, name)
+}`, name, name)
 }
 
 func ruleFalcoTerminalShellWithMissingOuput(name string) string {
