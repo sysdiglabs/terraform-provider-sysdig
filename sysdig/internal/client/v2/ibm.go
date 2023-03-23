@@ -26,10 +26,6 @@ type IBMMonitor interface {
 	IBMCommon
 }
 
-type IBMSecure interface {
-	IBMCommon
-}
-
 type IBMAccessToken string
 type UnixTimestamp int64
 
@@ -113,9 +109,5 @@ func newIBMClient(opts ...ClientOption) *Client {
 }
 
 func NewIBMMonitor(opts ...ClientOption) IBMMonitor {
-	return newIBMClient(opts...)
-}
-
-func NewIBMSecure(opts ...ClientOption) IBMSecure {
 	return newIBMClient(opts...)
 }
