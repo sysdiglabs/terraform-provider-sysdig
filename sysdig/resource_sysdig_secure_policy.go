@@ -161,6 +161,7 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 		_ = d.Set("type", "falco")
 
 	}
+	_ = d.Set("actions", policy.Actions)
 
 	actions := []map[string]interface{}{{}}
 	for _, action := range policy.Actions {
@@ -177,10 +178,6 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 			}}
 			_ = d.Set("actions", actions)
 		}
-	}
-
-	if len(policy.Actions) == 0 {
-		_ = d.Set("actions", policy.Actions)
 	}
 
 	_ = d.Set("notification_channels", policy.NotificationChannelIds)
