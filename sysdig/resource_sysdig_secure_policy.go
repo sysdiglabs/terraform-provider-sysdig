@@ -179,6 +179,10 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 		}
 	}
 
+	if len(policy.Actions) == 0 {
+		_ = d.Set("actions", policy.Actions)
+	}
+
 	_ = d.Set("notification_channels", policy.NotificationChannelIds)
 
 	_ = d.Set("rule_names", policy.RuleNames)
