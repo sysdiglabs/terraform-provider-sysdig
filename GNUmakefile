@@ -34,11 +34,15 @@ test: fmtcheck
 	go test $(TEST) -v -tags=unit -timeout=30s -parallel=4
 
 testacc: fmtcheck
-	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=tf_acc_sysdig -timeout 120m -race
+	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=tf_acc_sysdig -timeout 120m -race 2>&1 | tee testacc-output.txt
+
+junit-report: testacc
+	@go install github.com/jstemmer/go-junit-report/v2@latest
+	@go-junit-report -in testacc-output.txt -out junit-report.xml
+
 
 testacc-ibm: fmtcheck
 	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=tf_acc_ibm -timeout 120m -race
-
 
 vet:
 	@echo "go vet ."
