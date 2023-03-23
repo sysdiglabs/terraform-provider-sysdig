@@ -25,7 +25,6 @@ type SysdigClients interface {
 	sysdigMonitorClientV2() (v2.SysdigMonitor, error)
 	sysdigSecureClientV2() (v2.SysdigSecure, error)
 	ibmMonitorClient() (v2.IBMMonitor, error)
-	ibmSecureClient() (v2.IBMSecure, error)
 }
 
 type ClientType int
@@ -34,7 +33,6 @@ const (
 	SysdigMonitor ClientType = iota
 	SysdigSecure
 	IBMMonitor
-	IBMSecure
 )
 
 type sysdigClients struct {
@@ -51,7 +49,6 @@ type sysdigClients struct {
 	monitorClientV2  v2.SysdigMonitor
 	secureClientV2   v2.SysdigSecure
 	monitorIBMClient v2.IBMMonitor
-	secureIBMClient  v2.IBMMonitor
 }
 
 type globalVariables struct {
@@ -100,7 +97,7 @@ func getSysdigSecureVariables(data *schema.ResourceData) (*sysdigVariables, erro
 	var apiURL, token interface{}
 
 	if apiURL, ok = data.GetOk("sysdig_secure_url"); !ok {
-		return nil, errors.New("missing sysdig monitor URL")
+		return nil, errors.New("missing sysdig secure URL")
 	}
 
 	if token, ok = data.GetOk("sysdig_secure_api_token"); !ok {
@@ -147,39 +144,6 @@ func getIBMMonitorVariables(data *schema.ResourceData) (*ibmVariables, error) {
 		instanceID: instanceID.(string),
 		apiKey:     apiKey.(string),
 		teamID:     data.Get("ibm_monitor_team_id").(string),
-	}, nil
-}
-
-func getIBMSecureVariables(data *schema.ResourceData) (*ibmVariables, error) {
-	var ok bool
-	var apiURL, iamURL, instanceID, apiKey interface{}
-
-	if apiURL, ok = data.GetOk("ibm_secure_url"); !ok {
-		return nil, errors.New("missing secure IBM URL")
-	}
-
-	if iamURL, ok = data.GetOk("ibm_secure_iam_url"); !ok {
-		return nil, errors.New("missing secure IBM IAM URL")
-	}
-
-	if instanceID, ok = data.GetOk("ibm_secure_instance_id"); !ok {
-		return nil, errors.New("missing secure IBM instance ID")
-	}
-
-	if apiKey, ok = data.GetOk("ibm_secure_api_key"); !ok {
-		return nil, errors.New("missing secure IBM API key")
-	}
-
-	return &ibmVariables{
-		globalVariables: &globalVariables{
-			apiURL:       apiURL.(string),
-			insecure:     data.Get("ibm_secure_insecure_tls").(bool),
-			extraHeaders: getExtraHeaders(data),
-		},
-		iamURL:     iamURL.(string),
-		instanceID: instanceID.(string),
-		apiKey:     apiKey.(string),
-		teamID:     data.Get("ibm_secure_team_id").(string),
 	}, nil
 }
 
@@ -327,30 +291,6 @@ func (c *sysdigClients) ibmMonitorClient() (v2.IBMMonitor, error) {
 	return c.monitorIBMClient, nil
 }
 
-func (c *sysdigClients) ibmSecureClient() (v2.IBMSecure, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	if c.secureIBMClient != nil {
-		return c.secureIBMClient, nil
-	}
-
-	vars, err := getIBMSecureVariables(c.d)
-	if err != nil {
-		return nil, err
-	}
-
-	c.secureIBMClient = v2.NewIBMSecure(
-		v2.WithURL(vars.apiURL),
-		v2.WithIBMIamURL(vars.iamURL),
-		v2.WithIBMInstanceID(vars.instanceID),
-		v2.WithIBMAPIKey(vars.apiKey),
-		v2.WithInsecure(vars.insecure),
-	)
-
-	return c.secureIBMClient, nil
-}
-
 func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -394,10 +334,6 @@ func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err 
 func (c *sysdigClients) GetClientType() ClientType {
 	if _, err := getIBMMonitorVariables(c.d); err == nil {
 		return IBMMonitor
-	}
-
-	if _, err := getIBMSecureVariables(c.d); err == nil {
-		return IBMSecure
 	}
 
 	if _, err := getSysdigMonitorVariables(c.d); err == nil {
