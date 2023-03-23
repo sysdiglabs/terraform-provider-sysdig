@@ -95,6 +95,7 @@ func (client *sysdigSecureClient) doSysdigSecureRequest(ctx context.Context, met
 	request = request.WithContext(ctx)
 	request.Header.Set("Authorization", "Bearer "+client.SysdigSecureAPIToken)
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Provider", "Terraform")
 	if client.extraHeaders != nil {
 		for key, value := range client.extraHeaders {
 			request.Header.Set(key, value)
