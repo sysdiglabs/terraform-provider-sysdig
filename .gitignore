@@ -34,6 +34,10 @@ website/vendor
 !command/test-fixtures/**/*.tfstate
 !command/test-fixtures/**/.terraform/
 
+# Test reports
+junit-report.xml
+testacc-output.txt
+
 # Keep windows files with windows line endings
 *.winfile eol=crlf
 /.vs
