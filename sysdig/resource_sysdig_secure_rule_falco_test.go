@@ -97,6 +97,7 @@ func ruleFalcoTerminalShell(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "terminal_shell" {
   name = "TERRAFORM TEST %s - Terminal Shell"
+  description = "TERRAFORM TEST %s"
   tags = ["container", "shell", "mitre_execution"]
 
   condition = "spawned_process and container and shell_procs and proc.tty != 0 and container_entrypoint"
