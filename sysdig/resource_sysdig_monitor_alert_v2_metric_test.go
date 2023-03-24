@@ -155,10 +155,6 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 		id = sysdig_monitor_notification_channel_email.nc_email.id
 		notify_on_resolve = false
 	}
-	notification_channels {
-		id = sysdig_monitor_notification_channel_email.nc_email.id
-		renotify_every_minutes = 30
-	}
 }
 `, name, name)
 }
