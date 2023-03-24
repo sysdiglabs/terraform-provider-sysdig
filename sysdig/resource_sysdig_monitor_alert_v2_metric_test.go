@@ -152,11 +152,11 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	trigger_after_minutes = 15
 	enabled = false
 	notification_channels {
-		id = sysdig_monitor_notification_channel_email.nc_email
+		id = sysdig_monitor_notification_channel_email.nc_email.id
 		notify_on_resolve = false
 	}
 	notification_channels {
-		id = sysdig_monitor_notification_channel_email.nc_email
+		id = sysdig_monitor_notification_channel_email.nc_email.id
 		renotify_every_minutes = 30
 	}
 }
