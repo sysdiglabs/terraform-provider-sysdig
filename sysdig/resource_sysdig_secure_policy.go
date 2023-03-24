@@ -161,14 +161,12 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 		_ = d.Set("type", "falco")
 
 	}
-	_ = d.Set("actions", policy.Actions)
 
 	actions := []map[string]interface{}{{}}
 	for _, action := range policy.Actions {
 		if action.Type != "POLICY_ACTION_CAPTURE" {
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
 			actions[0]["container"] = strings.ToLower(action)
-			_ = d.Set("actions", actions)
 			//d.Set("actions.0.container", strings.ToLower(action))
 		} else {
 			actions[0]["capture"] = []map[string]interface{}{{
@@ -176,9 +174,9 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
 				"name":                 action.Name,
 			}}
-			_ = d.Set("actions", actions)
 		}
 	}
+	_ = d.Set("actions", actions)
 
 	_ = d.Set("notification_channels", policy.NotificationChannelIds)
 
