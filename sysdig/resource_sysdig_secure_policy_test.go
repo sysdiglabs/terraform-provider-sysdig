@@ -103,6 +103,8 @@ resource "sysdig_secure_policy" "sample2" {
   rule_names = [sysdig_secure_rule_falco.terminal_shell.name]
 
   notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
+
+  actions {}
 }
 `, secureNotificationChannelEmailWithName(name), ruleFalcoTerminalShell(name), name, name)
 }
@@ -116,6 +118,7 @@ resource "sysdig_secure_policy" "sample3" {
   severity = 4
   scope = "container.id != \"\""
   rule_names = ["Terminal shell in container"]
+  actions {}
 }
 `, name, name)
 }
@@ -125,6 +128,7 @@ func policyWithMinimumConfiguration(name string) string {
 resource "sysdig_secure_policy" "sample4" {
   name = "TERRAFORM TEST 4 %s"
   description = "TERRAFORM TEST %s"
+  actions {}
 }
 `, name, name)
 }
@@ -178,6 +182,7 @@ resource "sysdig_secure_policy" "sample4" {
   name = "TERRAFORM TEST 4 %s"
   description = "TERRAFORM TEST %s"
   type = "aws_cloudtrail"
+  actions {}
 }
 `, name, name)
 }
@@ -188,6 +193,7 @@ resource "sysdig_secure_policy" "sample5" {
   name = "TERRAFORM TEST %s"
   description = "TERRAFORM TEST %s"
   type = "gcp_auditlog"
+  actions {}
 }
 `, name, name)
 }
@@ -198,6 +204,7 @@ resource "sysdig_secure_policy" "sample6" {
   name = "TERRAFORM TEST %s"
   description = "TERRAFORM TEST %s"
   type = "azure_platformlogs"
+  actions {}
 }
 `, name, name)
 }
