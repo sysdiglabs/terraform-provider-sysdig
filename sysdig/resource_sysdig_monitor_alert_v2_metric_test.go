@@ -136,6 +136,11 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 
 func alertV2MetricWithNotificationChannels(name string) string {
 	return fmt.Sprintf(`
+resource "sysdig_monitor_notification_channel_email" "nc_email" {
+	name = "%s"
+	recipients = ["root@localhost.com"]
+}
+
 resource "sysdig_monitor_alert_v2_metric" "sample" {
 
 	name = "TERRAFORM TEST - METRICV2 %s"
@@ -147,15 +152,15 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	trigger_after_minutes = 15
 	enabled = false
 	notification_channels {
-		id = 47160
+		id = sysdig_monitor_notification_channel_email.nc_email
 		notify_on_resolve = false
 	}
 	notification_channels {
-		id = 47163
+		id = sysdig_monitor_notification_channel_email.nc_email
 		renotify_every_minutes = 30
 	}
 }
-`, name)
+`, name, name)
 }
 
 func alertV2MetricWithDescription(name string) string {
