@@ -34,7 +34,7 @@ test: fmtcheck
 	go test $(TEST) -timeout=30s -parallel=4
 
 testacc: fmtcheck
-	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m -race
+	CGO_ENABLED=1 TF_ACC=1 TF_LOG=debug go test $(TEST) -v $(TESTARGS) -timeout 120m -race
 
 junit-report: fmtcheck
 	@go install github.com/jstemmer/go-junit-report/v2@latest
