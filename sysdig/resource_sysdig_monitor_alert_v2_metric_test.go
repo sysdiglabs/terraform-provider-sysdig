@@ -136,6 +136,16 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 
 func alertV2MetricWithNotificationChannels(name string) string {
 	return fmt.Sprintf(`
+resource "sysdig_monitor_notification_channel_email" "nc_email1" {
+	name = "%s1"
+	recipients = ["root@localhost.com"]
+}
+
+resource "sysdig_monitor_notification_channel_email" "nc_email2" {
+	name = "%s2"
+	recipients = ["root@localhost.com"]
+}
+
 resource "sysdig_monitor_alert_v2_metric" "sample" {
 
 	name = "TERRAFORM TEST - METRICV2 %s"
@@ -147,15 +157,15 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	trigger_after_minutes = 15
 	enabled = false
 	notification_channels {
-		id = 47160
+		id = sysdig_monitor_notification_channel_email.nc_email1.id
 		notify_on_resolve = false
 	}
 	notification_channels {
-		id = 47163
+		id = sysdig_monitor_notification_channel_email.nc_email2.id
 		renotify_every_minutes = 30
 	}
 }
-`, name)
+`, name, name, name)
 }
 
 func alertV2MetricWithDescription(name string) string {
@@ -267,8 +277,40 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 
 func alertV2MetricWithLink(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_monitor_alert_v2_metric" "sample" {
+resource "sysdig_monitor_dashboard" "dashboard" {
+	name = "TERRAFORM TEST - METRIC %s"
+	description = "TERRAFORM TEST - METRIC %s"
 
+	panel {
+		pos_x = 0
+		pos_y = 0
+		width = 12 # Maximum size: 24
+		height = 6
+		type = "timechart"
+		name = "example panel"
+		description = "description"
+
+        legend {
+            show_current = true
+            position = "bottom"
+            layout = "inline"
+        }
+
+		query {
+			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+			unit = "percent"
+
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
+		}
+	}
+}
+
+resource "sysdig_monitor_alert_v2_metric" "sample" {
 	name = "TERRAFORM TEST - METRICV2 %s"
 	metric = "sysdig_container_cpu_used_percent"
 	group_aggregation = "avg"
@@ -282,10 +324,10 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	}
 	link {
 		type = "dashboard"
-		id = "218044"
+		id = sysdig_monitor_dashboard.dashboard.id
 	}
 }
-`, name)
+`, name, name, name)
 }
 
 func alertV2MetricWithEnabled(name string) string {
@@ -307,6 +349,16 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 
 func alertV2MetricWithWarningThreshold(name string) string {
 	return fmt.Sprintf(`
+resource "sysdig_monitor_notification_channel_email" "nc_email1" {
+	name = "%s1"
+	recipients = ["root@localhost.com"]
+}
+
+resource "sysdig_monitor_notification_channel_email" "nc_email2" {
+	name = "%s2"
+	recipients = ["root@localhost.com"]
+}
+
 resource "sysdig_monitor_alert_v2_metric" "sample" {
 
 	name = "TERRAFORM TEST - METRICV2 %s"
@@ -319,12 +371,12 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	enabled = false
 	warning_threshold = 10
 	notification_channels {
-		id = 47160
+		id = sysdig_monitor_notification_channel_email.nc_email1.id
 	}
 	notification_channels {
-		id = 47163
+		id = sysdig_monitor_notification_channel_email.nc_email2.id
 		warning_threshold = true
 	}
 }
-`, name)
+`, name, name, name)
 }

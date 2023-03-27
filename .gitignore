@@ -36,7 +36,6 @@ website/vendor
 
 # Test reports
 junit-report.xml
-testacc-output.txt
 
 # Keep windows files with windows line endings
 *.winfile eol=crlf
