@@ -79,7 +79,7 @@ func NewSysdigSecureClient(sysdigSecureAPIToken string, url string, insecure boo
 	return &sysdigSecureClient{
 		SysdigSecureAPIToken: sysdigSecureAPIToken,
 		URL:                  url,
-		httpClient:           httpClient.StandardClient(),
+		httpClient:           &http.Client{},
 	}
 }
 
