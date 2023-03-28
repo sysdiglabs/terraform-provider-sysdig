@@ -72,7 +72,7 @@ jobs:
         run: make test
 
   test-sysdig:
-    name: Test sysdig
+    name: Test Sysdig
     runs-on: ubuntu-latest
     needs: test
 
