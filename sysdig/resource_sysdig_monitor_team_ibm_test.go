@@ -30,10 +30,13 @@ func TestAccMonitorIBMTeam(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: monitorIBMTeamMinimumConfiguration(rText()),
+				Config: monitorTeamMinimumConfiguration(rText()),
 			},
 			{
-				Config: monitorIBMTeamWithName(rText()),
+				Config: monitorTeamWithName(rText()),
+			},
+			{
+				Config: monitorTeamWithFullConfigIBM(rText()),
 			},
 			{
 				ResourceName:      "sysdig_monitor_team.sample",
@@ -44,25 +47,18 @@ func TestAccMonitorIBMTeam(t *testing.T) {
 	})
 }
 
-func monitorIBMTeamMinimumConfiguration(name string) string {
+func monitorTeamWithFullConfigIBM(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team" "sample" {
-  name      = "sample-%s"
+  name                   		= "sample-%s"
+  description        			= "%s"
+  scope_by           			= "host"
+  filter             			= "container.image.repo = \"sysdig/agent\""
+  can_use_sysdig_capture 		= true
+  can_see_infrastructure_events = true
+  
   entrypoint {
-	type = "Explore"
-  }
-}`, name)
-}
-
-func monitorIBMTeamWithName(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_monitor_team" "sample" {
-  name               = "sample-%s"
-  description        = "%s"
-  scope_by           = "container"
-  filter             = "container.image.repo = \"sysdig/agent\""
-  entrypoint {
-	type = "Explore"
+	type = "Dashboards"
   }
 }`, name, name)
 }
