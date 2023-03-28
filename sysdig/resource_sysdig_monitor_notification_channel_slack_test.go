@@ -1,3 +1,5 @@
+//go:build tf_acc_sysdig
+
 package sysdig_test
 
 import (
