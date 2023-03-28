@@ -54,68 +54,13 @@ jobs:
         run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o terraform-provider-sysdig
 
   test:
-    name: Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          check-latest: true
-          cache: true
-
-      - name: Test
-        run: make test
+    uses: ./.github/workflows/unit-tests.yml
 
   test-sysdig:
-    name: Test Sysdig
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          check-latest: true
-          cache: true
-
-      - name: Acceptance tests Sysdig
-        run: make testacc
-        env:
-          SYSDIG_MONITOR_API_TOKEN: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
-          SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
+    uses: [test, ./.github/workflows/sysdig-terraform-tests.yml]
 
   test-ibm:
-    name: Test IBM
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          check-latest: true
-          cache: true
-
-      - name: Acceptance tests IBM
-        run: make testacc-ibm
-        env:
-          SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
-          SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_MONITOR_INSTANCE_ID }}
-          SYSDIG_IBM_MONITOR_URL: "https://us-south.monitoring.test.cloud.ibm.com"
-          SYSDIG_IBM_MONITOR_IAM_URL: "https://iam.test.cloud.ibm.com"
+    uses: [test, ./.github/workflows/ibm-terraform-tests.yml]
 
   lint:
     name: Lint
