@@ -7,7 +7,6 @@ jobs:
   test-sysdig:
     name: Test Sysdig
     runs-on: ubuntu-latest
-    needs: test
 
     steps:
       - name: Check out code
