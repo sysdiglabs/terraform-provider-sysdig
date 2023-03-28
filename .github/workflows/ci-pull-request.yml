@@ -54,13 +54,20 @@ jobs:
         run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o terraform-provider-sysdig
 
   test:
+    name: Test
     uses: ./.github/workflows/unit-tests.yml
 
   test-sysdig:
-    uses: ./.github/workflows/sysdig-terraform-tests.yml
+    uses: [test, ./.github/workflows/sysdig-terraform-tests.yml]
+    secrets:
+      monitor-api-token: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
+      secure-api-token: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
 
   test-ibm:
-    uses: ./.github/workflows/ibm-terraform-tests.yml
+    uses: [test, ./.github/workflows/ibm-terraform-tests.yml]
+    secrets:
+      api-key: secrets.TERRAFORM_IBM_API_KEY
+      instance-id: secrets.TERRAFORM_IBM_MONITOR_INSTANCE_ID
 
   lint:
     name: Lint

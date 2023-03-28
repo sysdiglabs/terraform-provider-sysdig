@@ -2,7 +2,13 @@ name: IBM terraform acceptance tests
 
 on:
   workflow_call:
-
+    secrets:
+      api-key:
+        required: true
+        type: string
+      instance-id:
+        required: true
+        type: string
 jobs:
   test-ibm:
     name: Test IBM
@@ -22,7 +28,7 @@ jobs:
       - name: Acceptance tests IBM
         run: make testacc-ibm
         env:
-          SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
-          SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_MONITOR_INSTANCE_ID }}
+          SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.api-key }}
+          SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.instance-id }}
           SYSDIG_IBM_MONITOR_URL: "https://us-south.monitoring.test.cloud.ibm.com"
           SYSDIG_IBM_MONITOR_IAM_URL: "https://iam.test.cloud.ibm.com"

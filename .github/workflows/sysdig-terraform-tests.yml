@@ -2,7 +2,13 @@ name: Sysdig terraform acceptance tests
 
 on:
   workflow_call:
-
+    secrets:
+      monitor-api-token:
+        required: true
+        type: string
+      secure-api-token:
+        required: true
+        type: string
 jobs:
   test-sysdig:
     name: Test Sysdig
@@ -22,5 +28,5 @@ jobs:
       - name: Acceptance tests Sysdig
         run: make testacc
         env:
-          SYSDIG_MONITOR_API_TOKEN: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
-          SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
+          SYSDIG_MONITOR_API_TOKEN: ${{ secrets.monitor-api-token }}
+          SYSDIG_SECURE_API_TOKEN: ${{ secrets.secure-api-token }}
