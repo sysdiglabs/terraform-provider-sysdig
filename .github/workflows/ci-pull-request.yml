@@ -58,13 +58,13 @@ jobs:
     uses: ./.github/workflows/unit-tests.yml
 
   test-sysdig:
-    uses: [test, ./.github/workflows/sysdig-terraform-tests.yml]
+    uses: ./.github/workflows/sysdig-terraform-tests.yml
     secrets:
       monitor-api-token: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
       secure-api-token: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
 
   test-ibm:
-    uses: [test, ./.github/workflows/ibm-terraform-tests.yml]
+    uses: ./.github/workflows/ibm-terraform-tests.yml
     secrets:
       api-key: secrets.TERRAFORM_IBM_API_KEY
       instance-id: secrets.TERRAFORM_IBM_MONITOR_INSTANCE_ID
