@@ -36,6 +36,9 @@ test: fmtcheck
 testacc: fmtcheck
 	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=tf_acc_sysdig -timeout 120m -race
 
+testacc-ibm: fmtcheck
+	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=tf_acc_ibm -timeout 120m -race
+
 junit-report: fmtcheck
 	@go install github.com/jstemmer/go-junit-report/v2@latest
 	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=tf_acc_sysdig -timeout 120m -race 2>&1 | go-junit-report -iocopy -out junit-report.xml
