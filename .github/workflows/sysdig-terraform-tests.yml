@@ -5,10 +5,9 @@ on:
     secrets:
       monitor-api-token:
         required: true
-        type: string
       secure-api-token:
         required: true
-        type: string
+
 jobs:
   test-sysdig:
     name: Test Sysdig

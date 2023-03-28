@@ -5,10 +5,8 @@ on:
     secrets:
       api-key:
         required: true
-        type: string
       instance-id:
         required: true
-        type: string
 jobs:
   test-ibm:
     name: Test IBM
