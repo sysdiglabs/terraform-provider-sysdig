@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig
+//go:build tf_acc_ibm
 
 package sysdig_test
 
@@ -14,13 +14,13 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccMonitorTeam(t *testing.T) {
+func TestAccMonitorIBMTeam(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_MONITOR_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN must be set for acceptance tests")
+			if v := os.Getenv("SYSDIG_IBM_MONITOR_API_KEY"); v == "" {
+				t.Fatal("SYSDIG_IBM_MONITOR_API_KEY must be set for acceptance tests")
 			}
 		},
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -36,7 +36,7 @@ func TestAccMonitorTeam(t *testing.T) {
 				Config: monitorTeamWithName(rText()),
 			},
 			{
-				Config: monitorTeamWithFullConfig(rText()),
+				Config: monitorTeamWithFullConfigIBM(rText()),
 			},
 			{
 				ResourceName:      "sysdig_monitor_team.sample",
@@ -47,7 +47,7 @@ func TestAccMonitorTeam(t *testing.T) {
 	})
 }
 
-func monitorTeamWithFullConfig(name string) string {
+func monitorTeamWithFullConfigIBM(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team" "sample" {
   name                   		= "sample-%s"
@@ -56,7 +56,6 @@ resource "sysdig_monitor_team" "sample" {
   filter             			= "container.image.repo = \"sysdig/agent\""
   can_use_sysdig_capture 		= true
   can_see_infrastructure_events = true
-  can_use_aws_data 				= true
   
   entrypoint {
 	type = "Dashboards"

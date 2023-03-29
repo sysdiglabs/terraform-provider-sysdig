@@ -11,32 +11,8 @@ env:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          check-latest: true
-          cache: true
-
-      - name: Get dependencies
-        run: |
-          go install github.com/onsi/ginkgo/v2/ginkgo@latest
-          go mod tidy
-
-      - name: Test
-        run: make test
-
-      - name: Acceptance tests
-        run: make testacc
-        env:
-          SYSDIG_MONITOR_API_TOKEN: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
-          SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
 
   slackNotification:
     needs: test
