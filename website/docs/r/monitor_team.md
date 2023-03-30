@@ -83,6 +83,8 @@ data "sysdig_current_user" "me" {
 
 ## Attributes Reference
 
+In addition to all arguments above, the following attributes are exported:
+
 ### IBM Cloud Monitoring arguments
 
 * `enable_ibm_platform_metrics` - (Optional) Enable platform metrics on IBM Cloud Monitoring.
