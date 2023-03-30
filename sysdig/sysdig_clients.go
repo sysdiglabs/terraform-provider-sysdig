@@ -118,7 +118,7 @@ func getIBMMonitorVariables(data *schema.ResourceData) (*ibmVariables, error) {
 	var ok bool
 	var apiURL, iamURL, instanceID, apiKey interface{}
 
-	if apiURL, ok = data.GetOk("ibm_monitor_url"); !ok {
+	if apiURL, ok = data.GetOk("sysdig_monitor_url"); !ok {
 		return nil, errors.New("missing monitor IBM URL")
 	}
 
@@ -137,13 +137,12 @@ func getIBMMonitorVariables(data *schema.ResourceData) (*ibmVariables, error) {
 	return &ibmVariables{
 		globalVariables: &globalVariables{
 			apiURL:       apiURL.(string),
-			insecure:     data.Get("ibm_monitor_insecure_tls").(bool),
+			insecure:     data.Get("sysdig_monitor_insecure_tls").(bool),
 			extraHeaders: getExtraHeaders(data),
 		},
 		iamURL:     iamURL.(string),
 		instanceID: instanceID.(string),
 		apiKey:     apiKey.(string),
-		teamID:     data.Get("ibm_monitor_team_id").(string),
 	}, nil
 }
 
