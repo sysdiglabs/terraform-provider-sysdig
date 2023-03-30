@@ -33,7 +33,6 @@ func TestIBMClient_DoIBMRequest(t *testing.T) {
 		instanceID := "instance ID"
 		apiKey := "api key"
 		token := "token"
-		teamID := "team ID"
 		iamEndpointCalled := 0
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == IBMIAMPath {
@@ -58,9 +57,6 @@ func TestIBMClient_DoIBMRequest(t *testing.T) {
 			}
 			if value := r.Header.Get(IBMInstanceIDHeader); value != instanceID {
 				t.Errorf("expected instance id %v, got %v", instanceID, value)
-			}
-			if value := r.Header.Get(SysdigTeamIDHeader); value != teamID {
-				t.Errorf("expected team id %v, got %v", teamID, value)
 			}
 		}))
 

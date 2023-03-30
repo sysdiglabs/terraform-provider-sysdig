@@ -87,9 +87,6 @@ func (ir *IBMRequest) Request(ctx context.Context, method string, url string, pa
 	}
 
 	r = r.WithContext(ctx)
-	if ir.config.teamID != "" {
-		r.Header.Set(SysdigTeamIDHeader, ir.config.teamID)
-	}
 	r.Header.Set(IBMInstanceIDHeader, ir.config.ibmInstanceID)
 	r.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", token))
 	r.Header.Set(ContentTypeHeader, ContentTypeJSON)
