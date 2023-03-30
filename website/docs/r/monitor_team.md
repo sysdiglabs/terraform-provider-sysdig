@@ -85,6 +85,8 @@ data "sysdig_current_user" "me" {
 
 In addition to all arguments above, the following attributes are exported:
 
+* `default_team` - (Optional) Mark team as default team. Users with no designated team will be added to this team by default.
+
 ### IBM Cloud Monitoring arguments
 
 * `enable_ibm_platform_metrics` - (Optional) Enable platform metrics on IBM Cloud Monitoring.
