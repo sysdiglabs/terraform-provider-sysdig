@@ -54,14 +54,12 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 				Optional: true,
 			},
 			"enable_ibm_platform_metrics": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Enable platform metrics on IBM Cloud Monitor.",
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			"ibm_platform_metrics": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Define platform metrics on IBM Cloud Monitor.",
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"can_use_sysdig_capture": {
 				Type:     schema.TypeBool,
