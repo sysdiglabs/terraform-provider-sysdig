@@ -5,7 +5,6 @@ type config struct {
 	token         string
 	insecure      bool
 	extraHeaders  map[string]string
-	teamID        string
 	ibmInstanceID string
 	ibmAPIKey     string
 	ibmIamURL     string
