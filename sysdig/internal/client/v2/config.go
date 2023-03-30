@@ -37,12 +37,6 @@ func WithExtraHeaders(headers map[string]string) ClientOption {
 	}
 }
 
-func WithTeamID(teamID string) ClientOption {
-	return func(c *config) {
-		c.teamID = teamID
-	}
-}
-
 func WithIBMInstanceID(instanceID string) ClientOption {
 	return func(c *config) {
 		c.ibmInstanceID = instanceID

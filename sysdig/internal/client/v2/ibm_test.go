@@ -69,7 +69,6 @@ func TestIBMClient_DoIBMRequest(t *testing.T) {
 			WithIBMAPIKey(apiKey),
 			WithIBMIamURL(server.URL),
 			WithURL(server.URL),
-			WithTeamID(teamID),
 		)
 
 		url := fmt.Sprintf("%s/foo/bar", server.URL)

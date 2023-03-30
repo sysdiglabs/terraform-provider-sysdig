@@ -67,7 +67,6 @@ type ibmVariables struct {
 	iamURL     string
 	instanceID string
 	apiKey     string
-	teamID     string
 }
 
 func getSysdigMonitorVariables(data *schema.ResourceData) (*sysdigVariables, error) {
