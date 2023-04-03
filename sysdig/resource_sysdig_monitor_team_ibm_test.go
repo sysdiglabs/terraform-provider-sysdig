@@ -17,7 +17,7 @@ import (
 func TestAccMonitorIBMTeam(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_IBM_MONITOR_API_KEY"); v == "" {
 				t.Fatal("SYSDIG_IBM_MONITOR_API_KEY must be set for acceptance tests")

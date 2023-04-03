@@ -18,7 +18,7 @@ func TestAccSecureConnection(t *testing.T) {
 
 	apiToken := os.Getenv("SYSDIG_SECURE_API_TOKEN")
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 
 		PreCheck: func() {
 			if apiToken == "" {

@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccSysdigFargateWorkloadAgent(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil

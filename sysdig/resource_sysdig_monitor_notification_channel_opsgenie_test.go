@@ -20,7 +20,7 @@ func TestAccMonitorNotificationChannelOpsGenie(t *testing.T) {
 
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
 			ibmMonitor := os.Getenv("SYSDIG_IBM_MONITOR_API_KEY")
