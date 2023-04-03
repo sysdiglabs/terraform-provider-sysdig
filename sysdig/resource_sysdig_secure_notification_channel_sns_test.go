@@ -20,7 +20,7 @@ func TestAccSecureNotificationChannelSNS(t *testing.T) {
 
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
 				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")

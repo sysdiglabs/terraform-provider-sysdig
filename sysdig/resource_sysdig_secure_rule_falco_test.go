@@ -21,7 +21,7 @@ func TestAccRuleFalco(t *testing.T) {
 	ruleRandomImmutableText := rText()
 
 	randomText := rText()
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
 				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")

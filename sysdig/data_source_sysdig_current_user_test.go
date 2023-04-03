@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccCurrentUser(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
 			secure := os.Getenv("SYSDIG_SECURE_API_TOKEN")
