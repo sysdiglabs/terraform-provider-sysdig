@@ -41,11 +41,7 @@ type SysdigMonitorClient interface {
 
 	GetLabelDescriptor(ctx context.Context, label string) (LabelDescriptorV3, error)
 
-	CreateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
 	GetNotificationChannelById(context.Context, int) (NotificationChannel, error)
-	GetNotificationChannelByName(context.Context, string) (NotificationChannel, error)
-	DeleteNotificationChannel(context.Context, int) error
-	UpdateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
 
 	GetDashboardByID(context.Context, int) (*model.Dashboard, error)
 	CreateDashboard(context.Context, *model.Dashboard) (*model.Dashboard, error)

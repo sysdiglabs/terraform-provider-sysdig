@@ -37,7 +37,7 @@ func dataSourceSysdigMonitorNotificationChannelPagerduty() *schema.Resource {
 }
 
 func dataSourceSysdigMonitorNotificationChannelPagerdutyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 
 	if err != nil {
 		return diag.FromErr(err)

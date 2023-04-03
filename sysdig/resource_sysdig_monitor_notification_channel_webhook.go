@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorNotificationChannelWebhook() *schema.Resource {
@@ -45,7 +44,7 @@ func resourceSysdigMonitorNotificationChannelWebhook() *schema.Resource {
 }
 
 func resourceSysdigMonitorNotificationChannelWebhookCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -68,7 +67,7 @@ func resourceSysdigMonitorNotificationChannelWebhookCreate(ctx context.Context, 
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigMonitorNotificationChannelWebhookRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -89,7 +88,7 @@ func resourceSysdigMonitorNotificationChannelWebhookRead(ctx context.Context, d 
 }
 
 func resourceSysdigMonitorNotificationChannelWebhookUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -111,7 +110,7 @@ func resourceSysdigMonitorNotificationChannelWebhookUpdate(ctx context.Context, 
 }
 
 func resourceSysdigMonitorNotificationChannelWebhookDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -127,7 +126,7 @@ func resourceSysdigMonitorNotificationChannelWebhookDelete(ctx context.Context, 
 
 // Channel type for Notification Channels
 
-func monitorNotificationChannelWebhookFromResourceData(d *schema.ResourceData) (nc monitor.NotificationChannel, err error) {
+func monitorNotificationChannelWebhookFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
 	nc, err = monitorNotificationChannelFromResourceData(d)
 	if err != nil {
 		return
@@ -139,7 +138,7 @@ func monitorNotificationChannelWebhookFromResourceData(d *schema.ResourceData) (
 	return
 }
 
-func monitorNotificationChannelWebhookToResourceData(nc *monitor.NotificationChannel, d *schema.ResourceData) (err error) {
+func monitorNotificationChannelWebhookToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return

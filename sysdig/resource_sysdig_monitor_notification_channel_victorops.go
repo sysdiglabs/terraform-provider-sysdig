@@ -2,13 +2,12 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorNotificationChannelVictorOps() *schema.Resource {
@@ -44,7 +43,7 @@ func resourceSysdigMonitorNotificationChannelVictorOps() *schema.Resource {
 }
 
 func resourceSysdigMonitorNotificationChannelVictorOpsCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -67,7 +66,7 @@ func resourceSysdigMonitorNotificationChannelVictorOpsCreate(ctx context.Context
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigMonitorNotificationChannelVictorOpsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -88,7 +87,7 @@ func resourceSysdigMonitorNotificationChannelVictorOpsRead(ctx context.Context, 
 }
 
 func resourceSysdigMonitorNotificationChannelVictorOpsUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -110,7 +109,7 @@ func resourceSysdigMonitorNotificationChannelVictorOpsUpdate(ctx context.Context
 }
 
 func resourceSysdigMonitorNotificationChannelVictorOpsDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -124,7 +123,7 @@ func resourceSysdigMonitorNotificationChannelVictorOpsDelete(ctx context.Context
 	return nil
 }
 
-func monitorNotificationChannelVictorOpsFromResourceData(d *schema.ResourceData) (nc monitor.NotificationChannel, err error) {
+func monitorNotificationChannelVictorOpsFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
 	nc, err = monitorNotificationChannelFromResourceData(d)
 	if err != nil {
 		return
@@ -136,7 +135,7 @@ func monitorNotificationChannelVictorOpsFromResourceData(d *schema.ResourceData)
 	return
 }
 
-func monitorNotificationChannelVictorOpsToResourceData(nc *monitor.NotificationChannel, d *schema.ResourceData) (err error) {
+func monitorNotificationChannelVictorOpsToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return

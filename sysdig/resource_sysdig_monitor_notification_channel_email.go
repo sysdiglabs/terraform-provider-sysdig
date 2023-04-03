@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
@@ -9,8 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/spf13/cast"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorNotificationChannelEmail() *schema.Resource {
@@ -43,7 +42,7 @@ func resourceSysdigMonitorNotificationChannelEmail() *schema.Resource {
 }
 
 func resourceSysdigMonitorNotificationChannelEmailCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -66,7 +65,7 @@ func resourceSysdigMonitorNotificationChannelEmailCreate(ctx context.Context, d 
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigMonitorNotificationChannelEmailRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -87,7 +86,7 @@ func resourceSysdigMonitorNotificationChannelEmailRead(ctx context.Context, d *s
 }
 
 func resourceSysdigMonitorNotificationChannelEmailUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -109,7 +108,7 @@ func resourceSysdigMonitorNotificationChannelEmailUpdate(ctx context.Context, d 
 }
 
 func resourceSysdigMonitorNotificationChannelEmailDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -126,7 +125,7 @@ func resourceSysdigMonitorNotificationChannelEmailDelete(ctx context.Context, d 
 
 // Channel type for Notification Channels
 
-func monitorNotificationChannelEmailFromResourceData(d *schema.ResourceData) (nc monitor.NotificationChannel, err error) {
+func monitorNotificationChannelEmailFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
 	nc, err = monitorNotificationChannelFromResourceData(d)
 	if err != nil {
 		return
@@ -137,7 +136,7 @@ func monitorNotificationChannelEmailFromResourceData(d *schema.ResourceData) (nc
 	return
 }
 
-func monitorNotificationChannelEmailToResourceData(nc *monitor.NotificationChannel, d *schema.ResourceData) (err error) {
+func monitorNotificationChannelEmailToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return
