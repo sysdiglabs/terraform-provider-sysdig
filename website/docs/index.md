@@ -159,6 +159,10 @@ When IBM Cloud Monitoring resources are to be created, this authentication must 
   <br/> It can also be sourced from the `SYSDIG_MONITOR_INSECURE_TLS`
   environment variable. By default, this is false.<br/><br/>
 
+> **Note**
+> Enabling this way of authentication is under active development. For now, you can manage following resources on IBM Cloud Monitoring:
+> - `sysdig_monitor_team`
+
 ###  Others
 * `extra_headers` - (Optional) Defines extra HTTP headers that will be added to the client
   while performing HTTP API calls.
