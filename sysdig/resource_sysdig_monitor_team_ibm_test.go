@@ -39,6 +39,9 @@ func TestAccMonitorIBMTeam(t *testing.T) {
 				Config: monitorTeamWithFullConfigIBM(rText()),
 			},
 			{
+				Config: monitorTeamWithPlatformMetricsIBM(rText()),
+			},
+			{
 				ResourceName:      "sysdig_monitor_team.sample",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -61,4 +64,17 @@ resource "sysdig_monitor_team" "sample" {
 	type = "Dashboards"
   }
 }`, name, name)
+}
+
+func monitorTeamWithPlatformMetricsIBM(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_team" "sample" {
+  name = "sample-%s"
+  enable_ibm_platform_metrics = true
+  ibm_platform_metrics = "foo in (\"0\") and bar in (\"3\")"
+
+  entrypoint {
+	type = "Dashboards"
+  }
+}`, name)
 }

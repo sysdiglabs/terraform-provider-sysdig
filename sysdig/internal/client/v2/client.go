@@ -17,7 +17,6 @@ import (
 )
 
 const (
-	SysdigTeamIDHeader        = "SysdigTeamID"
 	AuthorizationHeader       = "Authorization"
 	ContentTypeHeader         = "Content-Type"
 	ContentTypeJSON           = "application/json"

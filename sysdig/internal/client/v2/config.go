@@ -5,7 +5,6 @@ type config struct {
 	token         string
 	insecure      bool
 	extraHeaders  map[string]string
-	teamID        string
 	ibmInstanceID string
 	ibmAPIKey     string
 	ibmIamURL     string
@@ -34,12 +33,6 @@ func WithInsecure(insecure bool) ClientOption {
 func WithExtraHeaders(headers map[string]string) ClientOption {
 	return func(c *config) {
 		c.extraHeaders = headers
-	}
-}
-
-func WithTeamID(teamID string) ClientOption {
-	return func(c *config) {
-		c.teamID = teamID
 	}
 }
 

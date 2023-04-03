@@ -1,27 +1,32 @@
 package v2
 
 type Team struct {
-	UserRoles           []UserRoles `json:"userRoles,omitempty"`
-	Description         string      `json:"description"`
-	Name                string      `json:"name"`
-	ID                  int         `json:"id,omitempty"`
-	Version             int         `json:"version,omitempty"`
-	Origin              string      `json:"origin,omitempty"`
-	LastUpdated         int64       `json:"lastUpdated,omitempty"`
-	EntryPoint          *EntryPoint `json:"entryPoint,omitempty"`
-	Theme               string      `json:"theme"`
-	CustomerID          int         `json:"customerId,omitempty"`
-	DateCreated         int64       `json:"dateCreated,omitempty"`
-	Products            []string    `json:"products,omitempty"`
-	Show                string      `json:"show,omitempty"`
-	Immutable           bool        `json:"immutable,omitempty"`
-	CanUseSysdigCapture *bool       `json:"canUseSysdigCapture,omitempty"`
-	CanUseCustomEvents  *bool       `json:"canUseCustomEvents,omitempty"`
-	CanUseAwsMetrics    *bool       `json:"canUseAwsMetrics,omitempty"`
-	CanUseBeaconMetrics *bool       `json:"canUseBeaconMetrics,omitempty"`
-	UserCount           int         `json:"userCount,omitempty"`
-	Filter              string      `json:"filter,omitempty"`
-	DefaultTeam         bool        `json:"default,omitempty"`
+	UserRoles           []UserRoles       `json:"userRoles,omitempty"`
+	Description         string            `json:"description"`
+	Name                string            `json:"name"`
+	ID                  int               `json:"id,omitempty"`
+	Version             int               `json:"version,omitempty"`
+	Origin              string            `json:"origin,omitempty"`
+	LastUpdated         int64             `json:"lastUpdated,omitempty"`
+	EntryPoint          *EntryPoint       `json:"entryPoint,omitempty"`
+	Theme               string            `json:"theme"`
+	CustomerID          int               `json:"customerId,omitempty"`
+	DateCreated         int64             `json:"dateCreated,omitempty"`
+	Products            []string          `json:"products,omitempty"`
+	Show                string            `json:"show,omitempty"`
+	Immutable           bool              `json:"immutable,omitempty"`
+	CanUseSysdigCapture *bool             `json:"canUseSysdigCapture,omitempty"`
+	CanUseCustomEvents  *bool             `json:"canUseCustomEvents,omitempty"`
+	CanUseAwsMetrics    *bool             `json:"canUseAwsMetrics,omitempty"`
+	CanUseBeaconMetrics *bool             `json:"canUseBeaconMetrics,omitempty"`
+	UserCount           int               `json:"userCount,omitempty"`
+	Filter              string            `json:"filter,omitempty"`
+	NamespaceFilters    *NamespaceFilters `json:"namespaceFilters,omitempty"`
+	DefaultTeam         bool              `json:"default,omitempty"`
+}
+
+type NamespaceFilters struct {
+	IBMPlatformMetrics *string `json:"ibmPlatformMetrics"`
 }
 
 type UserRoles struct {

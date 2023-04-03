@@ -64,5 +64,5 @@ jobs:
         env:
           SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
           SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_MONITOR_INSTANCE_ID }}
-          SYSDIG_IBM_MONITOR_URL: "https://us-south.monitoring.test.cloud.ibm.com"
           SYSDIG_IBM_MONITOR_IAM_URL: "https://iam.test.cloud.ibm.com"
+          SYSDIG_MONITOR_URL: "https://us-south.monitoring.test.cloud.ibm.com"

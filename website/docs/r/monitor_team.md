@@ -64,7 +64,6 @@ data "sysdig_current_user" "me" {
                  Administrators of the account will be automatically added
                  to every new created team, so they don't need to be added as a
                  resource in the Terraform manifest.
-                 
 
 ### Entrypoint Argument Reference
 
@@ -84,7 +83,15 @@ data "sysdig_current_user" "me" {
 
 ## Attributes Reference
 
-No additional attributes are exported.
+In addition to all arguments above, the following attributes are exported:
+
+* `default_team` - (Optional) Mark team as default team. Users with no designated team will be added to this team by default.
+
+### IBM Cloud Monitoring arguments
+
+* `enable_ibm_platform_metrics` - (Optional) Enable platform metrics on IBM Cloud Monitoring.
+
+* `ibm_platform_metrics` - (Optional) Define platform metrics on IBM Cloud Monitoring.
 
 ## Import
 
