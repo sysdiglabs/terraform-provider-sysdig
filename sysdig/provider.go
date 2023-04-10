@@ -121,6 +121,7 @@ func Provider() *schema.Provider {
 			"sysdig_fargate_workload_agent":                 dataSourceSysdigFargateWorkloadAgent(),
 			"sysdig_monitor_notification_channel_pagerduty": dataSourceSysdigMonitorNotificationChannelPagerduty(),
 			"sysdig_monitor_notification_channel_email":     dataSourceSysdigMonitorNotificationChannelEmail(),
+			"sysdig_monitor_team":                           dataSourceSysdigMonitorTeam(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

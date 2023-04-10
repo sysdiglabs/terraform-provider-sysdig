@@ -7,16 +7,18 @@ import (
 )
 
 const (
-	GetUsersPath = "%s/api/users/light"
-	GetTeamsPath = "%s/api/teams"
-	GetTeamPath  = "%s/api/teams/%d"
+	GetUsersPath      = "%s/api/users/light"
+	GetTeamsPath      = "%s/api/teams"
+	GetTeamPath       = "%s/api/teams/%d"
+	GetTeamByNamePath = "%s/api/v2/teams/light/name/%s"
 )
 
 type TeamInterface interface {
 	GetUserIDByEmail(ctx context.Context, userRoles []UserRoles) ([]UserRoles, error)
-	GetTeamById(ctx context.Context, id int) (t Team, err error)
-	CreateTeam(ctx context.Context, tRequest Team) (t Team, err error)
-	UpdateTeam(ctx context.Context, tRequest Team) (t Team, err error)
+	GetTeamById(ctx context.Context, id int) (Team, error)
+	GetTeamByName(ctx context.Context, name string) (Team, error)
+	CreateTeam(ctx context.Context, tRequest Team) (Team, error)
+	UpdateTeam(ctx context.Context, tRequest Team) (Team, error)
 	DeleteTeam(ctx context.Context, id int) error
 }
 
@@ -62,6 +64,24 @@ func (client *Client) GetTeamById(ctx context.Context, id int) (Team, error) {
 		return Team{}, err
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return Team{}, client.ErrorFromResponse(response)
+	}
+
+	wrapper, err := Unmarshal[teamWrapper](response.Body)
+	if err != nil {
+		return Team{}, client.ErrorFromResponse(response)
+	}
+
+	return wrapper.Team, err
+}
+
+func (client *Client) GetTeamByName(ctx context.Context, name string) (Team, error) {
+	response, err := client.requester.Request(ctx, http.MethodGet, client.GetTeamByNameURL(name), nil)
+	if err != nil {
+		return Team{}, err
+	}
 
 	if response.StatusCode != http.StatusOK {
 		return Team{}, client.ErrorFromResponse(response)
@@ -151,6 +171,10 @@ func (client *Client) DeleteTeam(ctx context.Context, id int) error {
 	}
 
 	return nil
+}
+
+func (client *Client) GetTeamByNameURL(name string) string {
+	return fmt.Sprintf(GetTeamByNamePath, client.config.url, name)
 }
 
 func (client *Client) GetUsersLightURL() string {

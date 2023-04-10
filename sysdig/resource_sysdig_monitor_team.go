@@ -11,6 +11,130 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+const (
+	TeamSchemaThemeKey                      = "theme"
+	TeamSchemaNameKey                       = "name"
+	TeamSchemaDescriptionKey                = "description"
+	TeamSchemaScopeByKey                    = "scope_by"
+	TeamSchemaFilterKey                     = "filter"
+	TeamSchemaEnableIBMPlatformMetricsKey   = "enable_ibm_platform_metrics"
+	TeamSchemaIBMPlatformMetricsKey         = "ibm_platform_metrics"
+	TeamSchemaCanUseSysdigCaptureKey        = "can_use_sysdig_capture"
+	TeamSchemaCanUseInfrastructureEventsKey = "can_see_infrastructure_events"
+	TeamSchemaCanUseAWSDataKey              = "can_use_aws_data"
+	TeamSchemaUserRolesKey                  = "user_roles"
+	TeamSchemaUserRolesEmailKey             = "email"
+	TeamSchemaUserRolesRoleKey              = "role"
+	TeamSchemaEntrypointKey                 = "entrypoint"
+	TeamSchemaEntrypointTypeKey             = "type"
+	TeamSchemaEntrypointSelectionKey        = "selection"
+	TeamSchemaDefaultTeamKey                = "default_team"
+	TeamSchemaVersionKey                    = "version"
+)
+
+func createBaseMonitorTeamSchema() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		TeamSchemaThemeKey: {
+			Type: schema.TypeString,
+		},
+		TeamSchemaNameKey: {
+			Type: schema.TypeString,
+		},
+		TeamSchemaDescriptionKey: {
+			Type: schema.TypeString,
+		},
+		TeamSchemaScopeByKey: {
+			Type: schema.TypeString,
+		},
+		TeamSchemaFilterKey: {
+			Type: schema.TypeString,
+		},
+		TeamSchemaEnableIBMPlatformMetricsKey: {
+			Type: schema.TypeBool,
+		},
+		TeamSchemaIBMPlatformMetricsKey: {
+			Type: schema.TypeString,
+		},
+		TeamSchemaCanUseSysdigCaptureKey: {
+			Type: schema.TypeBool,
+		},
+		TeamSchemaCanUseInfrastructureEventsKey: {
+			Type: schema.TypeBool,
+		},
+		TeamSchemaCanUseAWSDataKey: {
+			Type: schema.TypeBool,
+		},
+		TeamSchemaUserRolesKey: {
+			Type: schema.TypeSet,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					TeamSchemaUserRolesEmailKey: {
+						Type: schema.TypeString,
+					},
+					TeamSchemaUserRolesRoleKey: {
+						Type: schema.TypeString,
+					},
+				},
+			},
+		},
+		TeamSchemaEntrypointKey: {
+			Type: schema.TypeList,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					TeamSchemaEntrypointTypeKey: {
+						Type: schema.TypeString,
+					},
+					TeamSchemaEntrypointSelectionKey: {
+						Type: schema.TypeString,
+					},
+				},
+			},
+		},
+		TeamSchemaDefaultTeamKey: {
+			Type: schema.TypeBool,
+		},
+		TeamSchemaVersionKey: {
+			Type: schema.TypeInt,
+		},
+	}
+
+	return s
+}
+
+func createMonitorTeamSchema() map[string]*schema.Schema {
+	s := createBaseMonitorTeamSchema()
+	applyOnSchema(s, func(s *schema.Schema) {
+		s.Optional = true
+	})
+
+	s[TeamSchemaThemeKey].Default = "#05C391"
+	s[TeamSchemaNameKey].Required = true
+	s[TeamSchemaNameKey].Optional = false
+	s[TeamSchemaScopeByKey].Default = "host"
+	s[TeamSchemaCanUseSysdigCaptureKey].Default = false
+	s[TeamSchemaCanUseInfrastructureEventsKey].Default = false
+	s[TeamSchemaCanUseAWSDataKey].Default = false
+	userRolesSchema := s[TeamSchemaUserRolesKey].Elem.(*schema.Resource).Schema
+	userRolesSchema[TeamSchemaUserRolesEmailKey].Required = true
+	userRolesSchema[TeamSchemaUserRolesEmailKey].Optional = false
+	userRolesSchema[TeamSchemaUserRolesRoleKey].Default = "ROLE_TEAM_STANDARD"
+	userRolesSchema[TeamSchemaUserRolesRoleKey].ValidateFunc = validation.StringInSlice([]string{
+		"ROLE_TEAM_STANDARD", "ROLE_TEAM_EDIT", "ROLE_TEAM_READ", "ROLE_TEAM_MANAGER",
+	}, false)
+	s[TeamSchemaEntrypointKey].Required = true
+	s[TeamSchemaEntrypointKey].Optional = false
+	entrypointSchema := s[TeamSchemaEntrypointKey].Elem.(*schema.Resource).Schema
+	entrypointSchema[TeamSchemaEntrypointTypeKey].Required = true
+	entrypointSchema[TeamSchemaEntrypointTypeKey].Optional = false
+	entrypointSchema[TeamSchemaEntrypointTypeKey].ValidateFunc = validation.StringInSlice([]string{
+		"Explore", "Dashboards", "Events", "Alerts", "Settings",
+	}, false)
+	s[TeamSchemaDefaultTeamKey].Default = false
+	s[TeamSchemaVersionKey].Computed = true
+	s[TeamSchemaVersionKey].Optional = false
+	return s
+}
+
 func resourceSysdigMonitorTeam() *schema.Resource {
 	timeout := 5 * time.Minute
 
@@ -30,98 +154,7 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 			Delete: schema.DefaultTimeout(5 * time.Minute), // Removing the team is for some reason slower.
 		},
 
-		Schema: map[string]*schema.Schema{
-			"theme": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "#05C391",
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"scope_by": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "host",
-			},
-			"filter": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"enable_ibm_platform_metrics": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"ibm_platform_metrics": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"can_use_sysdig_capture": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"can_see_infrastructure_events": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"can_use_aws_data": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"user_roles": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"email": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"role": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Default:      "ROLE_TEAM_STANDARD",
-							ValidateFunc: validation.StringInSlice([]string{"ROLE_TEAM_STANDARD", "ROLE_TEAM_EDIT", "ROLE_TEAM_READ", "ROLE_TEAM_MANAGER"}, false),
-						},
-					},
-				},
-			},
-			"entrypoint": {
-				Type:     schema.TypeList,
-				Required: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"type": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"Explore", "Dashboards", "Events", "Alerts", "Settings"}, false),
-						},
-
-						"selection": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
-			},
-			"default_team": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"version": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-		},
+		Schema: createMonitorTeamSchema(),
 	}
 }
 
@@ -180,33 +213,86 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	_ = d.Set("version", t.Version)
-	_ = d.Set("theme", t.Theme)
-	_ = d.Set("name", t.Name)
-	_ = d.Set("description", t.Description)
-	_ = d.Set("scope_by", t.Show)
-	_ = d.Set("filter", t.Filter)
-	_ = d.Set("can_use_sysdig_capture", t.CanUseSysdigCapture)
-	_ = d.Set("can_see_infrastructure_events", t.CanUseCustomEvents)
-	_ = d.Set("can_use_aws_data", t.CanUseAwsMetrics)
-	_ = d.Set("default_team", t.DefaultTeam)
-	_ = d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
-	_ = d.Set("entrypoint", entrypointToSet(t.EntryPoint))
-
-	if clients.GetClientType() == IBMMonitor {
-		resourceSysdigMonitorTeamReadIBM(d, &t)
+	err = teamMonitorToResourceData(d, clients, t)
+	if err != nil {
+		d.SetId("")
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceSysdigMonitorTeamReadIBM(d *schema.ResourceData, t *v2.Team) {
+func teamMonitorToResourceData(d *schema.ResourceData, c SysdigClients, t v2.Team) error {
+	d.SetId(strconv.Itoa(t.ID))
+
+	err := d.Set("version", t.Version)
+	if err != nil {
+		return err
+	}
+	err = d.Set("theme", t.Theme)
+	if err != nil {
+		return err
+	}
+	err = d.Set("name", t.Name)
+	if err != nil {
+		return err
+	}
+	err = d.Set("description", t.Description)
+	if err != nil {
+		return err
+	}
+	err = d.Set("scope_by", t.Show)
+	if err != nil {
+		return err
+	}
+	err = d.Set("filter", t.Filter)
+	if err != nil {
+		return err
+	}
+	err = d.Set("can_use_sysdig_capture", t.CanUseSysdigCapture)
+	if err != nil {
+		return err
+	}
+	err = d.Set("can_see_infrastructure_events", t.CanUseCustomEvents)
+	if err != nil {
+		return err
+	}
+	err = d.Set("can_use_aws_data", t.CanUseAwsMetrics)
+	if err != nil {
+		return err
+	}
+	err = d.Set("default_team", t.DefaultTeam)
+	if err != nil {
+		return err
+	}
+	err = d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
+	if err != nil {
+		return err
+	}
+	err = d.Set("entrypoint", entrypointToSet(t.EntryPoint))
+	if err != nil {
+		return err
+	}
+
+	if c.GetClientType() == IBMMonitor {
+		err = resourceSysdigMonitorTeamReadIBM(d, &t)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func resourceSysdigMonitorTeamReadIBM(d *schema.ResourceData, t *v2.Team) error {
 	var ibmPlatformMetrics *string
 	if t.NamespaceFilters != nil {
 		ibmPlatformMetrics = t.NamespaceFilters.IBMPlatformMetrics
 	}
-	_ = d.Set("enable_ibm_platform_metrics", t.CanUseBeaconMetrics)
-	_ = d.Set("ibm_platform_metrics", ibmPlatformMetrics)
+	err := d.Set("enable_ibm_platform_metrics", t.CanUseBeaconMetrics)
+	if err != nil {
+		return err
+	}
+	return d.Set("ibm_platform_metrics", ibmPlatformMetrics)
 }
 
 func userMonitorRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface{}) {

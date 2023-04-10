@@ -42,3 +42,16 @@ func parseAzureCreds(azureTrustedIdentity string) (tenantID string, spID string,
 	}
 	return tokens[0], tokens[1], nil
 }
+
+// applyOnSchema will traverse into schema definition in DFS manner and apply fn on every entry
+func applyOnSchema(s map[string]*schema.Schema, fn func(*schema.Schema)) {
+	for _, v := range s {
+		fn(v)
+
+		if v.Elem != nil {
+			if elem, ok := v.Elem.(*schema.Resource); ok && elem != nil {
+				applyOnSchema(elem.Schema, fn)
+			}
+		}
+	}
+}
