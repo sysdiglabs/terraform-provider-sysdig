@@ -32,7 +32,7 @@ func dataSourceSysdigMonitorTeamRead(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	team, err := client.GetTeamByName(ctx, data.Get("name").(string))
+	team, err := client.GetTeamByName(ctx, data.Get(TeamSchemaNameKey).(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
