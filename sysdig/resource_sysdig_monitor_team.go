@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
@@ -20,7 +21,7 @@ const (
 	TeamSchemaEnableIBMPlatformMetricsKey   = "enable_ibm_platform_metrics"
 	TeamSchemaIBMPlatformMetricsKey         = "ibm_platform_metrics"
 	TeamSchemaCanUseSysdigCaptureKey        = "can_use_sysdig_capture"
-	TeamSchemaCanUseInfrastructureEventsKey = "can_see_infrastructure_events"
+	TeamSchemaCanSeeInfrastructureEventsKey = "can_see_infrastructure_events"
 	TeamSchemaCanUseAWSDataKey              = "can_use_aws_data"
 	TeamSchemaUserRolesKey                  = "user_roles"
 	TeamSchemaUserRolesEmailKey             = "email"
@@ -58,7 +59,7 @@ func createBaseMonitorTeamSchema() map[string]*schema.Schema {
 		TeamSchemaCanUseSysdigCaptureKey: {
 			Type: schema.TypeBool,
 		},
-		TeamSchemaCanUseInfrastructureEventsKey: {
+		TeamSchemaCanSeeInfrastructureEventsKey: {
 			Type: schema.TypeBool,
 		},
 		TeamSchemaCanUseAWSDataKey: {
@@ -112,7 +113,7 @@ func createMonitorTeamSchema() map[string]*schema.Schema {
 	s[TeamSchemaNameKey].Optional = false
 	s[TeamSchemaScopeByKey].Default = "host"
 	s[TeamSchemaCanUseSysdigCaptureKey].Default = false
-	s[TeamSchemaCanUseInfrastructureEventsKey].Default = false
+	s[TeamSchemaCanSeeInfrastructureEventsKey].Default = false
 	s[TeamSchemaCanUseAWSDataKey].Default = false
 	userRolesSchema := s[TeamSchemaUserRolesKey].Elem.(*schema.Resource).Schema
 	userRolesSchema[TeamSchemaUserRolesEmailKey].Required = true
@@ -225,51 +226,51 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 func teamMonitorToResourceData(d *schema.ResourceData, c SysdigClients, t v2.Team) error {
 	d.SetId(strconv.Itoa(t.ID))
 
-	err := d.Set("version", t.Version)
+	err := d.Set(TeamSchemaVersionKey, t.Version)
 	if err != nil {
 		return err
 	}
-	err = d.Set("theme", t.Theme)
+	err = d.Set(TeamSchemaThemeKey, t.Theme)
 	if err != nil {
 		return err
 	}
-	err = d.Set("name", t.Name)
+	err = d.Set(TeamSchemaNameKey, t.Name)
 	if err != nil {
 		return err
 	}
-	err = d.Set("description", t.Description)
+	err = d.Set(TeamSchemaDescriptionKey, t.Description)
 	if err != nil {
 		return err
 	}
-	err = d.Set("scope_by", t.Show)
+	err = d.Set(TeamSchemaScopeByKey, t.Show)
 	if err != nil {
 		return err
 	}
-	err = d.Set("filter", t.Filter)
+	err = d.Set(TeamSchemaFilterKey, t.Filter)
 	if err != nil {
 		return err
 	}
-	err = d.Set("can_use_sysdig_capture", t.CanUseSysdigCapture)
+	err = d.Set(TeamSchemaCanUseSysdigCaptureKey, t.CanUseSysdigCapture)
 	if err != nil {
 		return err
 	}
-	err = d.Set("can_see_infrastructure_events", t.CanUseCustomEvents)
+	err = d.Set(TeamSchemaCanSeeInfrastructureEventsKey, t.CanUseCustomEvents)
 	if err != nil {
 		return err
 	}
-	err = d.Set("can_use_aws_data", t.CanUseAwsMetrics)
+	err = d.Set(TeamSchemaCanUseAWSDataKey, t.CanUseAwsMetrics)
 	if err != nil {
 		return err
 	}
-	err = d.Set("default_team", t.DefaultTeam)
+	err = d.Set(TeamSchemaDefaultTeamKey, t.DefaultTeam)
 	if err != nil {
 		return err
 	}
-	err = d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
+	err = d.Set(TeamSchemaUserRolesKey, userMonitorRolesToSet(t.UserRoles))
 	if err != nil {
 		return err
 	}
-	err = d.Set("entrypoint", entrypointToSet(t.EntryPoint))
+	err = d.Set(TeamSchemaEntrypointKey, entrypointToSet(t.EntryPoint))
 	if err != nil {
 		return err
 	}
@@ -288,11 +289,11 @@ func resourceSysdigMonitorTeamReadIBM(d *schema.ResourceData, t *v2.Team) error 
 	if t.NamespaceFilters != nil {
 		ibmPlatformMetrics = t.NamespaceFilters.IBMPlatformMetrics
 	}
-	err := d.Set("enable_ibm_platform_metrics", t.CanUseBeaconMetrics)
+	err := d.Set(TeamSchemaEnableIBMPlatformMetricsKey, t.CanUseBeaconMetrics)
 	if err != nil {
 		return err
 	}
-	return d.Set("ibm_platform_metrics", ibmPlatformMetrics)
+	return d.Set(TeamSchemaIBMPlatformMetricsKey, ibmPlatformMetrics)
 }
 
 func userMonitorRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface{}) {
@@ -302,8 +303,8 @@ func userMonitorRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface
 		}
 
 		roleMap := map[string]interface{}{
-			"email": role.Email,
-			"role":  role.Role,
+			TeamSchemaUserRolesEmailKey: role.Email,
+			TeamSchemaUserRolesRoleKey:  role.Role,
 		}
 		res = append(res, roleMap)
 	}
@@ -316,8 +317,8 @@ func entrypointToSet(entrypoint *v2.EntryPoint) (res []map[string]interface{}) {
 	}
 
 	entrypointMap := map[string]interface{}{
-		"type":      entrypoint.Module,
-		"selection": entrypoint.Selection,
+		TeamSchemaEntrypointTypeKey:      entrypoint.Module,
+		TeamSchemaEntrypointSelectionKey: entrypoint.Selection,
 	}
 	return append(res, entrypointMap)
 }
@@ -332,7 +333,7 @@ func resourceSysdigMonitorTeamUpdate(ctx context.Context, d *schema.ResourceData
 	t := teamFromResourceData(d, clients.GetClientType())
 	t.Products = []string{"SDC"}
 
-	t.Version = d.Get("version").(int)
+	t.Version = d.Get(TeamSchemaVersionKey).(int)
 	t.ID, _ = strconv.Atoi(d.Id())
 
 	_, err = client.UpdateTeam(ctx, t)
@@ -372,36 +373,36 @@ func updateNamespaceFilters(filters *v2.NamespaceFilters, update v2.NamespaceFil
 }
 
 func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team {
-	canUseSysdigCapture := d.Get("can_use_sysdig_capture").(bool)
-	canUseCustomEvents := d.Get("can_see_infrastructure_events").(bool)
-	canUseAwsMetrics := d.Get("can_use_aws_data").(bool)
+	canUseSysdigCapture := d.Get(TeamSchemaCanUseSysdigCaptureKey).(bool)
+	canUseCustomEvents := d.Get(TeamSchemaCanSeeInfrastructureEventsKey).(bool)
+	canUseAwsMetrics := d.Get(TeamSchemaCanUseAWSDataKey).(bool)
 	canUseBeaconMetrics := false
 	t := v2.Team{
-		Theme:               d.Get("theme").(string),
-		Name:                d.Get("name").(string),
-		Description:         d.Get("description").(string),
-		Show:                d.Get("scope_by").(string),
-		Filter:              d.Get("filter").(string),
+		Theme:               d.Get(TeamSchemaThemeKey).(string),
+		Name:                d.Get(TeamSchemaNameKey).(string),
+		Description:         d.Get(TeamSchemaDescriptionKey).(string),
+		Show:                d.Get(TeamSchemaScopeByKey).(string),
+		Filter:              d.Get(TeamSchemaFilterKey).(string),
 		CanUseSysdigCapture: &canUseSysdigCapture,
 		CanUseCustomEvents:  &canUseCustomEvents,
 		CanUseAwsMetrics:    &canUseAwsMetrics,
 		CanUseBeaconMetrics: &canUseBeaconMetrics,
-		DefaultTeam:         d.Get("default_team").(bool),
+		DefaultTeam:         d.Get(TeamSchemaDefaultTeamKey).(bool),
 	}
 
 	userRoles := make([]v2.UserRoles, 0)
-	for _, userRole := range d.Get("user_roles").(*schema.Set).List() {
+	for _, userRole := range d.Get(TeamSchemaUserRolesKey).(*schema.Set).List() {
 		ur := userRole.(map[string]interface{})
 		userRoles = append(userRoles, v2.UserRoles{
-			Email: ur["email"].(string),
-			Role:  ur["role"].(string),
+			Email: ur[TeamSchemaUserRolesEmailKey].(string),
+			Role:  ur[TeamSchemaUserRolesRoleKey].(string),
 		})
 	}
 	t.UserRoles = userRoles
 
 	t.EntryPoint = &v2.EntryPoint{}
-	t.EntryPoint.Module = d.Get("entrypoint.0.type").(string)
-	if val, ok := d.GetOk("entrypoint.0.selection"); ok {
+	t.EntryPoint.Module = d.Get(fmt.Sprintf("%s.0.%s", TeamSchemaEntrypointKey, TeamSchemaEntrypointTypeKey)).(string)
+	if val, ok := d.GetOk(fmt.Sprintf("%s.0.%s", TeamSchemaEntrypointKey, TeamSchemaEntrypointSelectionKey)); ok {
 		t.EntryPoint.Selection = val.(string)
 	}
 
@@ -413,10 +414,10 @@ func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team
 }
 
 func teamFromResourceDataIBM(d *schema.ResourceData, t *v2.Team) {
-	canUseBeaconMetrics := d.Get("enable_ibm_platform_metrics").(bool)
+	canUseBeaconMetrics := d.Get(TeamSchemaEnableIBMPlatformMetricsKey).(bool)
 	t.CanUseBeaconMetrics = &canUseBeaconMetrics
 
-	if v, ok := d.GetOk("ibm_platform_metrics"); ok {
+	if v, ok := d.GetOk(TeamSchemaIBMPlatformMetricsKey); ok {
 		metrics := v.(string)
 		t.NamespaceFilters = updateNamespaceFilters(t.NamespaceFilters, v2.NamespaceFilters{
 			IBMPlatformMetrics: &metrics,
