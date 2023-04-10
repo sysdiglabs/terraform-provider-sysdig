@@ -1,9 +1,8 @@
 package sysdig
 
 import (
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func createMonitorNotificationChannelSchema(original map[string]*schema.Schema) map[string]*schema.Schema {
@@ -45,11 +44,11 @@ func createMonitorNotificationChannelSchema(original map[string]*schema.Schema) 
 	return notificationChannelSchema
 }
 
-func monitorNotificationChannelFromResourceData(d *schema.ResourceData) (nc monitor.NotificationChannel, err error) {
-	nc = monitor.NotificationChannel{
+func monitorNotificationChannelFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
+	nc = v2.NotificationChannel{
 		Name:    d.Get("name").(string),
 		Enabled: d.Get("enabled").(bool),
-		Options: monitor.NotificationChannelOptions{
+		Options: v2.NotificationChannelOptions{
 			NotifyOnOk:           d.Get("notify_when_ok").(bool),
 			NotifyOnResolve:      d.Get("notify_when_resolved").(bool),
 			SendTestNotification: d.Get("send_test_notification").(bool),
@@ -58,7 +57,7 @@ func monitorNotificationChannelFromResourceData(d *schema.ResourceData) (nc moni
 	return
 }
 
-func monitorNotificationChannelToResourceData(nc *monitor.NotificationChannel, data *schema.ResourceData) (err error) {
+func monitorNotificationChannelToResourceData(nc *v2.NotificationChannel, data *schema.ResourceData) (err error) {
 	_ = data.Set("version", nc.Version)
 	_ = data.Set("name", nc.Name)
 	_ = data.Set("enabled", nc.Enabled)
@@ -67,4 +66,22 @@ func monitorNotificationChannelToResourceData(nc *monitor.NotificationChannel, d
 	_ = data.Set("send_test_notification", nc.Options.SendTestNotification)
 
 	return
+}
+
+func getMonitorNotificationChannelClient(c SysdigClients) (v2.NotificationChannelInterface, error) {
+	var client v2.NotificationChannelInterface
+	var err error
+	switch c.GetClientType() {
+	case IBMMonitor:
+		client, err = c.ibmMonitorClient()
+		if err != nil {
+			return nil, err
+		}
+	default:
+		client, err = c.sysdigMonitorClientV2()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }

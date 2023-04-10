@@ -330,6 +330,9 @@ func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err 
 }
 
 func (c *sysdigClients) GetClientType() ClientType {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	if _, err := getIBMMonitorVariables(c.d); err == nil {
 		return IBMMonitor
 	}

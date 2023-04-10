@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorNotificationChannelPagerduty() *schema.Resource {
@@ -49,7 +48,7 @@ func resourceSysdigMonitorNotificationChannelPagerduty() *schema.Resource {
 }
 
 func resourceSysdigMonitorNotificationChannelPagerdutyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -72,7 +71,7 @@ func resourceSysdigMonitorNotificationChannelPagerdutyCreate(ctx context.Context
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigMonitorNotificationChannelPagerdutyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -93,7 +92,7 @@ func resourceSysdigMonitorNotificationChannelPagerdutyRead(ctx context.Context, 
 }
 
 func resourceSysdigMonitorNotificationChannelPagerdutyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -115,7 +114,7 @@ func resourceSysdigMonitorNotificationChannelPagerdutyUpdate(ctx context.Context
 }
 
 func resourceSysdigMonitorNotificationChannelPagerdutyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -132,7 +131,7 @@ func resourceSysdigMonitorNotificationChannelPagerdutyDelete(ctx context.Context
 
 // Channel type for Notification Channels
 
-func monitorNotificationChannelPagerdutyFromResourceData(d *schema.ResourceData) (nc monitor.NotificationChannel, err error) {
+func monitorNotificationChannelPagerdutyFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
 	nc, err = monitorNotificationChannelFromResourceData(d)
 	if err != nil {
 		return
@@ -146,7 +145,7 @@ func monitorNotificationChannelPagerdutyFromResourceData(d *schema.ResourceData)
 	return
 }
 
-func monitorNotificationChannelPagerdutyToResourceData(nc *monitor.NotificationChannel, d *schema.ResourceData) (err error) {
+func monitorNotificationChannelPagerdutyToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return

@@ -160,8 +160,21 @@ When IBM Cloud Monitoring resources are to be created, this authentication must 
   environment variable. By default, this is false.<br/><br/>
 
 > **Note**
-> Enabling this way of authentication is under active development. For now, you can manage following resources on IBM Cloud Monitoring:
+> Enabling this way of authentication is under active development.
+>
+> For now, you can manage following resources sources on IBM Cloud Monitoring:
 > - `sysdig_monitor_team`
+> - `sysdig_monitor_notification_channel_email`
+> - `sysdig_monitor_notification_channel_opsgenie`
+> - `sysdig_monitor_notification_channel_pagerduty`
+> - `sysdig_monitor_notification_channel_slack`
+> - `sysdig_monitor_notification_channel_sns`
+> - `sysdig_monitor_notification_channel_victorops`
+> - `sysdig_monitor_notification_channel_webhook`
+>
+> And data sources:
+> - `sysdig_monitor_notification_channel_pagerduty`
+> - `sysdig_monitor_notification_channel_email`
 
 ###  Others
 * `extra_headers` - (Optional) Defines extra HTTP headers that will be added to the client

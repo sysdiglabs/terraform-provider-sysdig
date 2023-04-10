@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig
+//go:build tf_acc_sysdig || tf_acc_ibm
 
 package sysdig_test
 
@@ -19,8 +19,10 @@ func TestAccNotificationChannelEmailDataSource(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_MONITOR_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN must be set for acceptance tests")
+			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
+			ibmMonitor := os.Getenv("SYSDIG_IBM_MONITOR_API_KEY")
+			if monitor == "" && ibmMonitor == "" {
+				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_IBM_MONITOR_API_KEY must be set for acceptance tests")
 			}
 		},
 		ProviderFactories: map[string]func() (*schema.Provider, error){

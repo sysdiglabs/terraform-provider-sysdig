@@ -25,6 +25,7 @@ const (
 
 type Common interface {
 	TeamInterface
+	NotificationChannelInterface
 }
 
 type Requester interface {
