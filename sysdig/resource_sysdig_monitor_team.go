@@ -61,35 +61,53 @@ func createBaseMonitorTeamSchema() map[string]*schema.Schema {
 
 func createMonitorTeamSchema() map[string]*schema.Schema {
 	s := createBaseMonitorTeamSchema()
-	ApplyOnSchema(s, func(s *schema.Schema) {
-		s.Optional = true
-	})
 
 	s[TeamSchemaThemeKey].Default = "#05C391"
+	s[TeamSchemaThemeKey].Optional = true
+
 	s[TeamSchemaNameKey].Required = true
-	s[TeamSchemaNameKey].Optional = false
+
+	s[TeamSchemaDescriptionKey].Optional = true
+
 	s[TeamSchemaScopeByKey].Default = "host"
+	s[TeamSchemaScopeByKey].Optional = true
+
+	s[TeamSchemaFilterKey].Optional = true
+
+	s[TeamSchemaEnableIBMPlatformMetricsKey].Optional = true
+	s[TeamSchemaIBMPlatformMetricsKey].Optional = true
+
 	s[TeamSchemaCanUseSysdigCaptureKey].Default = false
+	s[TeamSchemaCanUseSysdigCaptureKey].Optional = true
+
 	s[TeamSchemaCanSeeInfrastructureEventsKey].Default = false
+	s[TeamSchemaCanSeeInfrastructureEventsKey].Optional = true
+
 	s[TeamSchemaCanUseAWSDataKey].Default = false
+	s[TeamSchemaCanUseAWSDataKey].Optional = true
+
+	s[TeamSchemaUserRolesKey].Optional = true
 	userRolesSchema := s[TeamSchemaUserRolesKey].Elem.(*schema.Resource).Schema
 	userRolesSchema[TeamSchemaUserRolesEmailKey].Required = true
-	userRolesSchema[TeamSchemaUserRolesEmailKey].Optional = false
 	userRolesSchema[TeamSchemaUserRolesRoleKey].Default = "ROLE_TEAM_STANDARD"
+	userRolesSchema[TeamSchemaUserRolesRoleKey].Optional = true
 	userRolesSchema[TeamSchemaUserRolesRoleKey].ValidateFunc = validation.StringInSlice([]string{
 		"ROLE_TEAM_STANDARD", "ROLE_TEAM_EDIT", "ROLE_TEAM_READ", "ROLE_TEAM_MANAGER",
 	}, false)
+
 	s[TeamSchemaEntrypointKey].Required = true
-	s[TeamSchemaEntrypointKey].Optional = false
 	entrypointSchema := s[TeamSchemaEntrypointKey].Elem.(*schema.Resource).Schema
 	entrypointSchema[TeamSchemaEntrypointTypeKey].Required = true
-	entrypointSchema[TeamSchemaEntrypointTypeKey].Optional = false
 	entrypointSchema[TeamSchemaEntrypointTypeKey].ValidateFunc = validation.StringInSlice([]string{
 		"Explore", "Dashboards", "Events", "Alerts", "Settings",
 	}, false)
+	entrypointSchema[TeamSchemaEntrypointSelectionKey].Optional = true
+
 	s[TeamSchemaDefaultTeamKey].Default = false
+	s[TeamSchemaDefaultTeamKey].Optional = true
+
 	s[TeamSchemaVersionKey].Computed = true
-	s[TeamSchemaVersionKey].Optional = false
+
 	return s
 }
 
