@@ -8,14 +8,14 @@ description: |-
 
 # Data Source: sysdig_monitor_team
 
-Retrieves information about a Monitor team
+Retrieves information about a Monitor team.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
 ```terraform
-data "sysdig_monitor_team" "monitor_by_name"{
+data "sysdig_monitor_team" "team_by_name"{
   name = "team name"
 }
 ```
