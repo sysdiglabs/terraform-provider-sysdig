@@ -3,7 +3,7 @@ subcategory: "Sysdig Monitor"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_team"
 description: |-
-Retrieves information about a Monitor team
+  Retrieves information about a Monitor team.
 ---
 
 # Data Source: sysdig_monitor_team
