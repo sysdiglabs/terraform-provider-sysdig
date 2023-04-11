@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -30,6 +31,7 @@ type IBMAccessToken string
 type UnixTimestamp int64
 
 type IBMRequest struct {
+	mu              sync.Mutex
 	config          *config
 	httpClient      *http.Client
 	tokenExpiration UnixTimestamp
@@ -42,6 +44,9 @@ type IAMTokenResponse struct {
 }
 
 func (ir *IBMRequest) getIBMIAMToken() (IBMAccessToken, error) {
+	ir.mu.Lock()
+	defer ir.mu.Unlock()
+
 	if UnixTimestamp(time.Now().Unix()) < ir.tokenExpiration {
 		return ir.token, nil
 	}
@@ -99,6 +104,7 @@ func newIBMClient(opts ...ClientOption) *Client {
 	return &Client{
 		config: cfg,
 		requester: &IBMRequest{
+			mu:         sync.Mutex{},
 			config:     cfg,
 			httpClient: newHTTPClient(cfg),
 		},
