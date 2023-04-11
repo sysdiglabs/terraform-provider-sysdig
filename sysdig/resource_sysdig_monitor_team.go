@@ -13,43 +13,19 @@ import (
 )
 
 const (
-	TeamSchemaThemeKey                      = "theme"
-	TeamSchemaNameKey                       = "name"
-	TeamSchemaDescriptionKey                = "description"
-	TeamSchemaScopeByKey                    = "scope_by"
-	TeamSchemaFilterKey                     = "filter"
 	TeamSchemaEnableIBMPlatformMetricsKey   = "enable_ibm_platform_metrics"
 	TeamSchemaIBMPlatformMetricsKey         = "ibm_platform_metrics"
 	TeamSchemaCanUseSysdigCaptureKey        = "can_use_sysdig_capture"
 	TeamSchemaCanSeeInfrastructureEventsKey = "can_see_infrastructure_events"
 	TeamSchemaCanUseAWSDataKey              = "can_use_aws_data"
-	TeamSchemaUserRolesKey                  = "user_roles"
-	TeamSchemaUserRolesEmailKey             = "email"
-	TeamSchemaUserRolesRoleKey              = "role"
 	TeamSchemaEntrypointKey                 = "entrypoint"
 	TeamSchemaEntrypointTypeKey             = "type"
 	TeamSchemaEntrypointSelectionKey        = "selection"
-	TeamSchemaDefaultTeamKey                = "default_team"
-	TeamSchemaVersionKey                    = "version"
 )
 
 func createBaseMonitorTeamSchema() map[string]*schema.Schema {
-	s := map[string]*schema.Schema{
-		TeamSchemaThemeKey: {
-			Type: schema.TypeString,
-		},
-		TeamSchemaNameKey: {
-			Type: schema.TypeString,
-		},
-		TeamSchemaDescriptionKey: {
-			Type: schema.TypeString,
-		},
-		TeamSchemaScopeByKey: {
-			Type: schema.TypeString,
-		},
-		TeamSchemaFilterKey: {
-			Type: schema.TypeString,
-		},
+	s := createBaseTeamSchema()
+	MergeMap(s, map[string]*schema.Schema{
 		TeamSchemaEnableIBMPlatformMetricsKey: {
 			Type: schema.TypeBool,
 		},
@@ -65,19 +41,6 @@ func createBaseMonitorTeamSchema() map[string]*schema.Schema {
 		TeamSchemaCanUseAWSDataKey: {
 			Type: schema.TypeBool,
 		},
-		TeamSchemaUserRolesKey: {
-			Type: schema.TypeSet,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					TeamSchemaUserRolesEmailKey: {
-						Type: schema.TypeString,
-					},
-					TeamSchemaUserRolesRoleKey: {
-						Type: schema.TypeString,
-					},
-				},
-			},
-		},
 		TeamSchemaEntrypointKey: {
 			Type: schema.TypeList,
 			Elem: &schema.Resource{
@@ -91,20 +54,14 @@ func createBaseMonitorTeamSchema() map[string]*schema.Schema {
 				},
 			},
 		},
-		TeamSchemaDefaultTeamKey: {
-			Type: schema.TypeBool,
-		},
-		TeamSchemaVersionKey: {
-			Type: schema.TypeInt,
-		},
-	}
+	})
 
 	return s
 }
 
 func createMonitorTeamSchema() map[string]*schema.Schema {
 	s := createBaseMonitorTeamSchema()
-	applyOnSchema(s, func(s *schema.Schema) {
+	ApplyOnSchema(s, func(s *schema.Schema) {
 		s.Optional = true
 	})
 

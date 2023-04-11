@@ -9,7 +9,7 @@ import (
 
 func createMonitorDataSourceTeamSchema() map[string]*schema.Schema {
 	s := createBaseMonitorTeamSchema()
-	applyOnSchema(s, func(s *schema.Schema) {
+	ApplyOnSchema(s, func(s *schema.Schema) {
 		s.Computed = true
 	})
 
