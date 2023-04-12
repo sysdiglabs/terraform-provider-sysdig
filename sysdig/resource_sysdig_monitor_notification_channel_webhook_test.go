@@ -4,7 +4,6 @@ package sysdig_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -18,13 +17,7 @@ func TestAccMonitorNotificationChannelWebhook(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
-			ibmMonitor := os.Getenv("SYSDIG_IBM_MONITOR_API_KEY")
-			if monitor == "" && ibmMonitor == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_IBM_MONITOR_API_KEY must be set for acceptance tests")
-			}
-		},
+		PreCheck: sysdigOrIBMMonitorPreCheck(t),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -33,6 +26,9 @@ func TestAccMonitorNotificationChannelWebhook(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: monitorNotificationChannelWebhookWithName(rText()),
+			},
+			{
+				Config: monitorNotificationChannelWebhookWithTeam(rText()),
 			},
 			{
 				ResourceName:      "sysdig_monitor_notification_channel_webhook.sample-webhook",
@@ -71,4 +67,25 @@ func monitorNotificationChannelWebhookWithNameWithAdditionalheaders(name string)
 			"Webhook-Header": "TestHeader"
 		}
 	}`, name)
+}
+
+func monitorNotificationChannelWebhookWithTeam(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_team" "sample_team" {
+  name = "team-%[1]s"
+
+  entrypoint {
+    type = "Explore"
+  }
+}
+
+resource "sysdig_monitor_notification_channel_webhook" "sample-webhook" {
+	name = "Example Channel %[1]s - Webhook"
+    share_with = sysdig_monitor_team.sample_team.id
+	enabled = true
+	url = "https://example.com/"
+	notify_when_ok = false
+	notify_when_resolved = false
+	send_test_notification = false
+}`, name)
 }

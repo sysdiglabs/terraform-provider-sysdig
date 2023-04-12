@@ -16,6 +16,10 @@ func createMonitorNotificationChannelSchema(original map[string]*schema.Schema) 
 			Optional: true,
 			Default:  true,
 		},
+		"share_with": {
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
 		"notify_when_ok": {
 			Type:     schema.TypeBool,
 			Optional: true,
@@ -45,9 +49,16 @@ func createMonitorNotificationChannelSchema(original map[string]*schema.Schema) 
 }
 
 func monitorNotificationChannelFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
+	var teamID *int
+	if v, ok := d.GetOk("share_with"); ok {
+		tmp := v.(int)
+		teamID = &tmp
+	}
+
 	nc = v2.NotificationChannel{
 		Name:    d.Get("name").(string),
 		Enabled: d.Get("enabled").(bool),
+		TeamID:  teamID,
 		Options: v2.NotificationChannelOptions{
 			NotifyOnOk:           d.Get("notify_when_ok").(bool),
 			NotifyOnResolve:      d.Get("notify_when_resolved").(bool),
@@ -61,6 +72,10 @@ func monitorNotificationChannelToResourceData(nc *v2.NotificationChannel, data *
 	_ = data.Set("version", nc.Version)
 	_ = data.Set("name", nc.Name)
 	_ = data.Set("enabled", nc.Enabled)
+	err = data.Set("share_with", nc.TeamID)
+	if err != nil {
+		return err
+	}
 	_ = data.Set("notify_when_ok", nc.Options.NotifyOnOk)
 	_ = data.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
 	_ = data.Set("send_test_notification", nc.Options.SendTestNotification)

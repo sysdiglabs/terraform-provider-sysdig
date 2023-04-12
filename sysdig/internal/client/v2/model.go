@@ -78,6 +78,7 @@ type NotificationChannel struct {
 	Type    string                     `json:"type"`
 	Name    string                     `json:"name"`
 	Enabled bool                       `json:"enabled"`
+	TeamID  *int                       `json:"teamId,omitempty"`
 	Options NotificationChannelOptions `json:"options"`
 }
 
