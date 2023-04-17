@@ -41,7 +41,7 @@ testacc-ibm: fmtcheck
 
 junit-report: fmtcheck
 	@go install github.com/jstemmer/go-junit-report/v2@latest
-	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=tf_acc_sysdig -timeout 120m -race 2>&1 | go-junit-report -iocopy -out junit-report.xml
+	CGO_ENABLED=1 TF_ACC=1 go test -p 1 $(TEST) -v $(TESTARGS) -tags=tf_acc_sysdig -timeout 120m -race 2>&1 | go-junit-report -iocopy -out junit-report.xml
 
 vet:
 	@echo "go vet ."
