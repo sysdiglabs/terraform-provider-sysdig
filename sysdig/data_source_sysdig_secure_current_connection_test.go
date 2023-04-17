@@ -19,7 +19,7 @@ func TestAccSecureConnection(t *testing.T) {
 	apiToken := os.Getenv("SYSDIG_SECURE_API_TOKEN")
 	secureUrl := os.Getenv("SYSDIG_SECURE_URL")
 	if secureUrl == "" {
-		secureUrl := "https://secure.sysdig.com"
+		secureUrl = "https://secure.sysdig.com"
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
