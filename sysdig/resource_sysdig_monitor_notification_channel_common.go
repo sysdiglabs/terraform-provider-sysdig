@@ -16,7 +16,7 @@ func createMonitorNotificationChannelSchema(original map[string]*schema.Schema) 
 			Optional: true,
 			Default:  true,
 		},
-		"share_with_all_teams": {
+		"share_with_current_team": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
@@ -51,8 +51,8 @@ func createMonitorNotificationChannelSchema(original map[string]*schema.Schema) 
 
 func monitorNotificationChannelFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	var tID *int
-	shareAllTeams := d.Get("share_with_all_teams").(bool)
-	if !shareAllTeams {
+	shareWithCurrentTeam := d.Get("share_with_current_team").(bool)
+	if shareWithCurrentTeam {
 		tID = &teamID
 	}
 
@@ -73,12 +73,12 @@ func monitorNotificationChannelToResourceData(nc *v2.NotificationChannel, data *
 	_ = data.Set("version", nc.Version)
 	_ = data.Set("name", nc.Name)
 	_ = data.Set("enabled", nc.Enabled)
-	shareWithAllTeams := false
-	if nc.TeamID == nil {
-		shareWithAllTeams = true
+	var shareWithCurrentTeam bool
+	if nc.TeamID != nil {
+		shareWithCurrentTeam = true
 	}
 
-	err = data.Set("share_with_all_teams", shareWithAllTeams)
+	err = data.Set("share_with_current_team", shareWithCurrentTeam)
 	if err != nil {
 		return err
 	}
