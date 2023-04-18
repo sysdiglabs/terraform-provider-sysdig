@@ -18,6 +18,7 @@ import (
 )
 
 const (
+	GetMePath                 = "/api/users/me"
 	AuthorizationHeader       = "Authorization"
 	ContentTypeHeader         = "Content-Type"
 	ContentTypeJSON           = "application/json"
@@ -109,7 +110,7 @@ func request(httpClient *http.Client, cfg *config, request *http.Request) (*http
 func getMe(ctx context.Context, cfg *config, httpClient *http.Client, headers map[string]string) (*User, error) {
 	r, err := http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf("%s/api/users/me", cfg.url),
+		fmt.Sprintf("%s%s", cfg.url, GetMePath),
 		nil,
 	)
 	if err != nil {

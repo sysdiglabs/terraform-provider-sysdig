@@ -60,11 +60,13 @@ func TestIBMClient_DoIBMRequest(t *testing.T) {
 			}
 		}))
 
+		var teamID int
 		c := newIBMClient(
 			WithIBMInstanceID(instanceID),
 			WithIBMAPIKey(apiKey),
 			WithIBMIamURL(server.URL),
 			WithURL(server.URL),
+			WithSysdigTeamID(&teamID),
 		)
 
 		url := fmt.Sprintf("%s/foo/bar", server.URL)
