@@ -28,6 +28,9 @@ func TestAccMonitorNotificationChannelSlack(t *testing.T) {
 				Config: monitorNotificationChannelSlackWithName(rText()),
 			},
 			{
+				Config: monitorNotificationChannelSlackSharedWithCurrentTeam(rText()),
+			},
+			{
 				ResourceName:      "sysdig_monitor_notification_channel_slack.sample-slack",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -40,6 +43,19 @@ func monitorNotificationChannelSlackWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_slack" "sample-slack" {
 	name = "Example Channel %s - Slack"
+	enabled = true
+	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	channel = "#sysdig"
+	notify_when_ok = true
+	notify_when_resolved = true
+}`, name)
+}
+
+func monitorNotificationChannelSlackSharedWithCurrentTeam(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_notification_channel_slack" "sample-slack" {
+	name = "Example Channel %s - Slack"
+    share_with_current_team = true
 	enabled = true
 	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	channel = "#sysdig"

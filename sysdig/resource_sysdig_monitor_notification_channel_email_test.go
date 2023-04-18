@@ -31,6 +31,9 @@ func TestAccMonitorNotificationChannelEmail(t *testing.T) {
 				Config: monitorNotificationChannelEmailWithNameInReverseOrder(rText()),
 			},
 			{
+				Config: monitorNotificationChannelEmailSharedWithCurrentTeam(rText()),
+			},
+			{
 				ResourceName:      "sysdig_monitor_notification_channel_email.sample_email",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -55,6 +58,19 @@ func monitorNotificationChannelEmailWithNameInReverseOrder(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_email" "sample_email" {
 	name = "%s"
+	recipients = ["bar@localhost.com", "root@localhost.com"]
+	enabled = false
+	notify_when_ok = false
+	notify_when_resolved = false
+	send_test_notification = false
+}`, name)
+}
+
+func monitorNotificationChannelEmailSharedWithCurrentTeam(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_notification_channel_email" "sample_email" {
+	name = "%s"
+    share_with_current_team = true
 	recipients = ["bar@localhost.com", "root@localhost.com"]
 	enabled = false
 	notify_when_ok = false

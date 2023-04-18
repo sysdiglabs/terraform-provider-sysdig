@@ -70,7 +70,6 @@ func (sr *SysdigRequest) CurrentTeamID(ctx context.Context) (int, error) {
 
 	user, err := getMe(ctx, sr.config, sr.httpClient, map[string]string{
 		AuthorizationHeader: fmt.Sprintf("Bearer %s", sr.config.token),
-		ContentTypeHeader:   ContentTypeJSON,
 	})
 	if err != nil {
 		return -1, err

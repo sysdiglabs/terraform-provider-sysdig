@@ -96,23 +96,37 @@ func TestIBMClient_CurrentTeamID(t *testing.T) {
 
 	testTable := []struct {
 		name           string
-		opt            ClientOption
+		opts           []ClientOption
 		expectedTeamID int
 	}{
 		{
-			name:           "use current team id from user",
-			opt:            WithSysdigTeamID(nil),
+			name: "use current team id from user",
+			opts: []ClientOption{
+				WithSysdigTeamID(nil),
+			},
 			expectedTeamID: teamID1,
 		},
 		{
-			name:           "use specified team id",
-			opt:            WithSysdigTeamID(&teamID2),
+			name: "use specified team id",
+			opts: []ClientOption{
+				WithSysdigTeamID(&teamID2),
+			},
 			expectedTeamID: teamID2,
 		},
 		{
-			name:           "get team id from team name",
-			opt:            WithSysdigTeamName(teamName),
+			name: "get team id from team name",
+			opts: []ClientOption{
+				WithSysdigTeamName(teamName),
+			},
 			expectedTeamID: teamID3,
+		},
+		{
+			name: "team id has priority over team name",
+			opts: []ClientOption{
+				WithSysdigTeamID(&teamID2),
+				WithSysdigTeamName(teamName),
+			},
+			expectedTeamID: teamID2,
 		},
 	}
 
@@ -156,13 +170,14 @@ func TestIBMClient_CurrentTeamID(t *testing.T) {
 
 	for _, testCase := range testTable {
 		t.Run(testCase.name, func(t *testing.T) {
-			c := newIBMClient(
+			opts := []ClientOption{
 				WithIBMInstanceID(instanceID),
 				WithIBMAPIKey(apiKey),
 				WithIBMIamURL(server.URL),
 				WithURL(server.URL),
-				testCase.opt,
-			)
+			}
+			opts = append(opts, testCase.opts...)
+			c := newIBMClient(opts...)
 
 			id, err := c.CurrentTeamID(context.Background())
 			if err != nil {

@@ -142,7 +142,6 @@ func (ir *IBMRequest) CurrentTeamID(ctx context.Context) (int, error) {
 	user, err := getMe(ctx, ir.config, ir.httpClient, map[string]string{
 		IBMInstanceIDHeader: ir.config.ibmInstanceID,
 		AuthorizationHeader: fmt.Sprintf("Bearer %s", token),
-		ContentTypeHeader:   ContentTypeJSON,
 	})
 	if err != nil {
 		return -1, err
