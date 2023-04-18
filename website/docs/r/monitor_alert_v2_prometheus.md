@@ -18,11 +18,11 @@ Creates a Sysdig Monitor Prometheus Alert. The notification is triggered on the 
 resource "sysdig_monitor_alert_v2_prometheus" "sample" {
   name = "Elasticsearch JVM heap usage"
   description = "Elasticsearch JVM heap used over attention threshold"
-  severity = high
+  severity = "high"
   query = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
   trigger_after_minutes = 10
   notification_channels {
-    id = <your-notification-channel-id>
+    id = 1234
     renotify_every_minutes = 5
   }
 }
