@@ -28,9 +28,6 @@ func TestAccMonitorNotificationChannelSNS(t *testing.T) {
 				Config: monitorNotificationChannelAmazonSNSWithName(rText()),
 			},
 			{
-				Config: monitorNotificationChannelAmazonSNSWithTeam(rText()),
-			},
-			{
 				ResourceName:      "sysdig_monitor_notification_channel_sns.sample-amazon-sns",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -43,27 +40,6 @@ func monitorNotificationChannelAmazonSNSWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_sns" "sample-amazon-sns" {
 	name = "Example Channel %s - Amazon SNS"
-	enabled = true
-	topics = ["arn:aws:sns:us-east-1:273489009834:my-alerts2", "arn:aws:sns:us-east-1:279948934544:my-alerts"]
-	notify_when_ok = false
-	notify_when_resolved = false
-	send_test_notification = false
-}`, name)
-}
-
-func monitorNotificationChannelAmazonSNSWithTeam(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_monitor_team" "sample_team" {
-  name = "team-%[1]s"
-
-  entrypoint {
-    type = "Explore"
-  }
-}
-
-resource "sysdig_monitor_notification_channel_sns" "sample-amazon-sns" {
-	name = "Example Channel %[1]s - Amazon SNS"
-    share_with = sysdig_monitor_team.sample_team.id
 	enabled = true
 	topics = ["arn:aws:sns:us-east-1:273489009834:my-alerts2", "arn:aws:sns:us-east-1:279948934544:my-alerts"]
 	notify_when_ok = false

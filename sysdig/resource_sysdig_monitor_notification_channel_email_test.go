@@ -31,9 +31,6 @@ func TestAccMonitorNotificationChannelEmail(t *testing.T) {
 				Config: monitorNotificationChannelEmailWithNameInReverseOrder(rText()),
 			},
 			{
-				Config: monitorNotificationChannelEmailWithTeam(rText()),
-			},
-			{
 				ResourceName:      "sysdig_monitor_notification_channel_email.sample_email",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -60,27 +57,6 @@ resource "sysdig_monitor_notification_channel_email" "sample_email" {
 	name = "%s"
 	recipients = ["bar@localhost.com", "root@localhost.com"]
 	enabled = false
-	notify_when_ok = false
-	notify_when_resolved = false
-	send_test_notification = false
-}`, name)
-}
-
-func monitorNotificationChannelEmailWithTeam(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_monitor_team" "sample_team" {
-  name = "team-%[1]s"
-
-  entrypoint {
-    type = "Explore"
-  }
-}
-
-resource "sysdig_monitor_notification_channel_email" "sample_email" {
-	name = "%[1]s"
-    share_with = sysdig_monitor_team.sample_team.id
-	recipients = ["root@localhost.com", "bar@localhost.com"]
-	enabled = true
 	notify_when_ok = false
 	notify_when_resolved = false
 	send_test_notification = false

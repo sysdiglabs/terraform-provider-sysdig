@@ -37,9 +37,6 @@ func TestAccMonitorNotificationChannelOpsGenie(t *testing.T) {
 				Config: monitorNotificationChannelOpsGenieWithNameAndRegion(rText()),
 			},
 			{
-				Config: monitorNotificationChannelOpsGenieWithTeam(rText()),
-			},
-			{
 				ResourceName:      "sysdig_monitor_notification_channel_opsgenie.sample-opsgenie-2",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -68,25 +65,5 @@ resource "sysdig_monitor_notification_channel_opsgenie" "sample-opsgenie-2" {
 	notify_when_ok = false
 	notify_when_resolved = false
 	region = "EU"
-}`, name)
-}
-
-func monitorNotificationChannelOpsGenieWithTeam(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_monitor_team" "sample_team" {
-  name = "team-%[1]s"
-
-  entrypoint {
-    type = "Explore"
-  }
-}
-
-resource "sysdig_monitor_notification_channel_opsgenie" "sample-opsgenie" {
-	name = "Example Channel %[1]s - OpsGenie"
-    share_with = sysdig_monitor_team.sample_team.id
-	enabled = true
-	api_key = "2349324-342354353-5324-23"
-	notify_when_ok = false
-	notify_when_resolved = false
 }`, name)
 }

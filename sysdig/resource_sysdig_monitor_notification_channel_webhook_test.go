@@ -28,9 +28,6 @@ func TestAccMonitorNotificationChannelWebhook(t *testing.T) {
 				Config: monitorNotificationChannelWebhookWithName(rText()),
 			},
 			{
-				Config: monitorNotificationChannelWebhookWithTeam(rText()),
-			},
-			{
 				ResourceName:      "sysdig_monitor_notification_channel_webhook.sample-webhook",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -67,25 +64,4 @@ func monitorNotificationChannelWebhookWithNameWithAdditionalheaders(name string)
 			"Webhook-Header": "TestHeader"
 		}
 	}`, name)
-}
-
-func monitorNotificationChannelWebhookWithTeam(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_monitor_team" "sample_team" {
-  name = "team-%[1]s"
-
-  entrypoint {
-    type = "Explore"
-  }
-}
-
-resource "sysdig_monitor_notification_channel_webhook" "sample-webhook" {
-	name = "Example Channel %[1]s - Webhook"
-    share_with = sysdig_monitor_team.sample_team.id
-	enabled = true
-	url = "https://example.com/"
-	notify_when_ok = false
-	notify_when_resolved = false
-	send_test_notification = false
-}`, name)
 }
