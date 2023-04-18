@@ -84,3 +84,94 @@ func TestIBMClient_DoIBMRequest(t *testing.T) {
 		server.Close()
 	}
 }
+
+func TestIBMClient_CurrentTeamID(t *testing.T) {
+	teamID1 := 1
+	teamID2 := 2
+	teamID3 := 3
+	teamName := "team"
+	instanceID := "instance ID"
+	apiKey := "api key"
+	token := "token"
+
+	testTable := []struct {
+		name           string
+		opt            ClientOption
+		expectedTeamID int
+	}{
+		{
+			name:           "use current team id from user",
+			opt:            WithSysdigTeamID(nil),
+			expectedTeamID: teamID1,
+		},
+		{
+			name:           "use specified team id",
+			opt:            WithSysdigTeamID(&teamID2),
+			expectedTeamID: teamID2,
+		},
+		{
+			name:           "get team id from team name",
+			opt:            WithSysdigTeamName(teamName),
+			expectedTeamID: teamID3,
+		},
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		var data []byte
+
+		switch r.URL.Path {
+		case fmt.Sprintf("%steam", GetTeamByNamePath):
+			data, err = json.Marshal(teamWrapper{Team: Team{
+				ID: teamID3,
+			}})
+			if err != nil {
+				t.Errorf("failed to create team response, err: %v", err)
+			}
+		case IBMIAMPath:
+			data, err = json.Marshal(IAMTokenResponse{
+				AccessToken: token,
+				Expiration:  time.Now().Add(time.Hour).Unix(),
+			})
+			if err != nil {
+				t.Errorf("failed to create IAM response, err: %v", err)
+			}
+		case GetMePath:
+			data, err = json.Marshal(userWrapper{
+				User: User{
+					CurrentTeam: teamID1,
+				},
+			})
+			if err != nil {
+				t.Errorf("failed to create user response, err: %v", err)
+			}
+		}
+
+		_, err = w.Write(data)
+		if err != nil {
+			t.Errorf("failed to create response, err: %v", err)
+		}
+		return
+	}))
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := newIBMClient(
+				WithIBMInstanceID(instanceID),
+				WithIBMAPIKey(apiKey),
+				WithIBMIamURL(server.URL),
+				WithURL(server.URL),
+				testCase.opt,
+			)
+
+			id, err := c.CurrentTeamID(context.Background())
+			if err != nil {
+				t.Errorf("got error while getting current team ID: %v", err)
+			}
+
+			if id != testCase.expectedTeamID {
+				t.Errorf("expected team ID %d, got %d", testCase.expectedTeamID, id)
+			}
+		})
+	}
+}

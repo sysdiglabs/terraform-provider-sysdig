@@ -19,6 +19,7 @@ const (
 	IBMApiKeyFormValue    = "apikey"
 	IBMAPIKeyGrantType    = "urn:ibm:params:oauth:grant-type:apikey"
 	SysdigTeamIDHeader    = "SysdigTeamID"
+	GetTeamByNamePath     = "/api/v2/teams/light/name/"
 )
 
 type IBMCommon interface {
@@ -89,7 +90,7 @@ func (ir *IBMRequest) getIBMIAMToken() (IBMAccessToken, error) {
 func (ir *IBMRequest) getTeamIDByName(ctx context.Context, name string, token IBMAccessToken) (int, error) {
 	r, err := http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf("%s/api/v2/teams/light/name/%s", ir.config.url, name),
+		fmt.Sprintf("%s%s%s", ir.config.url, GetTeamByNamePath, name),
 		nil,
 	)
 	if err != nil {
