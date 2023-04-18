@@ -44,12 +44,18 @@ func resourceSysdigMonitorNotificationChannelWebhook() *schema.Resource {
 }
 
 func resourceSysdigMonitorNotificationChannelWebhookCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
+	clients := meta.(SysdigClients)
+	client, err := getMonitorNotificationChannelClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err := monitorNotificationChannelWebhookFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	notificationChannel, err := monitorNotificationChannelWebhookFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -60,12 +66,10 @@ func resourceSysdigMonitorNotificationChannelWebhookCreate(ctx context.Context, 
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	_ = d.Set("version", notificationChannel.Version)
 
-	return nil
+	return resourceSysdigMonitorNotificationChannelWebhookRead(ctx, d, meta)
 }
 
-// Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigMonitorNotificationChannelWebhookRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
@@ -77,6 +81,7 @@ func resourceSysdigMonitorNotificationChannelWebhookRead(ctx context.Context, d 
 
 	if err != nil {
 		d.SetId("")
+		return diag.FromErr(err)
 	}
 
 	err = monitorNotificationChannelWebhookToResourceData(&nc, d)
@@ -88,12 +93,18 @@ func resourceSysdigMonitorNotificationChannelWebhookRead(ctx context.Context, d 
 }
 
 func resourceSysdigMonitorNotificationChannelWebhookUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
+	clients := meta.(SysdigClients)
+	client, err := getMonitorNotificationChannelClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	nc, err := monitorNotificationChannelWebhookFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	nc, err := monitorNotificationChannelWebhookFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -124,10 +135,8 @@ func resourceSysdigMonitorNotificationChannelWebhookDelete(ctx context.Context, 
 	return nil
 }
 
-// Channel type for Notification Channels
-
-func monitorNotificationChannelWebhookFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
-	nc, err = monitorNotificationChannelFromResourceData(d)
+func monitorNotificationChannelWebhookFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
+	nc, err = monitorNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
 		return
 	}

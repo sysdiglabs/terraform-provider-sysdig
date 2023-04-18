@@ -47,12 +47,18 @@ func resourceSysdigMonitorNotificationChannelOpsGenie() *schema.Resource {
 }
 
 func resourceSysdigMonitorNotificationChannelOpsGenieCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
+	clients := meta.(SysdigClients)
+	client, err := getMonitorNotificationChannelClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err := monitorNotificationChannelOpsGenieFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	notificationChannel, err := monitorNotificationChannelOpsGenieFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -63,12 +69,10 @@ func resourceSysdigMonitorNotificationChannelOpsGenieCreate(ctx context.Context,
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	_ = d.Set("version", notificationChannel.Version)
 
-	return nil
+	return resourceSysdigMonitorNotificationChannelOpsGenieRead(ctx, d, meta)
 }
 
-// Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigMonitorNotificationChannelOpsGenieRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
@@ -80,6 +84,7 @@ func resourceSysdigMonitorNotificationChannelOpsGenieRead(ctx context.Context, d
 
 	if err != nil {
 		d.SetId("")
+		return diag.FromErr(err)
 	}
 
 	err = monitorNotificationChannelOpsGenieToResourceData(&nc, d)
@@ -91,12 +96,18 @@ func resourceSysdigMonitorNotificationChannelOpsGenieRead(ctx context.Context, d
 }
 
 func resourceSysdigMonitorNotificationChannelOpsGenieUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
+	clients := meta.(SysdigClients)
+	client, err := getMonitorNotificationChannelClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	nc, err := monitorNotificationChannelOpsGenieFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	nc, err := monitorNotificationChannelOpsGenieFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -128,10 +139,8 @@ func resourceSysdigMonitorNotificationChannelOpsGenieDelete(ctx context.Context,
 	return nil
 }
 
-// Channel type for Notification Channels
-
-func monitorNotificationChannelOpsGenieFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
-	nc, err = monitorNotificationChannelFromResourceData(d)
+func monitorNotificationChannelOpsGenieFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
+	nc, err = monitorNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
 		return
 	}

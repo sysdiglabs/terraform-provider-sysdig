@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/jmespath/go-jmespath"
 	"github.com/spf13/cast"
@@ -23,12 +24,17 @@ const (
 	ContentTypeFormURLEncoded = "x-www-form-urlencoded"
 )
 
+type Base interface {
+	CurrentTeamID(ctx context.Context) (int, error)
+}
+
 type Common interface {
 	TeamInterface
 	NotificationChannelInterface
 }
 
 type Requester interface {
+	CurrentTeamID(ctx context.Context) (int, error)
 	Request(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error)
 }
 
@@ -98,6 +104,39 @@ func request(httpClient *http.Client, cfg *config, request *http.Request) (*http
 	}
 	log.Printf("[DEBUG] %s", string(out))
 	return response, err
+}
+
+func getMe(ctx context.Context, cfg *config, httpClient *http.Client, headers map[string]string) (*User, error) {
+	r, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("%s/api/users/me", cfg.url),
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	r = r.WithContext(ctx)
+	for k, v := range headers {
+		r.Header.Set(k, v)
+	}
+
+	resp, err := request(httpClient, cfg, r)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	wrapper, err := Unmarshal[userWrapper](resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return &wrapper.User, nil
+}
+
+func (client *Client) CurrentTeamID(ctx context.Context) (int, error) {
+	return client.requester.CurrentTeamID(ctx)
 }
 
 func newHTTPClient(cfg *config) *http.Client {

@@ -41,12 +41,18 @@ func resourceSysdigMonitorNotificationChannelSNS() *schema.Resource {
 }
 
 func resourceSysdigMonitorNotificationChannelSNSCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
+	clients := meta.(SysdigClients)
+	client, err := getMonitorNotificationChannelClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err := monitorNotificationChannelSNSFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	notificationChannel, err := monitorNotificationChannelSNSFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -57,12 +63,10 @@ func resourceSysdigMonitorNotificationChannelSNSCreate(ctx context.Context, d *s
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	_ = d.Set("version", notificationChannel.Version)
 
-	return nil
+	return resourceSysdigMonitorNotificationChannelSNSRead(ctx, d, meta)
 }
 
-// Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigMonitorNotificationChannelSNSRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
@@ -74,6 +78,7 @@ func resourceSysdigMonitorNotificationChannelSNSRead(ctx context.Context, d *sch
 
 	if err != nil {
 		d.SetId("")
+		return diag.FromErr(err)
 	}
 
 	err = monitorNotificationChannelSNSToResourceData(&nc, d)
@@ -85,12 +90,18 @@ func resourceSysdigMonitorNotificationChannelSNSRead(ctx context.Context, d *sch
 }
 
 func resourceSysdigMonitorNotificationChannelSNSUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
+	clients := meta.(SysdigClients)
+	client, err := getMonitorNotificationChannelClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	nc, err := monitorNotificationChannelSNSFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	nc, err := monitorNotificationChannelSNSFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -122,10 +133,8 @@ func resourceSysdigMonitorNotificationChannelSNSDelete(ctx context.Context, d *s
 	return nil
 }
 
-// Channel type for Notification Channels
-
-func monitorNotificationChannelSNSFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
-	nc, err = monitorNotificationChannelFromResourceData(d)
+func monitorNotificationChannelSNSFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
+	nc, err = monitorNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
 		return
 	}

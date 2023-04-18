@@ -12,6 +12,7 @@ const (
 )
 
 type NotificationChannelInterface interface {
+	Base
 	GetNotificationChannelById(ctx context.Context, id int) (NotificationChannel, error)
 	GetNotificationChannelByName(ctx context.Context, name string) (NotificationChannel, error)
 	CreateNotificationChannel(ctx context.Context, channel NotificationChannel) (NotificationChannel, error)

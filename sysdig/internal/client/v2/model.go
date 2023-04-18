@@ -1,5 +1,14 @@
 package v2
 
+type User struct {
+	ID          int `json:"id"`
+	CurrentTeam int `json:"currentTeam"`
+}
+
+type userWrapper struct {
+	User User `json:"user"`
+}
+
 type Team struct {
 	UserRoles           []UserRoles       `json:"userRoles,omitempty"`
 	Description         string            `json:"description"`

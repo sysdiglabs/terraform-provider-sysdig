@@ -64,9 +64,11 @@ type sysdigVariables struct {
 
 type ibmVariables struct {
 	*globalVariables
-	iamURL     string
-	instanceID string
-	apiKey     string
+	iamURL         string
+	instanceID     string
+	apiKey         string
+	sysdigTeamName string
+	sysdigTeamID   *int
 }
 
 func getSysdigMonitorVariables(data *schema.ResourceData) (*sysdigVariables, error) {
@@ -116,6 +118,7 @@ func getSysdigSecureVariables(data *schema.ResourceData) (*sysdigVariables, erro
 func getIBMMonitorVariables(data *schema.ResourceData) (*ibmVariables, error) {
 	var ok bool
 	var apiURL, iamURL, instanceID, apiKey interface{}
+	var teamID *int
 
 	if apiURL, ok = data.GetOk("sysdig_monitor_url"); !ok {
 		return nil, errors.New("missing monitor IBM URL")
@@ -133,15 +136,22 @@ func getIBMMonitorVariables(data *schema.ResourceData) (*ibmVariables, error) {
 		return nil, errors.New("missing monitor IBM API key")
 	}
 
+	if id, ok := data.GetOk("sysdig_monitor_team_id"); ok {
+		tmp := id.(int)
+		teamID = &tmp
+	}
+
 	return &ibmVariables{
 		globalVariables: &globalVariables{
 			apiURL:       apiURL.(string),
 			insecure:     data.Get("sysdig_monitor_insecure_tls").(bool),
 			extraHeaders: getExtraHeaders(data),
 		},
-		iamURL:     iamURL.(string),
-		instanceID: instanceID.(string),
-		apiKey:     apiKey.(string),
+		iamURL:         iamURL.(string),
+		instanceID:     instanceID.(string),
+		apiKey:         apiKey.(string),
+		sysdigTeamID:   teamID,
+		sysdigTeamName: data.Get("sysdig_monitor_team_name").(string),
 	}, nil
 }
 
@@ -284,6 +294,8 @@ func (c *sysdigClients) ibmMonitorClient() (v2.IBMMonitor, error) {
 		v2.WithIBMInstanceID(vars.instanceID),
 		v2.WithIBMAPIKey(vars.apiKey),
 		v2.WithInsecure(vars.insecure),
+		v2.WithSysdigTeamID(vars.sysdigTeamID),
+		v2.WithSysdigTeamName(vars.sysdigTeamName),
 	)
 
 	return c.monitorIBMClient, nil

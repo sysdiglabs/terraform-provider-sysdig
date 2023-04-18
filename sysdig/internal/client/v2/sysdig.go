@@ -5,11 +5,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 )
 
 type SysdigRequest struct {
 	config     *config
 	httpClient *http.Client
+
+	teamIDLock *sync.Mutex
+	teamID     *int
 }
 
 type SysdigCommon interface {
@@ -50,8 +54,29 @@ func newSysdigClient(opts ...ClientOption) *Client {
 	return &Client{
 		config: cfg,
 		requester: &SysdigRequest{
+			teamIDLock: &sync.Mutex{},
 			config:     cfg,
 			httpClient: newHTTPClient(cfg),
 		},
 	}
+}
+func (sr *SysdigRequest) CurrentTeamID(ctx context.Context) (int, error) {
+	sr.teamIDLock.Lock()
+	defer sr.teamIDLock.Unlock()
+
+	if sr.teamID != nil {
+		return *sr.teamID, nil
+	}
+
+	user, err := getMe(ctx, sr.config, sr.httpClient, map[string]string{
+		AuthorizationHeader: fmt.Sprintf("Bearer %s", sr.config.token),
+		ContentTypeHeader:   ContentTypeJSON,
+	})
+	if err != nil {
+		return -1, err
+	}
+
+	sr.teamID = &user.CurrentTeam
+
+	return *sr.teamID, nil
 }
