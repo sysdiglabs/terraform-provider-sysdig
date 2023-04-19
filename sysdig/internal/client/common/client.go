@@ -12,13 +12,6 @@ import (
 )
 
 type SysdigCommonClient interface {
-	CreateUser(context.Context, *User) (*User, error)
-	GetUserById(context.Context, int) (*User, error)
-	GetUserByEmail(context.Context, string) (*User, error)
-	DeleteUser(context.Context, int) error
-	UpdateUser(context.Context, *User) (*User, error)
-	GetCurrentUser(context.Context) (*User, error)
-
 	CreateGroupMapping(ctx context.Context, request *GroupMapping) (*GroupMapping, error)
 	UpdateGroupMapping(ctx context.Context, request *GroupMapping, id int) (*GroupMapping, error)
 	DeleteGroupMapping(ctx context.Context, id int) error
