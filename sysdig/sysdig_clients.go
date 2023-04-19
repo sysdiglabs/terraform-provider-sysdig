@@ -40,6 +40,7 @@ const (
 type sysdigClients struct {
 	d             *schema.ResourceData
 	mu            sync.Mutex
+	commonMu      sync.Mutex
 	onceMonitor   sync.Once
 	onceSecure    sync.Once
 	onceCommon    sync.Once
@@ -293,11 +294,11 @@ func (c *sysdigClients) ibmMonitorClient() (v2.IBMMonitor, error) {
 }
 
 func (c *sysdigClients) commonClientV2() (v2.Common, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	clientType := c.GetClientType()
+	c.commonMu.Lock()
+	defer c.commonMu.Unlock()
 
 	var err error
+	clientType := c.GetClientType()
 
 	switch clientType {
 	case SysdigMonitor:
