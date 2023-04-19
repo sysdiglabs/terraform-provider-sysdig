@@ -81,6 +81,8 @@ resource "sysdig_secure_policy" "unexpected_inbound_tcp_connection_traefik" {
 
 ```terraform
 provider "sysdig" {
+  sysdig_team_id = 1234
+  sysdig_team_name = "My team" # or use this as alternative to `sysdig_team_id`
   sysdig_monitor_url = "https://us-south.monitoring.test.cloud.ibm.com"
   ibm_monitor_iam_url = "https://iam.test.cloud.ibm.com"
   ibm_monitor_instance_id = "xxxxxx"
@@ -158,6 +160,12 @@ When IBM Cloud Monitoring resources are to be created, this authentication must 
   the use of invalid HTTPS certificates in the IBM Monitoring Cloud API.
   <br/> It can also be sourced from the `SYSDIG_MONITOR_INSECURE_TLS`
   environment variable. By default, this is false.<br/><br/>
+* `sysdig_monitor_team_id` - (Optional) Use this argument to specify team in which you will be logged in. 
+  If not specified, default team will be used. This argument has precedence over `sysdig_monitor_team_name` if both are specified.<br/>
+  It can also be configured from the `SYSDIG_MONITOR_TEAM_ID` environment variable.<br/><br/>
+* `sysdig_monitor_team_name` - (Optional) This argument is the alternative way of specifying team in which you will be logged in. 
+  It has exactly the same meaning as `sysdig_monitor_team_id`, but instead of specifying team ID you are specifying a team name.</br>
+  It can also be configured from the `SYSDIG_MONITOR_TEAM_NAME` environment variable.<br/><br/>
 
 > **Note**
 > Enabling this way of authentication is under active development.
