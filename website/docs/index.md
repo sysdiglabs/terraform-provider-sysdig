@@ -81,8 +81,8 @@ resource "sysdig_secure_policy" "unexpected_inbound_tcp_connection_traefik" {
 
 ```terraform
 provider "sysdig" {
-  sysdig_team_id = 1234
-  sysdig_team_name = "My team" # or use this as alternative to `sysdig_team_id`
+  sysdig_monitor_team_id = 1234
+  sysdig_monitor_team_name = "My team" # or use this as alternative to `sysdig_monitor_team_id`
   sysdig_monitor_url = "https://us-south.monitoring.test.cloud.ibm.com"
   ibm_monitor_iam_url = "https://iam.test.cloud.ibm.com"
   ibm_monitor_instance_id = "xxxxxx"
