@@ -24,6 +24,7 @@ const (
 )
 
 type Common interface {
+	UserInterface
 	TeamInterface
 	NotificationChannelInterface
 }

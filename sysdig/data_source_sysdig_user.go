@@ -45,7 +45,7 @@ func dataSourceSysdigUser() *schema.Resource {
 }
 
 func dataSourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigCommonClient()
+	client, err := meta.(SysdigClients).commonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}

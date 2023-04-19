@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"errors"
+	"fmt"
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"sync"
 
@@ -25,6 +26,7 @@ type SysdigClients interface {
 	sysdigMonitorClientV2() (v2.SysdigMonitor, error)
 	sysdigSecureClientV2() (v2.SysdigSecure, error)
 	ibmMonitorClient() (v2.IBMMonitor, error)
+	commonClientV2() (v2.Common, error)
 }
 
 type ClientType int
@@ -49,6 +51,7 @@ type sysdigClients struct {
 	monitorClientV2  v2.SysdigMonitor
 	secureClientV2   v2.SysdigSecure
 	monitorIBMClient v2.IBMMonitor
+	commonV2         v2.Common
 }
 
 type globalVariables struct {
@@ -287,6 +290,27 @@ func (c *sysdigClients) ibmMonitorClient() (v2.IBMMonitor, error) {
 	)
 
 	return c.monitorIBMClient, nil
+}
+
+func (c *sysdigClients) commonClientV2() (v2.Common, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	clientType := c.GetClientType()
+
+	var err error
+
+	switch clientType {
+	case SysdigMonitor:
+		c.commonV2, err = c.sysdigMonitorClientV2()
+	case SysdigSecure:
+		c.commonV2, err = c.sysdigSecureClientV2()
+	case IBMMonitor:
+		c.commonV2, err = c.ibmMonitorClient()
+	default:
+		return nil, fmt.Errorf("not supported client: %v", clientType)
+	}
+
+	return c.commonV2, err
 }
 
 func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err error) {

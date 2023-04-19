@@ -42,7 +42,7 @@ func dataSourceSysdigCurrentUser() *schema.Resource {
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func dataSourceSysdigCurrentUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigCommonClient()
+	client, err := meta.(SysdigClients).commonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
