@@ -55,6 +55,7 @@ type sysdigClients struct {
 	secureClientV2   v2.SysdigSecure
 	monitorIBMClient v2.IBMMonitor
 	commonV2         v2.Common
+	sysdigCommonV2   v2.SysdigCommon
 }
 
 type globalVariables struct {
@@ -316,14 +317,14 @@ func (c *sysdigClients) sysdigCommonClientV2() (v2.SysdigCommon, error) {
 
 	switch clientType {
 	case SysdigMonitor:
-		c.commonV2, err = c.sysdigMonitorClientV2()
+		c.sysdigCommonV2, err = c.sysdigMonitorClientV2()
 	case SysdigSecure:
-		c.commonV2, err = c.sysdigSecureClientV2()
+		c.sysdigCommonV2, err = c.sysdigSecureClientV2()
 	default:
 		return nil, fmt.Errorf("failed to create common sysdig client, %s is not supported", clientType)
 	}
 
-	return c.commonV2, err
+	return c.sysdigCommonV2, err
 }
 
 func (c *sysdigClients) commonClientV2() (v2.Common, error) {
