@@ -13,6 +13,7 @@ const (
 )
 
 type TeamInterface interface {
+	Base
 	GetUserIDByEmail(ctx context.Context, userRoles []UserRoles) ([]UserRoles, error)
 	GetTeamById(ctx context.Context, id int) (t Team, err error)
 	CreateTeam(ctx context.Context, tRequest Team) (t Team, err error)

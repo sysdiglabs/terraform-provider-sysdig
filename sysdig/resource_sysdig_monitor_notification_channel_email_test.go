@@ -4,7 +4,6 @@ package sysdig_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -15,18 +14,10 @@ import (
 )
 
 func TestAccMonitorNotificationChannelEmail(t *testing.T) {
-	//var ncBefore, ncAfter monitor.NotificationChannel
-
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
-			ibmMonitor := os.Getenv("SYSDIG_IBM_MONITOR_API_KEY")
-			if monitor == "" && ibmMonitor == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_IBM_MONITOR_API_KEY must be set for acceptance tests")
-			}
-		},
+		PreCheck: sysdigOrIBMMonitorPreCheck(t),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -38,6 +29,9 @@ func TestAccMonitorNotificationChannelEmail(t *testing.T) {
 			},
 			{
 				Config: monitorNotificationChannelEmailWithNameInReverseOrder(rText()),
+			},
+			{
+				Config: monitorNotificationChannelEmailSharedWithCurrentTeam(rText()),
 			},
 			{
 				ResourceName:      "sysdig_monitor_notification_channel_email.sample_email",
@@ -64,6 +58,19 @@ func monitorNotificationChannelEmailWithNameInReverseOrder(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_email" "sample_email" {
 	name = "%s"
+	recipients = ["bar@localhost.com", "root@localhost.com"]
+	enabled = false
+	notify_when_ok = false
+	notify_when_resolved = false
+	send_test_notification = false
+}`, name)
+}
+
+func monitorNotificationChannelEmailSharedWithCurrentTeam(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_notification_channel_email" "sample_email" {
+	name = "%s"
+    share_with_current_team = true
 	recipients = ["bar@localhost.com", "root@localhost.com"]
 	enabled = false
 	notify_when_ok = false

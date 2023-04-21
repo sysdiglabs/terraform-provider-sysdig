@@ -47,6 +47,16 @@ func Provider() *schema.Provider {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"sysdig_monitor_team_id": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_MONITOR_TEAM_ID", nil),
+			},
+			"sysdig_monitor_team_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_MONITOR_TEAM_NAME", nil),
+			},
 			"ibm_monitor_iam_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
