@@ -63,7 +63,7 @@ func TestSysdigClient_CurrentTeamID(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		data, err := json.Marshal(userWrapper{
 			User: User{
-				CurrentTeam: teamID,
+				CurrentTeam: &teamID,
 			},
 		})
 		if err != nil {

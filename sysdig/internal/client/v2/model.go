@@ -52,7 +52,7 @@ type User struct {
 	Email       string `json:"username"`
 	FirstName   string `json:"firstName,omitempty"`
 	LastName    string `json:"lastName,omitempty"`
-	CurrentTeam int    `json:"currentTeam"`
+	CurrentTeam *int   `json:"currentTeam"`
 }
 
 type userWrapper struct {

@@ -25,6 +25,10 @@ const (
 	ContentTypeFormURLEncoded = "x-www-form-urlencoded"
 )
 
+var (
+	errMissingCurrentTeam = errors.New("missing user's current team")
+)
+
 type Base interface {
 	CurrentTeamID(ctx context.Context) (int, error)
 }
