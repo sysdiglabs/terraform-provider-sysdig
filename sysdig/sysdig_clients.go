@@ -30,6 +30,7 @@ type SysdigClients interface {
 	sysdigCommonClientV2() (v2.Common, error)
 }
 
+//go:generate stringer -type ClientType
 type ClientType int
 
 const (
@@ -319,11 +320,10 @@ func (c *sysdigClients) sysdigCommonClientV2() (v2.Common, error) {
 	case SysdigSecure:
 		c.commonV2, err = c.sysdigSecureClientV2()
 	default:
-		return nil, fmt.Errorf("not supported client: %v", clientType)
+		return nil, fmt.Errorf("failed to create common sysdig client, %s is not supported", clientType)
 	}
 
 	return c.commonV2, err
-
 }
 
 func (c *sysdigClients) commonClientV2() (v2.Common, error) {
@@ -341,7 +341,7 @@ func (c *sysdigClients) commonClientV2() (v2.Common, error) {
 	case IBMMonitor:
 		c.commonV2, err = c.ibmMonitorClient()
 	default:
-		return nil, fmt.Errorf("not supported client: %v", clientType)
+		return nil, fmt.Errorf("failed to create common client, %s is not supported", clientType)
 	}
 
 	return c.commonV2, err
