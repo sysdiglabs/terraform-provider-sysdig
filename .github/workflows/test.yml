@@ -25,6 +25,7 @@ jobs:
   test-sysdig:
     name: Sysdig Acceptance Tests
     runs-on: ubuntu-latest
+    needs: test
 
     steps:
       - name: Check out code

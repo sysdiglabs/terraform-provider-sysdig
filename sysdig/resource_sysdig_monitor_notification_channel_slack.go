@@ -43,12 +43,18 @@ func resourceSysdigMonitorNotificationChannelSlack() *schema.Resource {
 }
 
 func resourceSysdigMonitorNotificationChannelSlackCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
+	clients := meta.(SysdigClients)
+	client, err := getMonitorNotificationChannelClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err := monitorNotificationChannelSlackFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	notificationChannel, err := monitorNotificationChannelSlackFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -59,12 +65,10 @@ func resourceSysdigMonitorNotificationChannelSlackCreate(ctx context.Context, d 
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	_ = d.Set("version", notificationChannel.Version)
 
-	return nil
+	return resourceSysdigMonitorNotificationChannelSlackRead(ctx, d, meta)
 }
 
-// Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigMonitorNotificationChannelSlackRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
@@ -76,6 +80,7 @@ func resourceSysdigMonitorNotificationChannelSlackRead(ctx context.Context, d *s
 
 	if err != nil {
 		d.SetId("")
+		return diag.FromErr(err)
 	}
 
 	err = monitorNotificationChannelSlackToResourceData(&nc, d)
@@ -87,12 +92,18 @@ func resourceSysdigMonitorNotificationChannelSlackRead(ctx context.Context, d *s
 }
 
 func resourceSysdigMonitorNotificationChannelSlackUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
+	clients := meta.(SysdigClients)
+	client, err := getMonitorNotificationChannelClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	nc, err := monitorNotificationChannelSlackFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	nc, err := monitorNotificationChannelSlackFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -124,10 +135,8 @@ func resourceSysdigMonitorNotificationChannelSlackDelete(ctx context.Context, d 
 	return nil
 }
 
-// Channel type for Notification Channels
-
-func monitorNotificationChannelSlackFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
-	nc, err = monitorNotificationChannelFromResourceData(d)
+func monitorNotificationChannelSlackFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
+	nc, err = monitorNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
 		return
 	}

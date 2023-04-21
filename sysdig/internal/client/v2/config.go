@@ -1,13 +1,15 @@
 package v2
 
 type config struct {
-	url           string
-	token         string
-	insecure      bool
-	extraHeaders  map[string]string
-	ibmInstanceID string
-	ibmAPIKey     string
-	ibmIamURL     string
+	url            string
+	token          string
+	insecure       bool
+	extraHeaders   map[string]string
+	ibmInstanceID  string
+	ibmAPIKey      string
+	ibmIamURL      string
+	sysdigTeamName string
+	sysdigTeamID   *int
 }
 
 type ClientOption func(c *config)
@@ -51,6 +53,18 @@ func WithIBMAPIKey(key string) ClientOption {
 func WithIBMIamURL(url string) ClientOption {
 	return func(c *config) {
 		c.ibmIamURL = url
+	}
+}
+
+func WithSysdigTeamID(teamID *int) ClientOption {
+	return func(c *config) {
+		c.sysdigTeamID = teamID
+	}
+}
+
+func WithSysdigTeamName(teamName string) ClientOption {
+	return func(c *config) {
+		c.sysdigTeamName = teamName
 	}
 }
 

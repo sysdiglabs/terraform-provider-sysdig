@@ -53,6 +53,9 @@ In addition to all arguments above, the following attributes are exported:
 
 * `version` - (Computed) The current version of the Notification Channel.
 
+* `share_with_current_team` - (Optional) If set to `true` it will share notification channel only with current team (in which user is logged in).
+  Otherwise, it will share it with all teams, which is the default behaviour.
+
 ## Import
 
 VictorOPS notification channels for Monitor can be imported using the ID, e.g.
