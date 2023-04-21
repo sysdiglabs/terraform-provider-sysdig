@@ -27,7 +27,7 @@ type SysdigClients interface {
 	sysdigSecureClientV2() (v2.SysdigSecure, error)
 	ibmMonitorClient() (v2.IBMMonitor, error)
 	commonClientV2() (v2.Common, error)
-	sysdigCommonClientV2() (v2.Common, error)
+	sysdigCommonClientV2() (v2.SysdigCommon, error)
 }
 
 //go:generate stringer -type ClientType
@@ -307,7 +307,7 @@ func (c *sysdigClients) ibmMonitorClient() (v2.IBMMonitor, error) {
 	return c.monitorIBMClient, nil
 }
 
-func (c *sysdigClients) sysdigCommonClientV2() (v2.Common, error) {
+func (c *sysdigClients) sysdigCommonClientV2() (v2.SysdigCommon, error) {
 	c.commonMu.Lock()
 	defer c.commonMu.Unlock()
 
