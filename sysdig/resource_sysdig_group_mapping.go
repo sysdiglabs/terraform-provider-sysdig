@@ -2,7 +2,7 @@ package sysdig
 
 import (
 	"context"
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/common"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strconv"
@@ -66,7 +66,7 @@ func resourceSysdigGroupMapping() *schema.Resource {
 }
 
 func resourceSysdigGroupMappingRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client, err := m.(SysdigClients).sysdigCommonClient()
+	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -78,7 +78,7 @@ func resourceSysdigGroupMappingRead(ctx context.Context, d *schema.ResourceData,
 
 	groupMapping, err := client.GetGroupMapping(ctx, id)
 	if err != nil {
-		if err == common.GroupMappingNotFound {
+		if err == v2.GroupMappingNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -96,7 +96,7 @@ func resourceSysdigGroupMappingRead(ctx context.Context, d *schema.ResourceData,
 func resourceSysdigGroupMappingCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var err error
 
-	client, err := m.(SysdigClients).sysdigCommonClient()
+	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -117,7 +117,7 @@ func resourceSysdigGroupMappingCreate(ctx context.Context, d *schema.ResourceDat
 func resourceSysdigGroupMappingUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var err error
 
-	client, err := m.(SysdigClients).sysdigCommonClient()
+	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -140,7 +140,7 @@ func resourceSysdigGroupMappingUpdate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceSysdigGroupMappingDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client, err := m.(SysdigClients).sysdigCommonClient()
+	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -158,8 +158,8 @@ func resourceSysdigGroupMappingDelete(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func groupMappingFromResourceData(d *schema.ResourceData) *common.GroupMapping {
-	return &common.GroupMapping{
+func groupMappingFromResourceData(d *schema.ResourceData) *v2.GroupMapping {
+	return &v2.GroupMapping{
 		GroupName:  d.Get("group_name").(string),
 		Role:       d.Get("role").(string),
 		SystemRole: d.Get("system_role").(string),
@@ -167,7 +167,7 @@ func groupMappingFromResourceData(d *schema.ResourceData) *common.GroupMapping {
 	}
 }
 
-func teamMapFromResourceData(d *schema.ResourceData) *common.TeamMap {
+func teamMapFromResourceData(d *schema.ResourceData) *v2.TeamMap {
 	teamMap := d.Get("team_map").(*schema.Set).List()[0].(map[string]interface{})
 	teamIDsInterface := teamMap["team_ids"].([]interface{})
 	teamIDs := make([]int, len(teamIDsInterface))
@@ -175,20 +175,20 @@ func teamMapFromResourceData(d *schema.ResourceData) *common.TeamMap {
 		teamIDs[i] = teamID.(int)
 	}
 
-	return &common.TeamMap{
+	return &v2.TeamMap{
 		AllTeams: teamMap["all_teams"].(bool),
 		TeamIDs:  teamIDs,
 	}
 }
 
-func teamMapToResourceData(teamMap *common.TeamMap) map[string]interface{} {
+func teamMapToResourceData(teamMap *v2.TeamMap) map[string]interface{} {
 	return map[string]interface{}{
 		"all_teams": teamMap.AllTeams,
 		"team_ids":  teamMap.TeamIDs,
 	}
 }
 
-func groupMappingToResourceData(groupMapping *common.GroupMapping, d *schema.ResourceData) error {
+func groupMappingToResourceData(groupMapping *v2.GroupMapping, d *schema.ResourceData) error {
 	err := d.Set("group_name", groupMapping.GroupName)
 	if err != nil {
 		return err

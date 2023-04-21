@@ -8,7 +8,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/common"
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
@@ -20,7 +19,6 @@ type SysdigClients interface {
 
 	sysdigMonitorClient() (monitor.SysdigMonitorClient, error)
 	sysdigSecureClient() (secure.SysdigSecureClient, error)
-	sysdigCommonClient() (common.SysdigCommonClient, error)
 
 	// v2
 	sysdigMonitorClientV2() (v2.SysdigMonitor, error)
@@ -48,7 +46,6 @@ type sysdigClients struct {
 	onceCommon    sync.Once
 	monitorClient monitor.SysdigMonitorClient
 	secureClient  secure.SysdigSecureClient
-	commonClient  common.SysdigCommonClient
 
 	// v2
 	monitorClientV2  v2.SysdigMonitor
@@ -346,46 +343,6 @@ func (c *sysdigClients) commonClientV2() (v2.Common, error) {
 	}
 
 	return c.commonV2, err
-}
-
-func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	monitorAPIToken := c.d.Get("sysdig_monitor_api_token").(string)
-	secureAPIToken := c.d.Get("sysdig_secure_api_token").(string)
-
-	if monitorAPIToken == "" && secureAPIToken == "" {
-		err = errors.New("sysdig monitor and sysdig secure tokens not provided")
-		return
-	}
-
-	commonAPIToken := monitorAPIToken
-	commonURL := c.d.Get("sysdig_monitor_url").(string)
-	commonInsecure := c.d.Get("sysdig_monitor_insecure_tls").(bool)
-	if monitorAPIToken == "" {
-		commonAPIToken = secureAPIToken
-		commonURL = c.d.Get("sysdig_secure_url").(string)
-		commonInsecure = c.d.Get("sysdig_secure_insecure_tls").(bool)
-	}
-
-	c.onceCommon.Do(func() {
-		c.commonClient = common.NewSysdigCommonClient(
-			commonAPIToken,
-			commonURL,
-			commonInsecure,
-		)
-
-		if headers, ok := c.d.GetOk("extra_headers"); ok {
-			extraHeaders := headers.(map[string]interface{})
-			extraHeadersTransformed := map[string]string{}
-			for key := range extraHeaders {
-				extraHeadersTransformed[key] = extraHeaders[key].(string)
-			}
-			c.commonClient = common.WithExtraHeaders(c.commonClient, extraHeadersTransformed)
-		}
-	})
-
-	return c.commonClient, nil
 }
 
 func (c *sysdigClients) GetClientType() ClientType {

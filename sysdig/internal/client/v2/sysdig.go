@@ -18,6 +18,7 @@ type SysdigRequest struct {
 
 type SysdigCommon interface {
 	Common
+	GroupMappingInterface
 }
 
 type SysdigMonitor interface {
