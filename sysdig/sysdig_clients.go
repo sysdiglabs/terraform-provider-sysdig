@@ -43,7 +43,6 @@ type sysdigClients struct {
 	commonMu      sync.Mutex
 	onceMonitor   sync.Once
 	onceSecure    sync.Once
-	onceCommon    sync.Once
 	monitorClient monitor.SysdigMonitorClient
 	secureClient  secure.SysdigSecureClient
 
