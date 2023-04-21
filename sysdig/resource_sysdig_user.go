@@ -53,7 +53,7 @@ func resourceSysdigUser() *schema.Resource {
 }
 
 func resourceSysdigUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).commonClientV2()
+	client, err := meta.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -73,7 +73,7 @@ func resourceSysdigUserCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).commonClientV2()
+	client, err := meta.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -96,7 +96,7 @@ func resourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSysdigUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).commonClientV2()
+	client, err := meta.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -115,7 +115,7 @@ func resourceSysdigUserUpdate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceSysdigUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).commonClientV2()
+	client, err := meta.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}

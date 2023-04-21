@@ -27,6 +27,7 @@ type SysdigClients interface {
 	sysdigSecureClientV2() (v2.SysdigSecure, error)
 	ibmMonitorClient() (v2.IBMMonitor, error)
 	commonClientV2() (v2.Common, error)
+	sysdigCommonClientV2() (v2.Common, error)
 }
 
 type ClientType int
@@ -303,6 +304,26 @@ func (c *sysdigClients) ibmMonitorClient() (v2.IBMMonitor, error) {
 	)
 
 	return c.monitorIBMClient, nil
+}
+
+func (c *sysdigClients) sysdigCommonClientV2() (v2.Common, error) {
+	c.commonMu.Lock()
+	defer c.commonMu.Unlock()
+
+	var err error
+	clientType := c.GetClientType()
+
+	switch clientType {
+	case SysdigMonitor:
+		c.commonV2, err = c.sysdigMonitorClientV2()
+	case SysdigSecure:
+		c.commonV2, err = c.sysdigSecureClientV2()
+	default:
+		return nil, fmt.Errorf("not supported client: %v", clientType)
+	}
+
+	return c.commonV2, err
+
 }
 
 func (c *sysdigClients) commonClientV2() (v2.Common, error) {
