@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"errors"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 const defaultAlertTitle = "{{__alert_name__}} is {{__alert_status__}}"
@@ -123,16 +122,16 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 	return alertSchema
 }
 
-func alertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert, err error) {
+func alertFromResourceData(d *schema.ResourceData) (alert *v2.Alert, err error) {
 
 	trigger_after_minutes := time.Duration(d.Get("trigger_after_minutes").(int)) * time.Minute
-	alert = &monitor.Alert{
+	alert = &v2.Alert{
 		Name:                   d.Get("name").(string),
 		Type:                   "MANUAL",
 		Timespan:               int(trigger_after_minutes.Microseconds()),
 		SegmentBy:              []string{},
 		NotificationChannelIds: []int{},
-		CustomNotification: &monitor.CustomNotification{
+		CustomNotification: &v2.CustomNotification{
 			TitleTemplate:  defaultAlertTitle,
 			UseNewTemplate: true,
 		},
@@ -201,7 +200,7 @@ func alertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert, err er
 	return
 }
 
-func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err error) {
+func alertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
 	trigger_after_minutes := time.Duration(alert.Timespan) * time.Microsecond
 
 	_ = data.Set("version", alert.Version)
@@ -253,10 +252,10 @@ func alertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err e
 	return
 }
 
-func sysdigCaptureFromSet(d *schema.Set) (captures []*monitor.SysdigCapture, err error) {
+func sysdigCaptureFromSet(d *schema.Set) (captures []*v2.SysdigCapture, err error) {
 	for _, v := range d.List() {
 		m := v.(map[string]interface{})
-		capture := &monitor.SysdigCapture{
+		capture := &v2.SysdigCapture{
 			Name:     m["filename"].(string),
 			Duration: m["duration"].(int),
 			Enabled:  true,
@@ -268,4 +267,22 @@ func sysdigCaptureFromSet(d *schema.Set) (captures []*monitor.SysdigCapture, err
 	}
 
 	return
+}
+
+func getMonitorAlertClient(c SysdigClients) (v2.AlertInterface, error) {
+	var client v2.AlertInterface
+	var err error
+	switch c.GetClientType() {
+	case IBMMonitor:
+		client, err = c.ibmMonitorClient()
+		if err != nil {
+			return nil, err
+		}
+	default:
+		client, err = c.sysdigMonitorClientV2()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }

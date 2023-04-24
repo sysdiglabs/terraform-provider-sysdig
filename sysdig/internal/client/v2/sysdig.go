@@ -23,6 +23,7 @@ type SysdigCommon interface {
 
 type SysdigMonitor interface {
 	SysdigCommon
+	MonitorCommon
 }
 
 type SysdigSecure interface {

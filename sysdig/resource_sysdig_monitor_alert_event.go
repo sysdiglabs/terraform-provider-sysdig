@@ -3,14 +3,13 @@ package sysdig
 import (
 	"context"
 	"fmt"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorAlertEvent() *schema.Resource {
@@ -59,7 +58,7 @@ func resourceSysdigMonitorAlertEvent() *schema.Resource {
 }
 
 func resourceSysdigAlertEventCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -81,7 +80,7 @@ func resourceSysdigAlertEventCreate(ctx context.Context, data *schema.ResourceDa
 }
 
 func resourceSysdigAlertEventUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -102,7 +101,7 @@ func resourceSysdigAlertEventUpdate(ctx context.Context, data *schema.ResourceDa
 }
 
 func resourceSysdigAlertEventRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -112,7 +111,7 @@ func resourceSysdigAlertEventRead(ctx context.Context, data *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	alert, err := client.GetAlertById(ctx, id)
+	alert, err := client.GetAlertByID(ctx, id)
 
 	if err != nil {
 		data.SetId("")
@@ -128,7 +127,7 @@ func resourceSysdigAlertEventRead(ctx context.Context, data *schema.ResourceData
 }
 
 func resourceSysdigAlertEventDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -146,7 +145,7 @@ func resourceSysdigAlertEventDelete(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
-func eventAlertFromResourceData(data *schema.ResourceData) (alert *monitor.Alert, err error) {
+func eventAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err error) {
 	alert, err = alertFromResourceData(data)
 	if err != nil {
 		return
@@ -156,13 +155,13 @@ func eventAlertFromResourceData(data *schema.ResourceData) (alert *monitor.Alert
 	event_count := data.Get("event_count").(int)
 	alert.Condition = fmt.Sprintf("count(customEvent) %s %d", event_rel, event_count)
 	alert.Type = "EVENT"
-	alert.Criteria = &monitor.Criteria{
+	alert.Criteria = &v2.Criteria{
 		Text:   data.Get("event_name").(string),
 		Source: data.Get("source").(string),
 	}
 
 	if alerts_by, ok := data.GetOk("multiple_alerts_by"); ok {
-		alert.SegmentCondition = &monitor.SegmentCondition{Type: "ANY"}
+		alert.SegmentCondition = &v2.SegmentCondition{Type: "ANY"}
 		for _, v := range alerts_by.([]interface{}) {
 			alert.SegmentBy = append(alert.SegmentBy, v.(string))
 		}
@@ -174,7 +173,7 @@ func eventAlertFromResourceData(data *schema.ResourceData) (alert *monitor.Alert
 // https://regex101.com/r/79VIkC/1
 var alertConditionRegex = regexp.MustCompile(`count\(customEvent\)\s*(?P<rel>[^\w\s]+)\s*(?P<count>\d+)`)
 
-func eventAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err error) {
+func eventAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
 	if err != nil {
 		return

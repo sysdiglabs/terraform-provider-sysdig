@@ -2,13 +2,12 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorAlertMetric() *schema.Resource {
@@ -45,7 +44,7 @@ func resourceSysdigMonitorAlertMetric() *schema.Resource {
 }
 
 func resourceSysdigAlertMetricCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -67,7 +66,7 @@ func resourceSysdigAlertMetricCreate(ctx context.Context, data *schema.ResourceD
 }
 
 func resourceSysdigAlertMetricUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -88,7 +87,7 @@ func resourceSysdigAlertMetricUpdate(ctx context.Context, data *schema.ResourceD
 }
 
 func resourceSysdigAlertMetricRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -98,7 +97,7 @@ func resourceSysdigAlertMetricRead(ctx context.Context, data *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	alert, err := client.GetAlertById(ctx, id)
+	alert, err := client.GetAlertByID(ctx, id)
 
 	if err != nil {
 		data.SetId("")
@@ -114,7 +113,7 @@ func resourceSysdigAlertMetricRead(ctx context.Context, data *schema.ResourceDat
 }
 
 func resourceSysdigAlertMetricDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -132,7 +131,7 @@ func resourceSysdigAlertMetricDelete(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func metricAlertFromResourceData(data *schema.ResourceData) (alert *monitor.Alert, err error) {
+func metricAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err error) {
 	alert, err = alertFromResourceData(data)
 	if err != nil {
 		return
@@ -140,7 +139,7 @@ func metricAlertFromResourceData(data *schema.ResourceData) (alert *monitor.Aler
 	alert.Condition = data.Get("metric").(string)
 
 	if alerts_by, ok := data.GetOk("multiple_alerts_by"); ok {
-		alert.SegmentCondition = &monitor.SegmentCondition{Type: "ANY"}
+		alert.SegmentCondition = &v2.SegmentCondition{Type: "ANY"}
 		for _, v := range alerts_by.([]interface{}) {
 			alert.SegmentBy = append(alert.SegmentBy, v.(string))
 		}
@@ -148,7 +147,7 @@ func metricAlertFromResourceData(data *schema.ResourceData) (alert *monitor.Aler
 	return
 }
 
-func metricAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err error) {
+func metricAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
 	if err != nil {
 		return

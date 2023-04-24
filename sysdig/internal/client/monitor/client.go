@@ -14,11 +14,6 @@ import (
 )
 
 type SysdigMonitorClient interface {
-	CreateAlert(context.Context, Alert) (Alert, error)
-	DeleteAlert(context.Context, int) error
-	UpdateAlert(context.Context, Alert) (Alert, error)
-	GetAlertById(context.Context, int) (Alert, error)
-
 	CreateAlertV2Prometheus(context.Context, AlertV2Prometheus) (AlertV2Prometheus, error)
 	DeleteAlertV2Prometheus(context.Context, int) error
 	UpdateAlertV2Prometheus(context.Context, AlertV2Prometheus) (AlertV2Prometheus, error)
