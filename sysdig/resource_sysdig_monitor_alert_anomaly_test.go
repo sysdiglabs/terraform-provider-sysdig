@@ -4,7 +4,6 @@ package sysdig_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -18,11 +17,7 @@ func TestAccAlertAnomaly(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_MONITOR_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigIBMMonitorAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
