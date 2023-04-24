@@ -98,3 +98,16 @@ type notificationChannelListWrapper struct {
 type notificationChannelWrapper struct {
 	NotificationChannel NotificationChannel `json:"notificationChannel"`
 }
+
+type TeamMap struct {
+	AllTeams bool  `json:"allTeams"`
+	TeamIDs  []int `json:"teamIds"`
+}
+
+type GroupMapping struct {
+	ID         int      `json:"id,omitempty"`
+	GroupName  string   `json:"groupName,omitempty"`
+	Role       string   `json:"role,omitempty"`
+	SystemRole string   `json:"systemRole,omitempty"`
+	TeamMap    *TeamMap `json:"teamMap,omitempty"`
+}
