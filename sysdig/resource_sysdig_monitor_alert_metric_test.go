@@ -44,6 +44,9 @@ func TestAccAlertMetric(t *testing.T) {
 				ResourceName:      "sysdig_secure_notification_channel_pagerduty.sample-pagerduty",
 				ImportState:       true,
 				ImportStateVerify: true,
+				SkipFunc: func() (bool, error) {
+					return buildinfo.IBM, nil
+				},
 			},
 		},
 	})
