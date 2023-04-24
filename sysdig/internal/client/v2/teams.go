@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	GetUsersPath = "%s/api/users/light"
-	GetTeamsPath = "%s/api/teams"
-	GetTeamPath  = "%s/api/teams/%d"
+	GetUsersLightPath = "%s/api/users/light"
+	GetTeamsPath      = "%s/api/teams"
+	GetTeamPath       = "%s/api/teams/%d"
 )
 
 type TeamInterface interface {
@@ -33,13 +33,13 @@ func (client *Client) GetUserIDByEmail(ctx context.Context, userRoles []UserRole
 		return nil, err
 	}
 
-	wrapper, err := Unmarshal[usersListWrapper](response.Body)
+	wrapper, err := Unmarshal[usersWrapper](response.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	usersMap := make(map[string]int)
-	for _, u := range wrapper.UsersList {
+	for _, u := range wrapper.Users {
 		usersMap[u.Email] = u.ID
 	}
 
@@ -155,7 +155,7 @@ func (client *Client) DeleteTeam(ctx context.Context, id int) error {
 }
 
 func (client *Client) GetUsersLightURL() string {
-	return fmt.Sprintf(GetUsersPath, client.config.url)
+	return fmt.Sprintf(GetUsersLightPath, client.config.url)
 }
 
 func (client *Client) GetTeamsURL() string {

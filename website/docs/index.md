@@ -183,6 +183,7 @@ When IBM Cloud Monitoring resources are to be created, this authentication must 
 > And data sources:
 > - `sysdig_monitor_notification_channel_pagerduty`
 > - `sysdig_monitor_notification_channel_email`
+> - `sysdig_current_user`
 
 ###  Others
 * `extra_headers` - (Optional) Defines extra HTTP headers that will be added to the client

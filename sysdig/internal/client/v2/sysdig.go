@@ -75,7 +75,11 @@ func (sr *SysdigRequest) CurrentTeamID(ctx context.Context) (int, error) {
 		return -1, err
 	}
 
-	sr.teamID = &user.CurrentTeam
+	if user.CurrentTeam == nil {
+		return -1, errMissingCurrentTeam
+	}
+
+	sr.teamID = user.CurrentTeam
 
 	return *sr.teamID, nil
 }

@@ -2,13 +2,12 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/common"
 )
 
 func resourceSysdigUser() *schema.Resource {
@@ -54,7 +53,7 @@ func resourceSysdigUser() *schema.Resource {
 }
 
 func resourceSysdigUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigCommonClient()
+	client, err := meta.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -74,7 +73,7 @@ func resourceSysdigUserCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigCommonClient()
+	client, err := meta.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -97,7 +96,7 @@ func resourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSysdigUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigCommonClient()
+	client, err := meta.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -116,7 +115,7 @@ func resourceSysdigUserUpdate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceSysdigUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigCommonClient()
+	client, err := meta.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -130,8 +129,8 @@ func resourceSysdigUserDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func userFromResourceData(d *schema.ResourceData) (u *common.User) {
-	u = &common.User{
+func userFromResourceData(d *schema.ResourceData) (u *v2.User) {
+	u = &v2.User{
 		SystemRole: d.Get("system_role").(string),
 		Email:      d.Get("email").(string),
 		FirstName:  d.Get("first_name").(string),

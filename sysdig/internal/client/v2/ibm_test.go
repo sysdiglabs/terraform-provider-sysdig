@@ -153,7 +153,7 @@ func TestIBMClient_CurrentTeamID(t *testing.T) {
 		case GetMePath:
 			data, err = json.Marshal(userWrapper{
 				User: User{
-					CurrentTeam: teamID1,
+					CurrentTeam: &teamID1,
 				},
 			})
 			if err != nil {

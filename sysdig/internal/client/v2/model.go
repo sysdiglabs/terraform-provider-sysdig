@@ -1,14 +1,5 @@
 package v2
 
-type User struct {
-	ID          int `json:"id"`
-	CurrentTeam int `json:"currentTeam"`
-}
-
-type userWrapper struct {
-	User User `json:"user"`
-}
-
 type Team struct {
 	UserRoles           []UserRoles       `json:"userRoles,omitempty"`
 	Description         string            `json:"description"`
@@ -54,13 +45,22 @@ type teamWrapper struct {
 	Team Team `json:"team"`
 }
 
-type UsersList struct {
-	ID    int    `json:"id"`
-	Email string `json:"username"`
+type User struct {
+	ID          int    `json:"id,omitempty"`
+	Version     int    `json:"version,omitempty"`
+	SystemRole  string `json:"systemRole,omitempty"`
+	Email       string `json:"username"`
+	FirstName   string `json:"firstName,omitempty"`
+	LastName    string `json:"lastName,omitempty"`
+	CurrentTeam *int   `json:"currentTeam"`
 }
 
-type usersListWrapper struct {
-	UsersList []UsersList `json:"users"`
+type userWrapper struct {
+	User User `json:"user"`
+}
+
+type usersWrapper struct {
+	Users []User `json:"users"`
 }
 
 type NotificationChannelOptions struct {

@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"errors"
+	"fmt"
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"sync"
 
@@ -25,8 +26,11 @@ type SysdigClients interface {
 	sysdigMonitorClientV2() (v2.SysdigMonitor, error)
 	sysdigSecureClientV2() (v2.SysdigSecure, error)
 	ibmMonitorClient() (v2.IBMMonitor, error)
+	commonClientV2() (v2.Common, error)
+	sysdigCommonClientV2() (v2.SysdigCommon, error)
 }
 
+//go:generate stringer -type ClientType
 type ClientType int
 
 const (
@@ -38,6 +42,7 @@ const (
 type sysdigClients struct {
 	d             *schema.ResourceData
 	mu            sync.Mutex
+	commonMu      sync.Mutex
 	onceMonitor   sync.Once
 	onceSecure    sync.Once
 	onceCommon    sync.Once
@@ -49,6 +54,8 @@ type sysdigClients struct {
 	monitorClientV2  v2.SysdigMonitor
 	secureClientV2   v2.SysdigSecure
 	monitorIBMClient v2.IBMMonitor
+	commonV2         v2.Common
+	sysdigCommonV2   v2.SysdigCommon
 }
 
 type globalVariables struct {
@@ -299,6 +306,46 @@ func (c *sysdigClients) ibmMonitorClient() (v2.IBMMonitor, error) {
 	)
 
 	return c.monitorIBMClient, nil
+}
+
+func (c *sysdigClients) sysdigCommonClientV2() (v2.SysdigCommon, error) {
+	c.commonMu.Lock()
+	defer c.commonMu.Unlock()
+
+	var err error
+	clientType := c.GetClientType()
+
+	switch clientType {
+	case SysdigMonitor:
+		c.sysdigCommonV2, err = c.sysdigMonitorClientV2()
+	case SysdigSecure:
+		c.sysdigCommonV2, err = c.sysdigSecureClientV2()
+	default:
+		return nil, fmt.Errorf("failed to create common sysdig client, %s is not supported", clientType)
+	}
+
+	return c.sysdigCommonV2, err
+}
+
+func (c *sysdigClients) commonClientV2() (v2.Common, error) {
+	c.commonMu.Lock()
+	defer c.commonMu.Unlock()
+
+	var err error
+	clientType := c.GetClientType()
+
+	switch clientType {
+	case SysdigMonitor:
+		c.commonV2, err = c.sysdigMonitorClientV2()
+	case SysdigSecure:
+		c.commonV2, err = c.sysdigSecureClientV2()
+	case IBMMonitor:
+		c.commonV2, err = c.ibmMonitorClient()
+	default:
+		return nil, fmt.Errorf("failed to create common client, %s is not supported", clientType)
+	}
+
+	return c.commonV2, err
 }
 
 func (c *sysdigClients) sysdigCommonClient() (co common.SysdigCommonClient, err error) {

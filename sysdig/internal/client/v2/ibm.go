@@ -147,7 +147,11 @@ func (ir *IBMRequest) CurrentTeamID(ctx context.Context) (int, error) {
 		return -1, err
 	}
 
-	ir.teamID = &user.CurrentTeam
+	if user.CurrentTeam == nil {
+		return -1, errMissingCurrentTeam
+	}
+
+	ir.teamID = user.CurrentTeam
 
 	return *ir.teamID, nil
 }
