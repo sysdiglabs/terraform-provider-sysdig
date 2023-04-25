@@ -1,4 +1,4 @@
-//go:build sysdig_monitor
+//go:build tf_acc_sysdig_monitor
 
 package buildinfo
 

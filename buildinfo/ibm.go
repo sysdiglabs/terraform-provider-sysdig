@@ -1,4 +1,4 @@
-//go:build tf_acc_ibm_monitor
+//go:build tf_acc_ibm
 
 package buildinfo
 
