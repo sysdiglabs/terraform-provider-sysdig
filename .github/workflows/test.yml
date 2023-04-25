@@ -85,7 +85,7 @@ jobs:
           cache: true
 
       - name: Test
-        run: make testacc-ibm
+        run: make testacc
         env:
           TEST_SUITE: ibm_monitor
           SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
