@@ -41,7 +41,7 @@ jobs:
       - name: Test
         run: make testacc
         env:
-          TEST_SUITE: sysdig_monitor
+          TEST_SUITE: tf_acc_sysdig_monitor
           SYSDIG_MONITOR_API_TOKEN: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
           SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
 
@@ -64,7 +64,7 @@ jobs:
       - name: Test
         run: make testacc
         env:
-          TEST_SUITE: sysdig_secure
+          TEST_SUITE: tf_acc_sysdig_secure
           SYSDIG_MONITOR_API_TOKEN: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
           SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
 
@@ -87,7 +87,7 @@ jobs:
       - name: Test
         run: make testacc
         env:
-          TEST_SUITE: ibm_monitor
+          TEST_SUITE: tf_acc_ibm_monitor
           SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
           SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_MONITOR_INSTANCE_ID }}
           SYSDIG_IBM_MONITOR_IAM_URL: "https://iam.test.cloud.ibm.com"

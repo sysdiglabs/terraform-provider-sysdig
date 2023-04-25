@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig || sysdig_monitor || sysdig_secure
+//go:build tf_acc_sysdig || tf_acc_sysdig_monitor || tf_acc_sysdig_secure
 
 package sysdig_test
 
