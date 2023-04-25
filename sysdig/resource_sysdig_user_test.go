@@ -61,7 +61,7 @@ func userWithSystemRole(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
   email      = "terraform-test+user%[1]s@sysdig.com"
-  system_role = "ROLE_CUSTOMER"
+  system_role = "ROLE_USER"
   first_name = "%[1]s"
   last_name  = "%[1]s"
 }`, name)
