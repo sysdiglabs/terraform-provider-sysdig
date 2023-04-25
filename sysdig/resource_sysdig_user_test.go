@@ -16,7 +16,6 @@ import (
 
 func TestAccUser(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
-	name := rText()
 	customdiff.All()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
@@ -27,16 +26,16 @@ func TestAccUser(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: userWithSystemRole(name),
+				Config: userWithSystemRole(rText()),
 			},
 			{
-				Config: userWithName(name),
+				Config: userWithName(rText()),
 			},
 			{
-				Config: userWithoutSystemRole(name),
+				Config: userWithoutSystemRole(rText()),
 			},
 			{
-				Config: userMinimumConfiguration(name),
+				Config: userMinimumConfiguration(rText()),
 			},
 			{
 				ResourceName:      "sysdig_user.sample",
@@ -73,12 +72,12 @@ resource "sysdig_user" "sample" {
   email      = "terraform-test+user%[1]s@sysdig.com"
   first_name = "%[1]s"
   last_name  = "%[1]s"
-}`, name, name)
+}`, name)
 }
 
 func userMinimumConfiguration(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user%[1]s@sysdig.com"
+  email      = "terraform-test+user%s@sysdig.com"
 }`, name)
 }
