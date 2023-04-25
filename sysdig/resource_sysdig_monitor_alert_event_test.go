@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig
+//go:build sysdig_monitor
 
 package sysdig_test
 

@@ -1,4 +1,4 @@
-//go:build tf_acc_ibm
+//go:build ibm_monitor
 
 package sysdig_test
 
