@@ -1,6 +1,6 @@
 SWEEP?=us-east-1,us-west-2
 TEST?=./...
-TEST_SUITE?=tf_acc_sysdig
+TEST_SUITE?=sysdig_monitor
 PKG_NAME=sysdig
 WEBSITE_REPO=github.com/hashicorp/terraform-website
 VERSION=$(shell [ ! -z `git tag -l --contains HEAD` ] && git tag -l --contains HEAD || git rev-parse --short HEAD)
