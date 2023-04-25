@@ -34,7 +34,7 @@ func TestAccUser(t *testing.T) {
 				Config: userWithoutSystemRole(rText()),
 			},
 			{
-				Config: userMinimumConfiguration(),
+				Config: userMinimumConfiguration(rText()),
 			},
 			{
 				ResourceName:      "sysdig_user.sample",
@@ -48,35 +48,35 @@ func TestAccUser(t *testing.T) {
 func userWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user@sysdig.com"
+  email      = "terraform-test+user%[1]s@sysdig.com"
   system_role = "ROLE_USER"
-  first_name = "%s"
-  last_name  = "%s"
-}`, name, name)
+  first_name = "%[1]s"
+  last_name  = "%[1]s"
+}`, name)
 }
 
 func userWithSystemRole(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user@sysdig.com"
+  email      = "terraform-test+user%[1]s@sysdig.com"
   system_role = "ROLE_CUSTOMER"
-  first_name = "%s"
-  last_name  = "%s"
-}`, name, name)
+  first_name = "%[1]s"
+  last_name  = "%[1]s"
+}`, name)
 }
 
 func userWithoutSystemRole(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user@sysdig.com"
-  first_name = "%s"
-  last_name  = "%s"
+  email      = "terraform-test+user%[1]s@sysdig.com"
+  first_name = "%[1]s"
+  last_name  = "%[1]s"
 }`, name, name)
 }
 
-func userMinimumConfiguration() string {
-	return `
+func userMinimumConfiguration(name string) string {
+	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user@sysdig.com"
-}`
+  email      = "terraform-test+user%[1]s@sysdig.com"
+}`, name)
 }
