@@ -4,7 +4,6 @@ package sysdig_test
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -16,7 +15,7 @@ import (
 
 func TestAccUser(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
-	customdiff.All()
+	name := rText()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -26,16 +25,16 @@ func TestAccUser(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: userWithSystemRole(rText()),
+				Config: userWithSystemRole(name),
 			},
 			{
-				Config: userWithName(rText()),
+				Config: userWithName(name),
 			},
 			{
-				Config: userWithoutSystemRole(rText()),
+				Config: userWithoutSystemRole(name),
 			},
 			{
-				Config: userMinimumConfiguration(rText()),
+				Config: userMinimumConfiguration(name),
 			},
 			{
 				ResourceName:      "sysdig_user.sample",
