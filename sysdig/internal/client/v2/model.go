@@ -119,30 +119,30 @@ type alertWrapper struct {
 type Alert struct {
 	ID                     int                 `json:"id,omitempty"`
 	Version                int                 `json:"version,omitempty"`
-	Type                   string              `json:"type"` // computed MANUAL
+	Type                   string              `json:"type"`
 	Name                   string              `json:"name"`
 	Description            string              `json:"description"`
 	Enabled                bool                `json:"enabled"`
 	GroupName              string              `json:"groupName,omitempty"`
 	NotificationChannelIds []int               `json:"notificationChannelIds"`
 	Filter                 string              `json:"filter"`
-	Severity               int                 `json:"severity"` // 6 == INFO, 4 == LOW, 2 == MEDIUM, 0 == HIGH // NOT USED
-	Timespan               int                 `json:"timespan"` // computed 600000000
+	Severity               int                 `json:"severity"`
+	Timespan               int                 `json:"timespan"`
 	CustomNotification     *CustomNotification `json:"customNotification"`
-	TeamID                 int                 `json:"teamId,omitempty"` // computed
+	TeamID                 int                 `json:"teamId,omitempty"`
 	AutoCreated            bool                `json:"autoCreated"`
 	SysdigCapture          *SysdigCapture      `json:"sysdigCapture"`
 	RateOfChange           bool                `json:"rateOfChange,omitempty"`
 	ReNotifyMinutes        int                 `json:"reNotifyMinutes"`
 	ReNotify               bool                `json:"reNotify"`
 	Valid                  bool                `json:"valid"`
-	SeverityLabel          string              `json:"severityLabel,omitempty"` // MEDIUM == MEDIUM, LOW == LOW, NONE == INFO, HIGH == HIGH
+	SeverityLabel          string              `json:"severityLabel,omitempty"`
 	SegmentBy              []string            `json:"segmentBy"`
 	SegmentCondition       *SegmentCondition   `json:"segmentCondition"`
 	Criteria               *Criteria           `json:"criteria,omitempty"`
 	Monitor                []*Monitor          `json:"monitor,omitempty"`
 	Condition              string              `json:"condition"`
-	SeverityLevel          int                 `json:"severityLevel,omitempty"` // 0 == MEDIUM, 2 == LOW, 4 == INFO, 6 == HIGH
+	SeverityLevel          int                 `json:"severityLevel,omitempty"`
 }
 
 type CustomNotification struct {
