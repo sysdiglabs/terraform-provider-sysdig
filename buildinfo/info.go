@@ -1,6 +1,7 @@
 package buildinfo
 
 var (
-	IBM    = false
-	Sysdig = false
+	SysdigMonitor bool
+	SysdigSecure  bool
+	IBMMonitor    bool
 )

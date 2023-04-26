@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig || tf_acc_ibm
+//go:build tf_acc_sysdig || tf_acc_sysdig_monitor || tf_acc_ibm || tf_acc_ibm_monitor
 
 package sysdig_test
 
@@ -37,7 +37,7 @@ func TestAccAlertMetric(t *testing.T) {
 			{
 				Config: alertMetricWithNotificationChannel(rText()),
 				SkipFunc: func() (bool, error) {
-					return buildinfo.IBM, nil
+					return buildinfo.IBMMonitor, nil
 				},
 			},
 			{
@@ -45,7 +45,7 @@ func TestAccAlertMetric(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				SkipFunc: func() (bool, error) {
-					return buildinfo.IBM, nil
+					return buildinfo.IBMMonitor, nil
 				},
 			},
 		},

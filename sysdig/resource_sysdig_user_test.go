@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig
+//go:build tf_acc_sysdig || tf_acc_sysdig_monitor || tf_acc_sysdig_secure
 
 package sysdig_test
 
@@ -15,7 +15,7 @@ import (
 
 func TestAccUser(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
-
+	name := rText()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -25,16 +25,16 @@ func TestAccUser(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: userWithSystemRole(rText()),
+				Config: userWithSystemRole(name),
 			},
 			{
-				Config: userWithName(rText()),
+				Config: userWithName(name),
 			},
 			{
-				Config: userWithoutSystemRole(rText()),
+				Config: userWithoutSystemRole(name),
 			},
 			{
-				Config: userMinimumConfiguration(),
+				Config: userMinimumConfiguration(name),
 			},
 			{
 				ResourceName:      "sysdig_user.sample",
@@ -48,35 +48,35 @@ func TestAccUser(t *testing.T) {
 func userWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user@sysdig.com"
+  email      = "terraform-test+user%[1]s@sysdig.com"
   system_role = "ROLE_USER"
-  first_name = "%s"
-  last_name  = "%s"
-}`, name, name)
+  first_name = "%[1]s"
+  last_name  = "%[1]s"
+}`, name)
 }
 
 func userWithSystemRole(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user@sysdig.com"
-  system_role = "ROLE_CUSTOMER"
-  first_name = "%s"
-  last_name  = "%s"
-}`, name, name)
+  email      = "terraform-test+user%[1]s@sysdig.com"
+  system_role = "ROLE_USER"
+  first_name = "%[1]s"
+  last_name  = "%[1]s"
+}`, name)
 }
 
 func userWithoutSystemRole(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user@sysdig.com"
-  first_name = "%s"
-  last_name  = "%s"
-}`, name, name)
+  email      = "terraform-test+user%[1]s@sysdig.com"
+  first_name = "%[1]s"
+  last_name  = "%[1]s"
+}`, name)
 }
 
-func userMinimumConfiguration() string {
-	return `
+func userMinimumConfiguration(name string) string {
+	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user@sysdig.com"
-}`
+  email      = "terraform-test+user%s@sysdig.com"
+}`, name)
 }

@@ -1,8 +1,7 @@
-//go:build tf_acc_sysdig
+//go:build tf_acc_sysdig_monitor
 
 package buildinfo
 
 func init() {
-	SysdigSecure = true
 	SysdigMonitor = true
 }

@@ -3,5 +3,5 @@
 package buildinfo
 
 func init() {
-	IBM = true
+	IBMMonitor = true
 }
