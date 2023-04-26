@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
@@ -20,7 +21,6 @@ func resourceSysdigMonitorAlertV2Prometheus() *schema.Resource {
 		UpdateContext: resourceSysdigMonitorAlertV2PrometheusUpdate,
 		ReadContext:   resourceSysdigMonitorAlertV2PrometheusRead,
 		DeleteContext: resourceSysdigMonitorAlertV2PrometheusDelete,
-		// CustomizeDiff: resourceSysdigMonitorAlertV2PrometheusCustomizeDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -42,7 +42,7 @@ func resourceSysdigMonitorAlertV2Prometheus() *schema.Resource {
 }
 
 func resourceSysdigMonitorAlertV2PrometheusCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertV2PrometheusClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -65,7 +65,7 @@ func resourceSysdigMonitorAlertV2PrometheusCreate(ctx context.Context, d *schema
 }
 
 func resourceSysdigMonitorAlertV2PrometheusRead(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertV2PrometheusClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -75,7 +75,7 @@ func resourceSysdigMonitorAlertV2PrometheusRead(ctx context.Context, d *schema.R
 		return diag.FromErr(err)
 	}
 
-	a, err := client.GetAlertV2PrometheusById(ctx, id)
+	a, err := client.GetAlertV2PrometheusByID(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -91,7 +91,7 @@ func resourceSysdigMonitorAlertV2PrometheusRead(ctx context.Context, d *schema.R
 }
 
 func resourceSysdigMonitorAlertV2PrometheusUpdate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertV2PrometheusClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -114,7 +114,7 @@ func resourceSysdigMonitorAlertV2PrometheusUpdate(ctx context.Context, d *schema
 }
 
 func resourceSysdigMonitorAlertV2PrometheusDelete(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertV2PrometheusClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -132,25 +132,21 @@ func resourceSysdigMonitorAlertV2PrometheusDelete(ctx context.Context, d *schema
 	return nil
 }
 
-// func resourceSysdigMonitorAlertV2PrometheusCustomizeDiff(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
-// 	return nil
-// }
-
-func buildAlertV2PrometheusStruct(d *schema.ResourceData) *monitor.AlertV2Prometheus {
+func buildAlertV2PrometheusStruct(d *schema.ResourceData) *v2.AlertV2Prometheus {
 	alertV2Common := buildAlertV2CommonStruct(d)
 	alertV2Common.Type = monitor.AlertV2AlertType_Prometheus
 
-	config := monitor.AlertV2ConfigPrometheus{}
+	config := v2.AlertV2ConfigPrometheus{}
 	config.Query = d.Get("query").(string)
 
-	alert := &monitor.AlertV2Prometheus{
+	alert := &v2.AlertV2Prometheus{
 		AlertV2Common: *alertV2Common,
 		Config:        config,
 	}
 	return alert
 }
 
-func updateAlertV2PrometheusState(d *schema.ResourceData, alert *monitor.AlertV2Prometheus) (err error) {
+func updateAlertV2PrometheusState(d *schema.ResourceData, alert *v2.AlertV2Prometheus) (err error) {
 	err = updateAlertV2CommonState(d, &alert.AlertV2Common)
 	if err != nil {
 		return

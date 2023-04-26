@@ -276,3 +276,30 @@ type AlertLinkV2 struct {
 type AlertV2ConfigPrometheus struct {
 	Query string `json:"query"`
 }
+
+type AlertV2Metric struct {
+	AlertV2Common
+	Config AlertV2ConfigMetric `json:"config"`
+}
+
+type AlertV2ConfigMetric struct {
+	ScopedSegmentedConfig
+
+	ConditionOperator        string   `json:"conditionOperator"`
+	Threshold                float64  `json:"threshold"`
+	WarningConditionOperator string   `json:"warningConditionOperator,omitempty"`
+	WarningThreshold         *float64 `json:"warningThreshold,omitempty"`
+
+	GroupAggregation string                  `json:"groupAggregation"`
+	TimeAggregation  string                  `json:"timeAggregation"`
+	Metric           AlertMetricDescriptorV2 `json:"metric"`
+	NoDataBehaviour  string                  `json:"noDataBehaviour"`
+}
+
+type AlertMetricDescriptorV2 struct {
+	ID string `json:"id"`
+}
+
+type alertV2MetricWrapper struct {
+	Alert AlertV2Metric `json:"alert"`
+}

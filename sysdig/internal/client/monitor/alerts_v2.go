@@ -62,50 +62,6 @@ func (c *sysdigMonitorClient) translateScopeSegmentLabels(ctx context.Context, s
 	return nil
 }
 
-// prometheus
-
-func (c *sysdigMonitorClient) CreateAlertV2Prometheus(ctx context.Context, alert AlertV2Prometheus) (createdAlert AlertV2Prometheus, err error) {
-	if err = c.addNotificationChannelType(ctx, alert.NotificationChannelConfigList); err != nil {
-		return
-	}
-
-	body, err := c.createAlertV2(ctx, alert.ToJSON())
-	if err != nil {
-		return
-	}
-
-	createdAlert = AlertV2PrometheusFromJSON(body)
-	return
-}
-
-func (c *sysdigMonitorClient) UpdateAlertV2Prometheus(ctx context.Context, alert AlertV2Prometheus) (updatedAlert AlertV2Prometheus, err error) {
-	if err = c.addNotificationChannelType(ctx, alert.NotificationChannelConfigList); err != nil {
-		return
-	}
-
-	body, err := c.updateAlertV2(ctx, alert.ID, alert.ToJSON())
-	if err != nil {
-		return
-	}
-
-	updatedAlert = AlertV2PrometheusFromJSON(body)
-	return
-}
-
-func (c *sysdigMonitorClient) GetAlertV2PrometheusById(ctx context.Context, alertID int) (alert AlertV2Prometheus, err error) {
-	body, err := c.getAlertV2ById(ctx, alertID)
-	if err != nil {
-		return
-	}
-
-	alert = AlertV2PrometheusFromJSON(body)
-	return
-}
-
-func (c *sysdigMonitorClient) DeleteAlertV2Prometheus(ctx context.Context, alertID int) (err error) {
-	return c.deleteAlertV2(ctx, alertID)
-}
-
 // event
 
 func (c *sysdigMonitorClient) CreateAlertV2Event(ctx context.Context, alert AlertV2Event) (createdAlert AlertV2Event, err error) {
@@ -155,58 +111,6 @@ func (c *sysdigMonitorClient) GetAlertV2EventById(ctx context.Context, alertID i
 }
 
 func (c *sysdigMonitorClient) DeleteAlertV2Event(ctx context.Context, alertID int) (err error) {
-	return c.deleteAlertV2(ctx, alertID)
-}
-
-// metric
-
-func (c *sysdigMonitorClient) CreateAlertV2Metric(ctx context.Context, alert AlertV2Metric) (createdAlert AlertV2Metric, err error) {
-	if err = c.addNotificationChannelType(ctx, alert.NotificationChannelConfigList); err != nil {
-		return
-	}
-
-	if err = c.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig); err != nil {
-		return
-	}
-
-	body, err := c.createAlertV2(ctx, alert.ToJSON())
-	if err != nil {
-		return
-	}
-
-	createdAlert = AlertV2MetricFromJSON(body)
-	return
-}
-
-func (c *sysdigMonitorClient) UpdateAlertV2Metric(ctx context.Context, alert AlertV2Metric) (updatedAlert AlertV2Metric, err error) {
-	if err = c.addNotificationChannelType(ctx, alert.NotificationChannelConfigList); err != nil {
-		return
-	}
-
-	if err = c.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig); err != nil {
-		return
-	}
-
-	body, err := c.updateAlertV2(ctx, alert.ID, alert.ToJSON())
-	if err != nil {
-		return
-	}
-
-	updatedAlert = AlertV2MetricFromJSON(body)
-	return
-}
-
-func (c *sysdigMonitorClient) GetAlertV2MetricById(ctx context.Context, alertID int) (alert AlertV2Metric, err error) {
-	body, err := c.getAlertV2ById(ctx, alertID)
-	if err != nil {
-		return
-	}
-
-	alert = AlertV2MetricFromJSON(body)
-	return
-}
-
-func (c *sysdigMonitorClient) DeleteAlertV2Metric(ctx context.Context, alertID int) (err error) {
 	return c.deleteAlertV2(ctx, alertID)
 }
 

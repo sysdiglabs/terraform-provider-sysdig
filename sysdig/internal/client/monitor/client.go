@@ -14,20 +14,10 @@ import (
 )
 
 type SysdigMonitorClient interface {
-	CreateAlertV2Prometheus(context.Context, AlertV2Prometheus) (AlertV2Prometheus, error)
-	DeleteAlertV2Prometheus(context.Context, int) error
-	UpdateAlertV2Prometheus(context.Context, AlertV2Prometheus) (AlertV2Prometheus, error)
-	GetAlertV2PrometheusById(context.Context, int) (AlertV2Prometheus, error)
-
 	CreateAlertV2Event(context.Context, AlertV2Event) (AlertV2Event, error)
 	DeleteAlertV2Event(context.Context, int) error
 	UpdateAlertV2Event(context.Context, AlertV2Event) (AlertV2Event, error)
 	GetAlertV2EventById(context.Context, int) (AlertV2Event, error)
-
-	CreateAlertV2Metric(context.Context, AlertV2Metric) (AlertV2Metric, error)
-	DeleteAlertV2Metric(context.Context, int) error
-	UpdateAlertV2Metric(context.Context, AlertV2Metric) (AlertV2Metric, error)
-	GetAlertV2MetricById(context.Context, int) (AlertV2Metric, error)
 
 	CreateAlertV2Downtime(context.Context, AlertV2Downtime) (AlertV2Downtime, error)
 	DeleteAlertV2Downtime(context.Context, int) error

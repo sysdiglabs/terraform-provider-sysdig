@@ -3,6 +3,7 @@ package sysdig
 import (
 	"context"
 	"fmt"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
@@ -73,7 +74,7 @@ func resourceSysdigMonitorAlertV2Metric() *schema.Resource {
 }
 
 func resourceSysdigMonitorAlertV2MetricCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertV2MetricClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -99,7 +100,7 @@ func resourceSysdigMonitorAlertV2MetricCreate(ctx context.Context, d *schema.Res
 }
 
 func resourceSysdigMonitorAlertV2MetricRead(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertV2MetricClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -109,7 +110,7 @@ func resourceSysdigMonitorAlertV2MetricRead(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	a, err := client.GetAlertV2MetricById(ctx, id)
+	a, err := client.GetAlertV2MetricByID(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -125,7 +126,7 @@ func resourceSysdigMonitorAlertV2MetricRead(ctx context.Context, d *schema.Resou
 }
 
 func resourceSysdigMonitorAlertV2MetricUpdate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertV2MetricClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -151,7 +152,7 @@ func resourceSysdigMonitorAlertV2MetricUpdate(ctx context.Context, d *schema.Res
 }
 
 func resourceSysdigMonitorAlertV2MetricDelete(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertV2MetricClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -169,10 +170,10 @@ func resourceSysdigMonitorAlertV2MetricDelete(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func buildAlertV2MetricStruct(d *schema.ResourceData) (*monitor.AlertV2Metric, error) {
+func buildAlertV2MetricStruct(d *schema.ResourceData) (*v2.AlertV2Metric, error) {
 	alertV2Common := buildAlertV2CommonStruct(d)
 	alertV2Common.Type = monitor.AlertV2AlertType_Manual
-	config := monitor.AlertV2ConfigMetric{}
+	config := v2.AlertV2ConfigMetric{}
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
 
@@ -205,14 +206,14 @@ func buildAlertV2MetricStruct(d *schema.ResourceData) (*monitor.AlertV2Metric, e
 
 	config.NoDataBehaviour = d.Get("no_data_behaviour").(string)
 
-	alert := &monitor.AlertV2Metric{
+	alert := &v2.AlertV2Metric{
 		AlertV2Common: *alertV2Common,
 		Config:        config,
 	}
 	return alert, nil
 }
 
-func updateAlertV2MetricState(d *schema.ResourceData, alert *monitor.AlertV2Metric) error {
+func updateAlertV2MetricState(d *schema.ResourceData, alert *v2.AlertV2Metric) error {
 	err := updateAlertV2CommonState(d, &alert.AlertV2Common)
 	if err != nil {
 		return err

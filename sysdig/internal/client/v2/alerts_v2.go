@@ -24,15 +24,23 @@ var labelCache struct {
 	labels []LabelDescriptorV3
 }
 
-type AlertsV2Interface interface {
-	AlertsV2PrometheusInterface
+type AlertV2Interface interface {
+	AlertV2PrometheusInterface
+	AlertV2MetricInterface
 }
 
-type AlertsV2PrometheusInterface interface {
+type AlertV2PrometheusInterface interface {
 	CreateAlertV2Prometheus(ctx context.Context, alert AlertV2Prometheus) (AlertV2Prometheus, error)
 	UpdateAlertV2Prometheus(ctx context.Context, alert AlertV2Prometheus) (AlertV2Prometheus, error)
 	GetAlertV2PrometheusByID(ctx context.Context, alertID int) (AlertV2Prometheus, error)
-	DeleteAlertV2Prometheus(ctx context.Context, alertID int) (err error)
+	DeleteAlertV2Prometheus(ctx context.Context, alertID int) error
+}
+
+type AlertV2MetricInterface interface {
+	CreateAlertV2Metric(ctx context.Context, alert AlertV2Metric) (AlertV2Metric, error)
+	UpdateAlertV2Metric(ctx context.Context, alert AlertV2Metric) (AlertV2Metric, error)
+	GetAlertV2MetricByID(ctx context.Context, alertID int) (AlertV2Metric, error)
+	DeleteAlertV2Metric(ctx context.Context, alertID int) error
 }
 
 func (client *Client) CreateAlertV2Prometheus(ctx context.Context, alert AlertV2Prometheus) (AlertV2Prometheus, error) {
@@ -97,7 +105,83 @@ func (client *Client) GetAlertV2PrometheusByID(ctx context.Context, alertID int)
 	return wrapper.Alert, nil
 }
 
-func (client *Client) DeleteAlertV2Prometheus(ctx context.Context, alertID int) (err error) {
+func (client *Client) DeleteAlertV2Prometheus(ctx context.Context, alertID int) error {
+	return client.deleteAlertV2(ctx, alertID)
+}
+
+func (client *Client) CreateAlertV2Metric(ctx context.Context, alert AlertV2Metric) (AlertV2Metric, error) {
+	err := client.addNotificationChannelType(ctx, alert.NotificationChannelConfigList)
+	if err != nil {
+		return AlertV2Metric{}, err
+	}
+
+	err = client.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig)
+	if err != nil {
+		return AlertV2Metric{}, err
+	}
+
+	payload, err := Marshal(alertV2MetricWrapper{Alert: alert})
+	if err != nil {
+		return AlertV2Metric{}, err
+	}
+
+	body, err := client.createAlertV2(ctx, payload)
+	if err != nil {
+		return AlertV2Metric{}, err
+	}
+
+	wrapper, err := Unmarshal[alertV2MetricWrapper](body)
+	if err != nil {
+		return AlertV2Metric{}, err
+	}
+
+	return wrapper.Alert, nil
+}
+
+func (client *Client) UpdateAlertV2Metric(ctx context.Context, alert AlertV2Metric) (AlertV2Metric, error) {
+	err := client.addNotificationChannelType(ctx, alert.NotificationChannelConfigList)
+	if err != nil {
+		return AlertV2Metric{}, err
+	}
+
+	err = client.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig)
+	if err != nil {
+		return AlertV2Metric{}, err
+	}
+
+	payload, err := Marshal(alertV2MetricWrapper{Alert: alert})
+	if err != nil {
+		return AlertV2Metric{}, err
+	}
+
+	body, err := client.updateAlertV2(ctx, alert.ID, payload)
+	if err != nil {
+		return AlertV2Metric{}, err
+	}
+
+	wrapper, err := Unmarshal[alertV2MetricWrapper](body)
+	if err != nil {
+		return AlertV2Metric{}, err
+	}
+
+	return wrapper.Alert, nil
+}
+
+func (client *Client) GetAlertV2MetricByID(ctx context.Context, alertID int) (AlertV2Metric, error) {
+	body, err := client.getAlertV2ByID(ctx, alertID)
+	if err != nil {
+		return AlertV2Metric{}, err
+	}
+
+	wrapper, err := Unmarshal[alertV2MetricWrapper](body)
+	if err != nil {
+		return AlertV2Metric{}, err
+	}
+
+	return wrapper.Alert, nil
+}
+
+func (client *Client) DeleteAlertV2Metric(ctx context.Context, alertID int) error {
 	return client.deleteAlertV2(ctx, alertID)
 }
 
