@@ -27,7 +27,7 @@ func (client *Client) CreateAlert(ctx context.Context, alert Alert) (Alert, erro
 		return Alert{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.createAlertURL(), payload)
+	response, err := client.requester.Request(ctx, http.MethodPost, client.CreateAlertURL(), payload)
 	if err != nil {
 		return Alert{}, err
 	}
@@ -46,7 +46,7 @@ func (client *Client) CreateAlert(ctx context.Context, alert Alert) (Alert, erro
 }
 
 func (client *Client) DeleteAlert(ctx context.Context, alertID int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.deleteAlertURL(alertID), nil)
+	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeleteAlertURL(alertID), nil)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func (client *Client) UpdateAlert(ctx context.Context, alert Alert) (Alert, erro
 		return Alert{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.updateAlertURL(alert.ID), payload)
+	response, err := client.requester.Request(ctx, http.MethodPut, client.UpdateAlertURL(alert.ID), payload)
 	if err != nil {
 		return Alert{}, err
 	}
@@ -102,15 +102,15 @@ func (client *Client) GetAlertByID(ctx context.Context, alertID int) (Alert, err
 	return wrapper.Alert, nil
 }
 
-func (client *Client) createAlertURL() string {
+func (client *Client) CreateAlertURL() string {
 	return fmt.Sprintf(CreateAlertPath, client.config.url)
 }
 
-func (client *Client) deleteAlertURL(alertID int) string {
+func (client *Client) DeleteAlertURL(alertID int) string {
 	return fmt.Sprintf(DeleteAlertPath, client.config.url, alertID)
 }
 
-func (client *Client) updateAlertURL(alertID int) string {
+func (client *Client) UpdateAlertURL(alertID int) string {
 	return fmt.Sprintf(UpdateAlertPath, client.config.url, alertID)
 }
 
