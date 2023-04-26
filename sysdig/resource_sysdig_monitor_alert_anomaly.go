@@ -46,7 +46,7 @@ func resourceSysdigMonitorAlertAnomaly() *schema.Resource {
 }
 
 func resourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := getSysdigMonitorAlertClient(i.(SysdigClients))
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -67,7 +67,7 @@ func resourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.Resource
 }
 
 func resourceSysdigAlertAnomalyUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := getSysdigMonitorAlertClient(i.(SysdigClients))
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -88,7 +88,7 @@ func resourceSysdigAlertAnomalyUpdate(ctx context.Context, data *schema.Resource
 }
 
 func resourceSysdigAlertAnomalyRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := getSysdigMonitorAlertClient(i.(SysdigClients))
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -114,7 +114,7 @@ func resourceSysdigAlertAnomalyRead(ctx context.Context, data *schema.ResourceDa
 }
 
 func resourceSysdigAlertAnomalyDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := getSysdigMonitorAlertClient(i.(SysdigClients))
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -183,6 +183,8 @@ When IBM Cloud Monitoring resources are to be created, this authentication must 
 > - `sysdig_monitor_alert_event`
 > - `sysdig_monitor_alert_metric`
 > - `sysdig_monitor_alert_promql`
+> - `sysdig_monitor_alert_anomaly`
+> - `sysdig_monitor_alert_group_outlier`
 > 
 > And data sources:
 > - `sysdig_monitor_notification_channel_pagerduty`
