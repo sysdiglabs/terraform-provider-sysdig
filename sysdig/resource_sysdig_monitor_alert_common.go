@@ -286,3 +286,7 @@ func getMonitorAlertClient(c SysdigClients) (v2.AlertInterface, error) {
 	}
 	return client, nil
 }
+
+func getSysdigMonitorAlertClient(c SysdigClients) (v2.AlertInterface, error) {
+	return c.sysdigMonitorClientV2()
+}
