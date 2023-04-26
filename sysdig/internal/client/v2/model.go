@@ -176,3 +176,103 @@ type Monitor struct {
 	Metric       string  `json:"metric"`
 	StdDevFactor float64 `json:"stdDevFactor"`
 }
+
+type NotificationChannelConfigV2 struct {
+	ChannelID       int                          `json:"channelId,omitempty"`
+	Type            string                       `json:"type,omitempty"`
+	Name            string                       `json:"nam,omitempty"`
+	Enabled         bool                         `json:"enabled,omitempty"`
+	OverrideOptions NotificationChannelOptionsV2 `json:"overrideOptions"`
+}
+
+type NotificationChannelOptionsV2 struct {
+	NotifyOnAcknowledge        bool                          `json:"notifyOnAcknowledge,omitempty"`
+	NotifyOnResolve            bool                          `json:"notifyOnResolve"`
+	ReNotifyEverySec           *int                          `json:"reNotifyEverySec"`
+	CustomNotificationTemplate *CustomNotificationTemplateV2 `json:"customNotificationTemplate,omitempty"`
+	Thresholds                 []string                      `json:"thresholds"`
+}
+
+type CustomNotificationTemplateV2 struct {
+	Subject     string `json:"subject"`
+	PrependText string `json:"prependText"`
+	AppendText  string `json:"appendText"`
+}
+
+type ScopedSegmentedConfig struct {
+	Scope     *AlertScopeV2            `json:"scope,omitempty"`
+	SegmentBy []AlertLabelDescriptorV2 `json:"segmentBy"`
+}
+
+type AlertScopeV2 struct {
+	Expressions []ScopeExpressionV2 `json:"expressions,omitempty"`
+}
+
+type ScopeExpressionV2 struct {
+	Operand    string                  `json:"operand"`
+	Descriptor *AlertLabelDescriptorV2 `json:"descriptor,omitempty"`
+	Operator   string                  `json:"operator"`
+	Value      []string                `json:"value"`
+}
+
+type AlertLabelDescriptorV2 struct {
+	ID       string `json:"id"`
+	PublicID string `json:"publicId,omitempty"`
+}
+
+type LabelDescriptorV3 struct {
+	ID       string `json:"id"`
+	PublicID string `json:"publicId"`
+}
+
+var labelsDescriptorsV3Wrapper struct {
+	LabelDescriptorV3 `json:"labelDescriptor"`
+}
+
+var labelsWrapper struct {
+	AllLabels []LabelDescriptorV3 `json:"allLabels"`
+}
+
+type AlertV2Prometheus struct {
+	AlertV2Common
+	Config AlertV2ConfigPrometheus `json:"config"`
+}
+
+type AlertV2PrometheusWrapper struct {
+	Alert AlertV2Prometheus `json:"alert"`
+}
+
+type AlertV2Common struct {
+	ID                            int                           `json:"id,omitempty"`
+	Version                       int                           `json:"version,omitempty"`
+	Name                          string                        `json:"name"`
+	Description                   string                        `json:"description,omitempty"`
+	DurationSec                   int                           `json:"durationSec"`
+	Type                          string                        `json:"type"`
+	Group                         string                        `json:"group,omitempty"`
+	Severity                      string                        `json:"severity"`
+	TeamID                        int                           `json:"teamId,omitempty"`
+	Enabled                       bool                          `json:"enabled"`
+	NotificationChannelConfigList []NotificationChannelConfigV2 `json:"notificationChannelConfigList"`
+	CustomNotificationTemplate    *CustomNotificationTemplateV2 `json:"customNotificationTemplate,omitempty"`
+	CaptureConfig                 *CaptureConfigV2              `json:"captureConfig,omitempty"`
+	Links                         []AlertLinkV2                 `json:"links"`
+}
+
+type CaptureConfigV2 struct {
+	DurationSec int    `json:"durationSec"`
+	Storage     string `json:"storage"`
+	Filter      string `json:"filter"`
+	FileName    string `json:"fileName"`
+	Enabled     bool   `json:"enabled"`
+}
+
+type AlertLinkV2 struct {
+	Type string `json:"type,omitempty"`
+	ID   string `json:"id,omitempty"`
+	Href string `json:"href,omitempty"`
+}
+
+type AlertV2ConfigPrometheus struct {
+	Query string `json:"query"`
+}
