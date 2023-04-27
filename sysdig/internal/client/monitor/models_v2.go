@@ -116,14 +116,6 @@ func (a *AlertV2Event) ToJSON() io.Reader {
 	return bytes.NewBuffer(payload)
 }
 
-func AlertV2EventFromJSON(body []byte) AlertV2Event {
-	var result struct {
-		Alert AlertV2Event
-	}
-	_ = json.Unmarshal(body, &result)
-	return result.Alert
-}
-
 // Metric
 type AlertV2ConfigMetric struct {
 	ScopedSegmentedConfig
@@ -152,14 +144,6 @@ func (a *AlertV2Metric) ToJSON() io.Reader {
 	return bytes.NewBuffer(payload)
 }
 
-func AlertV2MetricFromJSON(body []byte) AlertV2Metric {
-	var result struct {
-		Alert AlertV2Metric
-	}
-	_ = json.Unmarshal(body, &result)
-	return result.Alert
-}
-
 // Downtime
 type AlertV2ConfigDowntime struct {
 	ScopedSegmentedConfig
@@ -176,22 +160,6 @@ type AlertV2ConfigDowntime struct {
 type AlertV2Downtime struct {
 	AlertV2Common
 	Config AlertV2ConfigDowntime `json:"config"`
-}
-
-func (a *AlertV2Downtime) ToJSON() io.Reader {
-	data := struct {
-		Alert AlertV2Downtime `json:"alert"`
-	}{Alert: *a}
-	payload, _ := json.Marshal(data)
-	return bytes.NewBuffer(payload)
-}
-
-func AlertV2DowntimeFromJSON(body []byte) AlertV2Downtime {
-	var result struct {
-		Alert AlertV2Downtime
-	}
-	_ = json.Unmarshal(body, &result)
-	return result.Alert
 }
 
 // AlertScopeV2

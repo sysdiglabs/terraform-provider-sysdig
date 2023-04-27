@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
@@ -48,7 +49,7 @@ func resourceSysdigMonitorAlertV2Downtime() *schema.Resource {
 }
 
 func resourceSysdigMonitorAlertV2DowntimeCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertV2DowntimeClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -71,7 +72,7 @@ func resourceSysdigMonitorAlertV2DowntimeCreate(ctx context.Context, d *schema.R
 }
 
 func resourceSysdigMonitorAlertV2DowntimeRead(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertV2DowntimeClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -81,7 +82,7 @@ func resourceSysdigMonitorAlertV2DowntimeRead(ctx context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 
-	a, err := client.GetAlertV2DowntimeById(ctx, id)
+	a, err := client.GetAlertV2DowntimeByID(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -97,7 +98,7 @@ func resourceSysdigMonitorAlertV2DowntimeRead(ctx context.Context, d *schema.Res
 }
 
 func resourceSysdigMonitorAlertV2DowntimeUpdate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertV2DowntimeClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -120,7 +121,7 @@ func resourceSysdigMonitorAlertV2DowntimeUpdate(ctx context.Context, d *schema.R
 }
 
 func resourceSysdigMonitorAlertV2DowntimeDelete(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertV2DowntimeClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -138,10 +139,10 @@ func resourceSysdigMonitorAlertV2DowntimeDelete(ctx context.Context, d *schema.R
 	return nil
 }
 
-func buildAlertV2DowntimeStruct(d *schema.ResourceData) *monitor.AlertV2Downtime {
+func buildAlertV2DowntimeStruct(d *schema.ResourceData) *v2.AlertV2Downtime {
 	alertV2Common := buildAlertV2CommonStruct(d)
 	alertV2Common.Type = monitor.AlertV2AlertType_Manual
-	config := monitor.AlertV2ConfigDowntime{}
+	config := v2.AlertV2ConfigDowntime{}
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
 
@@ -163,14 +164,14 @@ func buildAlertV2DowntimeStruct(d *schema.ResourceData) *monitor.AlertV2Downtime
 
 	config.NoDataBehaviour = "DO_NOTHING"
 
-	alert := &monitor.AlertV2Downtime{
+	alert := &v2.AlertV2Downtime{
 		AlertV2Common: *alertV2Common,
 		Config:        config,
 	}
 	return alert
 }
 
-func updateAlertV2DowntimeState(d *schema.ResourceData, alert *monitor.AlertV2Downtime) error {
+func updateAlertV2DowntimeState(d *schema.ResourceData, alert *v2.AlertV2Downtime) error {
 	err := updateAlertV2CommonState(d, &alert.AlertV2Common)
 	if err != nil {
 		return err

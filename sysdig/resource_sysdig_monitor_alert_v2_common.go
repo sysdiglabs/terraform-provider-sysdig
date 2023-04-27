@@ -508,3 +508,11 @@ func getMonitorAlertV2PrometheusClient(c SysdigClients) (v2.AlertV2PrometheusInt
 func getMonitorAlertV2MetricClient(c SysdigClients) (v2.AlertV2MetricInterface, error) {
 	return getMonitorAlertV2Client(c)
 }
+
+func getMonitorAlertV2EventClient(c SysdigClients) (v2.AlertV2EventInterface, error) {
+	return getMonitorAlertV2Client(c)
+}
+
+func getMonitorAlertV2DowntimeClient(c SysdigClients) (v2.AlertV2DowntimeInterface, error) {
+	return getMonitorAlertV2Client(c)
+}
