@@ -8,8 +8,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorAlertV2Prometheus() *schema.Resource {
@@ -134,7 +132,7 @@ func resourceSysdigMonitorAlertV2PrometheusDelete(ctx context.Context, d *schema
 
 func buildAlertV2PrometheusStruct(d *schema.ResourceData) *v2.AlertV2Prometheus {
 	alertV2Common := buildAlertV2CommonStruct(d)
-	alertV2Common.Type = monitor.AlertV2AlertType_Prometheus
+	alertV2Common.Type = v2.AlertV2AlertTypePrometheus
 
 	config := v2.AlertV2ConfigPrometheus{}
 	config.Query = d.Get("query").(string)

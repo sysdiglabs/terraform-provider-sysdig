@@ -18,6 +18,22 @@ const (
 	DeleteAlertV2Path          = "%s/api/v2/alerts/%d"
 )
 
+const (
+	AlertV2AlertTypeEvent      = "EVENT"
+	AlertV2AlertTypeManual     = "MANUAL"
+	AlertV2AlertTypePrometheus = "PROMETHEUS"
+
+	AlertV2SeverityHigh   = "high"
+	AlertV2SeverityMedium = "medium"
+	AlertV2SeverityLow    = "low"
+	AlertV2SeverityInfo   = "info"
+
+	AlertLinkV2TypeDashboard = "dashboard"
+	AlertLinkV2TypeRunbook   = "runbook"
+
+	AlertV2CaptureFilenameRegexp = `.*?\.scap`
+)
+
 var labelCache struct {
 	sync.Mutex
 
@@ -514,6 +530,22 @@ func (client *Client) getLabels(ctx context.Context) ([]LabelDescriptorV3, error
 	}
 
 	return wrapper.AllLabels, err
+}
+
+func AlertV2SeverityValues() []string {
+	return []string{
+		AlertV2SeverityHigh,
+		AlertV2SeverityMedium,
+		AlertV2SeverityLow,
+		AlertV2SeverityInfo,
+	}
+}
+
+func AlertLinkV2TypeValues() []string {
+	return []string{
+		AlertLinkV2TypeDashboard,
+		AlertLinkV2TypeRunbook,
+	}
 }
 
 func (client *Client) GetLabelsDescriptorsV3URL(label string) string {

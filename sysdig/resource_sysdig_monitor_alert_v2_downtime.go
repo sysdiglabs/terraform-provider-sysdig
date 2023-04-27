@@ -9,8 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorAlertV2Downtime() *schema.Resource {
@@ -141,7 +139,7 @@ func resourceSysdigMonitorAlertV2DowntimeDelete(ctx context.Context, d *schema.R
 
 func buildAlertV2DowntimeStruct(d *schema.ResourceData) *v2.AlertV2Downtime {
 	alertV2Common := buildAlertV2CommonStruct(d)
-	alertV2Common.Type = monitor.AlertV2AlertType_Manual
+	alertV2Common.Type = v2.AlertV2AlertTypeManual
 	config := v2.AlertV2ConfigDowntime{}
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)

@@ -10,8 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorAlertV2Event() *schema.Resource {
@@ -161,7 +159,7 @@ func resourceSysdigMonitorAlertV2EventDelete(ctx context.Context, d *schema.Reso
 
 func buildAlertV2EventStruct(d *schema.ResourceData) (*v2.AlertV2Event, error) {
 	alertV2Common := buildAlertV2CommonStruct(d)
-	alertV2Common.Type = monitor.AlertV2AlertType_Event
+	alertV2Common.Type = v2.AlertV2AlertTypeEvent
 	config := v2.AlertV2ConfigEvent{}
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)

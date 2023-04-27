@@ -8,8 +8,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func minutesToSeconds(minutes int) (seconds int) {
@@ -34,8 +32,8 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 		"severity": {
 			Type:         schema.TypeString,
 			Optional:     true,
-			Default:      monitor.AlertV2Severity_Low,
-			ValidateFunc: validation.StringInSlice(monitor.AlertV2Severity_Values(), true),
+			Default:      v2.AlertV2SeverityLow,
+			ValidateFunc: validation.StringInSlice(v2.AlertV2SeverityValues(), true),
 		},
 		"trigger_after_minutes": {
 			Type:     schema.TypeInt,
@@ -140,7 +138,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 					"filename": {
 						Type:         schema.TypeString,
 						Required:     true,
-						ValidateFunc: validation.StringMatch(regexp.MustCompile(monitor.AlertV2CaptureFilenameRegexp), "the filename must end in .scap"), //otherwise the api will silently add .scap at the end
+						ValidateFunc: validation.StringMatch(regexp.MustCompile(v2.AlertV2CaptureFilenameRegexp), "the filename must end in .scap"), //otherwise the api will silently add .scap at the end
 					},
 					"filter": {
 						Type:     schema.TypeString,
@@ -163,7 +161,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 					"type": {
 						Type:         schema.TypeString,
 						Required:     true,
-						ValidateFunc: validation.StringInSlice(monitor.AlertLinkV2Type_Values(), true),
+						ValidateFunc: validation.StringInSlice(v2.AlertLinkV2TypeValues(), true),
 					},
 					"href": {
 						Type:     schema.TypeString,

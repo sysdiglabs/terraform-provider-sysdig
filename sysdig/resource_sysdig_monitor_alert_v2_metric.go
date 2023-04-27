@@ -10,8 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorAlertV2Metric() *schema.Resource {
@@ -172,7 +170,7 @@ func resourceSysdigMonitorAlertV2MetricDelete(ctx context.Context, d *schema.Res
 
 func buildAlertV2MetricStruct(d *schema.ResourceData) (*v2.AlertV2Metric, error) {
 	alertV2Common := buildAlertV2CommonStruct(d)
-	alertV2Common.Type = monitor.AlertV2AlertType_Manual
+	alertV2Common.Type = v2.AlertV2AlertTypeManual
 	config := v2.AlertV2ConfigMetric{}
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
