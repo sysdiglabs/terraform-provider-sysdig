@@ -555,7 +555,7 @@ func (client *Client) GetLabelsDescriptorsV3URL(label string) string {
 func (client *Client) GetLabelsV3URL(limit *int) string {
 	u := fmt.Sprintf(GetLabelsV3Path, client.config.url)
 	if limit != nil {
-		u = fmt.Sprintf("%s?limit=%d", u, limit)
+		u = fmt.Sprintf("%s?limit=%d", u, *limit)
 	}
 	return u
 }
