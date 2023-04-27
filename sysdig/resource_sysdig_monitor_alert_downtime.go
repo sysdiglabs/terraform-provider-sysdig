@@ -3,14 +3,13 @@ package sysdig
 import (
 	"context"
 	"fmt"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/spf13/cast"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorAlertDowntime() *schema.Resource {
@@ -48,7 +47,7 @@ func resourceSysdigMonitorAlertDowntime() *schema.Resource {
 }
 
 func resourceSysdigAlertDowntimeCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -70,7 +69,7 @@ func resourceSysdigAlertDowntimeCreate(ctx context.Context, data *schema.Resourc
 }
 
 func resourceSysdigAlertDowntimeUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -91,7 +90,7 @@ func resourceSysdigAlertDowntimeUpdate(ctx context.Context, data *schema.Resourc
 }
 
 func resourceSysdigAlertDowntimeRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -101,7 +100,7 @@ func resourceSysdigAlertDowntimeRead(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	alert, err := client.GetAlertById(ctx, id)
+	alert, err := client.GetAlertByID(ctx, id)
 
 	if err != nil {
 		data.SetId("")
@@ -116,7 +115,7 @@ func resourceSysdigAlertDowntimeRead(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 func resourceSysdigAlertDowntimeDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -134,13 +133,13 @@ func resourceSysdigAlertDowntimeDelete(ctx context.Context, data *schema.Resourc
 	return nil
 }
 
-func downtimeAlertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert, err error) {
+func downtimeAlertFromResourceData(d *schema.ResourceData) (alert *v2.Alert, err error) {
 	alert, err = alertFromResourceData(d)
 	if err != nil {
 		return
 	}
 
-	alert.SegmentCondition = &monitor.SegmentCondition{Type: "ANY"}
+	alert.SegmentCondition = &v2.SegmentCondition{Type: "ANY"}
 	alert.Condition = fmt.Sprintf("avg(timeAvg(uptime)) <= %.2f", 1.0-(cast.ToFloat64(d.Get("trigger_after_pct"))/100.0))
 
 	entitiesRaw := d.Get("entities_to_monitor").([]interface{})
@@ -151,7 +150,7 @@ func downtimeAlertFromResourceData(d *schema.ResourceData) (alert *monitor.Alert
 	return
 }
 
-func downtimeAlertToResourceData(alert *monitor.Alert, data *schema.ResourceData) (err error) {
+func downtimeAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
 	if err != nil {
 		return

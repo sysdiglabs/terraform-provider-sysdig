@@ -28,6 +28,7 @@ type IBMCommon interface {
 
 type IBMMonitor interface {
 	IBMCommon
+	MonitorCommon
 }
 
 type IBMAccessToken string

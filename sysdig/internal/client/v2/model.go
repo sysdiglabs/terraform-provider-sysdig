@@ -111,3 +111,68 @@ type GroupMapping struct {
 	SystemRole string   `json:"systemRole,omitempty"`
 	TeamMap    *TeamMap `json:"teamMap,omitempty"`
 }
+
+type alertWrapper struct {
+	Alert Alert `json:"alert"`
+}
+
+type Alert struct {
+	ID                     int                 `json:"id,omitempty"`
+	Version                int                 `json:"version,omitempty"`
+	Type                   string              `json:"type"`
+	Name                   string              `json:"name"`
+	Description            string              `json:"description"`
+	Enabled                bool                `json:"enabled"`
+	GroupName              string              `json:"groupName,omitempty"`
+	NotificationChannelIds []int               `json:"notificationChannelIds"`
+	Filter                 string              `json:"filter"`
+	Severity               int                 `json:"severity"`
+	Timespan               int                 `json:"timespan"`
+	CustomNotification     *CustomNotification `json:"customNotification"`
+	TeamID                 int                 `json:"teamId,omitempty"`
+	AutoCreated            bool                `json:"autoCreated"`
+	SysdigCapture          *SysdigCapture      `json:"sysdigCapture"`
+	RateOfChange           bool                `json:"rateOfChange,omitempty"`
+	ReNotifyMinutes        int                 `json:"reNotifyMinutes"`
+	ReNotify               bool                `json:"reNotify"`
+	Valid                  bool                `json:"valid"`
+	SeverityLabel          string              `json:"severityLabel,omitempty"`
+	SegmentBy              []string            `json:"segmentBy"`
+	SegmentCondition       *SegmentCondition   `json:"segmentCondition"`
+	Criteria               *Criteria           `json:"criteria,omitempty"`
+	Monitor                []*Monitor          `json:"monitor,omitempty"`
+	Condition              string              `json:"condition"`
+	SeverityLevel          int                 `json:"severityLevel,omitempty"`
+}
+
+type CustomNotification struct {
+	TitleTemplate  string `json:"titleTemplate"`
+	UseNewTemplate bool   `json:"useNewTemplate"`
+	PrependText    string `json:"prependText,omitempty"`
+	AppendText     string `json:"appendText,omitempty"`
+}
+
+type SysdigCapture struct {
+	Name       string      `json:"name"`
+	Filters    string      `json:"filters,omitempty"`
+	Duration   int         `json:"duration"`
+	Type       string      `json:"type,omitempty"`
+	BucketName string      `json:"bucketName"`
+	Folder     string      `json:"folder,omitempty"`
+	Enabled    bool        `json:"enabled"`
+	StorageID  interface{} `json:"storageId,omitempty"`
+}
+
+type SegmentCondition struct {
+	Type string `json:"type"`
+}
+
+type Criteria struct {
+	Text   string `json:"text"`
+	Source string `json:"source"`
+}
+
+type Monitor struct {
+	Metric       string  `json:"metric"`
+	StdDevFactor float64 `json:"stdDevFactor"`
+}
