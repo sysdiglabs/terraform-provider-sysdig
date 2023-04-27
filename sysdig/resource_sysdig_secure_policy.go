@@ -162,7 +162,7 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 
 	}
 
-	actions := []map[string]interface{}{{}}
+	actions := []map[string]interface{}{}
 	for _, action := range policy.Actions {
 		if action.Type != "POLICY_ACTION_CAPTURE" {
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
