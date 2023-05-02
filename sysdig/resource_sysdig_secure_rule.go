@@ -1,6 +1,9 @@
 package sysdig
 
 import (
+	"reflect"
+	"sort"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
@@ -46,22 +49,37 @@ func ruleFromResourceData(d *schema.ResourceData) secure.Rule {
 		Version:     d.Get("version").(int),
 	}
 
-	rule.Tags = []string{}
-	if tags, ok := d.Get("tags").([]interface{}); ok {
-		for _, rawTag := range tags {
-			if tag, ok := rawTag.(string); ok {
-				rule.Tags = append(rule.Tags, tag)
-			}
-		}
-	}
+	rule.Tags = getTagsFromResourceData(d)
+
 	return rule
 }
 
 // Saves in the resource data the information from the common fields of the rule.
 func updateResourceDataForRule(d *schema.ResourceData, rule secure.Rule) {
+	currentTags := getTagsFromResourceData(d)
+	newTags := append([]string{}, rule.Tags...)
+	sort.Strings(currentTags)
+	sort.Strings(newTags)
+	areTagsSame := reflect.DeepEqual(currentTags, newTags)
+
 	_ = d.Set("name", rule.Name)
 	_ = d.Set("description", rule.Description)
-	_ = d.Set("tags", rule.Tags)
+	if !areTagsSame {
+		_ = d.Set("tags", rule.Tags)
+	}
 	_ = d.Set("version", rule.Version)
 
+}
+
+func getTagsFromResourceData(d *schema.ResourceData) []string {
+	tags := []string{}
+	if tags, ok := d.Get("tags").([]interface{}); ok {
+		for _, rawTag := range tags {
+			if tag, ok := rawTag.(string); ok {
+				tags = append(tags, tag)
+			}
+		}
+	}
+
+	return tags
 }
