@@ -72,14 +72,14 @@ func updateResourceDataForRule(d *schema.ResourceData, rule secure.Rule) {
 }
 
 func getTagsFromResourceData(d *schema.ResourceData) []string {
-	tags := []string{}
+	result := []string{}
 	if tags, ok := d.Get("tags").([]interface{}); ok {
 		for _, rawTag := range tags {
 			if tag, ok := rawTag.(string); ok {
-				tags = append(tags, tag)
+				result = append(result, tag)
 			}
 		}
 	}
 
-	return tags
+	return result
 }
