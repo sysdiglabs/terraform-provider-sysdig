@@ -176,7 +176,14 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 			}}
 		}
 	}
-	_ = d.Set("actions", actions)
+
+	currentContainerAction := d.Get("actions.0.container").(string)
+	currentCaptureAction := d.Get("actions.0.capture").([]interface{})
+	// If the policy retrieved from service has no actions and the current state is default values,
+	// then do not set the "actions" key as it may cause terraform to think there has been a state change
+	if len(policy.Actions) > 0 || currentContainerAction != "" || len(currentCaptureAction) > 0 {
+		_ = d.Set("actions", actions)
+	}
 
 	_ = d.Set("notification_channels", policy.NotificationChannelIds)
 
