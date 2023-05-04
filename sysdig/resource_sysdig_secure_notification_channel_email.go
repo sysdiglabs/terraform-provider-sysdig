@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
@@ -9,8 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/spf13/cast"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureNotificationChannelEmail() *schema.Resource {
@@ -43,7 +42,7 @@ func resourceSysdigSecureNotificationChannelEmail() *schema.Resource {
 }
 
 func resourceSysdigSecureNotificationChannelEmailCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -64,9 +63,8 @@ func resourceSysdigSecureNotificationChannelEmailCreate(ctx context.Context, d *
 	return nil
 }
 
-// Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigSecureNotificationChannelEmailRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -87,7 +85,7 @@ func resourceSysdigSecureNotificationChannelEmailRead(ctx context.Context, d *sc
 }
 
 func resourceSysdigSecureNotificationChannelEmailUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -109,7 +107,7 @@ func resourceSysdigSecureNotificationChannelEmailUpdate(ctx context.Context, d *
 }
 
 func resourceSysdigSecureNotificationChannelEmailDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -123,9 +121,7 @@ func resourceSysdigSecureNotificationChannelEmailDelete(ctx context.Context, d *
 	return nil
 }
 
-// Channel type for Notification Channels
-
-func secureNotificationChannelEmailFromResourceData(d *schema.ResourceData) (nc secure.NotificationChannel, err error) {
+func secureNotificationChannelEmailFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
 	nc, err = secureNotificationChannelFromResourceData(d)
 	if err != nil {
 		return
@@ -136,7 +132,7 @@ func secureNotificationChannelEmailFromResourceData(d *schema.ResourceData) (nc 
 	return
 }
 
-func secureNotificationChannelEmailToResourceData(nc *secure.NotificationChannel, d *schema.ResourceData) (err error) {
+func secureNotificationChannelEmailToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = secureNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return

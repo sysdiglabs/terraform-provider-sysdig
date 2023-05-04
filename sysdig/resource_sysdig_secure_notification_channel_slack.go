@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureNotificationChannelSlack() *schema.Resource {
@@ -45,7 +44,7 @@ func resourceSysdigSecureNotificationChannelSlack() *schema.Resource {
 }
 
 func resourceSysdigSecureNotificationChannelSlackCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -66,9 +65,8 @@ func resourceSysdigSecureNotificationChannelSlackCreate(ctx context.Context, d *
 	return nil
 }
 
-// Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -89,7 +87,7 @@ func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *sc
 }
 
 func resourceSysdigSecureNotificationChannelSlackUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -111,7 +109,7 @@ func resourceSysdigSecureNotificationChannelSlackUpdate(ctx context.Context, d *
 }
 
 func resourceSysdigSecureNotificationChannelSlackDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -125,9 +123,7 @@ func resourceSysdigSecureNotificationChannelSlackDelete(ctx context.Context, d *
 	return nil
 }
 
-// Channel type for Notification Channels
-
-func secureNotificationChannelSlackFromResourceData(d *schema.ResourceData) (nc secure.NotificationChannel, err error) {
+func secureNotificationChannelSlackFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
 	nc, err = secureNotificationChannelFromResourceData(d)
 	if err != nil {
 		return
@@ -139,7 +135,7 @@ func secureNotificationChannelSlackFromResourceData(d *schema.ResourceData) (nc 
 	return
 }
 
-func secureNotificationChannelSlackToResourceData(nc *secure.NotificationChannel, d *schema.ResourceData) (err error) {
+func secureNotificationChannelSlackToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = secureNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return
