@@ -176,3 +176,15 @@ type Monitor struct {
 	Metric       string  `json:"metric"`
 	StdDevFactor float64 `json:"stdDevFactor"`
 }
+
+type Macro struct {
+	ID        int            `json:"id,omitempty"`
+	Version   int            `json:"version,omitempty"`
+	Name      string         `json:"name"`
+	Condition MacroCondition `json:"condition"`
+	Append    bool           `json:"append"`
+}
+
+type MacroCondition struct {
+	Condition string `json:"condition"`
+}
