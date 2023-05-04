@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureNotificationChannelVictorOps() *schema.Resource {
@@ -45,7 +44,7 @@ func resourceSysdigSecureNotificationChannelVictorOps() *schema.Resource {
 }
 
 func resourceSysdigSecureNotificationChannelVictorOpsCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -66,9 +65,8 @@ func resourceSysdigSecureNotificationChannelVictorOpsCreate(ctx context.Context,
 	return nil
 }
 
-// Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigSecureNotificationChannelVictorOpsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -89,7 +87,7 @@ func resourceSysdigSecureNotificationChannelVictorOpsRead(ctx context.Context, d
 }
 
 func resourceSysdigSecureNotificationChannelVictorOpsUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -111,7 +109,7 @@ func resourceSysdigSecureNotificationChannelVictorOpsUpdate(ctx context.Context,
 }
 
 func resourceSysdigSecureNotificationChannelVictorOpsDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -125,7 +123,7 @@ func resourceSysdigSecureNotificationChannelVictorOpsDelete(ctx context.Context,
 	return nil
 }
 
-func secureNotificationChannelVictorOpsFromResourceData(d *schema.ResourceData) (nc secure.NotificationChannel, err error) {
+func secureNotificationChannelVictorOpsFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
 	nc, err = secureNotificationChannelFromResourceData(d)
 	if err != nil {
 		return
@@ -137,7 +135,7 @@ func secureNotificationChannelVictorOpsFromResourceData(d *schema.ResourceData) 
 	return
 }
 
-func secureNotificationChannelVictorOpsToResourceData(nc *secure.NotificationChannel, d *schema.ResourceData) (err error) {
+func secureNotificationChannelVictorOpsToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = secureNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return

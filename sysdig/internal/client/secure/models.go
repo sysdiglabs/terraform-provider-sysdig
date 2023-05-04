@@ -42,84 +42,6 @@ func PolicyFromJSON(body []byte) (result Policy) {
 	return result
 }
 
-// -------- User Rules File --------
-
-type UserRulesFile struct {
-	Content string `json:"content"`
-	Version int    `json:"version"`
-}
-
-type userRulesFileWrapper struct {
-	UserRulesFile UserRulesFile `json:"userRulesFile"`
-}
-
-func (userRulesFile *UserRulesFile) ToJSON() io.Reader {
-	payload, _ := json.Marshal(userRulesFileWrapper{*userRulesFile})
-	return bytes.NewBuffer(payload)
-}
-
-func UserRulesFileFromJSON(body []byte) UserRulesFile {
-	var result userRulesFileWrapper
-	_ = json.Unmarshal(body, &result)
-
-	return result.UserRulesFile
-}
-
-// -------- Notification Channels --------
-
-type NotificationChannelOptions struct {
-	EmailRecipients []string `json:"emailRecipients,omitempty"` // Type: email
-	SnsTopicARNs    []string `json:"snsTopicARNs,omitempty"`    // Type: SNS
-	APIKey          string   `json:"apiKey,omitempty"`          // Type: VictorOps, OpsGenie
-	RoutingKey      string   `json:"routingKey,omitempty"`      // Type: VictorOps
-	Url             string   `json:"url,omitempty"`             // Type: OpsGenie, Webhook and Slack
-	Channel         string   `json:"channel,omitempty"`         // Type: Slack
-	Account         string   `json:"account,omitempty"`         // Type: PagerDuty
-	ServiceKey      string   `json:"serviceKey,omitempty"`      // Type: PagerDuty
-	ServiceName     string   `json:"serviceName,omitempty"`     // Type: PagerDuty
-	Region          string   `json:"region,omitempty"`          // Type: OpsGenie
-
-	NotifyOnOk           bool `json:"notifyOnOk"`
-	NotifyOnResolve      bool `json:"notifyOnResolve"`
-	SendTestNotification bool `json:"sendTestNotification"`
-}
-
-type NotificationChannel struct {
-	ID      int                        `json:"id,omitempty"`
-	Version int                        `json:"version,omitempty"`
-	Type    string                     `json:"type"`
-	Name    string                     `json:"name"`
-	Enabled bool                       `json:"enabled"`
-	Options NotificationChannelOptions `json:"options"`
-}
-
-func (n *NotificationChannel) ToJSON() io.Reader {
-	payload, _ := json.Marshal(notificationChannelWrapper{*n})
-	return bytes.NewBuffer(payload)
-}
-
-func NotificationChannelFromJSON(body []byte) NotificationChannel {
-	var result notificationChannelWrapper
-	_ = json.Unmarshal(body, &result)
-
-	return result.NotificationChannel
-}
-
-func NotificationChannelListFromJSON(body []byte) []NotificationChannel {
-	var result notificationChannelListWrapper
-	_ = json.Unmarshal(body, &result)
-
-	return result.NotificationChannels
-}
-
-type notificationChannelListWrapper struct {
-	NotificationChannels []NotificationChannel `json:"notificationChannels"`
-}
-
-type notificationChannelWrapper struct {
-	NotificationChannel NotificationChannel `json:"notificationChannel"`
-}
-
 // -------- Rules --------
 
 type Rule struct {
@@ -242,61 +164,6 @@ func MacroFromJSON(body []byte) (macro Macro, err error) {
 	return
 }
 
-// -------- Team --------
-type Team struct {
-	ID                  int         `json:"id,omitempty"`
-	Version             int         `json:"version,omitempty"`
-	Theme               string      `json:"theme"`
-	Name                string      `json:"name"`
-	Description         string      `json:"description"`
-	ScopeBy             string      `json:"show"`
-	Filter              string      `json:"filter"`
-	CanUseSysdigCapture bool        `json:"canUseSysdigCapture"`
-	UserRoles           []UserRoles `json:"userRoles,omitempty"`
-	DefaultTeam         bool        `json:"default"`
-	Products            []string    `json:"products"`
-}
-
-type UserRoles struct {
-	UserId int    `json:"userId"`
-	Email  string `json:"userName,omitempty"`
-	Role   string `json:"role"`
-	Admin  bool   `json:"admin,omitempty"`
-}
-
-func (t *Team) ToJSON() io.Reader {
-	payload, _ := json.Marshal(*t)
-	return bytes.NewBuffer(payload)
-}
-
-func TeamFromJSON(body []byte) Team {
-	var result teamWrapper
-	_ = json.Unmarshal(body, &result)
-
-	return result.Team
-}
-
-type teamWrapper struct {
-	Team Team `json:"team"`
-}
-
-// -------- UsersList --------
-type UsersList struct {
-	ID    int    `json:"id"`
-	Email string `json:"username"`
-}
-
-func UsersListFromJSON(body []byte) []UsersList {
-	var result usersListWrapper
-	_ = json.Unmarshal(body, &result)
-
-	return result.UsersList
-}
-
-type usersListWrapper struct {
-	UsersList []UsersList `json:"users"`
-}
-
 // -------- VulnerabilityExceptionList --------
 
 type VulnerabilityExceptionList struct {
@@ -361,35 +228,6 @@ func (e *CloudAccount) ToJSON() io.Reader {
 
 func CloudAccountFromJSON(body []byte) *CloudAccount {
 	var result CloudAccount
-	_ = json.Unmarshal(body, &result)
-
-	return &result
-}
-
-// -------- BenchmarkTask --------
-
-var SupportedBenchmarkTaskSchemas = []string{
-	"aws_foundations_bench-1.3.0",
-	"gcp_foundations_bench-1.2.0",
-	"azure_foundations_bench-1.3.0",
-}
-
-type BenchmarkTask struct {
-	ID       int    `json:"id,omitempty"`
-	Name     string `json:"name"`
-	Schema   string `json:"schema"`
-	Scope    string `json:"scope"`
-	Schedule string `json:"schedule"`
-	Enabled  bool   `json:"enabled"`
-}
-
-func (t *BenchmarkTask) ToJSON() io.Reader {
-	payload, _ := json.Marshal(*t)
-	return bytes.NewBuffer(payload)
-}
-
-func BenchmarkTaskFromJSON(body []byte) *BenchmarkTask {
-	var result BenchmarkTask
 	_ = json.Unmarshal(body, &result)
 
 	return &result
