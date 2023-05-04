@@ -17,12 +17,6 @@ type SysdigSecureClient interface {
 	UpdateRule(context.Context, Rule) (Rule, error)
 	DeleteRule(context.Context, int) error
 
-	CreateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
-	GetNotificationChannelById(context.Context, int) (NotificationChannel, error)
-	GetNotificationChannelByName(context.Context, string) (NotificationChannel, error)
-	DeleteNotificationChannel(context.Context, int) error
-	UpdateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
-
 	CreateList(context.Context, List) (List, error)
 	GetListById(context.Context, int) (List, error)
 	DeleteList(context.Context, int) error
