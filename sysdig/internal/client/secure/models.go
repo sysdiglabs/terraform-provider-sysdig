@@ -163,30 +163,6 @@ func ListFromJSON(body []byte) (list List, err error) {
 	return
 }
 
-// -------- Macro -------
-
-type Macro struct {
-	ID        int            `json:"id,omitempty"`
-	Version   int            `json:"version,omitempty"`
-	Name      string         `json:"name"`
-	Condition MacroCondition `json:"condition"`
-	Append    bool           `json:"append"`
-}
-
-type MacroCondition struct {
-	Condition string `json:"condition"`
-}
-
-func (l *Macro) ToJSON() io.Reader {
-	payload, _ := json.Marshal(l)
-	return bytes.NewBuffer(payload)
-}
-
-func MacroFromJSON(body []byte) (macro Macro, err error) {
-	err = json.Unmarshal(body, &macro)
-	return
-}
-
 // -------- VulnerabilityExceptionList --------
 
 type VulnerabilityExceptionList struct {

@@ -27,11 +27,6 @@ type SysdigSecureClient interface {
 	DeleteList(context.Context, int) error
 	UpdateList(context.Context, List) (List, error)
 
-	CreateMacro(context.Context, Macro) (Macro, error)
-	GetMacroById(context.Context, int) (Macro, error)
-	DeleteMacro(context.Context, int) error
-	UpdateMacro(context.Context, Macro) (Macro, error)
-
 	CreateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
 	GetVulnerabilityExceptionListByID(context.Context, string) (*VulnerabilityExceptionList, error)
 	DeleteVulnerabilityExceptionList(context.Context, string) error
