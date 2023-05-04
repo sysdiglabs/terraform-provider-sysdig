@@ -199,3 +199,27 @@ type Action struct {
 	IsLimitedToContainer bool   `json:"isLimitedToContainer"`
 	Type                 string `json:"type"`
 }
+
+type List struct {
+	Name    string `json:"name"`
+	Items   Items  `json:"items"`
+	Append  bool   `json:"append"`
+	ID      int    `json:"id,omitempty"`
+	Version int    `json:"version,omitempty"`
+}
+
+type Items struct {
+	Items []string `json:"items"`
+}
+
+type Macro struct {
+	ID        int            `json:"id,omitempty"`
+	Version   int            `json:"version,omitempty"`
+	Name      string         `json:"name"`
+	Condition MacroCondition `json:"condition"`
+	Append    bool           `json:"append"`
+}
+
+type MacroCondition struct {
+	Condition string `json:"condition"`
+}
