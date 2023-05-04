@@ -218,29 +218,6 @@ func RuleFromJSON(body []byte) (rule Rule, err error) {
 	return
 }
 
-// -------- List --------
-
-type List struct {
-	Name    string `json:"name"`
-	Items   Items  `json:"items"`
-	Append  bool   `json:"append"`
-	ID      int    `json:"id,omitempty"`
-	Version int    `json:"version,omitempty"`
-}
-type Items struct {
-	Items []string `json:"items"`
-}
-
-func (l *List) ToJSON() io.Reader {
-	payload, _ := json.Marshal(l)
-	return bytes.NewBuffer(payload)
-}
-
-func ListFromJSON(body []byte) (list List, err error) {
-	err = json.Unmarshal(body, &list)
-	return
-}
-
 // -------- Macro -------
 
 type Macro struct {

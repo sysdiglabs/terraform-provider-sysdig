@@ -176,3 +176,15 @@ type Monitor struct {
 	Metric       string  `json:"metric"`
 	StdDevFactor float64 `json:"stdDevFactor"`
 }
+
+type List struct {
+	Name    string `json:"name"`
+	Items   Items  `json:"items"`
+	Append  bool   `json:"append"`
+	ID      int    `json:"id,omitempty"`
+	Version int    `json:"version,omitempty"`
+}
+
+type Items struct {
+	Items []string `json:"items"`
+}

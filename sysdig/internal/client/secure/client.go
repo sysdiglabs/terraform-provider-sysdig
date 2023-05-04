@@ -28,11 +28,6 @@ type SysdigSecureClient interface {
 	DeleteNotificationChannel(context.Context, int) error
 	UpdateNotificationChannel(context.Context, NotificationChannel) (NotificationChannel, error)
 
-	CreateList(context.Context, List) (List, error)
-	GetListById(context.Context, int) (List, error)
-	DeleteList(context.Context, int) error
-	UpdateList(context.Context, List) (List, error)
-
 	CreateMacro(context.Context, Macro) (Macro, error)
 	GetMacroById(context.Context, int) (Macro, error)
 	DeleteMacro(context.Context, int) error
