@@ -2,13 +2,12 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureMacro() *schema.Resource {
@@ -53,8 +52,12 @@ func resourceSysdigSecureMacro() *schema.Resource {
 	}
 }
 
+func getSecureMacroClient(c SysdigClients) (v2.MacroInterface, error) {
+	return c.sysdigSecureClientV2()
+}
+
 func resourceSysdigMacroCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureMacroClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -72,7 +75,7 @@ func resourceSysdigMacroCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceSysdigMacroUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureMacroClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -91,13 +94,13 @@ func resourceSysdigMacroUpdate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceSysdigMacroRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureMacroClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	macro, err := client.GetMacroById(ctx, id)
+	macro, err := client.GetMacroByID(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -112,7 +115,7 @@ func resourceSysdigMacroRead(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func resourceSysdigMacroDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureMacroClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -126,10 +129,10 @@ func resourceSysdigMacroDelete(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func macroFromResourceData(d *schema.ResourceData) secure.Macro {
-	return secure.Macro{
+func macroFromResourceData(d *schema.ResourceData) v2.Macro {
+	return v2.Macro{
 		Name:      d.Get("name").(string),
 		Append:    d.Get("append").(bool),
-		Condition: secure.MacroCondition{Condition: d.Get("condition").(string)},
+		Condition: v2.MacroCondition{Condition: d.Get("condition").(string)},
 	}
 }
