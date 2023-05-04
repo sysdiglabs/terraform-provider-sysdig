@@ -177,6 +177,18 @@ type Monitor struct {
 	StdDevFactor float64 `json:"stdDevFactor"`
 }
 
+type List struct {
+	Name    string `json:"name"`
+	Items   Items  `json:"items"`
+	Append  bool   `json:"append"`
+	ID      int    `json:"id,omitempty"`
+	Version int    `json:"version,omitempty"`
+}
+
+type Items struct {
+	Items []string `json:"items"`
+}
+
 type Macro struct {
 	ID        int            `json:"id,omitempty"`
 	Version   int            `json:"version,omitempty"`

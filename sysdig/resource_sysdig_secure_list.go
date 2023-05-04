@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureList() *schema.Resource {
@@ -57,8 +56,12 @@ func resourceSysdigSecureList() *schema.Resource {
 	}
 }
 
+func getSecureListClient(c SysdigClients) (v2.ListInterface, error) {
+	return c.sysdigSecureClientV2()
+}
+
 func resourceSysdigListCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureListClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -76,7 +79,7 @@ func resourceSysdigListCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceSysdigListUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureListClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -95,13 +98,13 @@ func resourceSysdigListUpdate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceSysdigListRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureListClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	list, err := client.GetListById(ctx, id)
+	list, err := client.GetListByID(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -116,7 +119,7 @@ func resourceSysdigListRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSysdigListDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureListClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -130,11 +133,11 @@ func resourceSysdigListDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func listFromResourceData(d *schema.ResourceData) secure.List {
-	list := secure.List{
+func listFromResourceData(d *schema.ResourceData) v2.List {
+	list := v2.List{
 		Name:   d.Get("name").(string),
 		Append: d.Get("append").(bool),
-		Items:  secure.Items{Items: []string{}},
+		Items:  v2.Items{Items: []string{}},
 	}
 
 	items := d.Get("items").([]interface{})

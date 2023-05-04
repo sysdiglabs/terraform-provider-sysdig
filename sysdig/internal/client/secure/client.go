@@ -22,11 +22,6 @@ type SysdigSecureClient interface {
 	UpdateRule(context.Context, Rule) (Rule, error)
 	DeleteRule(context.Context, int) error
 
-	CreateList(context.Context, List) (List, error)
-	GetListById(context.Context, int) (List, error)
-	DeleteList(context.Context, int) error
-	UpdateList(context.Context, List) (List, error)
-
 	CreateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
 	GetVulnerabilityExceptionListByID(context.Context, string) (*VulnerabilityExceptionList, error)
 	DeleteVulnerabilityExceptionList(context.Context, string) error
