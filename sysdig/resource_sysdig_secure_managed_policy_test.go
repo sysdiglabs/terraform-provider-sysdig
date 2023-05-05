@@ -41,19 +41,19 @@ func TestAccManagedPolicy(t *testing.T) {
 				Config: managedPolicyWithoutActions(rText()),
 			},
 			{
-				Config: managedPolicyWithoutNotificationChannels(rText()),
+				Config: managedPolicyWithoutNotificationChannels(),
 			},
 			{
-				Config: managedPolicyWithMinimumConfiguration(rText()),
+				Config: managedPolicyWithMinimumConfiguration(),
 			},
 			{
-				Config: managedPolicyWithKillAction(rText()),
+				Config: managedPolicyWithKillAction(),
 			},
 		},
 	})
 }
 
-func managedPolicy() string {
+func managedPolicy(name string) string {
 	return fmt.Sprintf(`
 %s
 resource "sysdig_secure_managed_policy" "sample" {
@@ -77,8 +77,9 @@ resource "sysdig_secure_managed_policy" "sample" {
 	`, secureNotificationChannelEmailWithName(name))
 }
 
-func managedPolicyWithoutActions() string {
+func managedPolicyWithoutActions(name string) string {
 	return fmt.Sprintf(`
+%s
 resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
 	enabled = true
@@ -111,7 +112,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 		}
 	}	
 }
-	`, secureNotificationChannelEmailWithName(name))
+	`)
 }
 
 func managedPolicyWithMinimumConfiguration() string {
@@ -120,7 +121,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
 	enabled = true
 }
-	`, secureNotificationChannelEmailWithName(name))
+	`)
 }
 
 func managedPolicyWithKillAction() string {
@@ -136,5 +137,5 @@ resource "sysdig_secure_managed_policy" "sample" {
 		container = "kill"
 	}
 }
-	`, secureNotificationChannelEmailWithName(name))
+	`)
 }
