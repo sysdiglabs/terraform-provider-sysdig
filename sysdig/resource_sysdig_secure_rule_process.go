@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureRuleProcess() *schema.Resource {
@@ -49,7 +48,7 @@ func resourceSysdigSecureRuleProcess() *schema.Resource {
 }
 
 func resourceSysdigRuleProcessCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -69,7 +68,7 @@ func resourceSysdigRuleProcessCreate(ctx context.Context, d *schema.ResourceData
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -97,7 +96,7 @@ func resourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceSysdigRuleProcessUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -116,7 +115,7 @@ func resourceSysdigRuleProcessUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceSysdigRuleProcessDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -133,11 +132,11 @@ func resourceSysdigRuleProcessDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigRuleProcessFromResourceData(d *schema.ResourceData) secure.Rule {
+func resourceSysdigRuleProcessFromResourceData(d *schema.ResourceData) v2.Rule {
 	rule := ruleFromResourceData(d)
 	rule.Details.RuleType = "PROCESS"
 
-	rule.Details.Processes = &secure.Processes{}
+	rule.Details.Processes = &v2.Processes{}
 	rule.Details.Processes.MatchItems = d.Get("matching").(bool)
 	rule.Details.Processes.Items = []string{}
 	if processes, ok := d.Get("processes").([]interface{}); ok {

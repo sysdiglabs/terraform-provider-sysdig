@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureRuleContainer() *schema.Resource {
@@ -49,7 +48,7 @@ func resourceSysdigSecureRuleContainer() *schema.Resource {
 }
 
 func resourceSysdigRuleContainerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -69,7 +68,7 @@ func resourceSysdigRuleContainerCreate(ctx context.Context, d *schema.ResourceDa
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -97,7 +96,7 @@ func resourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceSysdigRuleContainerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -116,7 +115,7 @@ func resourceSysdigRuleContainerUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceSysdigRuleContainerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -133,11 +132,11 @@ func resourceSysdigRuleContainerDelete(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceSysdigRuleContainerFromResourceData(d *schema.ResourceData) secure.Rule {
+func resourceSysdigRuleContainerFromResourceData(d *schema.ResourceData) v2.Rule {
 	rule := ruleFromResourceData(d)
 	rule.Details.RuleType = "CONTAINER"
 
-	rule.Details.Containers = &secure.Containers{}
+	rule.Details.Containers = &v2.Containers{}
 	rule.Details.Containers.MatchItems = d.Get("matching").(bool)
 	rule.Details.Containers.Items = []string{}
 	if containers, ok := d.Get("containers").([]interface{}); ok {

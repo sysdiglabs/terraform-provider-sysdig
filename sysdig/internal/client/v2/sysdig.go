@@ -30,6 +30,7 @@ type SysdigSecure interface {
 	SysdigCommon
 	ListInterface
 	MacroInterface
+	RuleInterface
 }
 
 func (sr *SysdigRequest) Request(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {

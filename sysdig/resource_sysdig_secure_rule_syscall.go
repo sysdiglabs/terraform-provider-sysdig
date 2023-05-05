@@ -2,13 +2,12 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureRuleSyscall() *schema.Resource {
@@ -48,7 +47,7 @@ func resourceSysdigSecureRuleSyscall() *schema.Resource {
 }
 
 func resourceSysdigRuleSyscallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -68,7 +67,7 @@ func resourceSysdigRuleSyscallCreate(ctx context.Context, d *schema.ResourceData
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigRuleSyscallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -96,7 +95,7 @@ func resourceSysdigRuleSyscallRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceSysdigRuleSyscallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -115,7 +114,7 @@ func resourceSysdigRuleSyscallUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceSysdigRuleSyscallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -132,11 +131,11 @@ func resourceSysdigRuleSyscallDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigRuleSyscallFromResourceData(d *schema.ResourceData) secure.Rule {
+func resourceSysdigRuleSyscallFromResourceData(d *schema.ResourceData) v2.Rule {
 	rule := ruleFromResourceData(d)
 	rule.Details.RuleType = "SYSCALL"
 
-	rule.Details.Syscalls = &secure.Syscalls{}
+	rule.Details.Syscalls = &v2.Syscalls{}
 	rule.Details.Syscalls.MatchItems = d.Get("matching").(bool)
 	rule.Details.Syscalls.Items = []string{}
 	if syscalls, ok := d.Get("syscalls").([]interface{}); ok {
