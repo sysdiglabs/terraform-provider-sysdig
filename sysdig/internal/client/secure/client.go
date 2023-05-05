@@ -22,16 +22,6 @@ type SysdigSecureClient interface {
 	UpdateRule(context.Context, Rule) (Rule, error)
 	DeleteRule(context.Context, int) error
 
-	CreateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
-	GetVulnerabilityExceptionListByID(context.Context, string) (*VulnerabilityExceptionList, error)
-	DeleteVulnerabilityExceptionList(context.Context, string) error
-	UpdateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
-
-	CreateVulnerabilityException(context.Context, string, *VulnerabilityException) (*VulnerabilityException, error)
-	GetVulnerabilityExceptionByID(context.Context, string, string) (*VulnerabilityException, error)
-	DeleteVulnerabilityException(context.Context, string, string) error
-	UpdateVulnerabilityException(context.Context, string, *VulnerabilityException) (*VulnerabilityException, error)
-
 	CreateCloudAccount(context.Context, *CloudAccount) (*CloudAccount, error)
 	GetCloudAccountById(context.Context, string) (*CloudAccount, error)
 	DeleteCloudAccount(context.Context, string) error
