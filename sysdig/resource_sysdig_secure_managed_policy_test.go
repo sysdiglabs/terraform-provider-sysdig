@@ -45,13 +45,13 @@ func TestAccManagedPolicy(t *testing.T) {
 				Config: managedPolicyWithMinimumConfiguration(),
 			},
 			{
-				Config: managedPoliciesWithKillAction(),
+				Config: managedPolicyWithKillAction(),
 			},
 		},
 	})
 }
 
-func managedPolicy() {
+func managedPolicy() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
@@ -74,7 +74,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 	`)
 }
 
-func managedPolicyWithoutActions() {
+func managedPolicyWithoutActions() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
@@ -90,7 +90,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 	`)
 }
 
-func managedPolicyWithoutNotificationChannels() {
+func managedPolicyWithoutNotificationChannels() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
@@ -111,7 +111,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 	`)
 }
 
-func managedPolicyWithMinimumConfiguration() {
+func managedPolicyWithMinimumConfiguration() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
@@ -120,7 +120,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 	`)
 }
 
-func managedPolicyWithKillAction() {
+func managedPolicyWithKillAction() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
