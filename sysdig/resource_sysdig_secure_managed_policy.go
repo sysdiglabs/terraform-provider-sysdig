@@ -147,7 +147,7 @@ func resourceSysdigManagedPolicyCreate(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	policyToResourceData(&policy, d)
+	managedPolicyToResourceData(&policy, d)
 
 	return nil
 }
