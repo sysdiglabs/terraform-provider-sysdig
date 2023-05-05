@@ -204,11 +204,7 @@ func managedPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 func updateManagedPolicyFromResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	policy.Enabled = d.Get("enabled").(bool)
 	policy.Runbook = d.Get("runbook").(string)
-
-	scope := d.Get("scope").(string)
-	if scope != "" {
-		policy.Scope = scope
-	}
+	policy.Scope = d.Get("scope").(string)
 
 	addActionsToPolicy(d, policy)
 
