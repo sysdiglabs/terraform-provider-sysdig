@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -14,6 +15,8 @@ import (
 )
 
 func TestAccManagedPolicy(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -27,7 +30,7 @@ func TestAccManagedPolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: managedPolicy(),
+				Config: managedPolicy(rText()),
 			},
 			{
 				ResourceName:      "sysdig_secure_managed_policy.sample",
@@ -35,16 +38,16 @@ func TestAccManagedPolicy(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: managedPolicyWithoutActions(),
+				Config: managedPolicyWithoutActions(rText()),
 			},
 			{
-				Config: managedPolicyWithoutNotificationChannels(),
+				Config: managedPolicyWithoutNotificationChannels(rText()),
 			},
 			{
-				Config: managedPolicyWithMinimumConfiguration(),
+				Config: managedPolicyWithMinimumConfiguration(rText()),
 			},
 			{
-				Config: managedPolicyWithKillAction(),
+				Config: managedPolicyWithKillAction(rText()),
 			},
 		},
 	})
@@ -52,6 +55,7 @@ func TestAccManagedPolicy(t *testing.T) {
 
 func managedPolicy() string {
 	return fmt.Sprintf(`
+%s
 resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
 	enabled = true
@@ -70,7 +74,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 	
 	notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
 }
-	`)
+	`, secureNotificationChannelEmailWithName(name))
 }
 
 func managedPolicyWithoutActions() string {
@@ -86,7 +90,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 	
 	notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
 }
-	`)
+	`, secureNotificationChannelEmailWithName(name))
 }
 
 func managedPolicyWithoutNotificationChannels() string {
@@ -107,7 +111,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 		}
 	}	
 }
-	`)
+	`, secureNotificationChannelEmailWithName(name))
 }
 
 func managedPolicyWithMinimumConfiguration() string {
@@ -116,7 +120,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
 	enabled = true
 }
-	`)
+	`, secureNotificationChannelEmailWithName(name))
 }
 
 func managedPolicyWithKillAction() string {
@@ -132,5 +136,5 @@ resource "sysdig_secure_managed_policy" "sample" {
 		container = "kill"
 	}
 }
-	`)
+	`, secureNotificationChannelEmailWithName(name))
 }
