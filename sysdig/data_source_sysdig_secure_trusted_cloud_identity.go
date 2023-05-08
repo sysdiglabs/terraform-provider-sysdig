@@ -53,12 +53,12 @@ func dataSourceSysdigSecureTrustedCloudIdentity() *schema.Resource {
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureCloudAccountClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	identity, err := client.GetTrustedCloudIdentity(ctx, d.Get("cloud_provider").(string))
+	identity, err := client.GetTrustedCloudIdentitySecure(ctx, d.Get("cloud_provider").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}

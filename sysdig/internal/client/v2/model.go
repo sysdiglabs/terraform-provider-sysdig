@@ -326,6 +326,16 @@ type Exception struct {
 	Values interface{} `json:"values,omitempty"`
 }
 
+type CloudAccountSecure struct {
+	AccountID                    string `json:"accountId"`
+	Provider                     string `json:"provider"`
+	Alias                        string `json:"alias"`
+	RoleAvailable                bool   `json:"roleAvailable"`
+	RoleName                     string `json:"roleName"`
+	ExternalID                   string `json:"externalId,omitempty"`
+	WorkLoadIdentityAccountID    string `json:"workloadIdentityAccountId,omitempty"`
+	WorkLoadIdentityAccountAlias string `json:"workLoadIdentityAccountAlias,omitempty"`
+}
 type ScanningPolicy struct {
 	ID             string         `json:"id,omitempty"`
 	Version        string         `json:"version,omitempty"`

@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureCloudAccount() *schema.Resource {
@@ -70,13 +69,17 @@ func resourceSysdigSecureCloudAccount() *schema.Resource {
 	}
 }
 
+func getSecureCloudAccountClient(c SysdigClients) (v2.CloudAccountSecureInterface, error) {
+	return c.sysdigSecureClientV2()
+}
+
 func resourceSysdigSecureCloudAccountCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureCloudAccountClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	cloudAccount, err := client.CreateCloudAccount(ctx, cloudAccountFromResourceData(d))
+	cloudAccount, err := client.CreateCloudAccountSecure(ctx, cloudAccountFromResourceData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -95,13 +98,13 @@ func resourceSysdigSecureCloudAccountCreate(ctx context.Context, d *schema.Resou
 }
 
 func resourceSysdigSecureCloudAccountRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureCloudAccountClient(meta.(SysdigClients))
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
 	}
 
-	cloudAccount, err := client.GetCloudAccountById(ctx, d.Id())
+	cloudAccount, err := client.GetCloudAccountSecure(ctx, d.Id())
 	if err != nil {
 		d.SetId("")
 		if strings.Contains(err.Error(), "404") {
@@ -123,12 +126,12 @@ func resourceSysdigSecureCloudAccountRead(ctx context.Context, d *schema.Resourc
 }
 
 func resourceSysdigSecureCloudAccountUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureCloudAccountClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	_, err = client.UpdateCloudAccount(ctx, d.Id(), cloudAccountFromResourceData(d))
+	_, err = client.UpdateCloudAccountSecure(ctx, d.Id(), cloudAccountFromResourceData(d))
 	if err != nil {
 		if strings.Contains(err.Error(), "404") {
 			return nil
@@ -140,12 +143,12 @@ func resourceSysdigSecureCloudAccountUpdate(ctx context.Context, d *schema.Resou
 }
 
 func resourceSysdigSecureCloudAccountDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureCloudAccountClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteCloudAccount(ctx, d.Id())
+	err = client.DeleteCloudAccountSecure(ctx, d.Id())
 	if err != nil {
 		if strings.Contains(err.Error(), "404") {
 			return nil
@@ -155,8 +158,8 @@ func resourceSysdigSecureCloudAccountDelete(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func cloudAccountFromResourceData(d *schema.ResourceData) *secure.CloudAccount {
-	return &secure.CloudAccount{
+func cloudAccountFromResourceData(d *schema.ResourceData) *v2.CloudAccountSecure {
+	return &v2.CloudAccountSecure{
 		AccountID:                    d.Get("account_id").(string),
 		Provider:                     d.Get("cloud_provider").(string),
 		Alias:                        d.Get("alias").(string),
