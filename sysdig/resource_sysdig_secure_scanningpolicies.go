@@ -2,9 +2,9 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"time"
 
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -104,8 +104,12 @@ func resourceSysdigSecureScanningPolicy() *schema.Resource {
 	}
 }
 
+func getSecureScanningPolicyClient(c SysdigClients) (v2.ScanningPolicyInterface, error) {
+	return c.sysdigSecureClientV2()
+}
+
 func resourceSysdigScanningPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureScanningPolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -122,7 +126,7 @@ func resourceSysdigScanningPolicyCreate(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceSysdigScanningPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureScanningPolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -130,7 +134,7 @@ func resourceSysdigScanningPolicyUpdate(ctx context.Context, d *schema.ResourceD
 	scanningPolicy := scanningPolicyFromResourceData(d)
 	id := d.Get("id").(string)
 	scanningPolicy.ID = id
-	_, err = client.UpdateScanningPolicyById(ctx, scanningPolicy)
+	_, err = client.UpdateScanningPolicyByID(ctx, scanningPolicy)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -139,13 +143,13 @@ func resourceSysdigScanningPolicyUpdate(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceSysdigScanningPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureScanningPolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id := d.Get("id").(string)
-	scanningPolicy, err := client.GetScanningPolicyById(ctx, id)
+	scanningPolicy, err := client.GetScanningPolicyByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -156,13 +160,13 @@ func resourceSysdigScanningPolicyRead(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceSysdigScanningPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureScanningPolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id := d.Get("id").(string)
-	err = client.DeleteScanningPolicyById(ctx, id)
+	err = client.DeleteScanningPolicyByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -170,7 +174,7 @@ func resourceSysdigScanningPolicyDelete(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func scanningPolicyToResourceData(scanningPolicy *secure.ScanningPolicy, d *schema.ResourceData) {
+func scanningPolicyToResourceData(scanningPolicy *v2.ScanningPolicy, d *schema.ResourceData) {
 
 	d.SetId(scanningPolicy.ID)
 	_ = d.Set("name", scanningPolicy.Name)
@@ -190,7 +194,7 @@ func scanningPolicyToResourceData(scanningPolicy *secure.ScanningPolicy, d *sche
 
 }
 
-func scanningPolicyRulesToResourceData(scanningPolicyRule secure.ScanningGate) map[string]interface{} {
+func scanningPolicyRulesToResourceData(scanningPolicyRule v2.ScanningGate) map[string]interface{} {
 	rule := map[string]interface{}{
 		"id":      scanningPolicyRule.ID,
 		"gate":    scanningPolicyRule.Gate,
@@ -210,8 +214,8 @@ func scanningPolicyRulesToResourceData(scanningPolicyRule secure.ScanningGate) m
 	return rule
 }
 
-func scanningPolicyFromResourceData(d *schema.ResourceData) secure.ScanningPolicy {
-	scanningPolicy := secure.ScanningPolicy{
+func scanningPolicyFromResourceData(d *schema.ResourceData) v2.ScanningPolicy {
+	scanningPolicy := v2.ScanningPolicy{
 		Name:           d.Get("name").(string),
 		ID:             d.Get("id").(string),
 		Comment:        d.Get("comment").(string),
@@ -224,19 +228,19 @@ func scanningPolicyFromResourceData(d *schema.ResourceData) secure.ScanningPolic
 	return scanningPolicy
 }
 
-func scanningPolicyRulesFromResourceData(d *schema.ResourceData) (rules []secure.ScanningGate) {
+func scanningPolicyRulesFromResourceData(d *schema.ResourceData) (rules []v2.ScanningGate) {
 	for _, ruleItr := range d.Get("rules").(*schema.Set).List() {
 		ruleInfo := ruleItr.(map[string]interface{})
-		rule := secure.ScanningGate{
+		rule := v2.ScanningGate{
 			Gate:    ruleInfo["gate"].(string),
 			ID:      ruleInfo["id"].(string),
 			Trigger: ruleInfo["trigger"].(string),
 			Action:  ruleInfo["action"].(string),
 		}
-		var params []secure.ScanningGateParam
+		var params []v2.ScanningGateParam
 		for _, paramsItr := range ruleInfo["params"].(*schema.Set).List() {
 			paramsInfo := paramsItr.(map[string]interface{})
-			param := secure.ScanningGateParam{
+			param := v2.ScanningGateParam{
 				Name:  paramsInfo["name"].(string),
 				Value: paramsInfo["value"].(string),
 			}

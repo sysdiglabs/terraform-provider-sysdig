@@ -32,6 +32,8 @@ type SysdigSecure interface {
 	ListInterface
 	MacroInterface
 	RuleInterface
+	ScanningPolicyInterface
+	ScanningPolicyAssignmentInterface
 }
 
 func (sr *SysdigRequest) Request(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {
