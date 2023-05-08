@@ -14,6 +14,7 @@ const (
 )
 
 type ListInterface interface {
+	Base
 	CreateList(ctx context.Context, list List) (List, error)
 	GetListByID(ctx context.Context, id int) (List, error)
 	UpdateList(ctx context.Context, list List) (List, error)

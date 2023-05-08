@@ -14,6 +14,7 @@ const (
 )
 
 type RuleInterface interface {
+	Base
 	CreateRule(ctx context.Context, rule Rule) (Rule, error)
 	GetRuleByID(ctx context.Context, ruleID int) (Rule, error)
 	UpdateRule(ctx context.Context, rule Rule) (Rule, error)

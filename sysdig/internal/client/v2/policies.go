@@ -14,6 +14,7 @@ const (
 )
 
 type PolicyInterface interface {
+	Base
 	CreatePolicy(ctx context.Context, policy Policy) (Policy, error)
 	DeletePolicy(ctx context.Context, policyID int) error
 	UpdatePolicy(ctx context.Context, policy Policy) (Policy, error)
