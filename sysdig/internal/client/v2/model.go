@@ -326,7 +326,6 @@ type Exception struct {
 	Values interface{} `json:"values,omitempty"`
 }
 
-<<<<<<< HEAD
 type CloudAccountSecure struct {
 	AccountID                    string `json:"accountId"`
 	Provider                     string `json:"provider"`
@@ -336,7 +335,7 @@ type CloudAccountSecure struct {
 	ExternalID                   string `json:"externalId,omitempty"`
 	WorkLoadIdentityAccountID    string `json:"workloadIdentityAccountId,omitempty"`
 	WorkLoadIdentityAccountAlias string `json:"workLoadIdentityAccountAlias,omitempty"`
-=======
+}
 type ScanningPolicy struct {
 	ID             string         `json:"id,omitempty"`
 	Version        string         `json:"version,omitempty"`
@@ -378,5 +377,4 @@ type ScanningPolicyAssignment struct {
 type ScanningPolicyAssignmentImage struct {
 	Type  string `json:"type"`
 	Value string `json:"value"`
->>>>>>> master
 }
