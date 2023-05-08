@@ -325,3 +325,14 @@ type Exception struct {
 	Comps  interface{} `json:"comps,omitempty"`
 	Values interface{} `json:"values,omitempty"`
 }
+
+type CloudAccountSecure struct {
+	AccountID                    string `json:"accountId"`
+	Provider                     string `json:"provider"`
+	Alias                        string `json:"alias"`
+	RoleAvailable                bool   `json:"roleAvailable"`
+	RoleName                     string `json:"roleName"`
+	ExternalID                   string `json:"externalId,omitempty"`
+	WorkLoadIdentityAccountID    string `json:"workloadIdentityAccountId,omitempty"`
+	WorkLoadIdentityAccountAlias string `json:"workLoadIdentityAccountAlias,omitempty"`
+}
