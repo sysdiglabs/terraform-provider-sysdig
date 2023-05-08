@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"strings"
 	"time"
@@ -13,8 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/spf13/cast"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureRuleFalco() *schema.Resource {
@@ -94,7 +93,7 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 }
 
 func resourceSysdigRuleFalcoCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -117,7 +116,7 @@ func resourceSysdigRuleFalcoCreate(ctx context.Context, d *schema.ResourceData, 
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -155,7 +154,7 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func updateResourceDataExceptions(d *schema.ResourceData, ruleExceptions []*secure.Exception) error {
+func updateResourceDataExceptions(d *schema.ResourceData, ruleExceptions []*v2.Exception) error {
 	exceptions := make([]any, 0, len(ruleExceptions))
 	for _, exception := range ruleExceptions {
 		if exception == nil {
@@ -203,7 +202,7 @@ func fieldOrCompsToStringSlice(fields any) ([]string, error) {
 }
 
 func resourceSysdigRuleFalcoUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -225,7 +224,7 @@ func resourceSysdigRuleFalcoUpdate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceSysdigRuleFalcoDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -242,7 +241,7 @@ func resourceSysdigRuleFalcoDelete(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) (secure.Rule, error) {
+func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) (v2.Rule, error) {
 	rule := ruleFromResourceData(d)
 	rule.Details.RuleType = "FALCO"
 
@@ -255,31 +254,31 @@ func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) (secure.Rul
 	if source, ok := d.GetOk("source"); ok && source.(string) != "" {
 		rule.Details.Source = source.(string)
 	} else if !appendModeIsSet || !(appendMode.(bool)) {
-		return secure.Rule{}, errors.New("source must be set when append = false")
+		return v2.Rule{}, errors.New("source must be set when append = false")
 	}
 
 	if output, ok := d.GetOk("output"); ok && output.(string) != "" {
 		rule.Details.Output = output.(string)
 	} else if !appendModeIsSet || !(appendMode.(bool)) {
-		return secure.Rule{}, errors.New("output must be set when append = false")
+		return v2.Rule{}, errors.New("output must be set when append = false")
 	}
 
 	if priority, ok := d.GetOk("priority"); ok && priority.(string) != "" {
 		rule.Details.Priority = priority.(string)
 	} else if !appendModeIsSet || !(appendMode.(bool)) {
-		return secure.Rule{}, errors.New("priority must be set when append = false")
+		return v2.Rule{}, errors.New("priority must be set when append = false")
 	}
 
-	rule.Details.Condition = &secure.Condition{
+	rule.Details.Condition = &v2.Condition{
 		Condition:  d.Get("condition").(string),
 		Components: []interface{}{},
 	}
 
 	if exceptionsField, ok := d.GetOk("exceptions"); ok {
-		falcoExceptions := []*secure.Exception{}
+		falcoExceptions := []*v2.Exception{}
 		for _, exception := range exceptionsField.([]interface{}) {
 			exceptionMap := exception.(map[string]interface{})
-			newFalcoException := &secure.Exception{
+			newFalcoException := &v2.Exception{
 				Name: exceptionMap["name"].(string),
 			}
 
@@ -296,7 +295,7 @@ func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) (secure.Rul
 			values := cast.ToString(exceptionMap["values"])
 			err := json.Unmarshal([]byte(values), &newFalcoException.Values)
 			if err != nil {
-				return secure.Rule{}, err
+				return v2.Rule{}, err
 			}
 
 			falcoExceptions = append(falcoExceptions, newFalcoException)

@@ -1,12 +1,11 @@
 package sysdig
 
 import (
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"reflect"
 	"sort"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 // Creates a rule with the default schema that a Secure Rule should have,
@@ -42,8 +41,8 @@ func createRuleSchema(original map[string]*schema.Schema) map[string]*schema.Sch
 }
 
 // Retrieves the common rule fields for a rule from a resource data.
-func ruleFromResourceData(d *schema.ResourceData) secure.Rule {
-	rule := secure.Rule{
+func ruleFromResourceData(d *schema.ResourceData) v2.Rule {
+	rule := v2.Rule{
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
 		Version:     d.Get("version").(int),
@@ -55,7 +54,7 @@ func ruleFromResourceData(d *schema.ResourceData) secure.Rule {
 }
 
 // Saves in the resource data the information from the common fields of the rule.
-func updateResourceDataForRule(d *schema.ResourceData, rule secure.Rule) {
+func updateResourceDataForRule(d *schema.ResourceData, rule v2.Rule) {
 	currentTags := getTagsFromResourceData(d)
 	newTags := append([]string{}, rule.Tags...)
 	sort.Strings(currentTags)
@@ -82,4 +81,8 @@ func getTagsFromResourceData(d *schema.ResourceData) []string {
 	}
 
 	return result
+}
+
+func getSecureRuleClient(c SysdigClients) (v2.RuleInterface, error) {
+	return c.sysdigSecureClientV2()
 }

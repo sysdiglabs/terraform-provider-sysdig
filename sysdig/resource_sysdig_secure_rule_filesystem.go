@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureRuleFilesystem() *schema.Resource {
@@ -77,7 +76,7 @@ func resourceSysdigSecureRuleFilesystem() *schema.Resource {
 }
 
 func resourceSysdigRuleFilesystemCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -100,7 +99,7 @@ func resourceSysdigRuleFilesystemCreate(ctx context.Context, d *schema.ResourceD
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -144,7 +143,7 @@ func resourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceSysdigRuleFilesystemUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -166,7 +165,7 @@ func resourceSysdigRuleFilesystemUpdate(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceSysdigRuleFilesystemDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -184,15 +183,15 @@ func resourceSysdigRuleFilesystemDelete(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigRuleFilesystemFromResourceData(d *schema.ResourceData) (rule secure.Rule, err error) {
+func resourceSysdigRuleFilesystemFromResourceData(d *schema.ResourceData) (rule v2.Rule, err error) {
 	rule = ruleFromResourceData(d)
 	rule.Details.RuleType = "FILESYSTEM"
 
-	rule.Details.ReadPaths = &secure.ReadPaths{
+	rule.Details.ReadPaths = &v2.ReadPaths{
 		MatchItems: true,
 		Items:      []string{},
 	}
-	rule.Details.ReadWritePaths = &secure.ReadWritePaths{
+	rule.Details.ReadWritePaths = &v2.ReadWritePaths{
 		MatchItems: true,
 		Items:      []string{},
 	}

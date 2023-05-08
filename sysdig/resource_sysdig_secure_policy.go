@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"net/http"
 	"strconv"
 	"strings"
@@ -11,8 +12,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecurePolicy() *schema.Resource {
@@ -126,8 +125,12 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 	}
 }
 
+func getSecurePolicyClient(c SysdigClients) (v2.PolicyInterface, error) {
+	return c.sysdigSecureClientV2()
+}
+
 func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -143,7 +146,7 @@ func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
+func policyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	if policy.ID != 0 {
 		d.SetId(strconv.Itoa(policy.ID))
 	}
@@ -191,8 +194,8 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 
 }
 
-func policyFromResourceData(d *schema.ResourceData) secure.Policy {
-	policy := secure.Policy{
+func policyFromResourceData(d *schema.ResourceData) v2.Policy {
+	policy := v2.Policy{
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
 		Severity:    d.Get("severity").(int),
@@ -226,8 +229,8 @@ func policyFromResourceData(d *schema.ResourceData) secure.Policy {
 	return policy
 }
 
-func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
-	policy.Actions = []secure.Action{}
+func addActionsToPolicy(d *schema.ResourceData, policy *v2.Policy) {
+	policy.Actions = []v2.Action{}
 	actions := d.Get("actions").([]interface{})
 	if len(actions) == 0 {
 		return
@@ -237,14 +240,14 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 	if containerAction != "" {
 		containerAction = strings.ToUpper("POLICY_ACTION_" + containerAction)
 
-		policy.Actions = append(policy.Actions, secure.Action{Type: containerAction})
+		policy.Actions = append(policy.Actions, v2.Action{Type: containerAction})
 	}
 
 	if captureAction := d.Get("actions.0.capture").([]interface{}); len(captureAction) > 0 {
 		afterEventNs := d.Get("actions.0.capture.0.seconds_after_event").(int) * 1000000000
 		beforeEventNs := d.Get("actions.0.capture.0.seconds_before_event").(int) * 1000000000
 		name := d.Get("actions.0.capture.0.name").(string)
-		policy.Actions = append(policy.Actions, secure.Action{
+		policy.Actions = append(policy.Actions, v2.Action{
 			Type:                 "POLICY_ACTION_CAPTURE",
 			IsLimitedToContainer: false,
 			AfterEventNs:         afterEventNs,
@@ -255,13 +258,13 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 }
 
 func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	policy, statusCode, err := client.GetPolicyById(ctx, id)
+	policy, statusCode, err := client.GetPolicyByID(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -276,7 +279,7 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -292,7 +295,7 @@ func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceSysdigPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -177,6 +177,29 @@ type Monitor struct {
 	StdDevFactor float64 `json:"stdDevFactor"`
 }
 
+type Policy struct {
+	ID                     int      `json:"id,omitempty"`
+	Name                   string   `json:"name"`
+	Description            string   `json:"description"`
+	Severity               int      `json:"severity"`
+	Enabled                bool     `json:"enabled"`
+	RuleNames              []string `json:"ruleNames"`
+	Actions                []Action `json:"actions"`
+	Scope                  string   `json:"scope,omitempty"`
+	Version                int      `json:"version,omitempty"`
+	NotificationChannelIds []int    `json:"notificationChannelIds"`
+	Type                   string   `json:"type"`
+	Runbook                string   `json:"runbook"`
+}
+
+type Action struct {
+	AfterEventNs         int    `json:"afterEventNs,omitempty"`
+	BeforeEventNs        int    `json:"beforeEventNs,omitempty"`
+	Name                 string `json:"name,omitempty"`
+	IsLimitedToContainer bool   `json:"isLimitedToContainer"`
+	Type                 string `json:"type"`
+}
+
 type List struct {
 	Name    string `json:"name"`
 	Items   Items  `json:"items"`
@@ -215,4 +238,90 @@ type VulnerabilityException struct {
 	Notes          string `json:"notes"`
 	ExpirationDate *int   `json:"expiration_date,omitempty"`
 	Enabled        bool   `json:"enabled"`
+}
+
+type Rule struct {
+	ID          int      `json:"id,omitempty"`
+	Name        string   `json:"name"`
+	Description string   `json:"description,omitempty"`
+	Tags        []string `json:"tags"`
+	Details     Details  `json:"details"`
+	Version     int      `json:"version,omitempty"`
+}
+
+type Details struct {
+	// Containers
+	Containers *Containers `json:"containers,omitempty"`
+
+	// Filesystems
+	ReadWritePaths *ReadWritePaths `json:"readWritePaths,omitempty"`
+	ReadPaths      *ReadPaths      `json:"readPaths,omitempty"`
+
+	// Network
+	AllOutbound    bool            `json:"allOutbound,omitempty"`
+	AllInbound     bool            `json:"allInbound,omitempty"`
+	TCPListenPorts *TCPListenPorts `json:"tcpListenPorts,omitempty"`
+	UDPListenPorts *UDPListenPorts `json:"udpListenPorts,omitempty"`
+
+	// Processes
+	Processes *Processes `json:"processes,omitempty"`
+
+	// Syscalls
+	Syscalls *Syscalls `json:"syscalls,omitempty"`
+
+	// Falco
+	Append     *bool        `json:"append,omitempty"`
+	Source     string       `json:"source,omitempty"`
+	Output     string       `json:"output,omitempty"`
+	Condition  *Condition   `json:"condition,omitempty"`
+	Priority   string       `json:"priority,omitempty"`
+	Exceptions []*Exception `json:"exceptions,omitempty"`
+
+	RuleType string `json:"ruleType"`
+}
+
+type Containers struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type ReadWritePaths struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+type ReadPaths struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type TCPListenPorts struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type UDPListenPorts struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type Processes struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type Syscalls struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type Condition struct {
+	Condition  string        `json:"condition"`
+	Components []interface{} `json:"components"`
+}
+
+type Exception struct {
+	Name   string      `json:"name"`
+	Fields interface{} `json:"fields,omitempty"`
+	Comps  interface{} `json:"comps,omitempty"`
+	Values interface{} `json:"values,omitempty"`
 }

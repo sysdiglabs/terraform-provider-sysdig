@@ -2,14 +2,13 @@ package sysdig
 
 import (
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureRuleNetwork() *schema.Resource {
@@ -85,7 +84,7 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 }
 
 func resourceSysdigRuleNetworkCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -108,7 +107,7 @@ func resourceSysdigRuleNetworkCreate(ctx context.Context, d *schema.ResourceData
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -169,7 +168,7 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceSysdigRuleNetworkUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -191,7 +190,7 @@ func resourceSysdigRuleNetworkUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceSysdigRuleNetworkDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -209,12 +208,12 @@ func resourceSysdigRuleNetworkDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigRuleNetworkFromResourceData(d *schema.ResourceData) (rule secure.Rule, err error) {
+func resourceSysdigRuleNetworkFromResourceData(d *schema.ResourceData) (rule v2.Rule, err error) {
 	rule = ruleFromResourceData(d)
 	rule.Details.RuleType = "NETWORK"
 
-	rule.Details.TCPListenPorts = &secure.TCPListenPorts{}
-	rule.Details.UDPListenPorts = &secure.UDPListenPorts{}
+	rule.Details.TCPListenPorts = &v2.TCPListenPorts{}
+	rule.Details.UDPListenPorts = &v2.UDPListenPorts{}
 
 	rule.Details.AllInbound = d.Get("block_inbound").(bool)
 	rule.Details.AllOutbound = d.Get("block_outbound").(bool)
