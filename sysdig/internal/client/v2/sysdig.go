@@ -29,11 +29,14 @@ type SysdigMonitor interface {
 type SysdigSecure interface {
 	SysdigCommon
 	PolicyInterface
+	RuleInterface
 	ListInterface
 	MacroInterface
 	RuleInterface
 	ScanningPolicyInterface
 	ScanningPolicyAssignmentInterface
+	VulnerabilityExceptionListInterface
+	VulnerabilityExceptionInterface
 }
 
 func (sr *SysdigRequest) Request(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {
