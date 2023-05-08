@@ -3,13 +3,12 @@ package sysdig
 import (
 	"context"
 	"errors"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
 
 func resourceSysdigSecureScanningPolicyAssignment() *schema.Resource {
@@ -95,8 +94,12 @@ func resourceSysdigSecureScanningPolicyAssignment() *schema.Resource {
 	}
 }
 
+func getSecureScanningPolicyAssignmentClient(c SysdigClients) (v2.ScanningPolicyAssignmentInterface, error) {
+	return c.sysdigSecureClientV2()
+}
+
 func resourceSysdigScanningPolicyAssignmentCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -119,7 +122,7 @@ func resourceSysdigScanningPolicyAssignmentCreate(ctx context.Context, d *schema
 }
 
 func resourceSysdigScanningPolicyAssignmentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -135,7 +138,7 @@ func resourceSysdigScanningPolicyAssignmentRead(ctx context.Context, d *schema.R
 }
 
 func resourceSysdigScanningPolicyAssignmentUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -158,16 +161,16 @@ func resourceSysdigScanningPolicyAssignmentUpdate(ctx context.Context, d *schema
 
 // As Policy Assignments cannot be empty (default assignment cannot be deleted), pushing the default one
 func resourceSysdigScanningPolicyAssignmentDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	defaultImage := secure.ScanningPolicyAssignmentImage{
+	defaultImage := v2.ScanningPolicyAssignmentImage{
 		Type:  "tag",
 		Value: "*",
 	}
-	defaultItem := secure.ScanningPolicyAssignment{
+	defaultItem := v2.ScanningPolicyAssignment{
 		Name:         "default",
 		Registry:     "*",
 		Repository:   "*",
@@ -176,9 +179,9 @@ func resourceSysdigScanningPolicyAssignmentDelete(ctx context.Context, d *schema
 		WhitelistIDs: []string{},
 	}
 
-	scanningPolicyAssignmentList := secure.ScanningPolicyAssignmentList{
+	scanningPolicyAssignmentList := v2.ScanningPolicyAssignmentList{
 		PolicyBundleId: "default", // this is forced because there is no other possible value
-		Items:          []secure.ScanningPolicyAssignment{defaultItem},
+		Items:          []v2.ScanningPolicyAssignment{defaultItem},
 	}
 
 	err = client.DeleteScanningPolicyAssignmentList(ctx, scanningPolicyAssignmentList)
@@ -189,7 +192,7 @@ func resourceSysdigScanningPolicyAssignmentDelete(ctx context.Context, d *schema
 	return nil
 }
 
-func scanningPolicyAssignmentListToResourceData(scanningPolicyAssignmentList *secure.ScanningPolicyAssignmentList, d *schema.ResourceData) {
+func scanningPolicyAssignmentListToResourceData(scanningPolicyAssignmentList *v2.ScanningPolicyAssignmentList, d *schema.ResourceData) {
 	d.SetId(scanningPolicyAssignmentList.PolicyBundleId)
 	_ = d.Set("policy_bundle_id", scanningPolicyAssignmentList.PolicyBundleId)
 	var items []map[string]interface{}
@@ -203,7 +206,7 @@ func scanningPolicyAssignmentListToResourceData(scanningPolicyAssignmentList *se
 	_ = d.Set("items", items)
 }
 
-func scanningPolicyAssignmentToResourceData(scanningPolicyAssignment secure.ScanningPolicyAssignment) map[string]interface{} {
+func scanningPolicyAssignmentToResourceData(scanningPolicyAssignment v2.ScanningPolicyAssignment) map[string]interface{} {
 	item := map[string]interface{}{
 		"id":            scanningPolicyAssignment.ID,
 		"name":          scanningPolicyAssignment.Name,
@@ -223,8 +226,8 @@ func scanningPolicyAssignmentToResourceData(scanningPolicyAssignment secure.Scan
 	return item
 }
 
-func scanningPolicyAssignmentListFromResourceData(d *schema.ResourceData) secure.ScanningPolicyAssignmentList {
-	scanningPolicyAssignmentList := secure.ScanningPolicyAssignmentList{
+func scanningPolicyAssignmentListFromResourceData(d *schema.ResourceData) v2.ScanningPolicyAssignmentList {
+	scanningPolicyAssignmentList := v2.ScanningPolicyAssignmentList{
 		PolicyBundleId: "default", // this is forced because there is no other possible value
 	}
 
@@ -234,10 +237,10 @@ func scanningPolicyAssignmentListFromResourceData(d *schema.ResourceData) secure
 
 }
 
-func scanningPolicyAssignmentFromResourceData(d *schema.ResourceData) (scanningPolicyAssignmentItems []secure.ScanningPolicyAssignment) {
+func scanningPolicyAssignmentFromResourceData(d *schema.ResourceData) (scanningPolicyAssignmentItems []v2.ScanningPolicyAssignment) {
 	for _, item := range d.Get("items").([]interface{}) {
 		assignmentInfo := item.(map[string]interface{})
-		assignment := secure.ScanningPolicyAssignment{
+		assignment := v2.ScanningPolicyAssignment{
 			Name:       assignmentInfo["name"].(string),
 			Registry:   assignmentInfo["registry"].(string),
 			Repository: assignmentInfo["repository"].(string),
@@ -259,7 +262,7 @@ func scanningPolicyAssignmentFromResourceData(d *schema.ResourceData) (scanningP
 			return
 		}
 		for _, image := range imageSet {
-			assignment.Image = secure.ScanningPolicyAssignmentImage{
+			assignment.Image = v2.ScanningPolicyAssignmentImage{
 				Type:  image.(map[string]interface{})["type"].(string),
 				Value: image.(map[string]interface{})["value"].(string),
 			}
@@ -272,7 +275,7 @@ func scanningPolicyAssignmentFromResourceData(d *schema.ResourceData) (scanningP
 
 // Validate during creation as ValidateFunc is not supported in TypeList/TypeSet https://github.com/hashicorp/terraform-plugin-sdk/issues/156
 // This function validates the last Item from the assignment list applies to all (*/*:*) and the list of policies is not empty in any assignment
-func validateScanningPolicyAssignment(scanningPolicyAssignmentList secure.ScanningPolicyAssignmentList) diag.Diagnostics {
+func validateScanningPolicyAssignment(scanningPolicyAssignmentList v2.ScanningPolicyAssignmentList) diag.Diagnostics {
 	for _, item := range scanningPolicyAssignmentList.Items {
 		if len(item.PolicyIDs) == 0 {
 			return diag.FromErr(errors.New("'policy_ids' list can not be empty"))

@@ -32,6 +32,8 @@ type SysdigSecure interface {
 	RuleInterface
 	ListInterface
 	MacroInterface
+	ScanningPolicyInterface
+	ScanningPolicyAssignmentInterface
 	VulnerabilityExceptionListInterface
 	VulnerabilityExceptionInterface
 }
