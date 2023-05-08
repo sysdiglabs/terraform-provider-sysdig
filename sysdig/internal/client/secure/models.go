@@ -6,42 +6,6 @@ import (
 	"io"
 )
 
-// -------- Policies --------
-
-type Policy struct {
-	ID                     int      `json:"id,omitempty"`
-	Name                   string   `json:"name"`
-	Description            string   `json:"description"`
-	Severity               int      `json:"severity"`
-	Enabled                bool     `json:"enabled"`
-	RuleNames              []string `json:"ruleNames"`
-	Actions                []Action `json:"actions"`
-	Scope                  string   `json:"scope,omitempty"`
-	Version                int      `json:"version,omitempty"`
-	NotificationChannelIds []int    `json:"notificationChannelIds"`
-	Type                   string   `json:"type"`
-	Runbook                string   `json:"runbook"`
-}
-
-type Action struct {
-	AfterEventNs         int    `json:"afterEventNs,omitempty"`
-	BeforeEventNs        int    `json:"beforeEventNs,omitempty"`
-	Name                 string `json:"name,omitempty"`
-	IsLimitedToContainer bool   `json:"isLimitedToContainer"`
-	Type                 string `json:"type"`
-}
-
-func (policy *Policy) ToJSON() io.Reader {
-	payload, _ := json.Marshal(policy)
-	return bytes.NewBuffer(payload)
-}
-
-func PolicyFromJSON(body []byte) (result Policy) {
-	_ = json.Unmarshal(body, &result)
-
-	return result
-}
-
 // -------- Rules --------
 
 type Rule struct {
