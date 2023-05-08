@@ -177,6 +177,29 @@ type Monitor struct {
 	StdDevFactor float64 `json:"stdDevFactor"`
 }
 
+type Policy struct {
+	ID                     int      `json:"id,omitempty"`
+	Name                   string   `json:"name"`
+	Description            string   `json:"description"`
+	Severity               int      `json:"severity"`
+	Enabled                bool     `json:"enabled"`
+	RuleNames              []string `json:"ruleNames"`
+	Actions                []Action `json:"actions"`
+	Scope                  string   `json:"scope,omitempty"`
+	Version                int      `json:"version,omitempty"`
+	NotificationChannelIds []int    `json:"notificationChannelIds"`
+	Type                   string   `json:"type"`
+	Runbook                string   `json:"runbook"`
+}
+
+type Action struct {
+	AfterEventNs         int    `json:"afterEventNs,omitempty"`
+	BeforeEventNs        int    `json:"beforeEventNs,omitempty"`
+	Name                 string `json:"name,omitempty"`
+	IsLimitedToContainer bool   `json:"isLimitedToContainer"`
+	Type                 string `json:"type"`
+}
+
 type List struct {
 	Name    string `json:"name"`
 	Items   Items  `json:"items"`

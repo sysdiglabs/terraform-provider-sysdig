@@ -28,6 +28,7 @@ type SysdigMonitor interface {
 
 type SysdigSecure interface {
 	SysdigCommon
+	PolicyInterface
 	ListInterface
 	MacroInterface
 }
