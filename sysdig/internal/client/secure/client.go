@@ -12,11 +12,6 @@ import (
 )
 
 type SysdigSecureClient interface {
-	CreatePolicy(context.Context, Policy) (Policy, error)
-	DeletePolicy(context.Context, int) error
-	UpdatePolicy(context.Context, Policy) (Policy, error)
-	GetPolicyById(context.Context, int) (Policy, int, error)
-
 	CreateVulnerabilityExceptionList(context.Context, *VulnerabilityExceptionList) (*VulnerabilityExceptionList, error)
 	GetVulnerabilityExceptionListByID(context.Context, string) (*VulnerabilityExceptionList, error)
 	DeleteVulnerabilityExceptionList(context.Context, string) error
