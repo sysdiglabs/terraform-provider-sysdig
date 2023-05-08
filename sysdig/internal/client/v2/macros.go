@@ -14,6 +14,7 @@ const (
 )
 
 type MacroInterface interface {
+	Base
 	CreateMacro(ctx context.Context, macro Macro) (Macro, error)
 	GetMacroByID(ctx context.Context, id int) (Macro, error)
 	UpdateMacro(ctx context.Context, macro Macro) (Macro, error)

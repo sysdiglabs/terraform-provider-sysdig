@@ -17,6 +17,7 @@ const (
 )
 
 type UserInterface interface {
+	Base
 	GetUserById(ctx context.Context, id int) (*User, error)
 	GetUserByUsername(ctx context.Context, username string) (*User, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
