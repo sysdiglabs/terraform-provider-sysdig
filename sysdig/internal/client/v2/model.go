@@ -378,3 +378,19 @@ type ScanningPolicyAssignmentImage struct {
 	Type  string `json:"type"`
 	Value string `json:"value"`
 }
+
+type CloudAccountCredentialsMonitor struct {
+	AccountId string `json:"accountId"`
+}
+
+type CloudAccountMonitor struct {
+	Id                int                            `json:"id"`
+	Platform          string                         `json:"platform"`
+	IntegrationType   string                         `json:"integrationType"`
+	Credentials       CloudAccountCredentialsMonitor `json:"credentials"`
+	AdditionalOptions string                         `json:"additionalOptions"`
+}
+
+type cloudAccountWrapperMonitor struct {
+	CloudAccount CloudAccountMonitor `json:"provider"`
+}
