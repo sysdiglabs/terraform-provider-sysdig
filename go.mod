@@ -13,6 +13,7 @@ require (
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/cast v1.4.1
 	github.com/stretchr/testify v1.7.2
+	gopkg.in/jinzhu/copier.v0 v0.0.0-20190924061706-b57f9002281a
 )
 
 require (
@@ -48,6 +49,7 @@ require (
 	github.com/hashicorp/terraform-registry-address v0.1.0 // indirect
 	github.com/hashicorp/terraform-svchost v0.0.0-20200729002733-f050f53b9734 // indirect
 	github.com/hashicorp/yamux v0.0.0-20211028200310-0bc27b27de87 // indirect
+	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/klauspost/compress v1.14.1 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
