@@ -1,6 +1,7 @@
 package sysdig
 
 import (
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"regexp"
 	"strings"
 	"time"
@@ -288,6 +289,159 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *monitor.AlertV2Common {
 	}
 
 	return alert
+}
+
+// adapters bellow are used in transition phase from old to v2 client
+// once all alerts are refactored, we are going to remove adapters
+
+func customNotificationTemplateAdapterNewToOld(tpl *v2.CustomNotificationTemplateV2) *monitor.CustomNotificationTemplateV2 {
+	return &monitor.CustomNotificationTemplateV2{
+		Subject:     tpl.Subject,
+		PrependText: tpl.PrependText,
+		AppendText:  tpl.AppendText,
+	}
+}
+
+func customNotificationTemplateAdapterOldToNew(tpl *monitor.CustomNotificationTemplateV2) *v2.CustomNotificationTemplateV2 {
+	return &v2.CustomNotificationTemplateV2{
+		Subject:     tpl.Subject,
+		PrependText: tpl.PrependText,
+		AppendText:  tpl.AppendText,
+	}
+}
+
+func notificationChannelOptionsV2AdapterNewToOld(opt v2.NotificationChannelOptionsV2) monitor.NotificationChannelOptionsV2 {
+	return monitor.NotificationChannelOptionsV2{
+		NotifyOnAcknowledge:        opt.NotifyOnAcknowledge,
+		NotifyOnResolve:            opt.NotifyOnResolve,
+		ReNotifyEverySec:           opt.ReNotifyEverySec,
+		CustomNotificationTemplate: customNotificationTemplateAdapterNewToOld(opt.CustomNotificationTemplate),
+		Thresholds:                 opt.Thresholds,
+	}
+}
+
+func notificationChannelOptionsV2AdapterOldToNew(opt monitor.NotificationChannelOptionsV2) v2.NotificationChannelOptionsV2 {
+	return v2.NotificationChannelOptionsV2{
+		NotifyOnAcknowledge:        opt.NotifyOnAcknowledge,
+		NotifyOnResolve:            opt.NotifyOnResolve,
+		ReNotifyEverySec:           opt.ReNotifyEverySec,
+		CustomNotificationTemplate: customNotificationTemplateAdapterOldToNew(opt.CustomNotificationTemplate),
+		Thresholds:                 opt.Thresholds,
+	}
+}
+
+func notificationChannelConfigListAdapterNewToOld(l []v2.NotificationChannelConfigV2) []monitor.NotificationChannelConfigV2 {
+	out := make([]monitor.NotificationChannelConfigV2, len(l), len(l))
+	for i, elem := range l {
+		out[i] = monitor.NotificationChannelConfigV2{
+			ChannelID:       elem.ChannelID,
+			Type:            elem.Type,
+			Name:            elem.Name,
+			Enabled:         elem.Enabled,
+			OverrideOptions: notificationChannelOptionsV2AdapterNewToOld(elem.OverrideOptions),
+		}
+	}
+	return out
+}
+
+func notificationChannelConfigListAdapterOldToNew(l []monitor.NotificationChannelConfigV2) []v2.NotificationChannelConfigV2 {
+	out := make([]v2.NotificationChannelConfigV2, len(l), len(l))
+	for i, elem := range l {
+		out[i] = v2.NotificationChannelConfigV2{
+			ChannelID:       elem.ChannelID,
+			Type:            elem.Type,
+			Name:            elem.Name,
+			Enabled:         elem.Enabled,
+			OverrideOptions: notificationChannelOptionsV2AdapterOldToNew(elem.OverrideOptions),
+		}
+	}
+	return out
+}
+
+func captureConfigAdapterNewToOld(cfg *v2.CaptureConfigV2) *monitor.CaptureConfigV2 {
+	return &monitor.CaptureConfigV2{
+		DurationSec: cfg.DurationSec,
+		Storage:     cfg.Storage,
+		Filter:      cfg.Filter,
+		FileName:    cfg.FileName,
+		Enabled:     cfg.Enabled,
+	}
+}
+
+func captureConfigAdapterOldToNew(cfg *monitor.CaptureConfigV2) *v2.CaptureConfigV2 {
+	return &v2.CaptureConfigV2{
+		DurationSec: cfg.DurationSec,
+		Storage:     cfg.Storage,
+		Filter:      cfg.Filter,
+		FileName:    cfg.FileName,
+		Enabled:     cfg.Enabled,
+	}
+}
+
+func linksAdapterNewToOld(l []v2.AlertLinkV2) []monitor.AlertLinkV2 {
+	out := make([]monitor.AlertLinkV2, len(l), len(l))
+	for i, elem := range l {
+		out[i] = monitor.AlertLinkV2{
+			Type: elem.Type,
+			ID:   elem.ID,
+			Href: elem.Href,
+		}
+	}
+	return out
+}
+
+func linksAdapterOldToNew(l []monitor.AlertLinkV2) []v2.AlertLinkV2 {
+	out := make([]v2.AlertLinkV2, len(l), len(l))
+	for i, elem := range l {
+		out[i] = v2.AlertLinkV2{
+			Type: elem.Type,
+			ID:   elem.ID,
+			Href: elem.Href,
+		}
+	}
+	return out
+}
+
+func alertV2CommonAdapterNewToOld(alert *v2.AlertV2Common) *monitor.AlertV2Common {
+	oldCommon := &monitor.AlertV2Common{
+		ID:                            alert.ID,
+		Version:                       alert.Version,
+		Name:                          alert.Name,
+		Description:                   alert.Description,
+		DurationSec:                   alert.DurationSec,
+		Type:                          alert.Type,
+		Group:                         alert.Group,
+		Severity:                      alert.Severity,
+		TeamID:                        alert.TeamID,
+		Enabled:                       alert.Enabled,
+		NotificationChannelConfigList: notificationChannelConfigListAdapterNewToOld(alert.NotificationChannelConfigList),
+		CustomNotificationTemplate:    customNotificationTemplateAdapterNewToOld(alert.CustomNotificationTemplate),
+		CaptureConfig:                 captureConfigAdapterNewToOld(alert.CaptureConfig),
+		Links:                         linksAdapterNewToOld(alert.Links),
+	}
+
+	return oldCommon
+}
+
+func alertV2CommonAdapterOldToNew(alert *monitor.AlertV2Common) *v2.AlertV2Common {
+	oldCommon := &v2.AlertV2Common{
+		ID:                            alert.ID,
+		Version:                       alert.Version,
+		Name:                          alert.Name,
+		Description:                   alert.Description,
+		DurationSec:                   alert.DurationSec,
+		Type:                          alert.Type,
+		Group:                         alert.Group,
+		Severity:                      alert.Severity,
+		TeamID:                        alert.TeamID,
+		Enabled:                       alert.Enabled,
+		NotificationChannelConfigList: notificationChannelConfigListAdapterOldToNew(alert.NotificationChannelConfigList),
+		CustomNotificationTemplate:    customNotificationTemplateAdapterOldToNew(alert.CustomNotificationTemplate),
+		CaptureConfig:                 captureConfigAdapterOldToNew(alert.CaptureConfig),
+		Links:                         linksAdapterOldToNew(alert.Links),
+	}
+
+	return oldCommon
 }
 
 func updateAlertV2CommonState(d *schema.ResourceData, alert *monitor.AlertV2Common) (err error) {

@@ -15,7 +15,6 @@ const (
 	AlertV2AlertType_Event            = "EVENT"
 	AlertV2AlertType_GroupOutlier     = "GROUP_OUTLIER"
 	AlertV2AlertType_Manual           = "MANUAL"
-	AlertV2AlertType_Prometheus       = "PROMETHEUS"
 
 	// severities enum
 	AlertV2Severity_High   = "high"
@@ -62,32 +61,6 @@ type AlertV2Common struct {
 type ScopedSegmentedConfig struct {
 	Scope     *AlertScopeV2            `json:"scope,omitempty"`
 	SegmentBy []AlertLabelDescriptorV2 `json:"segmentBy"`
-}
-
-// Prometheus
-type AlertV2ConfigPrometheus struct {
-	Query string `json:"query"`
-}
-
-type AlertV2Prometheus struct {
-	AlertV2Common
-	Config AlertV2ConfigPrometheus `json:"config"`
-}
-
-func (a *AlertV2Prometheus) ToJSON() io.Reader {
-	data := struct {
-		Alert AlertV2Prometheus `json:"alert"`
-	}{Alert: *a}
-	payload, _ := json.Marshal(data)
-	return bytes.NewBuffer(payload)
-}
-
-func AlertV2PrometheusFromJSON(body []byte) AlertV2Prometheus {
-	var result struct {
-		Alert AlertV2Prometheus
-	}
-	_ = json.Unmarshal(body, &result)
-	return result.Alert
 }
 
 // Event

@@ -24,6 +24,7 @@ type SysdigCommon interface {
 type SysdigMonitor interface {
 	SysdigCommon
 	MonitorCommon
+	AlertV2PrometheusInterface
 }
 
 type SysdigSecure interface {

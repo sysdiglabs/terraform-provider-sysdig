@@ -378,3 +378,69 @@ type ScanningPolicyAssignmentImage struct {
 	Type  string `json:"type"`
 	Value string `json:"value"`
 }
+
+type NotificationChannelConfigV2 struct {
+	ChannelID       int                          `json:"channelId,omitempty"`
+	Type            string                       `json:"type,omitempty"`
+	Name            string                       `json:"nam,omitempty"`
+	Enabled         bool                         `json:"enabled,omitempty"`
+	OverrideOptions NotificationChannelOptionsV2 `json:"overrideOptions"`
+}
+
+type NotificationChannelOptionsV2 struct {
+	NotifyOnAcknowledge        bool                          `json:"notifyOnAcknowledge,omitempty"`
+	NotifyOnResolve            bool                          `json:"notifyOnResolve"`
+	ReNotifyEverySec           *int                          `json:"reNotifyEverySec"`
+	CustomNotificationTemplate *CustomNotificationTemplateV2 `json:"customNotificationTemplate,omitempty"`
+	Thresholds                 []string                      `json:"thresholds"`
+}
+
+type CustomNotificationTemplateV2 struct {
+	Subject     string `json:"subject"`
+	PrependText string `json:"prependText"`
+	AppendText  string `json:"appendText"`
+}
+
+type CaptureConfigV2 struct {
+	DurationSec int    `json:"durationSec"`
+	Storage     string `json:"storage"`
+	Filter      string `json:"filter"`
+	FileName    string `json:"fileName"`
+	Enabled     bool   `json:"enabled"`
+}
+
+type AlertLinkV2 struct {
+	Type string `json:"type,omitempty"`
+	ID   string `json:"id,omitempty"`
+	Href string `json:"href,omitempty"`
+}
+
+type AlertV2Common struct {
+	ID                            int                           `json:"id,omitempty"`
+	Version                       int                           `json:"version,omitempty"`
+	Name                          string                        `json:"name"`
+	Description                   string                        `json:"description,omitempty"`
+	DurationSec                   int                           `json:"durationSec"`
+	Type                          string                        `json:"type"`
+	Group                         string                        `json:"group,omitempty"`
+	Severity                      string                        `json:"severity"`
+	TeamID                        int                           `json:"teamId,omitempty"`
+	Enabled                       bool                          `json:"enabled"`
+	NotificationChannelConfigList []NotificationChannelConfigV2 `json:"notificationChannelConfigList"`
+	CustomNotificationTemplate    *CustomNotificationTemplateV2 `json:"customNotificationTemplate,omitempty"`
+	CaptureConfig                 *CaptureConfigV2              `json:"captureConfig,omitempty"`
+	Links                         []AlertLinkV2                 `json:"links"`
+}
+
+type AlertV2ConfigPrometheus struct {
+	Query string `json:"query"`
+}
+
+type AlertV2Prometheus struct {
+	AlertV2Common
+	Config AlertV2ConfigPrometheus `json:"config"`
+}
+
+type alertV2PrometheusWrapper struct {
+	Alert AlertV2Prometheus `json:"alert"`
+}
