@@ -37,14 +37,12 @@ func TestAccManagedPolicy(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			/* Tests aren't passing due to issue with notification channels.  Will add these back once the issue is fixed
 			{
 				Config: managedPolicyWithoutActions(rText()),
 			},
 			{
 				Config: managedPolicy(rText()),
 			},
-			*/
 			{
 				Config: managedPolicyWithMinimumConfiguration(),
 			},
