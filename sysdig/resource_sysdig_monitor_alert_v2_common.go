@@ -295,6 +295,10 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *monitor.AlertV2Common {
 // once all alerts are refactored, we are going to remove adapters
 
 func customNotificationTemplateAdapterNewToOld(tpl *v2.CustomNotificationTemplateV2) *monitor.CustomNotificationTemplateV2 {
+	if tpl == nil {
+		return nil
+	}
+
 	return &monitor.CustomNotificationTemplateV2{
 		Subject:     tpl.Subject,
 		PrependText: tpl.PrependText,
@@ -303,6 +307,10 @@ func customNotificationTemplateAdapterNewToOld(tpl *v2.CustomNotificationTemplat
 }
 
 func customNotificationTemplateAdapterOldToNew(tpl *monitor.CustomNotificationTemplateV2) *v2.CustomNotificationTemplateV2 {
+	if tpl == nil {
+		return nil
+	}
+
 	return &v2.CustomNotificationTemplateV2{
 		Subject:     tpl.Subject,
 		PrependText: tpl.PrependText,
@@ -331,6 +339,10 @@ func notificationChannelOptionsV2AdapterOldToNew(opt monitor.NotificationChannel
 }
 
 func notificationChannelConfigListAdapterNewToOld(l []v2.NotificationChannelConfigV2) []monitor.NotificationChannelConfigV2 {
+	if l == nil {
+		return nil
+	}
+
 	out := make([]monitor.NotificationChannelConfigV2, len(l))
 	for i, elem := range l {
 		out[i] = monitor.NotificationChannelConfigV2{
@@ -345,6 +357,10 @@ func notificationChannelConfigListAdapterNewToOld(l []v2.NotificationChannelConf
 }
 
 func notificationChannelConfigListAdapterOldToNew(l []monitor.NotificationChannelConfigV2) []v2.NotificationChannelConfigV2 {
+	if l == nil {
+		return nil
+	}
+
 	out := make([]v2.NotificationChannelConfigV2, len(l))
 	for i, elem := range l {
 		out[i] = v2.NotificationChannelConfigV2{
@@ -359,6 +375,10 @@ func notificationChannelConfigListAdapterOldToNew(l []monitor.NotificationChanne
 }
 
 func captureConfigAdapterNewToOld(cfg *v2.CaptureConfigV2) *monitor.CaptureConfigV2 {
+	if cfg == nil {
+		return nil
+	}
+
 	return &monitor.CaptureConfigV2{
 		DurationSec: cfg.DurationSec,
 		Storage:     cfg.Storage,
@@ -369,6 +389,10 @@ func captureConfigAdapterNewToOld(cfg *v2.CaptureConfigV2) *monitor.CaptureConfi
 }
 
 func captureConfigAdapterOldToNew(cfg *monitor.CaptureConfigV2) *v2.CaptureConfigV2 {
+	if cfg == nil {
+		return nil
+	}
+
 	return &v2.CaptureConfigV2{
 		DurationSec: cfg.DurationSec,
 		Storage:     cfg.Storage,
@@ -379,6 +403,10 @@ func captureConfigAdapterOldToNew(cfg *monitor.CaptureConfigV2) *v2.CaptureConfi
 }
 
 func linksAdapterNewToOld(l []v2.AlertLinkV2) []monitor.AlertLinkV2 {
+	if l == nil {
+		return nil
+	}
+
 	out := make([]monitor.AlertLinkV2, len(l))
 	for i, elem := range l {
 		out[i] = monitor.AlertLinkV2{
@@ -391,6 +419,10 @@ func linksAdapterNewToOld(l []v2.AlertLinkV2) []monitor.AlertLinkV2 {
 }
 
 func linksAdapterOldToNew(l []monitor.AlertLinkV2) []v2.AlertLinkV2 {
+	if l == nil {
+		return nil
+	}
+
 	out := make([]v2.AlertLinkV2, len(l))
 	for i, elem := range l {
 		out[i] = v2.AlertLinkV2{
@@ -403,6 +435,10 @@ func linksAdapterOldToNew(l []monitor.AlertLinkV2) []v2.AlertLinkV2 {
 }
 
 func alertV2CommonAdapterNewToOld(alert *v2.AlertV2Common) *monitor.AlertV2Common {
+	if alert == nil {
+		return nil
+	}
+
 	oldCommon := &monitor.AlertV2Common{
 		ID:                            alert.ID,
 		Version:                       alert.Version,
@@ -424,6 +460,10 @@ func alertV2CommonAdapterNewToOld(alert *v2.AlertV2Common) *monitor.AlertV2Commo
 }
 
 func alertV2CommonAdapterOldToNew(alert *monitor.AlertV2Common) *v2.AlertV2Common {
+	if alert == nil {
+		return nil
+	}
+
 	oldCommon := &v2.AlertV2Common{
 		ID:                            alert.ID,
 		Version:                       alert.Version,
