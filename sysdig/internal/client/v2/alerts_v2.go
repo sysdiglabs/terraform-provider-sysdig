@@ -33,7 +33,7 @@ func (client *Client) CreateAlertV2Prometheus(ctx context.Context, alert AlertV2
 		return AlertV2Prometheus{}, err
 	}
 
-	payload, err := Marshal(alert)
+	payload, err := Marshal(alertV2PrometheusWrapper{Alert: alert})
 	if err != nil {
 		return AlertV2Prometheus{}, err
 	}
@@ -57,7 +57,7 @@ func (client *Client) UpdateAlertV2Prometheus(ctx context.Context, alert AlertV2
 		return AlertV2Prometheus{}, err
 	}
 
-	payload, err := Marshal(alert)
+	payload, err := Marshal(alertV2PrometheusWrapper{Alert: alert})
 	if err != nil {
 		return AlertV2Prometheus{}, err
 	}
