@@ -15,7 +15,7 @@ import (
 )
 
 func TestAccManagedPolicy(t *testing.T) {
-	//	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
