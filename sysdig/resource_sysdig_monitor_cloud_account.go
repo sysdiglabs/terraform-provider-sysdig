@@ -2,7 +2,7 @@ package sysdig
 
 import (
 	"context"
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strconv"
@@ -47,15 +47,19 @@ func resourceSysdigMonitorCloudAccount() *schema.Resource {
 	}
 }
 
+func getMonitorCloudAccountClient(c SysdigClients) (v2.CloudAccountMonitorInterface, error) {
+	return c.sysdigMonitorClientV2()
+}
+
 func resourceSysdigMonitorCloudAccountCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorCloudAccountClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	cloudAccount := monitorCloudAccountFromResourceData(data)
 
-	cloudAccountCreated, err := client.CreateCloudAccount(ctx, &cloudAccount)
+	cloudAccountCreated, err := client.CreateCloudAccountMonitor(ctx, &cloudAccount)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -66,7 +70,7 @@ func resourceSysdigMonitorCloudAccountCreate(ctx context.Context, data *schema.R
 }
 
 func resourceSysdigMonitorCloudAccountDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorCloudAccountClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -76,7 +80,7 @@ func resourceSysdigMonitorCloudAccountDelete(ctx context.Context, data *schema.R
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteCloudAccountById(ctx, id)
+	err = client.DeleteCloudAccountMonitor(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -85,7 +89,7 @@ func resourceSysdigMonitorCloudAccountDelete(ctx context.Context, data *schema.R
 }
 
 func resourceSysdigMonitorCloudAccountRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorCloudAccountClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -95,7 +99,7 @@ func resourceSysdigMonitorCloudAccountRead(ctx context.Context, data *schema.Res
 		return diag.FromErr(err)
 	}
 
-	cloudAccount, err := client.GetCloudAccountById(ctx, id)
+	cloudAccount, err := client.GetCloudAccountMonitor(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -109,7 +113,7 @@ func resourceSysdigMonitorCloudAccountRead(ctx context.Context, data *schema.Res
 }
 
 func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorCloudAccountClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -121,7 +125,7 @@ func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.R
 		return diag.FromErr(err)
 	}
 
-	_, err = client.UpdateCloudAccount(ctx, id, &cloudAccount)
+	_, err = client.UpdateCloudAccountMonitor(ctx, id, &cloudAccount)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -129,18 +133,18 @@ func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.R
 	return nil
 }
 
-func monitorCloudAccountFromResourceData(data *schema.ResourceData) monitor.CloudAccount {
-	return monitor.CloudAccount{
+func monitorCloudAccountFromResourceData(data *schema.ResourceData) v2.CloudAccountMonitor {
+	return v2.CloudAccountMonitor{
 		Platform:          data.Get("cloud_provider").(string),
 		IntegrationType:   data.Get("integration_type").(string),
 		AdditionalOptions: data.Get("additional_options").(string),
-		Credentials: monitor.CloudAccountCredentials{
+		Credentials: v2.CloudAccountCredentialsMonitor{
 			AccountId: data.Get("account_id").(string),
 		},
 	}
 }
 
-func monitorCloudAccountToResourceData(data *schema.ResourceData, cloudAccount *monitor.CloudAccount) error {
+func monitorCloudAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudAccountMonitor) error {
 	err := data.Set("cloud_provider", cloudAccount.Platform)
 	if err != nil {
 		return err
