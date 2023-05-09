@@ -444,3 +444,19 @@ type AlertV2Prometheus struct {
 type alertV2PrometheusWrapper struct {
 	Alert AlertV2Prometheus `json:"alert"`
 }
+
+type CloudAccountCredentialsMonitor struct {
+	AccountId string `json:"accountId"`
+}
+
+type CloudAccountMonitor struct {
+	Id                int                            `json:"id"`
+	Platform          string                         `json:"platform"`
+	IntegrationType   string                         `json:"integrationType"`
+	Credentials       CloudAccountCredentialsMonitor `json:"credentials"`
+	AdditionalOptions string                         `json:"additionalOptions"`
+}
+
+type cloudAccountWrapperMonitor struct {
+	CloudAccount CloudAccountMonitor `json:"provider"`
+}
