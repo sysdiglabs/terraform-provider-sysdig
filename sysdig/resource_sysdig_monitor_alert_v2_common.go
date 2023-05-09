@@ -331,7 +331,7 @@ func notificationChannelOptionsV2AdapterOldToNew(opt monitor.NotificationChannel
 }
 
 func notificationChannelConfigListAdapterNewToOld(l []v2.NotificationChannelConfigV2) []monitor.NotificationChannelConfigV2 {
-	out := make([]monitor.NotificationChannelConfigV2, len(l), len(l))
+	out := make([]monitor.NotificationChannelConfigV2, len(l))
 	for i, elem := range l {
 		out[i] = monitor.NotificationChannelConfigV2{
 			ChannelID:       elem.ChannelID,
@@ -345,7 +345,7 @@ func notificationChannelConfigListAdapterNewToOld(l []v2.NotificationChannelConf
 }
 
 func notificationChannelConfigListAdapterOldToNew(l []monitor.NotificationChannelConfigV2) []v2.NotificationChannelConfigV2 {
-	out := make([]v2.NotificationChannelConfigV2, len(l), len(l))
+	out := make([]v2.NotificationChannelConfigV2, len(l))
 	for i, elem := range l {
 		out[i] = v2.NotificationChannelConfigV2{
 			ChannelID:       elem.ChannelID,
@@ -379,7 +379,7 @@ func captureConfigAdapterOldToNew(cfg *monitor.CaptureConfigV2) *v2.CaptureConfi
 }
 
 func linksAdapterNewToOld(l []v2.AlertLinkV2) []monitor.AlertLinkV2 {
-	out := make([]monitor.AlertLinkV2, len(l), len(l))
+	out := make([]monitor.AlertLinkV2, len(l))
 	for i, elem := range l {
 		out[i] = monitor.AlertLinkV2{
 			Type: elem.Type,
@@ -391,7 +391,7 @@ func linksAdapterNewToOld(l []v2.AlertLinkV2) []monitor.AlertLinkV2 {
 }
 
 func linksAdapterOldToNew(l []monitor.AlertLinkV2) []v2.AlertLinkV2 {
-	out := make([]v2.AlertLinkV2, len(l), len(l))
+	out := make([]v2.AlertLinkV2, len(l))
 	for i, elem := range l {
 		out[i] = v2.AlertLinkV2{
 			Type: elem.Type,
