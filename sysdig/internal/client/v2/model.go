@@ -444,6 +444,7 @@ type AlertV2Prometheus struct {
 type alertV2PrometheusWrapper struct {
 	Alert AlertV2Prometheus `json:"alert"`
 }
+
 type AlertLabelDescriptorV2 struct {
 	ID       string `json:"id"`
 	PublicID string `json:"publicId,omitempty"`
