@@ -50,6 +50,7 @@ type AlertV2Interface interface {
 }
 
 type AlertV2PrometheusInterface interface {
+	Base
 	CreateAlertV2Prometheus(ctx context.Context, alert AlertV2Prometheus) (AlertV2Prometheus, error)
 	UpdateAlertV2Prometheus(ctx context.Context, alert AlertV2Prometheus) (AlertV2Prometheus, error)
 	GetAlertV2Prometheus(ctx context.Context, alertID int) (AlertV2Prometheus, error)
@@ -57,6 +58,7 @@ type AlertV2PrometheusInterface interface {
 }
 
 type AlertV2EventInterface interface {
+	Base
 	CreateAlertV2Event(ctx context.Context, alert AlertV2Event) (AlertV2Event, error)
 	UpdateAlertV2Event(ctx context.Context, alert AlertV2Event) (AlertV2Event, error)
 	GetAlertV2Event(ctx context.Context, alertID int) (AlertV2Event, error)
@@ -64,6 +66,7 @@ type AlertV2EventInterface interface {
 }
 
 type AlertV2MetricInterface interface {
+	Base
 	CreateAlertV2Metric(ctx context.Context, alert AlertV2Metric) (AlertV2Metric, error)
 	UpdateAlertV2Metric(ctx context.Context, alert AlertV2Metric) (AlertV2Metric, error)
 	GetAlertV2Metric(ctx context.Context, alertID int) (AlertV2Metric, error)
@@ -71,6 +74,7 @@ type AlertV2MetricInterface interface {
 }
 
 type AlertV2DowntimeInterface interface {
+	Base
 	CreateAlertV2Downtime(ctx context.Context, alert AlertV2Downtime) (AlertV2Downtime, error)
 	UpdateAlertV2Downtime(ctx context.Context, alert AlertV2Downtime) (AlertV2Downtime, error)
 	GetAlertV2Downtime(ctx context.Context, alertID int) (AlertV2Downtime, error)
