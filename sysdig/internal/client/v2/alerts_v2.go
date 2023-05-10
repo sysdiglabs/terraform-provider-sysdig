@@ -9,10 +9,6 @@ import (
 	"sync"
 )
 
-type AlertsV2Interface interface {
-	Base
-}
-
 type AlertV2Type string
 type AlertV2Severity string
 type AlertLinkV2Type string
