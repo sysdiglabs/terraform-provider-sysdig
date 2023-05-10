@@ -153,7 +153,7 @@ func (client *Client) CreateAlertV2Event(ctx context.Context, alert AlertV2Event
 		return AlertV2Event{}, err
 	}
 
-	payload, err := Marshal(alert)
+	payload, err := Marshal(alertV2EventWrapper{Alert: alert})
 	if err != nil {
 		return AlertV2Event{}, err
 	}
@@ -182,7 +182,7 @@ func (client *Client) UpdateAlertV2Event(ctx context.Context, alert AlertV2Event
 		return AlertV2Event{}, err
 	}
 
-	payload, err := Marshal(alert)
+	payload, err := Marshal(alertV2EventWrapper{Alert: alert})
 	if err != nil {
 		return AlertV2Event{}, err
 	}
@@ -229,7 +229,7 @@ func (client *Client) CreateAlertV2Metric(ctx context.Context, alert AlertV2Metr
 		return AlertV2Metric{}, err
 	}
 
-	payload, err := Marshal(alert)
+	payload, err := Marshal(alertV2MetricWrapper{Alert: alert})
 	if err != nil {
 		return AlertV2Metric{}, err
 	}
@@ -258,7 +258,7 @@ func (client *Client) UpdateAlertV2Metric(ctx context.Context, alert AlertV2Metr
 		return AlertV2Metric{}, err
 	}
 
-	payload, err := Marshal(alert)
+	payload, err := Marshal(alertV2MetricWrapper{Alert: alert})
 	if err != nil {
 		return AlertV2Metric{}, err
 	}
@@ -305,7 +305,7 @@ func (client *Client) CreateAlertV2Downtime(ctx context.Context, alert AlertV2Do
 		return AlertV2Downtime{}, err
 	}
 
-	payload, err := Marshal(alert)
+	payload, err := Marshal(alertV2DowntimeWrapper{Alert: alert})
 	if err != nil {
 		return AlertV2Downtime{}, err
 	}
@@ -334,7 +334,7 @@ func (client *Client) UpdateAlertV2Downtime(ctx context.Context, alert AlertV2Do
 		return AlertV2Downtime{}, err
 	}
 
-	payload, err := Marshal(alert)
+	payload, err := Marshal(alertV2DowntimeWrapper{Alert: alert})
 	if err != nil {
 		return AlertV2Downtime{}, err
 	}
