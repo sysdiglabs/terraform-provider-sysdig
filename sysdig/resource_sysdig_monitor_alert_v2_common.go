@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+const AlertV2CaptureFilenameRegexp = `.*?\.scap`
+
 func minutesToSeconds(minutes int) (seconds int) {
 	durationMinutes := time.Duration(minutes) * time.Minute
 	return int(durationMinutes.Seconds())
@@ -33,7 +35,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 			Type:         schema.TypeString,
 			Optional:     true,
 			Default:      string(v2.AlertV2SeverityLow),
-			ValidateFunc: validation.StringInSlice(v2.AlertV2SeverityValues(), true),
+			ValidateFunc: validation.StringInSlice(AlertV2SeverityValues(), true),
 		},
 		"trigger_after_minutes": {
 			Type:     schema.TypeInt,
@@ -138,7 +140,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 					"filename": {
 						Type:         schema.TypeString,
 						Required:     true,
-						ValidateFunc: validation.StringMatch(regexp.MustCompile(v2.AlertV2CaptureFilenameRegexp), "the filename must end in .scap"), //otherwise the api will silently add .scap at the end
+						ValidateFunc: validation.StringMatch(regexp.MustCompile(AlertV2CaptureFilenameRegexp), "the filename must end in .scap"), //otherwise the api will silently add .scap at the end
 					},
 					"filter": {
 						Type:     schema.TypeString,
@@ -161,7 +163,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 					"type": {
 						Type:         schema.TypeString,
 						Required:     true,
-						ValidateFunc: validation.StringInSlice(v2.AlertLinkV2TypeValues(), true),
+						ValidateFunc: validation.StringInSlice(AlertLinkV2TypeValues(), true),
 					},
 					"href": {
 						Type:     schema.TypeString,
@@ -181,6 +183,22 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 	}
 
 	return alertSchema
+}
+
+func AlertV2SeverityValues() []string {
+	return []string{
+		string(v2.AlertV2SeverityHigh),
+		string(v2.AlertV2SeverityMedium),
+		string(v2.AlertV2SeverityLow),
+		string(v2.AlertV2SeverityInfo),
+	}
+}
+
+func AlertLinkV2TypeValues() []string {
+	return []string{
+		string(v2.AlertLinkV2TypeDashboard),
+		string(v2.AlertLinkV2TypeRunbook),
+	}
 }
 
 func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {

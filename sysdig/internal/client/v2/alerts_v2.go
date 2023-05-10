@@ -34,25 +34,7 @@ const (
 
 	AlertLinkV2TypeDashboard AlertLinkV2Type = "dashboard"
 	AlertLinkV2TypeRunbook   AlertLinkV2Type = "runbook"
-
-	AlertV2CaptureFilenameRegexp = `.*?\.scap`
 )
-
-func AlertV2SeverityValues() []string {
-	return []string{
-		string(AlertV2SeverityHigh),
-		string(AlertV2SeverityMedium),
-		string(AlertV2SeverityLow),
-		string(AlertV2SeverityInfo),
-	}
-}
-
-func AlertLinkV2TypeValues() []string {
-	return []string{
-		string(AlertLinkV2TypeDashboard),
-		string(AlertLinkV2TypeRunbook),
-	}
-}
 
 var labelCache struct {
 	sync.Mutex
