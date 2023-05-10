@@ -2,9 +2,7 @@ package sysdig
 
 import (
 	"context"
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
-	"gopkg.in/jinzhu/copier.v0"
 	"strconv"
 	"time"
 
@@ -50,10 +48,7 @@ func resourceSysdigMonitorAlertV2PrometheusCreate(ctx context.Context, d *schema
 		return diag.FromErr(err)
 	}
 
-	a, err := buildAlertV2PrometheusStruct(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	a := buildAlertV2PrometheusStruct(d)
 
 	aCreated, err := client.CreateAlertV2Prometheus(ctx, *a)
 	if err != nil {
@@ -102,10 +97,7 @@ func resourceSysdigMonitorAlertV2PrometheusUpdate(ctx context.Context, d *schema
 		return diag.FromErr(err)
 	}
 
-	a, err := buildAlertV2PrometheusStruct(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	a := buildAlertV2PrometheusStruct(d)
 
 	a.ID, _ = strconv.Atoi(d.Id())
 
@@ -141,37 +133,27 @@ func resourceSysdigMonitorAlertV2PrometheusDelete(ctx context.Context, d *schema
 	return nil
 }
 
-func buildAlertV2PrometheusStruct(d *schema.ResourceData) (*v2.AlertV2Prometheus, error) {
+func buildAlertV2PrometheusStruct(d *schema.ResourceData) *v2.AlertV2Prometheus {
 	alertV2Common := buildAlertV2CommonStruct(d)
-	alertV2Common.Type = string(v2.Prometheus)
-
-	var newAlertV2Common v2.AlertV2Common
-	err := copier.Copy(&newAlertV2Common, &alertV2Common)
-	if err != nil {
-		return nil, err
-	}
+	alertV2Common.Type = string(v2.AlertV2TypePrometheus)
 
 	config := v2.AlertV2ConfigPrometheus{}
 	config.Query = d.Get("query").(string)
 
 	alert := &v2.AlertV2Prometheus{
-		AlertV2Common: newAlertV2Common,
+		AlertV2Common: *alertV2Common,
 		Config:        config,
 	}
-	return alert, nil
+	return alert
 }
 
-func updateAlertV2PrometheusState(d *schema.ResourceData, alert *v2.AlertV2Prometheus) error {
-	var oldAlertV2Common monitor.AlertV2Common
-	err := copier.Copy(&oldAlertV2Common, &alert.AlertV2Common)
+func updateAlertV2PrometheusState(d *schema.ResourceData, alert *v2.AlertV2Prometheus) (err error) {
+	err = updateAlertV2CommonState(d, &alert.AlertV2Common)
 	if err != nil {
-		return err
+		return
 	}
 
-	err = updateAlertV2CommonState(d, &oldAlertV2Common)
-	if err != nil {
-		return err
-	}
+	_ = d.Set("query", alert.Config.Query)
 
-	return d.Set("query", alert.Config.Query)
+	return
 }

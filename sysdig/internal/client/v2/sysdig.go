@@ -25,7 +25,7 @@ type SysdigMonitor interface {
 	SysdigCommon
 	MonitorCommon
 	CloudAccountMonitorInterface
-	AlertV2PrometheusInterface
+	AlertV2Interface
 }
 
 type SysdigSecure interface {

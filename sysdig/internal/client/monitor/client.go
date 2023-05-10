@@ -14,25 +14,6 @@ import (
 )
 
 type SysdigMonitorClient interface {
-	CreateAlertV2Event(context.Context, AlertV2Event) (AlertV2Event, error)
-	DeleteAlertV2Event(context.Context, int) error
-	UpdateAlertV2Event(context.Context, AlertV2Event) (AlertV2Event, error)
-	GetAlertV2EventById(context.Context, int) (AlertV2Event, error)
-
-	CreateAlertV2Metric(context.Context, AlertV2Metric) (AlertV2Metric, error)
-	DeleteAlertV2Metric(context.Context, int) error
-	UpdateAlertV2Metric(context.Context, AlertV2Metric) (AlertV2Metric, error)
-	GetAlertV2MetricById(context.Context, int) (AlertV2Metric, error)
-
-	CreateAlertV2Downtime(context.Context, AlertV2Downtime) (AlertV2Downtime, error)
-	DeleteAlertV2Downtime(context.Context, int) error
-	UpdateAlertV2Downtime(context.Context, AlertV2Downtime) (AlertV2Downtime, error)
-	GetAlertV2DowntimeById(context.Context, int) (AlertV2Downtime, error)
-
-	GetLabelDescriptor(ctx context.Context, label string) (LabelDescriptorV3, error)
-
-	GetNotificationChannelById(context.Context, int) (NotificationChannel, error)
-
 	GetDashboardByID(context.Context, int) (*model.Dashboard, error)
 	CreateDashboard(context.Context, *model.Dashboard) (*model.Dashboard, error)
 	UpdateDashboard(context.Context, *model.Dashboard) (*model.Dashboard, error)

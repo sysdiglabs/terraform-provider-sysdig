@@ -444,6 +444,108 @@ type AlertV2Prometheus struct {
 type alertV2PrometheusWrapper struct {
 	Alert AlertV2Prometheus `json:"alert"`
 }
+type AlertLabelDescriptorV2 struct {
+	ID       string `json:"id"`
+	PublicID string `json:"publicId,omitempty"`
+}
+
+type ScopeExpressionV2 struct {
+	Operand    string                  `json:"operand"`
+	Descriptor *AlertLabelDescriptorV2 `json:"descriptor,omitempty"`
+	Operator   string                  `json:"operator"`
+	Value      []string                `json:"value"`
+}
+
+type AlertScopeV2 struct {
+	Expressions []ScopeExpressionV2 `json:"expressions,omitempty"`
+}
+
+type ScopedSegmentedConfig struct {
+	Scope     *AlertScopeV2            `json:"scope,omitempty"`
+	SegmentBy []AlertLabelDescriptorV2 `json:"segmentBy"`
+}
+
+type AlertV2ConfigEvent struct {
+	ScopedSegmentedConfig
+
+	ConditionOperator        string   `json:"conditionOperator"`
+	Threshold                float64  `json:"threshold"`
+	WarningConditionOperator string   `json:"warningConditionOperator,omitempty"`
+	WarningThreshold         *float64 `json:"warningThreshold,omitempty"`
+
+	Filter string   `json:"filter"`
+	Tags   []string `json:"tags"`
+}
+
+type AlertV2Event struct {
+	AlertV2Common
+	Config AlertV2ConfigEvent `json:"config"`
+}
+
+type alertV2EventWrapper struct {
+	Alert AlertV2Event `json:"alert"`
+}
+
+type LabelDescriptorV3 struct {
+	ID       string `json:"id"`
+	PublicID string `json:"publicId"`
+}
+
+type labelsDescriptorV3 struct {
+	AllLabels []LabelDescriptorV3 `json:"allLabels"`
+}
+
+type labelDescriptorV3 struct {
+	LabelDescriptor LabelDescriptorV3 `json:"labelDescriptor"`
+}
+
+type AlertMetricDescriptorV2 struct {
+	ID string `json:"id"`
+}
+
+type AlertV2ConfigMetric struct {
+	ScopedSegmentedConfig
+
+	ConditionOperator        string   `json:"conditionOperator"`
+	Threshold                float64  `json:"threshold"`
+	WarningConditionOperator string   `json:"warningConditionOperator,omitempty"`
+	WarningThreshold         *float64 `json:"warningThreshold,omitempty"`
+
+	GroupAggregation string                  `json:"groupAggregation"`
+	TimeAggregation  string                  `json:"timeAggregation"`
+	Metric           AlertMetricDescriptorV2 `json:"metric"`
+	NoDataBehaviour  string                  `json:"noDataBehaviour"`
+}
+
+type AlertV2Metric struct {
+	AlertV2Common
+	Config AlertV2ConfigMetric `json:"config"`
+}
+
+type alertV2MetricWrapper struct {
+	Alert AlertV2Metric `json:"alert"`
+}
+
+type AlertV2ConfigDowntime struct {
+	ScopedSegmentedConfig
+
+	ConditionOperator string  `json:"conditionOperator"`
+	Threshold         float64 `json:"threshold"`
+
+	GroupAggregation string                  `json:"groupAggregation"`
+	TimeAggregation  string                  `json:"timeAggregation"`
+	Metric           AlertMetricDescriptorV2 `json:"metric"`
+	NoDataBehaviour  string                  `json:"noDataBehaviour"`
+}
+
+type AlertV2Downtime struct {
+	AlertV2Common
+	Config AlertV2ConfigDowntime `json:"config"`
+}
+
+type alertV2DowntimeWrapper struct {
+	Alert AlertV2Downtime `json:"alert"`
+}
 
 type CloudAccountCredentialsMonitor struct {
 	AccountId string `json:"accountId"`
