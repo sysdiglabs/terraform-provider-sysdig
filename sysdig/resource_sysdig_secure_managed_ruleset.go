@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -11,15 +10,19 @@ import (
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceSysdigSecureManagedPolicy() *schema.Resource {
+func resourceSysdigSecureManagedRuleset() *schema.Resource {
 	timeout := 5 * time.Minute
 	return &schema.Resource{
-		CreateContext: resourceSysdigManagedPolicyCreate,
-		ReadContext:   resourceSysdigManagedPolicyRead,
-		UpdateContext: resourceSysdigManagedPolicyUpdate,
-		DeleteContext: resourceSysdigManagedPolicyDelete,
+		CreateContext: resourceSysdigManagedRulesetCreate,
+		ReadContext:   resourceSysdigManagedRulesetRead,
+		UpdateContext: resourceSysdigManagedRulesetUpdate,
+		DeleteContext: resourceSysdigManagedRulesetDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -33,16 +36,43 @@ func resourceSysdigSecureManagedPolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"type": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Default:          "falco",
-				ValidateDiagFunc: validateDiagFunc(validatePolicyType),
+			"inherited_from": {
+				Type:     schema.TypeList,
+				Required: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"type": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Default:          "falco",
+							ValidateDiagFunc: validateDiagFunc(validatePolicyType),
+						},
+					},
+				},
+			},
+			"template_id": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
+			},
+			"severity": {
+				Type:             schema.TypeInt,
+				Default:          4,
+				Optional:         true,
+				ValidateDiagFunc: validateDiagFunc(validation.IntBetween(0, 7)),
 			},
 			"disabled_rules": {
 				Type:     schema.TypeSet,
@@ -76,55 +106,57 @@ func resourceSysdigSecureManagedPolicy() *schema.Resource {
 	}
 }
 
-func resourceSysdigManagedPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigManagedRulesetCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	policyName := d.Get("name").(string)
-	policyType := d.Get("type").(string)
+	policyName := d.Get("inherited_from.0.name").(string)
+	policyType := d.Get("inherited_from.0.type").(string)
 
-	policy, err := getManagedPolicy(ctx, client, policyName, policyType)
+	managedPolicy, err := getManagedPolicy(ctx, client, policyName, policyType)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	updateManagedPolicyFromResourceData(policy, d)
+	policy := v2.Policy{}
 
-	updatedPolicy, err := client.UpdatePolicy(ctx, *policy)
+	updateManagedRulesetFromResourceData(&policy, d)
+	policy.TemplateId = managedPolicy.TemplateId
+	policy.TemplateVersion = managedPolicy.TemplateVersion
+	policy.Rules = managedPolicy.Rules
+
+	createdPolicy, err := client.CreatePolicy(ctx, policy)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	managedPolicyToResourceData(&updatedPolicy, d)
+	managedRulesetToResourceData(&createdPolicy, d)
 
 	return nil
 }
 
-func managedPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
+func managedRulesetToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	if policy.ID != 0 {
 		d.SetId(strconv.Itoa(policy.ID))
 	}
 
 	_ = d.Set("name", policy.Name)
-	if policy.Type != "" {
-		_ = d.Set("type", policy.Type)
-	} else {
-		_ = d.Set("type", "falco")
-	}
+	_ = d.Set("description", policy.Description)
 	_ = d.Set("enabled", policy.Enabled)
+	_ = d.Set("severity", policy.Severity)
 	_ = d.Set("scope", policy.Scope)
 	_ = d.Set("version", policy.Version)
 	_ = d.Set("notification_channels", policy.NotificationChannelIds)
 	_ = d.Set("runbook", policy.Runbook)
+	_ = d.Set("template_id", policy.TemplateId)
 
 	actions := []map[string]interface{}{{}}
 	for _, action := range policy.Actions {
 		if action.Type != "POLICY_ACTION_CAPTURE" {
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
 			actions[0]["container"] = strings.ToLower(action)
-			//d.Set("actions.0.container", strings.ToLower(action))
 		} else {
 			actions[0]["capture"] = []map[string]interface{}{{
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
@@ -151,10 +183,14 @@ func managedPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	_ = d.Set("disabled_rules", disabledRules)
 }
 
-func updateManagedPolicyFromResourceData(policy *v2.Policy, d *schema.ResourceData) {
+func updateManagedRulesetFromResourceData(policy *v2.Policy, d *schema.ResourceData) {
+	policy.Name = d.Get("name").(string)
+	policy.Description = d.Get("description").(string)
 	policy.Enabled = d.Get("enabled").(bool)
 	policy.Runbook = d.Get("runbook").(string)
+	policy.Severity = d.Get("severity").(int)
 	policy.Scope = d.Get("scope").(string)
+	policy.TemplateId = d.Get("template_id").(int)
 
 	addActionsToPolicy(d, policy)
 
@@ -174,7 +210,7 @@ func updateManagedPolicyFromResourceData(policy *v2.Policy, d *schema.ResourceDa
 	}
 }
 
-func resourceSysdigManagedPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigManagedRulesetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -190,12 +226,12 @@ func resourceSysdigManagedPolicyRead(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	managedPolicyToResourceData(&policy, d)
+	managedRulesetToResourceData(&policy, d)
 
 	return nil
 }
 
-func resourceSysdigManagedPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigManagedRulesetDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -203,26 +239,7 @@ func resourceSysdigManagedPolicyDelete(ctx context.Context, d *schema.ResourceDa
 
 	id, _ := strconv.Atoi(d.Id())
 
-	// Reset everything back to default values for managed policy
-	policy, statusCode, err := client.GetPolicyByID(ctx, id)
-	if err != nil {
-		d.SetId("")
-		if statusCode == http.StatusNotFound {
-			return diag.FromErr(err)
-		}
-	}
-
-	// Disable the policy as the managed policy is no longer going to be managed by Terraform
-	policy.Enabled = false
-	policy.Runbook = ""
-	policy.Scope = ""
-	policy.Actions = []v2.Action{}
-	policy.NotificationChannelIds = []int{}
-	for _, rule := range policy.Rules {
-		rule.Enabled = true
-	}
-
-	policy, err = client.UpdatePolicy(ctx, policy)
+	err = client.DeletePolicy(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -230,7 +247,7 @@ func resourceSysdigManagedPolicyDelete(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceSysdigManagedPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigManagedRulesetUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -247,34 +264,11 @@ func resourceSysdigManagedPolicyUpdate(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
-	updateManagedPolicyFromResourceData(&policy, d)
+	updateManagedRulesetFromResourceData(&policy, d)
 
 	_, err = client.UpdatePolicy(ctx, policy)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	return nil
-}
-
-func getManagedPolicy(ctx context.Context, client v2.PolicyInterface, policyName string, policyType string) (*v2.Policy, error) {
-	policies, _, err := client.GetPolicies(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var policy v2.Policy
-	for _, existingPolicy := range policies {
-		if existingPolicy.Name == policyName && existingPolicy.Type == policyType {
-			if !existingPolicy.IsDefault {
-				return nil, errors.New("policy is not a managed policy")
-			}
-			policy = existingPolicy
-		}
-	}
-
-	if policy.ID != 0 {
-		return &policy, nil
-	}
-
-	return nil, errors.New("unable to find managed policy")
 }
