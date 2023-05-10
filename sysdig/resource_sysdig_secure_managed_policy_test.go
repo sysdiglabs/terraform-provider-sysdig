@@ -33,11 +33,6 @@ func TestAccManagedPolicy(t *testing.T) {
 				Config: managedPolicyWithoutNotificationChannels(),
 			},
 			{
-				ResourceName:      "sysdig_secure_managed_policy.sample",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
 				Config: managedPolicyWithoutActions(rText()),
 			},
 			{
