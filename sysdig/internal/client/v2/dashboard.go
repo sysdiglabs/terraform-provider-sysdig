@@ -38,7 +38,7 @@ func (client *Client) GetDashboard(ctx context.Context, ID int) (*Dashboard, err
 }
 
 func (client *Client) CreateDashboard(ctx context.Context, dashboard *Dashboard) (*Dashboard, error) {
-	payload, err := Marshal(dashboard)
+	payload, err := Marshal(dashboardWrapper{Dashboard: dashboard})
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (client *Client) CreateDashboard(ctx context.Context, dashboard *Dashboard)
 }
 
 func (client *Client) UpdateDashboard(ctx context.Context, dashboard *Dashboard) (*Dashboard, error) {
-	payload, err := Marshal(dashboard)
+	payload, err := Marshal(dashboardWrapper{Dashboard: dashboard})
 	if err != nil {
 		return nil, err
 	}
