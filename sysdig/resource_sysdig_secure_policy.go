@@ -60,9 +60,6 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 		ReadContext:   resourceSysdigPolicyRead,
 		UpdateContext: resourceSysdigPolicyUpdate,
 		DeleteContext: resourceSysdigPolicyDelete,
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
