@@ -92,10 +92,10 @@ func resourceSysdigManagedRulesetCreate(ctx context.Context, d *schema.ResourceD
 
 	policy := v2.Policy{}
 
-	policy.TemplateId = managedPolicy.TemplateId
-	policy.TemplateVersion = managedPolicy.TemplateVersion
 	policy.Rules = managedPolicy.Rules
 	updateManagedRulesetFromResourceData(&policy, d)
+	policy.TemplateId = managedPolicy.TemplateId
+	policy.TemplateVersion = managedPolicy.TemplateVersion
 
 	createdPolicy, err := client.CreatePolicy(ctx, policy)
 	if err != nil {
