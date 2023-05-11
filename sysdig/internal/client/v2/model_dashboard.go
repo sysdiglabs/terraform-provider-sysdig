@@ -1,11 +1,8 @@
 package v2
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 )
 
 type Layout struct {
@@ -441,11 +438,6 @@ type dashboardWrapper struct {
 	Dashboard *Dashboard `json:"dashboard"`
 }
 
-func (db *Dashboard) ToJSON() io.Reader {
-	payload, _ := json.Marshal(dashboardWrapper{db})
-	return bytes.NewBuffer(payload)
-}
-
 func (db *Dashboard) AddPanels(panels ...*Panels) {
 	maxPanelID := 0
 	for _, existingPanel := range db.Panels {
@@ -475,11 +467,4 @@ func NewDashboard(name, description string) *Dashboard {
 func (db *Dashboard) AsPublic(value bool) *Dashboard {
 	db.Public = value
 	return db
-}
-
-func DashboardFromJSON(body []byte) *Dashboard {
-	var result dashboardWrapper
-	_ = json.Unmarshal(body, &result)
-
-	return result.Dashboard
 }
