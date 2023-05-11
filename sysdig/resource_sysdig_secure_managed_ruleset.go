@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -20,7 +21,7 @@ func resourceSysdigSecureManagedRuleset() *schema.Resource {
 		UpdateContext: resourceSysdigManagedRulesetUpdate,
 		DeleteContext: resourceSysdigManagedRulesetDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceSysdigSecureManagedRulesetImportState,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -199,4 +200,44 @@ func resourceSysdigManagedRulesetUpdate(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func resourceSysdigSecureManagedRulesetImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client, err := getSecurePolicyClient(meta.(SysdigClients))
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return nil, err
+	}
+
+	managedRuleset, _, err := client.GetPolicyByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if managedRuleset.TemplateId == 0 || managedRuleset.IsDefault {
+		return nil, errors.New("unable to import policy that is not a managed ruleset")
+	}
+
+	policies, _, err := client.GetPolicies(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, policy := range policies {
+		if policy.IsDefault && policy.TemplateId == managedRuleset.TemplateId {
+			inheritedFrom := map[string]string{
+				"name": policy.Name,
+				"type": policy.Type,
+			}
+			d.Set("inherited_from", []map[string]string{inheritedFrom})
+
+			break
+		}
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
