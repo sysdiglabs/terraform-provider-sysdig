@@ -42,11 +42,8 @@ func TestAccManagedPolicy(t *testing.T) {
 				Config: managedPolicyWithMinimumConfiguration(),
 			},
 			{
-				Config: managedPolicyWithKillAction(),
-			},
-			{
-				RefreshState: true,
-				Destroy:      true,
+				Config:  managedPolicyWithKillAction(),
+				Destroy: true,
 			},
 		},
 	})
