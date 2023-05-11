@@ -58,6 +58,7 @@ func managedRuleset(name string) string {
 %s
 resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
+	description = "Test Description"
 	inherited_from {
 		name = "Sysdig Runtime Threat Intelligence"
 		type = "falco"
@@ -86,6 +87,7 @@ func managedRulesetWithoutActions(name string) string {
 %s
 resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
+	description = "Test Description"
 	inherited_from {
 		name = "Sysdig Runtime Threat Intelligence"
 		type = "falco"
@@ -106,6 +108,7 @@ func managedRulesetWithoutNotificationChannels() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
+	description = "Test Description"
 	inherited_from {
 		name = "Sysdig Runtime Threat Intelligence"
 		type = "falco"
@@ -131,6 +134,7 @@ func managedRulesetWithMinimumConfiguration() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
+	description = "Test Description"
 	inherited_from {
 		name = "Sysdig Runtime Threat Intelligence"
 		type = "falco"
@@ -144,6 +148,7 @@ func managedRulesetWithKillAction() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
+	description = "Test Description"
 	inherited_from {
 		name = "Sysdig Runtime Threat Intelligence"
 		type = "falco"
