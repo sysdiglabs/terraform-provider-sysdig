@@ -39,7 +39,7 @@ type Left struct {
 	Unit           string      `json:"unit"`
 	DisplayFormat  string      `json:"displayFormat"`
 	Decimals       interface{} `json:"decimals"`
-	MinValue       int         `json:"minValue"`
+	MinValue       float64     `json:"minValue"`
 	MaxValue       interface{} `json:"maxValue"`
 	MinInputFormat string      `json:"minInputFormat"`
 	MaxInputFormat string      `json:"maxInputFormat"`
@@ -52,7 +52,7 @@ type Right struct {
 	Unit           string      `json:"unit"`
 	DisplayFormat  string      `json:"displayFormat"`
 	Decimals       interface{} `json:"decimals"`
-	MinValue       int         `json:"minValue"`
+	MinValue       float64     `json:"minValue"`
 	MaxValue       interface{} `json:"maxValue"`
 	MinInputFormat string      `json:"minInputFormat"`
 	MaxInputFormat string      `json:"maxInputFormat"`
