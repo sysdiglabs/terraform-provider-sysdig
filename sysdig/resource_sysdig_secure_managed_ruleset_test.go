@@ -50,7 +50,8 @@ func TestAccManagedRuleset(t *testing.T) {
 				Config: managedRulesetWithKillAction(),
 			},
 			{
-				Destroy: true,
+				RefreshState: true,
+				Destroy:      true,
 			},
 		},
 	})

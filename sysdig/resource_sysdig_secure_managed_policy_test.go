@@ -45,7 +45,8 @@ func TestAccManagedPolicy(t *testing.T) {
 				Config: managedPolicyWithKillAction(),
 			},
 			{
-				Destroy: true,
+				RefreshState: true,
+				Destroy:      true,
 			},
 		},
 	})
