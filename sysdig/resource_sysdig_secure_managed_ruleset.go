@@ -233,7 +233,7 @@ func resourceSysdigSecureManagedRulesetImportState(ctx context.Context, d *schem
 				"name": policy.Name,
 				"type": policy.Type,
 			}
-			d.Set("inherited_from", []map[string]string{inheritedFrom})
+			_ = d.Set("inherited_from", []map[string]string{inheritedFrom})
 
 			break
 		}
