@@ -60,7 +60,7 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
 	description = "Test Description"
 	inherited_from {
-		name = "Sysdig Runtime Threat Intelligence"
+		name = "Sysdig Runtime Threat Detection"
 		type = "falco"
 	}
 	enabled = true
@@ -89,7 +89,7 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
 	description = "Test Description"
 	inherited_from {
-		name = "Sysdig Runtime Threat Intelligence"
+		name = "Sysdig Runtime Threat Detection"
 		type = "falco"
 	}
 	enabled = true
@@ -110,7 +110,7 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
 	description = "Test Description"
 	inherited_from {
-		name = "Sysdig Runtime Threat Intelligence"
+		name = "Sysdig Runtime Threat Detection"
 		type = "falco"
 	}
 	enabled = true
@@ -136,7 +136,7 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
 	description = "Test Description"
 	inherited_from {
-		name = "Sysdig Runtime Threat Intelligence"
+		name = "Sysdig Runtime Threat Detection"
 		type = "falco"
 	}
 	enabled = true
@@ -150,7 +150,7 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
 	description = "Test Description"
 	inherited_from {
-		name = "Sysdig Runtime Threat Intelligence"
+		name = "Sysdig Runtime Threat Detection"
 		type = "falco"
 	}
 	enabled = true
