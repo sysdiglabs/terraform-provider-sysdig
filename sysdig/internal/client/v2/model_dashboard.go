@@ -372,11 +372,11 @@ func (p *Panels) WithLayout(xPos, yPos, width, height int) (*Panels, error) {
 }
 
 type NumberThresholds struct {
-	Base   NumberThresholdsBase `json:"base"`
-	Values []interface{}        `json:"values"`
+	Base   NumberThresholdBase `json:"base"`
+	Values []interface{}       `json:"values"`
 }
 
-type NumberThresholdsBase struct {
+type NumberThresholdBase struct {
 	DisplayText string `json:"displayText"`
 	Severity    string `json:"severity"`
 }

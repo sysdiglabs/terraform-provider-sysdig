@@ -572,7 +572,7 @@ func numberPanelFromResourceData(panelInfo map[string]interface{}) (*v2.Panels, 
 		TransparentBackground: false,
 		NumberThresholds: &v2.NumberThresholds{
 			Values: []interface{}{}, // These values must be not nil in case of type number
-			Base: v2.NumberThresholdsBase{
+			Base: v2.NumberThresholdBase{
 				Severity: "none",
 			},
 		},
