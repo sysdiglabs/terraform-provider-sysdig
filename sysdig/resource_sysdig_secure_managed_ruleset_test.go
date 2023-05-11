@@ -33,7 +33,7 @@ func TestAccManagedRuleset(t *testing.T) {
 				Config: managedRulesetWithoutNotificationChannels(),
 			},
 			{
-				ResourceName:      "secure_sysdig_managed_ruleset.sample",
+				ResourceName:      "sysdig_secure_managed_ruleset.sample",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
