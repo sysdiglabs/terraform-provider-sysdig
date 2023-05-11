@@ -44,6 +44,9 @@ func TestAccManagedPolicy(t *testing.T) {
 			{
 				Config: managedPolicyWithKillAction(),
 			},
+			{
+				Destroy: true,
+			},
 		},
 	})
 }

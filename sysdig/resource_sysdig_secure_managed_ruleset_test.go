@@ -33,7 +33,6 @@ func TestAccManagedRuleset(t *testing.T) {
 				Config: managedRulesetWithoutNotificationChannels(),
 			},
 			{
-				Config:            managedRuleset(rText()),
 				ResourceName:      "sysdig_secure_managed_ruleset.sample",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -49,6 +48,9 @@ func TestAccManagedRuleset(t *testing.T) {
 			},
 			{
 				Config: managedRulesetWithKillAction(),
+			},
+			{
+				Destroy: true,
 			},
 		},
 	})
