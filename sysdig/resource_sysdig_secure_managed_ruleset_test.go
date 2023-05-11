@@ -47,8 +47,8 @@ func TestAccManagedRuleset(t *testing.T) {
 				Config: managedRulesetWithMinimumConfiguration(),
 			},
 			{
-				Config: managedRulesetWithKillAction(),
-				Destroy: true
+				Config:  managedRulesetWithKillAction(),
+				Destroy: true,
 			},
 		},
 	})
