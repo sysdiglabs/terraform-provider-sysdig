@@ -47,7 +47,12 @@ func resourceSysdigSecureNotificationChannelSNSCreate(ctx context.Context, d *sc
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err := secureNotificationChannelSNSFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	notificationChannel, err := secureNotificationChannelSNSFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -90,7 +95,12 @@ func resourceSysdigSecureNotificationChannelSNSUpdate(ctx context.Context, d *sc
 		return diag.FromErr(err)
 	}
 
-	nc, err := secureNotificationChannelSNSFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	nc, err := secureNotificationChannelSNSFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -121,8 +131,8 @@ func resourceSysdigSecureNotificationChannelSNSDelete(ctx context.Context, d *sc
 	return nil
 }
 
-func secureNotificationChannelSNSFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
-	nc, err = secureNotificationChannelFromResourceData(d)
+func secureNotificationChannelSNSFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
+	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
 		return
 	}

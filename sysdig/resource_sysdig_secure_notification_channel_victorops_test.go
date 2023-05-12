@@ -29,6 +29,9 @@ func TestAccSecureNotificationChannelVictorOps(t *testing.T) {
 				Config: secureNotificationChannelVictorOpsWithName(rText()),
 			},
 			{
+				Config: secureNotificationChannelVictorOpsShareWithCurrentTeam(rText()),
+			},
+			{
 				ResourceName:      "sysdig_secure_notification_channel_victorops.sample-victorops",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -41,6 +44,20 @@ func secureNotificationChannelVictorOpsWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel_victorops" "sample-victorops" {
 	name = "Example Channel %s - VictorOps"
+	enabled = true
+	api_key = "1234342-4234243-4234-2"
+	routing_key = "My team"
+	notify_when_ok = false
+	notify_when_resolved = false
+	send_test_notification = false
+}`, name)
+}
+
+func secureNotificationChannelVictorOpsShareWithCurrentTeam(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_notification_channel_victorops" "sample-victorops" {
+	name = "Example Channel %s - VictorOps"
+    share_with_current_team = true
 	enabled = true
 	api_key = "1234342-4234243-4234-2"
 	routing_key = "My team"

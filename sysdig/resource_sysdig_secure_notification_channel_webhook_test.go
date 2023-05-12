@@ -29,6 +29,9 @@ func TestAccSecureNotificationChannelWebhook(t *testing.T) {
 				Config: secureNotificationChannelWebhookWithName(rText()),
 			},
 			{
+				Config: secureNotificationChannelWebhookSharedWithCurrentTeam(rText()),
+			},
+			{
 				ResourceName:      "sysdig_secure_notification_channel_webhook.sample-webhook",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -47,4 +50,17 @@ resource "sysdig_secure_notification_channel_webhook" "sample-webhook" {
 	notify_when_resolved = false
 	send_test_notification = false
 }`, name)
+}
+
+func secureNotificationChannelWebhookSharedWithCurrentTeam(name string) string {
+	return fmt.Sprintf(`
+	resource "sysdig_secure_notification_channel_webhook" "sample-webhook" {
+		name = "Example Channel %s - Webhook With Additional Headers"
+        share_with_current_team = true
+		enabled = true
+		url = "https://example.com/"
+		notify_when_ok = false
+		notify_when_resolved = false
+		send_test_notification = false
+	}`, name)
 }
