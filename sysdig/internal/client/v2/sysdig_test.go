@@ -27,6 +27,9 @@ func TestSysdigRequest(t *testing.T) {
 		if value := r.Header.Get(extraHeader); value != extraHeaderValue {
 			t.Errorf("invalid extra header %v", value)
 		}
+		if value := r.Header.Get(SysdigProviderHeader); value != SysdigProviderHeaderValue {
+			t.Errorf("expected sysdig provider %v, got %v", SysdigProviderHeaderValue, value)
+		}
 		unmarshalled, err := Unmarshal[foo](r.Body)
 		if err != nil {
 			t.Errorf("failed to unmarshal payload, err: %v", err)
