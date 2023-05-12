@@ -1,11 +1,8 @@
-package model
+package v2
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 )
 
 type Layout struct {
@@ -39,7 +36,7 @@ type Left struct {
 	Unit           string      `json:"unit"`
 	DisplayFormat  string      `json:"displayFormat"`
 	Decimals       interface{} `json:"decimals"`
-	MinValue       int         `json:"minValue"`
+	MinValue       float64     `json:"minValue"`
 	MaxValue       interface{} `json:"maxValue"`
 	MinInputFormat string      `json:"minInputFormat"`
 	MaxInputFormat string      `json:"maxInputFormat"`
@@ -52,7 +49,7 @@ type Right struct {
 	Unit           string      `json:"unit"`
 	DisplayFormat  string      `json:"displayFormat"`
 	Decimals       interface{} `json:"decimals"`
-	MinValue       int         `json:"minValue"`
+	MinValue       float64     `json:"minValue"`
 	MaxValue       interface{} `json:"maxValue"`
 	MinInputFormat string      `json:"minInputFormat"`
 	MaxInputFormat string      `json:"maxInputFormat"`
@@ -375,11 +372,11 @@ func (p *Panels) WithLayout(xPos, yPos, width, height int) (*Panels, error) {
 }
 
 type NumberThresholds struct {
-	Base   Base          `json:"base"`
-	Values []interface{} `json:"values"`
+	Base   NumberThresholdBase `json:"base"`
+	Values []interface{}       `json:"values"`
 }
 
-type Base struct {
+type NumberThresholdBase struct {
 	DisplayText string `json:"displayText"`
 	Severity    string `json:"severity"`
 }
@@ -441,11 +438,6 @@ type dashboardWrapper struct {
 	Dashboard *Dashboard `json:"dashboard"`
 }
 
-func (db *Dashboard) ToJSON() io.Reader {
-	payload, _ := json.Marshal(dashboardWrapper{db})
-	return bytes.NewBuffer(payload)
-}
-
 func (db *Dashboard) AddPanels(panels ...*Panels) {
 	maxPanelID := 0
 	for _, existingPanel := range db.Panels {
@@ -475,11 +467,4 @@ func NewDashboard(name, description string) *Dashboard {
 func (db *Dashboard) AsPublic(value bool) *Dashboard {
 	db.Public = value
 	return db
-}
-
-func DashboardFromJSON(body []byte) *Dashboard {
-	var result dashboardWrapper
-	_ = json.Unmarshal(body, &result)
-
-	return result.Dashboard
 }
