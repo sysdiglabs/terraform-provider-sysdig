@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
@@ -11,8 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/spf13/cast"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor/model"
 )
 
 func resourceSysdigMonitorDashboard() *schema.Resource {
@@ -278,8 +277,12 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 	}
 }
 
+func getMonitorDashboardClient(c SysdigClients) (v2.DashboardInterface, error) {
+	return c.sysdigMonitorClientV2()
+}
+
 func resourceSysdigDashboardCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorDashboardClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -301,7 +304,7 @@ func resourceSysdigDashboardCreate(ctx context.Context, data *schema.ResourceDat
 }
 
 func resourceSysdigDashboardUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorDashboardClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -322,7 +325,7 @@ func resourceSysdigDashboardUpdate(ctx context.Context, data *schema.ResourceDat
 }
 
 func resourceSysdigDashboardRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorDashboardClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -332,7 +335,7 @@ func resourceSysdigDashboardRead(ctx context.Context, data *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	dashboard, err := client.GetDashboardByID(ctx, id)
+	dashboard, err := client.GetDashboard(ctx, id)
 	if err != nil {
 		data.SetId("")
 		return nil
@@ -347,7 +350,7 @@ func resourceSysdigDashboardRead(ctx context.Context, data *schema.ResourceData,
 }
 
 func resourceSysdigDashboardDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getMonitorDashboardClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -365,8 +368,8 @@ func resourceSysdigDashboardDelete(ctx context.Context, data *schema.ResourceDat
 	return nil
 }
 
-func dashboardFromResourceData(data *schema.ResourceData) (dashboard *model.Dashboard, err error) {
-	dashboard = model.NewDashboard(data.Get("name").(string), data.Get("description").(string)).AsPublic(data.Get("public").(bool))
+func dashboardFromResourceData(data *schema.ResourceData) (dashboard *v2.Dashboard, err error) {
+	dashboard = v2.NewDashboard(data.Get("name").(string), data.Get("description").(string)).AsPublic(data.Get("public").(bool))
 	dashboard.Version = cast.ToInt(data.Get("version"))
 	dashboard.PublicToken = data.Get("public_token").(string)
 
@@ -392,13 +395,13 @@ func dashboardFromResourceData(data *schema.ResourceData) (dashboard *model.Dash
 	return dashboard, nil
 }
 
-func sharingFromResourceData(data *schema.ResourceData) (sharingSettings []*model.SharingOptions, err error) {
+func sharingFromResourceData(data *schema.ResourceData) (sharingSettings []*v2.SharingOptions, err error) {
 	for _, share := range data.Get("share").(*schema.Set).List() {
 		shareInfo := share.(map[string]interface{})
 		memberInfo := shareInfo["member"].(*schema.Set).List()[0].(map[string]interface{})
 		sharingSettings = append(sharingSettings,
-			&model.SharingOptions{
-				Member: model.SharingMember{
+			&v2.SharingOptions{
+				Member: v2.SharingMember{
 					Type: memberInfo["type"].(string),
 					ID:   memberInfo["id"].(int),
 				},
@@ -408,11 +411,11 @@ func sharingFromResourceData(data *schema.ResourceData) (sharingSettings []*mode
 	return
 }
 
-func panelsFromResourceData(data *schema.ResourceData) (panels []*model.Panels, err error) {
+func panelsFromResourceData(data *schema.ResourceData) (panels []*v2.Panels, err error) {
 	for _, panelItr := range data.Get("panel").(*schema.Set).List() {
 		panelInfo := panelItr.(map[string]interface{})
 
-		var panel *model.Panels
+		var panel *v2.Panels
 		switch panelInfo["type"].(string) {
 		case "timechart":
 			panel, err = timechartPanelFromResourceData(panelInfo)
@@ -432,8 +435,8 @@ func panelsFromResourceData(data *schema.ResourceData) (panels []*model.Panels, 
 	return
 }
 
-func legendFromResourceData(data interface{}) *model.LegendConfiguration {
-	defaultLegend := &model.LegendConfiguration{
+func legendFromResourceData(data interface{}) *v2.LegendConfiguration {
+	defaultLegend := &v2.LegendConfiguration{
 		Position: "bottom",
 		Layout:   "table",
 	}
@@ -449,7 +452,7 @@ func legendFromResourceData(data interface{}) *model.LegendConfiguration {
 	}
 
 	legend := legendList[0].(map[string]interface{})
-	return &model.LegendConfiguration{
+	return &v2.LegendConfiguration{
 		Enabled:     legend["enabled"].(bool),
 		Position:    legend["position"].(string),
 		Layout:      legend["layout"].(string),
@@ -457,17 +460,17 @@ func legendFromResourceData(data interface{}) *model.LegendConfiguration {
 	}
 }
 
-func timechartPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panels, error) {
-	panel := &model.Panels{
+func timechartPanelFromResourceData(panelInfo map[string]interface{}) (*v2.Panels, error) {
+	panel := &v2.Panels{
 		ID:                     0,
 		Name:                   panelInfo["name"].(string),
 		Description:            panelInfo["description"].(string),
-		Type:                   model.PanelTypeTimechart,
+		Type:                   v2.PanelTypeTimechart,
 		ApplyScopeToAll:        false,
 		ApplySegmentationToAll: false,
-		AxesConfiguration: &model.AxesConfiguration{
-			Bottom: model.Bottom{Enabled: true},
-			Left: model.Left{
+		AxesConfiguration: &v2.AxesConfiguration{
+			Bottom: v2.Bottom{Enabled: true},
+			Left: v2.Left{
 				Enabled:        true,
 				DisplayName:    nil,
 				Unit:           "auto",
@@ -479,7 +482,7 @@ func timechartPanelFromResourceData(panelInfo map[string]interface{}) (*model.Pa
 				MaxInputFormat: "ns",
 				Scale:          "linear",
 			},
-			Right: model.Right{
+			Right: v2.Right{
 				Enabled:        true,
 				DisplayName:    nil,
 				Unit:           "auto",
@@ -520,17 +523,17 @@ func timechartPanelFromResourceData(panelInfo map[string]interface{}) (*model.Pa
 	return panel, nil
 }
 
-func numberPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panels, error) {
-	panel := &model.Panels{
+func numberPanelFromResourceData(panelInfo map[string]interface{}) (*v2.Panels, error) {
+	panel := &v2.Panels{
 		ID:                     0,
 		Name:                   panelInfo["name"].(string),
 		Description:            panelInfo["description"].(string),
-		Type:                   model.PanelTypeNumber,
+		Type:                   v2.PanelTypeNumber,
 		ApplyScopeToAll:        false,
 		ApplySegmentationToAll: false,
-		AxesConfiguration: &model.AxesConfiguration{
-			Bottom: model.Bottom{Enabled: true},
-			Left: model.Left{
+		AxesConfiguration: &v2.AxesConfiguration{
+			Bottom: v2.Bottom{Enabled: true},
+			Left: v2.Left{
 				Enabled:        true,
 				DisplayName:    nil,
 				Unit:           "auto",
@@ -542,7 +545,7 @@ func numberPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panel
 				MaxInputFormat: "ns",
 				Scale:          "linear",
 			},
-			Right: model.Right{
+			Right: v2.Right{
 				Enabled:        true,
 				DisplayName:    nil,
 				Unit:           "auto",
@@ -555,7 +558,7 @@ func numberPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panel
 				Scale:          "linear",
 			},
 		},
-		LegendConfiguration: &model.LegendConfiguration{
+		LegendConfiguration: &v2.LegendConfiguration{
 			Enabled:     true,
 			Position:    "right",
 			Layout:      "table",
@@ -567,9 +570,9 @@ func numberPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panel
 		PanelTitleVisible:     false,
 		TextAutosized:         false,
 		TransparentBackground: false,
-		NumberThresholds: &model.NumberThresholds{
+		NumberThresholds: &v2.NumberThresholds{
 			Values: []interface{}{}, // These values must be not nil in case of type number
-			Base: model.Base{
+			Base: v2.NumberThresholdBase{
 				Severity: "none",
 			},
 		},
@@ -596,13 +599,13 @@ func numberPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panel
 	return panel, nil
 }
 
-func textPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panels, error) {
+func textPanelFromResourceData(panelInfo map[string]interface{}) (*v2.Panels, error) {
 	content := panelInfo["content"].(string)
-	panel := &model.Panels{
+	panel := &v2.Panels{
 		ID:                    0,
 		Name:                  panelInfo["name"].(string),
 		Description:           "",
-		Type:                  model.PanelTypeText,
+		Type:                  v2.PanelTypeText,
 		MarkdownSource:        &content,
 		PanelTitleVisible:     panelInfo["visible_title"].(bool),
 		TextAutosized:         panelInfo["autosize_text"].(bool),
@@ -616,7 +619,7 @@ func textPanelFromResourceData(panelInfo map[string]interface{}) (*model.Panels,
 	return panel, nil
 }
 
-func formatFromResourceData(queryInfo map[string]interface{}) *model.Format {
+func formatFromResourceData(queryInfo map[string]interface{}) *v2.Format {
 	formatData, ok := queryInfo["format"]
 	if !ok {
 		return nil
@@ -629,7 +632,7 @@ func formatFromResourceData(queryInfo map[string]interface{}) *model.Format {
 	}
 
 	fields := formatSet[0].(map[string]interface{})
-	format := &model.Format{}
+	format := &v2.Format{}
 
 	if inputFormat, ok := fields["input_format"].(string); ok {
 		format.InputFormat = &inputFormat
@@ -658,8 +661,8 @@ func formatFromResourceData(queryInfo map[string]interface{}) *model.Format {
 	return format
 }
 
-func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Panels) (newQueries []*model.AdvancedQueries, err error) {
-	var display model.DisplayInfo
+func queriesFromResourceData(panelInfo map[string]interface{}, panel *v2.Panels) (newQueries []*v2.AdvancedQueries, err error) {
+	var display v2.DisplayInfo
 
 	for _, queryItr := range panelInfo["query"].(*schema.Set).List() {
 		queryInfo := queryItr.(map[string]interface{})
@@ -676,7 +679,7 @@ func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Pane
 			display.Type = "lines"
 		}
 
-		promqlQuery := model.NewPromqlQuery(queryInfo["promql"].(string), panel, display)
+		promqlQuery := v2.NewPromqlQuery(queryInfo["promql"].(string), panel, display)
 
 		format := formatFromResourceData(queryInfo)
 
@@ -702,7 +705,7 @@ func queriesFromResourceData(panelInfo map[string]interface{}, panel *model.Pane
 	return
 }
 
-func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceData) (err error) {
+func dashboardToResourceData(dashboard *v2.Dashboard, data *schema.ResourceData) (err error) {
 	_ = data.Set("name", dashboard.Name)
 	_ = data.Set("description", dashboard.Description)
 	_ = data.Set("public", dashboard.Public)
@@ -742,7 +745,7 @@ func dashboardToResourceData(dashboard *model.Dashboard, data *schema.ResourceDa
 	return nil
 }
 
-func shareToResourceData(share *model.SharingOptions) (map[string]interface{}, error) {
+func shareToResourceData(share *v2.SharingOptions) (map[string]interface{}, error) {
 	res := map[string]interface{}{
 		"role": share.Role,
 		"member": []map[string]interface{}{{
@@ -753,7 +756,7 @@ func shareToResourceData(share *model.SharingOptions) (map[string]interface{}, e
 	return res, nil
 }
 
-func scopeToResourceData(scope *model.ScopeExpressionList) (map[string]interface{}, error) {
+func scopeToResourceData(scope *v2.ScopeExpressionList) (map[string]interface{}, error) {
 	res := map[string]interface{}{
 		"metric": scope.Operand,
 	}
@@ -770,12 +773,12 @@ func scopeToResourceData(scope *model.ScopeExpressionList) (map[string]interface
 	return res, nil
 }
 
-func scopeFromResourceData(data *schema.ResourceData) ([]*model.ScopeExpressionList, error) {
-	scopes := []*model.ScopeExpressionList{}
+func scopeFromResourceData(data *schema.ResourceData) ([]*v2.ScopeExpressionList, error) {
+	scopes := []*v2.ScopeExpressionList{}
 	for _, scopeItr := range data.Get("scope").(*schema.Set).List() {
 		scopeInfo := (scopeItr).(map[string]interface{})
 
-		scope := &model.ScopeExpressionList{}
+		scope := &v2.ScopeExpressionList{}
 		scope.Operand = cast.ToString(scopeInfo["metric"])
 		scope.Value = []string{}
 		comparator := cast.ToString(scopeInfo["comparator"])
@@ -806,8 +809,8 @@ func scopeFromResourceData(data *schema.ResourceData) ([]*model.ScopeExpressionL
 	return scopes, nil
 }
 
-func panelToResourceData(panel *model.Panels, layout []*model.Layout) (map[string]interface{}, error) {
-	var panelLayout *model.Layout
+func panelToResourceData(panel *v2.Panels, layout []*v2.Layout) (map[string]interface{}, error) {
+	var panelLayout *v2.Layout
 
 	for _, l := range layout {
 		if l.PanelID == panel.ID {
@@ -819,18 +822,18 @@ func panelToResourceData(panel *model.Panels, layout []*model.Layout) (map[strin
 	}
 
 	switch panel.Type {
-	case model.PanelTypeTimechart:
+	case v2.PanelTypeTimechart:
 		return timechartPanelToResourceData(panel, panelLayout)
-	case model.PanelTypeNumber:
+	case v2.PanelTypeNumber:
 		return numberPanelToResourceData(panel, panelLayout)
-	case model.PanelTypeText:
+	case v2.PanelTypeText:
 		return textPanelToResourceData(panel, panelLayout)
 	default:
 		return nil, fmt.Errorf("unsupported panel type %s", panel.Type)
 	}
 }
 
-func timechartPanelToResourceData(panel *model.Panels, panelLayout *model.Layout) (map[string]interface{}, error) {
+func timechartPanelToResourceData(panel *v2.Panels, panelLayout *v2.Layout) (map[string]interface{}, error) {
 	queries, err := queriesToResourceData(panel.AdvancedQueries)
 	if err != nil {
 		return nil, err
@@ -851,7 +854,7 @@ func timechartPanelToResourceData(panel *model.Panels, panelLayout *model.Layout
 	}, nil
 }
 
-func legendConfigurationToResourceData(legend *model.LegendConfiguration) map[string]interface{} {
+func legendConfigurationToResourceData(legend *v2.LegendConfiguration) map[string]interface{} {
 	return map[string]interface{}{
 		"enabled":      legend.Enabled,
 		"show_current": legend.ShowCurrent,
@@ -860,7 +863,7 @@ func legendConfigurationToResourceData(legend *model.LegendConfiguration) map[st
 	}
 }
 
-func numberPanelToResourceData(panel *model.Panels, panelLayout *model.Layout) (map[string]interface{}, error) {
+func numberPanelToResourceData(panel *v2.Panels, panelLayout *v2.Layout) (map[string]interface{}, error) {
 	queries, err := queriesToResourceData(panel.AdvancedQueries)
 	if err != nil {
 		return nil, err
@@ -878,7 +881,7 @@ func numberPanelToResourceData(panel *model.Panels, panelLayout *model.Layout) (
 	}, nil
 }
 
-func textPanelToResourceData(panel *model.Panels, panelLayout *model.Layout) (map[string]interface{}, error) {
+func textPanelToResourceData(panel *v2.Panels, panelLayout *v2.Layout) (map[string]interface{}, error) {
 	return map[string]interface{}{
 		"pos_x":                  panelLayout.X,
 		"pos_y":                  panelLayout.Y,
@@ -893,22 +896,22 @@ func textPanelToResourceData(panel *model.Panels, panelLayout *model.Layout) (ma
 	}, nil
 }
 
-func queriesToResourceData(advancedQueries []*model.AdvancedQueries) ([]map[string]interface{}, error) {
+func queriesToResourceData(advancedQueries []*v2.AdvancedQueries) ([]map[string]interface{}, error) {
 	var queries []map[string]interface{}
 	for _, query := range advancedQueries {
 		unit := ""
 		switch query.Format.Unit {
-		case model.FormatUnitPercentage:
+		case v2.FormatUnitPercentage:
 			unit = "percent"
-		case model.FormatUnitData:
+		case v2.FormatUnitData:
 			unit = "data"
-		case model.FormatUnitDataRate:
+		case v2.FormatUnitDataRate:
 			unit = "data rate"
-		case model.FormatUnitNumber:
+		case v2.FormatUnitNumber:
 			unit = "number"
-		case model.FormatUnitNumberRate:
+		case v2.FormatUnitNumberRate:
 			unit = "number rate"
-		case model.FormatUnitTime:
+		case v2.FormatUnitTime:
 			unit = "time"
 		default:
 			return nil, fmt.Errorf("unsupported query format unit: %s", query.Format.Unit)
