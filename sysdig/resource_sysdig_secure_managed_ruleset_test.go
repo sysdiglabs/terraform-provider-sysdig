@@ -14,7 +14,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccManagedPolicy(t *testing.T) {
+func TestAccManagedRuleset(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -30,30 +30,40 @@ func TestAccManagedPolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: managedPolicyWithoutNotificationChannels(),
+				Config: managedRulesetWithoutNotificationChannels(),
 			},
 			{
-				Config: managedPolicyWithoutActions(rText()),
+				ResourceName:      "sysdig_secure_managed_ruleset.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
-				Config: managedPolicy(rText()),
+				Config: managedRulesetWithoutActions(rText()),
 			},
 			{
-				Config: managedPolicyWithMinimumConfiguration(),
+				Config: managedRuleset(rText()),
 			},
 			{
-				Config:  managedPolicyWithKillAction(),
+				Config: managedRulesetWithMinimumConfiguration(),
+			},
+			{
+				Config:  managedRulesetWithKillAction(),
 				Destroy: true,
 			},
 		},
 	})
 }
 
-func managedPolicy(name string) string {
+func managedRuleset(name string) string {
 	return fmt.Sprintf(`
 %s
-resource "sysdig_secure_managed_policy" "sample" {
-	name = "Sysdig Runtime Threat Detection"
+resource "sysdig_secure_managed_ruleset" "sample" {
+	name = "Sysdig Runtime Threat Detection (Copy)"
+	description = "Test Description"
+	inherited_from {
+		name = "Sysdig Runtime Threat Detection"
+		type = "falco"
+	}
 	enabled = true
 	scope = "container.id != \"\""
 	disabled_rules = ["Suspicious Cron Modification"]
@@ -73,11 +83,16 @@ resource "sysdig_secure_managed_policy" "sample" {
 	`, secureNotificationChannelEmailWithName(name))
 }
 
-func managedPolicyWithoutActions(name string) string {
+func managedRulesetWithoutActions(name string) string {
 	return fmt.Sprintf(`
 %s
-resource "sysdig_secure_managed_policy" "sample" {
-	name = "Sysdig Runtime Threat Detection"
+resource "sysdig_secure_managed_ruleset" "sample" {
+	name = "Sysdig Runtime Threat Detection (Copy)"
+	description = "Test Description"
+	inherited_from {
+		name = "Sysdig Runtime Threat Detection"
+		type = "falco"
+	}
 	enabled = true
 	scope = "container.id != \"\""
 	disabled_rules = ["Suspicious Cron Modification"]
@@ -90,10 +105,15 @@ resource "sysdig_secure_managed_policy" "sample" {
 	`, secureNotificationChannelEmailWithName(name))
 }
 
-func managedPolicyWithoutNotificationChannels() string {
+func managedRulesetWithoutNotificationChannels() string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_managed_policy" "sample" {
-	name = "Sysdig Runtime Threat Detection"
+resource "sysdig_secure_managed_ruleset" "sample" {
+	name = "Sysdig Runtime Threat Detection (Copy)"
+	description = "Test Description"
+	inherited_from {
+		name = "Sysdig Runtime Threat Detection"
+		type = "falco"
+	}
 	enabled = true
 	scope = "container.id != \"\""
 	disabled_rules = ["Suspicious Cron Modification"]
@@ -111,19 +131,29 @@ resource "sysdig_secure_managed_policy" "sample" {
 	`)
 }
 
-func managedPolicyWithMinimumConfiguration() string {
+func managedRulesetWithMinimumConfiguration() string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_managed_policy" "sample" {
-	name = "Sysdig Runtime Threat Detection"
+resource "sysdig_secure_managed_ruleset" "sample" {
+	name = "Sysdig Runtime Threat Detection (Copy)"
+	description = "Test Description"
+	inherited_from {
+		name = "Sysdig Runtime Threat Detection"
+		type = "falco"
+	}
 	enabled = true
 }
 	`)
 }
 
-func managedPolicyWithKillAction() string {
+func managedRulesetWithKillAction() string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_managed_policy" "sample" {
-	name = "Sysdig Runtime Threat Detection"
+resource "sysdig_secure_managed_ruleset" "sample" {
+	name = "Sysdig Runtime Threat Detection (Copy)"
+	description = "Test Description"
+	inherited_from {
+		name = "Sysdig Runtime Threat Detection"
+		type = "falco"
+	}
 	enabled = true
 	scope = "container.id != \"\""
 	disabled_rules = ["Suspicious Cron Modification"]
