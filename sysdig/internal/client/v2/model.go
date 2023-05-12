@@ -178,18 +178,27 @@ type Monitor struct {
 }
 
 type Policy struct {
-	ID                     int      `json:"id,omitempty"`
-	Name                   string   `json:"name"`
-	Description            string   `json:"description"`
-	Severity               int      `json:"severity"`
-	Enabled                bool     `json:"enabled"`
-	RuleNames              []string `json:"ruleNames"`
-	Actions                []Action `json:"actions"`
-	Scope                  string   `json:"scope,omitempty"`
-	Version                int      `json:"version,omitempty"`
-	NotificationChannelIds []int    `json:"notificationChannelIds"`
-	Type                   string   `json:"type"`
-	Runbook                string   `json:"runbook"`
+	ID                     int           `json:"id,omitempty"`
+	IsDefault              bool          `json:"isDefault"`
+	Name                   string        `json:"name"`
+	Description            string        `json:"description"`
+	Severity               int           `json:"severity"`
+	Enabled                bool          `json:"enabled"`
+	RuleNames              []string      `json:"ruleNames"`
+	Rules                  []*PolicyRule `json:"rules,omitempty"`
+	Actions                []Action      `json:"actions"`
+	Scope                  string        `json:"scope,omitempty"`
+	Version                int           `json:"version,omitempty"`
+	NotificationChannelIds []int         `json:"notificationChannelIds"`
+	Type                   string        `json:"type"`
+	Runbook                string        `json:"runbook"`
+	TemplateId             int           `json:"templateId"`
+	TemplateVersion        string        `json:"templateVersion"`
+}
+
+type PolicyRule struct {
+	Name    string `json:"ruleName"`
+	Enabled bool   `json:"enabled"`
 }
 
 type Action struct {
