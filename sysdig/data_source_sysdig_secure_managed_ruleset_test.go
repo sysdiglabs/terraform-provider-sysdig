@@ -3,6 +3,7 @@
 package sysdig_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -13,7 +14,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccManagedPolicyDataSource(t *testing.T) {
+func TestAccManagedRulesetDataSource(t *testing.T) {
 	rText := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
