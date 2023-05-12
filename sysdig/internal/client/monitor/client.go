@@ -9,8 +9,6 @@ import (
 	"net/http/httputil"
 
 	"github.com/hashicorp/go-retryablehttp"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor/model"
 )
 
 type SysdigMonitorClient interface {
@@ -37,11 +35,6 @@ type SysdigMonitorClient interface {
 	GetLabelDescriptor(ctx context.Context, label string) (LabelDescriptorV3, error)
 
 	GetNotificationChannelById(context.Context, int) (NotificationChannel, error)
-
-	GetDashboardByID(context.Context, int) (*model.Dashboard, error)
-	CreateDashboard(context.Context, *model.Dashboard) (*model.Dashboard, error)
-	UpdateDashboard(context.Context, *model.Dashboard) (*model.Dashboard, error)
-	DeleteDashboard(context.Context, int) error
 }
 
 func WithExtraHeaders(client SysdigMonitorClient, extraHeaders map[string]string) SysdigMonitorClient {
