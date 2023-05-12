@@ -21,6 +21,8 @@ const (
 	GetMePath                 = "/api/users/me"
 	AuthorizationHeader       = "Authorization"
 	ContentTypeHeader         = "Content-Type"
+	SysdigProviderHeader      = "Sysdig-Provider"
+	SysdigProviderHeaderValue = "Terraform"
 	ContentTypeJSON           = "application/json"
 	ContentTypeFormURLEncoded = "x-www-form-urlencoded"
 )
