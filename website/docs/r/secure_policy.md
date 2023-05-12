@@ -52,7 +52,8 @@ resource "sysdig_secure_policy" "write_apt_database" {
 
 * `enabled` - (Optional) Will secure process with this rule?. By default this is true.
 
-* `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`, `aws_cloudtrail`. By default it is `falco`.
+* `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`,
+  `aws_cloudtrail`, `gcp_auditlog`, `azure_platformlogs`. By default it is `falco`.
 
 * `runbook` - (Optional) Customer provided url that provides a runbook for a given policy. 
 - - -
