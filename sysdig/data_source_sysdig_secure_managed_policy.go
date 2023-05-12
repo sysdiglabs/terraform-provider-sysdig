@@ -32,6 +32,9 @@ func dataSourceSysdigManagedPolicyRead(ctx context.Context, d *schema.ResourceDa
 	policyType := d.Get("type").(string)
 
 	policy, err := getManagedPolicy(ctx, client, policyName, policyType)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	loadedPolicy, _, err := client.GetPolicyByID(ctx, policy.ID)
 	if err != nil {
