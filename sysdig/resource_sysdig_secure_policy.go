@@ -2,17 +2,55 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
+
+var validatePolicyType = validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs"}, false)
+var policyActionBlockSchema = &schema.Schema{
+	Type:     schema.TypeList,
+	Optional: true,
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"container": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"stop", "pause", "kill"}, false),
+			},
+			"capture": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"seconds_after_event": {
+							Type:             schema.TypeInt,
+							Required:         true,
+							ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
+						},
+						"seconds_before_event": {
+							Type:             schema.TypeInt,
+							Required:         true,
+							ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+		},
+	},
+}
 
 func resourceSysdigSecurePolicy() *schema.Resource {
 	timeout := 5 * time.Minute
@@ -46,7 +84,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Default:          "falco",
-				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs"}, false)),
+				ValidateDiagFunc: validateDiagFunc(validatePolicyType),
 			},
 			"severity": {
 				Type:             schema.TypeInt,
@@ -86,41 +124,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"actions": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"container": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"stop", "pause", "kill"}, false),
-						},
-						"capture": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"seconds_after_event": {
-										Type:             schema.TypeInt,
-										Required:         true,
-										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
-									},
-									"seconds_before_event": {
-										Type:             schema.TypeInt,
-										Required:         true,
-										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
+			"actions": policyActionBlockSchema,
 		},
 	}
 }
