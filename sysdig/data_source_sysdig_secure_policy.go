@@ -119,7 +119,6 @@ func policyDataSourceToResourceData(policy v2.Policy, d *schema.ResourceData) {
 	_ = d.Set("severity", policy.Severity)
 	_ = d.Set("enabled", policy.Enabled)
 	_ = d.Set("scope", policy.Scope)
-	_ = d.Set("version", policy.Version)
 	_ = d.Set("notification_channels", policy.NotificationChannelIds)
 	_ = d.Set("runbook", policy.Runbook)
 
