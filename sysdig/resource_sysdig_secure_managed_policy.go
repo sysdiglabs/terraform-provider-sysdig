@@ -2,9 +2,9 @@ package sysdig
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -27,21 +27,12 @@ func resourceSysdigSecureManagedPolicy() *schema.Resource {
 			Read:   schema.DefaultTimeout(timeout),
 		},
 
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
+		Schema: createPolicySchema(map[string]*schema.Schema{
 			"type": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Default:          "falco",
 				ValidateDiagFunc: validateDiagFunc(validatePolicyType),
-			},
-			"enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
 			},
 			"disabled_rules": {
 				Type:     schema.TypeSet,
@@ -50,28 +41,7 @@ func resourceSysdigSecureManagedPolicy() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"scope": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			"version": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"notification_channels": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeInt,
-				},
-			},
-			"runbook": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"actions": policyActionBlockSchema,
-		},
+		}),
 	}
 }
 
@@ -81,77 +51,33 @@ func resourceSysdigManagedPolicyCreate(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	policies, _, err := client.GetPolicies(ctx)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	policyName := d.Get("name").(string)
 	policyType := d.Get("type").(string)
-	var policy v2.Policy
-	for _, existingPolicy := range policies {
-		if existingPolicy.Name == policyName && existingPolicy.Type == policyType {
-			if !existingPolicy.IsDefault {
-				return diag.Errorf("policy is not a managed policy - use `resource_sysdig_secure_policy`")
-			}
-			policy = existingPolicy
-		}
-	}
 
-	if policy.ID == 0 {
-		return diag.Errorf("unable to find managed policy")
-	}
-
-	updateManagedPolicyFromResourceData(&policy, d)
-
-	policy, err = client.UpdatePolicy(ctx, policy)
+	policy, err := getManagedPolicy(ctx, client, policyName, policyType)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	managedPolicyToResourceData(&policy, d)
+	updateManagedPolicyFromResourceData(policy, d)
+
+	updatedPolicy, err := client.UpdatePolicy(ctx, *policy)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	managedPolicyToResourceData(&updatedPolicy, d)
 
 	return nil
 }
 
 func managedPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
-	if policy.ID != 0 {
-		d.SetId(strconv.Itoa(policy.ID))
-	}
+	commonPolicyToResourceData(policy, d)
 
-	_ = d.Set("name", policy.Name)
 	if policy.Type != "" {
 		_ = d.Set("type", policy.Type)
 	} else {
 		_ = d.Set("type", "falco")
-	}
-	_ = d.Set("enabled", policy.Enabled)
-	_ = d.Set("scope", policy.Scope)
-	_ = d.Set("version", policy.Version)
-	_ = d.Set("notification_channels", policy.NotificationChannelIds)
-	_ = d.Set("runbook", policy.Runbook)
-
-	actions := []map[string]interface{}{{}}
-	for _, action := range policy.Actions {
-		if action.Type != "POLICY_ACTION_CAPTURE" {
-			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
-			actions[0]["container"] = strings.ToLower(action)
-			//d.Set("actions.0.container", strings.ToLower(action))
-		} else {
-			actions[0]["capture"] = []map[string]interface{}{{
-				"seconds_after_event":  action.AfterEventNs / 1000000000,
-				"seconds_before_event": action.BeforeEventNs / 1000000000,
-				"name":                 action.Name,
-			}}
-		}
-	}
-
-	currentContainerAction := d.Get("actions.0.container").(string)
-	currentCaptureAction := d.Get("actions.0.capture").([]interface{})
-	// If the policy retrieved from service has no actions and the current state is default values,
-	// then do not set the "actions" key as it may cause terraform to think there has been a state change
-	if len(policy.Actions) > 0 || currentContainerAction != "" || len(currentCaptureAction) > 0 {
-		_ = d.Set("actions", actions)
 	}
 
 	disabledRules := []string{}
@@ -164,11 +90,7 @@ func managedPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 }
 
 func updateManagedPolicyFromResourceData(policy *v2.Policy, d *schema.ResourceData) {
-	policy.Enabled = d.Get("enabled").(bool)
-	policy.Runbook = d.Get("runbook").(string)
-	policy.Scope = d.Get("scope").(string)
-
-	addActionsToPolicy(d, policy)
+	commonPolicyFromResourceData(policy, d)
 
 	disabledRules := d.Get("disabled_rules").(*schema.Set)
 	for _, rule := range policy.Rules {
@@ -177,12 +99,6 @@ func updateManagedPolicyFromResourceData(policy *v2.Policy, d *schema.ResourceDa
 		} else {
 			rule.Enabled = true
 		}
-	}
-
-	policy.NotificationChannelIds = []int{}
-	notificationChannelIdSet := d.Get("notification_channels").(*schema.Set)
-	for _, id := range notificationChannelIdSet.List() {
-		policy.NotificationChannelIds = append(policy.NotificationChannelIds, id.(int))
 	}
 }
 
@@ -266,4 +182,27 @@ func resourceSysdigManagedPolicyUpdate(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func getManagedPolicy(ctx context.Context, client v2.PolicyInterface, policyName string, policyType string) (*v2.Policy, error) {
+	policies, _, err := client.GetPolicies(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var policy v2.Policy
+	for _, existingPolicy := range policies {
+		if existingPolicy.Name == policyName && existingPolicy.Type == policyType {
+			if !existingPolicy.IsDefault {
+				return nil, errors.New("policy is not a managed policy")
+			}
+			policy = existingPolicy
+		}
+	}
+
+	if policy.ID != 0 {
+		return &policy, nil
+	}
+
+	return nil, errors.New("unable to find managed policy")
 }
