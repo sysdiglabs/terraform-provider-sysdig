@@ -58,7 +58,7 @@ func TestAccCustomPolicy(t *testing.T) {
 			},
 			{
 				Config: policiesWithDisabledRules(rText()),
-			}
+			},
 		},
 	})
 }
