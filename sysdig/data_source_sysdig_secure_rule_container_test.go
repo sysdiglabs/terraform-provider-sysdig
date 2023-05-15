@@ -30,7 +30,7 @@ func TestAccRuleContainerDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: managedPolicyDataSource(rText),
+				Config: ruleContainerDataSource(rText()),
 			},
 		},
 	})
