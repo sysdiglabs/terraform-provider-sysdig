@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -29,6 +30,11 @@ func TestSysdigRequest(t *testing.T) {
 		}
 		if value := r.Header.Get(SysdigProviderHeader); value != SysdigProviderHeaderValue {
 			t.Errorf("expected sysdig provider %v, got %v", SysdigProviderHeaderValue, value)
+		}
+		agent := r.Header.Get(UserAgentHeader)
+		agentParts := strings.Split(agent, "/")
+		if len(agentParts) != 2 || agentParts[0] != SysdigProviderHeaderValue || agentParts[1] == "" {
+			t.Errorf("invalid user agent: %v", agent)
 		}
 		unmarshalled, err := Unmarshal[foo](r.Body)
 		if err != nil {
