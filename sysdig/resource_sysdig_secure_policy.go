@@ -2,17 +2,98 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
+
+var validatePolicyType = validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs"}, false)
+
+// Creates the common policy schema that is shared between policy resources
+func createPolicySchema(original map[string]*schema.Schema) map[string]*schema.Schema {
+	policySchema := map[string]*schema.Schema{
+		"name": {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		"enabled": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		"scope": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Default:  "",
+		},
+		"version": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"notification_channels": {
+			Type:     schema.TypeSet,
+			Optional: true,
+			Elem: &schema.Schema{
+				Type: schema.TypeInt,
+			},
+		},
+		"runbook": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"actions": policyActionBlockSchema,
+	}
+
+	for k, v := range original {
+		policySchema[k] = v
+	}
+
+	return policySchema
+}
+
+var policyActionBlockSchema = &schema.Schema{
+	Type:     schema.TypeList,
+	Optional: true,
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"container": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"stop", "pause", "kill"}, false),
+			},
+			"capture": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"seconds_after_event": {
+							Type:             schema.TypeInt,
+							Required:         true,
+							ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
+						},
+						"seconds_before_event": {
+							Type:             schema.TypeInt,
+							Required:         true,
+							ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+		},
+	},
+}
 
 func resourceSysdigSecurePolicy() *schema.Resource {
 	timeout := 5 * time.Minute
@@ -33,11 +114,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 			Read:   schema.DefaultTimeout(timeout),
 		},
 
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
+		Schema: createPolicySchema(map[string]*schema.Schema{
 			"description": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -46,27 +123,13 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Default:          "falco",
-				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs"}, false)),
+				ValidateDiagFunc: validateDiagFunc(validatePolicyType),
 			},
 			"severity": {
 				Type:             schema.TypeInt,
 				Default:          4,
 				Optional:         true,
 				ValidateDiagFunc: validateDiagFunc(validation.IntBetween(0, 7)),
-			},
-			"enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-			"scope": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			"version": {
-				Type:     schema.TypeInt,
-				Computed: true,
 			},
 			"rule_names": {
 				Type:     schema.TypeSet,
@@ -75,53 +138,7 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"notification_channels": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeInt,
-				},
-			},
-			"runbook": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"actions": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"container": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"stop", "pause", "kill"}, false),
-						},
-						"capture": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"seconds_after_event": {
-										Type:             schema.TypeInt,
-										Required:         true,
-										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
-									},
-									"seconds_before_event": {
-										Type:             schema.TypeInt,
-										Required:         true,
-										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
+		}),
 	}
 }
 
@@ -146,24 +163,17 @@ func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func policyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
+// Saves the resource data information for the common fields of the policy
+func commonPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	if policy.ID != 0 {
 		d.SetId(strconv.Itoa(policy.ID))
 	}
 
 	_ = d.Set("name", policy.Name)
-	_ = d.Set("description", policy.Description)
 	_ = d.Set("scope", policy.Scope)
 	_ = d.Set("enabled", policy.Enabled)
 	_ = d.Set("version", policy.Version)
-	_ = d.Set("severity", policy.Severity)
 	_ = d.Set("runbook", policy.Runbook)
-	if policy.Type != "" {
-		_ = d.Set("type", policy.Type)
-	} else {
-		_ = d.Set("type", "falco")
-
-	}
 
 	actions := []map[string]interface{}{{}}
 	for _, action := range policy.Actions {
@@ -189,27 +199,44 @@ func policyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	}
 
 	_ = d.Set("notification_channels", policy.NotificationChannelIds)
+}
+
+func policyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
+	commonPolicyToResourceData(policy, d)
+
+	_ = d.Set("description", policy.Description)
+	_ = d.Set("severity", policy.Severity)
+	if policy.Type != "" {
+		_ = d.Set("type", policy.Type)
+	} else {
+		_ = d.Set("type", "falco")
+	}
 
 	_ = d.Set("rule_names", policy.RuleNames)
+}
 
+func commonPolicyFromResourceData(policy *v2.Policy, d *schema.ResourceData) {
+	policy.Name = d.Get("name").(string)
+	policy.Enabled = d.Get("enabled").(bool)
+	policy.Runbook = d.Get("runbook").(string)
+	policy.Scope = d.Get("scope").(string)
+
+	addActionsToPolicy(d, policy)
+
+	policy.NotificationChannelIds = []int{}
+	notificationChannelIdSet := d.Get("notification_channels").(*schema.Set)
+	for _, id := range notificationChannelIdSet.List() {
+		policy.NotificationChannelIds = append(policy.NotificationChannelIds, id.(int))
+	}
 }
 
 func policyFromResourceData(d *schema.ResourceData) v2.Policy {
-	policy := v2.Policy{
-		Name:        d.Get("name").(string),
-		Description: d.Get("description").(string),
-		Severity:    d.Get("severity").(int),
-		Enabled:     d.Get("enabled").(bool),
-		Type:        d.Get("type").(string),
-		Runbook:     d.Get("runbook").(string),
-	}
+	policy := &v2.Policy{}
+	commonPolicyFromResourceData(policy, d)
 
-	scope := d.Get("scope").(string)
-	if scope != "" {
-		policy.Scope = scope
-	}
-
-	addActionsToPolicy(d, &policy)
+	policy.Description = d.Get("description").(string)
+	policy.Severity = d.Get("severity").(int)
+	policy.Type = d.Get("type").(string)
 
 	policy.RuleNames = []string{}
 	rule_names := d.Get("rule_names").(*schema.Set)
@@ -220,13 +247,7 @@ func policyFromResourceData(d *schema.ResourceData) v2.Policy {
 		}
 	}
 
-	policy.NotificationChannelIds = []int{}
-	notificationChannelIdSet := d.Get("notification_channels").(*schema.Set)
-	for _, id := range notificationChannelIdSet.List() {
-		policy.NotificationChannelIds = append(policy.NotificationChannelIds, id.(int))
-	}
-
-	return policy
+	return *policy
 }
 
 func addActionsToPolicy(d *schema.ResourceData, policy *v2.Policy) {

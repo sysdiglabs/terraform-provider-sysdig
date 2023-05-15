@@ -11,6 +11,7 @@ const (
 	DeletePolicyPath = "%s/api/v2/policies/%d"
 	UpdatePolicyPath = "%s/api/v2/policies/%d"
 	GetPolicyPath    = "%s/api/v2/policies/%d"
+	GetPoliciesPath  = "%s/api/v2/policies"
 )
 
 type PolicyInterface interface {
@@ -19,6 +20,7 @@ type PolicyInterface interface {
 	DeletePolicy(ctx context.Context, policyID int) error
 	UpdatePolicy(ctx context.Context, policy Policy) (Policy, error)
 	GetPolicyByID(ctx context.Context, policyID int) (Policy, int, error)
+	GetPolicies(ctx context.Context) ([]Policy, int, error)
 }
 
 func (client *Client) CreatePolicy(ctx context.Context, policy Policy) (Policy, error) {
@@ -93,6 +95,26 @@ func (client *Client) GetPolicyByID(ctx context.Context, policyID int) (Policy, 
 	return policy, http.StatusOK, nil
 }
 
+func (client *Client) GetPolicies(ctx context.Context) ([]Policy, int, error) {
+	response, err := client.requester.Request(ctx, http.MethodGet, client.GetPoliciesURL(), nil)
+	if err != nil {
+		return []Policy{}, 0, err
+
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return []Policy{}, response.StatusCode, client.ErrorFromResponse(response)
+	}
+
+	policies, err := Unmarshal[[]Policy](response.Body)
+	if err != nil {
+		return []Policy{}, 0, err
+	}
+
+	return policies, http.StatusOK, nil
+}
+
 func (client *Client) CreatePolicyURL() string {
 	return fmt.Sprintf(CreatePolicyPath, client.config.url)
 }
@@ -107,4 +129,8 @@ func (client *Client) UpdatePolicyURL(policyID int) string {
 
 func (client *Client) GetPolicyURL(policyID int) string {
 	return fmt.Sprintf(GetPolicyPath, client.config.url, policyID)
+}
+
+func (client *Client) GetPoliciesURL() string {
+	return fmt.Sprintf(GetPoliciesPath, client.config.url)
 }

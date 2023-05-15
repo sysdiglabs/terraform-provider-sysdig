@@ -1,43 +1,46 @@
 ---
 subcategory: "Sysdig Secure"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_secure_policy"
+page_title: "Sysdig: sysdig_secure_managed_ruleset"
 description: |-
-  Creates a Sysdig Secure Policy.
+  Manages configuration of a Sysdig Secure Managed Ruleset.
 ---
 
-# Resource: sysdig_secure_policy
+# Resource: sysdig_secure_managed_ruleset
 
-Creates a Sysdig Secure Policy.
+Creates a Sysdig Secure Managed Ruleset
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.  
 
 ## Example Usage
 
 ```terraform
-resource "sysdig_secure_policy" "write_apt_database" {
-  name = "Write apt database"
-  description = "an attempt to write to the dpkg database by any non-dpkg related program"
-  severity = 4
-  enabled = true
-  runbook = "https://runbook.com"
-  
-  // Scope selection
-  scope = "container.id != \"\""
-
-  // Rule selection
-  rule_names = ["Terminal shell in container"]
-
-  actions {
-    container = "stop"
-    capture {
-      seconds_before_event = 5
-      seconds_after_event = 10
+resource "sysdig_secure_managed_ruleset" "sysdig_runtime_threat_detection_managed_ruleset" {
+    name = "Sysdig Runtime Threat Detection - Managed Ruleset"
+    description = "Managed ruleset for Sysdig Runtime Threat Detection"
+    inherited_from {
+        name = "Sysdig Runtime Threat Intelligence"
+        type = "falco"
     }
-  }
+    severity = 4
+    enabled = true
+    runbook = "https://runbook.com"
 
-  notification_channels = [10000]
+    // Scope selection
+    scope = "container.id != \"\""
 
+    // Disabling rules
+    disabled_rules = ["Suspicious Cron Modification"]
+
+    actions {
+        container = "stop"
+        capture {
+        seconds_before_event = 5
+        seconds_after_event = 10
+        }
+    }
+
+    notification_channels = [10000]
 }
 ```
 
@@ -52,10 +55,19 @@ resource "sysdig_secure_policy" "write_apt_database" {
 
 * `enabled` - (Optional) Will secure process with this rule?. By default this is true.
 
-* `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`,
-  `aws_cloudtrail`, `gcp_auditlog`, `azure_platformlogs`. By default it is `falco`.
+* `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`, `aws_cloudtrail`. By default it is `falco`.
 
 * `runbook` - (Optional) Customer provided url that provides a runbook for a given policy. 
+- - -
+
+### Inherited From block
+
+The `inherited_from` block is required and identifies the managed policy that the managed ruleset inherits from:
+
+* `name` - (Required) The name of the Secure managed policy. It must match the name of an existing managed policy.
+
+* `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`, `aws_cloudtrail`. By default it is `falco`.
+
 - - -
 
 ### Scope selection
@@ -83,9 +95,9 @@ The actions block is optional and supports:
 
 - - -
 
-### Falco rule selection
+### Disabling falco rules
 
-* `rule_names` - (Optional) Array with the name of the rules to match.
+* `disabled_rules` - (Optional) Array with the name of the rules in the managed policy to disable.
 
 - - -
 
@@ -100,8 +112,8 @@ No additional attributes are exported.
 
 ## Import
 
-Secure runtime policies can be imported using the ID, e.g.
+Secure managed rulesets can be imported using the ID, e.g.
 
 ```
-$ terraform import sysdig_secure_policy.example 12345
+$ terraform import sysdig_secure_managed_ruleset.example 12345
 ```

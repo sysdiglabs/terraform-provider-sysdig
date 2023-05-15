@@ -24,6 +24,7 @@ type SysdigCommon interface {
 type SysdigMonitor interface {
 	SysdigCommon
 	MonitorCommon
+	DashboardInterface
 	CloudAccountMonitorInterface
 	AlertV2Interface
 }
@@ -50,6 +51,7 @@ func (sr *SysdigRequest) Request(ctx context.Context, method string, url string,
 	r = r.WithContext(ctx)
 	r.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", sr.config.token))
 	r.Header.Set(ContentTypeHeader, ContentTypeJSON)
+	r.Header.Set(SysdigProviderHeader, SysdigProviderHeaderValue)
 
 	return request(sr.httpClient, sr.config, r)
 }
