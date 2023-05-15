@@ -25,7 +25,7 @@ func TestAccCustomPolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: policyWithName(rText()),
+				Config: customPolicyWithName(rText()),
 			},
 			{
 				ResourceName:      "sysdig_secure_custom_policy.sample",
@@ -33,37 +33,37 @@ func TestAccCustomPolicy(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: policyWithoutActions(rText()),
+				Config: customPolicyWithoutActions(rText()),
 			},
 			{
-				Config: policyWithoutNotificationChannels(rText()),
+				Config: customPolicyWithoutNotificationChannels(rText()),
 			},
 			{
-				Config: policyWithMinimumConfiguration(rText()),
+				Config: customPolicyWithMinimumConfiguration(rText()),
 			},
 			{
-				Config: policiesWithDifferentSeverities(rText()),
+				Config: customPoliciesWithDifferentSeverities(rText()),
 			},
 			{
-				Config: policiesWithKillAction(rText()),
+				Config: customPoliciesWithKillAction(rText()),
 			},
 			{
-				Config: policiesForAWSCloudtrail(rText()),
+				Config: customPoliciesForAWSCloudtrail(rText()),
 			},
 			{
-				Config: policiesForGCPAuditLog(rText()),
+				Config: customPoliciesForGCPAuditLog(rText()),
 			},
 			{
-				Config: policiesForAzurePlatformlogs(rText()),
+				Config: customPoliciesForAzurePlatformlogs(rText()),
 			},
 			{
-				Config: policiesWithDisabledRules(rText()),
+				Config: customPoliciesWithDisabledRules(rText()),
 			},
 		},
 	})
 }
 
-func policyWithName(name string) string {
+func customPolicyWithName(name string) string {
 	return fmt.Sprintf(`
 %s
 %s
@@ -94,7 +94,7 @@ resource "sysdig_secure_custom_policy" "sample" {
 `, secureNotificationChannelEmailWithName(name), ruleFalcoTerminalShell(name), name, name)
 }
 
-func policyWithoutActions(name string) string {
+func customPolicyWithoutActions(name string) string {
 	return fmt.Sprintf(`
 %s
 %s
@@ -117,7 +117,7 @@ resource "sysdig_secure_custom_policy" "sample2" {
 `, secureNotificationChannelEmailWithName(name), ruleFalcoTerminalShell(name), name, name)
 }
 
-func policyWithoutNotificationChannels(name string) string {
+func customPolicyWithoutNotificationChannels(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_custom_policy" "sample3" {
   name = "TERRAFORM TEST 3 %s"
@@ -135,7 +135,7 @@ resource "sysdig_secure_custom_policy" "sample3" {
 `, name, name)
 }
 
-func policyWithMinimumConfiguration(name string) string {
+func customPolicyWithMinimumConfiguration(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_custom_policy" "sample4" {
   name = "TERRAFORM TEST 4 %s"
@@ -145,7 +145,7 @@ resource "sysdig_secure_custom_policy" "sample4" {
 `, name, name)
 }
 
-func policiesWithDifferentSeverities(name string) (res string) {
+func customPoliciesWithDifferentSeverities(name string) (res string) {
 	for i := 0; i <= 7; i++ {
 		res += fmt.Sprintf(`
 resource "sysdig_secure_custom_policy" "sample_%d" {
@@ -174,7 +174,7 @@ resource "sysdig_secure_custom_policy" "sample_%d" {
 	return
 }
 
-func policiesWithKillAction(name string) (res string) {
+func customPoliciesWithKillAction(name string) (res string) {
 	return fmt.Sprintf(`
 resource "sysdig_secure_custom_policy" "sample" {
   name = "TERRAFORM TEST 1 %s"
@@ -195,7 +195,7 @@ resource "sysdig_secure_custom_policy" "sample" {
 `, name, name)
 }
 
-func policiesForAWSCloudtrail(name string) string {
+func customPoliciesForAWSCloudtrail(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_custom_policy" "sample4" {
   name = "TERRAFORM TEST 4 %s"
@@ -206,7 +206,7 @@ resource "sysdig_secure_custom_policy" "sample4" {
 `, name, name)
 }
 
-func policiesForGCPAuditLog(name string) string {
+func customPoliciesForGCPAuditLog(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_custom_policy" "sample5" {
   name = "TERRAFORM TEST %s"
@@ -217,7 +217,7 @@ resource "sysdig_secure_custom_policy" "sample5" {
 `, name, name)
 }
 
-func policiesForAzurePlatformlogs(name string) string {
+func customPoliciesForAzurePlatformlogs(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_custom_policy" "sample6" {
   name = "TERRAFORM TEST %s"
@@ -228,7 +228,7 @@ resource "sysdig_secure_custom_policy" "sample6" {
 `, name, name)
 }
 
-func policiesWithDisabledRules(name string) string {
+func customPoliciesWithDisabledRules(name string) string {
 	return fmt.Sprintf(`
 %s
 %s
