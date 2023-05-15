@@ -4,8 +4,10 @@ package v2
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -89,5 +91,30 @@ func TestClient_ErrorFromResponse(t *testing.T) {
 	err = c.ErrorFromResponse(resp)
 	if err.Error() != expected {
 		t.Errorf("expected err %v, got %v", expected, err)
+	}
+}
+
+func TestRequest(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		agent := r.Header.Get(UserAgentHeader)
+		agentParts := strings.Split(agent, "/")
+		if len(agentParts) != 2 || agentParts[0] != SysdigUserAgentHeaderValue || agentParts[1] == "" {
+			t.Errorf("invalid user agent: %v", agent)
+		}
+	}))
+
+	cfg := &config{
+		url: server.URL,
+	}
+	client := newHTTPClient(cfg)
+
+	r, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/", cfg.url), nil)
+	if err != nil {
+		t.Errorf("failed to create request, %v", err)
+	}
+
+	_, err = request(client, cfg, r)
+	if err != nil {
+		t.Errorf("failed to send request, %v", err)
 	}
 }
