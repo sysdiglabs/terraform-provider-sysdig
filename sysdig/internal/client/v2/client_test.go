@@ -98,7 +98,7 @@ func TestRequest(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		agent := r.Header.Get(UserAgentHeader)
 		agentParts := strings.Split(agent, "/")
-		if len(agentParts) != 2 || agentParts[0] != SysdigUserAgentValue || agentParts[1] == "" {
+		if len(agentParts) != 2 || agentParts[0] != SysdigUserAgentHeaderValue || agentParts[1] == "" {
 			t.Errorf("invalid user agent: %v", agent)
 		}
 	}))
