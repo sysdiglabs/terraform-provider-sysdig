@@ -6,7 +6,7 @@ description: |-
   Retrieves a Sysdig Secure Managed Policy.
 ---
 
-# sysdig_secure_managed_policy
+# Data Source: sysdig_secure_managed_policy
 
 Retrieves the information of an existing Sysdig Secure Managed Policy.
 

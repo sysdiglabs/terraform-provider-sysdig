@@ -6,7 +6,7 @@ description: |-
   Retrieves a Sysdig Secure Managed Ruleset.
 ---
 
-# sysdig_secure_managed_ruleset
+# Data Source: sysdig_secure_managed_ruleset
 
 Retrieves the information of an existing Sysdig Secure Managed Ruleset.
 
