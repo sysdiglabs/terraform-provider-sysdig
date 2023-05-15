@@ -3,16 +3,20 @@
 package sysdig_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccManagedPolicyDataSource(t *testing.T) {
+func TestAccManagedRulesetDataSource(t *testing.T) {
+	rText := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -26,17 +30,28 @@ func TestAccManagedPolicyDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: managedPolicyDataSource(),
+				Config: managedRulesetDataSource(rText),
 			},
 		},
 	})
 }
 
-func managedPolicyDataSource() string {
-	return `
-data "sysdig_secure_managed_policy" "example" {
-	name = "Sysdig Runtime Threat Detection"
+func managedRulesetDataSource(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_managed_ruleset" "sample" {
+	name = "%s"
+	description = "Test Description"
+	inherited_from {
+		name = "Sysdig Runtime Threat Detection"
+		type = "falco"
+	}
+	enabled = true
+}
+
+data "sysdig_secure_managed_ruleset" "example" {
+	depends_on = [sysdig_secure_managed_ruleset.sample]
+	name = "%s"
 	type = "falco"
 }
-`
+`, name, name)
 }
