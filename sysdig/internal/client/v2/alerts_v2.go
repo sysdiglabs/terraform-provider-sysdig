@@ -490,6 +490,8 @@ func (client *Client) getLabelDescriptor(ctx context.Context, label string) (Lab
 	return client.buildLabelDescriptor(ctx, label)
 }
 
+// buildLabelDescriptor gets the descriptor of a label in public notation from the v3/labels/descriptors api
+// this is not a general solution to get the descriptor for a public notation label since custom labels will not be properly translated
 func (client *Client) buildLabelDescriptor(ctx context.Context, label string) (LabelDescriptorV3, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.labelsDescriptorsV3URL(label), nil)
 	if err != nil {
