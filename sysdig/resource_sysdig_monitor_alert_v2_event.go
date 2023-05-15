@@ -3,14 +3,13 @@ package sysdig
 import (
 	"context"
 	"fmt"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 func resourceSysdigMonitorAlertV2Event() *schema.Resource {
@@ -61,8 +60,12 @@ func resourceSysdigMonitorAlertV2Event() *schema.Resource {
 	}
 }
 
+func getAlertV2EventClient(c SysdigClients) (v2.AlertV2EventInterface, error) {
+	return c.sysdigMonitorClientV2()
+}
+
 func resourceSysdigMonitorAlertV2EventCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getAlertV2EventClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -88,7 +91,7 @@ func resourceSysdigMonitorAlertV2EventCreate(ctx context.Context, d *schema.Reso
 }
 
 func resourceSysdigMonitorAlertV2EventRead(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getAlertV2EventClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -98,7 +101,7 @@ func resourceSysdigMonitorAlertV2EventRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	a, err := client.GetAlertV2EventById(ctx, id)
+	a, err := client.GetAlertV2Event(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -114,7 +117,7 @@ func resourceSysdigMonitorAlertV2EventRead(ctx context.Context, d *schema.Resour
 }
 
 func resourceSysdigMonitorAlertV2EventUpdate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getAlertV2EventClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -140,7 +143,7 @@ func resourceSysdigMonitorAlertV2EventUpdate(ctx context.Context, d *schema.Reso
 }
 
 func resourceSysdigMonitorAlertV2EventDelete(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
-	client, err := i.(SysdigClients).sysdigMonitorClient()
+	client, err := getAlertV2EventClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -158,10 +161,10 @@ func resourceSysdigMonitorAlertV2EventDelete(ctx context.Context, d *schema.Reso
 	return nil
 }
 
-func buildAlertV2EventStruct(d *schema.ResourceData) (*monitor.AlertV2Event, error) {
+func buildAlertV2EventStruct(d *schema.ResourceData) (*v2.AlertV2Event, error) {
 	alertV2Common := buildAlertV2CommonStruct(d)
-	alertV2Common.Type = monitor.AlertV2AlertType_Event
-	config := monitor.AlertV2ConfigEvent{}
+	alertV2Common.Type = string(v2.AlertV2TypeEvent)
+	config := v2.AlertV2ConfigEvent{}
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
 
@@ -195,14 +198,14 @@ func buildAlertV2EventStruct(d *schema.ResourceData) (*monitor.AlertV2Event, err
 	}
 	config.Tags = tags
 
-	alert := &monitor.AlertV2Event{
+	alert := &v2.AlertV2Event{
 		AlertV2Common: *alertV2Common,
 		Config:        config,
 	}
 	return alert, nil
 }
 
-func updateAlertV2EventState(d *schema.ResourceData, alert *monitor.AlertV2Event) error {
+func updateAlertV2EventState(d *schema.ResourceData, alert *v2.AlertV2Event) error {
 	err := updateAlertV2CommonState(d, &alert.AlertV2Common)
 	if err != nil {
 		return err
