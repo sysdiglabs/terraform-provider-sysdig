@@ -51,7 +51,7 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 data "sysdig_secure_managed_ruleset" "example" {
 	depends_on = [sysdig_secure_managed_ruleset.sample]
 	name = "%s"
-	type = "falco
+	type = "falco"
 }
 `, name, name)
 }
