@@ -66,5 +66,19 @@ func secureNotificationChannelToResourceData(nc *v2.NotificationChannel, data *s
 }
 
 func getSecureNotificationChannelClient(c SysdigClients) (v2.NotificationChannelInterface, error) {
-	return c.sysdigSecureClientV2()
+	var client v2.NotificationChannelInterface
+	var err error
+	switch c.GetClientType() {
+	case IBMSecure:
+		client, err = c.ibmSecureClient()
+		if err != nil {
+			return nil, err
+		}
+	default:
+		client, err = c.sysdigSecureClientV2()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }

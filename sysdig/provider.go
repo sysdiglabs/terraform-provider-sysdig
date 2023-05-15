@@ -72,6 +72,31 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_MONITOR_API_KEY", nil),
 			},
+			"sysdig_secure_team_id": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_SECURE_TEAM_ID", nil),
+			},
+			"sysdig_secure_team_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_SECURE_TEAM_NAME", nil),
+			},
+			"ibm_secure_iam_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_SECURE_IAM_URL", nil),
+			},
+			"ibm_secure_instance_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_SECURE_INSTANCE_ID", nil),
+			},
+			"ibm_secure_api_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_IBM_SECURE_API_KEY", nil),
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"sysdig_user":          resourceSysdigUser(),
