@@ -7,16 +7,12 @@ import (
 	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor"
 )
 
 type SysdigClients interface {
 	GetClientType() ClientType
 	GetSecureEndpoint() (string, error)
 	GetSecureApiToken() (string, error)
-
-	sysdigMonitorClient() (monitor.SysdigMonitorClient, error)
 
 	// v2
 	sysdigMonitorClientV2() (v2.SysdigMonitor, error)
@@ -38,11 +34,9 @@ const (
 )
 
 type sysdigClients struct {
-	d             *schema.ResourceData
-	mu            sync.Mutex
-	commonMu      sync.Mutex
-	onceMonitor   sync.Once
-	monitorClient monitor.SysdigMonitorClient
+	d        *schema.ResourceData
+	mu       sync.Mutex
+	commonMu sync.Mutex
 
 	// v2
 	monitorClientV2  v2.SysdigMonitor
@@ -211,35 +205,6 @@ func (c *sysdigClients) GetSecureApiToken() (string, error) {
 		return "", errors.New("GetSecureApiToken, sysdig secure token not provided")
 	}
 	return secureAPIToken, nil
-}
-
-func (c *sysdigClients) sysdigMonitorClient() (m monitor.SysdigMonitorClient, err error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	monitorAPIToken := c.d.Get("sysdig_monitor_api_token").(string)
-	if monitorAPIToken == "" {
-		err = errors.New("sysdig monitor token not provided")
-		return
-	}
-
-	c.onceMonitor.Do(func() {
-		c.monitorClient = monitor.NewSysdigMonitorClient(
-			monitorAPIToken,
-			c.d.Get("sysdig_monitor_url").(string),
-			c.d.Get("sysdig_monitor_insecure_tls").(bool),
-		)
-
-		if headers, ok := c.d.GetOk("extra_headers"); ok {
-			extraHeaders := headers.(map[string]interface{})
-			extraHeadersTransformed := map[string]string{}
-			for key := range extraHeaders {
-				extraHeadersTransformed[key] = extraHeaders[key].(string)
-			}
-			c.monitorClient = monitor.WithExtraHeaders(c.monitorClient, extraHeadersTransformed)
-		}
-	})
-
-	return c.monitorClient, nil
 }
 
 func (c *sysdigClients) sysdigMonitorClientV2() (v2.SysdigMonitor, error) {
