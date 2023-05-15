@@ -77,6 +77,7 @@ func Provider() *schema.Provider {
 			"sysdig_user":          resourceSysdigUser(),
 			"sysdig_group_mapping": resourceSysdigGroupMapping(),
 
+			"sysdig_secure_custom_policy":                  resourceSysdigSecureCustomPolicy(),
 			"sysdig_secure_managed_policy":                 resourceSysdigSecureManagedPolicy(),
 			"sysdig_secure_managed_ruleset":                resourceSysdigSecureManagedRuleset(),
 			"sysdig_secure_policy":                         resourceSysdigSecurePolicy(),
