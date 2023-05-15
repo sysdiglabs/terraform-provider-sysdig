@@ -2,9 +2,10 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -134,7 +135,7 @@ func resourceSysdigRuleContainerDelete(ctx context.Context, d *schema.ResourceDa
 
 func resourceSysdigRuleContainerFromResourceData(d *schema.ResourceData) v2.Rule {
 	rule := ruleFromResourceData(d)
-	rule.Details.RuleType = "CONTAINER"
+	rule.Details.RuleType = v2.RuleTypeContainer
 
 	rule.Details.Containers = &v2.Containers{}
 	rule.Details.Containers.MatchItems = d.Get("matching").(bool)

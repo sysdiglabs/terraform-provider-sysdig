@@ -258,6 +258,10 @@ type Rule struct {
 	Version     int      `json:"version,omitempty"`
 }
 
+const (
+	RuleTypeContainer = "CONTAINER"
+)
+
 type Details struct {
 	// Containers
 	Containers *Containers `json:"containers,omitempty"`
