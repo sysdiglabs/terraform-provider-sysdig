@@ -95,7 +95,7 @@ func customPolicyFromResourceData(d *schema.ResourceData) v2.Policy {
 	policy.Rules = []*v2.PolicyRule{}
 
 	rules := d.Get("rules").([]interface{})
-	for index, _ := range rules {
+	for index := range rules {
 		rule := &v2.PolicyRule{
 			Name:    d.Get(fmt.Sprintf("rules.%d.name", index)).(string),
 			Enabled: d.Get(fmt.Sprintf("rules.%d.enabled", index)).(bool),
