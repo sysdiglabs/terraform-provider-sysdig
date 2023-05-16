@@ -76,8 +76,8 @@ resource "sysdig_secure_custom_policy" "sample" {
   runbook = "https://sysdig.com"
 
   rules {
-	name = sysdig_secure_rule_falco.terminal_shell.name
-	enabled = true
+    name = sysdig_secure_rule_falco.terminal_shell.name
+    enabled = true
   }
 
   actions {
@@ -108,8 +108,8 @@ resource "sysdig_secure_custom_policy" "sample2" {
   notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
 
   rules {
-	name = sysdig_secure_rule_falco.terminal_shell.name
-	enabled = true
+    name = sysdig_secure_rule_falco.terminal_shell.name
+    enabled = true
   }
 
   actions {}
@@ -119,6 +119,7 @@ resource "sysdig_secure_custom_policy" "sample2" {
 
 func customPolicyWithoutNotificationChannels(name string) string {
 	return fmt.Sprintf(`
+%s
 resource "sysdig_secure_custom_policy" "sample3" {
   name = "TERRAFORM TEST 3 %s"
   description = "TERRAFORM TEST %s"
@@ -127,12 +128,12 @@ resource "sysdig_secure_custom_policy" "sample3" {
   scope = "container.id != \"\""
 
   rules {
-	name = sysdig_secure_rule_falco.terminal_shell.name
-	enabled = true
+    name = sysdig_secure_rule_falco.terminal_shell.name
+    enabled = true
   }
   actions {}
 }
-`, name, name)
+`, ruleFalcoTerminalShell(name), name, name)
 }
 
 func customPolicyWithMinimumConfiguration(name string) string {
@@ -155,8 +156,8 @@ resource "sysdig_secure_custom_policy" "sample_%d" {
   severity = %d
   scope = "container.id != \"\""
   rules {
-	name = "Terminal shell in container"
-	enabled = true
+    name = "Terminal shell in container"
+    enabled = true
   }
 
   actions {
@@ -184,8 +185,8 @@ resource "sysdig_secure_custom_policy" "sample" {
   scope = "container.id != \"\""
 
   rules {
-	name = "Terminal shell in container"
-	enabled = true
+    name = "Terminal shell in container"
+    enabled = true
   }
 
   actions {
@@ -241,8 +242,8 @@ resource "sysdig_secure_custom_policy" "sample" {
   runbook = "https://sysdig.com"
 
   rules {
-	name = sysdig_secure_rule_falco.terminal_shell.name
-	enabled = false
+    name = sysdig_secure_rule_falco.terminal_shell.name
+    enabled = false
   }
 
   actions {
