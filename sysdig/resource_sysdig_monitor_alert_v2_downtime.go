@@ -47,7 +47,21 @@ func resourceSysdigMonitorAlertV2Downtime() *schema.Resource {
 }
 
 func getAlertV2DowntimeClient(c SysdigClients) (v2.AlertV2DowntimeInterface, error) {
-	return c.sysdigMonitorClientV2()
+	var client v2.AlertV2DowntimeInterface
+	var err error
+	switch c.GetClientType() {
+	case IBMMonitor:
+		client, err = c.ibmMonitorClient()
+		if err != nil {
+			return nil, err
+		}
+	default:
+		client, err = c.sysdigMonitorClientV2()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }
 
 func resourceSysdigMonitorAlertV2DowntimeCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {

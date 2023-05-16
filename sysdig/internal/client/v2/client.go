@@ -46,6 +46,7 @@ type Common interface {
 
 type MonitorCommon interface {
 	AlertInterface
+	AlertV2Interface
 }
 
 type Requester interface {

@@ -26,7 +26,6 @@ type SysdigMonitor interface {
 	MonitorCommon
 	DashboardInterface
 	CloudAccountMonitorInterface
-	AlertV2Interface
 }
 
 type SysdigSecure interface {
