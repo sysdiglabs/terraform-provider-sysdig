@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"strings"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -243,7 +244,7 @@ func resourceSysdigRuleFalcoDelete(ctx context.Context, d *schema.ResourceData, 
 
 func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) (v2.Rule, error) {
 	rule := ruleFromResourceData(d)
-	rule.Details.RuleType = "FALCO"
+	rule.Details.RuleType = v2.RuleTypeFalco
 
 	appendMode, appendModeIsSet := d.GetOk("append")
 	if appendModeIsSet {
