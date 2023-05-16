@@ -235,6 +235,7 @@ func (c *sysdigClients) ibmMonitorClient() (v2.IBMMonitor, error) {
 	}
 
 	c.monitorIBMClient = v2.NewIBMMonitor(
+		v2.WithMonitorProduct(),
 		v2.WithURL(vars.apiURL),
 		v2.WithIBMIamURL(vars.iamURL),
 		v2.WithIBMInstanceID(vars.instanceID),
@@ -261,6 +262,7 @@ func (c *sysdigClients) ibmSecureClient() (v2.IBMSecure, error) {
 	}
 
 	c.secureIBMClient = v2.NewIBMSecure(
+		v2.WithSecureProduct(),
 		v2.WithURL(vars.apiURL),
 		v2.WithIBMIamURL(vars.iamURL),
 		v2.WithIBMInstanceID(vars.instanceID),

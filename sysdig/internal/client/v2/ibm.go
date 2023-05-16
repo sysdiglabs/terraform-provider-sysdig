@@ -183,6 +183,7 @@ func (ir *IBMRequest) Request(ctx context.Context, method string, url string, pa
 	r.Header.Set(SysdigTeamIDHeader, strconv.Itoa(teamID))
 	r.Header.Set(ContentTypeHeader, ContentTypeJSON)
 	r.Header.Set(SysdigProviderHeader, SysdigProviderHeaderValue)
+	r.Header.Set(SysdigProductHeader, ir.config.product)
 
 	return request(ir.httpClient, ir.config, r)
 }
