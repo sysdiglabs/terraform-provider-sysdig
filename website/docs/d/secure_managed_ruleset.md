@@ -1,29 +1,29 @@
 ---
 subcategory: "Sysdig Secure"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_secure_managed_policy"
+page_title: "Sysdig: sysdig_secure_managed_ruleset"
 description: |-
-  Retrieves a Sysdig Secure Managed Policy.
+  Retrieves a Sysdig Secure Managed Ruleset.
 ---
 
-# sysdig_secure_managed_policy
+# sysdig_secure_managed_ruleset
 
-Retrieves the information of an existing Sysdig Secure Managed Policy.
+Retrieves the information of an existing Sysdig Secure Managed Ruleset.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
 ```terraform
-data "sysdig_secure_managed_policy" "example" {
-  name                 = "Sysdig Runtime Threat Detection"
+data "sysdig_secure_managed_ruleset" "example" {
+  name                 = "Sysdig Runtime Threat Detection - Managed Ruleset"
   type                 = "falco"
 }
 ```
 
 ## Argument Reference
 
-* `name` - (Required) The name of the Secure managed policy.
+* `name` - (Required) The name of the Secure managed ruleset.
 
 * `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`,
   `aws_cloudtrail`, `gcp_auditlog`, `azure_platformlogs`. By default it is `falco`.
