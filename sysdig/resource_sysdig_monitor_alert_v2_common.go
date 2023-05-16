@@ -21,6 +21,24 @@ func secondsToMinutes(seconds int) (minutes int) {
 	return int(durationMinutes.Minutes())
 }
 
+func getAlertV2Client(c SysdigClients) (v2.AlertV2Interface, error) {
+	var client v2.AlertV2Interface
+	var err error
+	switch c.GetClientType() {
+	case IBMMonitor:
+		client, err = c.ibmMonitorClient()
+		if err != nil {
+			return nil, err
+		}
+	default:
+		client, err = c.sysdigMonitorClientV2()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
+}
+
 func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.Schema {
 	alertSchema := map[string]*schema.Schema{
 		"name": {

@@ -39,7 +39,7 @@ func resourceSysdigMonitorAlertV2Prometheus() *schema.Resource {
 }
 
 func getAlertV2PrometheusClient(c SysdigClients) (v2.AlertV2PrometheusInterface, error) {
-	return c.sysdigMonitorClientV2()
+	return getAlertV2Client(c)
 }
 
 func resourceSysdigMonitorAlertV2PrometheusCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {

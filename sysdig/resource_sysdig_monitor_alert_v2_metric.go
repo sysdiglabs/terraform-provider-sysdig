@@ -72,7 +72,7 @@ func resourceSysdigMonitorAlertV2Metric() *schema.Resource {
 }
 
 func getAlertV2MetricClient(c SysdigClients) (v2.AlertV2MetricInterface, error) {
-	return c.sysdigMonitorClientV2()
+	return getAlertV2Client(c)
 }
 
 func resourceSysdigMonitorAlertV2MetricCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {

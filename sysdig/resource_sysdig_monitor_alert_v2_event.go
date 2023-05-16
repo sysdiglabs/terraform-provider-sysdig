@@ -61,7 +61,7 @@ func resourceSysdigMonitorAlertV2Event() *schema.Resource {
 }
 
 func getAlertV2EventClient(c SysdigClients) (v2.AlertV2EventInterface, error) {
-	return c.sysdigMonitorClientV2()
+	return getAlertV2Client(c)
 }
 
 func resourceSysdigMonitorAlertV2EventCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
