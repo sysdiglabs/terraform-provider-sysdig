@@ -45,6 +45,7 @@ type Common interface {
 }
 
 type MonitorCommon interface {
+	DashboardInterface
 	AlertInterface
 	AlertV2Interface
 }
