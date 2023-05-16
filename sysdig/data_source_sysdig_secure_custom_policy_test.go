@@ -29,7 +29,7 @@ func TestAccCustomPolicyDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: customPolicyDataSource(rText()),
+				Config: customPolicyDataSource(rText),
 			},
 		},
 	})
