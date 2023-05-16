@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -21,6 +22,9 @@ func resourceSysdigSecureCustomPolicy() *schema.Resource {
 		ReadContext:   resourceSysdigCustomPolicyRead,
 		UpdateContext: resourceSysdigCustomPolicyUpdate,
 		DeleteContext: resourceSysdigCustomPolicyDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceSysdigSecureCustomPolicyImportState,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -181,4 +185,27 @@ func resourceSysdigCustomPolicyUpdate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func resourceSysdigSecureCustomPolicyImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client, err := getSecurePolicyClient(meta.(SysdigClients))
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return nil, err
+	}
+
+	policy, _, err := client.GetPolicyByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if policy.IsDefault || policy.TemplateId != 0 {
+		return nil, errors.New("unable to import policy that is not a custom policy")
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
