@@ -117,19 +117,19 @@ func getIBMVariables(product string, data *schema.ResourceData) (*ibmVariables, 
 	var teamID *int
 
 	if apiURL, ok = data.GetOk(fmt.Sprintf("sysdig_%s_url", product)); !ok {
-		return nil, errors.New(fmt.Sprintf("missing %s IBM URL", product))
+		return nil, fmt.Errorf("missing %s IBM URL", product)
 	}
 
 	if iamURL, ok = data.GetOk(fmt.Sprintf("ibm_%s_iam_url", product)); !ok {
-		return nil, errors.New(fmt.Sprintf("missing %s IBM IAM URL", product))
+		return nil, fmt.Errorf("missing %s IBM IAM URL", product)
 	}
 
 	if instanceID, ok = data.GetOk(fmt.Sprintf("ibm_%s_instance_id", product)); !ok {
-		return nil, errors.New(fmt.Sprintf("missing %s IBM instance ID", product))
+		return nil, fmt.Errorf("missing %s IBM instance ID", product)
 	}
 
 	if apiKey, ok = data.GetOk(fmt.Sprintf("ibm_%s_api_key", product)); !ok {
-		return nil, errors.New(fmt.Sprintf("missing %s IBM API key", product))
+		return nil, fmt.Errorf("missing %s IBM API key", product)
 	}
 
 	if id, ok := data.GetOk(fmt.Sprintf("sysdig_%s_team_id", product)); ok {
