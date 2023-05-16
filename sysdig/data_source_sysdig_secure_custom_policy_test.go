@@ -45,6 +45,7 @@ resource "sysdig_secure_custom_policy" "sample" {
 	
 data "sysdig_secure_custom_policy" "example" {
 	name = "%s"
+	depends_on=[ sysdig_secure_custom_policy.sample ]
 }
 `
 }
