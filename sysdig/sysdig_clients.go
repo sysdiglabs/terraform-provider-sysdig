@@ -111,28 +111,28 @@ func getSysdigSecureVariables(data *schema.ResourceData) (*sysdigVariables, erro
 	}, nil
 }
 
-func getIBMMonitorVariables(data *schema.ResourceData) (*ibmVariables, error) {
+func getIBMVariables(product string, data *schema.ResourceData) (*ibmVariables, error) {
 	var ok bool
 	var apiURL, iamURL, instanceID, apiKey interface{}
 	var teamID *int
 
-	if apiURL, ok = data.GetOk("sysdig_monitor_url"); !ok {
-		return nil, errors.New("missing monitor IBM URL")
+	if apiURL, ok = data.GetOk(fmt.Sprintf("sysdig_%s_url", product)); !ok {
+		return nil, errors.New(fmt.Sprintf("missing %s IBM URL", product))
 	}
 
-	if iamURL, ok = data.GetOk("ibm_monitor_iam_url"); !ok {
-		return nil, errors.New("missing monitor IBM IAM URL")
+	if iamURL, ok = data.GetOk(fmt.Sprintf("ibm_%s_iam_url", product)); !ok {
+		return nil, errors.New(fmt.Sprintf("missing %s IBM IAM URL", product))
 	}
 
-	if instanceID, ok = data.GetOk("ibm_monitor_instance_id"); !ok {
-		return nil, errors.New("missing monitor IBM instance ID")
+	if instanceID, ok = data.GetOk(fmt.Sprintf("ibm_%s_instance_id", product)); !ok {
+		return nil, errors.New(fmt.Sprintf("missing %s IBM instance ID", product))
 	}
 
-	if apiKey, ok = data.GetOk("ibm_monitor_api_key"); !ok {
-		return nil, errors.New("missing monitor IBM API key")
+	if apiKey, ok = data.GetOk(fmt.Sprintf("ibm_%s_api_key", product)); !ok {
+		return nil, errors.New(fmt.Sprintf("missing %s IBM API key", product))
 	}
 
-	if id, ok := data.GetOk("sysdig_monitor_team_id"); ok {
+	if id, ok := data.GetOk(fmt.Sprintf("sysdig_%s_team_id", product)); ok {
 		tmp := id.(int)
 		teamID = &tmp
 	}
@@ -140,55 +140,23 @@ func getIBMMonitorVariables(data *schema.ResourceData) (*ibmVariables, error) {
 	return &ibmVariables{
 		globalVariables: &globalVariables{
 			apiURL:       apiURL.(string),
-			insecure:     data.Get("sysdig_monitor_insecure_tls").(bool),
+			insecure:     data.Get(fmt.Sprintf("sysdig_%s_insecure_tls", product)).(bool),
 			extraHeaders: getExtraHeaders(data),
 		},
 		iamURL:         iamURL.(string),
 		instanceID:     instanceID.(string),
 		apiKey:         apiKey.(string),
 		sysdigTeamID:   teamID,
-		sysdigTeamName: data.Get("sysdig_monitor_team_name").(string),
+		sysdigTeamName: data.Get(fmt.Sprintf("sysdig_%s_team_name", product)).(string),
 	}, nil
 }
 
+func getIBMMonitorVariables(data *schema.ResourceData) (*ibmVariables, error) {
+	return getIBMVariables("monitor", data)
+}
+
 func getIBMSecureVariables(data *schema.ResourceData) (*ibmVariables, error) {
-	var ok bool
-	var apiURL, iamURL, instanceID, apiKey interface{}
-	var teamID *int
-
-	if apiURL, ok = data.GetOk("sysdig_secure_url"); !ok {
-		return nil, errors.New("missing secure IBM URL")
-	}
-
-	if iamURL, ok = data.GetOk("ibm_secure_iam_url"); !ok {
-		return nil, errors.New("missing secure IBM IAM URL")
-	}
-
-	if instanceID, ok = data.GetOk("ibm_secure_instance_id"); !ok {
-		return nil, errors.New("missing secure IBM instance ID")
-	}
-
-	if apiKey, ok = data.GetOk("ibm_secure_api_key"); !ok {
-		return nil, errors.New("missing secure IBM API key")
-	}
-
-	if id, ok := data.GetOk("sysdig_secure_team_id"); ok {
-		tmp := id.(int)
-		teamID = &tmp
-	}
-
-	return &ibmVariables{
-		globalVariables: &globalVariables{
-			apiURL:       apiURL.(string),
-			insecure:     data.Get("sysdig_secure_insecure_tls").(bool),
-			extraHeaders: getExtraHeaders(data),
-		},
-		iamURL:         iamURL.(string),
-		instanceID:     instanceID.(string),
-		apiKey:         apiKey.(string),
-		sysdigTeamID:   teamID,
-		sysdigTeamName: data.Get("sysdig_secure_team_name").(string),
-	}, nil
+	return getIBMVariables("secure", data)
 }
 
 func (c *sysdigClients) GetSecureEndpoint() (string, error) {
@@ -338,6 +306,8 @@ func (c *sysdigClients) commonClientV2() (v2.Common, error) {
 		c.commonV2, err = c.sysdigSecureClientV2()
 	case IBMMonitor:
 		c.commonV2, err = c.ibmMonitorClient()
+	case IBMSecure:
+		c.commonV2, err = c.ibmSecureClient()
 	default:
 		return nil, fmt.Errorf("failed to create common client, %s is not supported", clientType)
 	}
