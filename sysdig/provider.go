@@ -127,6 +127,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_trusted_cloud_identity": dataSourceSysdigSecureTrustedCloudIdentity(),
 			"sysdig_secure_notification_channel":   dataSourceSysdigSecureNotificationChannel(),
+			"sysdig_secure_custom_policy":          dataSourceSysdigSecureCustomPolicy(),
 			"sysdig_secure_managed_policy":         dataSourceSysdigSecureManagedPolicy(),
 			"sysdig_secure_managed_ruleset":        dataSourceSysdigSecureManagedRuleset(),
 			"sysdig_secure_rule_container":         dataSourceSysdigSecureRuleContainer(),
