@@ -114,6 +114,9 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 			Read:   schema.DefaultTimeout(timeout),
 		},
 
+		DeprecationMessage: "The sysdig_secure_policy resource is being replaced by sysdig_secure_custom_policy, " +
+			"sysdig_secure_managed_policy, and sysdig_secure_managed_ruleset depending on the type of policy.",
+
 		Schema: createPolicySchema(map[string]*schema.Schema{
 			"description": {
 				Type:     schema.TypeString,
