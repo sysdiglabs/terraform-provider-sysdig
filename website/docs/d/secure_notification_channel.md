@@ -6,7 +6,7 @@ description: |-
   Retrieves a Sysdig Secure Notification Channel.
 ---
 
-# sysdig_secure_notification_channel
+# Data Source: sysdig_secure_notification_channel
 
 Retrieves the information of an existing Sysdig Secure Notification Channel.
 

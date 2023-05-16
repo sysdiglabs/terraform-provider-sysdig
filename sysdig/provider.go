@@ -153,6 +153,7 @@ func Provider() *schema.Provider {
 			"sysdig_secure_notification_channel":   dataSourceSysdigSecureNotificationChannel(),
 			"sysdig_secure_managed_policy":         dataSourceSysdigSecureManagedPolicy(),
 			"sysdig_secure_managed_ruleset":        dataSourceSysdigSecureManagedRuleset(),
+			"sysdig_secure_rule_container":         dataSourceSysdigSecureRuleContainer(),
 
 			"sysdig_current_user":      dataSourceSysdigCurrentUser(),
 			"sysdig_user":              dataSourceSysdigUser(),
