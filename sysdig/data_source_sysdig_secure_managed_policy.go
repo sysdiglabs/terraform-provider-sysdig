@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -12,7 +13,7 @@ func dataSourceSysdigSecureManagedPolicy() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		ReadContext: dataSourceSysdigManagedPolicyRead,
+		ReadContext: dataSourceSysdigSecureManagedPolicyRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),
@@ -22,26 +23,10 @@ func dataSourceSysdigSecureManagedPolicy() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigManagedPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecurePolicyClient(meta.(SysdigClients))
-	if err != nil {
-		return diag.FromErr(err)
-	}
+func dataSourceSysdigSecureManagedPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return commonDataSourceSecurePolicyRead(ctx, d, meta, "managed policy", isManagedPolicy)
+}
 
-	policyName := d.Get("name").(string)
-	policyType := d.Get("type").(string)
-
-	policy, err := getManagedPolicy(ctx, client, policyName, policyType)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	loadedPolicy, _, err := client.GetPolicyByID(ctx, policy.ID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	policyDataSourceToResourceData(loadedPolicy, d)
-
-	return nil
+func isManagedPolicy(policy v2.Policy) bool {
+	return policy.IsDefault
 }
