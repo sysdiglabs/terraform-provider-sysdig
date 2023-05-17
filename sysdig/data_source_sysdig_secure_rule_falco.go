@@ -45,30 +45,29 @@ func dataSourceSysdigSecureRuleFalco() *schema.Resource {
 			"append": {
 
 				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"exceptions": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
 							Type:     schema.TypeString,
-							Required: true,
+							Computed: true,
 						},
 						"comps": {
 							Type:     schema.TypeList,
-							Optional: true,
+							Computed: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"values": {
 							Type:     schema.TypeString,
-							Required: true,
+							Computed: true,
 						},
 						"fields": {
 							Type:     schema.TypeList,
-							Optional: true,
+							Computed: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
