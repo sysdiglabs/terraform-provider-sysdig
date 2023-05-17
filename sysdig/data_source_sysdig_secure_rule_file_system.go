@@ -87,9 +87,10 @@ func dataSourceSysdigRuleFileSystemRead(ctx context.Context, d *schema.ResourceD
 	rule := rules[0]
 
 	ruleDataSourceToResourceData(rule, d)
-
-	_ = d.Set("read_only", rule.Details.ReadPaths)
-	_ = d.Set("read_write", rule.Details.ReadWritePaths)
+	_ = d.Set("read_only.matching", rule.Details.ReadPaths.MatchItems)
+	_ = d.Set("read_only.paths", rule.Details.ReadPaths.Items)
+	_ = d.Set("read_write.matching", rule.Details.ReadWritePaths.MatchItems)
+	_ = d.Set("read_write.paths", rule.Details.ReadWritePaths.Items)
 
 	return nil
 }
