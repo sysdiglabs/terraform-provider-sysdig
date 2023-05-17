@@ -44,5 +44,5 @@ data "sysdig_secure_rule_file_system" "data_sample" {
 	name = "TERRAFORM TEST %s"
 	depends_on = [ sysdig_secure_rule_filesystem.foo ]
 }
-`, ruleFileSystemWithName(name), name)
+`, ruleFilesystemWithName(name), name)
 }
