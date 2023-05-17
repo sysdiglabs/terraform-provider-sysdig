@@ -1,25 +1,21 @@
 ---
 subcategory: "Sysdig Secure"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_secure_policy"
+page_title: "Sysdig: sysdig_secure_custom_policy"
 description: |-
-  Creates a Sysdig Secure Policy.
+  Creates a Sysdig Secure Custom Policy.
 ---
 
-# Resource: sysdig_secure_policy
+# Resource: sysdig_secure_custom_policy
 
-Creates a Sysdig Secure Policy.
-
-~> **Deprecation Notice:** The `sysdig_secure_policy` resource has been deprecated and is being replaced by
-`sysdig_secure_custom_policy`, `sysdig_secure_managed_policy`, and `sysdig_secure_managed_ruleset` depending on the type
-of policy.
+Creates a Sysdig Secure Custom Policy.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
 ```terraform
-resource "sysdig_secure_policy" "write_apt_database" {
+resource "sysdig_secure_custom_policy" "write_apt_database" {
   name = "Write apt database"
   description = "an attempt to write to the dpkg database by any non-dpkg related program"
   severity = 4
@@ -30,7 +26,11 @@ resource "sysdig_secure_policy" "write_apt_database" {
   scope = "container.id != \"\""
 
   // Rule selection
-  rule_names = ["Terminal shell in container"]
+
+  rules {
+    name = "Terminal shell in container"
+    enabled = true
+  }
 
   actions {
     container = "stop"
@@ -87,9 +87,13 @@ The actions block is optional and supports:
 
 - - -
 
-### Falco rule selection
+### Falco rule selection - Rules block
 
-* `rule_names` - (Optional) Array with the name of the rules to match.
+The rules block can be repeated for each rule in the policy and supports:
+
+* `name` - (Required) The name of the rule to include in the policy.
+
+* `enabled` - (Optional) Whether the rule is enabled or not. The default is true.
 
 - - -
 
@@ -104,8 +108,8 @@ No additional attributes are exported.
 
 ## Import
 
-Secure runtime policies can be imported using the ID, e.g.
+Secure custom policies can be imported using the ID, e.g.
 
 ```
-$ terraform import sysdig_secure_policy.example 12345
+$ terraform import sysdig_secure_custom_policy.example 12345
 ```
