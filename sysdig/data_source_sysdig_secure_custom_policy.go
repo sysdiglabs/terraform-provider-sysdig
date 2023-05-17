@@ -9,11 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceSysdigSecureManagedRuleset() *schema.Resource {
+func dataSourceSysdigSecureCustomPolicy() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		ReadContext: dataSourceSysdigManagedRulesetRead,
+		ReadContext: dataSourceSysdigSecureCustomPolicyRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),
@@ -23,10 +23,10 @@ func dataSourceSysdigSecureManagedRuleset() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigManagedRulesetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return commonDataSourceSecurePolicyRead(ctx, d, meta, "managed ruleset", isManagedRuleset)
+func dataSourceSysdigSecureCustomPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return commonDataSourceSecurePolicyRead(ctx, d, meta, "custom policy", isCustomPolicy)
 }
 
-func isManagedRuleset(policy v2.Policy) bool {
-	return !policy.IsDefault && policy.TemplateId != 0
+func isCustomPolicy(policy v2.Policy) bool {
+	return !policy.IsDefault && policy.TemplateId == 0
 }
