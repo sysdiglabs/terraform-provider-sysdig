@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -20,6 +19,12 @@ func dataSourceSysdigSecureRuleFalco() *schema.Resource {
 		},
 
 		Schema: createRuleDataSourceSchema(map[string]*schema.Schema{
+			"source": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "",
+				ValidateDiagFunc: validateDiagFunc(validateFalcoRuleSource),
+			},
 			"index": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -34,10 +39,6 @@ func dataSourceSysdigSecureRuleFalco() *schema.Resource {
 				Computed: true,
 			},
 			"priority": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"source": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -84,7 +85,7 @@ func dataSourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	ruleName := d.Get("name").(string)
-	ruleType := v2.RuleTypeFalco
+	ruleType := d.Get("source").(string)
 	ruleIndex := d.Get("index").(int)
 	rules, err := client.GetRuleGroup(ctx, ruleName, ruleType)
 	if err != nil {
