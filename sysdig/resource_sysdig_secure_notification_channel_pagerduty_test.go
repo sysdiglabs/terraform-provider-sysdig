@@ -29,6 +29,9 @@ func TestAccSecureNotificationChannelPagerduty(t *testing.T) {
 				Config: secureNotificationChannelPagerdutyWithName(rText()),
 			},
 			{
+				Config: secureNotificationChannelPagerdutySharedWithCurrentTeam(rText()),
+			},
+			{
 				ResourceName:      "sysdig_secure_notification_channel_pagerduty.sample-pagerduty",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -41,6 +44,21 @@ func secureNotificationChannelPagerdutyWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel_pagerduty" "sample-pagerduty" {
 	name = "Example Channel %s - Pagerduty"
+	enabled = true
+	account = "account"
+	service_key = "XXXXXXXXXX"
+	service_name = "sysdig"
+	notify_when_ok = true
+	notify_when_resolved = true
+	send_test_notification = false
+}`, name)
+}
+
+func secureNotificationChannelPagerdutySharedWithCurrentTeam(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_notification_channel_pagerduty" "sample-pagerduty" {
+	name = "Example Channel %s - Pagerduty"
+    share_with_current_team = true
 	enabled = true
 	account = "account"
 	service_key = "XXXXXXXXXX"

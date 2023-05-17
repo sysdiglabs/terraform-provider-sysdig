@@ -29,12 +29,15 @@ func TestAccSecureNotificationChannelEmail(t *testing.T) {
 				Config: secureNotificationChannelEmailWithName(rText()),
 			},
 			{
+				Config: secureNotificationChannelEmailWithNameInReverseOrder(rText()),
+			},
+			{
+				Config: secureNotificationChannelEmailSharedWithCurrentTeam(rText()),
+			},
+			{
 				ResourceName:      "sysdig_secure_notification_channel_email.sample_email",
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-			{
-				Config: secureNotificationChannelEmailWithNameInReverseOrder(rText()),
 			},
 		},
 	})
@@ -56,6 +59,19 @@ func secureNotificationChannelEmailWithNameInReverseOrder(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel_email" "sample_email" {
 	name = "%s"
+	recipients = ["bar@localhost.com", "root@localhost.com"]
+	enabled = false
+	notify_when_ok = false
+	notify_when_resolved = false
+	send_test_notification = false
+}`, name)
+}
+
+func secureNotificationChannelEmailSharedWithCurrentTeam(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_notification_channel_email" "sample_email" {
+	name = "%s"
+    share_with_current_team = true
 	recipients = ["bar@localhost.com", "root@localhost.com"]
 	enabled = false
 	notify_when_ok = false
