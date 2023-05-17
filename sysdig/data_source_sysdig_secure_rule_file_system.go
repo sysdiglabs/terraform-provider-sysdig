@@ -27,8 +27,7 @@ func dataSourceSysdigSecureRuleFileSystem() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"matching": {
 							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
+							Computed: true,
 						},
 						"paths": {
 							Type:     schema.TypeList,
@@ -47,8 +46,7 @@ func dataSourceSysdigSecureRuleFileSystem() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"matching": {
 							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
+							Computed: true,
 						},
 						"paths": {
 							Type:     schema.TypeList,
