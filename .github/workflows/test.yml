@@ -118,4 +118,4 @@ jobs:
           SYSDIG_IBM_SECURE_INSTANCE_ID: 1ec238d3-d8a4-4f08-bf5f-e660e76efeac
           SYSDIG_IBM_SECURE_IAM_URL: "https://iam.test.cloud.ibm.com"
           SYSDIG_SECURE_URL: "https://us-south.monitoring.test.cloud.ibm.com"
-          SYSDIG_SECURE_TEAM_NAME: "Secure Operations2"
+          SYSDIG_SECURE_TEAM_NAME: "Secure Operations"
