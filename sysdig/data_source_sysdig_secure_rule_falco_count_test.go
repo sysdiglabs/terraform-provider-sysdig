@@ -32,13 +32,13 @@ func TestAccRuleFalcoCountDataSource(t *testing.T) {
 			{
 				Config: ruleFalcoCountDataSource(rText()),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sysdig_secure_rule_falco_count.data_terminal_shell", "rule_count", "1"),
+					resource.TestCheckResourceAttr("data.sysdig_secure_rule_falco_count.data_terminal_shell", "rule_count", "1"),
 				),
 			},
 			{
 				Config: ruleFalcoCountDataSourceWithAppends(rText()),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sysdig_secure_rule_falco_count.data_terminal_shell", "rule_count", "2"),
+					resource.TestCheckResourceAttr("data.sysdig_secure_rule_falco_count.data_terminal_shell", "rule_count", "2"),
 				),
 			},
 		},
@@ -65,6 +65,8 @@ resource "sysdig_secure_rule_falco" "terminal_shell_append" {
   
 	condition = "and never_true"
 	source = "syscall" // syscall or k8s_audit
+	append = true
+	depends_on = [ sysdig_secure_rule_falco.terminal_shell ]
 }
 
 data "sysdig_secure_rule_falco_count" "data_terminal_shell" {

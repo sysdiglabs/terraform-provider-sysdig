@@ -16,6 +16,7 @@ import (
 
 func TestAccRuleFalcoDataSource(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+	rTextForAppendTest := rText()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -33,10 +34,13 @@ func TestAccRuleFalcoDataSource(t *testing.T) {
 				Config: ruleFalcoDataSource(rText()),
 			},
 			{
-				Config: ruleFalcoCountDataSourceWithAppends(rText()),
+				Config: setupRuleFalcoDataSourceWithAppends(rTextForAppendTest),
+			},
+			{
+				Config: ruleFalcoDataSourceWithAppends(rTextForAppendTest),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("sysdig_secure_rule_falco.data_terminal_shell.0", "id"),
-					resource.TestCheckResourceAttrSet("sysdig_secure_rule_falco.data_terminal_shell.1", "id"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_rule_falco.data_terminal_shell.0", "id"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_rule_falco.data_terminal_shell.1", "id"),
 				),
 			},
 		},
@@ -54,28 +58,32 @@ data "sysdig_secure_rule_falco" "data_terminal_shell" {
 `, ruleFalcoTerminalShell(name), name)
 }
 
+func setupRuleFalcoDataSourceWithAppends(name string) string {
+	return fmt.Sprintf(`
+	%s
+
+	resource "sysdig_secure_rule_falco" "terminal_shell_append" {
+		name = "TERRAFORM TEST %s - Terminal Shell"
+
+		condition = "and never_true"
+		source = "syscall" // syscall or k8s_audit
+		append = true
+		depends_on = [ sysdig_secure_rule_falco.terminal_shell ]
+	}
+`, ruleFalcoTerminalShell(name), name)
+}
 func ruleFalcoDataSourceWithAppends(name string) string {
 	return fmt.Sprintf(`
-%s
-
-resource "sysdig_secure_rule_falco" "terminal_shell_append" {
-	name = "TERRAFORM TEST %s - Terminal Shell"
-  
-	condition = "and never_true"
-	source = "syscall" // syscall or k8s_audit
-}
-
 data "sysdig_secure_rule_falco_count" "terminal_shell_count" {
 	name = "TERRAFORM TEST %s - Terminal Shell"
-	depends_on = [ sysdig_secure_rule_falco.terminal_shell, sysdig_secure_rule_falco.terminal_shell_append ]
 }
 
 data "sysdig_secure_rule_falco" "data_terminal_shell" {
-	count = "data.sysdig_rule_falco_count.terminal_shell_count.rule_count
+	count = data.sysdig_secure_rule_falco_count.terminal_shell_count.rule_count
 	name = "TERRAFORM TEST %s - Terminal Shell"
-	index = ${count.index}
+	index = "${count.index}"
 
-	depends_on = [ sysdig_secure_rule_falco_count.terminal_shell_count ]
+	depends_on = [ data.sysdig_secure_rule_falco_count.terminal_shell_count ]
 }
-`, ruleFalcoTerminalShell(name), name, name, name)
+`, name, name)
 }
