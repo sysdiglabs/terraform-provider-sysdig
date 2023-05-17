@@ -53,7 +53,12 @@ func resourceSysdigSecureNotificationChannelPagerdutyCreate(ctx context.Context,
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err := secureNotificationChannelPagerdutyFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	notificationChannel, err := secureNotificationChannelPagerdutyFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -96,7 +101,12 @@ func resourceSysdigSecureNotificationChannelPagerdutyUpdate(ctx context.Context,
 		return diag.FromErr(err)
 	}
 
-	nc, err := secureNotificationChannelPagerdutyFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	nc, err := secureNotificationChannelPagerdutyFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -127,8 +137,8 @@ func resourceSysdigSecureNotificationChannelPagerdutyDelete(ctx context.Context,
 	return nil
 }
 
-func secureNotificationChannelPagerdutyFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
-	nc, err = secureNotificationChannelFromResourceData(d)
+func secureNotificationChannelPagerdutyFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
+	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
 		return
 	}
