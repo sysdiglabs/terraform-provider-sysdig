@@ -22,7 +22,7 @@ func dataSourceSysdigSecureRuleFileSystem() *schema.Resource {
 		Schema: createRuleDataSourceSchema(map[string]*schema.Schema{
 			"read_only": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"matching": {
@@ -31,7 +31,7 @@ func dataSourceSysdigSecureRuleFileSystem() *schema.Resource {
 						},
 						"paths": {
 							Type:     schema.TypeList,
-							Required: true,
+							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -41,7 +41,7 @@ func dataSourceSysdigSecureRuleFileSystem() *schema.Resource {
 			},
 			"read_write": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"matching": {
@@ -50,7 +50,7 @@ func dataSourceSysdigSecureRuleFileSystem() *schema.Resource {
 						},
 						"paths": {
 							Type:     schema.TypeList,
-							Required: true,
+							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},

@@ -38,5 +38,5 @@ In addition to the argument above, the following attributes are exported:
 
 Description of the attributes within the read_only and read_write blocks.
 
-* `matching` - (Optional) Defines if the path matches or not with the provided list. Default is true.
-* `paths` - (Required) List of paths to match.
+* `matching` - Boolean value that defines if the path matches or not with the provided list.
+* `paths` - List of paths to match.
