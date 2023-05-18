@@ -1,9 +1,11 @@
 package sysdig
 
 import (
+	"context"
 	"strconv"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -48,4 +50,33 @@ func ruleDataSourceToResourceData(rule v2.Rule, d *schema.ResourceData) {
 	_ = d.Set("description", rule.Description)
 	_ = d.Set("tags", rule.Tags)
 	_ = d.Set("version", rule.Version)
+}
+
+func commonDataSourceSysdigRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}, ruleType string, setResourceData func(v2.Rule, *schema.ResourceData) diag.Diagnostics) diag.Diagnostics {
+	client, err := getSecureRuleClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	ruleName := d.Get("name").(string)
+
+	rules, err := client.GetRuleGroup(ctx, ruleName, ruleType)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if len(rules) == 0 {
+		return diag.Errorf("unable to find rule")
+	}
+
+	if len(rules) > 1 {
+		return diag.Errorf("more than one rule with that name was found")
+	}
+
+	rule := rules[0]
+
+	ruleDataSourceToResourceData(rule, d)
+	diag := setResourceData(rule, d)
+
+	return diag
 }

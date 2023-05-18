@@ -36,31 +36,10 @@ func dataSourceSysdigSecureRuleContainer() *schema.Resource {
 }
 
 func dataSourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	return commonDataSourceSysdigRuleRead(ctx, d, meta, v2.RuleTypeContainer, containerRuleDataSourceToResourceData)
+}
 
-	ruleName := d.Get("name").(string)
-	ruleType := v2.RuleTypeContainer
-
-	rules, err := client.GetRuleGroup(ctx, ruleName, ruleType)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if len(rules) == 0 {
-		return diag.Errorf("unable to find rule")
-	}
-
-	if len(rules) > 1 {
-		return diag.Errorf("more than one rule with that name was found")
-	}
-
-	rule := rules[0]
-
-	ruleDataSourceToResourceData(rule, d)
-
+func containerRuleDataSourceToResourceData(rule v2.Rule, d *schema.ResourceData) diag.Diagnostics {
 	_ = d.Set("matching", rule.Details.Containers.MatchItems)
 	_ = d.Set("containers", rule.Details.Containers.Items)
 
