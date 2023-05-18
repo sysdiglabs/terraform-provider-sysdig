@@ -185,7 +185,7 @@ func resourceSysdigRuleFilesystemDelete(ctx context.Context, d *schema.ResourceD
 
 func resourceSysdigRuleFilesystemFromResourceData(d *schema.ResourceData) (rule v2.Rule, err error) {
 	rule = ruleFromResourceData(d)
-	rule.Details.RuleType = "FILESYSTEM"
+	rule.Details.RuleType = v2.RuleTypeFileSystem
 
 	rule.Details.ReadPaths = &v2.ReadPaths{
 		MatchItems: true,

@@ -259,8 +259,9 @@ type Rule struct {
 }
 
 const (
-	RuleTypeContainer = "CONTAINER"
-	RuleTypeFalco     = "FALCO"
+	RuleTypeContainer  = "CONTAINER"
+	RuleTypeFalco      = "FALCO"
+	RuleTypeFileSystem = "FILESYSTEM"
 )
 
 type Details struct {
