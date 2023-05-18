@@ -2,9 +2,10 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -185,7 +186,7 @@ func resourceSysdigRuleFilesystemDelete(ctx context.Context, d *schema.ResourceD
 
 func resourceSysdigRuleFilesystemFromResourceData(d *schema.ResourceData) (rule v2.Rule, err error) {
 	rule = ruleFromResourceData(d)
-	rule.Details.RuleType = v2.RuleTypeFileSystem
+	rule.Details.RuleType = v2.RuleTypeFilesystem
 
 	rule.Details.ReadPaths = &v2.ReadPaths{
 		MatchItems: true,
