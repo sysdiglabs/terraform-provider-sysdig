@@ -260,7 +260,7 @@ type Rule struct {
 
 const (
 	RuleTypeContainer  = "CONTAINER"
-	RuleTypeFileSystem = "FILESYSTEM"
+	RuleTypeFilesystem = "FILESYSTEM"
 )
 
 type Details struct {
