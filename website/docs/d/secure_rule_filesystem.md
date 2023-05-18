@@ -1,14 +1,14 @@
 ---
 subcategory: "Sysdig Secure"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_secure_rule_file_system"
+page_title: "Sysdig: sysdig_secure_rule_filesystem"
 description: |-
-  Retrieves a Sysdig Secure File System Rule.
+  Retrieves a Sysdig Secure Filesystem Rule.
 ---
 
-# Data Source: sysdig_secure_rule_file_system
+# Data Source: sysdig_secure_rule_filesystem
 
-Retrieves the information of an existing Sysdig Secure File System Rule.
+Retrieves the information of an existing Sysdig Secure Filesystem Rule.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
