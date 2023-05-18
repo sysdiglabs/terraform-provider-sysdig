@@ -260,6 +260,7 @@ type Rule struct {
 
 const (
 	RuleTypeContainer  = "CONTAINER"
+	RuleTypeFalco      = "FALCO"
 	RuleTypeFilesystem = "FILESYSTEM"
 )
 
