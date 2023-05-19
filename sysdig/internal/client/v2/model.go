@@ -262,6 +262,7 @@ const (
 	RuleTypeContainer  = "CONTAINER"
 	RuleTypeFalco      = "FALCO"
 	RuleTypeFilesystem = "FILESYSTEM"
+	RuleTypeNetwork    = "NETWORK"
 )
 
 type Details struct {

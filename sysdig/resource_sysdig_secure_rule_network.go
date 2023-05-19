@@ -2,9 +2,10 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -210,7 +211,7 @@ func resourceSysdigRuleNetworkDelete(ctx context.Context, d *schema.ResourceData
 
 func resourceSysdigRuleNetworkFromResourceData(d *schema.ResourceData) (rule v2.Rule, err error) {
 	rule = ruleFromResourceData(d)
-	rule.Details.RuleType = "NETWORK"
+	rule.Details.RuleType = v2.RuleTypeNetwork
 
 	rule.Details.TCPListenPorts = &v2.TCPListenPorts{}
 	rule.Details.UDPListenPorts = &v2.UDPListenPorts{}
