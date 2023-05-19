@@ -9,11 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceSysdigSecureRuleFileSystem() *schema.Resource {
+func dataSourceSysdigSecureRuleFilesystem() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		ReadContext: dataSourceSysdigRuleFileSystemRead,
+		ReadContext: dataSourceSysdigRuleFilesystemRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),
@@ -62,14 +62,14 @@ func dataSourceSysdigSecureRuleFileSystem() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigRuleFileSystemRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	ruleName := d.Get("name").(string)
-	ruleType := v2.RuleTypeFileSystem
+	ruleType := v2.RuleTypeFilesystem
 
 	rules, err := client.GetRuleGroup(ctx, ruleName, ruleType)
 	if err != nil {
