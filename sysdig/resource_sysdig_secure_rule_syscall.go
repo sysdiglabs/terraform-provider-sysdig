@@ -2,9 +2,10 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -133,7 +134,7 @@ func resourceSysdigRuleSyscallDelete(ctx context.Context, d *schema.ResourceData
 
 func resourceSysdigRuleSyscallFromResourceData(d *schema.ResourceData) v2.Rule {
 	rule := ruleFromResourceData(d)
-	rule.Details.RuleType = "SYSCALL"
+	rule.Details.RuleType = v2.RuleTypeSyscall
 
 	rule.Details.Syscalls = &v2.Syscalls{}
 	rule.Details.Syscalls.MatchItems = d.Get("matching").(bool)

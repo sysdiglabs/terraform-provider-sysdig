@@ -264,6 +264,7 @@ const (
 	RuleTypeFilesystem = "FILESYSTEM"
 	RuleTypeNetwork    = "NETWORK"
 	RuleTypeProcess    = "PROCESS"
+	RuleTypeSyscall    = "SYSCALL"
 )
 
 type Details struct {
