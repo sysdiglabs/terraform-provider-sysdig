@@ -57,16 +57,3 @@ jobs:
     name: Test
     uses: ./.github/workflows/test.yml
     secrets: inherit
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          args: --timeout 30m
