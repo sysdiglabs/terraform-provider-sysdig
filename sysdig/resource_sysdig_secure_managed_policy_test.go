@@ -91,7 +91,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 }
 
 func managedPolicyWithoutNotificationChannels() string {
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
 	enabled = true
@@ -107,22 +107,19 @@ resource "sysdig_secure_managed_policy" "sample" {
 		  name = "testcapture"
 		}
 	}	
-}
-	`)
+}`
 }
 
 func managedPolicyWithMinimumConfiguration() string {
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
 	enabled = true
-}
-	`)
+}`
 }
 
 func managedPolicyWithKillAction() string {
-	return fmt.Sprintf(`
-resource "sysdig_secure_managed_policy" "sample" {
+	return `resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
 	enabled = true
 	scope = "container.id != \"\""
@@ -132,6 +129,5 @@ resource "sysdig_secure_managed_policy" "sample" {
 	actions {
 		container = "kill"
 	}
-}
-	`)
+}`
 }

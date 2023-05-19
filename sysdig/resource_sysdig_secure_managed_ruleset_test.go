@@ -106,7 +106,7 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 }
 
 func managedRulesetWithoutNotificationChannels() string {
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
 	description = "Test Description"
@@ -127,12 +127,11 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 		  name = "testcapture"
 		}
 	}	
-}
-	`)
+}`
 }
 
 func managedRulesetWithMinimumConfiguration() string {
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
 	description = "Test Description"
@@ -141,12 +140,11 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 		type = "falco"
 	}
 	enabled = true
-}
-	`)
+}`
 }
 
 func managedRulesetWithKillAction() string {
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_secure_managed_ruleset" "sample" {
 	name = "Sysdig Runtime Threat Detection (Copy)"
 	description = "Test Description"
@@ -162,6 +160,5 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 	actions {
 		container = "kill"
 	}
-}
-	`)
+}`
 }
