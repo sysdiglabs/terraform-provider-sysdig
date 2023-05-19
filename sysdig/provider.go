@@ -135,6 +135,7 @@ func Provider() *schema.Provider {
 			"sysdig_secure_rule_falco_count":       dataSourceSysdigSecureRuleFalcoCount(),
 			"sysdig_secure_rule_filesystem":        dataSourceSysdigSecureRuleFilesystem(),
 			"sysdig_secure_rule_network":           dataSourceSysdigSecureRuleNetwork(),
+			"sysdig_secure_rule_process":           dataSourceSysdigSecureRuleProcess(),
 
 			"sysdig_current_user":      dataSourceSysdigCurrentUser(),
 			"sysdig_user":              dataSourceSysdigUser(),

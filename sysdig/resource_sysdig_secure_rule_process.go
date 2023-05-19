@@ -2,9 +2,10 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -134,7 +135,7 @@ func resourceSysdigRuleProcessDelete(ctx context.Context, d *schema.ResourceData
 
 func resourceSysdigRuleProcessFromResourceData(d *schema.ResourceData) v2.Rule {
 	rule := ruleFromResourceData(d)
-	rule.Details.RuleType = "PROCESS"
+	rule.Details.RuleType = v2.RuleTypeProcess
 
 	rule.Details.Processes = &v2.Processes{}
 	rule.Details.Processes.MatchItems = d.Get("matching").(bool)
