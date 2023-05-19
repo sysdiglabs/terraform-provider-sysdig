@@ -40,7 +40,7 @@ func ruleProcessDataSource(name string) string {
 	return fmt.Sprintf(`
 %s
 
-data "sysdig_secure_rule_network" "data_sample" {
+data "sysdig_secure_rule_process" "data_sample" {
 	name = "TERRAFORM TEST %s"
 	depends_on = [ sysdig_secure_rule_process.foo ]
 }
