@@ -14,7 +14,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccRuleFileSystemDataSource(t *testing.T) {
+func TestAccRuleFilesystemDataSource(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -30,17 +30,17 @@ func TestAccRuleFileSystemDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: ruleFileSystemDataSource(rText()),
+				Config: ruleFilesystemDataSource(rText()),
 			},
 		},
 	})
 }
 
-func ruleFileSystemDataSource(name string) string {
+func ruleFilesystemDataSource(name string) string {
 	return fmt.Sprintf(`
 %s
 
-data "sysdig_secure_rule_file_system" "data_sample" {
+data "sysdig_secure_rule_filesystem" "data_sample" {
 	name = "TERRAFORM TEST %s"
 	depends_on = [ sysdig_secure_rule_filesystem.foo ]
 }
