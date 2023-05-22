@@ -211,7 +211,7 @@ resource "sysdig_secure_notification_channel_email" "devops-email" {
 resource "sysdig_secure_notification_channel_slack" "devops-slack" {
   name                 = "DevOps Slack"
   enabled              = true
-  url                  = "https://hooks.slack.com/services/32klj54h2/34hjkhhsd/wjkkrjwlqpfdirej4jrlwkjx"
+  url                  = "https://hooks.slack.com/services/xxxxxx/xxxxxxx/xxxxxxxxxxx"
   channel              = "#devops"
   notify_when_ok       = false
   notify_when_resolved = false
