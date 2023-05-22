@@ -1,10 +1,10 @@
-//go:build tf_acc_sysdig || tf_acc_sysdig_monitor
+//go:build tf_acc_sysdig_monitor
 
 package sysdig_test
 
 import (
 	"fmt"
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/monitor/model"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"os"
 	"testing"
 
@@ -124,7 +124,7 @@ func TestAccDashboard(t *testing.T) {
 				),
 			},
 			{
-				Config: dashboardWithQueryFormat(rText(), *model.NewFormat(
+				Config: dashboardWithQueryFormat(rText(), *v2.NewFormat(
 					"number",
 					"K",
 					"K",
@@ -135,7 +135,7 @@ func TestAccDashboard(t *testing.T) {
 				)),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.unit", string(model.FormatUnitNumber),
+						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.unit", string(v2.FormatUnitNumber),
 					),
 					resource.TestCheckResourceAttr(
 						"sysdig_monitor_dashboard.dashboard", "panel.0.query.0.format.0.input_format", "K",
@@ -158,7 +158,7 @@ func TestAccDashboard(t *testing.T) {
 				),
 			},
 			{
-				Config: dashboardWithQueryFormat(rText(), *model.NewFormat(
+				Config: dashboardWithQueryFormat(rText(), *v2.NewFormat(
 					"percent",
 					"0-100",
 					"0-100",
@@ -192,7 +192,7 @@ func TestAccDashboard(t *testing.T) {
 				),
 			},
 			{
-				Config: dashboardWithQueryFormat(rText(), *model.NewFormat(
+				Config: dashboardWithQueryFormat(rText(), *v2.NewFormat(
 					"data",
 					"B",
 					"B",
@@ -226,7 +226,7 @@ func TestAccDashboard(t *testing.T) {
 				),
 			},
 			{
-				Config: dashboardWithQueryFormat(rText(), *model.NewFormat(
+				Config: dashboardWithQueryFormat(rText(), *v2.NewFormat(
 					"data rate",
 					"B/s",
 					"B/s",
@@ -260,7 +260,7 @@ func TestAccDashboard(t *testing.T) {
 				),
 			},
 			{
-				Config: dashboardWithQueryFormat(rText(), *model.NewFormat(
+				Config: dashboardWithQueryFormat(rText(), *v2.NewFormat(
 					"number rate",
 					"/s",
 					"/s",
@@ -294,7 +294,7 @@ func TestAccDashboard(t *testing.T) {
 				),
 			},
 			{
-				Config: dashboardWithQueryFormat(rText(), *model.NewFormat(
+				Config: dashboardWithQueryFormat(rText(), *v2.NewFormat(
 					"time",
 					"ns",
 					"ms",
@@ -800,7 +800,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 `, name, enabled, showCurrent, position, layout)
 }
 
-func dashboardWithQueryFormat(name string, format model.Format) string {
+func dashboardWithQueryFormat(name string, format v2.Format) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_dashboard" "dashboard" {
 	name = "TERRAFORM TEST - METRIC %[1]s"

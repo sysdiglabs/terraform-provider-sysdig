@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/draios/terraform-provider-sysdig/buildinfo"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/jmespath/go-jmespath"
 	"github.com/spf13/cast"
@@ -18,11 +19,15 @@ import (
 )
 
 const (
-	GetMePath                 = "/api/users/me"
-	AuthorizationHeader       = "Authorization"
-	ContentTypeHeader         = "Content-Type"
-	ContentTypeJSON           = "application/json"
-	ContentTypeFormURLEncoded = "x-www-form-urlencoded"
+	GetMePath                  = "/api/users/me"
+	UserAgentHeader            = "User-Agent"
+	AuthorizationHeader        = "Authorization"
+	ContentTypeHeader          = "Content-Type"
+	SysdigProviderHeader       = "Sysdig-Provider"
+	SysdigProviderHeaderValue  = "Terraform"
+	SysdigUserAgentHeaderValue = "SysdigTerraform"
+	ContentTypeJSON            = "application/json"
+	ContentTypeFormURLEncoded  = "x-www-form-urlencoded"
 )
 
 var (
@@ -90,6 +95,8 @@ func Marshal[T any](data T) (io.Reader, error) {
 }
 
 func request(httpClient *http.Client, cfg *config, request *http.Request) (*http.Response, error) {
+	request.Header.Set(UserAgentHeader, fmt.Sprintf("%s/%s", SysdigUserAgentHeaderValue, buildinfo.Version))
+
 	if cfg.extraHeaders != nil {
 		for key, value := range cfg.extraHeaders {
 			request.Header.Set(key, value)

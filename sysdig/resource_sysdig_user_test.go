@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig || tf_acc_sysdig_monitor || tf_acc_sysdig_secure
+//go:build tf_acc_sysdig_monitor || tf_acc_sysdig_secure
 
 package sysdig_test
 
@@ -48,27 +48,27 @@ func TestAccUser(t *testing.T) {
 func userWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user%[1]s@sysdig.com"
+  email       = "qa-robot+terraform%[1]s@sysdig.com"
   system_role = "ROLE_USER"
-  first_name = "%[1]s"
-  last_name  = "%[1]s"
+  first_name  = "%[1]s"
+  last_name   = "%[1]s"
 }`, name)
 }
 
 func userWithSystemRole(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user%[1]s@sysdig.com"
+  email       = "qa-robot+terraform%[1]s@sysdig.com"
   system_role = "ROLE_USER"
-  first_name = "%[1]s"
-  last_name  = "%[1]s"
+  first_name  = "%[1]s"
+  last_name   = "%[1]s"
 }`, name)
 }
 
 func userWithoutSystemRole(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user%[1]s@sysdig.com"
+  email      = "qa-robot+terraform%[1]s@sysdig.com"
   first_name = "%[1]s"
   last_name  = "%[1]s"
 }`, name)
@@ -77,6 +77,6 @@ resource "sysdig_user" "sample" {
 func userMinimumConfiguration(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email      = "terraform-test+user%s@sysdig.com"
+  email = "qa-robot+terraform%[1]s@sysdig.com"
 }`, name)
 }

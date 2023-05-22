@@ -77,6 +77,9 @@ func Provider() *schema.Provider {
 			"sysdig_user":          resourceSysdigUser(),
 			"sysdig_group_mapping": resourceSysdigGroupMapping(),
 
+			"sysdig_secure_custom_policy":                  resourceSysdigSecureCustomPolicy(),
+			"sysdig_secure_managed_policy":                 resourceSysdigSecureManagedPolicy(),
+			"sysdig_secure_managed_ruleset":                resourceSysdigSecureManagedRuleset(),
 			"sysdig_secure_policy":                         resourceSysdigSecurePolicy(),
 			"sysdig_secure_notification_channel_email":     resourceSysdigSecureNotificationChannelEmail(),
 			"sysdig_secure_notification_channel_sns":       resourceSysdigSecureNotificationChannelSNS(),
@@ -124,9 +127,19 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_trusted_cloud_identity": dataSourceSysdigSecureTrustedCloudIdentity(),
 			"sysdig_secure_notification_channel":   dataSourceSysdigSecureNotificationChannel(),
-			"sysdig_current_user":                  dataSourceSysdigCurrentUser(),
-			"sysdig_user":                          dataSourceSysdigUser(),
-			"sysdig_secure_connection":             dataSourceSysdigSecureConnection(),
+			"sysdig_secure_custom_policy":          dataSourceSysdigSecureCustomPolicy(),
+			"sysdig_secure_managed_policy":         dataSourceSysdigSecureManagedPolicy(),
+			"sysdig_secure_managed_ruleset":        dataSourceSysdigSecureManagedRuleset(),
+			"sysdig_secure_rule_container":         dataSourceSysdigSecureRuleContainer(),
+			"sysdig_secure_rule_falco":             dataSourceSysdigSecureRuleFalco(),
+			"sysdig_secure_rule_falco_count":       dataSourceSysdigSecureRuleFalcoCount(),
+			"sysdig_secure_rule_filesystem":        dataSourceSysdigSecureRuleFilesystem(),
+			"sysdig_secure_rule_network":           dataSourceSysdigSecureRuleNetwork(),
+			"sysdig_secure_rule_process":           dataSourceSysdigSecureRuleProcess(),
+
+			"sysdig_current_user":      dataSourceSysdigCurrentUser(),
+			"sysdig_user":              dataSourceSysdigUser(),
+			"sysdig_secure_connection": dataSourceSysdigSecureConnection(),
 
 			"sysdig_fargate_workload_agent":                 dataSourceSysdigFargateWorkloadAgent(),
 			"sysdig_monitor_notification_channel_pagerduty": dataSourceSysdigMonitorNotificationChannelPagerduty(),

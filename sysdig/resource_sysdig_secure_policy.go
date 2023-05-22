@@ -7,13 +7,93 @@ import (
 	"strings"
 	"time"
 
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/secure"
 )
+
+var validatePolicyType = validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs"}, false)
+
+// Creates the common policy schema that is shared between policy resources
+func createPolicySchema(original map[string]*schema.Schema) map[string]*schema.Schema {
+	policySchema := map[string]*schema.Schema{
+		"name": {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		"enabled": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		"scope": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Default:  "",
+		},
+		"version": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"notification_channels": {
+			Type:     schema.TypeSet,
+			Optional: true,
+			Elem: &schema.Schema{
+				Type: schema.TypeInt,
+			},
+		},
+		"runbook": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"actions": policyActionBlockSchema,
+	}
+
+	for k, v := range original {
+		policySchema[k] = v
+	}
+
+	return policySchema
+}
+
+var policyActionBlockSchema = &schema.Schema{
+	Type:     schema.TypeList,
+	Optional: true,
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"container": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"stop", "pause", "kill"}, false),
+			},
+			"capture": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"seconds_after_event": {
+							Type:             schema.TypeInt,
+							Required:         true,
+							ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
+						},
+						"seconds_before_event": {
+							Type:             schema.TypeInt,
+							Required:         true,
+							ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+		},
+	},
+}
 
 func resourceSysdigSecurePolicy() *schema.Resource {
 	timeout := 5 * time.Minute
@@ -34,11 +114,10 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 			Read:   schema.DefaultTimeout(timeout),
 		},
 
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
+		DeprecationMessage: "The sysdig_secure_policy resource is being replaced by sysdig_secure_custom_policy, " +
+			"sysdig_secure_managed_policy, and sysdig_secure_managed_ruleset depending on the type of policy.",
+
+		Schema: createPolicySchema(map[string]*schema.Schema{
 			"description": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -47,27 +126,13 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Default:          "falco",
-				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs"}, false)),
+				ValidateDiagFunc: validateDiagFunc(validatePolicyType),
 			},
 			"severity": {
 				Type:             schema.TypeInt,
 				Default:          4,
 				Optional:         true,
 				ValidateDiagFunc: validateDiagFunc(validation.IntBetween(0, 7)),
-			},
-			"enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-			"scope": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			"version": {
-				Type:     schema.TypeInt,
-				Computed: true,
 			},
 			"rule_names": {
 				Type:     schema.TypeSet,
@@ -76,58 +141,16 @@ func resourceSysdigSecurePolicy() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"notification_channels": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeInt,
-				},
-			},
-			"runbook": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"actions": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"container": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"stop", "pause", "kill"}, false),
-						},
-						"capture": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"seconds_after_event": {
-										Type:             schema.TypeInt,
-										Required:         true,
-										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
-									},
-									"seconds_before_event": {
-										Type:             schema.TypeInt,
-										Required:         true,
-										ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
+		}),
 	}
 }
 
+func getSecurePolicyClient(c SysdigClients) (v2.PolicyInterface, error) {
+	return c.sysdigSecureClientV2()
+}
+
 func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -143,24 +166,17 @@ func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
+// Saves the resource data information for the common fields of the policy
+func commonPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	if policy.ID != 0 {
 		d.SetId(strconv.Itoa(policy.ID))
 	}
 
 	_ = d.Set("name", policy.Name)
-	_ = d.Set("description", policy.Description)
 	_ = d.Set("scope", policy.Scope)
 	_ = d.Set("enabled", policy.Enabled)
 	_ = d.Set("version", policy.Version)
-	_ = d.Set("severity", policy.Severity)
 	_ = d.Set("runbook", policy.Runbook)
-	if policy.Type != "" {
-		_ = d.Set("type", policy.Type)
-	} else {
-		_ = d.Set("type", "falco")
-
-	}
 
 	actions := []map[string]interface{}{{}}
 	for _, action := range policy.Actions {
@@ -186,27 +202,44 @@ func policyToResourceData(policy *secure.Policy, d *schema.ResourceData) {
 	}
 
 	_ = d.Set("notification_channels", policy.NotificationChannelIds)
-
-	_ = d.Set("rule_names", policy.RuleNames)
-
 }
 
-func policyFromResourceData(d *schema.ResourceData) secure.Policy {
-	policy := secure.Policy{
-		Name:        d.Get("name").(string),
-		Description: d.Get("description").(string),
-		Severity:    d.Get("severity").(int),
-		Enabled:     d.Get("enabled").(bool),
-		Type:        d.Get("type").(string),
-		Runbook:     d.Get("runbook").(string),
+func policyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
+	commonPolicyToResourceData(policy, d)
+
+	_ = d.Set("description", policy.Description)
+	_ = d.Set("severity", policy.Severity)
+	if policy.Type != "" {
+		_ = d.Set("type", policy.Type)
+	} else {
+		_ = d.Set("type", "falco")
 	}
 
-	scope := d.Get("scope").(string)
-	if scope != "" {
-		policy.Scope = scope
-	}
+	_ = d.Set("rule_names", policy.RuleNames)
+}
 
-	addActionsToPolicy(d, &policy)
+func commonPolicyFromResourceData(policy *v2.Policy, d *schema.ResourceData) {
+	policy.Name = d.Get("name").(string)
+	policy.Enabled = d.Get("enabled").(bool)
+	policy.Runbook = d.Get("runbook").(string)
+	policy.Scope = d.Get("scope").(string)
+
+	addActionsToPolicy(d, policy)
+
+	policy.NotificationChannelIds = []int{}
+	notificationChannelIdSet := d.Get("notification_channels").(*schema.Set)
+	for _, id := range notificationChannelIdSet.List() {
+		policy.NotificationChannelIds = append(policy.NotificationChannelIds, id.(int))
+	}
+}
+
+func policyFromResourceData(d *schema.ResourceData) v2.Policy {
+	policy := &v2.Policy{}
+	commonPolicyFromResourceData(policy, d)
+
+	policy.Description = d.Get("description").(string)
+	policy.Severity = d.Get("severity").(int)
+	policy.Type = d.Get("type").(string)
 
 	policy.RuleNames = []string{}
 	rule_names := d.Get("rule_names").(*schema.Set)
@@ -217,17 +250,11 @@ func policyFromResourceData(d *schema.ResourceData) secure.Policy {
 		}
 	}
 
-	policy.NotificationChannelIds = []int{}
-	notificationChannelIdSet := d.Get("notification_channels").(*schema.Set)
-	for _, id := range notificationChannelIdSet.List() {
-		policy.NotificationChannelIds = append(policy.NotificationChannelIds, id.(int))
-	}
-
-	return policy
+	return *policy
 }
 
-func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
-	policy.Actions = []secure.Action{}
+func addActionsToPolicy(d *schema.ResourceData, policy *v2.Policy) {
+	policy.Actions = []v2.Action{}
 	actions := d.Get("actions").([]interface{})
 	if len(actions) == 0 {
 		return
@@ -237,14 +264,14 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 	if containerAction != "" {
 		containerAction = strings.ToUpper("POLICY_ACTION_" + containerAction)
 
-		policy.Actions = append(policy.Actions, secure.Action{Type: containerAction})
+		policy.Actions = append(policy.Actions, v2.Action{Type: containerAction})
 	}
 
 	if captureAction := d.Get("actions.0.capture").([]interface{}); len(captureAction) > 0 {
 		afterEventNs := d.Get("actions.0.capture.0.seconds_after_event").(int) * 1000000000
 		beforeEventNs := d.Get("actions.0.capture.0.seconds_before_event").(int) * 1000000000
 		name := d.Get("actions.0.capture.0.name").(string)
-		policy.Actions = append(policy.Actions, secure.Action{
+		policy.Actions = append(policy.Actions, v2.Action{
 			Type:                 "POLICY_ACTION_CAPTURE",
 			IsLimitedToContainer: false,
 			AfterEventNs:         afterEventNs,
@@ -255,13 +282,13 @@ func addActionsToPolicy(d *schema.ResourceData, policy *secure.Policy) {
 }
 
 func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	policy, statusCode, err := client.GetPolicyById(ctx, id)
+	policy, statusCode, err := client.GetPolicyByID(ctx, id)
 
 	if err != nil {
 		d.SetId("")
@@ -276,7 +303,7 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -292,7 +319,7 @@ func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceSysdigPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClient()
+	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}

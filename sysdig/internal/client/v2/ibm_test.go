@@ -58,6 +58,9 @@ func TestIBMClient_DoIBMRequest(t *testing.T) {
 			if value := r.Header.Get(IBMInstanceIDHeader); value != instanceID {
 				t.Errorf("expected instance id %v, got %v", instanceID, value)
 			}
+			if value := r.Header.Get(SysdigProviderHeader); value != SysdigProviderHeaderValue {
+				t.Errorf("expected sysdig provider %v, got %v", SysdigProviderHeaderValue, value)
+			}
 		}))
 
 		var teamID int
@@ -165,7 +168,6 @@ func TestIBMClient_CurrentTeamID(t *testing.T) {
 		if err != nil {
 			t.Errorf("failed to create response, err: %v", err)
 		}
-		return
 	}))
 
 	for _, testCase := range testTable {

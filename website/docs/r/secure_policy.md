@@ -10,7 +10,11 @@ description: |-
 
 Creates a Sysdig Secure Policy.
 
--> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.  
+~> **Deprecation Notice:** The `sysdig_secure_policy` resource has been deprecated and is being replaced by
+`sysdig_secure_custom_policy`, `sysdig_secure_managed_policy`, and `sysdig_secure_managed_ruleset` depending on the type
+of policy.
+
+-> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
@@ -52,14 +56,15 @@ resource "sysdig_secure_policy" "write_apt_database" {
 
 * `enabled` - (Optional) Will secure process with this rule?. By default this is true.
 
-* `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`, `aws_cloudtrail`. By default it is `falco`.
+* `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`,
+  `aws_cloudtrail`, `gcp_auditlog`, `azure_platformlogs`. By default it is `falco`.
 
 * `runbook` - (Optional) Customer provided url that provides a runbook for a given policy. 
 - - -
 
 ### Scope selection
 
-* `scope` - (Optional) Limit appplication scope based in one expresion. For
+* `scope` - (Optional) Limit application scope based in one expression. For
     example: "host.ip.private = \\"10.0.23.1\\"". By default the rule won't be scoped
     and will target the entire infrastructure.
 
