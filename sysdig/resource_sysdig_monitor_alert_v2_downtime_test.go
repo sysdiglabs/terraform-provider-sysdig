@@ -72,17 +72,17 @@ func alertV2DowntimeWithGroupBy(name string) string {
 		name = "TERRAFORM TEST - DOWNTIMEV2 %s"
 		metric = "sysdig_container_up"
 		threshold = 75
-		group_by = ["kube_cluster_name", "kube_pod_name", "cloud_provider_tag_Owner",]
-	
+		group_by = ["kube_cluster_name", "cloud_provider_tag_Owner",]
+
 		scope {
 			label = "kube_cluster_name"
 			operator = "in"
 			values = ["thom-cluster1", "demo-env-prom"]
 		}
-	
+
 		trigger_after_minutes = 15
-	
+
 	}
-	
+
 	`, name)
 }
