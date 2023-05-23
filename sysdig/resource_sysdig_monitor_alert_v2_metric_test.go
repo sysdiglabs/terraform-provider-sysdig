@@ -215,7 +215,7 @@ func alertV2MetricWithGroupBy(name string) string {
 		operator = ">="
 		threshold = 50
 		trigger_after_minutes = 15
-		group_by = ["kube_cluster_name", "kube_pod_name", "cloud_provider_tag_Owner",]
+		group_by = ["kube_cluster_name", "cloud_provider_tag_Owner",]
 
 	}
 	`, name)
