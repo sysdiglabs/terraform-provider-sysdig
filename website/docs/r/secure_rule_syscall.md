@@ -33,7 +33,7 @@ resource "sysdig_secure_rule_syscall" "foo" {
 ### Matching
 
 * `matching` - (Optional) Defines if the syscall name matches or not with the provided list. Default is true.
-* `processes` - (Required) List of syscalls to match.
+* `syscalls` - (Required) List of syscalls to match.
 
 ## Attributes Reference
 
