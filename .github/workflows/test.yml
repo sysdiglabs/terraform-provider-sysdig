@@ -4,6 +4,19 @@ on:
   workflow_call:
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          args: --timeout 30m --build-tags unit,tf_acc_sysdig_monitor,tf_acc_sysdig_secure,tf_acc_ibm_monitor
+
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -88,8 +101,8 @@ jobs:
         run: make testacc
         env:
           TEST_SUITE: tf_acc_ibm_monitor
-          SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
-          SYSDIG_IBM_MONITOR_INSTANCE_ID: 1ec238d3-d8a4-4f08-bf5f-e660e76efeac
+          SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY_TEST }}
+          SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_MONITOR_INSTANCE_ID_TEST }}
           SYSDIG_IBM_MONITOR_IAM_URL: "https://iam.test.cloud.ibm.com"
           SYSDIG_MONITOR_URL: "https://us-south.monitoring.test.cloud.ibm.com"
           SYSDIG_MONITOR_TEAM_NAME: "Monitor Operations"
@@ -114,8 +127,8 @@ jobs:
         run: make testacc
         env:
           TEST_SUITE: tf_acc_ibm_secure
-          SYSDIG_IBM_SECURE_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
-          SYSDIG_IBM_SECURE_INSTANCE_ID: 1ec238d3-d8a4-4f08-bf5f-e660e76efeac
+          SYSDIG_IBM_SECURE_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY_TEST }}
+          SYSDIG_IBM_SECURE_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_SECURE_INSTANCE_ID_TEST }}
           SYSDIG_IBM_SECURE_IAM_URL: "https://iam.test.cloud.ibm.com"
           SYSDIG_SECURE_URL: "https://us-south.monitoring.test.cloud.ibm.com"
           SYSDIG_SECURE_TEAM_NAME: "Secure Operations"

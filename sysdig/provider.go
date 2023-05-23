@@ -156,6 +156,12 @@ func Provider() *schema.Provider {
 			"sysdig_secure_managed_policy":         dataSourceSysdigSecureManagedPolicy(),
 			"sysdig_secure_managed_ruleset":        dataSourceSysdigSecureManagedRuleset(),
 			"sysdig_secure_rule_container":         dataSourceSysdigSecureRuleContainer(),
+			"sysdig_secure_rule_falco":             dataSourceSysdigSecureRuleFalco(),
+			"sysdig_secure_rule_falco_count":       dataSourceSysdigSecureRuleFalcoCount(),
+			"sysdig_secure_rule_filesystem":        dataSourceSysdigSecureRuleFilesystem(),
+			"sysdig_secure_rule_network":           dataSourceSysdigSecureRuleNetwork(),
+			"sysdig_secure_rule_process":           dataSourceSysdigSecureRuleProcess(),
+			"sysdig_secure_rule_syscall":           dataSourceSysdigSecureRuleSyscall(),
 
 			"sysdig_current_user":      dataSourceSysdigCurrentUser(),
 			"sysdig_user":              dataSourceSysdigUser(),

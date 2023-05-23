@@ -259,7 +259,12 @@ type Rule struct {
 }
 
 const (
-	RuleTypeContainer = "CONTAINER"
+	RuleTypeContainer  = "CONTAINER"
+	RuleTypeFalco      = "FALCO"
+	RuleTypeFilesystem = "FILESYSTEM"
+	RuleTypeNetwork    = "NETWORK"
+	RuleTypeProcess    = "PROCESS"
+	RuleTypeSyscall    = "SYSCALL"
 )
 
 type Details struct {

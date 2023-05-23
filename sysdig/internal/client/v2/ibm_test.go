@@ -168,7 +168,6 @@ func TestIBMClient_CurrentTeamID(t *testing.T) {
 		if err != nil {
 			t.Errorf("failed to create response, err: %v", err)
 		}
-		return
 	}))
 
 	for _, testCase := range testTable {
