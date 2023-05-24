@@ -1,5 +1,3 @@
-//go:build tf_acc_sysdig_monitor || tf_acc_ibm_monitor
-
 package sysdig_test
 
 import "fmt"
