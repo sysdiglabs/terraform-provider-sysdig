@@ -107,6 +107,7 @@ func (ir *IBMRequest) getTeamIDByName(ctx context.Context, name string, token IB
 	r.Header.Set(IBMInstanceIDHeader, ir.config.ibmInstanceID)
 	r.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", token))
 	r.Header.Set(SysdigProductHeader, ir.config.product)
+	r.Header.Set(IBMProductHeader, ir.config.product)
 
 	resp, err := request(ir.httpClient, ir.config, r)
 	if err != nil {
@@ -150,6 +151,7 @@ func (ir *IBMRequest) CurrentTeamID(ctx context.Context) (int, error) {
 		IBMInstanceIDHeader: ir.config.ibmInstanceID,
 		AuthorizationHeader: fmt.Sprintf("Bearer %s", token),
 		SysdigProductHeader: ir.config.product,
+		IBMProductHeader:    ir.config.product,
 	})
 	if err != nil {
 		return -1, err
