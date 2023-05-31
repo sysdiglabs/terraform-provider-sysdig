@@ -20,7 +20,8 @@ const (
 	IBMAPIKeyGrantType    = "urn:ibm:params:oauth:grant-type:apikey"
 	SysdigTeamIDHeader    = "SysdigTeamID"
 	GetTeamByNamePath     = "/api/v2/teams/light/name/"
-	IBMProductHeader      = "SysdigProduct"
+	IBMProductHeader      = "X-IBM-Sysdig-Product"
+	//IBMProductHeader      = "SysdigProduct"
 )
 
 type IBMCommon interface {
