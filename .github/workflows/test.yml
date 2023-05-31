@@ -15,7 +15,7 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v2
         with:
-          args: --timeout 30m --build-tags unit,tf_acc_sysdig_monitor,tf_acc_sysdig_secure,tf_acc_ibm_monitor
+          args: --timeout 30m --build-tags unit,tf_acc_sysdig_monitor,tf_acc_sysdig_secure,tf_acc_ibm_monitor,tf_acc_ibm_secure
 
   test:
     name: Unit Tests
