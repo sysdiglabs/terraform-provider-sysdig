@@ -20,6 +20,7 @@ const (
 	IBMAPIKeyGrantType    = "urn:ibm:params:oauth:grant-type:apikey"
 	SysdigTeamIDHeader    = "SysdigTeamID"
 	GetTeamByNamePath     = "/api/v2/teams/light/name/"
+	IBMProductHeader      = "SysdigProduct"
 )
 
 type IBMCommon interface {
@@ -186,6 +187,7 @@ func (ir *IBMRequest) Request(ctx context.Context, method string, url string, pa
 	r.Header.Set(ContentTypeHeader, ContentTypeJSON)
 	r.Header.Set(SysdigProviderHeader, SysdigProviderHeaderValue)
 	r.Header.Set(SysdigProductHeader, ir.config.product)
+	r.Header.Set(IBMProductHeader, ir.config.product)
 
 	return request(ir.httpClient, ir.config, r)
 }
