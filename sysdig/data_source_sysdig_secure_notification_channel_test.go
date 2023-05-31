@@ -4,7 +4,6 @@ package sysdig_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -18,11 +17,7 @@ func TestAccNotificationChannelDataSource(t *testing.T) {
 	rText := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
