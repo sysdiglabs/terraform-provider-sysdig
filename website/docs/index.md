@@ -15,7 +15,7 @@ For Sysdig provider authentication **one of Monitor or Secure authentication is 
 optional.
 
 For either options, the corresponding **URL** and **API Token** must be configured.
-See options bellow.
+See options below.
 
 Sysdig provider can also be used to interact with [IBM Cloud Monitoring](https://cloud.ibm.com/docs/monitoring?topic=monitoring-getting-started). For more details check `IBM Cloud Monitoring Authentication` example and configuration reference below. 
 
