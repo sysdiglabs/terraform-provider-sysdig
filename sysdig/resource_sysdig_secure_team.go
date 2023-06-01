@@ -90,8 +90,26 @@ func resourceSysdigSecureTeam() *schema.Resource {
 	}
 }
 
+func getSecureTeamClient(c SysdigClients) (v2.TeamInterface, error) {
+	var client v2.TeamInterface
+	var err error
+	switch c.GetClientType() {
+	case IBMSecure:
+		client, err = c.ibmSecureClient()
+		if err != nil {
+			return nil, err
+		}
+	default:
+		client, err = c.sysdigSecureClientV2()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
+}
+
 func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClientV2()
+	client, err := getSecureTeamClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -112,7 +130,7 @@ func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData,
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClientV2()
+	client, err := getSecureTeamClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -153,7 +171,7 @@ func userSecureRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface{
 }
 
 func resourceSysdigSecureTeamUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClientV2()
+	client, err := getSecureTeamClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -173,7 +191,7 @@ func resourceSysdigSecureTeamUpdate(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(SysdigClients).sysdigSecureClientV2()
+	client, err := getSecureTeamClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
