@@ -67,7 +67,7 @@ func resourceSysdigGroupMappingConfigCreate(ctx context.Context, d *schema.Resou
 	}
 
 	groupMappingConfig := groupMappingConfigFromResourceData(d)
-	groupMappingConfig, err = client.CreateGroupMappingConfig(ctx, groupMappingConfig)
+	_, err = client.CreateGroupMappingConfig(ctx, groupMappingConfig)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -86,12 +86,11 @@ func resourceSysdigGroupMappingConfigUpdate(ctx context.Context, d *schema.Resou
 	}
 
 	groupMappingConfig := groupMappingConfigFromResourceData(d)
-	groupMappingConfig, err = client.UpdateGroupMappingConfig(ctx, groupMappingConfig)
+	_, err = client.UpdateGroupMappingConfig(ctx, groupMappingConfig)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	// TODO
 	resourceSysdigGroupMappingConfigRead(ctx, d, m)
 
 	return nil
@@ -107,7 +106,9 @@ func groupMappingConfigToResourceData(groupMappingConfig *v2.GroupMappingConfig,
 		return err
 	}
 	err = d.Set("different_team_same_role_strategy", groupMappingConfig.DifferentTeamSameRoleStrategy)
-
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
