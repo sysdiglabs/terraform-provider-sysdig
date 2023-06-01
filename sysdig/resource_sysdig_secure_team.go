@@ -207,6 +207,7 @@ func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData,
 
 func secureTeamFromResourceData(d *schema.ResourceData) v2.Team {
 	canUseSysdigCapture := d.Get("use_sysdig_capture").(bool)
+	canUseAwsMetrics := new(bool)
 	t := v2.Team{
 		Theme:               d.Get("theme").(string),
 		Name:                d.Get("name").(string),
@@ -214,6 +215,7 @@ func secureTeamFromResourceData(d *schema.ResourceData) v2.Team {
 		Show:                d.Get("scope_by").(string),
 		Filter:              d.Get("filter").(string),
 		CanUseSysdigCapture: &canUseSysdigCapture,
+		CanUseAwsMetrics:    canUseAwsMetrics,
 		DefaultTeam:         d.Get("default_team").(bool),
 	}
 
