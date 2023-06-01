@@ -39,7 +39,7 @@ resource "sysdig_group_mapping" "my_group" {
 
 * `team_map` - (Required) Block to define team mapping.
 
-* `weight` - (Optional) The group mapping weight used to solve conflicts. Weight is a positive number, lower number has higher priority
+* `weight` - (Optional) The group mapping weight used to solve conflicts. Weight is a positive number, lower number has higher priority.
 
 ### team_map
 
