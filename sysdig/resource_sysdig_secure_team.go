@@ -203,7 +203,7 @@ func resourceSysdigSecureTeamUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	resourceSysdigMonitorTeamRead(ctx, d, meta)
+	resourceSysdigSecureTeamRead(ctx, d, meta)
 	return nil
 }
 
