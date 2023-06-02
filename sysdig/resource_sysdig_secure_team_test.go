@@ -4,6 +4,7 @@ package sysdig_test
 
 import (
 	"fmt"
+	"github.com/draios/terraform-provider-sysdig/buildinfo"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -32,6 +33,9 @@ func TestAccSecureTeam(t *testing.T) {
 			},
 			{
 				Config: secureTeamWithPlatformMetricsIBM(rText()),
+				SkipFunc: func() (bool, error) {
+					return !buildinfo.IBMSecure, nil
+				},
 			},
 			{
 				ResourceName:      "sysdig_secure_team.sample",
