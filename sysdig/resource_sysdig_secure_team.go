@@ -53,6 +53,14 @@ func resourceSysdigSecureTeam() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"enable_ibm_platform_metrics": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"ibm_platform_metrics": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"use_sysdig_capture": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -109,12 +117,13 @@ func getSecureTeamClient(c SysdigClients) (v2.TeamInterface, error) {
 }
 
 func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureTeamClient(meta.(SysdigClients))
+	clients := meta.(SysdigClients)
+	client, err := getSecureTeamClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	team := secureTeamFromResourceData(d)
+	team := secureTeamFromResourceData(d, clients.GetClientType())
 	team.Products = []string{"SDS"}
 
 	team, err = client.CreateTeam(ctx, team)
@@ -124,13 +133,15 @@ func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData,
 
 	d.SetId(strconv.Itoa(team.ID))
 	_ = d.Set("version", team.Version)
+	resourceSysdigSecureTeamRead(ctx, d, meta)
 
 	return nil
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureTeamClient(meta.(SysdigClients))
+	clients := meta.(SysdigClients)
+	client, err := getSecureTeamClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -153,6 +164,10 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 	_ = d.Set("default_team", t.DefaultTeam)
 	_ = d.Set("user_roles", userSecureRolesToSet(t.UserRoles))
 
+	if clients.GetClientType() == IBMSecure {
+		resourceSysdigTeamReadIBM(d, &t)
+	}
+
 	return nil
 }
 
@@ -171,12 +186,13 @@ func userSecureRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface{
 }
 
 func resourceSysdigSecureTeamUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureTeamClient(meta.(SysdigClients))
+	clients := meta.(SysdigClients)
+	client, err := getSecureTeamClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	t := secureTeamFromResourceData(d)
+	t := secureTeamFromResourceData(d, clients.GetClientType())
 	t.Products = []string{"SDS"}
 
 	t.Version = d.Get("version").(int)
@@ -187,6 +203,7 @@ func resourceSysdigSecureTeamUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
+	resourceSysdigMonitorTeamRead(ctx, d, meta)
 	return nil
 }
 
@@ -205,7 +222,7 @@ func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func secureTeamFromResourceData(d *schema.ResourceData) v2.Team {
+func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team {
 	canUseSysdigCapture := d.Get("use_sysdig_capture").(bool)
 	canUseAwsMetrics := new(bool)
 	t := v2.Team{
@@ -228,6 +245,10 @@ func secureTeamFromResourceData(d *schema.ResourceData) v2.Team {
 		})
 	}
 	t.UserRoles = userRoles
+
+	if clientType == IBMSecure {
+		teamFromResourceDataIBM(d, &t)
+	}
 
 	return t
 }
