@@ -129,5 +129,5 @@ jobs:
           SYSDIG_IBM_SECURE_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY_TEST }}
           SYSDIG_IBM_SECURE_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_SECURE_INSTANCE_ID_TEST }}
           SYSDIG_IBM_SECURE_IAM_URL: "https://iam.test.cloud.ibm.com"
-          SYSDIG_SECURE_URL: "https://jp-osa.dev.monitoring.test.cloud.ibm.com"
+          SYSDIG_SECURE_URL: "https://us-south.monitoring.test.cloud.ibm.com"
           SYSDIG_SECURE_TEAM_NAME: "Secure Operations"

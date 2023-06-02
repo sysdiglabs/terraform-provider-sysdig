@@ -90,7 +90,7 @@ provider "sysdig" {
 }
 ```
 
-### IBM Cloud Secure Authentication
+### IBM Workload Protection Authentication
 
 ```terraform
 provider "sysdig" {
@@ -180,17 +180,17 @@ When IBM Cloud Monitoring resources are to be created, this authentication must 
   It has exactly the same meaning as `sysdig_monitor_team_id`, but instead of specifying team ID you are specifying a team name.</br>
   It can also be configured from the `SYSDIG_MONITOR_TEAM_NAME` environment variable.<br/><br/>
 
-### IBM Cloud Secure Authentication
+### IBM Workload Protection Authentication
 
-When IBM Cloud Secure resources are to be created, this authentication must be in place.
+When IBM Workload Protection resources are to be created, this authentication must be in place.
 
-* `sysdig_secure_url` - (Required) This is the target IBM Cloud Secure API
+* `sysdig_secure_url` - (Required) This is the target IBM Workload Protection API
   endpoint. It can also be sourced from the `SYSDIG_SECURE_URL` environment variable.
   <br/>Notice: it should not be ended with a slash.<br/><br/>
 * `ibm_secure_iam_url` - (Required) This is the target IAM endpoint used to issue IBM IAM token by consuming `ibm_secure_api_key`.
   Provider will handle token expiration and refresh it when needed.
   <br/>It can also be configured from the `SYSDIG_IBM_SECURE_IAM_URL` environment variable.<br/><br/>
-* `ibm_secure_instance_id` (Required) This is the target instance ID (GUID format) of IBM instance which is hosting IBM Cloud Secure.
+* `ibm_secure_instance_id` (Required) This is the target instance ID (GUID format) of IBM instance which is hosting IBM Workload Protection.
   <br/>It can also be configured from the `SYSDIG_IBM_SECURE_INSTANCE_ID` environment variable.
   <br/><br/>
 * `ibm_secure_api_key` (Required) An API key is a unique code that is passed to an IBM IAM service to generate IAM token used for making HTTP request against IBM endpoints.
@@ -198,7 +198,7 @@ When IBM Cloud Secure resources are to be created, this authentication must be i
   <br/>It can also be configured from the `SYSDIG_IBM_SECURE_API_KEY` environment variable.
   <br/><br/>
 * `sysdig_secure_insecure_tls` - (Optional) Defines if the HTTP client can ignore
-  the use of invalid HTTPS certificates in the IBM Cloud Secure API.
+  the use of invalid HTTPS certificates in the IBM Workload Protection API.
   <br/> It can also be sourced from the `SYSDIG_SECURE_INSECURE_TLS`
   environment variable. By default, this is false.<br/><br/>
 * `sysdig_secure_team_id` - (Optional) Use this argument to specify team in which you will be logged in.
