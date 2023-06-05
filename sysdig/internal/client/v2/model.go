@@ -110,6 +110,7 @@ type GroupMapping struct {
 	Role       string   `json:"role,omitempty"`
 	SystemRole string   `json:"systemRole,omitempty"`
 	TeamMap    *TeamMap `json:"teamMap,omitempty"`
+	Weight     int      `json:"weight,omitempty"`
 }
 
 type alertWrapper struct {
