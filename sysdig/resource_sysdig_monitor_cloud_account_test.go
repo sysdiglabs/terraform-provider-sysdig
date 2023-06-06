@@ -24,8 +24,7 @@ func TestCustomerProviderKeys(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config:             monitorCustomerProviderKey(),
-				ExpectNonEmptyPlan: true,
+				Config: monitorCustomerProviderKey(),
 			},
 		},
 	})
