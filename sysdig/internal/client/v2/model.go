@@ -25,6 +25,16 @@ type Team struct {
 	DefaultTeam         bool              `json:"default,omitempty"`
 }
 
+type Team2 struct {
+	Name string `json:"name"`
+	ID   int    `json:"id,omitempty"`
+	Show string `json:"show,omitempty"`
+}
+
+type teamWrapper2 struct {
+	Team Team2 `json:"team"`
+}
+
 type NamespaceFilters struct {
 	IBMPlatformMetrics *string `json:"ibmPlatformMetrics"`
 }

@@ -41,6 +41,7 @@ type Base interface {
 type Common interface {
 	UserInterface
 	TeamInterface
+	TeamInterface2
 	NotificationChannelInterface
 }
 
