@@ -37,7 +37,6 @@ func createTeamResource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team2" "sample" {
   name = "my-team-%s"
-
 }`, name)
 }
 
@@ -45,6 +44,5 @@ func updateTeamResource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team2" "sample" {
   name = "updated-my-team-%s"
-
 }`, name)
 }
