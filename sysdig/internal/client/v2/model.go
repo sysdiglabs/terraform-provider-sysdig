@@ -110,6 +110,12 @@ type GroupMapping struct {
 	Role       string   `json:"role,omitempty"`
 	SystemRole string   `json:"systemRole,omitempty"`
 	TeamMap    *TeamMap `json:"teamMap,omitempty"`
+	Weight     int      `json:"weight,omitempty"`
+}
+
+type GroupMappingConfig struct {
+	NoMappingStrategy             string `json:"noMappingStrategy"`
+	DifferentTeamSameRoleStrategy string `json:"differentRolesSameTeamStrategy"`
 }
 
 type alertWrapper struct {

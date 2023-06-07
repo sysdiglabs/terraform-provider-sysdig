@@ -24,6 +24,7 @@ resource "sysdig_group_mapping" "my_group" {
     all_teams = false
     team_ids = [sysdig_secure_team.my_team.id, sysdig_monitor_team.my_team.id]
   }
+  weight = 10
 }
 
 ```
@@ -37,6 +38,8 @@ resource "sysdig_group_mapping" "my_group" {
 * `system_role` (Optional) The system role that is assigned to the users.
 
 * `team_map` - (Required) Block to define team mapping.
+
+* `weight` - (Optional) The group mapping weight used to solve conflicts. Weight is a positive number, lower number has higher priority.
 
 ### team_map
 
