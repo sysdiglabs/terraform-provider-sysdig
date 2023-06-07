@@ -44,6 +44,11 @@ func TestAccGroupMapping(t *testing.T) {
 						"team_map.0.all_teams",
 						"true",
 					),
+					resource.TestCheckResourceAttr(
+						"sysdig_group_mapping.all_teams",
+						"weight",
+						"10",
+					),
 				),
 			},
 			{
@@ -100,6 +105,7 @@ resource "sysdig_group_mapping" "all_teams" {
   team_map {
     all_teams = true
   }
+  weight = 10
 }
 `, groupName)
 }

@@ -2,11 +2,12 @@ package sysdig
 
 import (
 	"context"
+	"strconv"
+	"time"
+
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strconv"
-	"time"
 )
 
 func resourceSysdigGroupMapping() *schema.Resource {
@@ -60,6 +61,10 @@ func resourceSysdigGroupMapping() *schema.Resource {
 						},
 					},
 				},
+			},
+			"weight": {
+				Type:     schema.TypeInt,
+				Optional: true,
 			},
 		},
 	}
@@ -164,6 +169,7 @@ func groupMappingFromResourceData(d *schema.ResourceData) *v2.GroupMapping {
 		Role:       d.Get("role").(string),
 		SystemRole: d.Get("system_role").(string),
 		TeamMap:    teamMapFromResourceData(d),
+		Weight:     d.Get("weight").(int),
 	}
 }
 
