@@ -45,7 +45,12 @@ func resourceSysdigSecureNotificationChannelWebhookCreate(ctx context.Context, d
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err := secureNotificationChannelWebhookFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	notificationChannel, err := secureNotificationChannelWebhookFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -88,7 +93,12 @@ func resourceSysdigSecureNotificationChannelWebhookUpdate(ctx context.Context, d
 		return diag.FromErr(err)
 	}
 
-	nc, err := secureNotificationChannelWebhookFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	nc, err := secureNotificationChannelWebhookFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -120,8 +130,8 @@ func resourceSysdigSecureNotificationChannelWebhookDelete(ctx context.Context, d
 	return nil
 }
 
-func secureNotificationChannelWebhookFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
-	nc, err = secureNotificationChannelFromResourceData(d)
+func secureNotificationChannelWebhookFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
+	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
 		return
 	}

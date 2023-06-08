@@ -28,6 +28,7 @@ const (
 	SysdigUserAgentHeaderValue = "SysdigTerraform"
 	ContentTypeJSON            = "application/json"
 	ContentTypeFormURLEncoded  = "x-www-form-urlencoded"
+	SysdigProductHeader        = "X-Sysdig-Product"
 )
 
 var (

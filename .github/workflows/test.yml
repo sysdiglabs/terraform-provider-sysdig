@@ -15,7 +15,7 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v2
         with:
-          args: --timeout 30m --build-tags unit,tf_acc_sysdig_monitor,tf_acc_sysdig_secure,tf_acc_ibm_monitor
+          args: --timeout 30m --build-tags unit,tf_acc_sysdig_monitor,tf_acc_sysdig_secure,tf_acc_ibm_monitor,tf_acc_ibm_secure
 
   test:
     name: Unit Tests
@@ -105,3 +105,28 @@ jobs:
           SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_MONITOR_INSTANCE_ID }}
           SYSDIG_IBM_MONITOR_IAM_URL: "https://iam.cloud.ibm.com"
           SYSDIG_MONITOR_URL: "https://eu-gb.monitoring.cloud.ibm.com"
+
+  test-ibm-secure:
+    name: IBM Secure Acceptance Tests
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+          cache: true
+
+      - name: Test
+        run: make testacc
+        env:
+          TEST_SUITE: tf_acc_ibm_secure
+          SYSDIG_IBM_SECURE_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
+          SYSDIG_IBM_SECURE_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_SECURE_INSTANCE_ID }}
+          SYSDIG_IBM_SECURE_IAM_URL: "https://iam.cloud.ibm.com"
+          SYSDIG_SECURE_URL: "https://eu-gb.monitoring.cloud.ibm.com"

@@ -10,6 +10,7 @@ const (
 	SysdigMonitorApiTokenEnv  = "SYSDIG_MONITOR_API_TOKEN"
 	SysdigSecureApiTokenEnv   = "SYSDIG_SECURE_API_TOKEN"
 	SysdigIBMMonitorAPIKeyEnv = "SYSDIG_IBM_MONITOR_API_KEY"
+	SysdigIBMSecureAPIKeyEnv  = "SYSDIG_IBM_SECURE_API_KEY"
 )
 
 func isAnyEnvSet(envs ...string) bool {

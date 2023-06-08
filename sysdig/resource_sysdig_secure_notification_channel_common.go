@@ -15,6 +15,11 @@ func createSecureNotificationChannelSchema(original map[string]*schema.Schema) m
 			Type:     schema.TypeBool,
 			Required: true,
 		},
+		"share_with_current_team": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
 		"notify_when_ok": {
 			Type:     schema.TypeBool,
 			Required: true,
@@ -41,10 +46,17 @@ func createSecureNotificationChannelSchema(original map[string]*schema.Schema) m
 	return notificationChannelSchema
 }
 
-func secureNotificationChannelFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
+func secureNotificationChannelFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
+	var tID *int
+	shareWithCurrentTeam := d.Get("share_with_current_team").(bool)
+	if shareWithCurrentTeam {
+		tID = &teamID
+	}
+
 	nc = v2.NotificationChannel{
 		Name:    d.Get("name").(string),
 		Enabled: d.Get("enabled").(bool),
+		TeamID:  tID,
 		Options: v2.NotificationChannelOptions{
 			NotifyOnOk:           d.Get("notify_when_ok").(bool),
 			NotifyOnResolve:      d.Get("notify_when_resolved").(bool),
@@ -58,6 +70,15 @@ func secureNotificationChannelToResourceData(nc *v2.NotificationChannel, data *s
 	_ = data.Set("version", nc.Version)
 	_ = data.Set("name", nc.Name)
 	_ = data.Set("enabled", nc.Enabled)
+	var shareWithCurrentTeam bool
+	if nc.TeamID != nil {
+		shareWithCurrentTeam = true
+	}
+
+	err = data.Set("share_with_current_team", shareWithCurrentTeam)
+	if err != nil {
+		return err
+	}
 	_ = data.Set("notify_when_ok", nc.Options.NotifyOnOk)
 	_ = data.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
 	_ = data.Set("send_test_notification", nc.Options.SendTestNotification)
@@ -66,5 +87,19 @@ func secureNotificationChannelToResourceData(nc *v2.NotificationChannel, data *s
 }
 
 func getSecureNotificationChannelClient(c SysdigClients) (v2.NotificationChannelInterface, error) {
-	return c.sysdigSecureClientV2()
+	var client v2.NotificationChannelInterface
+	var err error
+	switch c.GetClientType() {
+	case IBMSecure:
+		client, err = c.ibmSecureClient()
+		if err != nil {
+			return nil, err
+		}
+	default:
+		client, err = c.sysdigSecureClientV2()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }

@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig_secure || tf_acc_sysdig_common
+//go:build tf_acc_sysdig_secure || tf_acc_sysdig_common || tf_acc_ibm_secure || tf_acc_ibm_common
 
 package sysdig_test
 
@@ -18,7 +18,7 @@ func TestAccSecureNotificationChannelOpsGenie(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
+		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -38,6 +38,14 @@ func TestAccSecureNotificationChannelOpsGenie(t *testing.T) {
 			},
 			{
 				ResourceName:      "sysdig_secure_notification_channel_opsgenie.sample-opsgenie-2",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: secureNotificationChannelOpsGenieSharedWithCurrentTeam(rText()),
+			},
+			{
+				ResourceName:      "sysdig_secure_notification_channel_opsgenie.sample-opsgenie-3",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -61,6 +69,19 @@ func secureNotificationChannelOpsGenieWithNameAndRegion(name string) string {
 resource "sysdig_secure_notification_channel_opsgenie" "sample-opsgenie-2" {
 	name = "Example Channel %s - OpsGenie - 2"
 	enabled = true
+	api_key = "2349324-342354353-5324-23"
+	notify_when_ok = false
+	notify_when_resolved = false
+	region = "EU"
+}`, name)
+}
+
+func secureNotificationChannelOpsGenieSharedWithCurrentTeam(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_notification_channel_opsgenie" "sample-opsgenie-3" {
+	name = "Example Channel %s - OpsGenie - 3"
+	enabled = true
+    share_with_current_team = true
 	api_key = "2349324-342354353-5324-23"
 	notify_when_ok = false
 	notify_when_resolved = false

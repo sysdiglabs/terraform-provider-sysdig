@@ -20,6 +20,7 @@ const (
 	IBMAPIKeyGrantType    = "urn:ibm:params:oauth:grant-type:apikey"
 	SysdigTeamIDHeader    = "SysdigTeamID"
 	GetTeamByNamePath     = "/api/v2/teams/light/name/"
+	IBMProductHeader      = "SysdigProduct"
 )
 
 type IBMCommon interface {
@@ -29,6 +30,10 @@ type IBMCommon interface {
 type IBMMonitor interface {
 	IBMCommon
 	MonitorCommon
+}
+
+type IBMSecure interface {
+	IBMCommon
 }
 
 type IBMAccessToken string
@@ -101,6 +106,8 @@ func (ir *IBMRequest) getTeamIDByName(ctx context.Context, name string, token IB
 	r = r.WithContext(ctx)
 	r.Header.Set(IBMInstanceIDHeader, ir.config.ibmInstanceID)
 	r.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", token))
+	r.Header.Set(SysdigProductHeader, ir.config.product)
+	r.Header.Set(IBMProductHeader, ir.config.product)
 
 	resp, err := request(ir.httpClient, ir.config, r)
 	if err != nil {
@@ -143,6 +150,8 @@ func (ir *IBMRequest) CurrentTeamID(ctx context.Context) (int, error) {
 	user, err := getMe(ctx, ir.config, ir.httpClient, map[string]string{
 		IBMInstanceIDHeader: ir.config.ibmInstanceID,
 		AuthorizationHeader: fmt.Sprintf("Bearer %s", token),
+		SysdigProductHeader: ir.config.product,
+		IBMProductHeader:    ir.config.product,
 	})
 	if err != nil {
 		return -1, err
@@ -179,6 +188,8 @@ func (ir *IBMRequest) Request(ctx context.Context, method string, url string, pa
 	r.Header.Set(SysdigTeamIDHeader, strconv.Itoa(teamID))
 	r.Header.Set(ContentTypeHeader, ContentTypeJSON)
 	r.Header.Set(SysdigProviderHeader, SysdigProviderHeaderValue)
+	r.Header.Set(SysdigProductHeader, ir.config.product)
+	r.Header.Set(IBMProductHeader, ir.config.product)
 
 	return request(ir.httpClient, ir.config, r)
 }
@@ -198,5 +209,9 @@ func newIBMClient(opts ...ClientOption) *Client {
 }
 
 func NewIBMMonitor(opts ...ClientOption) IBMMonitor {
+	return newIBMClient(opts...)
+}
+
+func NewIBMSecure(opts ...ClientOption) IBMSecure {
 	return newIBMClient(opts...)
 }

@@ -10,7 +10,15 @@ type config struct {
 	ibmIamURL      string
 	sysdigTeamName string
 	sysdigTeamID   *int
+	product        string
 }
+
+type Product string
+
+const (
+	MonitorProduct Product = "SDC"
+	SecureProduct  Product = "SDS"
+)
 
 type ClientOption func(c *config)
 
@@ -65,6 +73,18 @@ func WithSysdigTeamID(teamID *int) ClientOption {
 func WithSysdigTeamName(teamName string) ClientOption {
 	return func(c *config) {
 		c.sysdigTeamName = teamName
+	}
+}
+
+func WithMonitorProduct() ClientOption {
+	return func(c *config) {
+		c.product = string(MonitorProduct)
+	}
+}
+
+func WithSecureProduct() ClientOption {
+	return func(c *config) {
+		c.product = string(SecureProduct)
 	}
 }
 
