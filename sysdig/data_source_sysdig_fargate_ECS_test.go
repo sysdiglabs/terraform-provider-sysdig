@@ -25,6 +25,8 @@ var (
 		SysdigLogging:    "sysdig_logging",
 	}
 
+	testIgnoreContainers = []string{}
+
 	testContainerDefinitionFiles = []string{
 		"fargate_entrypoint_test",
 		"fargate_env_test",
@@ -32,6 +34,7 @@ var (
 		"fargate_linuxparameters_test",
 		"fargate_combined_test",
 		"fargate_volumesfrom_test",
+		"fargate_field_case_test",
 	}
 )
 
@@ -86,7 +89,7 @@ func TestECStransformation(t *testing.T) {
 		RecipeConfig:       string(jsonConf),
 	}
 
-	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig, nil)
+	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig, nil, &testIgnoreContainers)
 	if err != nil {
 		t.Fatalf("Cannot execute PatchFargateTaskDefinition : %v", err.Error())
 	}
@@ -105,6 +108,7 @@ func TestECStransformation(t *testing.T) {
 		VolumesFrom      []interface{}       `json:"VolumesFrom"`
 		LogConfiguration interface{}         `json:"LogConfiguration"`
 		Name             string              `json:"Name"`
+		Name2            string              `json:"name"`
 		Image2           string              `json:"image"`
 		EntryPoint2      string              `json:"entryPoint"`
 	}
@@ -120,7 +124,9 @@ func TestECStransformation(t *testing.T) {
 		t.Fatalf("Error Unmarshaling expected Container definitions: %v", err.Error())
 	}
 
+	// Check if Name key is correct
 	assert.Equal(t, expectedContainerDefinitions[0].Name, patchedContainerDefinitions[0].Name)
+	assert.Equal(t, expectedContainerDefinitions[0].Name2, "")
 
 	// The order received from patchedOutput changes continuously hence it is important to check if the arrays of expected and actual are equal without order being correct. This check also
 	// helps with checking if key/value is named "Name" and "Value" accordingly.
@@ -148,7 +154,7 @@ func TestTransform(t *testing.T) {
 			}
 
 			inputContainerDefinition, _ := os.ReadFile("testfiles/" + testName + ".json")
-			patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, nil)
+			patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, nil, &testIgnoreContainers)
 			expectedContainerDefinition, _ := os.ReadFile("testfiles/" + testName + "_expected.json")
 
 			sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
@@ -173,8 +179,28 @@ func TestLogGroup(t *testing.T) {
 	}
 
 	inputContainerDefinition, _ := os.ReadFile("testfiles/fargate_log_group.json")
-	patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, logConfig)
+	patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, logConfig, &testIgnoreContainers)
 	expectedContainerDefinition, _ := os.ReadFile("testfiles/fargate_log_group_expected.json")
+
+	sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
+}
+
+func TestIgnoreContainers(t *testing.T) {
+	jsonConfig, _ := json.Marshal(testKiltDefinition)
+	kiltConfig := &cfnpatcher.Configuration{
+		Kilt:               agentinoKiltDefinition,
+		ImageAuthSecret:    "image_auth_secret",
+		OptIn:              false,
+		UseRepositoryHints: true,
+		RecipeConfig:       string(jsonConfig),
+	}
+
+	fileTemplate := "fargate_ignore_container_test"
+	ignoreContainers := []string{"other", "another"}
+
+	inputContainerDefinition, _ := os.ReadFile("testfiles/" + fileTemplate + ".json")
+	patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, nil, &ignoreContainers)
+	expectedContainerDefinition, _ := os.ReadFile("testfiles/" + fileTemplate + "_expected.json")
 
 	sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
 }

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/Jeffail/gabs/v2"
 	"github.com/aws/aws-sdk-go/aws"
@@ -81,6 +82,12 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 				Description: "the collector port to connect to",
 				Optional:    true,
 			},
+			"ignore_containers": {
+				Type:        schema.TypeList,
+				Description: "list of containers to not add instrumentation to",
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"log_configuration": {
 				Type:        schema.TypeSet,
 				MaxItems:    1,
@@ -119,9 +126,15 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 	}
 }
 
+type cfnTag struct {
+	Key   string `json:"Key"`
+	Value string `json:"Value"`
+}
+
 type cfnProperties struct {
 	RequiresCompatibilities []string                 `json:"RequiresCompatibilities"`
 	ContainerDefinitions    []map[string]interface{} `json:"ContainerDefinitions"`
+	Tags                    []cfnTag                 `json:"Tags"`
 }
 
 type cfnResource struct {
@@ -171,11 +184,21 @@ func fargatePostKiltModifications(patchedBytes []byte, logConfig map[string]inte
 }
 
 // PatchFargateTaskDefinition modifies the container definitions
-func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string, kiltConfig *cfnpatcher.Configuration, logConfig map[string]interface{}) (patched *string, err error) {
+func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string, kiltConfig *cfnpatcher.Configuration, logConfig map[string]interface{}, ignoreContainers *[]string) (patched *string, err error) {
 	var cdefs []map[string]interface{}
 	err = json.Unmarshal([]byte(containerDefinitions), &cdefs)
 	if err != nil {
 		return nil, err
+	}
+
+	// Convert the ignore containers list into Kilt tags for the patcher
+	tags := []cfnTag{}
+	if len(*ignoreContainers) > 0 {
+		containerTagValue := strings.Join(*ignoreContainers, ":")
+		tags = append(tags, cfnTag{
+			Key:   "kilt-ignore-containers",
+			Value: containerTagValue,
+		})
 	}
 
 	stack := cfnStack{
@@ -185,6 +208,7 @@ func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string
 				Properties: cfnProperties{
 					RequiresCompatibilities: []string{"FARGATE"},
 					ContainerDefinitions:    cdefs,
+					Tags:                    tags,
 				},
 			},
 		},
@@ -270,12 +294,23 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 
 	containerDefinitions := d.Get("container_definitions").(string)
 
+	ignoreContainersField := d.Get("ignore_containers")
+	ignoreContainers := []string{}
+	if ignoreContainersField != nil {
+		for _, value := range ignoreContainersField.([]interface{}) {
+			if value_str, ok := value.(string); ok {
+				value_str = strings.TrimSpace(value_str)
+				ignoreContainers = append(ignoreContainers, value_str)
+			}
+		}
+	}
+
 	logConfig := map[string]interface{}{}
 	if logConfiguration := d.Get("log_configuration").(*schema.Set).List(); len(logConfiguration) > 0 {
 		logConfig = logConfiguration[0].(map[string]interface{})
 	}
 
-	outputContainerDefinitions, err := patchFargateTaskDefinition(ctx, containerDefinitions, kiltConfig, logConfig)
+	outputContainerDefinitions, err := patchFargateTaskDefinition(ctx, containerDefinitions, kiltConfig, logConfig, &ignoreContainers)
 	if err != nil {
 		return diag.Errorf("Error applying configuration patch: %v", err.Error())
 	}

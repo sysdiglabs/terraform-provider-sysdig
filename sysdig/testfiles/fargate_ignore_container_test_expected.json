@@ -6,10 +6,7 @@
             "/opt/draios/bin/instrument"
         ],
         "Command": [
-            "/bin/test",
-            "test",
-            "--test-arg",
-            "test-arg-value"
+            "/bin/test"
         ],
         "Environment": [
             {
@@ -35,14 +32,6 @@
             {
                 "Name": "SYSDIG_ORCHESTRATOR",
                 "Value": "orchestrator_host"
-            },
-            {
-                "Name": "TMP",
-                "Value": "temporary"
-            },
-            {
-                "Name": "SYSDIG_CUSTOM",
-                "Value": "custom"
             }
         ],
         "LinuxParameters": {
@@ -55,12 +44,22 @@
         "VolumesFrom": [
             {
                 "ReadOnly": true,
-                "SourceContainer": "test_container"
-            },
-            {
-                "ReadOnly": true,
                 "SourceContainer": "SysdigInstrumentation"
             }
+        ]
+    },
+    {
+        "Name": "other",
+        "Image": "other_image:latest",
+        "EntryPoint": [
+            "/bin/other"
+        ]
+    },
+    {
+        "Name": "another",
+        "Image": "another_image:latest",
+        "EntryPoint": [
+            "/bin/another"
         ]
     },
     {

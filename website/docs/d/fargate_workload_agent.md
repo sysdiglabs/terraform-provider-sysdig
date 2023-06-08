@@ -42,6 +42,7 @@ data "sysdig_fargate_workload_agent" "instrumented_containers" {
   * `stream_prefix` - Prefix for the instrumentation log stream
   * `region` - The AWS region where the target log group resides
 * `sysdig_logging` - (Optional) The instrumentation logging level: `trace`, `debug`, `info`, `warning`, `error`, `silent`.
+* `ignore_containers` - (Optional) A list of containers in this data source that should not be instrumented.
 
 
 ## Attributes Reference

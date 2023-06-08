@@ -66,7 +66,7 @@
         "awslogs-stream-prefix": "ecs"
       }
     },
-    "name": "busybox"
+    "Name": "busybox"
   },
   {
     "EntryPoint": [

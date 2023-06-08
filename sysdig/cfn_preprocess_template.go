@@ -96,6 +96,19 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 				}
 			}
 
+			if container.Exists("name") {
+				passthrough, _ := GetValueFromTemplate(container.S("name"))
+				_, err = container.Set(passthrough, "Name")
+				if err != nil {
+					return nil, fmt.Errorf("Could not update Name field: %v", err)
+				}
+
+				err = container.Delete("name")
+				if err != nil {
+					return nil, fmt.Errorf("could not delete name in the Container definition: %w", err)
+				}
+			}
+
 			if container.Exists("environment") {
 				for _, env := range container.S("environment").Children() {
 					if env.Exists("name") {

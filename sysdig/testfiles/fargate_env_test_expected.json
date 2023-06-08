@@ -1,6 +1,6 @@
 [
     {
-        "name": "test",
+        "Name": "test",
         "Image": "test_image:latest",
         "EntryPoint": [
             "/opt/draios/bin/instrument"
