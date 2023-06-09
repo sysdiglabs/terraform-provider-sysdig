@@ -1,10 +1,10 @@
-//go:build tf_acc_sysdig_secure || tf_acc_sysdig_common
+//go:build tf_acc_sysdig_secure || tf_acc_sysdig_common || tf_acc_ibm_secure || tf_acc_ibm_common
 
 package sysdig_test
 
 import (
 	"fmt"
-	"os"
+	"github.com/draios/terraform-provider-sysdig/buildinfo"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -18,11 +18,7 @@ func TestAccSecureTeam(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -34,6 +30,12 @@ func TestAccSecureTeam(t *testing.T) {
 			},
 			{
 				Config: secureTeamMinimumConfiguration(rText()),
+			},
+			{
+				Config: secureTeamWithPlatformMetricsIBM(rText()),
+				SkipFunc: func() (bool, error) {
+					return !buildinfo.IBMSecure, nil
+				},
 			},
 			{
 				ResourceName:      "sysdig_secure_team.sample",
@@ -59,5 +61,14 @@ func secureTeamMinimumConfiguration(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_team" "sample" {
   name      = "sample-%s"
+}`, name)
+}
+
+func secureTeamWithPlatformMetricsIBM(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_team" "sample" {
+  name = "sample-%s"
+  enable_ibm_platform_metrics = true
+  ibm_platform_metrics = "foo in (\"0\") and bar in (\"3\")"
 }`, name)
 }
