@@ -47,7 +47,12 @@ func resourceSysdigSecureNotificationChannelEmailCreate(ctx context.Context, d *
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err := secureNotificationChannelEmailFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	notificationChannel, err := secureNotificationChannelEmailFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -90,7 +95,12 @@ func resourceSysdigSecureNotificationChannelEmailUpdate(ctx context.Context, d *
 		return diag.FromErr(err)
 	}
 
-	nc, err := secureNotificationChannelEmailFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	nc, err := secureNotificationChannelEmailFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -121,8 +131,8 @@ func resourceSysdigSecureNotificationChannelEmailDelete(ctx context.Context, d *
 	return nil
 }
 
-func secureNotificationChannelEmailFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
-	nc, err = secureNotificationChannelFromResourceData(d)
+func secureNotificationChannelEmailFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
+	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
 		return
 	}

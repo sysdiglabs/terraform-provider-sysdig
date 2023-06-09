@@ -11,11 +11,12 @@ func _() {
 	_ = x[SysdigMonitor-0]
 	_ = x[SysdigSecure-1]
 	_ = x[IBMMonitor-2]
+	_ = x[IBMSecure-3]
 }
 
-const _ClientType_name = "SysdigMonitorSysdigSecureIBMMonitor"
+const _ClientType_name = "SysdigMonitorSysdigSecureIBMMonitorIBMSecure"
 
-var _ClientType_index = [...]uint8{0, 13, 25, 35}
+var _ClientType_index = [...]uint8{0, 13, 25, 35, 44}
 
 func (i ClientType) String() string {
 	if i < 0 || i >= ClientType(len(_ClientType_index)-1) {

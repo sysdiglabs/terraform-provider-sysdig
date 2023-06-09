@@ -55,7 +55,12 @@ func resourceSysdigSecureNotificationChannelSlackCreate(ctx context.Context, d *
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err := secureNotificationChannelSlackFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	notificationChannel, err := secureNotificationChannelSlackFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -98,7 +103,12 @@ func resourceSysdigSecureNotificationChannelSlackUpdate(ctx context.Context, d *
 		return diag.FromErr(err)
 	}
 
-	nc, err := secureNotificationChannelSlackFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	nc, err := secureNotificationChannelSlackFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -129,8 +139,8 @@ func resourceSysdigSecureNotificationChannelSlackDelete(ctx context.Context, d *
 	return nil
 }
 
-func secureNotificationChannelSlackFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
-	nc, err = secureNotificationChannelFromResourceData(d)
+func secureNotificationChannelSlackFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
+	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
 		return
 	}

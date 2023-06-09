@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig_secure || tf_acc_sysdig_common
+//go:build tf_acc_sysdig_secure || tf_acc_sysdig_common || tf_acc_ibm_secure || tf_acc_ibm_common
 
 package sysdig_test
 
@@ -18,7 +18,7 @@ func TestAccSecureNotificationChannelSNS(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
+		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -27,6 +27,9 @@ func TestAccSecureNotificationChannelSNS(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: secureNotificationChannelAmazonSNSWithName(rText()),
+			},
+			{
+				Config: secureNotificationChannelAmazonSNSShareWithCurrentTeam(rText()),
 			},
 			{
 				ResourceName:      "sysdig_secure_notification_channel_sns.sample-amazon-sns",
@@ -41,6 +44,19 @@ func secureNotificationChannelAmazonSNSWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel_sns" "sample-amazon-sns" {
 	name = "Example Channel %s - Amazon SNS"
+	enabled = true
+	topics = ["arn:aws:sns:us-east-1:273489009834:my-alerts2", "arn:aws:sns:us-east-1:279948934544:my-alerts"]
+	notify_when_ok = false
+	notify_when_resolved = false
+	send_test_notification = false
+}`, name)
+}
+
+func secureNotificationChannelAmazonSNSShareWithCurrentTeam(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_notification_channel_sns" "sample-amazon-sns" {
+	name = "Example Channel %s - Amazon SNS"
+    share_with_current_team = true
 	enabled = true
 	topics = ["arn:aws:sns:us-east-1:273489009834:my-alerts2", "arn:aws:sns:us-east-1:279948934544:my-alerts"]
 	notify_when_ok = false

@@ -52,7 +52,12 @@ func resourceSysdigSecureNotificationChannelOpsGenieCreate(ctx context.Context, 
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err := secureNotificationChannelOpsGenieFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	notificationChannel, err := secureNotificationChannelOpsGenieFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -95,7 +100,12 @@ func resourceSysdigSecureNotificationChannelOpsGenieUpdate(ctx context.Context, 
 		return diag.FromErr(err)
 	}
 
-	nc, err := secureNotificationChannelOpsGenieFromResourceData(d)
+	teamID, err := client.CurrentTeamID(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	nc, err := secureNotificationChannelOpsGenieFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -126,8 +136,8 @@ func resourceSysdigSecureNotificationChannelOpsGenieDelete(ctx context.Context, 
 	return nil
 }
 
-func secureNotificationChannelOpsGenieFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
-	nc, err = secureNotificationChannelFromResourceData(d)
+func secureNotificationChannelOpsGenieFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
+	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
 		return
 	}
