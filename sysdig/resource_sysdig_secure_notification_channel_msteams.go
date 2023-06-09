@@ -187,7 +187,6 @@ func secureNotificationChannelMSTeamsToResourceData(nc *v2.NotificationChannel, 
 	}
 
 	_ = d.Set("url", nc.Options.Url)
-	_ = d.Set("channel", nc.Options.Channel)
 
 	err = getTemplateVersionFromNotificationChannelMSTeams(nc, d)
 
