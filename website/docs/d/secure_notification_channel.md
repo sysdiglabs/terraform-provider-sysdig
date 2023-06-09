@@ -71,6 +71,8 @@ In addition to all arguments above, the following attributes are exported:
 
 * `channel` - Channel name from this Slack.
 
+* `template_version` - The chosen template version for this channel
+
 ### Attributes for type PAGERDUTY
 
 * `account` - Pagerduty account.
@@ -78,3 +80,9 @@ In addition to all arguments above, the following attributes are exported:
 * `service_key` - Service Key for the Pagerduty account.
 
 * `service_name` - Service name for the Pagerduty account.
+
+### Attributes for type MS_TEAMS
+
+* `url` - URL of the MS Teams webhook.
+
+* `template_version` - The chosen template version for this channel

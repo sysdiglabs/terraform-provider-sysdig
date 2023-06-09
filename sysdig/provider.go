@@ -89,6 +89,7 @@ func Provider() *schema.Provider {
 			"sysdig_secure_notification_channel_webhook":   resourceSysdigSecureNotificationChannelWebhook(),
 			"sysdig_secure_notification_channel_slack":     resourceSysdigSecureNotificationChannelSlack(),
 			"sysdig_secure_notification_channel_pagerduty": resourceSysdigSecureNotificationChannelPagerduty(),
+			"sysdig_secure_notification_channel_msteams":   resourceSysdigSecureNotificationChannelMSTeams(),
 			"sysdig_secure_rule_container":                 resourceSysdigSecureRuleContainer(),
 			"sysdig_secure_rule_filesystem":                resourceSysdigSecureRuleFilesystem(),
 			"sysdig_secure_rule_network":                   resourceSysdigSecureRuleNetwork(),

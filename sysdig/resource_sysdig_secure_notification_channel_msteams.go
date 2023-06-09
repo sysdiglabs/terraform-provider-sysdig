@@ -13,14 +13,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceSysdigSecureNotificationChannelSlack() *schema.Resource {
+func resourceSysdigSecureNotificationChannelMSTeams() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigSecureNotificationChannelSlackCreate,
-		UpdateContext: resourceSysdigSecureNotificationChannelSlackUpdate,
-		ReadContext:   resourceSysdigSecureNotificationChannelSlackRead,
-		DeleteContext: resourceSysdigSecureNotificationChannelSlackDelete,
+		CreateContext: resourceSysdigSecureNotificationChannelMSTeamsCreate,
+		UpdateContext: resourceSysdigSecureNotificationChannelMSTeamsUpdate,
+		ReadContext:   resourceSysdigSecureNotificationChannelMSTeamsRead,
+		DeleteContext: resourceSysdigSecureNotificationChannelMSTeamsDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -37,10 +37,6 @@ func resourceSysdigSecureNotificationChannelSlack() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"channel": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"template_version": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -49,13 +45,13 @@ func resourceSysdigSecureNotificationChannelSlack() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureNotificationChannelSlackCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelMSTeamsCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err := secureNotificationChannelSlackFromResourceData(d)
+	notificationChannel, err := secureNotificationChannelMSTeamsFromResourceData(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -71,7 +67,7 @@ func resourceSysdigSecureNotificationChannelSlackCreate(ctx context.Context, d *
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelMSTeamsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -84,7 +80,7 @@ func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *sc
 		d.SetId("")
 	}
 
-	err = secureNotificationChannelSlackToResourceData(&nc, d)
+	err = secureNotificationChannelMSTeamsToResourceData(&nc, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -92,13 +88,13 @@ func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *sc
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelSlackUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelMSTeamsUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	nc, err := secureNotificationChannelSlackFromResourceData(d)
+	nc, err := secureNotificationChannelMSTeamsFromResourceData(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -114,7 +110,7 @@ func resourceSysdigSecureNotificationChannelSlackUpdate(ctx context.Context, d *
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelSlackDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelMSTeamsDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -129,29 +125,28 @@ func resourceSysdigSecureNotificationChannelSlackDelete(ctx context.Context, d *
 	return nil
 }
 
-func secureNotificationChannelSlackFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
+func secureNotificationChannelMSTeamsFromResourceData(d *schema.ResourceData) (nc v2.NotificationChannel, err error) {
 	nc, err = secureNotificationChannelFromResourceData(d)
 	if err != nil {
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_SLACK
+	nc.Type = NOTIFICATION_CHANNEL_TYPE_MS_TEAMS
 	nc.Options.Url = d.Get("url").(string)
-	nc.Options.Channel = d.Get("channel").(string)
 
-	setNotificationChannelSlackTemplateConfig(&nc, d)
+	setNotificationChannelMSTeamsTemplateConfig(&nc, d)
 
 	return
 }
 
-func setNotificationChannelSlackTemplateConfig(nc *v2.NotificationChannel, d *schema.ResourceData) {
+func setNotificationChannelMSTeamsTemplateConfig(nc *v2.NotificationChannel, d *schema.ResourceData) {
 	templateVersion := d.Get("template_version").(string)
 
 	switch templateVersion {
 	case "v1":
 		nc.Options.TemplateConfiguration = []v2.NotificationChannelTemplateConfiguration{
 			{
-				TemplateKey: NOTIFICATION_CHANNEL_TYPE_SLACK_TEMPLATE_KEY_V1,
+				TemplateKey: NOTIFICATION_CHANNEL_TYPE_MS_TEAMS_TEMPLATE_KEY_V1,
 				TemplateConfigurationSections: []v2.NotificationChannelTemplateConfigurationSection{
 					{
 						SectionName: NOTIFICATION_CHANNEL_SECURE_EVENT_NOTIFICATION_CONTENT_SECTION,
@@ -163,7 +158,7 @@ func setNotificationChannelSlackTemplateConfig(nc *v2.NotificationChannel, d *sc
 	case "v2":
 		nc.Options.TemplateConfiguration = []v2.NotificationChannelTemplateConfiguration{
 			{
-				TemplateKey: NOTIFICATION_CHANNEL_TYPE_SLACK_TEMPLATE_KEY_V2,
+				TemplateKey: NOTIFICATION_CHANNEL_TYPE_MS_TEAMS_TEMPLATE_KEY_V2,
 				TemplateConfigurationSections: []v2.NotificationChannelTemplateConfigurationSection{
 					{
 						SectionName: NOTIFICATION_CHANNEL_SECURE_EVENT_NOTIFICATION_CONTENT_SECTION,
@@ -175,7 +170,7 @@ func setNotificationChannelSlackTemplateConfig(nc *v2.NotificationChannel, d *sc
 	}
 }
 
-func secureNotificationChannelSlackToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
+func secureNotificationChannelMSTeamsToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = secureNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return
@@ -184,22 +179,22 @@ func secureNotificationChannelSlackToResourceData(nc *v2.NotificationChannel, d 
 	_ = d.Set("url", nc.Options.Url)
 	_ = d.Set("channel", nc.Options.Channel)
 
-	err = getTemplateVersionFromNotificationChannelSlack(nc, d)
+	err = getTemplateVersionFromNotificationChannelMSTeams(nc, d)
 
 	return
 }
 
-func getTemplateVersionFromNotificationChannelSlack(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
+func getTemplateVersionFromNotificationChannelMSTeams(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	if len(nc.Options.TemplateConfiguration) == 0 {
 		return
 	}
 
 	if len(nc.Options.TemplateConfiguration) > 1 {
-		return fmt.Errorf("expected slack notification templates to have only one configuration, found %d", len(nc.Options.TemplateConfiguration))
+		return fmt.Errorf("expected ms teams notification templates to have only one configuration, found %d", len(nc.Options.TemplateConfiguration))
 	}
 
 	switch nc.Options.TemplateConfiguration[0].TemplateKey {
-	case NOTIFICATION_CHANNEL_TYPE_SLACK_TEMPLATE_KEY_V2:
+	case NOTIFICATION_CHANNEL_TYPE_MS_TEAMS_TEMPLATE_KEY_V2:
 		_ = d.Set("template_version", "v2")
 	default:
 		_ = d.Set("template_version", "v1")

@@ -14,7 +14,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccSecureNotificationChannelSlack(t *testing.T) {
+func TestAccSecureNotificationChannelMSTeams(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -26,21 +26,21 @@ func TestAccSecureNotificationChannelSlack(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureNotificationChannelSlackWithName(rText()),
+				Config: secureNotificationChannelMSTeamsWithName(rText()),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_slack.sample-slack",
+				ResourceName:      "sysdig_secure_notification_channel_msteams.sample-msteams",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				Config: secureNotificationChannelSlackWithNameAndTemplateVersion(rText(), "v2"),
+				Config: secureNotificationChannelMSTeamsWithNameAndTemplateVersion(rText(), "v2"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sysdig_secure_notification_channel_slack.sample-slack", "template_version", "v2"),
 				),
 			},
 			{
-				Config: secureNotificationChannelSlackWithNameAndTemplateVersion(rText(), "v1"),
+				Config: secureNotificationChannelMSTeamsWithNameAndTemplateVersion(rText(), "v1"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sysdig_secure_notification_channel_slack.sample-slack", "template_version", "v1"),
 				),
@@ -49,25 +49,23 @@ func TestAccSecureNotificationChannelSlack(t *testing.T) {
 	})
 }
 
-func secureNotificationChannelSlackWithName(name string) string {
+func secureNotificationChannelMSTeamsWithName(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_notification_channel_slack" "sample-slack" {
-	name = "Example Channel %s - Slack"
+resource "sysdig_secure_notification_channel_msteams" "sample-msteams" {
+	name = "Example Channel %s - MS Teams"
 	enabled = true
-	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
-	channel = "#sysdig"
+	url = "https://hooks.msteams.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	notify_when_ok = true
 	notify_when_resolved = true
 }`, name)
 }
 
-func secureNotificationChannelSlackWithNameAndTemplateVersion(name, version string) string {
+func secureNotificationChannelMSTeamsWithNameAndTemplateVersion(name, version string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_notification_channel_slack" "sample-slack" {
-	name = "Example Channel %s - Slack"
+resource "sysdig_secure_notification_channel_msteams" "sample-msteams" {
+	name = "Example Channel %s - MS Teams"
 	enabled = true
-	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
-	channel = "#sysdig"
+	url = "https://hooks.msteams.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	notify_when_ok = true
 	notify_when_resolved = true
 	template_version = "%s"

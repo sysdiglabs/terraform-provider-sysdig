@@ -63,18 +63,29 @@ type usersWrapper struct {
 	Users []User `json:"users"`
 }
 
+type NotificationChannelTemplateConfigurationSection struct {
+	SectionName string `json:"sectionName,omitempty"`
+	ShouldShow  bool   `json:"shouldShow"`
+}
+
+type NotificationChannelTemplateConfiguration struct {
+	TemplateKey                   string                                            `json:"templateKey,omitempty"`
+	TemplateConfigurationSections []NotificationChannelTemplateConfigurationSection `json:"templateConfigurationSections,omitempty"`
+}
+
 type NotificationChannelOptions struct {
-	EmailRecipients   []string               `json:"emailRecipients,omitempty"`   // Type: email
-	SnsTopicARNs      []string               `json:"snsTopicARNs,omitempty"`      // Type: SNS
-	APIKey            string                 `json:"apiKey,omitempty"`            // Type: VictorOps
-	RoutingKey        string                 `json:"routingKey,omitempty"`        // Type: VictorOps
-	Url               string                 `json:"url,omitempty"`               // Type: OpsGenie, Webhook and Slack
-	Channel           string                 `json:"channel,omitempty"`           // Type: Slack
-	Account           string                 `json:"account,omitempty"`           // Type: PagerDuty
-	ServiceKey        string                 `json:"serviceKey,omitempty"`        // Type: PagerDuty
-	ServiceName       string                 `json:"serviceName,omitempty"`       // Type: PagerDuty
-	AdditionalHeaders map[string]interface{} `json:"additionalHeaders,omitempty"` // Type: Webhook
-	Region            string                 `json:"region,omitempty"`            // Type: OpsGenie
+	EmailRecipients       []string                                   `json:"emailRecipients,omitempty"`   // Type: email
+	SnsTopicARNs          []string                                   `json:"snsTopicARNs,omitempty"`      // Type: SNS
+	APIKey                string                                     `json:"apiKey,omitempty"`            // Type: VictorOps
+	RoutingKey            string                                     `json:"routingKey,omitempty"`        // Type: VictorOps
+	Url                   string                                     `json:"url,omitempty"`               // Type: OpsGenie, Webhook and Slack
+	Channel               string                                     `json:"channel,omitempty"`           // Type: Slack
+	Account               string                                     `json:"account,omitempty"`           // Type: PagerDuty
+	ServiceKey            string                                     `json:"serviceKey,omitempty"`        // Type: PagerDuty
+	ServiceName           string                                     `json:"serviceName,omitempty"`       // Type: PagerDuty
+	AdditionalHeaders     map[string]interface{}                     `json:"additionalHeaders,omitempty"` // Type: Webhook
+	Region                string                                     `json:"region,omitempty"`            // Type: OpsGenie
+	TemplateConfiguration []NotificationChannelTemplateConfiguration `json:"templateConfiguration,omitempty"`
 
 	NotifyOnOk           bool `json:"notifyOnOk"`
 	NotifyOnResolve      bool `json:"notifyOnResolve"`
