@@ -194,19 +194,10 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 	_ = d.Set("entrypoint", entrypointToSet(t.EntryPoint))
 
 	if clients.GetClientType() == IBMMonitor {
-		resourceSysdigMonitorTeamReadIBM(d, &t)
+		resourceSysdigTeamReadIBM(d, &t)
 	}
 
 	return nil
-}
-
-func resourceSysdigMonitorTeamReadIBM(d *schema.ResourceData, t *v2.Team) {
-	var ibmPlatformMetrics *string
-	if t.NamespaceFilters != nil {
-		ibmPlatformMetrics = t.NamespaceFilters.IBMPlatformMetrics
-	}
-	_ = d.Set("enable_ibm_platform_metrics", t.CanUseBeaconMetrics)
-	_ = d.Set("ibm_platform_metrics", ibmPlatformMetrics)
 }
 
 func userMonitorRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface{}) {
@@ -273,18 +264,6 @@ func resourceSysdigMonitorTeamDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func updateNamespaceFilters(filters *v2.NamespaceFilters, update v2.NamespaceFilters) *v2.NamespaceFilters {
-	if filters == nil {
-		filters = &v2.NamespaceFilters{}
-	}
-
-	if update.IBMPlatformMetrics != nil {
-		filters.IBMPlatformMetrics = update.IBMPlatformMetrics
-	}
-
-	return filters
-}
-
 func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team {
 	canUseSysdigCapture := d.Get("can_use_sysdig_capture").(bool)
 	canUseCustomEvents := d.Get("can_see_infrastructure_events").(bool)
@@ -324,16 +303,4 @@ func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team
 	}
 
 	return t
-}
-
-func teamFromResourceDataIBM(d *schema.ResourceData, t *v2.Team) {
-	canUseBeaconMetrics := d.Get("enable_ibm_platform_metrics").(bool)
-	t.CanUseBeaconMetrics = &canUseBeaconMetrics
-
-	if v, ok := d.GetOk("ibm_platform_metrics"); ok {
-		metrics := v.(string)
-		t.NamespaceFilters = updateNamespaceFilters(t.NamespaceFilters, v2.NamespaceFilters{
-			IBMPlatformMetrics: &metrics,
-		})
-	}
 }

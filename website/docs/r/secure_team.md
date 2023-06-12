@@ -70,6 +70,12 @@ data "sysdig_current_user" "me" {
 
 No additional attributes are exported.
 
+### IBM Workload protection arguments
+
+* `enable_ibm_platform_metrics` - (Optional) Enable platform metrics on IBM Cloud Monitoring.
+
+* `ibm_platform_metrics` - (Optional) Define platform metrics on IBM Cloud Monitoring.
+
 ## Import
 
 Secure Teams can be imported using the ID, e.g.

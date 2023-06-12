@@ -209,10 +209,11 @@ When IBM Workload Protection resources are to be created, this authentication mu
   It can also be configured from the `SYSDIG_SECURE_TEAM_NAME` environment variable.<br/><br/>
 
 > **Note**
-> Enabling this way of authentication is under active development.
+> Enabling resources and data sources on IBM is under active development.
 >
-> For now, you can manage following resources sources on IBM Cloud Monitoring:
+> For now, you can manage following resources:
 > - `sysdig_monitor_team`
+> - `sysdig_secure_team`
 > - `sysdig_monitor_notification_channel_email`
 > - `sysdig_secure_notification_channel_email`
 > - `sysdig_monitor_notification_channel_opsgenie`
