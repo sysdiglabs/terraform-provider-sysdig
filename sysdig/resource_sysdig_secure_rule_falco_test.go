@@ -40,6 +40,9 @@ func TestAccRuleFalco(t *testing.T) {
 				Config: ruleFalcoUpdatedTerminalShell(ruleRandomImmutableText),
 			},
 			{
+				Config: ruleFalcoTerminalShellWithMinimumEngineVersion(rText()),
+			},
+			{
 				ResourceName:      "sysdig_secure_rule_falco.terminal_shell",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -253,4 +256,19 @@ resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role_exceptions" {
         values = jsonencode([["sh"]])
    }
 }`
+}
+
+func ruleFalcoTerminalShellWithMinimumEngineVersion(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "terminal_shell" {
+  name = "TERRAFORM TEST %s - Terminal Shell"
+  minimum_engine_version = 13
+  description = "TERRAFORM TEST %s"
+  tags = ["container", "shell", "mitre_execution"]
+
+  condition = "spawned_process and container and shell_procs and proc.tty != 0 and container_entrypoint"
+  output = "A shell was spawned in a container with an attached terminal (user=%%user.name %%container.info shell=%%proc.name parent=%%proc.pname cmdline=%%proc.cmdline terminal=%%proc.tty container_id=%%container.id image=%%container.image.repository)"
+  priority = "notice"
+  source = "syscall" // syscall or k8s_audit
+}`, name, name)
 }

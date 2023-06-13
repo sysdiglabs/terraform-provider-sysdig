@@ -228,11 +228,12 @@ type Items struct {
 }
 
 type Macro struct {
-	ID        int            `json:"id,omitempty"`
-	Version   int            `json:"version,omitempty"`
-	Name      string         `json:"name"`
-	Condition MacroCondition `json:"condition"`
-	Append    bool           `json:"append"`
+	ID                   int            `json:"id,omitempty"`
+	Version              int            `json:"version,omitempty"`
+	Name                 string         `json:"name"`
+	Condition            MacroCondition `json:"condition"`
+	Append               bool           `json:"append"`
+	MinimumEngineVersion *int           `json:"minimumEngineVersion,omitempty"`
 }
 
 type MacroCondition struct {
@@ -294,12 +295,13 @@ type Details struct {
 	Syscalls *Syscalls `json:"syscalls,omitempty"`
 
 	// Falco
-	Append     *bool        `json:"append,omitempty"`
-	Source     string       `json:"source,omitempty"`
-	Output     string       `json:"output,omitempty"`
-	Condition  *Condition   `json:"condition,omitempty"`
-	Priority   string       `json:"priority,omitempty"`
-	Exceptions []*Exception `json:"exceptions,omitempty"`
+	Append               *bool        `json:"append,omitempty"`
+	Source               string       `json:"source,omitempty"`
+	Output               string       `json:"output,omitempty"`
+	Condition            *Condition   `json:"condition,omitempty"`
+	Priority             string       `json:"priority,omitempty"`
+	Exceptions           []*Exception `json:"exceptions,omitempty"`
+	MinimumEngineVersion *int         `json:"minimumEngineVersion,omitempty"`
 
 	RuleType string `json:"ruleType"`
 }
