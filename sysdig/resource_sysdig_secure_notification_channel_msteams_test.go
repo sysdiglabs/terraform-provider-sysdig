@@ -36,13 +36,13 @@ func TestAccSecureNotificationChannelMSTeams(t *testing.T) {
 			{
 				Config: secureNotificationChannelMSTeamsWithNameAndTemplateVersion(rText(), "v2"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sysdig_secure_notification_channel_slack.sample-slack", "template_version", "v2"),
+					resource.TestCheckResourceAttr("sysdig_secure_notification_channel_msteams.sample-msteams", "template_version", "v2"),
 				),
 			},
 			{
 				Config: secureNotificationChannelMSTeamsWithNameAndTemplateVersion(rText(), "v1"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sysdig_secure_notification_channel_slack.sample-slack", "template_version", "v1"),
+					resource.TestCheckResourceAttr("sysdig_secure_notification_channel_msteams.sample-msteams", "template_version", "v1"),
 				),
 			},
 		},
