@@ -86,6 +86,7 @@ func resourceSysdigSecureNotificationChannelMSTeamsRead(ctx context.Context, d *
 
 	if err != nil {
 		d.SetId("")
+		return diag.FromErr(err)
 	}
 
 	err = secureNotificationChannelMSTeamsToResourceData(&nc, d)

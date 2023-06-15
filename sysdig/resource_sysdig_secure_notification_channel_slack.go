@@ -92,6 +92,7 @@ func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *sc
 
 	if err != nil {
 		d.SetId("")
+		return diag.FromErr(err)
 	}
 
 	err = secureNotificationChannelSlackToResourceData(&nc, d)
