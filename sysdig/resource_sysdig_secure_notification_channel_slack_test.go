@@ -32,11 +32,6 @@ func TestAccSecureNotificationChannelSlack(t *testing.T) {
 				Config: secureNotificationChannelSlackSharedWithCurrentTeam(rText()),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_slack.sample-slack",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
 				Config: secureNotificationChannelSlackWithNameAndTemplateVersion(rText(), "v2"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sysdig_secure_notification_channel_slack.sample-slack", "template_version", "v2"),
@@ -47,6 +42,11 @@ func TestAccSecureNotificationChannelSlack(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sysdig_secure_notification_channel_slack.sample-slack", "template_version", "v1"),
 				),
+			},
+			{
+				ResourceName:      "sysdig_secure_notification_channel_slack.sample-slack",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

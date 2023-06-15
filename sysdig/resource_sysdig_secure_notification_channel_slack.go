@@ -65,13 +65,12 @@ func resourceSysdigSecureNotificationChannelSlackCreate(ctx context.Context, d *
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err = client.CreateNotificationChannel(ctx, notificationChannel)
+	_, err = client.CreateNotificationChannel(ctx, notificationChannel)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(strconv.Itoa(notificationChannel.ID))
-	_ = d.Set("version", notificationChannel.Version)
+	resourceSysdigSecureNotificationChannelSlackRead(ctx, d, meta)
 
 	return nil
 }
@@ -82,7 +81,11 @@ func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *sc
 		return diag.FromErr(err)
 	}
 
-	id, _ := strconv.Atoi(d.Id())
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	nc, err := client.GetNotificationChannelById(ctx, id)
 
 	if err != nil {
@@ -114,12 +117,17 @@ func resourceSysdigSecureNotificationChannelSlackUpdate(ctx context.Context, d *
 	}
 
 	nc.Version = d.Get("version").(int)
-	nc.ID, _ = strconv.Atoi(d.Id())
+	nc.ID, err = strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	_, err = client.UpdateNotificationChannel(ctx, nc)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	resourceSysdigSecureNotificationChannelSlackRead(ctx, d, meta)
 
 	return nil
 }
@@ -130,7 +138,10 @@ func resourceSysdigSecureNotificationChannelSlackDelete(ctx context.Context, d *
 		return diag.FromErr(err)
 	}
 
-	id, _ := strconv.Atoi(d.Id())
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	err = client.DeleteNotificationChannel(ctx, id)
 	if err != nil {

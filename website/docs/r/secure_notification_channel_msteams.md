@@ -21,6 +21,7 @@ resource "sysdig_secure_notification_channel_msteams" "sample-msteams" {
 	url                     = "https://xxxxx.webhook.office.com/xxxxxxxxx"
 	notify_when_ok          = false
 	notify_when_resolved    = false
+    template_version        = "v2"
 }
 ```
 
@@ -42,8 +43,8 @@ resource "sysdig_secure_notification_channel_msteams" "sample-msteams" {
     if the notification channel is working. Default is false.
 
 * `template_version` - (Optional) The notification template version to use to create notifications.
-    Currently v1 refers to Detailed Notification and v2 refers to Shortened Notification. Default is v1
-    This field should not be set for Sysdig onprems version < 6.2.x
+    Currently v1 refers to Detailed Notification and v2 refers to Shortened Notification. Default is v1.
+	This field is not supported for Sysdig onprems < 6.2.1
 
 ## Attributes Reference
 
@@ -52,6 +53,9 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - (Computed) The ID of the Notification Channel.
 
 * `version` - (Computed) The current version of the Notification Channel.
+
+* `share_with_current_team` - (Optional) If set to `true` it will share notification channel only with current team (in which user is logged in).
+  Otherwise, it will share it with all teams, which is the default behaviour.
 
 ## Import
 

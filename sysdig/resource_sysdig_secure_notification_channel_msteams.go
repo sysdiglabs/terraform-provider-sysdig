@@ -67,9 +67,8 @@ func resourceSysdigSecureNotificationChannelMSTeamsCreate(ctx context.Context, d
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	_ = d.Set("version", notificationChannel.Version)
 
-	return nil
+	return resourceSysdigSecureNotificationChannelMSTeamsRead(ctx, d, meta)
 }
 
 func resourceSysdigSecureNotificationChannelMSTeamsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -78,7 +77,11 @@ func resourceSysdigSecureNotificationChannelMSTeamsRead(ctx context.Context, d *
 		return diag.FromErr(err)
 	}
 
-	id, _ := strconv.Atoi(d.Id())
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	nc, err := client.GetNotificationChannelById(ctx, id)
 
 	if err != nil {
@@ -110,14 +113,17 @@ func resourceSysdigSecureNotificationChannelMSTeamsUpdate(ctx context.Context, d
 	}
 
 	nc.Version = d.Get("version").(int)
-	nc.ID, _ = strconv.Atoi(d.Id())
+	nc.ID, err = strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	_, err = client.UpdateNotificationChannel(ctx, nc)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	return nil
+	return resourceSysdigSecureNotificationChannelMSTeamsRead(ctx, d, meta)
 }
 
 func resourceSysdigSecureNotificationChannelMSTeamsDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -126,7 +132,10 @@ func resourceSysdigSecureNotificationChannelMSTeamsDelete(ctx context.Context, d
 		return diag.FromErr(err)
 	}
 
-	id, _ := strconv.Atoi(d.Id())
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	err = client.DeleteNotificationChannel(ctx, id)
 	if err != nil {

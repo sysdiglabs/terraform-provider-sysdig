@@ -29,9 +29,7 @@ func TestAccSecureNotificationChannelMSTeams(t *testing.T) {
 				Config: secureNotificationChannelMSTeamsWithName(rText()),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_msteams.sample-msteams",
-				ImportState:       true,
-				ImportStateVerify: true,
+				Config: secureNotificationChannelMSTeamsSharedWithCurrentTeam(rText()),
 			},
 			{
 				Config: secureNotificationChannelMSTeamsWithNameAndTemplateVersion(rText(), "v2"),
@@ -45,6 +43,11 @@ func TestAccSecureNotificationChannelMSTeams(t *testing.T) {
 					resource.TestCheckResourceAttr("sysdig_secure_notification_channel_msteams.sample-msteams", "template_version", "v1"),
 				),
 			},
+			{
+				ResourceName:      "sysdig_secure_notification_channel_msteams.sample-msteams",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -53,6 +56,18 @@ func secureNotificationChannelMSTeamsWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel_msteams" "sample-msteams" {
 	name = "Example Channel %s - MS Teams"
+	enabled = true
+	url = "https://hooks.msteams.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	notify_when_ok = true
+	notify_when_resolved = true
+}`, name)
+}
+
+func secureNotificationChannelMSTeamsSharedWithCurrentTeam(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_notification_channel_msteams" "sample-msteams" {
+	name = "Example Channel %s - MS Teams"
+    share_with_current_team = true
 	enabled = true
 	url = "https://hooks.msteams.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	notify_when_ok = true
