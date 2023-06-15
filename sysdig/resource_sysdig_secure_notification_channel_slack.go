@@ -65,10 +65,12 @@ func resourceSysdigSecureNotificationChannelSlackCreate(ctx context.Context, d *
 		return diag.FromErr(err)
 	}
 
-	_, err = client.CreateNotificationChannel(ctx, notificationChannel)
+	notificationChannel, err = client.CreateNotificationChannel(ctx, notificationChannel)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	d.SetId(strconv.Itoa(notificationChannel.ID))
 
 	resourceSysdigSecureNotificationChannelSlackRead(ctx, d, meta)
 
