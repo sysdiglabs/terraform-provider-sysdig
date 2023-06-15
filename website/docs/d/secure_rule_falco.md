@@ -40,6 +40,7 @@ In addition to the argument above, the following attributes are exported:
 * `priority` - The priority of the Falco rule. It can be: "emergency", "alert", "critical", "error", "warning", "notice", "info" or "debug". By default is "warning".
 * `exceptions` - The exceptions key is a list of identifier plus list of tuples of filtercheck fields. See below for details.
 * `append` - This indicates that the rule being created appends the condition to an existing Sysdig-provided rule
+* `minimum_engine_version` - This is used to indicate that the rule requires a minimum engine version.
 * `version` - Current version of the resource in Sysdig Secure.
 
 ### Exceptions

@@ -2,9 +2,10 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -43,6 +44,10 @@ func resourceSysdigSecureMacro() *schema.Resource {
 			"condition": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"minimum_engine_version": {
+				Type:     schema.TypeInt,
+				Optional: true,
 			},
 			"version": {
 				Type:     schema.TypeInt,
@@ -110,6 +115,9 @@ func resourceSysdigMacroRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("version", macro.Version)
 	_ = d.Set("condition", macro.Condition.Condition)
 	_ = d.Set("append", macro.Append)
+	if macro.MinimumEngineVersion != nil {
+		_ = d.Set("minimum_engine_version", *macro.MinimumEngineVersion)
+	}
 
 	return nil
 }
@@ -130,9 +138,15 @@ func resourceSysdigMacroDelete(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func macroFromResourceData(d *schema.ResourceData) v2.Macro {
-	return v2.Macro{
+	macro := v2.Macro{
 		Name:      d.Get("name").(string),
 		Append:    d.Get("append").(bool),
 		Condition: v2.MacroCondition{Condition: d.Get("condition").(string)},
 	}
+	minimumEngineVersionInterface, ok := d.GetOk("minimum_engine_version")
+	if ok {
+		minimumEngineVersion := minimumEngineVersionInterface.(int)
+		macro.MinimumEngineVersion = &minimumEngineVersion
+	}
+	return macro
 }

@@ -66,7 +66,11 @@ The following arguments are supported:
 * `priority` - (Optional) The priority of the Falco rule. It can be: "emergency", "alert", "critical", "error", "warning", "notice", "info" or "debug". By default is "warning".
 * `source` - (Optional) The source of the event. It can be either "syscall", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", or "azure_platformlogs". Required if append is false.
 * `exceptions` - (Optional) The exceptions key is a list of identifier plus list of tuples of filtercheck fields. See below for details.
-* `append` - (Optional) This indicates that the rule being created appends the condition to an existing Sysdig-provided rule. By default this is false. Appending to user-created rules is not supported by the API.
+* `append` - (Optional) This indicates that the rule being created appends the condition to an existing Sysdig-provided
+  rule. By default this is false. Appending to user-created rules is not supported by the API.
+* `minimum_engine_version` - (Optional) This is used to indicate that the rule requires a minimum engine version. This
+    can allow you to add rules that would not normally pass validation with older agents in your environment. The rule
+    will only be processed by agents that support the minimum_engine_version specified.
 
 ### Exceptions
 
