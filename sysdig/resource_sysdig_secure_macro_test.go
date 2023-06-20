@@ -52,6 +52,9 @@ func TestAccMacro(t *testing.T) {
 			{
 				Config: macroWithMacroAndList(rText(), rText(), rText()),
 			},
+			{
+				Config: macroWithMinimumEngineVersion(rText()),
+			},
 		},
 	})
 }
@@ -112,4 +115,14 @@ resource "sysdig_secure_macro" "sample6" {
   condition = "never_true and ${sysdig_secure_macro.sample5.name}"
 }
 `, listWithName(name3), name1, name2)
+}
+
+func macroWithMinimumEngineVersion(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_macro" "sample" {
+	minimum_engine_version = 13
+	name = "terraform_test_%s"
+	condition = "always_true"
+  }
+`, name)
 }

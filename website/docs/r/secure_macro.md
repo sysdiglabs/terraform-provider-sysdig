@@ -37,6 +37,11 @@ resource "sysdig_secure_macro" "https_port" {
     The macros can only be extended once, for example if there is an existing macro called "foo", one can have another 
     append macro called "foo" but not a second one. By default this is false.
 
+* `minimum_engine_version` - (Optional) This is used to indicate that the macro requires a minimum engine version. This
+    can allow you to add macros that would not normally pass validation with older agents in your environment. The macro
+    will only be processed by agents that support the minimum_engine_version specified.
+
+
 ## Attributes Reference
 
 No additional attributes are exported.
