@@ -16,9 +16,9 @@
 *secure*macro* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
 
 # Vulnerability Management
-*secure*vulnerability_exception* @acaprari @dippie8 @driver2000 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
-*secure*trusted_cloud_identity* @acaprari @dippie8 @driver2000 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
-*secure*scanning_policy* @acaprari @dippie8 @driver2000 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
+*secure*vulnerability_exception* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
+*secure*trusted_cloud_identity* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
+*secure*scanning_policy* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
 
 # Cloud metrics
 *cloud_account* @jwsarna1 # report to: TODO
