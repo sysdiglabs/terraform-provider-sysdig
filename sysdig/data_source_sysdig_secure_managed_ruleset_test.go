@@ -15,6 +15,10 @@ import (
 )
 
 func TestAccManagedRulesetDataSource(t *testing.T) {
+	t.Cleanup(func() {
+		handleReport(t)
+	})
+
 	rText := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{

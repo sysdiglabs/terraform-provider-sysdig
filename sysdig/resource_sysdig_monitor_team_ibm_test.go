@@ -3,6 +3,7 @@
 package sysdig_test
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"testing"
@@ -15,6 +16,10 @@ import (
 )
 
 func TestAccMonitorIBMTeam(t *testing.T) {
+	t.Cleanup(func() {
+		handleReport(t)
+	})
+
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{

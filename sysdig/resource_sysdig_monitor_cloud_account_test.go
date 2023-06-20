@@ -11,6 +11,10 @@ import (
 )
 
 func TestCustomerProviderKeys(t *testing.T) {
+	t.Cleanup(func() {
+		handleReport(t)
+	})
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_MONITOR_API_TOKEN"); v == "" {

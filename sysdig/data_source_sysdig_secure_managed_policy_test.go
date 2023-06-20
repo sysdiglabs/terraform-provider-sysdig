@@ -13,6 +13,10 @@ import (
 )
 
 func TestAccManagedPolicyDataSource(t *testing.T) {
+	t.Cleanup(func() {
+		handleReport(t)
+	})
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {

@@ -13,6 +13,10 @@ import (
 )
 
 func TestAccGroupMapping(t *testing.T) {
+	t.Cleanup(func() {
+		handleReport(t)
+	})
+
 	groupAllTeams := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	groupMonitor := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	groupSecure := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)

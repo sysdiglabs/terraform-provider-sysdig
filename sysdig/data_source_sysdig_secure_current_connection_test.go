@@ -13,6 +13,9 @@ import (
 )
 
 func TestAccSecureConnection(t *testing.T) {
+	t.Cleanup(func() {
+		handleReport(t)
+	})
 
 	dataSourceResourceName := "data.sysdig_secure_connection.current"
 

@@ -1,14 +1,30 @@
-# Fargate workload agent
-*fargate* @marojor @francesco-racciatti
+# Alerts
+*alert* @arturodilecce @dbonf # report to: team-alerts-and-events
+*notification_channel* @arturodilecce @dbonf # report to: team-alerts-and-events
 
-# compliance
-*benchmark* @haresh-suresh  @nkraemer-sysdig @sameer-in
+# Enterprise readiness/Platform Services
+*user* @shadow649 # report to: team_platform_dev
+*team* @shadow649 @filiptubic # report to: team_platform_dev
+*group_mapping* @shadow649 # report to: team_platform_dev
+*secure*secure_connection* @filiptubic # report to: team_platform_dev
 
-# monitor
-*monitor*alert* @arturodilecce @dbonf
-*monitor*dashboard* @brokenpip3
-*monitor*providers* @jwsarna1
-*monitor*groupmapping* @shadow649
+# Detection/Network
+*secure*ruleset* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
+*secure*policy* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
+*secure*rule* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
+*secure*list* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
+*secure*macro* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
 
-# policies/rules
-*secure*policy* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig
+# Vulnerability Management
+*secure*vulnerability_exception* @acaprari @dippie8 @driver2000 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
+*secure*trusted_cloud_identity* @acaprari @dippie8 @driver2000 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
+*secure*scanning_policy* @acaprari @dippie8 @driver2000 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
+
+# Cloud metrics
+*cloud_account* @jwsarna1 # report to: TODO
+
+# Visualization
+*monitor*dashboard* @brokenpip3 # report to: team-visualization
+
+# Falco
+*fargate* @marojor @francesco-racciatti # report to: TODO

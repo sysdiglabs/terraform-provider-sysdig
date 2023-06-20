@@ -14,6 +14,10 @@ import (
 )
 
 func TestAccUser(t *testing.T) {
+	t.Cleanup(func() {
+		handleReport(t)
+	})
+
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	name := rText()
 	resource.ParallelTest(t, resource.TestCase{

@@ -10,6 +10,9 @@ import (
 )
 
 func TestAccGroupMappingConfig(t *testing.T) {
+	t.Cleanup(func() {
+		handleReport(t)
+	})
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv),

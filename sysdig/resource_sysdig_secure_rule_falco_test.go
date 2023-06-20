@@ -16,6 +16,10 @@ import (
 )
 
 func TestAccRuleFalco(t *testing.T) {
+	t.Cleanup(func() {
+		handleReport(t)
+	})
+
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	ruleRandomImmutableText := rText()

@@ -12,6 +12,10 @@ import (
 )
 
 func TestAccSysdigFargateWorkloadAgent(t *testing.T) {
+	t.Cleanup(func() {
+		handleReport(t)
+	})
+
 	resource.ParallelTest(t, resource.TestCase{
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {

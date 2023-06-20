@@ -12,6 +12,10 @@ import (
 )
 
 func TestAccDataUser(t *testing.T) {
+	t.Cleanup(func() {
+		handleReport(t)
+	})
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
