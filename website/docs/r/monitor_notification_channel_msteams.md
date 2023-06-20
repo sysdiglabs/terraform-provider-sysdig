@@ -1,28 +1,27 @@
 ---
-subcategory: "Sysdig Secure"
+subcategory: "Sysdig Monitor"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_secure_notification_channel_slack"
+page_title: "Sysdig: sysdig_monitor_notification_channel_msteams"
 description: |-
-  Creates a Sysdig Secure Notification Channel of type Slack.
+  Creates a Sysdig Monitor Notification Channel of type MS Teams.
 ---
 
-# Resource: sysdig_secure_notification_channel_slack
+# Resource: sysdig_monitor_notification_channel_msteams
 
-Creates a Sysdig Secure Notification Channel of type Slack.
+Creates a Sysdig Monitor Notification Channel of type MS Teams.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
 ```terraform
-resource "sysdig_secure_notification_channel_slack" "sample-slack" {
-	name                    = "Example Channel - Slack"
+resource "sysdig_monitor_notification_channel_msteams" "sample-msteams" {
+	name                    = "Example Channel - MS Teams"
 	enabled                 = true
-	url                     = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
-	channel                 = "#sysdig"
+	url                     = "https://xxxxx.webhook.office.com/xxxxxxxxx"
 	notify_when_ok          = false
 	notify_when_resolved    = false
-	template_version        = "v2"
+	share_with_current_team = true
 }
 ```
 
@@ -30,9 +29,7 @@ resource "sysdig_secure_notification_channel_slack" "sample-slack" {
 
 * `name` - (Required) The name of the Notification Channel. Must be unique.
 
-* `url` - (Required) URL of the Slack.
-
-* `channel` - (Required) Channel name from this Slack.
+* `url` - (Required) URL of the MS Teams webhook.
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
@@ -44,10 +41,6 @@ resource "sysdig_secure_notification_channel_slack" "sample-slack" {
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
-
-* `template_version` - (Optional) The notification template version to use to create notifications.
-    Currently v1 refers to Detailed Notification and v2 refers to Shortened Notification. Default is v1.
-	This field is not supported for Sysdig onprems < 6.2.1
 
 ## Attributes Reference
 
@@ -62,8 +55,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-Slack notification channels for Secure can be imported using the ID, e.g.
+MS Teams notification channels for Monitor can be imported using the ID, e.g.
 
 ```
-$ terraform import sysdig_secure_notification_channel_slack.example 12345
+$ terraform import sysdig_monitor_notification_channel_msteams.example 12345
 ```

@@ -32,6 +32,18 @@ func TestAccSecureNotificationChannelSlack(t *testing.T) {
 				Config: secureNotificationChannelSlackSharedWithCurrentTeam(rText()),
 			},
 			{
+				Config: secureNotificationChannelSlackWithNameAndTemplateVersion(rText(), "v2"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sysdig_secure_notification_channel_slack.sample-slack", "template_version", "v2"),
+				),
+			},
+			{
+				Config: secureNotificationChannelSlackWithNameAndTemplateVersion(rText(), "v1"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sysdig_secure_notification_channel_slack.sample-slack", "template_version", "v1"),
+				),
+			},
+			{
 				ResourceName:      "sysdig_secure_notification_channel_slack.sample-slack",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -63,4 +75,17 @@ resource "sysdig_secure_notification_channel_slack" "sample-slack" {
 	notify_when_ok = true
 	notify_when_resolved = true
 }`, name)
+}
+
+func secureNotificationChannelSlackWithNameAndTemplateVersion(name, version string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_notification_channel_slack" "sample-slack" {
+	name = "Example Channel %s - Slack"
+	enabled = true
+	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	channel = "#sysdig"
+	notify_when_ok = true
+	notify_when_resolved = true
+	template_version = "%s"
+}`, name, version)
 }
