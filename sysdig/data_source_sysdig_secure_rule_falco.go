@@ -42,6 +42,11 @@ func dataSourceSysdigSecureRuleFalco() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"minimum_engine_version": {
+				Type:     schema.TypeInt,
+				Computed: true,
+				Optional: true,
+			},
 			"append": {
 
 				Type:     schema.TypeBool,
@@ -108,6 +113,9 @@ func dataSourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, 
 	_ = d.Set("output", rule.Details.Output)
 	_ = d.Set("priority", rule.Details.Priority)
 	_ = d.Set("source", rule.Details.Source)
+	if rule.Details.MinimumEngineVersion != nil {
+		_ = d.Set("minimum_engine_version", *rule.Details.MinimumEngineVersion)
+	}
 	if rule.Details.Append != nil {
 		_ = d.Set("append", *rule.Details.Append)
 	}

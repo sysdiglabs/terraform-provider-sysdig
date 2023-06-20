@@ -60,6 +60,10 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 				Default:          "",
 				ValidateDiagFunc: validateDiagFunc(validateFalcoRuleSource),
 			},
+			"minimum_engine_version": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
 			"append": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -147,6 +151,9 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 	_ = d.Set("output", rule.Details.Output)
 	_ = d.Set("priority", strings.ToLower(rule.Details.Priority))
 	_ = d.Set("source", rule.Details.Source)
+	if rule.Details.MinimumEngineVersion != nil {
+		_ = d.Set("minimum_engine_version", *rule.Details.MinimumEngineVersion)
+	}
 	if rule.Details.Append != nil {
 		_ = d.Set("append", *rule.Details.Append)
 	}
@@ -270,6 +277,12 @@ func resourceSysdigRuleFalcoFromResourceData(d *schema.ResourceData) (v2.Rule, e
 		rule.Details.Priority = priority.(string)
 	} else if !appendModeIsSet || !(appendMode.(bool)) {
 		return v2.Rule{}, errors.New("priority must be set when append = false")
+	}
+
+	minimumEngineVersionInterface, ok := d.GetOk("minimum_engine_version")
+	if ok {
+		minimumEngineVersion := minimumEngineVersionInterface.(int)
+		rule.Details.MinimumEngineVersion = &minimumEngineVersion
 	}
 
 	rule.Details.Condition = &v2.Condition{
