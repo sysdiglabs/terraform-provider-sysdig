@@ -32,6 +32,7 @@ type SysdigMonitor interface {
 
 type SysdigSecure interface {
 	SysdigCommon
+	SecureCommon
 	PolicyInterface
 	RuleInterface
 	ListInterface
