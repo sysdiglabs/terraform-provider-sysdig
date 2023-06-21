@@ -77,6 +77,7 @@ func newSysdigClient(opts ...ClientOption) *Client {
 		},
 	}
 }
+
 func (sr *SysdigRequest) CurrentTeamID(ctx context.Context) (int, error) {
 	sr.teamIDLock.Lock()
 	defer sr.teamIDLock.Unlock()

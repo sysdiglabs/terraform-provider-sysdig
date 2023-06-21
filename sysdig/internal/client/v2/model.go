@@ -608,14 +608,18 @@ type PostureZoneScope struct {
 }
 
 type PostureZonePolicySlim struct {
-	ID   int    `json:"id,omitempty"`
+	ID   string `json:"id,omitempty"`
 	Name string `json:"name"`
 	Type int    `json:"type"`
 	Kind int    `json:"kind"`
 }
 
+type PostureZonePolicyListResponse struct {
+	Data []PostureZonePolicySlim `json:"data"`
+}
+
 type PostureZone struct {
-	ID             int                     `json:"id"`
+	ID             string                  `json:"id"`
 	Name           string                  `json:"name"`
 	Description    string                  `json:"description"`
 	Author         string                  `json:"author"`
@@ -627,9 +631,10 @@ type PostureZone struct {
 }
 
 type PostureZoneRequest struct {
+	ID          string             `json:"id"`
 	Name        string             `json:"name"`
 	Description string             `json:"description"`
-	PolicyIDs   []int              `json:"policyIds"`
+	PolicyIDs   []string           `json:"policyIds"`
 	Scopes      []PostureZoneScope `json:"scopes"`
 	Username    string             `json:"username"`
 }

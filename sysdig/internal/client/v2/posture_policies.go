@@ -20,7 +20,12 @@ func (client *Client) ListPosturePolicies(ctx context.Context) ([]PostureZonePol
 	}
 	defer response.Body.Close()
 
-	return Unmarshal[[]PostureZonePolicySlim](response.Body)
+	resp, err := Unmarshal[PostureZonePolicyListResponse](response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Data, nil
 }
 
 func (client *Client) getPosturePolicyListURL() string {

@@ -8,14 +8,14 @@ import (
 
 const (
 	ZonesPath = "%s/api/cspm/v1/policy/zones"
-	ZonePath  = "%s/api/cspm/v1/policy/zones/%d"
+	ZonePath  = "%s/api/cspm/v1/policy/zones/%s"
 )
 
 type PostureZoneInterface interface {
 	Base
 	CreateOrUpdatePostureZone(ctx context.Context, z *PostureZoneRequest) (*PostureZone, error)
-	GetPostureZone(ctx context.Context, id int) (*PostureZone, error)
-	DeletePostureZone(ctx context.Context, id int) error
+	GetPostureZone(ctx context.Context, id string) (*PostureZone, error)
+	DeletePostureZone(ctx context.Context, id string) error
 }
 
 func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZoneRequest) (*PostureZone, error) {
@@ -30,30 +30,30 @@ func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZ
 	}
 	defer response.Body.Close()
 
-	zone, err := Unmarshal[PostureZone](response.Body)
+	wrapper, err := Unmarshal[PostureZoneResponse](response.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	return &zone, nil
+	return &wrapper.Data, nil
 }
 
-func (client *Client) GetPostureZone(ctx context.Context, id int) (*PostureZone, error) {
+func (client *Client) GetPostureZone(ctx context.Context, id string) (*PostureZone, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.getZoneURL(id), nil)
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
 
-	zone, err := Unmarshal[PostureZone](response.Body)
+	wrapper, err := Unmarshal[PostureZoneResponse](response.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	return &zone, nil
+	return &wrapper.Data, nil
 }
 
-func (client *Client) DeletePostureZone(ctx context.Context, id int) error {
+func (client *Client) DeletePostureZone(ctx context.Context, id string) error {
 	response, err := client.requester.Request(ctx, http.MethodDelete, client.getZoneURL(id), nil)
 	if err != nil {
 		return err
@@ -71,6 +71,6 @@ func (client *Client) createZoneURL() string {
 	return fmt.Sprintf(ZonesPath, client.config.url)
 }
 
-func (client *Client) getZoneURL(id int) string {
+func (client *Client) getZoneURL(id string) string {
 	return fmt.Sprintf(ZonePath, client.config.url, id)
 }
