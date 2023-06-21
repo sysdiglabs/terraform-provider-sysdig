@@ -26,5 +26,5 @@
 # Visualization
 *monitor*dashboard* @brokenpip3 # report to: team-visualization
 
-# Falco
-*fargate* @marojor @francesco-racciatti # report to: TODO
+# Agent serverless
+*fargate* @marojor @francesco-racciatti # report to: ws-agent-serverless
