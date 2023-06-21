@@ -11,14 +11,14 @@ const (
 	ZonePath  = "%s/api/cspm/v1/policy/zones/%d"
 )
 
-type ZoneInterface interface {
+type PostureZoneInterface interface {
 	Base
-	CreateOrUpdate(ctx context.Context, z *ZoneRequest) (*Zone, error)
-	GetZone(ctx context.Context, id int) (*Zone, error)
-	DeleteZone(ctx context.Context, id int) error
+	CreateOrUpdatePostureZone(ctx context.Context, z *PostureZoneRequest) (*PostureZone, error)
+	GetPostureZone(ctx context.Context, id int) (*PostureZone, error)
+	DeletePostureZone(ctx context.Context, id int) error
 }
 
-func (client *Client) CreateOrUpdate(ctx context.Context, r *ZoneRequest) (*Zone, error) {
+func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZoneRequest) (*PostureZone, error) {
 	payload, err := Marshal(r)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func (client *Client) CreateOrUpdate(ctx context.Context, r *ZoneRequest) (*Zone
 	}
 	defer response.Body.Close()
 
-	zone, err := Unmarshal[Zone](response.Body)
+	zone, err := Unmarshal[PostureZone](response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -38,14 +38,14 @@ func (client *Client) CreateOrUpdate(ctx context.Context, r *ZoneRequest) (*Zone
 	return &zone, nil
 }
 
-func (client *Client) GetZone(ctx context.Context, id int) (*Zone, error) {
+func (client *Client) GetPostureZone(ctx context.Context, id int) (*PostureZone, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.getZoneURL(id), nil)
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
 
-	zone, err := Unmarshal[Zone](response.Body)
+	zone, err := Unmarshal[PostureZone](response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (client *Client) GetZone(ctx context.Context, id int) (*Zone, error) {
 	return &zone, nil
 }
 
-func (client *Client) DeleteZone(ctx context.Context, id int) error {
+func (client *Client) DeletePostureZone(ctx context.Context, id int) error {
 	response, err := client.requester.Request(ctx, http.MethodDelete, client.getZoneURL(id), nil)
 	if err != nil {
 		return err

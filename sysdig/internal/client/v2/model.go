@@ -601,39 +601,39 @@ type cloudAccountWrapperMonitor struct {
 	CloudAccount CloudAccountMonitor `json:"provider"`
 }
 
-type ZoneScope struct {
+type PostureZoneScope struct {
 	ID         int    `json:"id,omitempty"`
 	TargetType string `json:"target_type"`
 	Rules      string `json:"rules"`
 }
 
-type ZonePolicySlim struct {
+type PostureZonePolicySlim struct {
 	ID   int    `json:"id,omitempty"`
 	Name string `json:"name"`
-	Type string `json:"type"`
-	Kind string `json:"kind"`
+	Type int    `json:"type"`
+	Kind int    `json:"kind"`
 }
 
-type Zone struct {
-	ID             int              `json:"id"`
-	Name           string           `json:"name"`
-	Description    string           `json:"description"`
-	Author         string           `json:"author"`
-	LastModifiedBy string           `json:"last_modified_by"`
-	LastUpdated    int              `json:"last_updated"`
-	IsSystem       bool             `json:"is_system"`
-	Scopes         []ZoneScope      `json:"scopes"`
-	Policies       []ZonePolicySlim `json:"policies"`
+type PostureZone struct {
+	ID             int                     `json:"id"`
+	Name           string                  `json:"name"`
+	Description    string                  `json:"description"`
+	Author         string                  `json:"author"`
+	LastModifiedBy string                  `json:"last_modified_by"`
+	LastUpdated    int                     `json:"last_updated"`
+	IsSystem       bool                    `json:"is_system"`
+	Scopes         []PostureZoneScope      `json:"scopes"`
+	Policies       []PostureZonePolicySlim `json:"policies"`
 }
 
-type ZoneRequest struct {
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	PolicyIDs   []int       `json:"policyIds"`
-	Scopes      []ZoneScope `json:"scopes"`
-	Username    string      `json:"username"`
+type PostureZoneRequest struct {
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	PolicyIDs   []int              `json:"policyIds"`
+	Scopes      []PostureZoneScope `json:"scopes"`
+	Username    string             `json:"username"`
 }
 
-type ZoneResponse struct {
-	Data Zone `json:"data"`
+type PostureZoneResponse struct {
+	Data PostureZone `json:"data"`
 }
