@@ -14,11 +14,15 @@ import (
 var ruleset codeowners.Ruleset
 
 func getCodeOwnersPath() (string, error) {
+	if co := os.Getenv("CODEOWNERS_PATH"); co != "" {
+		return co, nil
+	}
+
 	dir, err := os.Getwd()
 	if err != nil {
 		return "", err
 	}
-	dir = filepath.Join(dir, "..", "CODEOWNERS")
+	dir = filepath.Join(dir, "CODEOWNERS")
 	return filepath.Clean(dir), nil
 }
 
