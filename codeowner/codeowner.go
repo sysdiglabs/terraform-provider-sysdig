@@ -18,8 +18,8 @@ func getCodeOwnersPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	dir = filepath.Clean(dir)
-	return filepath.Join(dir, "CODEOWNERS"), nil
+	dir = filepath.Join(dir, "..", "CODEOWNERS")
+	return filepath.Clean(dir), nil
 }
 
 func LoadOwners(path string) ([]string, error) {
