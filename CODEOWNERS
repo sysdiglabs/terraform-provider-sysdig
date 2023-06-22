@@ -22,6 +22,7 @@
 
 # Cloud metrics
 *cloud_account* @jwsarna1 # report to: S05E9KETDMW
+<!subteam^S05E9KETDMW>
 
 # Visualization
 *dashboard* @brokenpip3 # report to: team-visualization
