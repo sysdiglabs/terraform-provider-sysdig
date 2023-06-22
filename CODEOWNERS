@@ -1,30 +1,30 @@
 # Alerts
-*alert* @arturodilecce @dbonf # report to: team-alerts-and-events
-*notification_channel* @arturodilecce @dbonf # report to: team-alerts-and-events
+*alert* @arturodilecce @dbonf # report to: SLACK_TEAM_ALERTS_ID
+*notification_channel* @arturodilecce @dbonf # report to: SLACK_TEAM_ALERTS_ID
 
 # Enterprise readiness/Platform Services
-*user* @shadow649 # report to: team_platform_dev
-*team* @shadow649 @filiptubic # report to: team_platform_dev
-*group_mapping* @shadow649 # report to: team_platform_dev
-*secure_connection* @filiptubic # report to: team_platform_dev
+*user* @shadow649 # report to: SLACK_TEAM_PLATFORM_DEV_ID
+*team* @shadow649 @filiptubic # report to: SLACK_TEAM_PLATFORM_DEV_ID
+*group_mapping* @shadow649 # report to: SLACK_TEAM_PLATFORM_DEV_ID
+*secure_connection* @filiptubic # report to: SLACK_TEAM_PLATFORM_DEV_ID
 
 # Detection/Network
-*ruleset* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
-*policy* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
-*rule* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
-*list* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
-*macro* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
+*ruleset* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: SLACK_TEAM_DETECTION_ID
+*policy* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: SLACK_TEAM_DETECTION_ID
+*rule* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: SLACK_TEAM_DETECTION_ID
+*list* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: SLACK_TEAM_DETECTION_ID
+*macro* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: SLACK_TEAM_DETECTION_ID
 
 # Vulnerability Management
-*vulnerability_exception* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
-*trusted_cloud_identity* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
-*scanningpolicies* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
+*vulnerability_exception* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: SLACK_TEAM_VULNERABILITY_MANAGEMENT_ID
+*trusted_cloud_identity* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: SLACK_TEAM_VULNERABILITY_MANAGEMENT_ID
+*scanningpolicies* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: SLACK_TEAM_VULNERABILITY_MANAGEMENT_ID
 
 # Cloud metrics
 *cloud_account* @jwsarna1 # report to: SLACK_TEAM_CLOUD_METRICS_ID
 
 # Visualization
-*dashboard* @brokenpip3 # report to: team-visualization
+*dashboard* @brokenpip3 # report to: SLACK_TEAM_VISUALIZATION_ID
 
 # Agent serverless
-*fargate* @marojor @francesco-racciatti # report to: ws-agent-serverless
+*fargate* @marojor @francesco-racciatti # report to: SLACK_TEAM_AGENT_SERVERLESS_ID

@@ -14,7 +14,7 @@ import (
 
 func TestAccGroupMapping(t *testing.T) {
 	t.Cleanup(func() {
-		handleReport(t)
+		handleSlackNotification(t)
 	})
 
 	groupAllTeams := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)

@@ -64,5 +64,9 @@ func LoadOwners(path string) ([]string, error) {
 		}
 	}
 
+	if len(owners) == 0 {
+		return nil, errors.New("missing owners")
+	}
+
 	return owners, nil
 }

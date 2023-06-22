@@ -15,7 +15,7 @@ import (
 
 func TestAccMonitorNotificationChannelSlack(t *testing.T) {
 	t.Cleanup(func() {
-		handleReport(t)
+		handleSlackNotification(t)
 	})
 
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }

@@ -12,7 +12,7 @@ import (
 
 func TestCustomerProviderKeys(t *testing.T) {
 	t.Cleanup(func() {
-		handleReport(t)
+		handleSlackNotification(t)
 	})
 
 	resource.Test(t, resource.TestCase{

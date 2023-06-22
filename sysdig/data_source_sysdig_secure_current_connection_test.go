@@ -14,7 +14,7 @@ import (
 
 func TestAccSecureConnection(t *testing.T) {
 	t.Cleanup(func() {
-		handleReport(t)
+		handleSlackNotification(t)
 	})
 
 	dataSourceResourceName := "data.sysdig_secure_connection.current"

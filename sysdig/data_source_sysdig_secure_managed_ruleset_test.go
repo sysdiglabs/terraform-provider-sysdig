@@ -16,7 +16,7 @@ import (
 
 func TestAccManagedRulesetDataSource(t *testing.T) {
 	t.Cleanup(func() {
-		handleReport(t)
+		handleSlackNotification(t)
 	})
 
 	rText := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)

@@ -11,7 +11,7 @@ import (
 
 func TestAccGroupMappingConfig(t *testing.T) {
 	t.Cleanup(func() {
-		handleReport(t)
+		handleSlackNotification(t)
 	})
 
 	resource.ParallelTest(t, resource.TestCase{

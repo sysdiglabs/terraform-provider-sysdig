@@ -44,7 +44,7 @@ func findCaller(t *testing.T) (string, error) {
 	return "", errors.New("failed to find function caller")
 }
 
-func handleReport(t *testing.T) {
+func handleSlackNotification(t *testing.T) {
 	if t.Failed() {
 		// get file path from which this function is called
 		callerFile, err := findCaller(t)
@@ -54,7 +54,7 @@ func handleReport(t *testing.T) {
 
 		owners, err := codeowner.LoadOwners(callerFile)
 		if err != nil {
-			t.Fatalf("failed to create report notification: %v", err)
+			t.Fatalf("failed to create slack notification: %v", err)
 		}
 
 		t.Fatalf("report to %s", strings.Join(owners, ", "))
