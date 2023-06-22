@@ -6,25 +6,25 @@
 *user* @shadow649 # report to: team_platform_dev
 *team* @shadow649 @filiptubic # report to: team_platform_dev
 *group_mapping* @shadow649 # report to: team_platform_dev
-*secure*secure_connection* @filiptubic # report to: team_platform_dev
+*secure_connection* @filiptubic # report to: team_platform_dev
 
 # Detection/Network
-*secure*ruleset* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
-*secure*policy* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
-*secure*rule* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
-*secure*list* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
-*secure*macro* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
+*ruleset* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
+*policy* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
+*rule* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
+*list* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
+*macro* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig # report to: team-secure-detection
 
 # Vulnerability Management
-*secure*vulnerability_exception* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
-*secure*trusted_cloud_identity* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
-*secure*scanningpolicies* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
+*vulnerability_exception* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
+*trusted_cloud_identity* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
+*scanningpolicies* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
 
 # Cloud metrics
 *cloud_account* @jwsarna1 # report to: team-cloud-metrics
 
 # Visualization
-*monitor*dashboard* @brokenpip3 # report to: team-visualization
+*dashboard* @brokenpip3 # report to: team-visualization
 
 # Agent serverless
 *fargate* @marojor @francesco-racciatti # report to: ws-agent-serverless
