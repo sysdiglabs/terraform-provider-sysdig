@@ -58,10 +58,10 @@ func LoadOwners(path string) ([]string, error) {
 
 	owners := strings.Split(strings.TrimSpace(strings.TrimPrefix(match.Comment, "report to: ")), " ")
 	for i := 0; i < len(owners); i++ {
-		//owners[i] = strings.TrimPrefix(owners[i], "<@")
-		//owners[i] = strings.TrimSuffix(owners[i], ">")
-		//owners[i] = fmt.Sprintf("<@%s>", owners[i])
-		owners[i] = fmt.Sprintf("<!subteam^%s>", owners[i])
+		teamID := os.Getenv(owners[i])
+		if teamID != "" {
+			owners[i] = fmt.Sprintf("<!subteam^%s>", teamID)
+		}
 	}
 
 	return owners, nil

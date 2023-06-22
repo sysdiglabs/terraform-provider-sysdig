@@ -21,7 +21,7 @@
 *scanningpolicies* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
 
 # Cloud metrics
-*cloud_account* @jwsarna1 # report to: S05E9KETDMW
+*cloud_account* @jwsarna1 # report to: SLACK_TEAM_CLOUD_METRICS_ID
 
 # Visualization
 *dashboard* @brokenpip3 # report to: team-visualization

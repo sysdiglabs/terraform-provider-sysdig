@@ -41,11 +41,10 @@ testacc: fmtcheck
 	CGO_ENABLED=1 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -tags=$(TEST_SUITE) -timeout 120m -race -parallel=1
 
 junit-report: fmtcheck
-	echo Slack Team ID $(SLACK_TEAM_CLOUD_METRICS_ID)
-#	@go install github.com/jstemmer/go-junit-report/v2@latest
-#	CGO_ENABLED=1 TF_ACC=1 TF_LOG=DEBUG go test $(TEST) -v $(TESTARGS) -tags=$(TEST_SUITE) -timeout 120m -race -parallel=1 2>&1 | tee output.txt
-#	! grep -q "\[build failed\]" output.txt
-#	go-junit-report -in output.txt -out junit-report.xml
+	@go install github.com/jstemmer/go-junit-report/v2@latest
+	CGO_ENABLED=1 TF_ACC=1 TF_LOG=DEBUG go test $(TEST) -v $(TESTARGS) -tags=$(TEST_SUITE) -timeout 120m -race -parallel=1 2>&1 | tee output.txt
+	! grep -q "\[build failed\]" output.txt
+	go-junit-report -in output.txt -out junit-report.xml
 
 vet:
 	@echo "go vet ."
