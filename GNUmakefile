@@ -13,8 +13,6 @@ TERRAFORM_PROVIDER_DEV_VERSION=1.0.0
 TERRAFORM_PLATFORM=$(shell terraform version -json | jq -r .platform)
 TERRAFORM_SYSDIG_PLUGIN_DIR=$(TERRAFORM_PLUGIN_ROOT_DIR)/$(TERRAFORM_PROVIDER_REFERENCE_NAME)/$(TERRAFORM_PROVIDER_NAME)/$(TERRAFORM_PROVIDER_DEV_VERSION)/$(TERRAFORM_PLATFORM)
 
-CODEOWNERS_PATH=$(PWD)/CODEOWNERS
-
 install-tools:
 	go install golang.org/x/tools/cmd/stringer@latest
 
@@ -44,7 +42,7 @@ testacc: fmtcheck
 
 junit-report: fmtcheck
 	@go install github.com/jstemmer/go-junit-report/v2@latest
-	CGO_ENABLED=1 TF_ACC=1 TF_LOG=DEBUG go test $(TEST) -v $(TESTARGS) -tags=$(TEST_SUITE) -timeout 120m -race -parallel=1 2>&1 | tee output.txt
+	CGO_ENABLED=1 TF_ACC=1 TF_LOG=DEBUG CODEOWNERS_PATH=$(PWD)/CODEOWNERS go test $(TEST) -v $(TESTARGS) -tags=$(TEST_SUITE) -timeout 120m -race -parallel=1 2>&1 | tee output.txt
 	! grep -q "\[build failed\]" output.txt
 	go-junit-report -in output.txt -out junit-report.xml
 
