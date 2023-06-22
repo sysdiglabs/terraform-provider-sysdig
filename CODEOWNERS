@@ -18,10 +18,10 @@
 # Vulnerability Management
 *secure*vulnerability_exception* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
 *secure*trusted_cloud_identity* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
-*secure*scanning_policy* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
+*secure*scanningpolicies* @acaprari @dippie8 @d-enz @fedemengo @ggiala @mech-pig @mattpag @ProvoK # report to: team-secure-vulnerability-management
 
 # Cloud metrics
-*cloud_account* @jwsarna1 # report to: TODO
+*cloud_account* @jwsarna1 # report to: team-cloud-metrics
 
 # Visualization
 *monitor*dashboard* @brokenpip3 # report to: team-visualization
