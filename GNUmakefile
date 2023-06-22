@@ -42,7 +42,7 @@ testacc: fmtcheck
 
 junit-report: fmtcheck
 	@go install github.com/jstemmer/go-junit-report/v2@latest
-	CGO_ENABLED=1 TF_ACC=1 TF_LOG_PROVIDER_SYSDIG=DEBUG go test $(TEST) -v $(TESTARGS) -tags=$(TEST_SUITE) -timeout 120m -race -parallel=1 2>&1 | tee output.txt
+	CGO_ENABLED=1 TF_ACC=1 TF_LOG=DEBUG go test $(TEST) -v $(TESTARGS) -tags=$(TEST_SUITE) -timeout 120m -race -parallel=1 2>&1 | tee output.txt
 	! grep -q "\[build failed\]" output.txt
 	go-junit-report -in output.txt -out junit-report.xml
 
