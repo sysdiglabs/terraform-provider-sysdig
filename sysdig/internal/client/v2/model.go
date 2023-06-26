@@ -601,44 +601,30 @@ type cloudAccountWrapperMonitor struct {
 	CloudAccount CloudAccountMonitor `json:"provider"`
 }
 
-type PostureZoneScope struct {
-	ID         string `json:"id,omitempty"`
-	TargetType string `json:"targetType"`
-	Rules      string `json:"rules"`
+type PosturePolicyZoneMeta struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
-type PostureZonePolicySlim struct {
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name"`
-	Type int    `json:"type"`
-	Kind int    `json:"kind"`
+type PosturePolicy struct {
+	ID             string                  `json:"id,omitempty"`
+	Name           string                  `json:"name"`
+	Type           int                     `json:"type"`
+	Kind           int                     `json:"kind"`
+	Description    string                  `json:"description"`
+	Version        string                  `json:"version"`
+	AplVersion     string                  `json:"aplVersion"`
+	Link           string                  `json:"link"`
+	Authors        string                  `json:"authors"`
+	PublishedData  string                  `json:"publishedDate"`
+	MinKubeVersion float64                 `json:"minKubeVersion"`
+	MaxKubeVersion float64                 `json:"maxKubeVersion"`
+	IsCustom       bool                    `json:"isCustom"`
+	IsActive       bool                    `json:"isActive"`
+	Platform       string                  `json:"platform"`
+	Zones          []PosturePolicyZoneMeta `json:"zones"`
 }
 
 type PostureZonePolicyListResponse struct {
-	Data []PostureZonePolicySlim `json:"data"`
-}
-
-type PostureZone struct {
-	ID             string                  `json:"id"`
-	Name           string                  `json:"name"`
-	Description    string                  `json:"description"`
-	Author         string                  `json:"author"`
-	LastModifiedBy string                  `json:"last_modified_by"`
-	LastUpdated    int                     `json:"last_updated"`
-	IsSystem       bool                    `json:"is_system"`
-	Scopes         []PostureZoneScope      `json:"scopes"`
-	Policies       []PostureZonePolicySlim `json:"policies"`
-}
-
-type PostureZoneRequest struct {
-	ID          string             `json:"id"`
-	Name        string             `json:"name"`
-	Description string             `json:"description"`
-	PolicyIDs   []string           `json:"policyIds"`
-	Scopes      []PostureZoneScope `json:"scopes"`
-	Username    string             `json:"username"`
-}
-
-type PostureZoneResponse struct {
-	Data PostureZone `json:"data"`
+	Data []PosturePolicy `json:"data"`
 }

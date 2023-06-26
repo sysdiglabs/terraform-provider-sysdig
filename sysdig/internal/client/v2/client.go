@@ -50,7 +50,6 @@ type MonitorCommon interface {
 }
 
 type SecureCommon interface {
-	PostureZoneInterface
 	PosturePolicyInterface
 }
 

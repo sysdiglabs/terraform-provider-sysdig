@@ -15,30 +15,90 @@ func dataSourceSysdigSecurePosturePolicies() *schema.Resource {
 			Read: schema.DefaultTimeout(5 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			"id": {
+			SchemaIDKey: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"policies": {
+			SchemaPoliciesKey: {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id": {
+						SchemaIDKey: {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"name": {
+						SchemaNameKey: {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"type": {
+						SchemaTypeKey: {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"kind": {
+						SchemaKindKey: {
 							Type:     schema.TypeInt,
 							Computed: true,
+						},
+						SchemaDescriptionKey: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						SchemaVersionKey: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						SchemaAplVersionKey: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						SchemaLinkKey: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						SchemaAuthorsKey: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						SchemaPublishedDateKey: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						SchemaMinKubeVersionKey: {
+							Type:     schema.TypeFloat,
+							Computed: true,
+						},
+						SchemaMaxKubeVersionKey: {
+							Type:     schema.TypeFloat,
+							Computed: true,
+						},
+						SchemaIsCustomKey: {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						SchemaIsActiveKey: {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						SchemaPlatformKey: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						SchemaZonesKey: {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									SchemaIDKey: {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									SchemaNameKey: {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -78,16 +138,38 @@ func dataSourceSysdigSecurePosturePoliciesRead(ctx context.Context, d *schema.Re
 
 	policies := make([]map[string]interface{}, len(resp))
 	for i, p := range resp {
+		zones := make([]map[string]interface{}, len(p.Zones))
+		for j, z := range p.Zones {
+			zones[j] = map[string]interface{}{
+				"id":   z.ID,
+				"name": z.Name,
+			}
+		}
 		policies[i] = map[string]interface{}{
-			"id":   p.ID,
-			"name": p.Name,
-			"type": p.Type,
-			"kind": p.Kind,
+			SchemaIDKey:             p.ID,
+			SchemaNameKey:           p.Name,
+			SchemaTypeKey:           p.Type,
+			SchemaKindKey:           p.Kind,
+			SchemaDescriptionKey:    p.Description,
+			SchemaVersionKey:        p.Version,
+			SchemaAplVersionKey:     p.AplVersion,
+			SchemaLinkKey:           p.Link,
+			SchemaAuthorsKey:        p.Authors,
+			SchemaPublishedDateKey:  p.PublishedData,
+			SchemaMinKubeVersionKey: p.MinKubeVersion,
+			SchemaMaxKubeVersionKey: p.MaxKubeVersion,
+			SchemaIsCustomKey:       p.IsCustom,
+			SchemaIsActiveKey:       p.IsActive,
+			SchemaPlatformKey:       p.Platform,
+			SchemaZonesKey:          zones,
 		}
 	}
 
-	d.SetId("policies")
-	_ = d.Set("policies", policies)
+	err = d.Set(SchemaPoliciesKey, policies)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
+	d.SetId("0")
 	return nil
 }
