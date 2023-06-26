@@ -141,8 +141,8 @@ func dataSourceSysdigSecurePosturePoliciesRead(ctx context.Context, d *schema.Re
 		zones := make([]map[string]interface{}, len(p.Zones))
 		for j, z := range p.Zones {
 			zones[j] = map[string]interface{}{
-				"id":   z.ID,
-				"name": z.Name,
+				SchemaIDKey:   z.ID,
+				SchemaNameKey: z.Name,
 			}
 		}
 		policies[i] = map[string]interface{}{
