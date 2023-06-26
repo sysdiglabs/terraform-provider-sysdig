@@ -1,3 +1,5 @@
+//go:build tf_acc_sysdig_secure || tf_acc_ibm_secure
+
 package sysdig_test
 
 import (
@@ -17,10 +19,14 @@ func TestAccPosturePolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: `
-data sysdig_secure_posture_policies policies {}
-`,
+				Config: listAllPosturePolicies(),
 			},
 		},
 	})
+}
+
+func listAllPosturePolicies() string {
+	return `
+data sysdig_secure_posture_policies policies {}
+`
 }
