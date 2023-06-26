@@ -24,9 +24,10 @@ func TestAccPosturePolicy(t *testing.T) {
 			{
 				Config: "data sysdig_secure_posture_policies policies {}",
 				Check: func(state *terraform.State) error {
-					s, ok := state.RootModule().Resources["data.sysdig_secure_posture_policies.policies"]
+					policiesRef := "data.sysdig_secure_posture_policies.policies"
+					s, ok := state.RootModule().Resources[policiesRef]
 					if !ok {
-						return fmt.Errorf("data source not found")
+						return fmt.Errorf("%s not found", policiesRef)
 					}
 					numOfPolicies, err := strconv.Atoi(s.Primary.Attributes["policies.#"])
 					if err != nil {
