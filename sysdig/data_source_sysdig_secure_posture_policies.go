@@ -48,7 +48,7 @@ func dataSourceSysdigSecurePosturePolicies() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						SchemaAplVersionKey: {
+						SchemaApiVersionKey: {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -152,7 +152,7 @@ func dataSourceSysdigSecurePosturePoliciesRead(ctx context.Context, d *schema.Re
 			SchemaKindKey:           p.Kind,
 			SchemaDescriptionKey:    p.Description,
 			SchemaVersionKey:        p.Version,
-			SchemaAplVersionKey:     p.AplVersion,
+			SchemaApiVersionKey:     p.ApiVersion,
 			SchemaLinkKey:           p.Link,
 			SchemaAuthorsKey:        p.Authors,
 			SchemaPublishedDateKey:  p.PublishedData,
