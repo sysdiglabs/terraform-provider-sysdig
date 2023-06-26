@@ -1,6 +1,7 @@
 package sysdig_test
 
 import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"os"
 	"strings"
 	"testing"
@@ -38,4 +39,8 @@ func sysdigOrIBMMonitorPreCheck(t *testing.T) func() {
 			t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_IBM_MONITOR_API_KEY must be set for acceptance tests")
 		}
 	}
+}
+
+func randomText(len int) string {
+	return acctest.RandStringFromCharSet(len, acctest.CharSetAlphaNum)
 }

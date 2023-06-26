@@ -19,6 +19,10 @@ type PostureZoneInterface interface {
 }
 
 func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZoneRequest) (*PostureZone, error) {
+	if r.ID == "" {
+		r.ID = "0"
+	}
+
 	payload, err := Marshal(r)
 	if err != nil {
 		return nil, err

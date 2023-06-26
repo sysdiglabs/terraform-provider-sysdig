@@ -602,8 +602,8 @@ type cloudAccountWrapperMonitor struct {
 }
 
 type PostureZoneScope struct {
-	ID         int    `json:"id,omitempty"`
-	TargetType string `json:"target_type"`
+	ID         string `json:"id,omitempty"`
+	TargetType string `json:"targetType"`
 	Rules      string `json:"rules"`
 }
 
