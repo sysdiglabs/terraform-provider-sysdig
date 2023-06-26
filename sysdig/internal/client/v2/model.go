@@ -613,7 +613,6 @@ type PosturePolicy struct {
 	Kind           int                     `json:"kind"`
 	Description    string                  `json:"description"`
 	Version        string                  `json:"version"`
-	ApiVersion     string                  `json:"apiVersion"`
 	Link           string                  `json:"link"`
 	Authors        string                  `json:"authors"`
 	PublishedData  string                  `json:"publishedDate"`

@@ -8,7 +8,6 @@ const (
 	SchemaKindKey           = "kind"
 	SchemaDescriptionKey    = "description"
 	SchemaVersionKey        = "version"
-	SchemaApiVersionKey     = "api_version"
 	SchemaLinkKey           = "link"
 	SchemaAuthorsKey        = "authors"
 	SchemaPublishedDateKey  = "published_date"

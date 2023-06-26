@@ -43,7 +43,6 @@ In addition to all arguments above, the following attributes are exported:
   - 3 - Corporate
 * `description` - Policy description, eg. `CIS Docker Benchmark`
 * `version` - Policy version, eg. `1.0.0`
-* `api_version` - Policy API version `1.0.0`
 * `link` - Policy link
 * `authors` - Policy authors, eg. `John Doe`
 * `published_date` - Policy published date, eg. `1588617600000`

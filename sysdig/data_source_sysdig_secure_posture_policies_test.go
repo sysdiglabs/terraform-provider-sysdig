@@ -3,9 +3,12 @@
 package sysdig_test
 
 import (
+	"fmt"
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"strconv"
 	"testing"
 )
 
@@ -19,14 +22,23 @@ func TestAccPosturePolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: listAllPosturePolicies(),
+				Config: "data sysdig_secure_posture_policies policies {}",
+				Check: func(state *terraform.State) error {
+					s, ok := state.RootModule().Resources["data.sysdig_secure_posture_policies.policies"]
+					if !ok {
+						return fmt.Errorf("data source not found")
+					}
+					numOfPolicies, err := strconv.Atoi(s.Primary.Attributes["policies.#"])
+					if err != nil {
+						return err
+					}
+
+					if numOfPolicies == 0 {
+						return fmt.Errorf("missing policies")
+					}
+					return nil
+				},
 			},
 		},
 	})
-}
-
-func listAllPosturePolicies() string {
-	return `
-data sysdig_secure_posture_policies policies {}
-`
 }
