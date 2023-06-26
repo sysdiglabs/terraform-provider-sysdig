@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestAccPosturePolicy(t *testing.T) {
+func TestAccPosturePoliciesDataSource(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigIBMSecureAPIKeyEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
