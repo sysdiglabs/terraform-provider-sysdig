@@ -665,3 +665,14 @@ type PostureZoneRequest struct {
 type PostureZoneResponse struct {
 	Data PostureZone `json:"data"`
 }
+
+type IdentityContext struct {
+	IdentityType       string `json:"identityType"`
+	CustomerID         int    `json:"customerId"`
+	TeamID             int    `json:"teamId"`
+	TeamName           string `json:"teamName"`
+	UserID             int    `json:"userId"`
+	Username           string `json:"username"`
+	ServiceAccountID   int    `json:"serviceAccountId"`
+	ServiceAccountName string `json:"serviceAccountName"`
+}

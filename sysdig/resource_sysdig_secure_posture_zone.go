@@ -97,7 +97,7 @@ func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	u, err := commonClient.GetCurrentUser(ctx)
+	identityCtx, err := commonClient.GetIdentityContext(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -121,13 +121,18 @@ func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
+	username := identityCtx.Username
+	if identityCtx.ServiceAccountID != 0 {
+		username = identityCtx.ServiceAccountName
+	}
+
 	req := &v2.PostureZoneRequest{
 		ID:          d.Id(),
 		Name:        d.Get(SchemaNameKey).(string),
 		Description: d.Get(SchemaDescriptionKey).(string),
 		PolicyIDs:   policies,
 		Scopes:      scopes,
-		Username:    u.Email,
+		Username:    username,
 	}
 
 	zoneClient, err := getPostureZoneClient(meta.(SysdigClients))
