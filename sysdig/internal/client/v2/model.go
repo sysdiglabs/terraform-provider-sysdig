@@ -646,9 +646,9 @@ type PostureZone struct {
 	Name           string                  `json:"name"`
 	Description    string                  `json:"description"`
 	Author         string                  `json:"author"`
-	LastModifiedBy string                  `json:"last_modified_by"`
-	LastUpdated    int                     `json:"last_updated"`
-	IsSystem       bool                    `json:"is_system"`
+	LastModifiedBy string                  `json:"lastModifiedBy"`
+	LastUpdated    string                  `json:"lastUpdated"`
+	IsSystem       bool                    `json:"isSystem"`
 	Scopes         []PostureZoneScope      `json:"scopes"`
 	Policies       []PostureZonePolicySlim `json:"policies"`
 }

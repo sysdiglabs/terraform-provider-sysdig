@@ -69,6 +69,6 @@ data "sysdig_secure_posture_policies" "all" {}
 
 resource "sysdig_secure_posture_zone" "z1" {
   name = "%s"
-  policies = [data.sysdig_secure_posture_policies.all.policies[0].id]
+  policy_ids = [data.sysdig_secure_posture_policies.all.policies[0].id]
 }`, name)
 }

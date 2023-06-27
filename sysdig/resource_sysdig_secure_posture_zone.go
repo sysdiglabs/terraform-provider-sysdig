@@ -36,12 +36,28 @@ func resourceSysdigSecurePostureZone() *schema.Resource {
 				Optional: true,
 				Type:     schema.TypeString,
 			},
-			SchemaPoliciesKey: {
+			SchemaPolicyIDsKey: {
 				Optional: true,
 				Type:     schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			SchemaAuthorKey: {
+				Computed: true,
+				Type:     schema.TypeString,
+			},
+			SchemaLastModifiedBy: {
+				Computed: true,
+				Type:     schema.TypeString,
+			},
+			SchemaLastUpdated: {
+				Computed: true,
+				Type:     schema.TypeString,
+			},
+			SchemaIsSystem: {
+				Computed: true,
+				Type:     schema.TypeBool,
 			},
 			SchemaScopesKey: {
 				Optional: true,
@@ -102,7 +118,7 @@ func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	policiesData := d.Get(SchemaPoliciesKey).([]interface{})
+	policiesData := d.Get(SchemaPolicyIDsKey).([]interface{})
 	policies := make([]string, len(policiesData))
 	for i, p := range policiesData {
 		policies[i] = p.(string)
@@ -162,29 +178,45 @@ func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	// set name
 	err = d.Set(SchemaNameKey, zone.Name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	// set description
 	err = d.Set(SchemaDescriptionKey, zone.Description)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	// set policies
-	pIDs := make([]string, len(zone.Policies))
-	for i, p := range zone.Policies {
-		pIDs[i] = p.ID
-	}
-	err = d.Set(SchemaPoliciesKey, pIDs)
+	err = d.Set(SchemaAuthorKey, zone.Author)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	// set scopes
+	err = d.Set(SchemaLastModifiedBy, zone.LastModifiedBy)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set(SchemaLastUpdated, zone.LastUpdated)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set(SchemaIsSystem, zone.IsSystem)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	pIDs := make([]string, len(zone.Policies))
+	for i, p := range zone.Policies {
+		pIDs[i] = p.ID
+	}
+	err = d.Set(SchemaPolicyIDsKey, pIDs)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	scopes := make([]map[string]interface{}, len(zone.Scopes))
 	for i, s := range zone.Scopes {
 		scopes[i] = map[string]interface{}{
