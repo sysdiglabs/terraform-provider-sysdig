@@ -1,3 +1,5 @@
+//go:build tf_acc_sysdig_secure || tf_acc_ibm_secure
+
 package sysdig_test
 
 import (
