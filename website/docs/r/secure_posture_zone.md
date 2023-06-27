@@ -24,7 +24,7 @@ locals {
   ]
 }
 
-resource "sysdig_secure_posture_zone" "z1" {
+resource "sysdig_secure_posture_zone" "example" {
   name        = "Zone with FedRAMP policies"
   description = "Zone description"
   policy_ids  = [for p in local.fedramp_policies : p.id]
@@ -44,3 +44,29 @@ resource "sysdig_secure_posture_zone" "z1" {
 ```
 
 ## Argument Reference
+
+* `name` - (Required) The name of the Posture Zone.
+* `description` - (Optional) The description of the Posture Zone.
+* `policy_ids` - (Optional) The list of Posture Policy IDs attached to Zone.
+* `scopes` - (Optional) Scopes block defines list of scopes attached to Zone.
+
+### Scopes block
+
+* `target_type` - (Required) The target type for the scope.
+* `rules` - (Required) Rules attached to scope.
+
+## Attributes Reference
+
+In addition to all arguments above, the following attributes are exported:
+
+* `author` - (Computed) The zone author.
+* `last_modified_by` - (Computed) By whom is last modification made.
+* `last_updated` - (Computed) Timestamp of last modification of zone.
+
+## Import
+
+Posture zone can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_secure_posture_zone.example 12345
+```

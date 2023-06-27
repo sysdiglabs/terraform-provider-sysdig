@@ -14,7 +14,6 @@ const (
 	SchemaAuthorKey         = "author"
 	SchemaLastModifiedBy    = "last_modified_by"
 	SchemaLastUpdated       = "last_updated"
-	SchemaIsSystem          = "is_system"
 	SchemaPublishedDateKey  = "published_date"
 	SchemaMinKubeVersionKey = "min_kube_version"
 	SchemaMaxKubeVersionKey = "max_kube_version"

@@ -55,10 +55,6 @@ func resourceSysdigSecurePostureZone() *schema.Resource {
 				Computed: true,
 				Type:     schema.TypeString,
 			},
-			SchemaIsSystem: {
-				Computed: true,
-				Type:     schema.TypeBool,
-			},
 			SchemaScopesKey: {
 				Optional: true,
 				Type:     schema.TypeSet,
@@ -199,11 +195,6 @@ func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resource
 	}
 
 	err = d.Set(SchemaLastUpdated, zone.LastUpdated)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	err = d.Set(SchemaIsSystem, zone.IsSystem)
 	if err != nil {
 		return diag.FromErr(err)
 	}
