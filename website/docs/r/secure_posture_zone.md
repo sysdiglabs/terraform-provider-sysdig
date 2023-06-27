@@ -53,7 +53,7 @@ resource "sysdig_secure_posture_zone" "example" {
 ### Scopes block
 
 * `target_type` - (Required) The target type for the scope.
-* `rules` - (Required) Rules attached to scope.
+* `rules` - (Optional) Rules attached to scope.
 
 ## Attributes Reference
 
