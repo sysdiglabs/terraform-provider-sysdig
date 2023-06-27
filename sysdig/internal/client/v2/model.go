@@ -627,3 +627,41 @@ type PosturePolicy struct {
 type PostureZonePolicyListResponse struct {
 	Data []PosturePolicy `json:"data"`
 }
+
+type PostureZoneScope struct {
+	ID         string `json:"id,omitempty"`
+	TargetType string `json:"targetType"`
+	Rules      string `json:"rules"`
+}
+
+type PostureZonePolicySlim struct {
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name"`
+	Type int    `json:"type"`
+	Kind int    `json:"kind"`
+}
+
+type PostureZone struct {
+	ID             string                  `json:"id"`
+	Name           string                  `json:"name"`
+	Description    string                  `json:"description"`
+	Author         string                  `json:"author"`
+	LastModifiedBy string                  `json:"last_modified_by"`
+	LastUpdated    int                     `json:"last_updated"`
+	IsSystem       bool                    `json:"is_system"`
+	Scopes         []PostureZoneScope      `json:"scopes"`
+	Policies       []PostureZonePolicySlim `json:"policies"`
+}
+
+type PostureZoneRequest struct {
+	ID          string             `json:"id"`
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	PolicyIDs   []string           `json:"policyIds"`
+	Scopes      []PostureZoneScope `json:"scopes"`
+	Username    string             `json:"username"`
+}
+
+type PostureZoneResponse struct {
+	Data PostureZone `json:"data"`
+}
