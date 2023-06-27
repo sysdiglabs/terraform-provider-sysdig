@@ -51,6 +51,7 @@ type MonitorCommon interface {
 
 type SecureCommon interface {
 	PosturePolicyInterface
+	PostureZoneInterface
 }
 
 type Requester interface {
