@@ -102,7 +102,7 @@ func getPostureZoneClient(c SysdigClients) (v2.PostureZoneInterface, error) {
 }
 
 func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	commonClient, err := meta.(SysdigClients).sysdigCommonClientV2()
+	commonClient, err := meta.(SysdigClients).commonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
