@@ -8,16 +8,6 @@ import (
 	"time"
 )
 
-const (
-	namePostureZoneKey        = "name"
-	descriptionPostureZoneKey = "description"
-	policiesPostureZoneKey    = "policies"
-	scopesPostureZoneKey      = "scopes"
-	scopePostureZoneKey       = "scope"
-	targetTypePostureScopeKey = "target_type"
-	rulesPostureScopeKey      = "rules"
-)
-
 func resourceSysdigSecurePostureZone() *schema.Resource {
 	timeout := 5 * time.Minute
 
@@ -38,38 +28,38 @@ func resourceSysdigSecurePostureZone() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			namePostureZoneKey: {
+			SchemaNameKey: {
 				Required: true,
 				Type:     schema.TypeString,
 			},
-			descriptionPostureZoneKey: {
+			SchemaDescriptionKey: {
 				Optional: true,
 				Type:     schema.TypeString,
 			},
-			policiesPostureZoneKey: {
+			SchemaPoliciesKey: {
 				Optional: true,
 				Type:     schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			scopesPostureZoneKey: {
+			SchemaScopesKey: {
 				Optional: true,
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						scopePostureZoneKey: {
+						SchemaScopeKey: {
 							Type:     schema.TypeSet,
 							MinItems: 1,
 							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									targetTypePostureScopeKey: {
+									SchemaTargetTypeKey: {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									rulesPostureScopeKey: {
+									SchemaRulesKey: {
 										Type:     schema.TypeString,
 										Required: true,
 									},
@@ -112,40 +102,40 @@ func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	policiesData := d.Get(policiesPostureZoneKey).([]interface{})
+	policiesData := d.Get(SchemaPoliciesKey).([]interface{})
 	policies := make([]string, len(policiesData))
 	for i, p := range policiesData {
 		policies[i] = p.(string)
 	}
 
-	scopesList := d.Get(scopesPostureZoneKey).(*schema.Set).List()
+	scopesList := d.Get(SchemaScopesKey).(*schema.Set).List()
 	scopes := make([]v2.PostureZoneScope, 0)
 	if len(scopesList) > 0 {
-		scopeList := scopesList[0].(map[string]interface{})[scopePostureZoneKey].(*schema.Set).List()
+		scopeList := scopesList[0].(map[string]interface{})[SchemaScopeKey].(*schema.Set).List()
 		for _, attr := range scopeList {
 			s := attr.(map[string]interface{})
 			scopes = append(scopes, v2.PostureZoneScope{
-				TargetType: s[targetTypePostureScopeKey].(string),
-				Rules:      s[rulesPostureScopeKey].(string),
+				TargetType: s[SchemaTargetTypeKey].(string),
+				Rules:      s[SchemaRulesKey].(string),
 			})
 		}
 	}
 
 	req := &v2.PostureZoneRequest{
 		ID:          d.Id(),
-		Name:        d.Get(namePostureZoneKey).(string),
-		Description: d.Get(descriptionPostureZoneKey).(string),
+		Name:        d.Get(SchemaNameKey).(string),
+		Description: d.Get(SchemaDescriptionKey).(string),
 		PolicyIDs:   policies,
 		Scopes:      scopes,
 		Username:    u.Email,
 	}
 
-	client, err := getPostureZoneClient(meta.(SysdigClients))
+	zoneClient, err := getPostureZoneClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	zone, err := client.CreateOrUpdatePostureZone(ctx, req)
+	zone, err := zoneClient.CreateOrUpdatePostureZone(ctx, req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -168,13 +158,13 @@ func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resource
 	}
 
 	// set name
-	err = d.Set(namePostureZoneKey, zone.Name)
+	err = d.Set(SchemaNameKey, zone.Name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// set description
-	err = d.Set(descriptionPostureZoneKey, zone.Description)
+	err = d.Set(SchemaDescriptionKey, zone.Description)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -184,7 +174,7 @@ func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resource
 	for i, p := range zone.Policies {
 		pIDs[i] = p.ID
 	}
-	err = d.Set(policiesPostureZoneKey, pIDs)
+	err = d.Set(SchemaPoliciesKey, pIDs)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -193,14 +183,14 @@ func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resource
 	scopes := make([]map[string]interface{}, len(zone.Scopes))
 	for i, s := range zone.Scopes {
 		scopes[i] = map[string]interface{}{
-			targetTypePostureScopeKey: s.TargetType,
-			rulesPostureScopeKey:      s.Rules,
+			SchemaTargetTypeKey: s.TargetType,
+			SchemaRulesKey:      s.Rules,
 		}
 	}
 	if len(scopes) > 0 {
-		err = d.Set(scopesPostureZoneKey, []interface{}{
+		err = d.Set(SchemaScopesKey, []interface{}{
 			map[string]interface{}{
-				scopePostureZoneKey: scopes,
+				SchemaScopeKey: scopes,
 			},
 		})
 		if err != nil {
