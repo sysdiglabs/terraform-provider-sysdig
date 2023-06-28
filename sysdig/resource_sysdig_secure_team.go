@@ -34,7 +34,7 @@ func resourceSysdigSecureTeam() *schema.Resource {
 			}
 
 			if nonEmptyZoneIDs && allZonesPlan.True() {
-				return fmt.Errorf("if %s is set, %s must be omitted", SchemaAllZones, SchemaZonesIDsKey)
+				return fmt.Errorf("if %s is enabled, %s must be omitted", SchemaAllZones, SchemaZonesIDsKey)
 			}
 
 			return nil
