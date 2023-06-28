@@ -5,6 +5,7 @@ import (
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"strconv"
 	"time"
 )
 
@@ -40,7 +41,7 @@ func resourceSysdigSecurePostureZone() *schema.Resource {
 				Optional: true,
 				Type:     schema.TypeList,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type: schema.TypeInt,
 				},
 			},
 			SchemaAuthorKey: {
@@ -117,7 +118,7 @@ func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceDa
 	policiesData := d.Get(SchemaPolicyIDsKey).([]interface{})
 	policies := make([]string, len(policiesData))
 	for i, p := range policiesData {
-		policies[i] = p.(string)
+		policies[i] = strconv.Itoa(p.(int))
 	}
 
 	scopesList := d.Get(SchemaScopesKey).(*schema.Set).List()
@@ -169,7 +170,12 @@ func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	zone, err := client.GetPostureZone(ctx, d.Id())
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	zone, err := client.GetPostureZone(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -199,9 +205,13 @@ func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	pIDs := make([]string, len(zone.Policies))
+	pIDs := make([]int, len(zone.Policies))
 	for i, p := range zone.Policies {
-		pIDs[i] = p.ID
+		id, err := strconv.Atoi(p.ID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		pIDs[i] = id
 	}
 	err = d.Set(SchemaPolicyIDsKey, pIDs)
 	if err != nil {
@@ -235,7 +245,12 @@ func resourceSysdigSecurePostureZoneDelete(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	err = client.DeletePostureZone(ctx, d.Id())
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.DeletePostureZone(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}

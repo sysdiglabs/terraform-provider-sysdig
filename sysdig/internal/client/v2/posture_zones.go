@@ -8,14 +8,14 @@ import (
 
 const (
 	ZonesPath = "%s/api/cspm/v1/policy/zones"
-	ZonePath  = "%s/api/cspm/v1/policy/zones/%s"
+	ZonePath  = "%s/api/cspm/v1/policy/zones/%d"
 )
 
 type PostureZoneInterface interface {
 	Base
 	CreateOrUpdatePostureZone(ctx context.Context, z *PostureZoneRequest) (*PostureZone, error)
-	GetPostureZone(ctx context.Context, id string) (*PostureZone, error)
-	DeletePostureZone(ctx context.Context, id string) error
+	GetPostureZone(ctx context.Context, id int) (*PostureZone, error)
+	DeletePostureZone(ctx context.Context, id int) error
 }
 
 func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZoneRequest) (*PostureZone, error) {
@@ -42,7 +42,7 @@ func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZ
 	return &wrapper.Data, nil
 }
 
-func (client *Client) GetPostureZone(ctx context.Context, id string) (*PostureZone, error) {
+func (client *Client) GetPostureZone(ctx context.Context, id int) (*PostureZone, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.getZoneURL(id), nil)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (client *Client) GetPostureZone(ctx context.Context, id string) (*PostureZo
 	return &wrapper.Data, nil
 }
 
-func (client *Client) DeletePostureZone(ctx context.Context, id string) error {
+func (client *Client) DeletePostureZone(ctx context.Context, id int) error {
 	response, err := client.requester.Request(ctx, http.MethodDelete, client.getZoneURL(id), nil)
 	if err != nil {
 		return err
@@ -75,6 +75,6 @@ func (client *Client) createZoneURL() string {
 	return fmt.Sprintf(ZonesPath, client.config.url)
 }
 
-func (client *Client) getZoneURL(id string) string {
+func (client *Client) getZoneURL(id int) string {
 	return fmt.Sprintf(ZonePath, client.config.url, id)
 }

@@ -5,6 +5,7 @@ import (
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"strconv"
 	"time"
 )
 
@@ -25,7 +26,7 @@ func dataSourceSysdigSecurePosturePolicies() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						SchemaIDKey: {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						SchemaNameKey: {
@@ -141,8 +142,12 @@ func dataSourceSysdigSecurePosturePoliciesRead(ctx context.Context, d *schema.Re
 				SchemaNameKey: z.Name,
 			}
 		}
+		policyID, err := strconv.Atoi(p.ID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 		policies[i] = map[string]interface{}{
-			SchemaIDKey:             p.ID,
+			SchemaIDKey:             policyID,
 			SchemaNameKey:           p.Name,
 			SchemaTypeKey:           p.Type,
 			SchemaKindKey:           p.Kind,
