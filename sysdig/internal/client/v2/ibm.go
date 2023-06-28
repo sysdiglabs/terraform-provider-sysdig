@@ -34,6 +34,7 @@ type IBMMonitor interface {
 
 type IBMSecure interface {
 	IBMCommon
+	SecureCommon
 }
 
 type IBMAccessToken string

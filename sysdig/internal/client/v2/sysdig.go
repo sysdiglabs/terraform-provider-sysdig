@@ -32,6 +32,7 @@ type SysdigMonitor interface {
 
 type SysdigSecure interface {
 	SysdigCommon
+	SecureCommon
 	PolicyInterface
 	RuleInterface
 	ListInterface
@@ -76,6 +77,7 @@ func newSysdigClient(opts ...ClientOption) *Client {
 		},
 	}
 }
+
 func (sr *SysdigRequest) CurrentTeamID(ctx context.Context) (int, error) {
 	sr.teamIDLock.Lock()
 	defer sr.teamIDLock.Unlock()

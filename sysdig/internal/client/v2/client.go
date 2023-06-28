@@ -49,6 +49,10 @@ type MonitorCommon interface {
 	AlertInterface
 }
 
+type SecureCommon interface {
+	PosturePolicyInterface
+}
+
 type Requester interface {
 	CurrentTeamID(ctx context.Context) (int, error)
 	Request(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error)

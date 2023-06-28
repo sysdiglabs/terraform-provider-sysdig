@@ -600,3 +600,30 @@ type CloudAccountMonitor struct {
 type cloudAccountWrapperMonitor struct {
 	CloudAccount CloudAccountMonitor `json:"provider"`
 }
+
+type PosturePolicyZoneMeta struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type PosturePolicy struct {
+	ID             string                  `json:"id,omitempty"`
+	Name           string                  `json:"name"`
+	Type           int                     `json:"type"`
+	Kind           int                     `json:"kind"`
+	Description    string                  `json:"description"`
+	Version        string                  `json:"version"`
+	Link           string                  `json:"link"`
+	Authors        string                  `json:"authors"`
+	PublishedData  string                  `json:"publishedDate"`
+	MinKubeVersion float64                 `json:"minKubeVersion"`
+	MaxKubeVersion float64                 `json:"maxKubeVersion"`
+	IsCustom       bool                    `json:"isCustom"`
+	IsActive       bool                    `json:"isActive"`
+	Platform       string                  `json:"platform"`
+	Zones          []PosturePolicyZoneMeta `json:"zones"`
+}
+
+type PostureZonePolicyListResponse struct {
+	Data []PosturePolicy `json:"data"`
+}
