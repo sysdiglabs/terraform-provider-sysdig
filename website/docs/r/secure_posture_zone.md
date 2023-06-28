@@ -52,8 +52,123 @@ resource "sysdig_secure_posture_zone" "example" {
 
 ### Scopes block
 
-* `target_type` - (Required) The target type for the scope.
-* `rules` - (Optional) Rules attached to scope.
+* `target_type` - (Required) The target type for the scope. Supported types:
+  - AWS - `aws`
+  - GCP - `gcp`
+  - Azure - `azure`
+  - Kubernetes - `kubernetes`
+  - Image - `image`
+  - Host - `host`
+  - Git - `git`
+
+* `rules` - (Optional) Query language expression for filtering results. Empty rules means no filtering. 
+
+  Operators:
+  - `and`, `or` and `not` logical operators
+  - `=`, `!=`
+  - `>`, `>=`, `<`, `<=`
+  - `in`
+  - `contains` and `startsWith` to check partial values of attributes
+  
+  List of supported fields by target type:
+  - `aws`:
+    - `account`
+      - Type: string
+      - Description: AWS account ID
+      - Example query: `account in ("123456789012")`
+    - `organization`
+      - Type: string
+      - Description: AWS organization ID
+      - Example query: `organization in ("o-1234567890")`
+    - `labels`
+      - Type: string
+      - Description: AWS account labels
+      - Example query: `labels in ("label1")`
+    - `location`
+      - Type: string
+      - Description: AWS account location
+      - Example query: `location in ("us-east-1")`
+  - `gcp`:
+    - `account`
+      - Type: string
+      - Description: GCP account ID
+      - Example query: `account in ("123456789012")`
+    - `organization`
+      - Type: string
+      - Description: GCP organization ID
+      - Example query: `organization in ("1234567890")`
+    - `labels`
+      - Type: string
+      - Description: GCP account labels
+      - Example query: `labels in ("label1")`
+    - `location`
+      - Type: string
+      - Description: GCP account location
+      - Example query: `location in ("us-east-1")`
+  - `azure`:
+    - `account`
+      - Type: string
+      - Description: Azure account ID
+      - Example query: `account in ("123456789012")`
+    - `organization`
+      - Type: string
+      - Description: Azure organization ID
+      - Example query: `organization in ("1234567890")`
+    - `labels`
+      - Type: string
+      - Description: Azure account labels
+      - Example query: `labels in ("label1")`
+    - `location`
+      - Type: string
+      - Description: Azure account location
+      - Example query: `location in ("us-east-1")`
+  - `kubernetes`:
+     - `clusterId`
+       - Type: string
+       - Description: Kubernetes cluster ID
+       - Example query: `clusterId in ("cluster")`
+     - `namespace`
+       - Type: string
+       - Description: Kubernetes namespace
+       - Example query: `namespace in ("namespace")`
+     - `labelValues`
+       - Type: string
+       - Description: Kubernetes label values
+       - Example query: `labelValues in ("label1")`
+     - `distribution`
+       - Type: string
+       - Description: Kubernetes distribution
+       - Example query: `distribution in ("eks")`
+  - `host`:
+    - `clusterId`
+      - Type: string
+      - Description: Kubernetes cluster ID
+      - Example query: `clusterId in ("cluster")`
+    - `name`
+      - Type: string
+      - Description: Host name
+      - Example query: `name in ("host")`
+  - `image`:
+    - `registry`
+      - Type: string
+      - Description: Image registry
+      - Example query: `registry in ("registry")`
+    - `repository`
+      - Type: string
+      - Description: Image repository
+      - Example query: `repository in ("repository")`
+  - `git`:
+     - `gitIntegrationId`
+       - Type: string
+       - Description: Git integration ID
+       - Example query: `gitIntegrationId in ("gitIntegrationId")`
+     - `gitSourceId`
+       - Type: string
+       - Description: Git source ID
+       - Example query: `gitSourceId in ("gitSourceId")`
+  
+  **Note**: Whenever filtering for values with special characters, the values need to be encoded.
+  When “ or \ are the special characters, they need to be escaped with \ and then encoded.
 
 ## Attributes Reference
 
