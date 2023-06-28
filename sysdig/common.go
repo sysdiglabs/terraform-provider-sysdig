@@ -21,6 +21,8 @@ const (
 	SchemaIsActiveKey       = "is_active"
 	SchemaPlatformKey       = "platform"
 	SchemaZonesKey          = "zones"
+	SchemaZonesIDsKey       = "zone_ids"
+	SchemaAllZones          = "all_zones"
 	SchemaScopeKey          = "scope"
 	SchemaScopesKey         = "scopes"
 	SchemaTargetTypeKey     = "target_type"
