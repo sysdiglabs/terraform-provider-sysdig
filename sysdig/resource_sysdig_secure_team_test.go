@@ -5,6 +5,7 @@ package sysdig_test
 import (
 	"fmt"
 	"github.com/draios/terraform-provider-sysdig/buildinfo"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -36,6 +37,15 @@ func TestAccSecureTeam(t *testing.T) {
 			},
 			{
 				Config: secureTeamWithPostureZones(randomText(10)),
+			},
+			{
+				Config: secureTeamWithPostureZonesAndAllZones(randomText(10)),
+				ExpectError: regexp.MustCompile(
+					fmt.Sprintf("if %s is enabled, %s must be omitted",
+						sysdig.SchemaAllZones,
+						sysdig.SchemaZonesIDsKey,
+					),
+				),
 			},
 			{
 				ResourceName:      "sysdig_secure_team.sample",
@@ -82,5 +92,18 @@ resource "sysdig_secure_posture_zone" "z1" {
 resource "sysdig_secure_team" "sample" {
   name     = "sample-%[1]s"
   zone_ids = [sysdig_secure_posture_zone.z1.id]
+}`, name)
+}
+
+func secureTeamWithPostureZonesAndAllZones(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_posture_zone" "z1" {
+  name = "Zone-%[1]s"
+}
+
+resource "sysdig_secure_team" "sample" {
+  name      = "sample-%[1]s"
+  zone_ids  = [sysdig_secure_posture_zone.z1.id]
+  all_zones = true
 }`, name)
 }
