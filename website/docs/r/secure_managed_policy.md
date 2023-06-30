@@ -18,6 +18,10 @@ allows you to identify and configure a managed policy. The managed policy is loo
 ## Example Usage
 
 ```terraform
+data "sysdig_secure_notification_channel" "email_notification_channel" {
+  name = "Test Email Channel"
+}
+
 resource "sysdig_secure_managed_policy" "sysdig_runtime_threat_detection" {
   name = "Sysdig Runtime Threat Detection"
   type = "falco"
@@ -38,7 +42,7 @@ resource "sysdig_secure_managed_policy" "sysdig_runtime_threat_detection" {
     }
   }
 
-  notification_channels = [10000]
+  notification_channels = [data.sysdig_secure_notification_channel.email_notification_channel.id]
 }
 ```
 

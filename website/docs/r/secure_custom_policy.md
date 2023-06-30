@@ -15,6 +15,10 @@ Creates a Sysdig Secure Custom Policy.
 ## Example Usage
 
 ```terraform
+data "sysdig_secure_notification_channel" "email_notification_channel" {
+  name = "Test Email Channel"
+}
+
 resource "sysdig_secure_custom_policy" "write_apt_database" {
   name = "Write apt database"
   description = "an attempt to write to the dpkg database by any non-dpkg related program"
@@ -40,8 +44,7 @@ resource "sysdig_secure_custom_policy" "write_apt_database" {
     }
   }
 
-  notification_channels = [10000]
-
+  notification_channels = [data.sysdig_secure_notification_channel.email_notification_channel.id]
 }
 ```
 
