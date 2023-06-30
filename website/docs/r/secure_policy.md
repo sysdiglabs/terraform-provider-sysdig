@@ -44,7 +44,7 @@ resource "sysdig_secure_policy" "write_apt_database" {
     }
   }
 
-  notification_channels = [data.sysdig_secure_notification_channel.email_notification_channel]
+  notification_channels = [data.sysdig_secure_notification_channel.email_notification_channel.id]
 }
 ```
 

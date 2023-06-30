@@ -42,7 +42,7 @@ resource "sysdig_secure_managed_policy" "sysdig_runtime_threat_detection" {
     }
   }
 
-  notification_channels = [data.sysdig_secure_notification_channel.email_notification_channel]
+  notification_channels = [data.sysdig_secure_notification_channel.email_notification_channel.id]
 }
 ```
 
