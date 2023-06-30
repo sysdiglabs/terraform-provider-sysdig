@@ -43,6 +43,7 @@ type Common interface {
 	UserInterface
 	TeamInterface
 	NotificationChannelInterface
+	IdentityContextInterface
 }
 
 type MonitorCommon interface {
@@ -51,6 +52,7 @@ type MonitorCommon interface {
 
 type SecureCommon interface {
 	PosturePolicyInterface
+	PostureZoneInterface
 }
 
 type Requester interface {

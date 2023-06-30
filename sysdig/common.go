@@ -3,6 +3,7 @@ package sysdig
 const (
 	SchemaIDKey             = "id"
 	SchemaPoliciesKey       = "policies"
+	SchemaPolicyIDsKey      = "policy_ids"
 	SchemaNameKey           = "name"
 	SchemaTypeKey           = "type"
 	SchemaKindKey           = "kind"
@@ -10,6 +11,9 @@ const (
 	SchemaVersionKey        = "version"
 	SchemaLinkKey           = "link"
 	SchemaAuthorsKey        = "authors"
+	SchemaAuthorKey         = "author"
+	SchemaLastModifiedBy    = "last_modified_by"
+	SchemaLastUpdated       = "last_updated"
 	SchemaPublishedDateKey  = "published_date"
 	SchemaMinKubeVersionKey = "min_kube_version"
 	SchemaMaxKubeVersionKey = "max_kube_version"
@@ -17,4 +21,8 @@ const (
 	SchemaIsActiveKey       = "is_active"
 	SchemaPlatformKey       = "platform"
 	SchemaZonesKey          = "zones"
+	SchemaScopeKey          = "scope"
+	SchemaScopesKey         = "scopes"
+	SchemaTargetTypeKey     = "target_type"
+	SchemaRulesKey          = "rules"
 )

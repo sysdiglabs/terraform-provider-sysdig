@@ -627,3 +627,52 @@ type PosturePolicy struct {
 type PostureZonePolicyListResponse struct {
 	Data []PosturePolicy `json:"data"`
 }
+
+type PostureZoneScope struct {
+	ID         string `json:"id,omitempty"`
+	TargetType string `json:"targetType"`
+	Rules      string `json:"rules"`
+}
+
+type PostureZonePolicySlim struct {
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name"`
+	Type int    `json:"type"`
+	Kind int    `json:"kind"`
+}
+
+type PostureZone struct {
+	ID             string                  `json:"id"`
+	Name           string                  `json:"name"`
+	Description    string                  `json:"description"`
+	Author         string                  `json:"author"`
+	LastModifiedBy string                  `json:"lastModifiedBy"`
+	LastUpdated    string                  `json:"lastUpdated"`
+	IsSystem       bool                    `json:"isSystem"`
+	Scopes         []PostureZoneScope      `json:"scopes"`
+	Policies       []PostureZonePolicySlim `json:"policies"`
+}
+
+type PostureZoneRequest struct {
+	ID          string             `json:"id"`
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	PolicyIDs   []string           `json:"policyIds"`
+	Scopes      []PostureZoneScope `json:"scopes"`
+	Username    string             `json:"username"`
+}
+
+type PostureZoneResponse struct {
+	Data PostureZone `json:"data"`
+}
+
+type IdentityContext struct {
+	IdentityType       string `json:"identityType"`
+	CustomerID         int    `json:"customerId"`
+	TeamID             int    `json:"teamId"`
+	TeamName           string `json:"teamName"`
+	UserID             int    `json:"userId"`
+	Username           string `json:"username"`
+	ServiceAccountID   int    `json:"serviceAccountId"`
+	ServiceAccountName string `json:"serviceAccountName"`
+}
