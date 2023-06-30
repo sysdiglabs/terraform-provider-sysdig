@@ -15,6 +15,10 @@ Creates a Sysdig Secure Managed Ruleset
 ## Example Usage
 
 ```terraform
+data "sysdig_secure_notification_channel" "email_notification_channel" {
+  name = "Test Email Channel"
+}
+
 resource "sysdig_secure_managed_ruleset" "sysdig_runtime_threat_detection_managed_ruleset" {
     name = "Sysdig Runtime Threat Detection - Managed Ruleset"
     description = "Managed ruleset for Sysdig Runtime Threat Detection"
@@ -40,7 +44,7 @@ resource "sysdig_secure_managed_ruleset" "sysdig_runtime_threat_detection_manage
         }
     }
 
-    notification_channels = [10000]
+    notification_channels = [data.sysdig_secure_notification_channel.email_notification_channel]
 }
 ```
 
