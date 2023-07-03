@@ -57,6 +57,10 @@ data "sysdig_current_user" "me" {
                  Administrators of the account will be automatically added
                  to every new created team, so they don't need to be added as a
                  resource in the Terraform manifest.
+
+* `zone_ids` - (Optional) List of zone IDs attached to the team. If `all_zones` is specified this argument needs to be omitted.
+
+* `all_zones` - (Optional) Attach all zones to the team. If this argument is enabled then `zone_ids` needs to be omitted.
                          
 ### User Role Argument Reference
 

@@ -234,12 +234,14 @@ When IBM Workload Protection resources are to be created, this authentication mu
 > - `sysdig_monitor_alert_promql`
 > - `sysdig_monitor_alert_anomaly`
 > - `sysdig_monitor_alert_group_outlier`
+> - `sysdig_secure_posture_zone`
 > 
 > And data sources:
 > - `sysdig_monitor_notification_channel_pagerduty`
 > - `sysdig_monitor_notification_channel_email`
 > - `sysdig_current_user`
 > - `sysdig_secure_notification_channel`
+> - `sysdig_secure_posture_policies`
 
 ###  Others
 * `extra_headers` - (Optional) Defines extra HTTP headers that will be added to the client

@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
@@ -22,7 +23,22 @@ func resourceSysdigSecureTeam() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
+			plan := diff.GetRawPlan().AsValueMap()
+			zoneIDsPlan := plan[SchemaZonesIDsKey]
+			allZonesPlan := plan[SchemaAllZones]
 
+			var nonEmptyZoneIDs bool
+			if !zoneIDsPlan.IsNull() && len(zoneIDsPlan.AsValueSlice()) > 0 {
+				nonEmptyZoneIDs = true
+			}
+
+			if nonEmptyZoneIDs && allZonesPlan.True() {
+				return fmt.Errorf("if %s is enabled, %s must be omitted", SchemaAllZones, SchemaZonesIDsKey)
+			}
+
+			return nil
+		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
 			Update: schema.DefaultTimeout(timeout),
@@ -94,6 +110,18 @@ func resourceSysdigSecureTeam() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			SchemaZonesIDsKey: {
+				Optional: true,
+				Type:     schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeInt,
+				},
+			},
+			SchemaAllZones: {
+				Optional: true,
+				Type:     schema.TypeBool,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -164,6 +192,16 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 	_ = d.Set("default_team", t.DefaultTeam)
 	_ = d.Set("user_roles", userSecureRolesToSet(t.UserRoles))
 
+	err = d.Set(SchemaZonesIDsKey, t.ZoneIDs)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set(SchemaAllZones, t.AllZones)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	if clients.GetClientType() == IBMSecure {
 		resourceSysdigTeamReadIBM(d, &t)
 	}
@@ -225,6 +263,7 @@ func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData,
 func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team {
 	canUseSysdigCapture := d.Get("use_sysdig_capture").(bool)
 	canUseAwsMetrics := new(bool)
+	allZones := d.Get(SchemaAllZones).(bool)
 	t := v2.Team{
 		Theme:               d.Get("theme").(string),
 		Name:                d.Get("name").(string),
@@ -234,6 +273,7 @@ func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v
 		CanUseSysdigCapture: &canUseSysdigCapture,
 		CanUseAwsMetrics:    canUseAwsMetrics,
 		DefaultTeam:         d.Get("default_team").(bool),
+		AllZones:            allZones,
 	}
 
 	userRoles := make([]v2.UserRoles, 0)
@@ -245,6 +285,12 @@ func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v
 		})
 	}
 	t.UserRoles = userRoles
+
+	zonesData := d.Get("zone_ids").([]interface{})
+	t.ZoneIDs = make([]int, len(zonesData))
+	for i, z := range zonesData {
+		t.ZoneIDs[i] = z.(int)
+	}
 
 	if clientType == IBMSecure {
 		teamFromResourceDataIBM(d, &t)

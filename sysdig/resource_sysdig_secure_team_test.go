@@ -5,9 +5,9 @@ package sysdig_test
 import (
 	"fmt"
 	"github.com/draios/terraform-provider-sysdig/buildinfo"
+	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -15,8 +15,6 @@ import (
 )
 
 func TestAccSecureTeam(t *testing.T) {
-	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -26,16 +24,28 @@ func TestAccSecureTeam(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureTeamWithName(rText()),
+				Config: secureTeamWithName(randomText(10)),
 			},
 			{
-				Config: secureTeamMinimumConfiguration(rText()),
+				Config: secureTeamMinimumConfiguration(randomText(10)),
 			},
 			{
-				Config: secureTeamWithPlatformMetricsIBM(rText()),
+				Config: secureTeamWithPlatformMetricsIBM(randomText(10)),
 				SkipFunc: func() (bool, error) {
 					return !buildinfo.IBMSecure, nil
 				},
+			},
+			{
+				Config: secureTeamWithPostureZones(randomText(10)),
+			},
+			{
+				Config: secureTeamWithPostureZonesAndAllZones(randomText(10)),
+				ExpectError: regexp.MustCompile(
+					fmt.Sprintf("if %s is enabled, %s must be omitted",
+						sysdig.SchemaAllZones,
+						sysdig.SchemaZonesIDsKey,
+					),
+				),
 			},
 			{
 				ResourceName:      "sysdig_secure_team.sample",
@@ -70,5 +80,30 @@ resource "sysdig_secure_team" "sample" {
   name = "sample-%s"
   enable_ibm_platform_metrics = true
   ibm_platform_metrics = "foo in (\"0\") and bar in (\"3\")"
+}`, name)
+}
+
+func secureTeamWithPostureZones(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_posture_zone" "z1" {
+  name = "Zone-%[1]s"
+}
+
+resource "sysdig_secure_team" "sample" {
+  name     = "sample-%[1]s"
+  zone_ids = [sysdig_secure_posture_zone.z1.id]
+}`, name)
+}
+
+func secureTeamWithPostureZonesAndAllZones(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_posture_zone" "z1" {
+  name = "Zone-%[1]s"
+}
+
+resource "sysdig_secure_team" "sample" {
+  name      = "sample-%[1]s"
+  zone_ids  = [sysdig_secure_posture_zone.z1.id]
+  all_zones = true
 }`, name)
 }

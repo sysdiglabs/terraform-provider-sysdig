@@ -23,6 +23,8 @@ type Team struct {
 	Filter              string            `json:"filter,omitempty"`
 	NamespaceFilters    *NamespaceFilters `json:"namespaceFilters,omitempty"`
 	DefaultTeam         bool              `json:"default,omitempty"`
+	ZoneIDs             []int             `json:"zoneIds,omitempty"`
+	AllZones            bool              `json:"allZones"`
 }
 
 type NamespaceFilters struct {
