@@ -193,9 +193,7 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 	_ = d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
 	_ = d.Set("entrypoint", entrypointToSet(t.EntryPoint))
 
-	if clients.GetClientType() == IBMMonitor {
-		resourceSysdigTeamReadIBM(d, &t)
-	}
+	resourceSysdigTeamReadIBM(d, &t)
 
 	return nil
 }
@@ -298,9 +296,7 @@ func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team
 		t.EntryPoint.Selection = val.(string)
 	}
 
-	if clientType == IBMMonitor {
-		teamFromResourceDataIBM(d, &t)
-	}
+	teamFromResourceDataIBM(d, &t)
 
 	return t
 }
