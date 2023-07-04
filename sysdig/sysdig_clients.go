@@ -98,7 +98,7 @@ func getSysdigSecureVariables(data *schema.ResourceData) (*sysdigVariables, erro
 	}
 
 	if token, ok = data.GetOk("sysdig_secure_api_token"); !ok {
-		return nil, errors.New("missing sysdig monitor token")
+		return nil, errors.New("missing sysdig secure token")
 	}
 
 	return &sysdigVariables{
