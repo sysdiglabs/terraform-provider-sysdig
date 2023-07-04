@@ -202,9 +202,7 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	if clients.GetClientType() == IBMSecure {
-		resourceSysdigTeamReadIBM(d, &t)
-	}
+	resourceSysdigTeamReadIBM(d, &t)
 
 	return nil
 }
@@ -292,9 +290,7 @@ func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v
 		t.ZoneIDs[i] = z.(int)
 	}
 
-	if clientType == IBMSecure {
-		teamFromResourceDataIBM(d, &t)
-	}
+	teamFromResourceDataIBM(d, &t)
 
 	return t
 }
