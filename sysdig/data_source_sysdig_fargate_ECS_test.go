@@ -86,7 +86,12 @@ func TestECStransformation(t *testing.T) {
 		RecipeConfig:       string(jsonConf),
 	}
 
-	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig, nil)
+	postConfig := &postPatchConfig{
+		LogConfig:          map[string]interface{}{},
+		PdigOnlyContainers: []string{},
+	}
+
+	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig, postConfig)
 	if err != nil {
 		t.Fatalf("Cannot execute PatchFargateTaskDefinition : %v", err.Error())
 	}
@@ -147,8 +152,13 @@ func TestTransform(t *testing.T) {
 				RecipeConfig:       string(jsonConfig),
 			}
 
+			postConfig := &postPatchConfig{
+				LogConfig:          map[string]interface{}{},
+				PdigOnlyContainers: []string{},
+			}
+
 			inputContainerDefinition, _ := os.ReadFile("testfiles/" + testName + ".json")
-			patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, nil)
+			patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, postConfig)
 			expectedContainerDefinition, _ := os.ReadFile("testfiles/" + testName + "_expected.json")
 
 			sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
@@ -166,15 +176,40 @@ func TestLogGroup(t *testing.T) {
 		RecipeConfig:       string(jsonConfig),
 	}
 
-	logConfig := map[string]interface{}{
-		"group":         "test_log_group",
-		"stream_prefix": "test_prefix",
-		"region":        "test_region",
+	postConfig := &postPatchConfig{
+		LogConfig: map[string]interface{}{
+			"group":         "test_log_group",
+			"stream_prefix": "test_prefix",
+			"region":        "test_region",
+		},
+		PdigOnlyContainers: []string{},
 	}
 
 	inputContainerDefinition, _ := os.ReadFile("testfiles/fargate_log_group.json")
-	patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, logConfig)
+	patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, postConfig)
 	expectedContainerDefinition, _ := os.ReadFile("testfiles/fargate_log_group_expected.json")
+
+	sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
+}
+
+func TestPdigOnly(t *testing.T) {
+	jsonConfig, _ := json.Marshal(testKiltDefinition)
+	kiltConfig := &cfnpatcher.Configuration{
+		Kilt:               agentinoKiltDefinition,
+		ImageAuthSecret:    "image_auth_secret",
+		OptIn:              false,
+		UseRepositoryHints: true,
+		RecipeConfig:       string(jsonConfig),
+	}
+
+	postConfig := &postPatchConfig{
+		LogConfig:          map[string]interface{}{},
+		PdigOnlyContainers: []string{"usePdigOnly1", "usePdigOnly2"},
+	}
+
+	inputContainerDefinition, _ := os.ReadFile("testfiles/fargate_pdig_only.json")
+	patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, postConfig)
+	expectedContainerDefinition, _ := os.ReadFile("testfiles/fargate_pdig_only_expected.json")
 
 	sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
 }
