@@ -146,8 +146,7 @@ type cfnStack struct {
 	Resources map[string]cfnResource `json:"Resources"`
 }
 
-// fargatePostKiltModifications performs any additional changes needed after
-// Kilt has applied it's transformations
+// fargatePostKiltModifications performs any additional changes needed after Kilt has applied it's transformations
 func fargatePostKiltModifications(patchedBytes []byte, logConfig map[string]interface{}) ([]byte, error) {
 	if len(logConfig) == 0 {
 		// no log configuration provided, nothing to do
@@ -268,6 +267,32 @@ type KiltRecipeConfig struct {
 	SysdigLogging    string `json:"sysdig_logging"`
 }
 
+type patchOptions struct {
+	IgnoreContainers []string
+	LogConfiguration map[string]interface{}
+}
+
+func newPatchOptions(d *schema.ResourceData) *patchOptions {
+	opts := &patchOptions{
+		IgnoreContainers: []string{},
+		LogConfiguration: map[string]interface{}{},
+	}
+
+	if items := d.Get("ignore_containers"); items != nil {
+		for _, itemRaw := range items.([]interface{}) {
+			if itemStr, ok := itemRaw.(string); ok {
+				opts.IgnoreContainers = append(opts.IgnoreContainers, strings.TrimSpace(itemStr))
+			}
+		}
+	}
+
+	if logConfiguration := d.Get("log_configuration").(*schema.Set).List(); len(logConfiguration) > 0 {
+		opts.LogConfiguration = logConfiguration[0].(map[string]interface{})
+	}
+
+	return opts
+}
+
 func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	recipeConfig := KiltRecipeConfig{
 		SysdigAccessKey:  d.Get("sysdig_access_key").(string),
@@ -293,6 +318,8 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 	}
 
 	containerDefinitions := d.Get("container_definitions").(string)
+
+	//patchOpts := newPatchOptions(d)
 
 	ignoreContainersField := d.Get("ignore_containers")
 	ignoreContainers := []string{}

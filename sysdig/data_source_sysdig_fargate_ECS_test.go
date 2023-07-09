@@ -6,12 +6,15 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"reflect"
 	"sort"
 	"testing"
 
 	"github.com/Jeffail/gabs/v2"
 	"github.com/falcosecurity/kilt/runtimes/cloudformation/cfnpatcher"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var (
@@ -57,6 +60,68 @@ func sortAndCompare(t *testing.T, expected []byte, actual []byte) {
 	expectedJSON := sortContainerEnv(expected)
 	actualJSON := sortContainerEnv(actual)
 	assert.JSONEq(t, expectedJSON, actualJSON)
+}
+
+func TestNewPatchOptions(t *testing.T) {
+	newMockResource := func() *schema.Resource {
+		return &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"ignore_containers": {
+					Type: schema.TypeList,
+					Elem: &schema.Schema{Type: schema.TypeString},
+				},
+				"log_configuration": {
+					Type:     schema.TypeSet,
+					MaxItems: 1,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"group": {
+								Type:     schema.TypeString,
+								Required: true,
+							},
+							"stream_prefix": {
+								Type:     schema.TypeString,
+								Required: true,
+							},
+							"region": {
+								Type:     schema.TypeString,
+								Required: true,
+							},
+						},
+					},
+				},
+			},
+		}
+	}
+
+	// Create a mock resource
+	resource := newMockResource()
+	data := resource.Data(nil)
+	data.Set("ignore_containers", []interface{}{
+		"gimme", "fried", "chicken",
+	})
+	data.Set("log_configuration", []interface{}{
+		map[string]interface{}{
+			"group":         "gimme",
+			"stream_prefix": "fried",
+			"region":        "chicken",
+		},
+	})
+
+	// Expected vs actual
+	expectedPatchOptions := &patchOptions{
+		IgnoreContainers: []string{"gimme", "fried", "chicken"},
+		LogConfiguration: map[string]interface{}{
+			"group":         "gimme",
+			"stream_prefix": "fried",
+			"region":        "chicken",
+		},
+	}
+	actualPatchOptions := newPatchOptions(data)
+
+	if !reflect.DeepEqual(expectedPatchOptions, actualPatchOptions) {
+		t.Errorf("patcConfigurations are not equal. Expected: %v, Actual: %v", expectedPatchOptions, actualPatchOptions)
+	}
 }
 
 func TestECStransformation(t *testing.T) {
