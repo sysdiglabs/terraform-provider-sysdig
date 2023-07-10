@@ -1,0 +1,53 @@
+[
+    {
+        "Name": "defaultInstrumentation",
+        "Image": "test_image:latest",
+        "EntryPoint": [
+            "/bin/test"
+        ],
+        "Environment": [
+            {
+                "Name": "GIMME",
+                "Value": "friedChicken"
+            },
+            {
+                "Name": "THE_ANSWER_IS",
+                "Value": "42"
+            }
+        ]
+    },
+    {
+        "Name": "barePdig",
+        "Image": "test_image:latest",
+        "EntryPoint": [
+            "/bin/test"
+        ],
+        "Environment": [
+            {
+                "Name": "GIMME",
+                "Value": "friedChicken"
+            },
+            {
+                "Name": "THE_ANSWER_IS",
+                "Value": "42"
+            }
+        ]
+    },
+    {
+        "Name": "skipped",
+        "Image": "test_image:latest",
+        "EntryPoint": [
+            "/bin/test"
+        ],
+        "Environment": [
+            {
+                "Name": "GIMME",
+                "Value": "friedChicken"
+            },
+            {
+                "Name": "THE_ANSWER_IS",
+                "Value": "42"
+            }
+        ]
+    }
+]

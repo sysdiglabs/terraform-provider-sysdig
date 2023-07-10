@@ -88,6 +88,12 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"bare_pdig_on_containers": {
+				Type:        schema.TypeList,
+				Description: "use bare pdig to instrument the containers in the list",
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"log_configuration": {
 				Type:        schema.TypeSet,
 				MaxItems:    1,
@@ -146,10 +152,19 @@ type cfnStack struct {
 	Resources map[string]cfnResource `json:"Resources"`
 }
 
+func contains(items []string, target string) bool {
+	for _, item := range items {
+		if item == target {
+			return true
+		}
+	}
+	return false
+}
+
 // fargatePostKiltModifications performs any additional changes needed after Kilt has applied it's transformations
-func fargatePostKiltModifications(patchedBytes []byte, patchOpt *patchOptions) ([]byte, error) {
-	if len(patchOpt.LogConfiguration) == 0 {
-		// no log configuration provided, nothing to do
+func fargatePostKiltModifications(patchedBytes []byte, patchOpts *patchOptions) ([]byte, error) {
+	if len(patchOpts.LogConfiguration) == 0 && len(patchOpts.BarePdigOnContainers) == 0 {
+		// nothing to do
 		return patchedBytes, nil
 	}
 
@@ -159,23 +174,38 @@ func fargatePostKiltModifications(patchedBytes []byte, patchOpt *patchOptions) (
 	}
 
 	for _, container := range containers.Children() {
+		// Skip unnamed containers
+		// Note that lowercase "name" tags have been replaced by "Name" during TaskDefinition patching
 		containerName, ok := container.Search("Name").Data().(string)
-		if !ok || containerName != "SysdigInstrumentation" {
-			// not the instrumentation container, skip it
+		if !ok {
 			continue
 		}
 
-		awsLogConfig := &ecs.LogConfiguration{
-			LogDriver: aws.String("awslogs"),
-			Options: map[string]*string{
-				"awslogs-group":         aws.String(patchOpt.LogConfiguration["group"].(string)),
-				"awslogs-stream-prefix": aws.String(patchOpt.LogConfiguration["stream_prefix"].(string)),
-				"awslogs-region":        aws.String(patchOpt.LogConfiguration["region"].(string)),
-			},
-		}
-		_, err = container.Set(awsLogConfig, "LogConfiguration")
-		if err != nil {
-			return nil, fmt.Errorf("failed to set log configuration: %s", err)
+		if containerName == "SysdigInstrumentation" {
+			// Add log configuration to the SysdigInstrumentation sidecar container
+			if len(patchOpts.LogConfiguration) != 0 {
+				awsLogConfig := &ecs.LogConfiguration{
+					LogDriver: aws.String("awslogs"),
+					Options: map[string]*string{
+						"awslogs-group":         aws.String(patchOpts.LogConfiguration["group"].(string)),
+						"awslogs-stream-prefix": aws.String(patchOpts.LogConfiguration["stream_prefix"].(string)),
+						"awslogs-region":        aws.String(patchOpts.LogConfiguration["region"].(string)),
+					},
+				}
+				_, err = container.Set(awsLogConfig, "LogConfiguration")
+				if err != nil {
+					return nil, fmt.Errorf("failed to set log configuration: %s", err)
+				}
+			}
+		} else {
+			// Use bare pdig in the current workload container if instrumented
+			if contains(patchOpts.BarePdigOnContainers, containerName) && !contains(patchOpts.IgnoreContainers, containerName) {
+				envars := map[string]interface{}{
+					"Name":  "__INSTRUMENTATION_WRAPPER",
+					"Value": "/opt/draios/bin/pdig,-C,-t,-1",
+				}
+				container.ArrayAppend(envars, "Environment")
+			}
 		}
 	}
 
@@ -268,14 +298,24 @@ type KiltRecipeConfig struct {
 }
 
 type patchOptions struct {
-	IgnoreContainers []string
-	LogConfiguration map[string]interface{}
+	BarePdigOnContainers []string
+	IgnoreContainers     []string
+	LogConfiguration     map[string]interface{}
 }
 
 func newPatchOptions(d *schema.ResourceData) *patchOptions {
 	opts := &patchOptions{
-		IgnoreContainers: []string{},
-		LogConfiguration: map[string]interface{}{},
+		BarePdigOnContainers: []string{},
+		IgnoreContainers:     []string{},
+		LogConfiguration:     map[string]interface{}{},
+	}
+
+	if items := d.Get("bare_pdig_on_containers"); items != nil {
+		for _, itemRaw := range items.([]interface{}) {
+			if itemStr, ok := itemRaw.(string); ok {
+				opts.BarePdigOnContainers = append(opts.BarePdigOnContainers, strings.TrimSpace(itemStr))
+			}
+		}
 	}
 
 	if items := d.Get("ignore_containers"); items != nil {

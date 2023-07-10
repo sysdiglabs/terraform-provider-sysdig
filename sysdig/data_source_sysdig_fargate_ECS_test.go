@@ -59,11 +59,45 @@ func getKiltRecipe(t *testing.T) string {
 	return string(jsonRecipeConfig)
 }
 
+func testContains(t *testing.T) {
+	tests := []struct {
+		slice  []string
+		target string
+		result bool
+	}{
+		{
+			slice:  []string{"gimme", "fried", "chicken"},
+			target: "chicken",
+			result: true,
+		},
+		{
+			slice:  []string{"the", "answer", "is"},
+			target: "42",
+			result: false,
+		},
+		{
+			slice:  []string{""},
+			target: "empty",
+			result: false,
+		},
+	}
+	for idx, tc := range tests {
+		t.Run(fmt.Sprintf("%d", idx), func(t *testing.T) {
+			result := contains(tc.slice, tc.target)
+			assert.Equal(t, tc.result, result, "Error, expected: %t, got: %t", tc.result, result)
+		})
+	}
+}
+
 func TestNewPatchOptions(t *testing.T) {
 	newMockResource := func() *schema.Resource {
 		return &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"ignore_containers": {
+					Type: schema.TypeList,
+					Elem: &schema.Schema{Type: schema.TypeString},
+				},
+				"bare_pdig_on_containers": {
 					Type: schema.TypeList,
 					Elem: &schema.Schema{Type: schema.TypeString},
 				},
@@ -94,6 +128,9 @@ func TestNewPatchOptions(t *testing.T) {
 	// Create a mock resource
 	resource := newMockResource()
 	data := resource.Data(nil)
+	data.Set("bare_pdig_on_containers", []interface{}{
+		"gimme", "fried", "chicken",
+	})
 	data.Set("ignore_containers", []interface{}{
 		"gimme", "fried", "chicken",
 	})
@@ -107,7 +144,8 @@ func TestNewPatchOptions(t *testing.T) {
 
 	// Expected vs actual
 	expectedPatchOptions := &patchOptions{
-		IgnoreContainers: []string{"gimme", "fried", "chicken"},
+		BarePdigOnContainers: []string{"gimme", "fried", "chicken"},
+		IgnoreContainers:     []string{"gimme", "fried", "chicken"},
 		LogConfiguration: map[string]interface{}{
 			"group":         "gimme",
 			"stream_prefix": "fried",
@@ -259,6 +297,13 @@ func TestPatchFargateTaskDefinition(t *testing.T) {
 			testName: `fargate_ignore_container_test`,
 			patchOpts: &patchOptions{
 				IgnoreContainers: []string{"other", "another"},
+			},
+		},
+		{
+			testName: `fargate_bare_pdig`,
+			patchOpts: &patchOptions{
+				BarePdigOnContainers: []string{"barePdig"},
+				IgnoreContainers:     []string{"skipped"},
 			},
 		},
 	}
