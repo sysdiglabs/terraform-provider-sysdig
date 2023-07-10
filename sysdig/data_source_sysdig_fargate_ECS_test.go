@@ -131,9 +131,9 @@ func TestECStransformation(t *testing.T) {
 		RecipeConfig:       string(jsonConf),
 	}
 
-	ignoreContainers := []string{}
+	patchOpts := &patchOptions{}
 
-	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig, nil, &ignoreContainers)
+	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig, patchOpts)
 	if err != nil {
 		t.Fatalf("Cannot execute PatchFargateTaskDefinition : %v", err.Error())
 	}
@@ -225,58 +225,52 @@ func TestPatchFargateTaskDefinition(t *testing.T) {
 	}
 
 	tests := []struct {
-		testName         string
-		logConfig        map[string]interface{}
-		ignoreContainers []string
+		testName  string
+		patchOpts *patchOptions
 	}{
 		{
-			testName:         `fargate_entrypoint_test`,
-			logConfig:        map[string]interface{}{},
-			ignoreContainers: []string{},
+			testName:  `fargate_entrypoint_test`,
+			patchOpts: &patchOptions{},
 		},
 		{
-			testName:         `fargate_env_test`,
-			logConfig:        map[string]interface{}{},
-			ignoreContainers: []string{},
+			testName:  `fargate_env_test`,
+			patchOpts: &patchOptions{},
 		},
 		{
-			testName:         `fargate_cmd_test`,
-			logConfig:        map[string]interface{}{},
-			ignoreContainers: []string{},
+			testName:  `fargate_cmd_test`,
+			patchOpts: &patchOptions{},
 		},
 		{
-			testName:         `fargate_linuxparameters_test`,
-			logConfig:        map[string]interface{}{},
-			ignoreContainers: []string{},
+			testName:  `fargate_linuxparameters_test`,
+			patchOpts: &patchOptions{},
 		},
 		{
-			testName:         `fargate_combined_test`,
-			logConfig:        map[string]interface{}{},
-			ignoreContainers: []string{},
+			testName:  `fargate_combined_test`,
+			patchOpts: &patchOptions{},
 		},
 		{
-			testName:         `fargate_volumesfrom_test`,
-			logConfig:        map[string]interface{}{},
-			ignoreContainers: []string{},
+			testName:  `fargate_volumesfrom_test`,
+			patchOpts: &patchOptions{},
 		},
 		{
-			testName:         `fargate_field_case_test`,
-			logConfig:        map[string]interface{}{},
-			ignoreContainers: []string{},
+			testName:  `fargate_field_case_test`,
+			patchOpts: &patchOptions{},
 		},
 		{
 			testName: `fargate_log_group`,
-			logConfig: map[string]interface{}{
-				"group":         "test_log_group",
-				"stream_prefix": "test_prefix",
-				"region":        "test_region",
+			patchOpts: &patchOptions{
+				LogConfiguration: map[string]interface{}{
+					"group":         "test_log_group",
+					"stream_prefix": "test_prefix",
+					"region":        "test_region",
+				},
 			},
-			ignoreContainers: []string{},
 		},
 		{
-			testName:         `fargate_ignore_container_test`,
-			logConfig:        map[string]interface{}{},
-			ignoreContainers: []string{"other", "another"},
+			testName: `fargate_ignore_container_test`,
+			patchOpts: &patchOptions{
+				IgnoreContainers: []string{"other", "another"},
+			},
 		},
 	}
 	for _, tc := range tests {
@@ -285,8 +279,7 @@ func TestPatchFargateTaskDefinition(t *testing.T) {
 				context.Background(),
 				getContainerDefinitionOriginal(tc.testName),
 				kiltConfig,
-				tc.logConfig,
-				&tc.ignoreContainers)
+				tc.patchOpts)
 			if err != nil {
 				assert.FailNow(t, fmt.Sprintf("Could not patch task definition, got error: %v", err))
 			}

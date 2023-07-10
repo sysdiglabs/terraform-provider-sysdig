@@ -147,8 +147,8 @@ type cfnStack struct {
 }
 
 // fargatePostKiltModifications performs any additional changes needed after Kilt has applied it's transformations
-func fargatePostKiltModifications(patchedBytes []byte, logConfig map[string]interface{}) ([]byte, error) {
-	if len(logConfig) == 0 {
+func fargatePostKiltModifications(patchedBytes []byte, patchOpt *patchOptions) ([]byte, error) {
+	if len(patchOpt.LogConfiguration) == 0 {
 		// no log configuration provided, nothing to do
 		return patchedBytes, nil
 	}
@@ -168,9 +168,9 @@ func fargatePostKiltModifications(patchedBytes []byte, logConfig map[string]inte
 		awsLogConfig := &ecs.LogConfiguration{
 			LogDriver: aws.String("awslogs"),
 			Options: map[string]*string{
-				"awslogs-group":         aws.String(logConfig["group"].(string)),
-				"awslogs-stream-prefix": aws.String(logConfig["stream_prefix"].(string)),
-				"awslogs-region":        aws.String(logConfig["region"].(string)),
+				"awslogs-group":         aws.String(patchOpt.LogConfiguration["group"].(string)),
+				"awslogs-stream-prefix": aws.String(patchOpt.LogConfiguration["stream_prefix"].(string)),
+				"awslogs-region":        aws.String(patchOpt.LogConfiguration["region"].(string)),
 			},
 		}
 		_, err = container.Set(awsLogConfig, "LogConfiguration")
@@ -183,7 +183,7 @@ func fargatePostKiltModifications(patchedBytes []byte, logConfig map[string]inte
 }
 
 // PatchFargateTaskDefinition modifies the container definitions
-func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string, kiltConfig *cfnpatcher.Configuration, logConfig map[string]interface{}, ignoreContainers *[]string) (patched *string, err error) {
+func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string, kiltConfig *cfnpatcher.Configuration, patchOpts *patchOptions) (patched *string, err error) {
 	var cdefs []map[string]interface{}
 	err = json.Unmarshal([]byte(containerDefinitions), &cdefs)
 	if err != nil {
@@ -192,8 +192,8 @@ func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string
 
 	// Convert the ignore containers list into Kilt tags for the patcher
 	tags := []cfnTag{}
-	if len(*ignoreContainers) > 0 {
-		containerTagValue := strings.Join(*ignoreContainers, ":")
+	if len(patchOpts.IgnoreContainers) > 0 {
+		containerTagValue := strings.Join(patchOpts.IgnoreContainers, ":")
 		tags = append(tags, cfnTag{
 			Key:   "kilt-ignore-containers",
 			Value: containerTagValue,
@@ -251,7 +251,7 @@ func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string
 		return nil, err
 	}
 
-	patchedBytes, err = fargatePostKiltModifications(patchedBytes, logConfig)
+	patchedBytes, err = fargatePostKiltModifications(patchedBytes, patchOpts)
 
 	patchedString := string(patchedBytes)
 	return &patchedString, nil
@@ -319,25 +319,9 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 
 	containerDefinitions := d.Get("container_definitions").(string)
 
-	//patchOpts := newPatchOptions(d)
+	patchOpts := newPatchOptions(d)
 
-	ignoreContainersField := d.Get("ignore_containers")
-	ignoreContainers := []string{}
-	if ignoreContainersField != nil {
-		for _, value := range ignoreContainersField.([]interface{}) {
-			if value_str, ok := value.(string); ok {
-				value_str = strings.TrimSpace(value_str)
-				ignoreContainers = append(ignoreContainers, value_str)
-			}
-		}
-	}
-
-	logConfig := map[string]interface{}{}
-	if logConfiguration := d.Get("log_configuration").(*schema.Set).List(); len(logConfiguration) > 0 {
-		logConfig = logConfiguration[0].(map[string]interface{})
-	}
-
-	outputContainerDefinitions, err := patchFargateTaskDefinition(ctx, containerDefinitions, kiltConfig, logConfig, &ignoreContainers)
+	outputContainerDefinitions, err := patchFargateTaskDefinition(ctx, containerDefinitions, kiltConfig, patchOpts)
 	if err != nil {
 		return diag.Errorf("Error applying configuration patch: %v", err.Error())
 	}
