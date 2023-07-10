@@ -39,6 +39,26 @@ func sortAndCompare(t *testing.T, expected []byte, actual []byte) {
 	assert.JSONEq(t, expectedJSON, actualJSON)
 }
 
+// getKiltRecipe returns the default json Kilt recipe
+func getKiltRecipe(t *testing.T) string {
+	recipeConfig := KiltRecipeConfig{
+		SysdigAccessKey:  "sysdig_access_key",
+		AgentImage:       "workload_agent_image",
+		OrchestratorHost: "orchestrator_host",
+		OrchestratorPort: "orchestrator_port",
+		CollectorHost:    "collector_host",
+		CollectorPort:    "collector_port",
+		SysdigLogging:    "sysdig_logging",
+	}
+
+	jsonRecipeConfig, err := json.Marshal(&recipeConfig)
+	if err != nil {
+		t.Fatalf("Failed to serialize configuration: %v", err.Error())
+	}
+
+	return string(jsonRecipeConfig)
+}
+
 func TestNewPatchOptions(t *testing.T) {
 	newMockResource := func() *schema.Resource {
 		return &schema.Resource{
@@ -103,24 +123,8 @@ func TestNewPatchOptions(t *testing.T) {
 
 func TestECStransformation(t *testing.T) {
 	inputfile, err := os.ReadFile("testfiles/ECSinput.json")
-
 	if err != nil {
 		t.Fatalf("Cannot find testfiles/ECSinput.json")
-	}
-
-	recipeConfig := KiltRecipeConfig{
-		SysdigAccessKey:  "sysdig_access_key",
-		AgentImage:       "workload_agent_image",
-		OrchestratorHost: "orchestrator_host",
-		OrchestratorPort: "orchestrator_port",
-		CollectorHost:    "collector_host",
-		CollectorPort:    "collector_port",
-		SysdigLogging:    "sysdig_logging",
-	}
-
-	jsonConf, err := json.Marshal(&recipeConfig)
-	if err != nil {
-		t.Fatalf("Failed to serialize configuration: %v", err.Error())
 	}
 
 	kiltConfig := &cfnpatcher.Configuration{
@@ -128,7 +132,7 @@ func TestECStransformation(t *testing.T) {
 		ImageAuthSecret:    "image_auth_secret",
 		OptIn:              false,
 		UseRepositoryHints: true,
-		RecipeConfig:       string(jsonConf),
+		RecipeConfig:       getKiltRecipe(t),
 	}
 
 	patchOpts := &patchOptions{}
@@ -187,27 +191,12 @@ func TestECStransformation(t *testing.T) {
 
 func TestPatchFargateTaskDefinition(t *testing.T) {
 	// Kilt Configuration, test invariant
-	recipeConfig := KiltRecipeConfig{
-		SysdigAccessKey:  "sysdig_access_key",
-		AgentImage:       "workload_agent_image",
-		OrchestratorHost: "orchestrator_host",
-		OrchestratorPort: "orchestrator_port",
-		CollectorHost:    "collector_host",
-		CollectorPort:    "collector_port",
-		SysdigLogging:    "sysdig_logging",
-	}
-
-	jsonRecipeConfig, err := json.Marshal(&recipeConfig)
-	if err != nil {
-		t.Fatalf("Failed to serialize configuration: %v", err.Error())
-	}
-
 	kiltConfig := &cfnpatcher.Configuration{
 		Kilt:               agentinoKiltDefinition,
 		ImageAuthSecret:    "image_auth_secret",
 		OptIn:              false,
 		UseRepositoryHints: true,
-		RecipeConfig:       string(jsonRecipeConfig),
+		RecipeConfig:       getKiltRecipe(t),
 	}
 
 	// File readers
