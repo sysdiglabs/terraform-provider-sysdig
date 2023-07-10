@@ -83,8 +83,8 @@ resource "sysdig_secure_policy" "unexpected_inbound_tcp_connection_traefik" {
 provider "sysdig" {
   sysdig_monitor_team_id = 1234
   sysdig_monitor_team_name = "My team" # or use this as alternative to `sysdig_monitor_team_id`
-  sysdig_monitor_url = "https://us-south.monitoring.test.cloud.ibm.com"
-  ibm_monitor_iam_url = "https://iam.test.cloud.ibm.com"
+  sysdig_monitor_url = "https://us-south.monitoring.cloud.ibm.com"
+  ibm_monitor_iam_url = "https://iam.cloud.ibm.com"
   ibm_monitor_instance_id = "xxxxxx"
   ibm_monitor_api_key = "xxxxxx"
 }
@@ -96,8 +96,8 @@ provider "sysdig" {
 provider "sysdig" {
   sysdig_secure_team_id = 1234
   sysdig_secure_team_name = "My team" # or use this as alternative to `sysdig_monitor_team_id`
-  sysdig_secure_url = "https://us-south.monitoring.test.cloud.ibm.com"
-  ibm_secure_iam_url = "https://iam.test.cloud.ibm.com"
+  sysdig_secure_url = "https://us-south.monitoring.cloud.ibm.com"
+  ibm_secure_iam_url = "https://iam.cloud.ibm.com"
   ibm_secure_instance_id = "xxxxxx"
   ibm_secure_api_key = "xxxxxx"
 }
@@ -157,7 +157,7 @@ When Secure resources are to be created, this authentication must be in place.
 When IBM Cloud Monitoring resources are to be created, this authentication must be in place.
 
 * `sysdig_monitor_url` - (Required) This is the target IBM Cloud Monitoring API
-  endpoint. It can also be sourced from the `SYSDIG_MONITOR_URL` environment variable.
+  endpoint. It can also be sourced from the `SYSDIG_MONITOR_URL` environment variable. [Find your IBM Cloud Monitoring region url](https://cloud.ibm.com/docs/monitoring?topic=monitoring-endpoints#endpoints_monitoring).
   <br/>Notice: it should not be ended with a slash.<br/><br/>
 * `ibm_monitor_iam_url` - (Required) This is the target IAM endpoint used to issue IBM IAM token by consuming `ibm_monitor_api_key`. 
   Provider will handle token expiration and refresh it when needed.
@@ -185,7 +185,7 @@ When IBM Cloud Monitoring resources are to be created, this authentication must 
 When IBM Workload Protection resources are to be created, this authentication must be in place.
 
 * `sysdig_secure_url` - (Required) This is the target IBM Workload Protection API
-  endpoint. It can also be sourced from the `SYSDIG_SECURE_URL` environment variable.
+  endpoint. It can also be sourced from the `SYSDIG_SECURE_URL` environment variable. [Find your Workload Protection region url](https://cloud.ibm.com/docs/workload-protection?topic=workload-protection-endpoints#endpoints_monitoring).
   <br/>Notice: it should not be ended with a slash.<br/><br/>
 * `ibm_secure_iam_url` - (Required) This is the target IAM endpoint used to issue IBM IAM token by consuming `ibm_secure_api_key`.
   Provider will handle token expiration and refresh it when needed.
