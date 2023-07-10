@@ -5,6 +5,7 @@ package sysdig
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"reflect"
 	"sort"
@@ -15,30 +16,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
-
-var (
-	testKiltDefinition = KiltRecipeConfig{
-		SysdigAccessKey:  "sysdig_access_key",
-		AgentImage:       "workload_agent_image",
-		OrchestratorHost: "orchestrator_host",
-		OrchestratorPort: "orchestrator_port",
-		CollectorHost:    "collector_host",
-		CollectorPort:    "collector_port",
-		SysdigLogging:    "sysdig_logging",
-	}
-
-	testIgnoreContainers = []string{}
-
-	testContainerDefinitionFiles = []string{
-		"fargate_entrypoint_test",
-		"fargate_env_test",
-		"fargate_cmd_test",
-		"fargate_linuxparameters_test",
-		"fargate_combined_test",
-		"fargate_volumesfrom_test",
-		"fargate_field_case_test",
-	}
 )
 
 // sortContainerEnv goes into a container definition and sorts the environment variables
@@ -154,7 +131,9 @@ func TestECStransformation(t *testing.T) {
 		RecipeConfig:       string(jsonConf),
 	}
 
-	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig, nil, &testIgnoreContainers)
+	ignoreContainers := []string{}
+
+	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig, nil, &ignoreContainers)
 	if err != nil {
 		t.Fatalf("Cannot execute PatchFargateTaskDefinition : %v", err.Error())
 	}
@@ -206,66 +185,112 @@ func TestECStransformation(t *testing.T) {
 	assert.Equal(t, patchedContainerDefinitions[0].EntryPoint2, "")
 }
 
-func TestTransform(t *testing.T) {
-	for _, testName := range testContainerDefinitionFiles {
-		t.Run(testName, func(t *testing.T) {
-			jsonConfig, _ := json.Marshal(testKiltDefinition)
-			kiltConfig := &cfnpatcher.Configuration{
-				Kilt:               agentinoKiltDefinition,
-				ImageAuthSecret:    "image_auth_secret",
-				OptIn:              false,
-				UseRepositoryHints: true,
-				RecipeConfig:       string(jsonConfig),
+func TestPatchFargateTaskDefinition(t *testing.T) {
+	// Kilt Configuration, test invariant
+	recipeConfig := KiltRecipeConfig{
+		SysdigAccessKey:  "sysdig_access_key",
+		AgentImage:       "workload_agent_image",
+		OrchestratorHost: "orchestrator_host",
+		OrchestratorPort: "orchestrator_port",
+		CollectorHost:    "collector_host",
+		CollectorPort:    "collector_port",
+		SysdigLogging:    "sysdig_logging",
+	}
+
+	jsonRecipeConfig, err := json.Marshal(&recipeConfig)
+	if err != nil {
+		t.Fatalf("Failed to serialize configuration: %v", err.Error())
+	}
+
+	kiltConfig := &cfnpatcher.Configuration{
+		Kilt:               agentinoKiltDefinition,
+		ImageAuthSecret:    "image_auth_secret",
+		OptIn:              false,
+		UseRepositoryHints: true,
+		RecipeConfig:       string(jsonRecipeConfig),
+	}
+
+	// File readers
+	readFile := func(fileName string) string {
+		content, _ := os.ReadFile("testfiles/" + fileName + ".json")
+		return string(content)
+	}
+
+	getContainerDefinitionOriginal := func(fileName string) string {
+		return readFile(fileName)
+	}
+
+	getContainerDefinitionPatched := func(fileName string) string {
+		return readFile(fileName + "_expected")
+	}
+
+	tests := []struct {
+		testName         string
+		logConfig        map[string]interface{}
+		ignoreContainers []string
+	}{
+		{
+			testName:         `fargate_entrypoint_test`,
+			logConfig:        map[string]interface{}{},
+			ignoreContainers: []string{},
+		},
+		{
+			testName:         `fargate_env_test`,
+			logConfig:        map[string]interface{}{},
+			ignoreContainers: []string{},
+		},
+		{
+			testName:         `fargate_cmd_test`,
+			logConfig:        map[string]interface{}{},
+			ignoreContainers: []string{},
+		},
+		{
+			testName:         `fargate_linuxparameters_test`,
+			logConfig:        map[string]interface{}{},
+			ignoreContainers: []string{},
+		},
+		{
+			testName:         `fargate_combined_test`,
+			logConfig:        map[string]interface{}{},
+			ignoreContainers: []string{},
+		},
+		{
+			testName:         `fargate_volumesfrom_test`,
+			logConfig:        map[string]interface{}{},
+			ignoreContainers: []string{},
+		},
+		{
+			testName:         `fargate_field_case_test`,
+			logConfig:        map[string]interface{}{},
+			ignoreContainers: []string{},
+		},
+		{
+			testName: `fargate_log_group`,
+			logConfig: map[string]interface{}{
+				"group":         "test_log_group",
+				"stream_prefix": "test_prefix",
+				"region":        "test_region",
+			},
+			ignoreContainers: []string{},
+		},
+		{
+			testName:         `fargate_ignore_container_test`,
+			logConfig:        map[string]interface{}{},
+			ignoreContainers: []string{"other", "another"},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			patched, err := patchFargateTaskDefinition(
+				context.Background(),
+				getContainerDefinitionOriginal(tc.testName),
+				kiltConfig,
+				tc.logConfig,
+				&tc.ignoreContainers)
+			if err != nil {
+				assert.FailNow(t, fmt.Sprintf("Could not patch task definition, got error: %v", err))
 			}
-
-			inputContainerDefinition, _ := os.ReadFile("testfiles/" + testName + ".json")
-			patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, nil, &testIgnoreContainers)
-			expectedContainerDefinition, _ := os.ReadFile("testfiles/" + testName + "_expected.json")
-
-			sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
+			sortAndCompare(t, []byte(getContainerDefinitionPatched(tc.testName)), []byte(*patched))
 		})
 	}
-}
-
-func TestLogGroup(t *testing.T) {
-	jsonConfig, _ := json.Marshal(testKiltDefinition)
-	kiltConfig := &cfnpatcher.Configuration{
-		Kilt:               agentinoKiltDefinition,
-		ImageAuthSecret:    "image_auth_secret",
-		OptIn:              false,
-		UseRepositoryHints: true,
-		RecipeConfig:       string(jsonConfig),
-	}
-
-	logConfig := map[string]interface{}{
-		"group":         "test_log_group",
-		"stream_prefix": "test_prefix",
-		"region":        "test_region",
-	}
-
-	inputContainerDefinition, _ := os.ReadFile("testfiles/fargate_log_group.json")
-	patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, logConfig, &testIgnoreContainers)
-	expectedContainerDefinition, _ := os.ReadFile("testfiles/fargate_log_group_expected.json")
-
-	sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
-}
-
-func TestIgnoreContainers(t *testing.T) {
-	jsonConfig, _ := json.Marshal(testKiltDefinition)
-	kiltConfig := &cfnpatcher.Configuration{
-		Kilt:               agentinoKiltDefinition,
-		ImageAuthSecret:    "image_auth_secret",
-		OptIn:              false,
-		UseRepositoryHints: true,
-		RecipeConfig:       string(jsonConfig),
-	}
-
-	fileTemplate := "fargate_ignore_container_test"
-	ignoreContainers := []string{"other", "another"}
-
-	inputContainerDefinition, _ := os.ReadFile("testfiles/" + fileTemplate + ".json")
-	patched, _ := patchFargateTaskDefinition(context.Background(), string(inputContainerDefinition), kiltConfig, nil, &ignoreContainers)
-	expectedContainerDefinition, _ := os.ReadFile("testfiles/" + fileTemplate + "_expected.json")
-
-	sortAndCompare(t, expectedContainerDefinition, []byte(*patched))
 }
