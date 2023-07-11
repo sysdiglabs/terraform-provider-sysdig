@@ -27,9 +27,18 @@ resource "sysdig_secure_team" "devops" {
     email = "john.doe@example.com"
     role = "ROLE_TEAM_STANDARD"
   }
+
+  user_roles {
+    email = "john.smith@example.com"
+    role = data.sysdig_custom_role.custom_role.id
+  }
 }
  
 data "sysdig_current_user" "me" {
+}
+
+data "sysdig_custom_role" "custom_role" {
+  name = "CustomRoleName"
 }
 ```
 
@@ -67,7 +76,7 @@ data "sysdig_current_user" "me" {
 * `email` - (Required) The email of the user in the group.
 
 * `role` - (Optional) The role for the user in this group.
-           Valid roles are: ROLE_TEAM_STANDARD, ROLE_TEAM_EDIT, ROLE_TEAM_READ, ROLE_TEAM_MANAGER.
+           Valid roles are: ROLE_TEAM_STANDARD, ROLE_TEAM_EDIT, ROLE_TEAM_READ, ROLE_TEAM_MANAGER or CustomRole ID.
            Default: ROLE_TEAM_STANDARD.
 
 ## Attributes Reference
