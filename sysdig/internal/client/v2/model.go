@@ -38,6 +38,17 @@ type UserRoles struct {
 	Admin  bool   `json:"admin,omitempty"`
 }
 
+type CustomRole struct {
+	ID                 int      `json:"id,omitempty"`
+	Name               string   `json:"name"`
+	Description        string   `json:"description,omitempty"`
+	MonitorPermissions []string `json:"monitorPermissions,omitempty"`
+	SecurePermissions  []string `json:"securePermissions,omitempty"`
+}
+type customRoleListWrapper struct {
+	Roles []CustomRole `json:"roles"`
+}
+
 type TeamServiceAccount struct {
 	ID             int    `json:"id,omitempty"`
 	Name           string `json:"name"`
@@ -307,8 +318,8 @@ type Details struct {
 	ReadPaths      *ReadPaths      `json:"readPaths,omitempty"`
 
 	// Network
-	AllOutbound    bool            `json:"allOutbound"`
-	AllInbound     bool            `json:"allInbound"`
+	AllOutbound    bool            `json:"allOutbound,omitempty"`
+	AllInbound     bool            `json:"allInbound,omitempty"`
 	TCPListenPorts *TCPListenPorts `json:"tcpListenPorts,omitempty"`
 	UDPListenPorts *UDPListenPorts `json:"udpListenPorts,omitempty"`
 
