@@ -86,10 +86,9 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 							Required: true,
 						},
 						"role": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Default:      "ROLE_TEAM_STANDARD",
-							ValidateFunc: validation.StringInSlice([]string{"ROLE_TEAM_STANDARD", "ROLE_TEAM_EDIT", "ROLE_TEAM_READ", "ROLE_TEAM_MANAGER"}, false),
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "ROLE_TEAM_STANDARD",
 						},
 					},
 				},
