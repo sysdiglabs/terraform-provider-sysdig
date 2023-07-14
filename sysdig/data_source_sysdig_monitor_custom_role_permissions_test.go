@@ -3,7 +3,6 @@
 package sysdig_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -39,9 +38,9 @@ func TestAccMonitorCustomRolePermissionsDataSource(t *testing.T) {
 }
 
 func monitorCustomRolePermissions() string {
-	return fmt.Sprintf(`
+	return `
 data "sysdig_monitor_custom_role_permissions" "dashboard_edit" {
   requested_permissions = ["dashboards.edit"]
 }
-`)
+`
 }

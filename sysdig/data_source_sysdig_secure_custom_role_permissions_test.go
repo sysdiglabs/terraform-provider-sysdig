@@ -3,7 +3,6 @@
 package sysdig_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -36,9 +35,9 @@ func TestAccSecureCustomRolePermissionsDataSource(t *testing.T) {
 }
 
 func secureCustomRolePermissions() string {
-	return fmt.Sprintf(`
+	return `
 data "sysdig_secure_custom_role_permissions" "images_edit" {
   requested_permissions = ["secure.blacklist.images.edit"]
 }
-`)
+`
 }
