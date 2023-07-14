@@ -102,6 +102,7 @@ func Provider() *schema.Provider {
 			"sysdig_user":                 resourceSysdigUser(),
 			"sysdig_group_mapping":        resourceSysdigGroupMapping(),
 			"sysdig_group_mapping_config": resourceSysdigGroupMappingConfig(),
+			"sysdig_custom_role":          resourceSysdigCustomRole(),
 			"sysdig_team_service_account": resourceSysdigTeamServiceAccount(),
 
 			"sysdig_secure_custom_policy":                  resourceSysdigSecureCustomPolicy(),
