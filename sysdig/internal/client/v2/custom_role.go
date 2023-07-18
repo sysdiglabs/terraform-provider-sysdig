@@ -22,7 +22,7 @@ type CustomRoleInterface interface {
 	UpdateCustomRole(ctx context.Context, cr *CustomRole, id int) (*CustomRole, error)
 	DeleteCustomRole(ctx context.Context, id int) error
 	GetCustomRole(ctx context.Context, id int) (*CustomRole, error)
-	GetCustomRoleByName(ctx context.Context, name string) (CustomRole, error)
+	GetCustomRoleByName(ctx context.Context, name string) (*CustomRole, error)
 }
 
 func (client *Client) CreateCustomRole(ctx context.Context, cr *CustomRole) (*CustomRole, error) {
@@ -109,30 +109,30 @@ func (client *Client) GetCustomRole(ctx context.Context, id int) (*CustomRole, e
 	return &cr, nil
 }
 
-func (client *Client) GetCustomRoleByName(ctx context.Context, name string) (CustomRole, error) {
+func (client *Client) GetCustomRoleByName(ctx context.Context, name string) (*CustomRole, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.GetCustomRolesURL(), nil)
 	if err != nil {
-		return CustomRole{}, err
+		return nil, err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return CustomRole{}, client.ErrorFromResponse(response)
+		return nil, client.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[customRoleListWrapper](response.Body)
 
 	if err != nil {
-		return CustomRole{}, err
+		return nil, err
 	}
 
 	for _, customRole := range wrapper.Roles {
 		if customRole.Name == name {
-			return customRole, nil
+			return &customRole, nil
 		}
 	}
 
-	return CustomRole{}, fmt.Errorf("custom role with name: %s does not exist", name)
+	return nil, fmt.Errorf("custom role with name: %s does not exist", name)
 
 }
 
