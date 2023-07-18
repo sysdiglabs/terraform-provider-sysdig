@@ -21,7 +21,7 @@ type SysdigCommon interface {
 	GroupMappingInterface
 	GroupMappingConfigInterface
 	CustomRoleInterface
-	PermissionInterface
+	CustomRolePermissionInterface
 	TeamServiceAccountInterface
 }
 

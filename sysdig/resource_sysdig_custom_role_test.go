@@ -5,14 +5,13 @@ package sysdig_test
 import (
 	"fmt"
 	"github.com/draios/terraform-provider-sysdig/sysdig"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"testing"
 )
 
 func TestAccCustomRoleResource(t *testing.T) {
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	name := randomText(10)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv),

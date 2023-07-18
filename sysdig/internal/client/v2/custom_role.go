@@ -10,10 +10,8 @@ import (
 var CustomRoleNotFound = errors.New("custom role not found")
 
 const (
-	CustomRolePath       = "%s/api/roles"
-	UpdateCustomRolePath = "%s/api/roles/%d"
-	DeleteCustomRolePath = "%s/api/roles/%d"
-	GetCustomRolePath    = "%s/api/roles/%d"
+	CustomRolesPath = "%s/api/roles"
+	CustomRolePath  = "%s/api/roles/%d"
 )
 
 type CustomRoleInterface interface {
@@ -41,7 +39,6 @@ func (client *Client) CreateCustomRole(ctx context.Context, cr *CustomRole) (*Cu
 	}
 
 	created, err := Unmarshal[CustomRole](response.Body)
-
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +118,6 @@ func (client *Client) GetCustomRoleByName(ctx context.Context, name string) (*Cu
 	}
 
 	wrapper, err := Unmarshal[customRoleListWrapper](response.Body)
-
 	if err != nil {
 		return nil, err
 	}
@@ -137,21 +133,21 @@ func (client *Client) GetCustomRoleByName(ctx context.Context, name string) (*Cu
 }
 
 func (client *Client) CreateCustomRoleURL() string {
-	return fmt.Sprintf(CustomRolePath, client.config.url)
+	return fmt.Sprintf(CustomRolesPath, client.config.url)
 }
 
 func (client *Client) UpdateCustomRoleURL(id int) string {
-	return fmt.Sprintf(UpdateCustomRolePath, client.config.url, id)
+	return fmt.Sprintf(CustomRolePath, client.config.url, id)
 }
 
 func (client *Client) DeleteCustomRoleURL(id int) string {
-	return fmt.Sprintf(DeleteCustomRolePath, client.config.url, id)
+	return fmt.Sprintf(CustomRolePath, client.config.url, id)
 }
 
 func (client *Client) GetCustomRoleURL(id int) string {
-	return fmt.Sprintf(GetCustomRolePath, client.config.url, id)
+	return fmt.Sprintf(CustomRolePath, client.config.url, id)
 }
 
 func (client *Client) GetCustomRolesURL() string {
-	return fmt.Sprintf(CustomRolePath, client.config.url)
+	return fmt.Sprintf(CustomRolesPath, client.config.url)
 }

@@ -210,7 +210,9 @@ func customRoleToResourceData(customRole *v2.CustomRole, d *schema.ResourceData)
 	if err != nil {
 		return err
 	}
-	err = d.Set("permissions", []map[string]interface{}{permissionsToResourceData(customRole.MonitorPermissions, customRole.SecurePermissions)})
+	err = d.Set("permissions", []map[string]interface{}{
+		permissionsToResourceData(customRole.MonitorPermissions, customRole.SecurePermissions),
+	})
 	if err != nil {
 		return err
 	}

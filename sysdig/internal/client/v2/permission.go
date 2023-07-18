@@ -9,7 +9,7 @@ import (
 
 const PermissionsURL = "%s/api/permissions/%s/dependencies?requestedPermissions=%s"
 
-type PermissionInterface interface {
+type CustomRolePermissionInterface interface {
 	Base
 
 	GetPermissionsDependencies(ctx context.Context, product Product, permissions []string) ([]Dependency, error)
