@@ -7,37 +7,37 @@ import (
 	"strings"
 )
 
-const PermissionsURL = "%s/api/permissions/%s?requestedPermissions=%s&withDependencies=true"
+const PermissionsURL = "%s/api/permissions/%s/dependencies?requestedPermissions=%s"
 
 type PermissionInterface interface {
 	Base
 
-	GetPermissionsWithDependencies(ctx context.Context, product Product, permissions []string) ([]Permission, error)
+	GetPermissionsDependencies(ctx context.Context, product Product, permissions []string) ([]Dependency, error)
 }
 
-func (client *Client) GetPermissionsWithDependencies(ctx context.Context, product Product, permissions []string) ([]Permission, error) {
+func (client *Client) GetPermissionsDependencies(ctx context.Context, product Product, permissions []string) ([]Dependency, error) {
 	segments := map[Product]string{MonitorProduct: "monitor", SecureProduct: "secure"}
 	url := fmt.Sprintf(PermissionsURL, client.config.url, segments[product], strings.Join(permissions, ","))
 
-	return client.getPermissionsWithDependencies(ctx, url)
+	return client.getPermissionsDependencies(ctx, url)
 }
 
-func (client *Client) getPermissionsWithDependencies(ctx context.Context, url string) ([]Permission, error) {
+func (client *Client) getPermissionsDependencies(ctx context.Context, url string) ([]Dependency, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return []Permission{}, err
+		return []Dependency{}, err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return []Permission{}, client.ErrorFromResponse(response)
+		return []Dependency{}, client.ErrorFromResponse(response)
 	}
 
-	wrapper, err := Unmarshal[permissionListWrapper](response.Body)
+	dependencies, err := Unmarshal[Dependencies](response.Body)
 
 	if err != nil {
-		return []Permission{}, err
+		return []Dependency{}, err
 	}
 
-	return wrapper.Permissions, nil
+	return dependencies, nil
 }

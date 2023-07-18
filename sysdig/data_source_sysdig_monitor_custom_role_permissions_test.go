@@ -30,7 +30,10 @@ func TestAccMonitorCustomRolePermissionsDataSource(t *testing.T) {
 					resource.TestCheckTypeSetElemAttr("data.sysdig_monitor_custom_role_permissions.dashboard_edit", "enriched_permissions.*", "dashboard-metrics-data.read"),
 					resource.TestCheckTypeSetElemAttr("data.sysdig_monitor_custom_role_permissions.dashboard_edit", "enriched_permissions.*", "metrics-data.read"),
 					resource.TestCheckTypeSetElemAttr("data.sysdig_monitor_custom_role_permissions.dashboard_edit", "enriched_permissions.*", "alert-events.read"),
-					resource.TestCheckResourceAttr("data.sysdig_monitor_custom_role_permissions.dashboard_edit", "enriched_permissions.#", "6"),
+					resource.TestCheckTypeSetElemAttr("data.sysdig_monitor_custom_role_permissions.dashboard_edit", "enriched_permissions.*", "api-token.read"),
+					resource.TestCheckTypeSetElemAttr("data.sysdig_monitor_custom_role_permissions.dashboard_edit", "enriched_permissions.*", "token.view"),
+
+					resource.TestCheckResourceAttr("data.sysdig_monitor_custom_role_permissions.dashboard_edit", "enriched_permissions.#", "8"),
 				),
 			},
 		},
@@ -40,7 +43,7 @@ func TestAccMonitorCustomRolePermissionsDataSource(t *testing.T) {
 func monitorCustomRolePermissions() string {
 	return `
 data "sysdig_monitor_custom_role_permissions" "dashboard_edit" {
-  requested_permissions = ["dashboards.edit"]
+  requested_permissions = ["dashboards.edit", "token.view"]
 }
 `
 }

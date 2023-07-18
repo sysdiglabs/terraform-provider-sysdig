@@ -49,15 +49,12 @@ type customRoleListWrapper struct {
 	Roles []CustomRole `json:"roles"`
 }
 
-type Permission struct {
-	Authority   string   `json:"authority"`
-	Description string   `json:"description"`
-	Products    []string `json:"products"`
+type Dependency struct {
+	PermissionAuthority string   `json:"permissionAuthority"`
+	Dependencies        []string `json:"dependencies"`
 }
 
-type permissionListWrapper struct {
-	Permissions []Permission `json:"permissions"`
-}
+type Dependencies []Dependency
 
 type TeamServiceAccount struct {
 	ID             int    `json:"id,omitempty"`

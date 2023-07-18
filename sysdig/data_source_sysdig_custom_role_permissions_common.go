@@ -39,14 +39,15 @@ func getDataSourceSysdigCustomRoleMonitorPermissionsRead(product v2.Product) sch
 		rp := d.Get("requested_permissions").([]interface{})
 
 		rps := readPermissions(rp)
-		permissions, err := client.GetPermissionsWithDependencies(ctx, product, rps)
+		dependencies, err := client.GetPermissionsDependencies(ctx, product, rps)
 
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		ps := make([]string, len(permissions))
-		for i, permission := range permissions {
-			ps[i] = permission.Authority
+		ps := make([]string, len(dependencies))
+		for i, dependency := range dependencies {
+			ps[i] = dependency.PermissionAuthority
+			ps = append(ps, dependency.Dependencies...)
 		}
 
 		cdefChecksum := sha256.Sum256([]byte(strings.Join(rps, ",")))
