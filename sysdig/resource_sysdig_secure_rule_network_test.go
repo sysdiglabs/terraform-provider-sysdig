@@ -42,6 +42,9 @@ func TestAccRuleNetwork(t *testing.T) {
 				Config: ruleNetworkWithUDP(rText()),
 			},
 			{
+				Config: ruleNetworkAllowingAllTraffic(rText()),
+			},
+			{
 				ResourceName:      "sysdig_secure_rule_network.foo",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -62,6 +65,28 @@ resource "sysdig_secure_rule_network" "foo" {
 
   block_inbound = true
   block_outbound = true
+
+  tcp {
+    matching = true // default
+    ports = [80, 443]
+  }
+
+  udp {
+    matching = true // default
+    ports = [80, 443]
+  }
+}`, name, name)
+}
+
+func ruleNetworkAllowingAllTraffic(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_network" "foo" {
+  name = "TERRAFORM TEST %s" // ID
+  description = "TERRAFORM TEST %s"
+  tags = ["network", "cis"]
+
+  block_inbound = false
+  block_outbound = false
 
   tcp {
     matching = true // default
