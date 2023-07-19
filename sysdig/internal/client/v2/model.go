@@ -296,8 +296,8 @@ type Details struct {
 	ReadPaths      *ReadPaths      `json:"readPaths,omitempty"`
 
 	// Network
-	AllOutbound    bool            `json:"allOutbound,omitempty"`
-	AllInbound     bool            `json:"allInbound,omitempty"`
+	AllOutbound    bool            `json:"allOutbound"`
+	AllInbound     bool            `json:"allInbound"`
 	TCPListenPorts *TCPListenPorts `json:"tcpListenPorts,omitempty"`
 	UDPListenPorts *UDPListenPorts `json:"udpListenPorts,omitempty"`
 
