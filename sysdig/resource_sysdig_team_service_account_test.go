@@ -59,7 +59,7 @@ resource "sysdig_monitor_team" "sample" {
 resource "sysdig_team_service_account" "service-account" {
   name = "%s"
   expiration_date = time_static.example.unix
-  team_id = sysdig_monitor_teamt.sample.id
+  team_id = sysdig_monitor_team.sample.id
 }
 `, name, name)
 }
