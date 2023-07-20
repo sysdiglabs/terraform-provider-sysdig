@@ -6,10 +6,7 @@
             "/opt/draios/bin/instrument"
         ],
         "Command": [
-            "/bin/test",
-            "test",
-            "--test-arg",
-            "test-arg-value"
+            "/bin/test"
         ],
         "Environment": [
             {
@@ -35,14 +32,6 @@
             {
                 "Name": "SYSDIG_ORCHESTRATOR",
                 "Value": "orchestrator_host"
-            },
-            {
-                "Name": "TMP",
-                "Value": "temporary"
-            },
-            {
-                "Name": "SYSDIG_CUSTOM",
-                "Value": "custom"
             }
         ],
         "LinuxParameters": {
@@ -55,8 +44,53 @@
         "VolumesFrom": [
             {
                 "ReadOnly": true,
-                "SourceContainer": "test_container"
+                "SourceContainer": "SysdigInstrumentation"
+            }
+        ]
+    },
+    {
+        "Name": "other",
+        "Image": "other_image:latest",
+        "EntryPoint": [
+            "/opt/draios/bin/instrument"
+        ],
+        "Command": [
+            "/bin/other"
+        ],
+        "Environment": [
+            {
+                "Name": "SYSDIG_ORCHESTRATOR_PORT",
+                "Value": "orchestrator_port"
             },
+            {
+                "Name": "SYSDIG_COLLECTOR",
+                "Value": "collector_host"
+            },
+            {
+                "Name": "SYSDIG_COLLECTOR_PORT",
+                "Value": "collector_port"
+            },
+            {
+                "Name": "SYSDIG_ACCESS_KEY",
+                "Value": "sysdig_access_key"
+            },
+            {
+                "Name": "SYSDIG_LOGGING",
+                "Value": "sysdig_logging"
+            },
+            {
+                "Name": "SYSDIG_ORCHESTRATOR",
+                "Value": "orchestrator_host"
+            }
+        ],
+        "LinuxParameters": {
+            "Capabilities": {
+                "Add": [
+                    "SYS_PTRACE"
+                ]
+            }
+        },
+        "VolumesFrom": [
             {
                 "ReadOnly": true,
                 "SourceContainer": "SysdigInstrumentation"

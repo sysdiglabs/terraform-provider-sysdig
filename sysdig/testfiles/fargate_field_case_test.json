@@ -1,0 +1,16 @@
+[
+    {
+        "name": "test",
+        "image": "test_image:latest",
+        "entryPoint": [
+            "/bin/test"
+        ]
+    },
+    {
+        "Name": "other",
+        "Image": "other_image:latest",
+        "entryPoint": [
+            "/bin/other"
+        ]
+    }
+]
