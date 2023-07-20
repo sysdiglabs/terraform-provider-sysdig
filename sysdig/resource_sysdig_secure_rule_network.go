@@ -125,8 +125,8 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 	}
 	updateResourceDataForRule(d, rule)
 
-	_ = d.Set("block_inbound", rule.Details.AllInbound)
-	_ = d.Set("block_outbound", rule.Details.AllOutbound)
+	_ = d.Set("block_inbound", !rule.Details.AllInbound)
+	_ = d.Set("block_outbound", !rule.Details.AllOutbound)
 
 	if rule.Details.TCPListenPorts == nil {
 		return diag.Errorf("no tcpListenPorts for a filesystem rule")
@@ -216,8 +216,8 @@ func resourceSysdigRuleNetworkFromResourceData(d *schema.ResourceData) (rule v2.
 	rule.Details.TCPListenPorts = &v2.TCPListenPorts{}
 	rule.Details.UDPListenPorts = &v2.UDPListenPorts{}
 
-	rule.Details.AllInbound = d.Get("block_inbound").(bool)
-	rule.Details.AllOutbound = d.Get("block_outbound").(bool)
+	rule.Details.AllInbound = !d.Get("block_inbound").(bool)
+	rule.Details.AllOutbound = !d.Get("block_outbound").(bool)
 
 	rule.Details.TCPListenPorts.Items = []string{}
 	if tcpRules := d.Get("tcp").([]interface{}); len(tcpRules) > 0 {

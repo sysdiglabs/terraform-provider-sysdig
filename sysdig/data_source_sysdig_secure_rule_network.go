@@ -76,8 +76,8 @@ func dataSourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData
 }
 
 func networkRuleDataSourceToResourceData(rule v2.Rule, d *schema.ResourceData) diag.Diagnostics {
-	_ = d.Set("block_inbound", rule.Details.AllInbound)
-	_ = d.Set("block_outbound", rule.Details.AllOutbound)
+	_ = d.Set("block_inbound", !rule.Details.AllInbound)
+	_ = d.Set("block_outbound", !rule.Details.AllOutbound)
 
 	if rule.Details.TCPListenPorts == nil {
 		return diag.Errorf("no tcpListenPorts for a network rule")
