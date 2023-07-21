@@ -53,8 +53,9 @@ func resourceSysdigTeamServiceAccount() *schema.Resource {
 				Computed: true,
 			},
 			"api_key": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 		},
 	}
