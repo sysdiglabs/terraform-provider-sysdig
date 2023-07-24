@@ -72,7 +72,7 @@ func resourceSysdigTeamServiceAccountRead(ctx context.Context, d *schema.Resourc
 		diag.FromErr(err)
 	}
 
-	teamServiceAccount, err := client.GetTeamServiceAccountById(ctx, id)
+	teamServiceAccount, err := client.GetTeamServiceAccountByID(ctx, id)
 	if err != nil {
 		if err == v2.TeamServiceAccountNotFound {
 			d.SetId("")

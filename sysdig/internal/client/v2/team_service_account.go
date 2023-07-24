@@ -17,13 +17,13 @@ const (
 
 type TeamServiceAccountInterface interface {
 	Base
-	GetTeamServiceAccountById(ctx context.Context, id int) (*TeamServiceAccount, error)
+	GetTeamServiceAccountByID(ctx context.Context, id int) (*TeamServiceAccount, error)
 	CreateTeamServiceAccount(ctx context.Context, account *TeamServiceAccount) (*TeamServiceAccount, error)
 	UpdateTeamServiceAccount(ctx context.Context, account *TeamServiceAccount, id int) (*TeamServiceAccount, error)
 	DeleteTeamServiceAccount(ctx context.Context, id int) error
 }
 
-func (client *Client) GetTeamServiceAccountById(ctx context.Context, id int) (*TeamServiceAccount, error) {
+func (client *Client) GetTeamServiceAccountByID(ctx context.Context, id int) (*TeamServiceAccount, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.GetTeamServiceAccountURL(id), nil)
 	if err != nil {
 		return nil, err
