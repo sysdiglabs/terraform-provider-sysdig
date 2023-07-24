@@ -155,41 +155,41 @@ func resourceSysdigTeamServiceAccountDelete(ctx context.Context, d *schema.Resou
 
 func teamServiceAccountFromResourceData(d *schema.ResourceData) *v2.TeamServiceAccount {
 	return &v2.TeamServiceAccount{
-		Name:           d.Get("name").(string),
-		TeamRole:       d.Get("role").(string),
-		ExpirationDate: int64(d.Get("expiration_date").(int) * 1000),
-		TeamId:         d.Get("team_id").(int),
-		SystemRole:     d.Get("system_role").(string),
-		ApiKey:         d.Get("api_key").(string),
+		Name:           d.Get(SchemaNameKey).(string),
+		TeamRole:       d.Get(SchemaRoleKey).(string),
+		ExpirationDate: int64(d.Get(SchemaExpirationDateKey).(int) * 1000),
+		TeamId:         d.Get(SchemaTeamIDKey).(int),
+		SystemRole:     d.Get(SchemaSystemRoleKey).(string),
+		ApiKey:         d.Get(SchemaApiKeyKey).(string),
 	}
 }
 
 func teamServiceAccountToResourceData(teamServiceAccount *v2.TeamServiceAccount, d *schema.ResourceData) error {
-	err := d.Set("name", teamServiceAccount.Name)
+	err := d.Set(SchemaNameKey, teamServiceAccount.Name)
 	if err != nil {
 		return err
 	}
-	err = d.Set("role", teamServiceAccount.TeamRole)
+	err = d.Set(SchemaRoleKey, teamServiceAccount.TeamRole)
 	if err != nil {
 		return err
 	}
-	err = d.Set("expiration_date", teamServiceAccount.ExpirationDate/1000)
+	err = d.Set(SchemaExpirationDateKey, teamServiceAccount.ExpirationDate/1000)
 	if err != nil {
 		return err
 	}
-	err = d.Set("team_id", teamServiceAccount.TeamId)
+	err = d.Set(SchemaTeamIDKey, teamServiceAccount.TeamId)
 	if err != nil {
 		return err
 	}
-	err = d.Set("system_role", teamServiceAccount.SystemRole)
+	err = d.Set(SchemaSystemRoleKey, teamServiceAccount.SystemRole)
 	if err != nil {
 		return err
 	}
-	err = d.Set("date_created", teamServiceAccount.DateCreated)
+	err = d.Set(SchemaCreatedDateKey, teamServiceAccount.DateCreated)
 	if err != nil {
 		return err
 	}
-	err = d.Set("api_key", teamServiceAccount.ApiKey)
+	err = d.Set(SchemaApiKeyKey, teamServiceAccount.ApiKey)
 	if err != nil {
 		return err
 	}
