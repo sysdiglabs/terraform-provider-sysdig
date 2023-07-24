@@ -37,11 +37,11 @@ func (client *Client) GetTeamServiceAccountById(ctx context.Context, id int) (*T
 		return nil, client.ErrorFromResponse(response)
 	}
 
-	teamServiceaccount, err := Unmarshal[TeamServiceAccount](response.Body)
+	teamServiceAccount, err := Unmarshal[TeamServiceAccount](response.Body)
 	if err != nil {
 		return nil, err
 	}
-	return &teamServiceaccount, nil
+	return &teamServiceAccount, nil
 }
 
 func (client *Client) CreateTeamServiceAccount(ctx context.Context, account *TeamServiceAccount) (*TeamServiceAccount, error) {

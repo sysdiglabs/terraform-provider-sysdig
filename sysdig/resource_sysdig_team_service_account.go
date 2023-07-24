@@ -26,33 +26,33 @@ func resourceSysdigTeamServiceAccount() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 		Schema: map[string]*schema.Schema{
-			"name": {
+			SchemaNameKey: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"role": {
+			SchemaRoleKey: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "ROLE_TEAM_READ",
 			},
-			"expiration_date": {
+			SchemaExpirationDateKey: {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"team_id": {
+			SchemaTeamIDKey: {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"system_role": {
+			SchemaSystemRoleKey: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "ROLE_SERVICE_ACCOUNT",
 			},
-			"date_created": {
+			SchemaCreatedDateKey: {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"api_key": {
+			SchemaApiKeyKey: {
 				Type:      schema.TypeString,
 				Computed:  true,
 				Sensitive: true,
