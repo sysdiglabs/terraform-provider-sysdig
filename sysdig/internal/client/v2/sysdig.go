@@ -20,6 +20,7 @@ type SysdigCommon interface {
 	Common
 	GroupMappingInterface
 	GroupMappingConfigInterface
+	TeamServiceAccountInterface
 }
 
 type SysdigMonitor interface {

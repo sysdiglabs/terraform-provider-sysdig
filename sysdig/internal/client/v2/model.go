@@ -38,6 +38,17 @@ type UserRoles struct {
 	Admin  bool   `json:"admin,omitempty"`
 }
 
+type TeamServiceAccount struct {
+	ID             int    `json:"id,omitempty"`
+	Name           string `json:"name"`
+	SystemRole     string `json:"systemRole"`
+	TeamId         int    `json:"teamId"`
+	TeamRole       string `json:"teamRole"`
+	DateCreated    int64  `json:"dateCreated,omitempty"`
+	ExpirationDate int64  `json:"expirationDate"`
+	ApiKey         string `json:"apiKey,omitempty"`
+}
+
 type EntryPoint struct {
 	Module    string `json:"module"`
 	Selection string `json:"selection,omitempty"`
