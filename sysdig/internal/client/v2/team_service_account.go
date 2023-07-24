@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-var TeamServiceAccountNotFound = errors.New("group mapping not found")
+var TeamServiceAccountNotFound = errors.New("team service account not found")
 
 const (
 	ServiceAccountsPath      = "%s/api/serviceaccounts/team"
