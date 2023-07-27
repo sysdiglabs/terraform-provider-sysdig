@@ -2,12 +2,14 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceSysdigMonitorAlertV2Prometheus() *schema.Resource {
@@ -33,6 +35,11 @@ func resourceSysdigMonitorAlertV2Prometheus() *schema.Resource {
 			"query": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"keep_firing_for_minutes": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(1),
 			},
 		}),
 	}
@@ -139,6 +146,10 @@ func buildAlertV2PrometheusStruct(d *schema.ResourceData) *v2.AlertV2Prometheus 
 
 	config := v2.AlertV2ConfigPrometheus{}
 	config.Query = d.Get("query").(string)
+	if keepFiringForMinutes, ok := d.GetOk("keep_firing_for_minutes"); ok {
+		kff := keepFiringForMinutes.(int) * 60
+		config.KeepFiringForSec = &kff
+	}
 
 	alert := &v2.AlertV2Prometheus{
 		AlertV2Common: *alertV2Common,
@@ -154,6 +165,11 @@ func updateAlertV2PrometheusState(d *schema.ResourceData, alert *v2.AlertV2Prome
 	}
 
 	_ = d.Set("query", alert.Config.Query)
+	if alert.Config.KeepFiringForSec != nil {
+		_ = d.Set("keep_firing_for_minutes", *alert.Config.KeepFiringForSec/60)
+	} else {
+		_ = d.Set("keep_firing_for_minutes", nil)
+	}
 
 	return
 }

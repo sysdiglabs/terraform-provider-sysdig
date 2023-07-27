@@ -73,6 +73,7 @@ By defining this field, the user can add link to notificatons.
 ### Prometheus alert arguments
 
 * `query` - (Required) PromQL-based metric expression to alert on. Example: `histogram_quantile(0.99, rate(etcd_http_successful_duration_seconds_bucket[5m]) > 0.15` or `predict_linear(sysdig_fs_free_bytes{fstype!~"tmpfs"}[1h], 24*3600) < 10000000000`.
+* `keep_firing_for_minutes` - (Optional) Alert resolution delay before actually resolving an alert.
 
 ## Attributes Reference
 

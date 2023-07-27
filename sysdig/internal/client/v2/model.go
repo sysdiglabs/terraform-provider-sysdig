@@ -501,7 +501,8 @@ type AlertV2Common struct {
 }
 
 type AlertV2ConfigPrometheus struct {
-	Query string `json:"query"`
+	Query            string `json:"query"`
+	KeepFiringForSec *int   `json:"keepFiringForSec,omitempty"`
 }
 
 type AlertV2Prometheus struct {
