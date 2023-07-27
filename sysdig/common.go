@@ -33,4 +33,9 @@ const (
 	SchemaSystemRoleKey     = "system_role"
 	SchemaRulesKey          = "rules"
 	SchemaApiKeyKey         = "api_key"
+	SchemaPermissionsKey    = "permissions"
+	SchemaMonitorPermKey    = "monitor_permissions"
+	SchemaSecurePermKey     = "secure_permissions"
+	SchemaRequestedPermKey  = "requested_permissions"
+	SchemaEnrichedPermKey   = "enriched_permissions"
 )

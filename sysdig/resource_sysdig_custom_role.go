@@ -29,28 +29,28 @@ func resourceSysdigCustomRole() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 		Schema: map[string]*schema.Schema{
-			"name": {
+			SchemaNameKey: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			SchemaDescriptionKey: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"permissions": {
+			SchemaPermissionsKey: {
 				Type:     schema.TypeSet,
 				Required: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"monitor_permissions": {
+						SchemaMonitorPermKey: {
 							Type:     schema.TypeSet,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"secure_permissions": {
+						SchemaSecurePermKey: {
 							Type:     schema.TypeSet,
 							Optional: true,
 							Elem: &schema.Schema{
@@ -164,7 +164,7 @@ func resourceSysdigCustomRoleDelete(ctx context.Context, d *schema.ResourceData,
 }
 
 func customRoleFromResourceData(d *schema.ResourceData) (*v2.CustomRole, error) {
-	schemaPermissions, ok := d.Get("permissions").(*schema.Set)
+	schemaPermissions, ok := d.Get(SchemaPermissionsKey).(*schema.Set)
 	if !ok {
 		return nil, fmt.Errorf("cast permissions to set resuts in an error")
 	}
@@ -172,8 +172,8 @@ func customRoleFromResourceData(d *schema.ResourceData) (*v2.CustomRole, error) 
 		schemaPermissions,
 	}
 	return &v2.CustomRole{
-		Name:               d.Get("name").(string),
-		Description:        d.Get("description").(string),
+		Name:               d.Get(SchemaNameKey).(string),
+		Description:        d.Get(SchemaDescriptionKey).(string),
 		MonitorPermissions: p.readMonitorPermissions(),
 		SecurePermissions:  p.readSecurePermissions(),
 	}, nil
@@ -194,23 +194,23 @@ func (p *permission) readPermissions(product string) []string {
 }
 
 func (p *permission) readSecurePermissions() []string {
-	return p.readPermissions("secure_permissions")
+	return p.readPermissions(SchemaSecurePermKey)
 }
 
 func (p *permission) readMonitorPermissions() []string {
-	return p.readPermissions("monitor_permissions")
+	return p.readPermissions(SchemaMonitorPermKey)
 }
 
 func customRoleToResourceData(customRole *v2.CustomRole, d *schema.ResourceData) error {
-	err := d.Set("name", customRole.Name)
+	err := d.Set(SchemaNameKey, customRole.Name)
 	if err != nil {
 		return err
 	}
-	err = d.Set("description", customRole.Description)
+	err = d.Set(SchemaDescriptionKey, customRole.Description)
 	if err != nil {
 		return err
 	}
-	err = d.Set("permissions", []map[string]interface{}{
+	err = d.Set(SchemaPermissionsKey, []map[string]interface{}{
 		permissionsToResourceData(customRole.MonitorPermissions, customRole.SecurePermissions),
 	})
 	if err != nil {
@@ -221,7 +221,7 @@ func customRoleToResourceData(customRole *v2.CustomRole, d *schema.ResourceData)
 
 func permissionsToResourceData(monitorPermissions []string, securePermissions []string) map[string]interface{} {
 	return map[string]interface{}{
-		"monitor_permissions": monitorPermissions,
-		"secure_permissions":  securePermissions,
+		SchemaMonitorPermKey: monitorPermissions,
+		SchemaSecurePermKey:  securePermissions,
 	}
 }

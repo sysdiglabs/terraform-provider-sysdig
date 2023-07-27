@@ -12,14 +12,14 @@ import (
 
 func dataSourceSysdigCustomRoleSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"requested_permissions": {
+		SchemaRequestedPermKey: {
 			Type:     schema.TypeList,
 			Required: true,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
 		},
-		"enriched_permissions": {
+		SchemaEnrichedPermKey: {
 			Type:     schema.TypeSet,
 			Computed: true,
 			Elem: &schema.Schema{
@@ -36,7 +36,7 @@ func getDataSourceSysdigCustomRoleMonitorPermissionsRead(product v2.Product) sch
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		rp := d.Get("requested_permissions").([]interface{})
+		rp := d.Get(SchemaRequestedPermKey).([]interface{})
 
 		rps := readPermissions(rp)
 		dependencies, err := client.GetPermissionsDependencies(ctx, product, rps)
@@ -52,7 +52,7 @@ func getDataSourceSysdigCustomRoleMonitorPermissionsRead(product v2.Product) sch
 
 		cdefChecksum := sha256.Sum256([]byte(strings.Join(rps, ",")))
 		d.SetId(fmt.Sprintf("%x", cdefChecksum))
-		_ = d.Set("enriched_permissions", ps)
+		_ = d.Set(SchemaEnrichedPermKey, ps)
 
 		return nil
 	}
