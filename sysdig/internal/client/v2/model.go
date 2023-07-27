@@ -38,6 +38,24 @@ type UserRoles struct {
 	Admin  bool   `json:"admin,omitempty"`
 }
 
+type CustomRole struct {
+	ID                 int      `json:"id,omitempty"`
+	Name               string   `json:"name"`
+	Description        string   `json:"description,omitempty"`
+	MonitorPermissions []string `json:"monitorPermissions,omitempty"`
+	SecurePermissions  []string `json:"securePermissions,omitempty"`
+}
+type customRoleListWrapper struct {
+	Roles []CustomRole `json:"roles"`
+}
+
+type Dependency struct {
+	PermissionAuthority string   `json:"permissionAuthority"`
+	Dependencies        []string `json:"dependencies"`
+}
+
+type Dependencies []Dependency
+
 type TeamServiceAccount struct {
 	ID             int    `json:"id,omitempty"`
 	Name           string `json:"name"`
