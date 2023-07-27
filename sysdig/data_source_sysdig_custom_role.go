@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -29,12 +28,18 @@ func dataSourceSysdigCustomRole() *schema.Resource {
 				Computed: true,
 			},
 			"monitor_permissions": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeSet,
 				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"secure_permissions": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeSet,
 				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	}
@@ -56,8 +61,8 @@ func dataSourceSysdigCustomRoleRead(ctx context.Context, d *schema.ResourceData,
 	d.SetId(strconv.Itoa(customRole.ID))
 	_ = d.Set("name", customRole.Name)
 	_ = d.Set("description", customRole.Description)
-	_ = d.Set("monitor_permissions", strings.Join(customRole.MonitorPermissions, ","))
-	_ = d.Set("secure_permissions", strings.Join(customRole.SecurePermissions, ","))
+	_ = d.Set("monitor_permissions", customRole.MonitorPermissions)
+	_ = d.Set("secure_permissions", customRole.SecurePermissions)
 
 	return nil
 }
