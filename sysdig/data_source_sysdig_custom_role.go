@@ -19,22 +19,22 @@ func dataSourceSysdigCustomRole() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			SchemaRequestedPermKey: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			SchemaDescriptionKey: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"monitor_permissions": {
+			SchemaMonitorPermKey: {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"secure_permissions": {
+			SchemaSecurePermKey: {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Schema{
@@ -51,7 +51,7 @@ func dataSourceSysdigCustomRoleRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	name := d.Get("name").(string)
+	name := d.Get(SchemaNameKey).(string)
 
 	customRole, err := client.GetCustomRoleByName(ctx, name)
 	if err != nil {
@@ -59,10 +59,10 @@ func dataSourceSysdigCustomRoleRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(strconv.Itoa(customRole.ID))
-	_ = d.Set("name", customRole.Name)
-	_ = d.Set("description", customRole.Description)
-	_ = d.Set("monitor_permissions", customRole.MonitorPermissions)
-	_ = d.Set("secure_permissions", customRole.SecurePermissions)
+	_ = d.Set(SchemaNameKey, customRole.Name)
+	_ = d.Set(SchemaDescriptionKey, customRole.Description)
+	_ = d.Set(SchemaMonitorPermKey, customRole.MonitorPermissions)
+	_ = d.Set(SchemaSecurePermKey, customRole.SecurePermissions)
 
 	return nil
 }
