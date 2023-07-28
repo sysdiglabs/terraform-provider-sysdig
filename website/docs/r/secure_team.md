@@ -76,8 +76,9 @@ data "sysdig_custom_role" "custom_role" {
 * `email` - (Required) The email of the user in the group.
 
 * `role` - (Optional) The role for the user in this group.
-           Valid roles are: ROLE_TEAM_STANDARD, ROLE_TEAM_EDIT, ROLE_TEAM_READ, ROLE_TEAM_MANAGER or CustomRole ID.
-           Default: ROLE_TEAM_STANDARD.
+           Valid roles are: ROLE_TEAM_STANDARD, ROLE_TEAM_EDIT, ROLE_TEAM_READ, ROLE_TEAM_MANAGER or CustomRole ID.<br/>
+           Default: ROLE_TEAM_STANDARD.<br/>
+           Note: CustomRole ID can be referenced from `sysdig_custom_role` resource or `sysdig_custom_role` data source
 
 ## Attributes Reference
 
