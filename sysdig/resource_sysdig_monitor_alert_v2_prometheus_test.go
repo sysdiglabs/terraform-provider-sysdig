@@ -36,6 +36,9 @@ func TestAccAlertV2Prometheus(t *testing.T) {
 				Config: alertV2PrometheusWithGroup(rText()),
 			},
 			{
+				Config: alertV2PrometheusWithKeepFiringFor(rText()),
+			},
+			{
 				ResourceName:      "sysdig_monitor_alert_v2_prometheus.sample",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -67,6 +70,20 @@ resource "sysdig_monitor_alert_v2_prometheus" "sample" {
 	query = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
 	trigger_after_minutes = 10
 	enabled = false
+}
+`, name, name)
+}
+
+func alertV2PrometheusWithKeepFiringFor(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_prometheus" "sample" {
+	name = "TERRAFORM TEST - PROMQL %s"
+	description = "TERRAFORM TEST - PROMQL %s"
+	severity = "high"
+	query = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
+	trigger_after_minutes = 10
+	enabled = false
+	keep_firing_for_minutes = 10
 }
 `, name, name)
 }
