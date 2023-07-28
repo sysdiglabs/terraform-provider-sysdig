@@ -59,10 +59,25 @@ func dataSourceSysdigCustomRoleRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(strconv.Itoa(customRole.ID))
-	_ = d.Set(SchemaNameKey, customRole.Name)
-	_ = d.Set(SchemaDescriptionKey, customRole.Description)
-	_ = d.Set(SchemaMonitorPermKey, customRole.MonitorPermissions)
-	_ = d.Set(SchemaSecurePermKey, customRole.SecurePermissions)
+	err = d.Set(SchemaNameKey, customRole.Name)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set(SchemaDescriptionKey, customRole.Description)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set(SchemaMonitorPermKey, customRole.MonitorPermissions)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set(SchemaSecurePermKey, customRole.SecurePermissions)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
