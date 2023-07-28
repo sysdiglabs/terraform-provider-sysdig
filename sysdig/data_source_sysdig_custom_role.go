@@ -19,7 +19,7 @@ func dataSourceSysdigCustomRole() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			SchemaRequestedPermKey: {
+			SchemaNameKey: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
