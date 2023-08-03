@@ -40,8 +40,7 @@ func resourceSysdigMonitorNotificationChannelMSTeams() *schema.Resource {
 }
 
 func resourceSysdigMonitorNotificationChannelMSTeamsCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	clients := meta.(SysdigClients)
-	client, err := getMonitorNotificationChannelClient(clients)
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -78,9 +77,11 @@ func resourceSysdigMonitorNotificationChannelMSTeamsRead(ctx context.Context, d 
 	}
 
 	nc, err := client.GetNotificationChannelById(ctx, id)
-
 	if err != nil {
-		d.SetId("")
+		if err == v2.NotificationChannelNotFound {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -93,8 +94,7 @@ func resourceSysdigMonitorNotificationChannelMSTeamsRead(ctx context.Context, d 
 }
 
 func resourceSysdigMonitorNotificationChannelMSTeamsUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	clients := meta.(SysdigClients)
-	client, err := getMonitorNotificationChannelClient(clients)
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}

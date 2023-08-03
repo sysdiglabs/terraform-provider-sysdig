@@ -55,7 +55,7 @@ func monitorNotificationChannelSlackSharedWithCurrentTeam(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_slack" "sample-slack" {
 	name = "Example Channel %s - Slack"
-    share_with_current_team = true
+	share_with_current_team = true
 	enabled = true
 	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	channel = "#sysdig"

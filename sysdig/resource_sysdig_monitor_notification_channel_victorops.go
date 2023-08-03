@@ -2,9 +2,10 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -43,8 +44,7 @@ func resourceSysdigMonitorNotificationChannelVictorOps() *schema.Resource {
 }
 
 func resourceSysdigMonitorNotificationChannelVictorOpsCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	clients := meta.(SysdigClients)
-	client, err := getMonitorNotificationChannelClient(clients)
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -77,9 +77,11 @@ func resourceSysdigMonitorNotificationChannelVictorOpsRead(ctx context.Context, 
 
 	id, _ := strconv.Atoi(d.Id())
 	nc, err := client.GetNotificationChannelById(ctx, id)
-
 	if err != nil {
-		d.SetId("")
+		if err == v2.NotificationChannelNotFound {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -92,8 +94,7 @@ func resourceSysdigMonitorNotificationChannelVictorOpsRead(ctx context.Context, 
 }
 
 func resourceSysdigMonitorNotificationChannelVictorOpsUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	clients := meta.(SysdigClients)
-	client, err := getMonitorNotificationChannelClient(clients)
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}

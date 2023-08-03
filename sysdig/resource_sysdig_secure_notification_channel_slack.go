@@ -9,7 +9,6 @@ import (
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -72,9 +71,7 @@ func resourceSysdigSecureNotificationChannelSlackCreate(ctx context.Context, d *
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
 
-	resourceSysdigSecureNotificationChannelSlackRead(ctx, d, meta)
-
-	return nil
+	return resourceSysdigSecureNotificationChannelSlackRead(ctx, d, meta)
 }
 
 func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -89,9 +86,11 @@ func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *sc
 	}
 
 	nc, err := client.GetNotificationChannelById(ctx, id)
-
 	if err != nil {
-		d.SetId("")
+		if err == v2.NotificationChannelNotFound {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -150,6 +149,7 @@ func resourceSysdigSecureNotificationChannelSlackDelete(ctx context.Context, d *
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }
 

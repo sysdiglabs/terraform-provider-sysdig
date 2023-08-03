@@ -2,9 +2,10 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -35,6 +36,10 @@ func resourceSysdigSecureNotificationChannelWebhook() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"additional_headers": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 		}),
 	}
 }
@@ -61,9 +66,8 @@ func resourceSysdigSecureNotificationChannelWebhookCreate(ctx context.Context, d
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	_ = d.Set("version", notificationChannel.Version)
 
-	return nil
+	return resourceSysdigSecureNotificationChannelWebhookRead(ctx, d, meta)
 }
 
 func resourceSysdigSecureNotificationChannelWebhookRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -74,9 +78,12 @@ func resourceSysdigSecureNotificationChannelWebhookRead(ctx context.Context, d *
 
 	id, _ := strconv.Atoi(d.Id())
 	nc, err := client.GetNotificationChannelById(ctx, id)
-
 	if err != nil {
-		d.SetId("")
+		if err == v2.NotificationChannelNotFound {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
 	}
 
 	err = secureNotificationChannelWebhookToResourceData(&nc, d)
@@ -138,6 +145,7 @@ func secureNotificationChannelWebhookFromResourceData(d *schema.ResourceData, te
 
 	nc.Type = NOTIFICATION_CHANNEL_TYPE_WEBHOOK
 	nc.Options.Url = d.Get("url").(string)
+	nc.Options.AdditionalHeaders = d.Get("additional_headers").(map[string]interface{})
 	return
 }
 
@@ -148,6 +156,7 @@ func secureNotificationChannelWebhookToResourceData(nc *v2.NotificationChannel, 
 	}
 
 	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("additional_headers", nc.Options.AdditionalHeaders)
 
 	return
 }

@@ -67,7 +67,7 @@ func secureNotificationChannelMSTeamsSharedWithCurrentTeam(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel_msteams" "sample-msteams" {
 	name = "Example Channel %s - MS Teams"
-    share_with_current_team = true
+	share_with_current_team = true
 	enabled = true
 	url = "https://hooks.msteams.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	notify_when_ok = true

@@ -33,14 +33,17 @@ resource "sysdig_monitor_notification_channel_sns" "sample-amazon-sns" {
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
-* `notify_when_ok` - (Optional) Send a new notification when the alert condition is 
+* `notify_when_ok` - (Optional) Send a new notification when the alert condition is
     no longer triggered. Default is false.
 
-* `notify_when_resolved` - (Optional) Send a new notification when the alert is manually 
+* `notify_when_resolved` - (Optional) Send a new notification when the alert is manually
     acknowledged by a user. Default is false.
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
+
+* `share_with_current_team` - (Optional) If set to `true` it will share notification channel only with current team (in which user is logged in).
+  Otherwise, it will share it with all teams, which is the default behaviour.
 
 ## Attributes Reference
 
@@ -49,9 +52,6 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - (Computed) The ID of the Notification Channel.
 
 * `version` - (Computed) The current version of the Notification Channel.
-
-* `share_with_current_team` - (Optional) If set to `true` it will share notification channel only with current team (in which user is logged in).
-  Otherwise, it will share it with all teams, which is the default behaviour.
 
 ## Import
 

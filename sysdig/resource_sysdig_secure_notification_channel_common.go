@@ -13,7 +13,8 @@ func createSecureNotificationChannelSchema(original map[string]*schema.Schema) m
 		},
 		"enabled": {
 			Type:     schema.TypeBool,
-			Required: true,
+			Optional: true,
+			Default:  true,
 		},
 		"share_with_current_team": {
 			Type:     schema.TypeBool,
@@ -22,11 +23,13 @@ func createSecureNotificationChannelSchema(original map[string]*schema.Schema) m
 		},
 		"notify_when_ok": {
 			Type:     schema.TypeBool,
-			Required: true,
+			Optional: true,
+			Default:  false,
 		},
 		"notify_when_resolved": {
 			Type:     schema.TypeBool,
-			Required: true,
+			Optional: true,
+			Default:  false,
 		},
 		"version": {
 			Type:     schema.TypeInt,

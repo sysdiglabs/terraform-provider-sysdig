@@ -105,6 +105,7 @@ jobs:
           SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_MONITOR_INSTANCE_ID }}
           SYSDIG_IBM_MONITOR_IAM_URL: "https://iam.cloud.ibm.com"
           SYSDIG_MONITOR_URL: "https://eu-gb.monitoring.cloud.ibm.com"
+          IBM_EVENT_NOTIFICATION_INSTANCE_ID: ${{ secrets.IBM_EVENT_NOTIFICATION_INSTANCE_ID }}
 
   test-ibm-secure:
     name: IBM Secure Acceptance Tests

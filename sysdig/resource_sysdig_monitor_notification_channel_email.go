@@ -2,9 +2,10 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -42,8 +43,7 @@ func resourceSysdigMonitorNotificationChannelEmail() *schema.Resource {
 }
 
 func resourceSysdigMonitorNotificationChannelEmailCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	clients := meta.(SysdigClients)
-	client, err := getMonitorNotificationChannelClient(clients)
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -76,9 +76,11 @@ func resourceSysdigMonitorNotificationChannelEmailRead(ctx context.Context, d *s
 
 	id, _ := strconv.Atoi(d.Id())
 	nc, err := client.GetNotificationChannelById(ctx, id)
-
 	if err != nil {
-		d.SetId("")
+		if err == v2.NotificationChannelNotFound {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -91,8 +93,7 @@ func resourceSysdigMonitorNotificationChannelEmailRead(ctx context.Context, d *s
 }
 
 func resourceSysdigMonitorNotificationChannelEmailUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	clients := meta.(SysdigClients)
-	client, err := getMonitorNotificationChannelClient(clients)
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}

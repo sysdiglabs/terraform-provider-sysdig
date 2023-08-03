@@ -58,7 +58,7 @@ func monitorNotificationChannelPagerdutySharedWithCurrentTeam(name string) strin
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_pagerduty" "sample-pagerduty" {
 	name = "Example Channel %s - Pagerduty"
-    share_with_current_team = true
+	share_with_current_team = true
 	enabled = true
 	account = "account"
 	service_key = "XXXXXXXXXX"

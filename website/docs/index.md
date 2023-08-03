@@ -228,6 +228,14 @@ When IBM Workload Protection resources are to be created, this authentication mu
 > - `sysdig_secure_notification_channel_victorops`
 > - `sysdig_monitor_notification_channel_webhook`
 > - `sysdig_secure_notification_channel_webhook`
+> - `sysdig_monitor_notification_channel_prometheus_alert_manager`
+> - `sysdig_secure_notification_channel_prometheus_alert_manager`
+> - `sysdig_monitor_notification_channel_team_email`
+> - `sysdig_secure_notification_channel_team_email`
+> - `sysdig_monitor_notification_channel_google_chat`
+> - `sysdig_monitor_notification_channel_custom_webhook`
+> - `sysdig_monitor_notification_channel_ibm_function`
+> - `sysdig_monitor_notification_channel_ibm_event_notification`
 > - `sysdig_monitor_alert_downtime`
 > - `sysdig_monitor_alert_event`
 > - `sysdig_monitor_alert_metric`
