@@ -204,7 +204,10 @@ func fargatePostKiltModifications(patchedBytes []byte, patchOpts *patchOptions) 
 					"Name":  "__INSTRUMENTATION_WRAPPER",
 					"Value": "/opt/draios/bin/pdig,-C,-t,-1",
 				}
-				container.ArrayAppend(envars, "Environment")
+				err := container.ArrayAppend(envars, "Environment")
+				if err != nil {
+					return nil, fmt.Errorf("failed to extend environment variables: %s", err)
+				}
 			}
 		}
 	}

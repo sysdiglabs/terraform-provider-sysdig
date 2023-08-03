@@ -59,7 +59,7 @@ func getKiltRecipe(t *testing.T) string {
 	return string(jsonRecipeConfig)
 }
 
-func testContains(t *testing.T) {
+func TestContains(t *testing.T) {
 	tests := []struct {
 		slice  []string
 		target string
@@ -128,19 +128,32 @@ func TestNewPatchOptions(t *testing.T) {
 	// Create a mock resource
 	resource := newMockResource()
 	data := resource.Data(nil)
-	data.Set("bare_pdig_on_containers", []interface{}{
+
+	var err error
+	err = data.Set("bare_pdig_on_containers", []interface{}{
 		"gimme", "fried", "chicken",
 	})
-	data.Set("ignore_containers", []interface{}{
+	if err != nil {
+		assert.FailNow(t, fmt.Sprintf("Could not set bare_pdig_on_containers, got error: %v", err))
+	}
+
+	err = data.Set("ignore_containers", []interface{}{
 		"gimme", "fried", "chicken",
 	})
-	data.Set("log_configuration", []interface{}{
+	if err != nil {
+		assert.FailNow(t, fmt.Sprintf("Could not set ignore_containers, got error: %v", err))
+	}
+
+	err = data.Set("log_configuration", []interface{}{
 		map[string]interface{}{
 			"group":         "gimme",
 			"stream_prefix": "fried",
 			"region":        "chicken",
 		},
 	})
+	if err != nil {
+		assert.FailNow(t, fmt.Sprintf("Could not set log_configuration, got error: %v", err))
+	}
 
 	// Expected vs actual
 	expectedPatchOptions := &patchOptions{
