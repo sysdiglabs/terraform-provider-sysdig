@@ -44,6 +44,8 @@ resource "sysdig_monitor_notification_channel_webhook" "sample-webhook" {
 
 * `additional_headers` - (Optional) Key value list of custom headers.
 
+* `allow_insecure_connections` - (Optional) Whether to skip TLS verification. Default: `false`.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:

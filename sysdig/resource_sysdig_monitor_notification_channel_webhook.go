@@ -40,6 +40,11 @@ func resourceSysdigMonitorNotificationChannelWebhook() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
+			"allow_insecure_connections": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		}),
 	}
 }
@@ -147,6 +152,8 @@ func monitorNotificationChannelWebhookFromResourceData(d *schema.ResourceData, t
 	nc.Type = NOTIFICATION_CHANNEL_TYPE_WEBHOOK
 	nc.Options.Url = d.Get("url").(string)
 	nc.Options.AdditionalHeaders = d.Get("additional_headers").(map[string]interface{})
+	allowInsecureConnections := d.Get("allow_insecure_connections").(bool)
+	nc.Options.AllowInsecureConnections = &allowInsecureConnections
 	return
 }
 
@@ -158,6 +165,9 @@ func monitorNotificationChannelWebhookToResourceData(nc *v2.NotificationChannel,
 
 	_ = d.Set("url", nc.Options.Url)
 	_ = d.Set("additional_headers", nc.Options.AdditionalHeaders)
+	if nc.Options.AllowInsecureConnections != nil {
+		_ = d.Set("allow_insecure_connections", *nc.Options.AllowInsecureConnections)
+	}
 
 	return
 }

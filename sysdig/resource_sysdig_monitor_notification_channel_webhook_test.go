@@ -48,6 +48,14 @@ func TestAccMonitorNotificationChannelWebhook(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: monitorNotificationChannelWebhookSharedWithWithAllowInsecureConnections(rText()),
+			},
+			{
+				ResourceName:      "sysdig_monitor_notification_channel_webhook.sample-webhook4",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -85,6 +93,19 @@ func monitorNotificationChannelWebhookSharedWithCurrentTeam(name string) string 
 		name = "Example Channel %s - Webhook With Additional Headers"
 		share_with_current_team = true
 		enabled = true
+		url = "https://example.com/"
+		notify_when_ok = false
+		notify_when_resolved = false
+		send_test_notification = false
+	}`, name)
+}
+
+func monitorNotificationChannelWebhookSharedWithWithAllowInsecureConnections(name string) string {
+	return fmt.Sprintf(`
+	resource "sysdig_monitor_notification_channel_webhook" "sample-webhook4" {
+		name = "Example Channel %s - Webhook With Allow Insecure Connections"
+		enabled = true
+		allow_insecure_connections = true
 		url = "https://example.com/"
 		notify_when_ok = false
 		notify_when_resolved = false
