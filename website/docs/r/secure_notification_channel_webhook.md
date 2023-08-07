@@ -16,12 +16,17 @@ Creates a Sysdig Secure Notification Channel of type Webhook.
 
 ```terraform
 resource "sysdig_secure_notification_channel_webhook" "sample-webhook" {
-	name                    = "Example Channel - Webhook"
-	enabled                 = true
-	url                     = "localhost:8080"
-	notify_when_ok          = false
-	notify_when_resolved    = false
-	send_test_notification  = false
+  name                    = "Example Channel - Webhook"
+  enabled                 = true
+  url                     = "localhost:8080"
+  notify_when_ok          = false
+  notify_when_resolved    = false
+  send_test_notification  = false
+
+  custom_data = {
+    "data1": "value1"
+    "data2": "value2"
+  }
 }
 ```
 
@@ -30,6 +35,8 @@ resource "sysdig_secure_notification_channel_webhook" "sample-webhook" {
 * `name` - (Required) The name of the Notification Channel. Must be unique.
 
 * `url` - (Required) URL to send the event.
+
+* `custom_data` - (Optional) Key value list of additional data you want to attach to the alert notification.
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
