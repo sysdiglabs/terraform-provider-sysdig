@@ -50,6 +50,7 @@ type Common interface {
 type MonitorCommon interface {
 	AlertInterface
 	AlertV2Interface
+	DashboardInterface
 }
 
 type SecureCommon interface {

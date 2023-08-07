@@ -1,12 +1,12 @@
-//go:build tf_acc_sysdig_monitor
+//go:build tf_acc_sysdig_monitor || tf_acc_ibm_monitor
 
 package sysdig_test
 
 import (
 	"fmt"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
-	"os"
 	"testing"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -19,11 +19,7 @@ func TestAccDashboard(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_MONITOR_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigIBMMonitorAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -386,7 +382,7 @@ resource "sysdig_monitor_dashboard" "dashboard_2" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "percent"
-            
+
             format {
                 display_format = "auto"
                 input_format = "0-100"
@@ -557,7 +553,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "time"
-            
+
             format {
                 display_format = "auto"
                 input_format = "ns"
@@ -713,7 +709,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "time"
-            
+
             format {
                 display_format = "auto"
                 input_format = "ns"
@@ -771,7 +767,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		type = "timechart"
 		name = "example panel"
 		description = "description"
-        
+
         legend {
             enabled = %[2]s
             show_current = %[3]s
@@ -787,7 +783,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 				time_series_display_name_template = "{{host_hostname}}"
 				type                              = "lines"
 			}
-            
+
             format {
                 display_format = "auto"
                 input_format = "0-100"
@@ -823,7 +819,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 		query {
 			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
 			unit = "%[2]s"
-            
+
             format {
                 display_format = "%[3]s"
                 input_format = "%[4]s"

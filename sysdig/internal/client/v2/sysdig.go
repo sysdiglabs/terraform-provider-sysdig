@@ -28,7 +28,6 @@ type SysdigCommon interface {
 type SysdigMonitor interface {
 	SysdigCommon
 	MonitorCommon
-	DashboardInterface
 	CloudAccountMonitorInterface
 }
 
