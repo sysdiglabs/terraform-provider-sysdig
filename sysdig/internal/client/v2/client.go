@@ -7,15 +7,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/draios/terraform-provider-sysdig/buildinfo"
-	"github.com/hashicorp/go-retryablehttp"
-	"github.com/jmespath/go-jmespath"
-	"github.com/spf13/cast"
 	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"strings"
+
+	"github.com/draios/terraform-provider-sysdig/buildinfo"
+	"github.com/hashicorp/go-retryablehttp"
+	"github.com/jmespath/go-jmespath"
+	"github.com/spf13/cast"
 )
 
 const (
@@ -48,6 +49,7 @@ type Common interface {
 
 type MonitorCommon interface {
 	AlertInterface
+	AlertV2Interface
 }
 
 type SecureCommon interface {

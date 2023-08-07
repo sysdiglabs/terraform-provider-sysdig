@@ -3,9 +3,10 @@ package sysdig
 import (
 	"context"
 	"fmt"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -61,7 +62,7 @@ func resourceSysdigMonitorAlertV2Event() *schema.Resource {
 }
 
 func getAlertV2EventClient(c SysdigClients) (v2.AlertV2EventInterface, error) {
-	return c.sysdigMonitorClientV2()
+	return getAlertV2Client(c)
 }
 
 func resourceSysdigMonitorAlertV2EventCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {

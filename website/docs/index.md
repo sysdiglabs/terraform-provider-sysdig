@@ -17,7 +17,7 @@ optional.
 For either options, the corresponding **URL** and **API Token** must be configured.
 See options below.
 
-Sysdig provider can also be used to interact with [IBM Cloud Monitoring](https://cloud.ibm.com/docs/monitoring?topic=monitoring-getting-started). For more details check `IBM Cloud Monitoring Authentication` example and configuration reference below. 
+Sysdig provider can also be used to interact with [IBM Cloud Monitoring](https://cloud.ibm.com/docs/monitoring?topic=monitoring-getting-started). For more details check `IBM Cloud Monitoring Authentication` example and configuration reference below.
 
 Use the navigation to the left to read about the available resources.
 
@@ -41,7 +41,7 @@ terraform {
 ```terraform
 provider "sysdig" {
   sysdig_monitor_url = "https://app.sysdigcloud.com"
-  sysdig_monitor_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  
+  sysdig_monitor_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 }
 ```
 
@@ -58,13 +58,13 @@ provider "sysdig" {
 
 ```terraform
 provider "sysdig" {
-  
+
   sysdig_secure_url="https://secure.sysdig.com"
   sysdig_secure_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-  
+
   sysdig_monitor_url = "https://app.sysdigcloud.com"
   sysdig_monitor_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-  
+
   extra_headers = {
     "Proxy-Authorization": "Basic xxxxxxxxxxxxxxxx"
   }
@@ -114,9 +114,9 @@ optional.
 When Monitor resources are to be created, this authentication must be in place.
 
 * `sysdig_monitor_url` - (Required) This is the target Sysdig Monitor base API
-  endpoint. It's intended to be used with OnPrem installations. 
+  endpoint. It's intended to be used with OnPrem installations.
   <br/>By default, it  points to `https://app.sysdigcloud.com`. [Find your Sysdig Saas region url](https://docs.sysdig.com/en/docs/administration/saas-regions-and-ip-ranges/#saas-regions-and-ip-ranges) (Sysdig Monitor endpoint)</br>
-  It can also be sourced from the `SYSDIG_MONITOR_URL` environment variable.<br/>Notice: it should not be ended with a 
+  It can also be sourced from the `SYSDIG_MONITOR_URL` environment variable.<br/>Notice: it should not be ended with a
   slash.<br/><br/>
 
 * `sysdig_monitor_api_token` - (Required) The Sysdig Monitor API token.
@@ -136,7 +136,7 @@ When Secure resources are to be created, this authentication must be in place.
 
 * `sysdig_secure_url` - (Required) This is the target Sysdig Secure base API
   endpoint. It's intended to be used with OnPrem installations.
-  <br/>By default, it  points to `https://secure.sysdig.com`. 
+  <br/>By default, it  points to `https://secure.sysdig.com`.
   <br/>[Find your Sysdig Saas region url](https://docs.sysdig.com/en/docs/administration/saas-regions-and-ip-ranges/#saas-regions-and-ip-ranges) (Secure endpoint)
   <br/> It can also be sourced from the `SYSDIG_SECURE_URL` environment variable.
   <br/>Notice: it should not be ended with a slash.<br/><br/>
@@ -147,7 +147,7 @@ When Secure resources are to be created, this authentication must be in place.
   <br/>Required if any `sysdig_secure_*` resource or data source is used.<br/><br/>
 
 * `sysdig_secure_insecure_tls` - (Optional) Defines if the HTTP client can ignore
-  the use of invalid HTTPS certificates in the Secure API. It can be useful for 
+  the use of invalid HTTPS certificates in the Secure API. It can be useful for
   on-prem installations. It can also be sourced from the `SYSDIG_SECURE_INSECURE_TLS`
   environment variable. By default, this is false.<br/><br/>
 
@@ -159,13 +159,13 @@ When IBM Cloud Monitoring resources are to be created, this authentication must 
 * `sysdig_monitor_url` - (Required) This is the target IBM Cloud Monitoring API
   endpoint. It can also be sourced from the `SYSDIG_MONITOR_URL` environment variable. [Find your IBM Cloud Monitoring region url](https://cloud.ibm.com/docs/monitoring?topic=monitoring-endpoints#endpoints_monitoring).
   <br/>Notice: it should not be ended with a slash.<br/><br/>
-* `ibm_monitor_iam_url` - (Required) This is the target IAM endpoint used to issue IBM IAM token by consuming `ibm_monitor_api_key`. 
+* `ibm_monitor_iam_url` - (Required) This is the target IAM endpoint used to issue IBM IAM token by consuming `ibm_monitor_api_key`.
   Provider will handle token expiration and refresh it when needed.
   <br/>It can also be configured from the `SYSDIG_IBM_MONITOR_IAM_URL` environment variable.<br/><br/>
 * `ibm_monitor_instance_id` (Required) This is the target instance ID (GUID format) of IBM instance which is hosting IBM Cloud Monitoring.
   <br/>It can also be configured from the `SYSDIG_IBM_MONITOR_INSTANCE_ID` environment variable.
   <br/><br/>
-* `ibm_monitor_api_key` (Required) An API key is a unique code that is passed to an IBM IAM service to generate IAM token used for making HTTP request against IBM endpoints. 
+* `ibm_monitor_api_key` (Required) An API key is a unique code that is passed to an IBM IAM service to generate IAM token used for making HTTP request against IBM endpoints.
   This argument can be used to specify any kind of IBM API keys (User API key, Service ID, ...).
   <br/>It can also be configured from the `SYSDIG_IBM_MONITOR_API_KEY` environment variable.
   <br/><br/>
@@ -173,10 +173,10 @@ When IBM Cloud Monitoring resources are to be created, this authentication must 
   the use of invalid HTTPS certificates in the IBM Monitoring Cloud API.
   <br/> It can also be sourced from the `SYSDIG_MONITOR_INSECURE_TLS`
   environment variable. By default, this is false.<br/><br/>
-* `sysdig_monitor_team_id` - (Optional) Use this argument to specify team in which you will be logged in. 
+* `sysdig_monitor_team_id` - (Optional) Use this argument to specify team in which you will be logged in.
   If not specified, default team will be used. This argument has precedence over `sysdig_monitor_team_name` if both are specified.<br/>
   It can also be configured from the `SYSDIG_MONITOR_TEAM_ID` environment variable.<br/><br/>
-* `sysdig_monitor_team_name` - (Optional) This argument is the alternative way of specifying team in which you will be logged in. 
+* `sysdig_monitor_team_name` - (Optional) This argument is the alternative way of specifying team in which you will be logged in.
   It has exactly the same meaning as `sysdig_monitor_team_id`, but instead of specifying team ID you are specifying a team name.</br>
   It can also be configured from the `SYSDIG_MONITOR_TEAM_NAME` environment variable.<br/><br/>
 
@@ -234,8 +234,12 @@ When IBM Workload Protection resources are to be created, this authentication mu
 > - `sysdig_monitor_alert_promql`
 > - `sysdig_monitor_alert_anomaly`
 > - `sysdig_monitor_alert_group_outlier`
+> - `sysdig_monitor_alert_v2_downtime`
+> - `sysdig_monitor_alert_v2_event`
+> - `sysdig_monitor_alert_v2_metric`
+> - `sysdig_monitor_alert_v2_prometheus`
 > - `sysdig_secure_posture_zone`
-> 
+>
 > And data sources:
 > - `sysdig_monitor_notification_channel_pagerduty`
 > - `sysdig_monitor_notification_channel_email`
