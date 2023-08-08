@@ -32,6 +32,10 @@ func resourceSysdigMonitorAlertV2Prometheus() *schema.Resource {
 		},
 
 		Schema: createAlertV2Schema(map[string]*schema.Schema{
+			"trigger_after_minutes": {
+				Type:     schema.TypeInt,
+				Required: true,
+			},
 			"query": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -84,10 +88,12 @@ func resourceSysdigMonitorAlertV2PrometheusRead(ctx context.Context, d *schema.R
 	}
 
 	a, err := client.GetAlertV2Prometheus(ctx, id)
-
 	if err != nil {
-		d.SetId("")
-		return nil
+		if err == v2.AlertV2NotFound {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
 	}
 
 	err = updateAlertV2PrometheusState(d, &a)
@@ -153,6 +159,7 @@ func buildAlertV2PrometheusStruct(d *schema.ResourceData) *v2.AlertV2Prometheus 
 
 	alert := &v2.AlertV2Prometheus{
 		AlertV2Common: *alertV2Common,
+		DurationSec:   minutesToSeconds(d.Get("trigger_after_minutes").(int)),
 		Config:        config,
 	}
 	return alert
@@ -164,7 +171,10 @@ func updateAlertV2PrometheusState(d *schema.ResourceData, alert *v2.AlertV2Prome
 		return
 	}
 
+	_ = d.Set("trigger_after_minutes", secondsToMinutes(alert.DurationSec))
+
 	_ = d.Set("query", alert.Config.Query)
+
 	if alert.Config.KeepFiringForSec != nil {
 		_ = d.Set("keep_firing_for_minutes", *alert.Config.KeepFiringForSec/60)
 	} else {

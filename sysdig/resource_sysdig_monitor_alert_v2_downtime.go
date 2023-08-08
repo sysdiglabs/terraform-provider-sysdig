@@ -33,6 +33,10 @@ func resourceSysdigMonitorAlertV2Downtime() *schema.Resource {
 		},
 
 		Schema: createScopedSegmentedAlertV2Schema(createAlertV2Schema(map[string]*schema.Schema{
+			"trigger_after_minutes": {
+				Type:     schema.TypeInt,
+				Required: true,
+			},
 			"threshold": {
 				Type:     schema.TypeFloat,
 				Optional: true,
@@ -86,10 +90,12 @@ func resourceSysdigMonitorAlertV2DowntimeRead(ctx context.Context, d *schema.Res
 	}
 
 	a, err := client.GetAlertV2Downtime(ctx, id)
-
 	if err != nil {
-		d.SetId("")
-		return nil
+		if err == v2.AlertV2NotFound {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
 	}
 
 	err = updateAlertV2DowntimeState(d, &a)
@@ -169,6 +175,7 @@ func buildAlertV2DowntimeStruct(d *schema.ResourceData) *v2.AlertV2Downtime {
 
 	alert := &v2.AlertV2Downtime{
 		AlertV2Common: *alertV2Common,
+		DurationSec:   minutesToSeconds(d.Get("trigger_after_minutes").(int)),
 		Config:        config,
 	}
 	return alert
@@ -184,6 +191,8 @@ func updateAlertV2DowntimeState(d *schema.ResourceData, alert *v2.AlertV2Downtim
 	if err != nil {
 		return err
 	}
+
+	_ = d.Set("trigger_after_minutes", secondsToMinutes(alert.DurationSec))
 
 	_ = d.Set("threshold", (1-alert.Config.Threshold)*100)
 

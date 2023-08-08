@@ -34,6 +34,10 @@ func resourceSysdigMonitorAlertV2Metric() *schema.Resource {
 		},
 
 		Schema: createScopedSegmentedAlertV2Schema(createAlertV2Schema(map[string]*schema.Schema{
+			"trigger_after_minutes": {
+				Type:     schema.TypeInt,
+				Required: true,
+			},
 			"operator": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -114,10 +118,12 @@ func resourceSysdigMonitorAlertV2MetricRead(ctx context.Context, d *schema.Resou
 	}
 
 	a, err := client.GetAlertV2Metric(ctx, id)
-
 	if err != nil {
-		d.SetId("")
-		return nil
+		if err == v2.AlertV2NotFound {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
 	}
 
 	err = updateAlertV2MetricState(d, &a)
@@ -211,6 +217,7 @@ func buildAlertV2MetricStruct(d *schema.ResourceData) (*v2.AlertV2Metric, error)
 
 	alert := &v2.AlertV2Metric{
 		AlertV2Common: *alertV2Common,
+		DurationSec:   minutesToSeconds(d.Get("trigger_after_minutes").(int)),
 		Config:        config,
 	}
 	return alert, nil
@@ -226,6 +233,8 @@ func updateAlertV2MetricState(d *schema.ResourceData, alert *v2.AlertV2Metric) e
 	if err != nil {
 		return err
 	}
+
+	_ = d.Set("trigger_after_minutes", secondsToMinutes(alert.DurationSec))
 
 	_ = d.Set("operator", alert.Config.ConditionOperator)
 

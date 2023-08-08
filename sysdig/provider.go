@@ -145,6 +145,7 @@ func Provider() *schema.Provider {
 			"sysdig_monitor_alert_v2_metric":                               resourceSysdigMonitorAlertV2Metric(),
 			"sysdig_monitor_alert_v2_downtime":                             resourceSysdigMonitorAlertV2Downtime(),
 			"sysdig_monitor_alert_v2_prometheus":                           resourceSysdigMonitorAlertV2Prometheus(),
+			"sysdig_monitor_alert_v2_change":                               resourceSysdigMonitorAlertV2Change(),
 			"sysdig_monitor_dashboard":                                     resourceSysdigMonitorDashboard(),
 			"sysdig_monitor_notification_channel_email":                    resourceSysdigMonitorNotificationChannelEmail(),
 			"sysdig_monitor_notification_channel_opsgenie":                 resourceSysdigMonitorNotificationChannelOpsGenie(),

@@ -495,7 +495,6 @@ type AlertV2Common struct {
 	Version                       int                           `json:"version,omitempty"`
 	Name                          string                        `json:"name"`
 	Description                   string                        `json:"description,omitempty"`
-	DurationSec                   int                           `json:"durationSec"`
 	Type                          string                        `json:"type"`
 	Group                         string                        `json:"group,omitempty"`
 	Severity                      string                        `json:"severity"`
@@ -514,7 +513,8 @@ type AlertV2ConfigPrometheus struct {
 
 type AlertV2Prometheus struct {
 	AlertV2Common
-	Config AlertV2ConfigPrometheus `json:"config"`
+	DurationSec int                     `json:"durationSec"`
+	Config      AlertV2ConfigPrometheus `json:"config"`
 }
 
 type alertV2PrometheusWrapper struct {
@@ -556,7 +556,8 @@ type AlertV2ConfigEvent struct {
 
 type AlertV2Event struct {
 	AlertV2Common
-	Config AlertV2ConfigEvent `json:"config"`
+	DurationSec int                `json:"durationSec"`
+	Config      AlertV2ConfigEvent `json:"config"`
 }
 
 type alertV2EventWrapper struct {
@@ -596,7 +597,8 @@ type AlertV2ConfigMetric struct {
 
 type AlertV2Metric struct {
 	AlertV2Common
-	Config AlertV2ConfigMetric `json:"config"`
+	DurationSec int                 `json:"durationSec"`
+	Config      AlertV2ConfigMetric `json:"config"`
 }
 
 type alertV2MetricWrapper struct {
@@ -617,11 +619,38 @@ type AlertV2ConfigDowntime struct {
 
 type AlertV2Downtime struct {
 	AlertV2Common
-	Config AlertV2ConfigDowntime `json:"config"`
+	DurationSec int                   `json:"durationSec"`
+	Config      AlertV2ConfigDowntime `json:"config"`
 }
 
 type alertV2DowntimeWrapper struct {
 	Alert AlertV2Downtime `json:"alert"`
+}
+
+type AlertV2ConfigChange struct {
+	ScopedSegmentedConfig
+
+	ConditionOperator        string   `json:"conditionOperator"`
+	Threshold                float64  `json:"threshold"`
+	WarningConditionOperator string   `json:"warningConditionOperator,omitempty"`
+	WarningThreshold         *float64 `json:"warningThreshold,omitempty"`
+
+	GroupAggregation string                  `json:"groupAggregation"`
+	TimeAggregation  string                  `json:"timeAggregation"`
+	Metric           AlertMetricDescriptorV2 `json:"metric"`
+
+	ShorterRangeSec int `json:"shorterRangeSec"`
+	LongerRangeSec  int `json:"longerRangeSec"`
+}
+
+type AlertV2Change struct {
+	AlertV2Common
+	DurationSec int                 `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
+	Config      AlertV2ConfigChange `json:"config"`
+}
+
+type alertV2ChangeWrapper struct {
+	Alert AlertV2Change `json:"alert"`
 }
 
 type CloudAccountCredentialsMonitor struct {

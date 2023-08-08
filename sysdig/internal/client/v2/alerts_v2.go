@@ -2,12 +2,15 @@ package v2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"sync"
 )
+
+var AlertV2NotFound = errors.New("alert not found")
 
 type AlertV2Type string
 type AlertV2Severity string
@@ -22,6 +25,7 @@ const (
 	AlertV2TypePrometheus AlertV2Type = "PROMETHEUS"
 	AlertV2TypeManual     AlertV2Type = "MANUAL"
 	AlertV2TypeEvent      AlertV2Type = "EVENT"
+	AlertV2TypeChange     AlertV2Type = "PERCENTAGE_OF_CHANGE"
 
 	AlertV2SeverityHigh   AlertV2Severity = "high"
 	AlertV2SeverityMedium AlertV2Severity = "medium"
@@ -43,6 +47,7 @@ type AlertV2Interface interface {
 	AlertV2EventInterface
 	AlertV2MetricInterface
 	AlertV2DowntimeInterface
+	AlertV2ChangeInterface
 }
 
 type AlertV2PrometheusInterface interface {
@@ -67,6 +72,14 @@ type AlertV2MetricInterface interface {
 	UpdateAlertV2Metric(ctx context.Context, alert AlertV2Metric) (AlertV2Metric, error)
 	GetAlertV2Metric(ctx context.Context, alertID int) (AlertV2Metric, error)
 	DeleteAlertV2Metric(ctx context.Context, alertID int) error
+}
+
+type AlertV2ChangeInterface interface {
+	Base
+	CreateAlertV2Change(ctx context.Context, alert AlertV2Change) (AlertV2Change, error)
+	UpdateAlertV2Change(ctx context.Context, alert AlertV2Change) (AlertV2Change, error)
+	GetAlertV2Change(ctx context.Context, alertID int) (AlertV2Change, error)
+	DeleteAlertV2Change(ctx context.Context, alertID int) error
 }
 
 type AlertV2DowntimeInterface interface {
@@ -370,6 +383,82 @@ func (client *Client) DeleteAlertV2Downtime(ctx context.Context, alertID int) er
 	return client.deleteAlertV2(ctx, alertID)
 }
 
+func (client *Client) CreateAlertV2Change(ctx context.Context, alert AlertV2Change) (AlertV2Change, error) {
+	err := client.addNotificationChannelType(ctx, alert.NotificationChannelConfigList)
+	if err != nil {
+		return AlertV2Change{}, err
+	}
+
+	err = client.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig)
+	if err != nil {
+		return AlertV2Change{}, err
+	}
+
+	payload, err := Marshal(alertV2ChangeWrapper{Alert: alert})
+	if err != nil {
+		return AlertV2Change{}, err
+	}
+
+	body, err := client.createAlertV2(ctx, payload)
+	if err != nil {
+		return AlertV2Change{}, err
+	}
+
+	wrapper, err := Unmarshal[alertV2ChangeWrapper](body)
+	if err != nil {
+		return AlertV2Change{}, err
+	}
+
+	return wrapper.Alert, nil
+}
+
+func (client *Client) UpdateAlertV2Change(ctx context.Context, alert AlertV2Change) (AlertV2Change, error) {
+	err := client.addNotificationChannelType(ctx, alert.NotificationChannelConfigList)
+	if err != nil {
+		return AlertV2Change{}, err
+	}
+
+	err = client.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig)
+	if err != nil {
+		return AlertV2Change{}, err
+	}
+
+	payload, err := Marshal(alertV2ChangeWrapper{Alert: alert})
+	if err != nil {
+		return AlertV2Change{}, err
+	}
+
+	body, err := client.updateAlertV2(ctx, alert.ID, payload)
+	if err != nil {
+		return AlertV2Change{}, err
+	}
+
+	wrapper, err := Unmarshal[alertV2ChangeWrapper](body)
+	if err != nil {
+		return AlertV2Change{}, err
+	}
+
+	return wrapper.Alert, nil
+}
+
+func (client *Client) GetAlertV2Change(ctx context.Context, alertID int) (AlertV2Change, error) {
+	body, err := client.getAlertV2(ctx, alertID)
+	if err != nil {
+		return AlertV2Change{}, err
+	}
+
+	wrapper, err := Unmarshal[alertV2ChangeWrapper](body)
+	if err != nil {
+		return AlertV2Change{}, err
+	}
+
+	return wrapper.Alert, nil
+}
+
+func (client *Client) DeleteAlertV2Change(ctx context.Context, alertID int) error {
+	return client.deleteAlertV2(ctx, alertID)
+}
+
 func (client *Client) createAlertV2(ctx context.Context, alertJson io.Reader) (io.ReadCloser, error) {
 	response, err := client.requester.Request(ctx, http.MethodPost, client.alertsV2URL(), alertJson)
 	if err != nil {
@@ -419,6 +508,9 @@ func (client *Client) getAlertV2(ctx context.Context, alertID int) (io.ReadClose
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode == http.StatusNotFound {
+		return nil, AlertV2NotFound
+	}
 	if response.StatusCode != http.StatusOK {
 		return nil, client.ErrorFromResponse(response)
 	}

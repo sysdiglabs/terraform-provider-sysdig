@@ -1,31 +1,29 @@
 ---
 subcategory: "Sysdig Monitor"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_monitor_alert_v2_event"
+page_title: "Sysdig: sysdig_monitor_alert_v2_change"
 description: |-
-  Creates a Sysdig Monitor Event Alert with AlertV2 API.
+  Creates a Sysdig Monitor Change Alert with AlertV2 API.
 ---
 
-# Resource: sysdig_monitor_alert_v2_event
+# Resource: sysdig_monitor_alert_v2_change
 
-Creates a Sysdig Monitor Event Alert. Monitor occurrences of specific events, and alert if the total
-number of occurrences violates a threshold. Useful for alerting on container, orchestration, and
-service events like restarts and deployments.
+Creates a Sysdig Monitor Change Alert. Change Alerts trigger when a metric value substantially deviates compared to historical values.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
 ```terraform
-resource "sysdig_monitor_alert_v2_event" "sample" {
+resource "sysdig_monitor_alert_v2_change" "sample" {
 
-  name = "[Kubernetes] Failed to pull image"
-  description = "A Kubernetes pod failed to pull an image from the registry"
+  name = "high cpu used compared to previous periods"
   severity = "high"
-  filter = "Failed to pull image"
-  sources = ["kubernetes"]
+  metric = "sysdig_container_cpu_used_percent"
+  group_aggregation = "avg"
+  time_aggregation = "avg"
   operator = ">"
-  threshold = 0
+  threshold = 75
   group_by = ["kube_pod_name"]
 
   scope {
@@ -45,7 +43,8 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
     renotify_every_minutes = 60
   }
 
-  trigger_after_minutes = 1
+  shorter_time_range_seconds = 300
+  longer_time_range_seconds = 3600
 
 }
 
@@ -59,7 +58,6 @@ These arguments are common to all alerts in Sysdig Monitor.
 
 * `name` - (Required) The name of the Monitor alert. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
-* `trigger_after_minutes` - (Required) Threshold of time for the status to stabilize until the alert is fired.
 * `group` - (Optional) Lowercase string to group alerts in the UI.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.
@@ -94,25 +92,18 @@ By defining this field, the user can add link to notifications.
 * `href` - (Optional) When using `runbook` type, url of the external resource.
 * `id` - (Optional) When using `dashboard` type, dashboard id.
 
-### `capture`
-
-Enables the creation of a capture file of the syscalls during the event.
-
-* `filename` - (Required) Defines the name of the capture file. Must have `.scap` suffix.
-* `duration_seconds` - (Optional) Time frame of the capture. Default: `15`.
-* `storage` - (Optional) Custom bucket where to save the capture.
-* `filter` - (Optional) Additional filter to apply to the capture. For example: `proc.name contains nginx`.
-* `enabled` - (Optional) Wether to enable captures. Default: `true`.
-
-### Event alert arguments
+### Change alert arguments
 
 * `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure. Can be repeated.
 * `group_by` - (Optional) List of segments to trigger a separate alert on. Example: `["kube_cluster_name", "kube_pod_name"]`.
-* `operator` - (Required) Condition operator of the event count. It can be `>`, `>=`, `<`, `<=`, `=` or `!=`.
-* `threshold` - (Required) Number of events to match with `op`.
-* `warning_threshold` - (Optional) Number of events to match with `op` to trigger a warning alert. Must be a number lower than `threshold`.
-* `filter` - (Required) String that matches part of name, tag or the description of Sysdig Events.
-* `sources` - (Required) List of sources of the event. It can be `kubernetes`, `containerd`, `docker` or arbitrary custom sources.
+* `metric` - (Required) Metric the alert will act upon.
+* `time_aggregation` - (Required) time aggregation function for data. It can be `avg`, `timeAvg`, `sum`, `min`, `max`.
+* `group_aggregation` - (Required) group aggregation function for data. It can be `avg`, `sum`, `min`, `max`.
+* `operator` - (Required) Operator for the condition to alert on. It can be `>`, `>=`, `<`, `<=`, `=` or `!=`.
+* `threshold` - (Required) Threshold used together with `op` to trigger the alert if crossed.
+* `warning_threshold` - (Optional) Warning threshold used together with `op` to trigger the alert if crossed. Must be a number lower than `threshold`.
+* `shorter_time_range_seconds` - (Required) Time range for which data is compared to a longer, previous period. Can be one of `300` (5 minutes), `600` (10 minutes), `3600` (1 hour), `14400` (4 hours), `86400` (1 day).
+* `longer_time_range_seconds` - (Required) Time range for which data will be used as baseline for comparisons with data in the time range defined in `shorter_time_range_seconds`. Possible values depend on `shorter_time_range_seconds`: for a shorter time range of 5 minutes, longer time range can be 1, 2 or 3 hours, for a shorter time range or 10 minutes, it can be from 1 to 8 hours, for a shorter time range or one hour, it can be from 4 to 24 hours, for a shorter time range of 4 hours, it can be from 1 to 7 days, for a shorter time range of one day, it can only be 7 days.
 
 ### `scope`
 
@@ -135,8 +126,8 @@ In addition to all arguments above, the following attributes are exported, which
 
 ## Import
 
-Event alerts can be imported using the alert ID, e.g.
+Change alerts can be imported using the alert ID, e.g.
 
 ```
-$ terraform import sysdig_monitor_alert_v2_event.example 12345
+$ terraform import sysdig_monitor_alert_v2_change.example 12345
 ```
