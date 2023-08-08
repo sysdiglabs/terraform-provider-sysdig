@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -278,7 +279,21 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 }
 
 func getMonitorDashboardClient(c SysdigClients) (v2.DashboardInterface, error) {
-	return c.sysdigMonitorClientV2()
+	var client v2.DashboardInterface
+	var err error
+	switch c.GetClientType() {
+	case IBMMonitor:
+		client, err = c.ibmMonitorClient()
+		if err != nil {
+			return nil, err
+		}
+	default:
+		client, err = c.sysdigMonitorClientV2()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }
 
 func resourceSysdigDashboardCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {

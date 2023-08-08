@@ -1,10 +1,11 @@
 package sysdig
 
 import (
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"regexp"
 	"strings"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -495,4 +496,22 @@ func updateScopedSegmentedConfigState(d *schema.ResourceData, config *v2.ScopedS
 	}
 
 	return nil
+}
+
+func getAlertV2Client(c SysdigClients) (v2.AlertV2Interface, error) {
+	var client v2.AlertV2Interface
+	var err error
+	switch c.GetClientType() {
+	case IBMMonitor:
+		client, err = c.ibmMonitorClient()
+		if err != nil {
+			return nil, err
+		}
+	default:
+		client, err = c.sysdigMonitorClientV2()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }
