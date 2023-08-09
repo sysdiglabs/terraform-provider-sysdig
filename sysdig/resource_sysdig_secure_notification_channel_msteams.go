@@ -9,7 +9,6 @@ import (
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -83,9 +82,11 @@ func resourceSysdigSecureNotificationChannelMSTeamsRead(ctx context.Context, d *
 	}
 
 	nc, err := client.GetNotificationChannelById(ctx, id)
-
 	if err != nil {
-		d.SetId("")
+		if err == v2.NotificationChannelNotFound {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -142,6 +143,7 @@ func resourceSysdigSecureNotificationChannelMSTeamsDelete(ctx context.Context, d
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }
 

@@ -2,12 +2,12 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -65,9 +65,8 @@ func resourceSysdigSecureNotificationChannelVictorOpsCreate(ctx context.Context,
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	_ = d.Set("version", notificationChannel.Version)
 
-	return nil
+	return resourceSysdigSecureNotificationChannelVictorOpsRead(ctx, d, meta)
 }
 
 func resourceSysdigSecureNotificationChannelVictorOpsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -78,9 +77,12 @@ func resourceSysdigSecureNotificationChannelVictorOpsRead(ctx context.Context, d
 
 	id, _ := strconv.Atoi(d.Id())
 	nc, err := client.GetNotificationChannelById(ctx, id)
-
 	if err != nil {
-		d.SetId("")
+		if err == v2.NotificationChannelNotFound {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
 	}
 
 	err = secureNotificationChannelVictorOpsToResourceData(&nc, d)

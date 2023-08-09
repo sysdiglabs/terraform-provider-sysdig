@@ -2,12 +2,12 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/spf13/cast"
 )
@@ -63,9 +63,8 @@ func resourceSysdigSecureNotificationChannelSNSCreate(ctx context.Context, d *sc
 	}
 
 	d.SetId(strconv.Itoa(notificationChannel.ID))
-	_ = d.Set("version", notificationChannel.Version)
 
-	return nil
+	return resourceSysdigSecureNotificationChannelSNSRead(ctx, d, meta)
 }
 
 func resourceSysdigSecureNotificationChannelSNSRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -76,9 +75,12 @@ func resourceSysdigSecureNotificationChannelSNSRead(ctx context.Context, d *sche
 
 	id, _ := strconv.Atoi(d.Id())
 	nc, err := client.GetNotificationChannelById(ctx, id)
-
 	if err != nil {
-		d.SetId("")
+		if err == v2.NotificationChannelNotFound {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
 	}
 
 	err = secureNotificationChannelSNSToResourceData(&nc, d)
@@ -128,6 +130,7 @@ func resourceSysdigSecureNotificationChannelSNSDelete(ctx context.Context, d *sc
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }
 

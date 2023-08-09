@@ -56,7 +56,7 @@ func monitorNotificationChannelVictorOpsShareWithCurrentTeam(name string) string
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_victorops" "sample-victorops" {
 	name = "Example Channel %s - VictorOps"
-    share_with_current_team = true
+	share_with_current_team = true
 	enabled = true
 	api_key = "1234342-4234243-4234-2"
 	routing_key = "My team"

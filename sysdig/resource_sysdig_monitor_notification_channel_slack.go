@@ -2,9 +2,10 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -43,8 +44,7 @@ func resourceSysdigMonitorNotificationChannelSlack() *schema.Resource {
 }
 
 func resourceSysdigMonitorNotificationChannelSlackCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	clients := meta.(SysdigClients)
-	client, err := getMonitorNotificationChannelClient(clients)
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -75,11 +75,17 @@ func resourceSysdigMonitorNotificationChannelSlackRead(ctx context.Context, d *s
 		return diag.FromErr(err)
 	}
 
-	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(ctx, id)
-
+	id, err := strconv.Atoi(d.Id())
 	if err != nil {
-		d.SetId("")
+		return diag.FromErr(err)
+	}
+
+	nc, err := client.GetNotificationChannelById(ctx, id)
+	if err != nil {
+		if err == v2.NotificationChannelNotFound {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -92,8 +98,7 @@ func resourceSysdigMonitorNotificationChannelSlackRead(ctx context.Context, d *s
 }
 
 func resourceSysdigMonitorNotificationChannelSlackUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	clients := meta.(SysdigClients)
-	client, err := getMonitorNotificationChannelClient(clients)
+	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -109,12 +114,17 @@ func resourceSysdigMonitorNotificationChannelSlackUpdate(ctx context.Context, d 
 	}
 
 	nc.Version = d.Get("version").(int)
-	nc.ID, _ = strconv.Atoi(d.Id())
+	nc.ID, err = strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	_, err = client.UpdateNotificationChannel(ctx, nc)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	resourceSysdigMonitorNotificationChannelSlackRead(ctx, d, meta)
 
 	return nil
 }
@@ -125,7 +135,10 @@ func resourceSysdigMonitorNotificationChannelSlackDelete(ctx context.Context, d 
 		return diag.FromErr(err)
 	}
 
-	id, _ := strconv.Atoi(d.Id())
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	err = client.DeleteNotificationChannel(ctx, id)
 	if err != nil {

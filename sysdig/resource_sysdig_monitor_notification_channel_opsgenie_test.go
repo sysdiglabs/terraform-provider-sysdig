@@ -81,7 +81,7 @@ func monitorNotificationChannelOpsGenieSharedWithCurrentTeam(name string) string
 resource "sysdig_monitor_notification_channel_opsgenie" "sample-opsgenie-3" {
 	name = "Example Channel %s - OpsGenie - 3"
 	enabled = true
-    share_with_current_team = true
+	share_with_current_team = true
 	api_key = "2349324-342354353-5324-23"
 	notify_when_ok = false
 	notify_when_resolved = false

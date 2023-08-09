@@ -105,18 +105,25 @@ type NotificationChannelTemplateConfiguration struct {
 }
 
 type NotificationChannelOptions struct {
-	EmailRecipients       []string                                   `json:"emailRecipients,omitempty"`   // Type: email
-	SnsTopicARNs          []string                                   `json:"snsTopicARNs,omitempty"`      // Type: SNS
-	APIKey                string                                     `json:"apiKey,omitempty"`            // Type: VictorOps
-	RoutingKey            string                                     `json:"routingKey,omitempty"`        // Type: VictorOps
-	Url                   string                                     `json:"url,omitempty"`               // Type: OpsGenie, Webhook and Slack
-	Channel               string                                     `json:"channel,omitempty"`           // Type: Slack
-	Account               string                                     `json:"account,omitempty"`           // Type: PagerDuty
-	ServiceKey            string                                     `json:"serviceKey,omitempty"`        // Type: PagerDuty
-	ServiceName           string                                     `json:"serviceName,omitempty"`       // Type: PagerDuty
-	AdditionalHeaders     map[string]interface{}                     `json:"additionalHeaders,omitempty"` // Type: Webhook
-	Region                string                                     `json:"region,omitempty"`            // Type: OpsGenie
-	TemplateConfiguration []NotificationChannelTemplateConfiguration `json:"templateConfiguration,omitempty"`
+	EmailRecipients          []string                                   `json:"emailRecipients,omitempty"`          // Type: email
+	SnsTopicARNs             []string                                   `json:"snsTopicARNs,omitempty"`             // Type: SNS
+	APIKey                   string                                     `json:"apiKey,omitempty"`                   // Type: VictorOps, ibm event function
+	RoutingKey               string                                     `json:"routingKey,omitempty"`               // Type: VictorOps
+	Url                      string                                     `json:"url,omitempty"`                      // Type: OpsGenie, Webhook, Slack, google chat, prometheus alert manager, custom webhook
+	Channel                  string                                     `json:"channel,omitempty"`                  // Type: Slack
+	Account                  string                                     `json:"account,omitempty"`                  // Type: PagerDuty
+	ServiceKey               string                                     `json:"serviceKey,omitempty"`               // Type: PagerDuty
+	ServiceName              string                                     `json:"serviceName,omitempty"`              // Type: PagerDuty
+	AdditionalHeaders        map[string]interface{}                     `json:"additionalHeaders,omitempty"`        // Type: Webhook, prometheus alert manager, custom webhook, ibm function
+	Region                   string                                     `json:"region,omitempty"`                   // Type: OpsGenie
+	AllowInsecureConnections *bool                                      `json:"allowInsecureConnections,omitempty"` // Type: prometheus alert manager, custom webhook
+	TeamId                   int                                        `json:"teamId,omitempty"`                   // Type: team email
+	HttpMethod               string                                     `json:"httpMethod,omitempty"`               // Type: custom webhook
+	MonitorTemplate          string                                     `json:"monitorTemplate,omitempty"`          // Type: custom webhook
+	InstanceId               string                                     `json:"instanceId,omitempty"`               // Type: ibm event notification
+	IbmFunctionType          string                                     `json:"ibmFunctionType,omitempty"`          // Type: ibm event function
+	CustomData               map[string]interface{}                     `json:"customData,omitempty"`               // Type: ibm function
+	TemplateConfiguration    []NotificationChannelTemplateConfiguration `json:"templateConfiguration,omitempty"`
 
 	NotifyOnOk           bool `json:"notifyOnOk"`
 	NotifyOnResolve      bool `json:"notifyOnResolve"`

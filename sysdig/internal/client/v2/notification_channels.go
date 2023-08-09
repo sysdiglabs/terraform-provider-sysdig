@@ -2,6 +2,7 @@ package v2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -10,6 +11,8 @@ const (
 	GetNotificationChannels = "%s/api/notificationChannels"
 	GetNotificationChannel  = "%s/api/notificationChannels/%d"
 )
+
+var NotificationChannelNotFound = errors.New("notification channel not found")
 
 type NotificationChannelInterface interface {
 	Base
@@ -27,6 +30,9 @@ func (client *Client) GetNotificationChannelById(ctx context.Context, id int) (N
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode == http.StatusNotFound {
+		return NotificationChannel{}, NotificationChannelNotFound
+	}
 	if response.StatusCode != http.StatusOK {
 		return NotificationChannel{}, client.ErrorFromResponse(response)
 	}

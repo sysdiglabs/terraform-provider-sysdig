@@ -33,10 +33,10 @@ resource "sysdig_monitor_notification_channel_webhook" "sample-webhook" {
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
-* `notify_when_ok` - (Optional) Send a new notification when the alert condition is 
+* `notify_when_ok` - (Optional) Send a new notification when the alert condition is
     no longer triggered. Default is false.
 
-* `notify_when_resolved` - (Optional) Send a new notification when the alert is manually 
+* `notify_when_resolved` - (Optional) Send a new notification when the alert is manually
     acknowledged by a user. Default is false.
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
