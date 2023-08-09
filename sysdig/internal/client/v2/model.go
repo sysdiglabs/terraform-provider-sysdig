@@ -109,7 +109,7 @@ type NotificationChannelOptions struct {
 	SnsTopicARNs             []string                                   `json:"snsTopicARNs,omitempty"`             // Type: SNS
 	APIKey                   string                                     `json:"apiKey,omitempty"`                   // Type: VictorOps, ibm event function
 	RoutingKey               string                                     `json:"routingKey,omitempty"`               // Type: VictorOps
-	Url                      string                                     `json:"url,omitempty"`                      // Type: OpsGenie, Webhook, Slack, google chat, prometheus alert manager, custom webhook
+	Url                      string                                     `json:"url,omitempty"`                      // Type: OpsGenie, Webhook, Slack, google chat, prometheus alert manager, custom webhook, ms teams
 	Channel                  string                                     `json:"channel,omitempty"`                  // Type: Slack
 	Account                  string                                     `json:"account,omitempty"`                  // Type: PagerDuty
 	ServiceKey               string                                     `json:"serviceKey,omitempty"`               // Type: PagerDuty
@@ -123,7 +123,7 @@ type NotificationChannelOptions struct {
 	InstanceId               string                                     `json:"instanceId,omitempty"`               // Type: ibm event notification
 	IbmFunctionType          string                                     `json:"ibmFunctionType,omitempty"`          // Type: ibm event function
 	CustomData               map[string]interface{}                     `json:"customData,omitempty"`               // Type: ibm function, Webhook
-	TemplateConfiguration    []NotificationChannelTemplateConfiguration `json:"templateConfiguration,omitempty"`
+	TemplateConfiguration    []NotificationChannelTemplateConfiguration `json:"templateConfiguration,omitempty"`    // Type: slack, ms teams
 
 	NotifyOnOk           bool `json:"notifyOnOk"`
 	NotifyOnResolve      bool `json:"notifyOnResolve"`

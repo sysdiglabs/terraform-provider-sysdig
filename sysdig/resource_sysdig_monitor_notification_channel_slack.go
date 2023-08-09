@@ -39,6 +39,41 @@ func resourceSysdigMonitorNotificationChannelSlack() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"show_section_runbook_links": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"show_section_event_details": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"show_section_user_defined_content": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"show_section_notification_chart": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"show_section_dashboard_links": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"show_section_alert_details": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"show_section_capturing_information": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 		}),
 	}
 }
@@ -157,6 +192,46 @@ func monitorNotificationChannelSlackFromResourceData(d *schema.ResourceData, tea
 	nc.Type = NOTIFICATION_CHANNEL_TYPE_SLACK
 	nc.Options.Url = d.Get("url").(string)
 	nc.Options.Channel = d.Get("channel").(string)
+	nc.Options.TemplateConfiguration = []v2.NotificationChannelTemplateConfiguration{
+		{
+			TemplateKey: "SLACK_MONITOR_ALERT_NOTIFICATION_TEMPLATE_METADATA_v1",
+			TemplateConfigurationSections: []v2.NotificationChannelTemplateConfigurationSection{
+				{
+					SectionName: "MONITOR_ALERT_NOTIFICATION_HEADER",
+					ShouldShow:  true,
+				},
+				{
+					SectionName: "MONITOR_ALERT_NOTIFICATION_RUNBOOK_LINKS",
+					ShouldShow:  d.Get("show_section_runbook_links").(bool),
+				},
+				{
+					SectionName: "MONITOR_ALERT_NOTIFICATION_EVENT_DETAILS",
+					ShouldShow:  d.Get("show_section_event_details").(bool),
+				},
+				{
+					SectionName: "MONITOR_ALERT_NOTIFICATION_USER_DEFINED_CONTENT",
+					ShouldShow:  d.Get("show_section_user_defined_content").(bool),
+				},
+				{
+					SectionName: "MONITOR_ALERT_NOTIFICATION_CHART",
+					ShouldShow:  d.Get("show_section_notification_chart").(bool),
+				},
+				{
+					SectionName: "MONITOR_ALERT_NOTIFICATION_DASHBOARD_LINKS",
+					ShouldShow:  d.Get("show_section_dashboard_links").(bool),
+				},
+				{
+					SectionName: "MONITOR_ALERT_NOTIFICATION_ALERT_DETAILS",
+					ShouldShow:  d.Get("show_section_alert_details").(bool),
+				},
+				{
+					SectionName: "MONITOR_ALERT_NOTIFICATION_CAPTURING_INFORMATION",
+					ShouldShow:  d.Get("show_section_capturing_information").(bool),
+				},
+			},
+		},
+	}
+
 	return
 }
 
@@ -168,6 +243,43 @@ func monitorNotificationChannelSlackToResourceData(nc *v2.NotificationChannel, d
 
 	_ = d.Set("url", nc.Options.Url)
 	_ = d.Set("channel", nc.Options.Channel)
+
+	runbookLinks := true
+	eventDetails := true
+	userDefinedContent := true
+	notificationChart := true
+	dashboardLinks := true
+	alertDetails := true
+	capturingInformation := true
+
+	if len(nc.Options.TemplateConfiguration) == 1 {
+		for _, c := range nc.Options.TemplateConfiguration[0].TemplateConfigurationSections {
+			switch c.SectionName {
+			case "MONITOR_ALERT_NOTIFICATION_RUNBOOK_LINKS":
+				runbookLinks = c.ShouldShow
+			case "MONITOR_ALERT_NOTIFICATION_EVENT_DETAILS":
+				eventDetails = c.ShouldShow
+			case "MONITOR_ALERT_NOTIFICATION_USER_DEFINED_CONTENT":
+				userDefinedContent = c.ShouldShow
+			case "MONITOR_ALERT_NOTIFICATION_CHART":
+				notificationChart = c.ShouldShow
+			case "MONITOR_ALERT_NOTIFICATION_DASHBOARD_LINKS":
+				dashboardLinks = c.ShouldShow
+			case "MONITOR_ALERT_NOTIFICATION_ALERT_DETAILS":
+				alertDetails = c.ShouldShow
+			case "MONITOR_ALERT_NOTIFICATION_CAPTURING_INFORMATION":
+				capturingInformation = c.ShouldShow
+			}
+		}
+	}
+
+	_ = d.Set("show_section_runbook_links", runbookLinks)
+	_ = d.Set("show_section_event_details", eventDetails)
+	_ = d.Set("show_section_user_defined_content", userDefinedContent)
+	_ = d.Set("show_section_notification_chart", notificationChart)
+	_ = d.Set("show_section_dashboard_links", dashboardLinks)
+	_ = d.Set("show_section_alert_details", alertDetails)
+	_ = d.Set("show_section_capturing_information", capturingInformation)
 
 	return
 }

@@ -35,6 +35,14 @@ func TestAccMonitorNotificationChannelSlack(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: monitorNotificationChannelSlackSharedWithShowSection(rText()),
+			},
+			{
+				ResourceName:      "sysdig_monitor_notification_channel_slack.sample-slack",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -61,5 +69,24 @@ resource "sysdig_monitor_notification_channel_slack" "sample-slack" {
 	channel = "#sysdig"
 	notify_when_ok = true
 	notify_when_resolved = true
+}`, name)
+}
+
+func monitorNotificationChannelSlackSharedWithShowSection(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_notification_channel_slack" "sample-slack" {
+	name = "Example Channel %s - Slack"
+	enabled = true
+	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	channel = "#sysdig"
+	notify_when_ok = true
+	notify_when_resolved = true
+	show_section_runbook_links = false
+	show_section_event_details = false
+	show_section_user_defined_content = false
+	show_section_notification_chart = false
+	show_section_dashboard_links = false
+	show_section_alert_details = false
+	show_section_capturing_information = false
 }`, name)
 }
