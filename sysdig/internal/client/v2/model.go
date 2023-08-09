@@ -691,7 +691,6 @@ type PostureZoneRequest struct {
 	Description string             `json:"description"`
 	PolicyIDs   []string           `json:"policyIds"`
 	Scopes      []PostureZoneScope `json:"scopes"`
-	Username    string             `json:"username"`
 }
 
 type PostureZoneResponse struct {
