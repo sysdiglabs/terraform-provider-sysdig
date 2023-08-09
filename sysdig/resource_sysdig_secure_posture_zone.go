@@ -2,11 +2,12 @@ package sysdig
 
 import (
 	"context"
+	"strconv"
+	"time"
+
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strconv"
-	"time"
 )
 
 func resourceSysdigSecurePostureZone() *schema.Resource {
@@ -105,16 +106,6 @@ func getPostureZoneClient(c SysdigClients) (v2.PostureZoneInterface, error) {
 }
 
 func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	commonClient, err := meta.(SysdigClients).commonClientV2()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	identityCtx, err := commonClient.GetIdentityContext(ctx)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	policiesData := d.Get(SchemaPolicyIDsKey).([]interface{})
 	policies := make([]string, len(policiesData))
 	for i, p := range policiesData {
@@ -134,18 +125,12 @@ func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
-	username := identityCtx.Username
-	if identityCtx.ServiceAccountID != 0 {
-		username = identityCtx.ServiceAccountName
-	}
-
 	req := &v2.PostureZoneRequest{
 		ID:          d.Id(),
 		Name:        d.Get(SchemaNameKey).(string),
 		Description: d.Get(SchemaDescriptionKey).(string),
 		PolicyIDs:   policies,
 		Scopes:      scopes,
-		Username:    username,
 	}
 
 	zoneClient, err := getPostureZoneClient(meta.(SysdigClients))
