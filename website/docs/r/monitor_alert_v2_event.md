@@ -110,7 +110,7 @@ Enables the creation of a capture file of the syscalls during the event.
 * `group_by` - (Optional) List of segments to trigger a separate alert on. Example: `["kube_cluster_name", "kube_pod_name"]`.
 * `operator` - (Required) Condition operator of the event count. It can be `>`, `>=`, `<`, `<=`, `=` or `!=`.
 * `threshold` - (Required) Number of events to match with `op`.
-* `warning_threshold` - (Optional) Number of events to match with `op` to trigger a warning alert. Must be a number lower than `threshold`.
+* `warning_threshold` - (Optional) Warning threshold used together with `op` to trigger the alert if crossed. Must be a number that triggers the alert before reaching the main `threshold`.
 * `filter` - (Required) String that matches part of name, tag or the description of Sysdig Events.
 * `sources` - (Required) List of sources of the event. It can be `kubernetes`, `containerd`, `docker` or arbitrary custom sources.
 

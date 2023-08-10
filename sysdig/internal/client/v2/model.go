@@ -643,6 +643,27 @@ type AlertV2ConfigChange struct {
 	LongerRangeSec  int `json:"longerRangeSec"`
 }
 
+type AlertV2ConfigFormBasedPrometheus struct {
+	ScopedSegmentedConfig
+
+	Query                    string   `json:"query"`
+	ConditionOperator        string   `json:"conditionOperator"`
+	Threshold                float64  `json:"threshold"`
+	WarningConditionOperator string   `json:"warningConditionOperator,omitempty"`
+	WarningThreshold         *float64 `json:"warningThreshold,omitempty"`
+	NoDataBehaviour          string   `json:"noDataBehaviour"`
+}
+
+type AlertV2FormBasedPrometheus struct {
+	AlertV2Common
+	DurationSec int                              `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
+	Config      AlertV2ConfigFormBasedPrometheus `json:"config"`
+}
+
+type alertV2FormBasedPrometheusWrapper struct {
+	Alert AlertV2FormBasedPrometheus `json:"alert"`
+}
+
 type AlertV2Change struct {
 	AlertV2Common
 	DurationSec int                 `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT

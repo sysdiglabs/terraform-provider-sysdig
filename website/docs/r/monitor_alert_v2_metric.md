@@ -111,7 +111,7 @@ Enables the creation of a capture file of the syscalls during the event.
 * `group_aggregation` - (Required) group aggregation function for data. It can be `avg`, `sum`, `min`, `max`.
 * `operator` - (Required) Operator for the condition to alert on. It can be `>`, `>=`, `<`, `<=`, `=` or `!=`.
 * `threshold` - (Required) Threshold used together with `op` to trigger the alert if crossed.
-* `warning_threshold` - (Optional) Warning threshold used together with `op` to trigger the alert if crossed. Must be a number lower than `threshold`.
+* `warning_threshold` - (Optional) Warning threshold used together with `op` to trigger the alert if crossed. Must be a number that triggers the alert before reaching the main `threshold`.
 * `no_data_behaviour` - (Optional) behaviour in case of missing data. Can be `DO_NOTHING`, i.e. ignore, or `TRIGGER`, i.e. notify on main threshold. Default: `DO_NOTHING`.
 
 ### `scope`

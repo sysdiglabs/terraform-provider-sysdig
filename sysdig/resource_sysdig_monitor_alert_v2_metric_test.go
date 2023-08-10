@@ -317,7 +317,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	trigger_after_minutes = 15
 	link {
 		type = "runbook"
-		href = "http://ciao2.com"
+		href = "http://example.com"
 	}
 	link {
 		type = "dashboard"

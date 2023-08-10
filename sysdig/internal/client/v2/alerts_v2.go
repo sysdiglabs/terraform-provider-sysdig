@@ -22,10 +22,11 @@ const (
 	labelsV3Path            = "%s/api/v3/labels/?limit=6000"
 	labelsV3DescriptorsPath = "%s/api/v3/labels/descriptors/%s"
 
-	AlertV2TypePrometheus AlertV2Type = "PROMETHEUS"
-	AlertV2TypeManual     AlertV2Type = "MANUAL"
-	AlertV2TypeEvent      AlertV2Type = "EVENT"
-	AlertV2TypeChange     AlertV2Type = "PERCENTAGE_OF_CHANGE"
+	AlertV2TypePrometheus          AlertV2Type = "PROMETHEUS"
+	AlertV2TypeManual              AlertV2Type = "MANUAL"
+	AlertV2TypeEvent               AlertV2Type = "EVENT"
+	AlertV2TypeChange              AlertV2Type = "PERCENTAGE_OF_CHANGE"
+	AlertV2TypeFormBasedPrometheus AlertV2Type = "FORM_BASED_PROMETHEUS"
 
 	AlertV2SeverityHigh   AlertV2Severity = "high"
 	AlertV2SeverityMedium AlertV2Severity = "medium"
@@ -48,6 +49,7 @@ type AlertV2Interface interface {
 	AlertV2MetricInterface
 	AlertV2DowntimeInterface
 	AlertV2ChangeInterface
+	AlertV2FormBasedPrometheusInterface
 }
 
 type AlertV2PrometheusInterface interface {
@@ -80,6 +82,14 @@ type AlertV2ChangeInterface interface {
 	UpdateAlertV2Change(ctx context.Context, alert AlertV2Change) (AlertV2Change, error)
 	GetAlertV2Change(ctx context.Context, alertID int) (AlertV2Change, error)
 	DeleteAlertV2Change(ctx context.Context, alertID int) error
+}
+
+type AlertV2FormBasedPrometheusInterface interface {
+	Base
+	CreateAlertV2FormBasedPrometheus(ctx context.Context, alert AlertV2FormBasedPrometheus) (AlertV2FormBasedPrometheus, error)
+	UpdateAlertV2FormBasedPrometheus(ctx context.Context, alert AlertV2FormBasedPrometheus) (AlertV2FormBasedPrometheus, error)
+	GetAlertV2FormBasedPrometheus(ctx context.Context, alertID int) (AlertV2FormBasedPrometheus, error)
+	DeleteAlertV2FormBasedPrometheus(ctx context.Context, alertID int) error
 }
 
 type AlertV2DowntimeInterface interface {
@@ -456,6 +466,82 @@ func (client *Client) GetAlertV2Change(ctx context.Context, alertID int) (AlertV
 }
 
 func (client *Client) DeleteAlertV2Change(ctx context.Context, alertID int) error {
+	return client.deleteAlertV2(ctx, alertID)
+}
+
+func (client *Client) CreateAlertV2FormBasedPrometheus(ctx context.Context, alert AlertV2FormBasedPrometheus) (AlertV2FormBasedPrometheus, error) {
+	err := client.addNotificationChannelType(ctx, alert.NotificationChannelConfigList)
+	if err != nil {
+		return AlertV2FormBasedPrometheus{}, err
+	}
+
+	err = client.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig)
+	if err != nil {
+		return AlertV2FormBasedPrometheus{}, err
+	}
+
+	payload, err := Marshal(alertV2FormBasedPrometheusWrapper{Alert: alert})
+	if err != nil {
+		return AlertV2FormBasedPrometheus{}, err
+	}
+
+	body, err := client.createAlertV2(ctx, payload)
+	if err != nil {
+		return AlertV2FormBasedPrometheus{}, err
+	}
+
+	wrapper, err := Unmarshal[alertV2FormBasedPrometheusWrapper](body)
+	if err != nil {
+		return AlertV2FormBasedPrometheus{}, err
+	}
+
+	return wrapper.Alert, nil
+}
+
+func (client *Client) UpdateAlertV2FormBasedPrometheus(ctx context.Context, alert AlertV2FormBasedPrometheus) (AlertV2FormBasedPrometheus, error) {
+	err := client.addNotificationChannelType(ctx, alert.NotificationChannelConfigList)
+	if err != nil {
+		return AlertV2FormBasedPrometheus{}, err
+	}
+
+	err = client.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig)
+	if err != nil {
+		return AlertV2FormBasedPrometheus{}, err
+	}
+
+	payload, err := Marshal(alertV2FormBasedPrometheusWrapper{Alert: alert})
+	if err != nil {
+		return AlertV2FormBasedPrometheus{}, err
+	}
+
+	body, err := client.updateAlertV2(ctx, alert.ID, payload)
+	if err != nil {
+		return AlertV2FormBasedPrometheus{}, err
+	}
+
+	wrapper, err := Unmarshal[alertV2FormBasedPrometheusWrapper](body)
+	if err != nil {
+		return AlertV2FormBasedPrometheus{}, err
+	}
+
+	return wrapper.Alert, nil
+}
+
+func (client *Client) GetAlertV2FormBasedPrometheus(ctx context.Context, alertID int) (AlertV2FormBasedPrometheus, error) {
+	body, err := client.getAlertV2(ctx, alertID)
+	if err != nil {
+		return AlertV2FormBasedPrometheus{}, err
+	}
+
+	wrapper, err := Unmarshal[alertV2FormBasedPrometheusWrapper](body)
+	if err != nil {
+		return AlertV2FormBasedPrometheus{}, err
+	}
+
+	return wrapper.Alert, nil
+}
+
+func (client *Client) DeleteAlertV2FormBasedPrometheus(ctx context.Context, alertID int) error {
 	return client.deleteAlertV2(ctx, alertID)
 }
 
