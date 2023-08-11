@@ -116,13 +116,13 @@ type NotificationChannelOptions struct {
 	ServiceName              string                                     `json:"serviceName,omitempty"`              // Type: PagerDuty
 	AdditionalHeaders        map[string]interface{}                     `json:"additionalHeaders,omitempty"`        // Type: Webhook, prometheus alert manager, custom webhook, ibm function
 	Region                   string                                     `json:"region,omitempty"`                   // Type: OpsGenie
-	AllowInsecureConnections *bool                                      `json:"allowInsecureConnections,omitempty"` // Type: prometheus alert manager, custom webhook
+	AllowInsecureConnections *bool                                      `json:"allowInsecureConnections,omitempty"` // Type: prometheus alert manager, custom webhook, Webhook
 	TeamId                   int                                        `json:"teamId,omitempty"`                   // Type: team email
 	HttpMethod               string                                     `json:"httpMethod,omitempty"`               // Type: custom webhook
 	MonitorTemplate          string                                     `json:"monitorTemplate,omitempty"`          // Type: custom webhook
 	InstanceId               string                                     `json:"instanceId,omitempty"`               // Type: ibm event notification
 	IbmFunctionType          string                                     `json:"ibmFunctionType,omitempty"`          // Type: ibm event function
-	CustomData               map[string]interface{}                     `json:"customData,omitempty"`               // Type: ibm function
+	CustomData               map[string]interface{}                     `json:"customData,omitempty"`               // Type: ibm function, Webhook
 	TemplateConfiguration    []NotificationChannelTemplateConfiguration `json:"templateConfiguration,omitempty"`
 
 	NotifyOnOk           bool `json:"notifyOnOk"`
