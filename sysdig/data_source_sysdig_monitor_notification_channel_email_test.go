@@ -13,7 +13,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccNotificationChannelEmailDataSource(t *testing.T) {
+func TestAccMonitorNotificationChannelEmailDataSource(t *testing.T) {
 	rText := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -25,7 +25,7 @@ func TestAccNotificationChannelEmailDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: notificationChannelEmail(rText),
+				Config: monitorNotificationChannelEmail(rText),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_email.nc_email", "id", "sysdig_monitor_notification_channel_email.nc_email", "id"),
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_email.nc_email", "name", "sysdig_monitor_notification_channel_email.nc_email", "name"),
@@ -36,7 +36,7 @@ func TestAccNotificationChannelEmailDataSource(t *testing.T) {
 	})
 }
 
-func notificationChannelEmail(name string) string {
+func monitorNotificationChannelEmail(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_email" "nc_email" {
 	name = "%s"

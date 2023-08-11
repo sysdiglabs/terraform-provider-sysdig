@@ -38,6 +38,10 @@ resource "sysdig_monitor_notification_channel_webhook" "sample-webhook" {
 
 * `custom_data` - (Optional) Key value list of additional data you want to attach to the alert notification.
 
+* `additional_headers` - (Optional) Key value list of custom headers.
+
+* `allow_insecure_connections` - (Optional) Whether to skip TLS verification. Default: `false`.
+
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
 * `notify_when_ok` - (Optional) Send a new notification when the alert condition is
@@ -48,10 +52,6 @@ resource "sysdig_monitor_notification_channel_webhook" "sample-webhook" {
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
-
-* `additional_headers` - (Optional) Key value list of custom headers.
-
-* `allow_insecure_connections` - (Optional) Whether to skip TLS verification. Default: `false`.
 
 ## Attributes Reference
 

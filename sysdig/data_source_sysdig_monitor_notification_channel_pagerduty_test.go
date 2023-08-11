@@ -13,7 +13,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccNotificationChannelPagerdutyDataSource(t *testing.T) {
+func TestAccMonitorNotificationChannelPagerdutyDataSource(t *testing.T) {
 	rText := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -25,7 +25,7 @@ func TestAccNotificationChannelPagerdutyDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: notificationChannelPagerduty(rText),
+				Config: monitorNotificationChannelPagerduty(rText),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "name", "sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "name"),
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "account", "sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "account"),
@@ -40,7 +40,7 @@ func TestAccNotificationChannelPagerdutyDataSource(t *testing.T) {
 	})
 }
 
-func notificationChannelPagerduty(name string) string {
+func monitorNotificationChannelPagerduty(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_pagerduty" "nc_pagerduty" {
 	name = "%s"
