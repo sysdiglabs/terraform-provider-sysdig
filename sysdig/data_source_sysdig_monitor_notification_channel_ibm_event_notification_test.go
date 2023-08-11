@@ -32,7 +32,7 @@ func TestAccMonitorNotificationChannelIBMEventNotificationDataSource(t *testing.
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: monitorNotificationChannelIBMEventNotification(rText),
+				Config: monitorNotificationChannelIBMEventNotification(rText, ibmEventNotificationInstanceId),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_ibm_event_notification.nc_ibm_event_notification", "id", "sysdig_monitor_notification_channel_ibm_event_notification.nc_ibm_event_notification", "id"),
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_ibm_event_notification.nc_ibm_event_notification", "name", "sysdig_monitor_notification_channel_ibm_event_notification.nc_ibm_event_notification", "name"),
