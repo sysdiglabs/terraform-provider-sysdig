@@ -30,6 +30,7 @@ func TestAccSecureNotificationChannelMSTeamsDataSource(t *testing.T) {
 					resource.TestCheckResourceAttrPair("data.sysdig_secure_notification_channel_msteams.nc_msteams", "id", "sysdig_secure_notification_channel_msteams.nc_msteams", "id"),
 					resource.TestCheckResourceAttrPair("data.sysdig_secure_notification_channel_msteams.nc_msteams", "name", "sysdig_secure_notification_channel_msteams.nc_msteams", "name"),
 					resource.TestCheckResourceAttrPair("data.sysdig_secure_notification_channel_msteams.nc_msteams", "url", "sysdig_secure_notification_channel_msteams.nc_msteams", "url"),
+					resource.TestCheckResourceAttrPair("data.sysdig_secure_notification_channel_msteams.nc_msteams", "template_version", "sysdig_secure_notification_channel_msteams.nc_msteams", "template_version"),
 				),
 			},
 		},

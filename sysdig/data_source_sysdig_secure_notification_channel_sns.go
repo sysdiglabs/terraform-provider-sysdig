@@ -22,6 +22,7 @@ func dataSourceSysdigSecureNotificationChannelSNS() *schema.Resource {
 		Schema: createSecureNotificationChannelSchema(map[string]*schema.Schema{
 			"topics": {
 				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
 		}),

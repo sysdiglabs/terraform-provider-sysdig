@@ -39,7 +39,7 @@ func TestAccMonitorNotificationChannelTeamEmailDataSource(t *testing.T) {
 func monitorNotificationChannelTeamEmail(name string) string {
 	return fmt.Sprintf(`
 	resource "sysdig_monitor_team" "sample_data" {
-		name = "monitor-sample-data"
+		name = "monitor-sample-data-%s"
 		entrypoint {
 		type = "Explore"
 		}
@@ -52,5 +52,5 @@ resource "sysdig_monitor_notification_channel_team_email" "nc_team_email" {
 data "sysdig_monitor_notification_channel_team_email" "nc_team_email" {
 	name = sysdig_monitor_notification_channel_team_email.nc_team_email.name
 }
-`, name)
+`, name, name)
 }

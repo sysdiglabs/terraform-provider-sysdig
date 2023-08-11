@@ -22,6 +22,7 @@ func dataSourceSysdigMonitorNotificationChannelSNS() *schema.Resource {
 		Schema: createMonitorNotificationChannelSchema(map[string]*schema.Schema{
 			"topics": {
 				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
 		}),

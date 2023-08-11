@@ -40,9 +40,7 @@ func secureNotificationChannelTeamEmail(name string) string {
 	return fmt.Sprintf(`
 	resource "sysdig_secure_team" "sample_data" {
 		name = "secure-sample-data"
-		entrypoint {
-		type = "Explore"
-		}
+		all_zones = "true"
 	}
 resource "sysdig_secure_notification_channel_team_email" "nc_team_email" {
 	name = "%s"
