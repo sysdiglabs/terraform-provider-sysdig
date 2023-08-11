@@ -31,14 +31,28 @@ resource "sysdig_monitor_notification_channel_slack" "sample-slack" {
 
 * `url` - (Required) URL of the Slack.
 
+* `show_section_runbook_links` - (Optional) Whether to include the runbook links section in the Slack messages. Default: true.
+
+* `show_section_event_details` - (Optional) Whether to include the event details section in the Slack messages. Default: true.
+
+* `show_section_user_defined_content` - (Optional) Whether to include the user defined section in the Slack messages. Default: true.
+
+* `show_section_notification_chart` - (Optional) Whether to include the notification chart section in the Slack messages. Default: true.
+
+* `show_section_dashboard_links` - (Optional) Whether to include the dashboard links section in the Slack messages. Default: true.
+
+* `show_section_alert_details` - (Optional) Whether to include the alert details section in the Slack messages. Default: true.
+
+* `show_section_capturing_information` - (Optional) Whether to include the capturing information section in the Slack messages. Default: true.
+
 * `channel` - (Required) Channel name from this Slack.
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
-* `notify_when_ok` - (Optional) Send a new notification when the alert condition is 
+* `notify_when_ok` - (Optional) Send a new notification when the alert condition is
     no longer triggered. Default is false.
 
-* `notify_when_resolved` - (Optional) Send a new notification when the alert is manually 
+* `notify_when_resolved` - (Optional) Send a new notification when the alert is manually
     acknowledged by a user. Default is false.
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
