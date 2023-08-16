@@ -24,7 +24,7 @@ const agentinoKiltDefinition = `build {
         "SYSDIG_ORCHESTRATOR_PORT": ${config.orchestrator_port}
         "SYSDIG_COLLECTOR": ${config.collector_host}
         "SYSDIG_COLLECTOR_PORT": ${config.collector_port}
-        "SYSDIG_ACCESS_KEY": ${config.sysdig_access_key}
+        "SYSDIG_AGENT_ACCESS_KEY": ${config.sysdig_agent_access_key}
         "SYSDIG_LOGGING": ${config.sysdig_logging}
     }
     mount: [
@@ -47,9 +47,9 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 				Description: "the input Fargate container definitions to instrument with the Sysdig workload agent",
 				Required:    true,
 			},
-			"sysdig_access_key": {
+			"sysdig_agent_access_key": {
 				Type:        schema.TypeString,
-				Description: "the Sysdig access key",
+				Description: "the Sysdig agent access key",
 				Optional:    true,
 			},
 			"workload_agent_image": {
@@ -291,13 +291,13 @@ func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string
 }
 
 type KiltRecipeConfig struct {
-	SysdigAccessKey  string `json:"sysdig_access_key"`
-	AgentImage       string `json:"agent_image"`
-	OrchestratorHost string `json:"orchestrator_host"`
-	OrchestratorPort string `json:"orchestrator_port"`
-	CollectorHost    string `json:"collector_host"`
-	CollectorPort    string `json:"collector_port"`
-	SysdigLogging    string `json:"sysdig_logging"`
+	SysdigAgentAccessKey string `json:"sysdig_agent_access_key"`
+	AgentImage           string `json:"agent_image"`
+	OrchestratorHost     string `json:"orchestrator_host"`
+	OrchestratorPort     string `json:"orchestrator_port"`
+	CollectorHost        string `json:"collector_host"`
+	CollectorPort        string `json:"collector_port"`
+	SysdigLogging        string `json:"sysdig_logging"`
 }
 
 type patchOptions struct {
@@ -338,13 +338,13 @@ func newPatchOptions(d *schema.ResourceData) *patchOptions {
 
 func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	recipeConfig := KiltRecipeConfig{
-		SysdigAccessKey:  d.Get("sysdig_access_key").(string),
-		AgentImage:       d.Get("workload_agent_image").(string),
-		OrchestratorHost: d.Get("orchestrator_host").(string),
-		OrchestratorPort: d.Get("orchestrator_port").(string),
-		CollectorHost:    d.Get("collector_host").(string),
-		CollectorPort:    d.Get("collector_port").(string),
-		SysdigLogging:    d.Get("sysdig_logging").(string),
+		SysdigAgentAccessKey: d.Get("sysdig_agent_access_key").(string),
+		AgentImage:           d.Get("workload_agent_image").(string),
+		OrchestratorHost:     d.Get("orchestrator_host").(string),
+		OrchestratorPort:     d.Get("orchestrator_port").(string),
+		CollectorHost:        d.Get("collector_host").(string),
+		CollectorPort:        d.Get("collector_port").(string),
+		SysdigLogging:        d.Get("sysdig_logging").(string),
 	}
 
 	jsonConf, err := json.Marshal(&recipeConfig)

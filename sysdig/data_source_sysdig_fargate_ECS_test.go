@@ -42,13 +42,13 @@ func sortAndCompare(t *testing.T, expected []byte, actual []byte) {
 // getKiltRecipe returns the default json Kilt recipe
 func getKiltRecipe(t *testing.T) string {
 	recipeConfig := KiltRecipeConfig{
-		SysdigAccessKey:  "sysdig_access_key",
-		AgentImage:       "workload_agent_image",
-		OrchestratorHost: "orchestrator_host",
-		OrchestratorPort: "orchestrator_port",
-		CollectorHost:    "collector_host",
-		CollectorPort:    "collector_port",
-		SysdigLogging:    "sysdig_logging",
+		SysdigAgentAccessKey: "sysdig_agent_access_key",
+		AgentImage:           "workload_agent_image",
+		OrchestratorHost:     "orchestrator_host",
+		OrchestratorPort:     "orchestrator_port",
+		CollectorHost:        "collector_host",
+		CollectorPort:        "collector_port",
+		SysdigLogging:        "sysdig_logging",
 	}
 
 	jsonRecipeConfig, err := json.Marshal(&recipeConfig)

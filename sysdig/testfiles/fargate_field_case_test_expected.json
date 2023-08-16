@@ -22,8 +22,8 @@
                 "Value": "collector_port"
             },
             {
-                "Name": "SYSDIG_ACCESS_KEY",
-                "Value": "sysdig_access_key"
+                "Name": "SYSDIG_AGENT_ACCESS_KEY",
+                "Value": "sysdig_agent_access_key"
             },
             {
                 "Name": "SYSDIG_LOGGING",
@@ -71,8 +71,8 @@
                 "Value": "collector_port"
             },
             {
-                "Name": "SYSDIG_ACCESS_KEY",
-                "Value": "sysdig_access_key"
+                "Name": "SYSDIG_AGENT_ACCESS_KEY",
+                "Value": "sysdig_agent_access_key"
             },
             {
                 "Name": "SYSDIG_LOGGING",
