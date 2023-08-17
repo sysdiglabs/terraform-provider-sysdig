@@ -47,7 +47,7 @@ func TestAccMonitorNotificationChannelTeamEmail(t *testing.T) {
 func monitorNotificationChannelTeamEmailWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team" "sample" {
-	name = "monitor-sample"
+	name = "monitor-sample-%s"
 	entrypoint {
 	type = "Explore"
 	}
@@ -58,13 +58,13 @@ resource "sysdig_monitor_notification_channel_team_email" "sample_team_email1" {
 	team_id = sysdig_monitor_team.sample.id
 	notify_when_ok = true
 	notify_when_resolved = true
-}`, name)
+}`, name, name)
 }
 
 func monitorNotificationChannelTeamEmailSharedWithCurrentTeam(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team" "sample" {
-	name = "monitor-sample"
+	name = "monitor-sample-%s"
 	entrypoint {
 	type = "Explore"
 	}
@@ -76,5 +76,5 @@ resource "sysdig_monitor_notification_channel_team_email" "sample_team_email2" {
 	notify_when_ok = true
 	notify_when_resolved = true
 	share_with_current_team = true
-}`, name)
+}`, name, name)
 }
