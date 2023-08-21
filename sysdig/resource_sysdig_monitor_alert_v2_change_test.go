@@ -269,7 +269,7 @@ resource "sysdig_monitor_alert_v2_change" "sample" {
 	longer_time_range_seconds = 3600
 	link {
 		type = "runbook"
-		href = "http://ciao2.com"
+		href = "http://example.com"
 	}
 	link {
 		type = "dashboard"

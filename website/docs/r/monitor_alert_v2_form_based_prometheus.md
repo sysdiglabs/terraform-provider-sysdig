@@ -1,53 +1,32 @@
 ---
 subcategory: "Sysdig Monitor"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_monitor_alert_v2_change"
+page_title: "Sysdig: sysdig_monitor_alert_v2_form_based_prometheus"
 description: |-
-  Creates a Sysdig Monitor Change Alert with AlertV2 API.
+  Creates a Sysdig Monitor Form Based Prometheus Alert with AlertV2 API.
 ---
 
-# Resource: sysdig_monitor_alert_v2_change
+# Resource: sysdig_monitor_alert_v2_form_based_prometheus
 
-Creates a Sysdig Monitor Change Alert. Change Alerts trigger when a metric value substantially deviates compared to historical values.
+Creates a Sysdig Monitor Form Based Prometheus Alert. The notification is triggered on the user-defined PromQL expression with a threshold and operator defined outside of the expression, as described in [here](https://docs.sysdig.com/en/docs/sysdig-monitor/alerts/alert-types/metric-alerts/#translate-to-promql).
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
 ```terraform
-resource "sysdig_monitor_alert_v2_change" "sample" {
-
-  name = "high cpu used compared to previous periods"
+resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
+  name = "Elasticsearch JVM heap usage"
+  description = "Elasticsearch JVM heap used over attention threshold"
   severity = "high"
-  metric = "sysdig_container_cpu_used_percent"
-  group_aggregation = "avg"
-  time_aggregation = "avg"
+  query = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100"
   operator = ">"
-  threshold = 75
-  group_by = ["kube_pod_name"]
-
-  scope {
-    label = "kube_cluster_name"
-    operator = "in"
-    values = ["my_cluster_1", "my_cluster_2"]
-  }
-
-  scope {
-    label = "kube_deployment_name"
-    operator = "equals"
-    values = ["my_deployment"]
-  }
-
+  threshold = 80
   notification_channels {
     id = 1234
-    renotify_every_minutes = 60
+    renotify_every_minutes = 5
   }
-
-  shorter_time_range_seconds = 300
-  longer_time_range_seconds = 3600
-
 }
-
 ```
 
 ## Argument Reference
@@ -71,7 +50,7 @@ By defining this field, the user can choose to which notification channels send 
 
 It is a list of objects with the following fields:
 * `id` - (Required) The ID of the notification channel.
-* `renotify_every_minutes` - (Optional) the amount of minutes to wait before re sending the notification to this channel. `0` means no renotification enabled. Default: `0`.
+* `renotify_every_minutes` - (Optional) the amount of minutes to wait before re sending the notification to this channel. `0` means no renotification enabled.
 * `notify_on_resolve` - (Optional) Wether to send a notification when the alert is resolved. Default: `true`.
 * `main_threshold` - (Optional) Whether this notification channel is used for the main threshold of the alert. Default: `true`.
 * `warning_threshold` - (Optional) Whether this notification channel is used for the warning threshold of the alert. Default: `false`.
@@ -92,24 +71,13 @@ By defining this field, the user can add link to notifications.
 * `href` - (Optional) When using `runbook` type, url of the external resource.
 * `id` - (Optional) When using `dashboard` type, dashboard id.
 
-### Change alert arguments
+### Form Based Prometheus alert arguments
 
-* `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure. Can be repeated.
-* `group_by` - (Optional) List of segments to trigger a separate alert on. Example: `["kube_cluster_name", "kube_pod_name"]`.
-* `metric` - (Required) Metric the alert will act upon.
-* `time_aggregation` - (Required) time aggregation function for data. It can be `avg`, `timeAvg`, `sum`, `min`, `max`.
-* `group_aggregation` - (Required) group aggregation function for data. It can be `avg`, `sum`, `min`, `max`.
+* `query` - (Required) PromQL-based metric expression to alert on. Example: `sysdig_host_memory_available_bytes / sysdig_host_memory_total_bytes * 100` or `avg_over_time(sysdig_container_cpu_used_percent{}[59s])`.
 * `operator` - (Required) Operator for the condition to alert on. It can be `>`, `>=`, `<`, `<=`, `=` or `!=`.
 * `threshold` - (Required) Threshold used together with `op` to trigger the alert if crossed.
 * `warning_threshold` - (Optional) Warning threshold used together with `op` to trigger the alert if crossed. Must be a number that triggers the alert before reaching the main `threshold`.
-* `shorter_time_range_seconds` - (Required) Time range for which data is compared to a longer, previous period. Can be one of `300` (5 minutes), `600` (10 minutes), `3600` (1 hour), `14400` (4 hours), `86400` (1 day).
-* `longer_time_range_seconds` - (Required) Time range for which data will be used as baseline for comparisons with data in the time range defined in `shorter_time_range_seconds`. Possible values depend on `shorter_time_range_seconds`: for a shorter time range of 5 minutes, longer time range can be 1, 2 or 3 hours, for a shorter time range or 10 minutes, it can be from 1 to 8 hours, for a shorter time range or one hour, it can be from 4 to 24 hours, for a shorter time range of 4 hours, it can be from 1 to 7 days, for a shorter time range of one day, it can only be 7 days.
-
-### `scope`
-
-* `label` - (Required) Label in prometheus notation to select a part of the infrastructure.
-* `operator` - (Required) Operator to match the label. It can be `equals`, `notEquals`, `in`, `notIn`, `contains`, `notContains`, `startsWith`.
-* `values` - (Required) List of values to match the scope.
+* `no_data_behaviour` - (Optional) behaviour in case of missing data. Can be `DO_NOTHING`, i.e. ignore, or `TRIGGER`, i.e. notify on main threshold. Default: `DO_NOTHING`.
 
 ## Attributes Reference
 
@@ -123,11 +91,10 @@ In addition to all arguments above, the following attributes are exported, which
 * `version` - Current version of the resource in Sysdig Monitor.
 * `team` - Team ID that owns the alert.
 
-
 ## Import
 
-Change alerts can be imported using the alert ID, e.g.
+Form Based Prometheus alerts can be imported using the alert ID, e.g.
 
 ```
-$ terraform import sysdig_monitor_alert_v2_change.example 12345
+$ terraform import sysdig_monitor_alert_v2_form_based_prometheus.example 12345
 ```

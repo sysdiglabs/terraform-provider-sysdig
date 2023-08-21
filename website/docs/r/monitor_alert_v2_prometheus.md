@@ -44,7 +44,7 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
 * `link` - (Optional) List of links to add to notifications.
 
-### `notification_channels` -
+### `notification_channels`
 
 By defining this field, the user can choose to which notification channels send the events when the alert fires.
 
