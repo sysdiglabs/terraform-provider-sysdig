@@ -51,7 +51,7 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `group` - (Optional) Lowercase string to group alerts in the UI.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.
-* `notification_channels` - (Optional) List of notification channel configuration
+* `notification_channels` - (Optional) List of notification channel configurations.
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
 * `link` - (Optional) List of links to add to notifications.
 
@@ -66,8 +66,7 @@ It is a list of objects with the following fields:
 
 ### `custom_notification`
 
-By defining this field, the user can modify the title and the body of the message sent when the alert
-is fired.
+By defining this field, the user can modify the title and the body of the message sent when the alert is fired.
 
 * `subject` - (Optional) Sets the title of the alert.
 * `prepend` - (Optional) Text to add before the alert template.
@@ -75,11 +74,11 @@ is fired.
 
 ### `link`
 
-By defining this field, the user can add link to notificatons.
+By defining this field, the user can add link to notifications.
 
 * `type` - (Required) Type of link. Must be `runbook`, for generic links, or `dashboard`, for internal links to existing dashboards.
 * `href` - (Optional) When using `runbook` type, url of the external resource.
-* `id` - (Optional) When using `dashboard` type, dasboard id.
+* `id` - (Optional) When using `dashboard` type, dashboard id.
 
 ### `capture`
 
@@ -110,8 +109,7 @@ In addition to all arguments above, the following attributes are exported:
 
 ### Common alert attributes
 
-In addition to all arguments above, the following attributes are exported, which are common to all the
-alerts in Sysdig Monitor:
+In addition to all arguments above, the following attributes are exported, which are common to all the alerts in Sysdig Monitor:
 
 * `id` - ID of the alert created.
 * `version` - Current version of the resource in Sysdig Monitor.
@@ -119,7 +117,7 @@ alerts in Sysdig Monitor:
 
 ## Import
 
-Prometheus Monitor alerts can be imported using the alert ID, e.g.
+Downtime alerts can be imported using the alert ID, e.g.
 
 ```
 $ terraform import sysdig_monitor_alert_v2_downtime.example 12345

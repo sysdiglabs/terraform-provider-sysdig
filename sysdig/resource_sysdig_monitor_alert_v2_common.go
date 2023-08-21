@@ -38,10 +38,6 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 			Default:      string(v2.AlertV2SeverityLow),
 			ValidateFunc: validation.StringInSlice(AlertV2SeverityValues(), true),
 		},
-		"trigger_after_minutes": {
-			Type:     schema.TypeInt,
-			Required: true,
-		},
 		"group": {
 			Type:     schema.TypeString,
 			Optional: true,
@@ -205,11 +201,10 @@ func AlertLinkV2TypeValues() []string {
 func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 
 	alert := &v2.AlertV2Common{
-		Name:        d.Get("name").(string),
-		Type:        "MANUAL",
-		DurationSec: minutesToSeconds(d.Get("trigger_after_minutes").(int)),
-		Severity:    d.Get("severity").(string),
-		Enabled:     d.Get("enabled").(bool),
+		Name:     d.Get("name").(string),
+		Type:     "MANUAL",
+		Severity: d.Get("severity").(string),
+		Enabled:  d.Get("enabled").(bool),
 	}
 
 	if description, ok := d.GetOk("description"); ok {
@@ -311,7 +306,6 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 func updateAlertV2CommonState(d *schema.ResourceData, alert *v2.AlertV2Common) (err error) {
 	_ = d.Set("name", alert.Name)
 	_ = d.Set("description", alert.Description)
-	_ = d.Set("trigger_after_minutes", secondsToMinutes(alert.DurationSec))
 	_ = d.Set("severity", alert.Severity)
 
 	// optional with defaults

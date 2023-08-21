@@ -247,6 +247,7 @@ When IBM Workload Protection resources are to be created, this authentication mu
 > - `sysdig_monitor_alert_v2_event`
 > - `sysdig_monitor_alert_v2_metric`
 > - `sysdig_monitor_alert_v2_prometheus`
+> - `sysdig_monitor_alert_v2_change`
 > - `sysdig_monitor_dashboard`
 > - `sysdig_secure_posture_zone`
 >
