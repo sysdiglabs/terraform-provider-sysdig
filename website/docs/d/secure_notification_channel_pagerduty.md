@@ -1,21 +1,21 @@
 ---
-subcategory: "Sysdig Monitor"
+subcategory: "Sysdig Secure"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_monitor_notification_channel_pagerduty"
+page_title: "Sysdig: sysdig_secure_notification_channel_pagerduty"
 description: |-
-  Retrieves information about a Monitor notification channel of type Pagerduty
+  Retrieves information about a Secure notification channel of type Pagerduty
 ---
 
-# Data Source: sysdig_monitor_notification_channel_pagerduty
+# Data Source: sysdig_secure_notification_channel_pagerduty
 
-Retrieves information about a Monitor notification channel of type Pagerduty
+Retrieves information about a Secure notification channel of type Pagerduty
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
 ```terraform
-data "sysdig_monitor_notification_channel_pagerduty" "nc_pagerduty" {
+data "sysdig_secure_notification_channel_pagerduty" "nc_pagerduty" {
 	name = "some notification channel name"
 }
 ```

@@ -4,7 +4,6 @@ package sysdig_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -14,26 +13,19 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccNotificationChannelPagerdutyDataSource(t *testing.T) {
+func TestAccMonitorNotificationChannelPagerdutyDataSource(t *testing.T) {
 	rText := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
-			ibmMonitor := os.Getenv("SYSDIG_IBM_MONITOR_API_KEY")
-			if monitor == "" && ibmMonitor == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_IBM_MONITOR_API_KEY must be set for acceptance tests")
-			}
-		},
+		PreCheck: sysdigOrIBMMonitorPreCheck(t),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
 			},
 		},
-
 		Steps: []resource.TestStep{
 			{
-				Config: notificationChannelPagerduty(rText),
+				Config: monitorNotificationChannelPagerduty(rText),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "name", "sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "name"),
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "account", "sysdig_monitor_notification_channel_pagerduty.nc_pagerduty", "account"),
@@ -48,7 +40,7 @@ func TestAccNotificationChannelPagerdutyDataSource(t *testing.T) {
 	})
 }
 
-func notificationChannelPagerduty(name string) string {
+func monitorNotificationChannelPagerduty(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_pagerduty" "nc_pagerduty" {
 	name = "%s"

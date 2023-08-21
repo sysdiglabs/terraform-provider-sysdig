@@ -69,7 +69,7 @@ func resourceSysdigMonitorNotificationChannelIBMFunctionCreate(ctx context.Conte
 		return diag.FromErr(err)
 	}
 
-	notificationChannel, err := secureNotificationChannelIBMFunctionFromResourceData(d, teamID)
+	notificationChannel, err := monitorNotificationChannelIBMFunctionFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -100,7 +100,7 @@ func resourceSysdigMonitorNotificationChannelIBMFunctionRead(ctx context.Context
 		return diag.FromErr(err)
 	}
 
-	err = secureNotificationChannelIBMFunctionToResourceData(&nc, d)
+	err = monitorNotificationChannelIBMFunctionToResourceData(&nc, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -119,7 +119,7 @@ func resourceSysdigMonitorNotificationChannelIBMFunctionUpdate(ctx context.Conte
 		return diag.FromErr(err)
 	}
 
-	nc, err := secureNotificationChannelIBMFunctionFromResourceData(d, teamID)
+	nc, err := monitorNotificationChannelIBMFunctionFromResourceData(d, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -151,8 +151,8 @@ func resourceSysdigMonitorNotificationChannelIBMFunctionDelete(ctx context.Conte
 	return nil
 }
 
-func secureNotificationChannelIBMFunctionFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
-	nc, err = secureNotificationChannelFromResourceData(d, teamID)
+func monitorNotificationChannelIBMFunctionFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
+	nc, err = monitorNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
 		return
 	}
@@ -177,8 +177,8 @@ func secureNotificationChannelIBMFunctionFromResourceData(d *schema.ResourceData
 	return
 }
 
-func secureNotificationChannelIBMFunctionToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
-	err = secureNotificationChannelToResourceData(nc, d)
+func monitorNotificationChannelIBMFunctionToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
+	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
 		return
 	}
