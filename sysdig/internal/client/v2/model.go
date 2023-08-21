@@ -714,3 +714,16 @@ type IdentityContext struct {
 	ServiceAccountID   int    `json:"serviceAccountId"`
 	ServiceAccountName string `json:"serviceAccountName"`
 }
+
+type SilenceRule struct {
+	Name                   string `json:"name"`
+	Enabled                bool   `json:"enabled"`
+	StartTs                int64  `json:"startTs"`
+	DurationInSec          int    `json:"durationInSec"`
+	Scope                  string `json:"scope,omitempty"`
+	AlertIds               []int  `json:"alertIds,omitempty"`
+	NotificationChannelIds []int  `json:"notificationChannelIds,omitempty"`
+
+	Version int `json:"version,omitempty"`
+	ID      int `json:"id,omitempty"`
+}

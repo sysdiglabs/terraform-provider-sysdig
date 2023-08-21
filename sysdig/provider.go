@@ -134,6 +134,7 @@ func Provider() *schema.Provider {
 			"sysdig_secure_scanning_policy":                               resourceSysdigSecureScanningPolicy(),
 			"sysdig_secure_scanning_policy_assignment":                    resourceSysdigSecureScanningPolicyAssignment(),
 
+			"sysdig_monitor_silence_rule":                                  resourceSysdigMonitorSilenceRule(),
 			"sysdig_monitor_alert_downtime":                                resourceSysdigMonitorAlertDowntime(),
 			"sysdig_monitor_alert_metric":                                  resourceSysdigMonitorAlertMetric(),
 			"sysdig_monitor_alert_event":                                   resourceSysdigMonitorAlertEvent(),

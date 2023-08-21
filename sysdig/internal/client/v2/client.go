@@ -51,6 +51,7 @@ type MonitorCommon interface {
 	AlertInterface
 	AlertV2Interface
 	DashboardInterface
+	SilenceRuleInterface
 }
 
 type SecureCommon interface {
