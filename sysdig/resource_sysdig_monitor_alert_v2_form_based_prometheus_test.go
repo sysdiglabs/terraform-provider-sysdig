@@ -67,7 +67,7 @@ func alertV2FormBasedPrometheusTest(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
-	query = "avg_over_time(sysdig_container_cpu_used_percent{}[59s])"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
 	operator = ">="
 	threshold = 50
 }
@@ -78,7 +78,7 @@ func alertV2FormBasedPrometheusTestWithNoData(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
-	query = "avg_over_time(sysdig_container_cpu_used_percent{}[59s])"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
 	operator = ">="
 	threshold = 50
 	no_data_behaviour = "TRIGGER"
@@ -101,7 +101,7 @@ resource "sysdig_monitor_notification_channel_email" "nc_email_2" {
 resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 
 	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
-	query = "avg_over_time(sysdig_container_cpu_used_percent{}[59s])"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
 	operator = ">="
 	threshold = 50
 	enabled = false
@@ -121,7 +121,7 @@ func alertV2FormBasedPrometheusTestWithDescription(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
-	query = "avg_over_time(sysdig_container_cpu_used_percent{}[59s])"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
 	operator = ">="
 	threshold = 50
 	description = "description"
@@ -133,7 +133,7 @@ func alertV2FormBasedPrometheusTestWithSeverity(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
-	query = "avg_over_time(sysdig_container_cpu_used_percent{}[59s])"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
 	operator = ">="
 	threshold = 50
 	severity = "high"
@@ -145,7 +145,7 @@ func alertV2FormBasedPrometheusTestWithGroup(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
-	query = "avg_over_time(sysdig_container_cpu_used_percent{}[59s])"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
 	operator = ">="
 	threshold = 50
 	group = "customgroup"
@@ -157,7 +157,7 @@ func alertV2FormBasedPrometheusTestWithCustomNotifications(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
-	query = "avg_over_time(sysdig_container_cpu_used_percent{}[59s])"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
 	operator = ">="
 	threshold = 50
 	custom_notification {
@@ -205,7 +205,7 @@ resource "sysdig_monitor_dashboard" "dashboard_1" {
 
 resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
-	query = "avg_over_time(sysdig_container_cpu_used_percent{}[59s])"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
 	operator = ">="
 	threshold = 50
 	link {
@@ -224,7 +224,7 @@ func alertV2FormBasedPrometheusTestWithEnabled(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
-	query = "avg_over_time(sysdig_container_cpu_used_percent{}[59s])"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
 	operator = ">="
 	threshold = 50
 	enabled = false
@@ -247,7 +247,7 @@ resource "sysdig_monitor_notification_channel_email" "nc_email_4" {
 resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 
 	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
-	query = "avg_over_time(sysdig_container_cpu_used_percent{}[59s])"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
 	operator = ">="
 	threshold = 50
 	enabled = false
