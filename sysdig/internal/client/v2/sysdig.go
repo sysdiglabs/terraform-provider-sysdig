@@ -43,6 +43,7 @@ type SysdigSecure interface {
 	VulnerabilityExceptionListInterface
 	VulnerabilityExceptionInterface
 	CloudAccountSecureInterface
+	OrganizationSecureInterface
 }
 
 func (sr *SysdigRequest) Request(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {
