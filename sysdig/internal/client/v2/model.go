@@ -788,6 +788,7 @@ type SilenceRule struct {
 }
 
 type CloudAccountSecure2 struct {
+	// TODO: Temporarily adding this to support till we add CloudAccountSecure here
 }
 
 type Timestamp struct {
