@@ -86,7 +86,7 @@ func (client *Client) UpdateOrganizationSecure(ctx context.Context, orgID string
 
 	return Unmarshal[*OrganizationSecure](response.Body)
 }
-func (client *Client) ListOrganizationsSecure(ctx context.Context) ([]OrganizationSecure, error) {
+func (client *Client) ListOrganizationsSecure(ctx context.Context) (*OrganizationSecureList, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.organizationsURL(), nil)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (client *Client) ListOrganizationsSecure(ctx context.Context) ([]Organizati
 		return nil, client.ErrorFromResponse(response)
 	}
 
-	return Unmarshal[[]OrganizationSecure](response.Body)
+	return Unmarshal[*OrganizationSecureList](response.Body)
 }
 func (client *Client) organizationsURL() string {
 	return fmt.Sprintf(organizationPath, client.config.url)
