@@ -411,6 +411,16 @@ type CloudAccountSecure struct {
 	WorkLoadIdentityAccountID    string `json:"workloadIdentityAccountId,omitempty"`
 	WorkLoadIdentityAccountAlias string `json:"workLoadIdentityAccountAlias,omitempty"`
 }
+
+type CloudAccountSecureV2 struct {
+	// TODO: we might need more fields based on the module definition finalized for each provider &
+	// feature combination, resulting in the corresponding components info to be passed in here
+	AccountID         string `json:"accountId"`
+	Provider          string `json:"provider"`
+	IntegrationType   string `json:"integrationType"`
+	AdditionalOptions string `json:"additionalOptions"`
+}
+
 type ScanningPolicy struct {
 	ID             string         `json:"id,omitempty"`
 	Version        string         `json:"version,omitempty"`
