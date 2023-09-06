@@ -787,29 +787,4 @@ type SilenceRule struct {
 	ID      int `json:"id,omitempty"`
 }
 
-type CloudAccountSecure2 struct {
-	// TODO: Temporarily adding this to support till we add CloudAccountSecure here
-}
-
-type Timestamp struct {
-	Seconds int64 `json:"seconds,omitempty"`
-	Nanos   int32 `json:"nanos,omitempty"`
-}
-
-type OrganizationSecure struct {
-	Id                    string                 `json:"id,omitempty"`
-	Name                  string                 `json:"name,omitempty"`
-	ManagementAccountId   string                 `json:"management_account_id,omitempty"`
-	Accounts              []*CloudAccountSecure2 `json:"accounts,omitempty"`
-	CreatedAt             *Timestamp             `json:"created_at,omitempty"`
-	UpdatedAt             *Timestamp             `json:"updated_at,omitempty"`
-	ProviderId            string                 `json:"provider_id,omitempty"` // cloud provider's organization identifier
-	Provider              int32                  `json:"provider,omitempty"`    // cloud provider type
-	CustomerId            uint64                 `json:"customer_id,omitempty"` // the associated customer id
-	OrganizationalUnitIds []string               `json:"organizational_unit_ids,omitempty"`
-}
-
-// TODO: Required only if we need to expose this out
-type OrganizationSecureList struct {
-	Organizations []*OrganizationSecure `json:"organizations,omitempty"`
-}
+type OrganizationSecure cloudauth.CloudOrganization
