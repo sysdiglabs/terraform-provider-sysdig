@@ -28,40 +28,26 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 		Schema: map[string]*schema.Schema{
-			"account_id": {
+			"cloud_provider_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"cloud_provider": {
+			"cloud_provider_type": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"gcp"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"aws", "gcp", "azure"}, false),
 			},
-			"alias": {
+			"cloud_provider_alias": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"role_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"role_name": {
+			"customer_id": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "SysdigCloudBench",
+				Required: true,
 			},
-			"external_id": {
+			"account_id": {
 				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"workload_identity_account_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"workload_identity_account_alias": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 		},
 	}
@@ -83,14 +69,14 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, d *schema.R
 	return nil
 }
 
-func cloudauthAccountFromResourceData(d *schema.ResourceData) *v2.CloudAccountSecure {
+func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudAccountSecure {
 	return &v2.CloudAccountSecure{
-		AccountID:                    d.Get("account_id").(string),
-		Provider:                     d.Get("cloud_provider").(string),
-		Alias:                        d.Get("alias").(string),
-		RoleAvailable:                d.Get("role_enabled").(bool),
-		RoleName:                     d.Get("role_name").(string),
-		WorkLoadIdentityAccountID:    d.Get("workload_identity_account_id").(string),
-		WorkLoadIdentityAccountAlias: d.Get("workload_identity_account_alias").(string),
+		AccountID:                    data.Get("account_id").(string),
+		Provider:                     data.Get("cloud_provider").(string),
+		Alias:                        data.Get("alias").(string),
+		RoleAvailable:                data.Get("role_enabled").(bool),
+		RoleName:                     data.Get("role_name").(string),
+		WorkLoadIdentityAccountID:    data.Get("workload_identity_account_id").(string),
+		WorkLoadIdentityAccountAlias: data.Get("workload_identity_account_alias").(string),
 	}
 }
