@@ -1,5 +1,7 @@
 package v2
 
+import "google.golang.org/protobuf/types/known/timestamppb"
+
 type Team struct {
 	UserRoles           []UserRoles       `json:"userRoles,omitempty"`
 	Description         string            `json:"description"`
@@ -412,13 +414,32 @@ type CloudAccountSecure struct {
 	WorkLoadIdentityAccountAlias string `json:"workLoadIdentityAccountAlias,omitempty"`
 }
 
+type CloudAccountFeature struct {
+	// TODO: define fields based on how features are passed in TF resource,
+	// and in sync with modified cloudAccount API request body
+}
+
+type CloudAccountFeatures struct {
+	SecureThreatDetection     *CloudAccountFeature
+	SecureConfigPosture       *CloudAccountFeature
+	SecureIdentityEntitlement *CloudAccountFeature
+	MonitorCloudMetrics       *CloudAccountFeature
+	SecureAgentlessScanning   *CloudAccountFeature
+}
+
 type CloudAccountSecureV2 struct {
-	// TODO: we might need more fields based on the module definition finalized for each provider &
-	// feature combination, resulting in the corresponding components info to be passed in here
-	AccountID         string `json:"accountId"`
-	Provider          string `json:"provider"`
-	IntegrationType   string `json:"integrationType"`
-	AdditionalOptions string `json:"additionalOptions"`
+	Id             string                 `json:"id,omitempty"`
+	CustomerId     uint64                 `json:"customerId,omitempty"`
+	Enabled        bool                   `json:"enabled,omitempty"`
+	OrganizationId string                 `json:"organizationId,omitempty"`
+	Name           string                 `json:"name,omitempty"`
+	ProviderId     string                 `json:"providerId,omitempty"`    // cloud provider's account id
+	ProviderAlias  string                 `json:"providerAlias,omitempty"` // cloud provider alias
+	Provider       string                 `json:"provider,omitempty"`      // cloud provider
+	Feature        *CloudAccountFeatures  `json:"feature,omitempty"`
+	Components     []string               `json:"components,omitempty"`
+	CreatedAt      *timestamppb.Timestamp `json:"createdAt,omitempty"`
+	UpdatedAt      *timestamppb.Timestamp `json:"updatedAt,omitempty"`
 }
 
 type ScanningPolicy struct {

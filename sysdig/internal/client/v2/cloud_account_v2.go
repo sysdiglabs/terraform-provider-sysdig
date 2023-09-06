@@ -20,7 +20,6 @@ type CloudAccountSecureInterfaceV2 interface {
 }
 
 func (client *Client) CreateCloudAccountSecureV2(ctx context.Context, cloudAccount *CloudAccountSecureV2) (*CloudAccountSecureV2, error) {
-	// TODO: convert payload as per cloudauth API request object OR till API is updated return {}, nil
 	payload, err := Marshal(cloudAccount)
 	if err != nil {
 		return nil, err
@@ -37,7 +36,6 @@ func (client *Client) CreateCloudAccountSecureV2(ctx context.Context, cloudAccou
 		return nil, err
 	}
 
-	// TODO: convert response as per return CloudAccountSecureV2 struct OR till API is updated return {}, nil
 	return Unmarshal[*CloudAccountSecureV2](response.Body)
 }
 
