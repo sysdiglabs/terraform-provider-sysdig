@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	draiosproto "github.com/draios/protorepo/cloudauth/go"
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -69,14 +70,46 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, d *schema.R
 	return nil
 }
 
-func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudAccountSecure {
-	return &v2.CloudAccountSecure{
-		AccountID:                    data.Get("account_id").(string),
-		Provider:                     data.Get("cloud_provider").(string),
-		Alias:                        data.Get("alias").(string),
-		RoleAvailable:                data.Get("role_enabled").(bool),
-		RoleName:                     data.Get("role_name").(string),
-		WorkLoadIdentityAccountID:    data.Get("workload_identity_account_id").(string),
-		WorkLoadIdentityAccountAlias: data.Get("workload_identity_account_alias").(string),
+func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
+	return &v2.CloudauthAccountSecure{
+		Id:            data.Get("account_id").(string),
+		CustomerId:    data.Get("customer_id").(uint64),
+		ProviderId:    data.Get("cloud_provider_id").(string),
+		Provider:      data.Get("cloud_provider_type").(draiosproto.Provider),
+		ProviderAlias: data.Get("cloud_provider_alias").(string),
 	}
+}
+
+func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudauthAccountSecure) error {
+	err := data.Set("account_id", cloudAccount.Id)
+
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("customer_id", cloudAccount.CustomerId)
+
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("cloud_provider_id", cloudAccount.ProviderId)
+
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("cloud_provider_type", cloudAccount.Provider)
+
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("cloud_provider_alias", cloudAccount.ProviderAlias)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
