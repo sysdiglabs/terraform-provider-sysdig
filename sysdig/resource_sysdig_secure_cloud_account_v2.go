@@ -14,10 +14,10 @@ func resourceSysdigSecureCloudAccountV2() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		// CreateContext: resourceSysdigSecureCloudAccountCreate,
-		// UpdateContext: resourceSysdigSecureCloudAccountUpdate,
-		// ReadContext:   resourceSysdigSecureCloudAccountRead,
-		// DeleteContext: resourceSysdigSecureCloudAccountDelete,
+		CreateContext: resourceSysdigSecureCloudAccountV2Create,
+		UpdateContext: resourceSysdigSecureCloudAccountV2Update,
+		ReadContext:   resourceSysdigSecureCloudAccountV2Read,
+		DeleteContext: resourceSysdigSecureCloudAccountV2Delete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
