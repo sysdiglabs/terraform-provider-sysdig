@@ -17,7 +17,6 @@ type OrganizationSecureInterface interface {
 	GetOrganizationSecure(ctx context.Context, orgID string) (*OrganizationSecure, error)
 	DeleteOrganizationSecure(ctx context.Context, orgID string) error
 	UpdateOrganizationSecure(ctx context.Context, orgID string, org *OrganizationSecure) (*OrganizationSecure, error)
-	ListOrganizationsSecure(ctx context.Context) (*OrganizationSecureList, error) // TODO: Not sure if we need this from TF
 }
 
 func (client *Client) CreateOrganizationSecure(ctx context.Context, org *OrganizationSecure) (*OrganizationSecure, error) {
@@ -86,19 +85,7 @@ func (client *Client) UpdateOrganizationSecure(ctx context.Context, orgID string
 
 	return Unmarshal[*OrganizationSecure](response.Body)
 }
-func (client *Client) ListOrganizationsSecure(ctx context.Context) (*OrganizationSecureList, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.organizationsURL(), nil)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
-	}
-
-	return Unmarshal[*OrganizationSecureList](response.Body)
-}
 func (client *Client) organizationsURL() string {
 	return fmt.Sprintf(organizationPath, client.config.url)
 }

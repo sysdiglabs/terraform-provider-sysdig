@@ -5,7 +5,6 @@ go 1.19
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0
 	github.com/aws/aws-sdk-go v1.44.280
-	github.com/draios/protorepo/cloudauth/go v0.0.0-20230901163632-fcbfe0cb84e0
 	github.com/falcosecurity/kilt/runtimes/cloudformation v0.0.0-20230606123839-2e4c434d5d88
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/go-retryablehttp v0.7.4

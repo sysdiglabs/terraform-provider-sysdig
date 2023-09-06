@@ -1,8 +1,6 @@
 package v2
 
-import (
-	proto "github.com/draios/protorepo/cloudauth/go"
-)
+import cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 
 type Team struct {
 	UserRoles           []UserRoles       `json:"userRoles,omitempty"`
@@ -782,4 +780,4 @@ type SilenceRule struct {
 	ID      int `json:"id,omitempty"`
 }
 
-type OrganizationSecure proto.CloudOrganization
+type OrganizationSecure cloudauth.CloudOrganization
