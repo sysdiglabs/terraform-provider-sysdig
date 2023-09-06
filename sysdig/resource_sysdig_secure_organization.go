@@ -2,9 +2,11 @@ package sysdig
 
 import (
 	"context"
+	proto "github.com/draios/protorepo/cloudauth/go"
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"time"
 )
 
@@ -31,8 +33,9 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 				Required: true,
 			},
 			"cloud_provider_type": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{proto.Provider_PROVIDER_AWS.String(), proto.Provider_PROVIDER_GCP.String(), proto.Provider_PROVIDER_AZURE.String()}, false),
 			},
 			"customer_id": {
 				Type:     schema.TypeInt,
@@ -121,7 +124,7 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) v2.Organizati
 	return v2.OrganizationSecure{
 		Id:         data.Get("organization_id").(string),
 		ProviderId: data.Get("cloud_provider_id").(string),
-		Provider:   data.Get("cloud_provider_type").(int32),
+		Provider:   proto.Provider(data.Get("cloud_provider_type").(int32)),
 		CustomerId: data.Get("customer_id").(uint64),
 	}
 }
