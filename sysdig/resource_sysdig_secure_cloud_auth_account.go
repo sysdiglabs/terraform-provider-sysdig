@@ -83,7 +83,7 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, d *schema.R
 	return nil
 }
 
-func cloudAccountFromResourceDataV2(d *schema.ResourceData) *v2.CloudAccountSecure {
+func cloudauthAccountFromResourceData(d *schema.ResourceData) *v2.CloudAccountSecure {
 	return &v2.CloudAccountSecure{
 		AccountID:                    d.Get("account_id").(string),
 		Provider:                     d.Get("cloud_provider").(string),
