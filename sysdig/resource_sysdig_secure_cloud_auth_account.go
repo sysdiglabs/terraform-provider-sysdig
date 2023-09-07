@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	draiosproto "github.com/draios/protorepo/cloudauth/go"
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -142,7 +141,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 		Id:         data.Get("account_id").(string),
 		Enabled:    data.Get("enabled").(bool),
 		ProviderId: data.Get("cloud_provider_id").(string),
-		Provider:   data.Get("cloud_provider_type").(draiosproto.Provider),
+		Provider:   data.Get("cloud_provider_type").(cloudauth.Provider),
 	}
 }
 
