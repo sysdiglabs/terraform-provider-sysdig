@@ -30,7 +30,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 		Schema: map[string]*schema.Schema{
-			"account_id": {
+			"id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -135,7 +135,6 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
 	return &v2.CloudauthAccountSecure{
-		Id:         data.Get("account_id").(string),
 		Enabled:    data.Get("enabled").(bool),
 		ProviderId: data.Get("cloud_provider_id").(string),
 		Provider:   data.Get("cloud_provider_type").(cloudauth.Provider),
@@ -143,7 +142,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 }
 
 func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudauthAccountSecure) error {
-	err := data.Set("account_id", cloudAccount.Id)
+	err := data.Set("id", cloudAccount.Id)
 
 	if err != nil {
 		return err
