@@ -30,6 +30,10 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 		Schema: map[string]*schema.Schema{
+			"account_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"cloud_provider_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -39,16 +43,8 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"aws", "gcp", "azure"}, false),
 			},
-			"cloud_provider_alias": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"customer_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"account_id": {
-				Type:     schema.TypeString,
+			"enabled": {
+				Type:     schema.TypeBool,
 				Required: true,
 			},
 		},
@@ -89,7 +85,7 @@ func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.
 
 	if err != nil {
 		data.SetId("")
-		
+
 		if strings.Contains(err.Error(), "404") {
 			return nil
 		}
@@ -142,11 +138,10 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
 	return &v2.CloudauthAccountSecure{
-		Id:            data.Get("account_id").(string),
-		CustomerId:    data.Get("customer_id").(uint64),
-		ProviderId:    data.Get("cloud_provider_id").(string),
-		Provider:      data.Get("cloud_provider_type").(draiosproto.Provider),
-		ProviderAlias: data.Get("cloud_provider_alias").(string),
+		Id:         data.Get("account_id").(string),
+		Enabled:    data.Get("enabled").(bool),
+		ProviderId: data.Get("cloud_provider_id").(string),
+		Provider:   data.Get("cloud_provider_type").(draiosproto.Provider),
 	}
 }
 
@@ -157,7 +152,7 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		return err
 	}
 
-	err = data.Set("customer_id", cloudAccount.CustomerId)
+	err = data.Set("enabled", cloudAccount.Enabled)
 
 	if err != nil {
 		return err
@@ -170,12 +165,6 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 	}
 
 	err = data.Set("cloud_provider_type", cloudAccount.Provider)
-
-	if err != nil {
-		return err
-	}
-
-	err = data.Set("cloud_provider_alias", cloudAccount.ProviderAlias)
 
 	if err != nil {
 		return err
