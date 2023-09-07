@@ -77,15 +77,12 @@ func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.
 	client, err := getSecureCloudauthAccountClient(meta.(SysdigClients))
 
 	if err != nil {
-		data.SetId("")
 		return diag.FromErr(err)
 	}
 
 	cloudauthAccount, err := client.GetCloudauthAccountSecure(ctx, data.Id())
 
 	if err != nil {
-		data.SetId("")
-
 		if strings.Contains(err.Error(), "404") {
 			return nil
 		}
