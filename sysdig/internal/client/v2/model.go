@@ -1,7 +1,7 @@
 package v2
 
 import (
-	proto "github.com/draios/protorepo/cloudauth/go"
+	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
 
 type Team struct {
@@ -416,7 +416,7 @@ type CloudAccountSecure struct {
 	WorkLoadIdentityAccountAlias string `json:"workLoadIdentityAccountAlias,omitempty"`
 }
 
-type CloudauthAccountSecure proto.CloudAccount
+type CloudauthAccountSecure cloudauth.CloudAccount
 
 type ScanningPolicy struct {
 	ID             string         `json:"id,omitempty"`
