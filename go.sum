@@ -40,8 +40,6 @@ github.com/docker/docker v20.10.24+incompatible h1:Ugvxm7a8+Gz6vqQYQQ2W7GYq5EUPa
 github.com/docker/docker v20.10.24+incompatible/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
 github.com/docker/docker-credential-helpers v0.7.0 h1:xtCHsjxogADNZcdv1pKUHXryefjlVRqWqIhk/uXJp0A=
 github.com/docker/docker-credential-helpers v0.7.0/go.mod h1:rETQfLdHNT3foU5kuNkFR1R1V12OJRRO5lzt2D1b5X0=
-github.com/draios/protorepo/cloudauth/go v0.0.0-20230901163632-fcbfe0cb84e0 h1:LKBglxJ55sl7NuP5IrC/SD89ZQFwN8ejh8XGJ0dj5P0=
-github.com/draios/protorepo/cloudauth/go v0.0.0-20230901163632-fcbfe0cb84e0/go.mod h1:JmBZh3AOhz4gg83qMw9p2QDCIiLSH9YCyyvDVClIynU=
 github.com/emirpasic/gods v1.12.0 h1:QAUIPSaCu4G+POclxeqb3F+WPpdKqFGlw36+yOzGlrg=
 github.com/emirpasic/gods v1.12.0/go.mod h1:YfzfFFoVP/catgzJb4IKIqXjX78Ha8FMSDh3ymbK86o=
 github.com/falcosecurity/kilt/pkg v0.0.0-20230111165949-b36cdd622de1 h1:7JOAJwPA4FEtowSP133pgicOu+nOfo0wGuXapXKhafk=
