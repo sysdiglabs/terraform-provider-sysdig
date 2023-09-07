@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	draiosproto "github.com/draios/protorepo/cloudauth/go"
@@ -54,19 +55,88 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func getSecureCloudauthAccountClient(client SysdigClients) (v2.CloudauthAccountSecureInterface, error) {
+	return client.sysdigSecureClientV2()
+}
+
+func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getSecureCloudauthAccountClient((meta.(SysdigClients)))
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	cloudauthAccount, err := client.CreateCloudauthAccountSecure(ctx, cloudauthAccountFromResourceData(data))
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	data.SetId(cloudauthAccount.Id)
+
 	return nil
 }
 
-func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getSecureCloudauthAccountClient(meta.(SysdigClients))
+
+	if err != nil {
+		data.SetId("")
+		return diag.FromErr(err)
+	}
+
+	cloudauthAccount, err := client.GetCloudauthAccountSecure(ctx, data.Id())
+
+	if err != nil {
+		data.SetId("")
+		
+		if strings.Contains(err.Error(), "404") {
+			return nil
+		}
+		return diag.FromErr(err)
+	}
+
+	err = cloudauthAccountToResourceData(data, cloudauthAccount)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
 }
 
-func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getSecureCloudauthAccountClient(meta.(SysdigClients))
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	_, err = client.UpdateCloudauthAccountSecure(ctx, data.Id(), cloudauthAccountFromResourceData(data))
+
+	if err != nil {
+		if strings.Contains(err.Error(), "404") {
+			return nil
+		}
+		return diag.FromErr(err)
+	}
+
 	return nil
 }
 
-func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getSecureCloudauthAccountClient(meta.(SysdigClients))
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.DeleteCloudauthAccountSecure(ctx, data.Id())
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
 }
 
