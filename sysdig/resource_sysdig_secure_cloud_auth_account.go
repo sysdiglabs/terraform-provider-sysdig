@@ -7,6 +7,7 @@ import (
 
 	draiosproto "github.com/draios/protorepo/cloudauth/go"
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
+	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -39,9 +40,9 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Required: true,
 			},
 			"cloud_provider_type": {
-				Type:         schema.TypeString,
+				Type:         schema.TypeInt,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"aws", "gcp", "azure"}, false),
+				ValidateFunc: validation.StringInSlice([]string{cloudauth.Provider_PROVIDER_AWS.String(), cloudauth.Provider_PROVIDER_GCP.String(), cloudauth.Provider_PROVIDER_AZURE.String()}, false),
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
