@@ -6,7 +6,6 @@ import (
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"time"
 )
 
@@ -33,9 +32,9 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 				Required: true,
 			},
 			"cloud_provider_type": {
-				Type:         schema.TypeInt,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{cloudauth.Provider_PROVIDER_AWS.String(), cloudauth.Provider_PROVIDER_GCP.String(), cloudauth.Provider_PROVIDER_AZURE.String()}, false),
+				Type:     schema.TypeInt,
+				Required: true,
+				//ValidateFunc: validation.StringInSlice([]string{cloudauth.Provider_PROVIDER_AWS.String(), cloudauth.Provider_PROVIDER_GCP.String(), cloudauth.Provider_PROVIDER_AZURE.String()}, false),
 			},
 			"customer_id": {
 				Type:     schema.TypeInt,
