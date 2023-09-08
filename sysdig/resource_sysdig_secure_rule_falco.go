@@ -133,7 +133,7 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 
-	rule, err, statusCode := client.GetRuleByID(ctx, id)
+	rule, statusCode, err := client.GetRuleByID(ctx, id)
 	if err != nil {
 		if statusCode == 404 {
 			d.SetId("")
