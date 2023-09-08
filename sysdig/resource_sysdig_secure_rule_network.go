@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -118,10 +119,14 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	rule, err := client.GetRuleByID(ctx, id)
+	rule, statusCode, err := client.GetRuleByID(ctx, id)
 
 	if err != nil {
-		d.SetId("")
+		if statusCode == http.StatusNotFound {
+			d.SetId("")
+		} else {
+			return diag.FromErr(err)
+		}
 	}
 	updateResourceDataForRule(d, rule)
 

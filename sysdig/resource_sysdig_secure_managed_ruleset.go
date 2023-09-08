@@ -149,8 +149,9 @@ func resourceSysdigManagedRulesetRead(ctx context.Context, d *schema.ResourceDat
 	policy, statusCode, err := client.GetPolicyByID(ctx, id)
 
 	if err != nil {
-		d.SetId("")
 		if statusCode == http.StatusNotFound {
+			d.SetId("")
+		} else {
 			return diag.FromErr(err)
 		}
 	}
@@ -187,8 +188,9 @@ func resourceSysdigManagedRulesetUpdate(ctx context.Context, d *schema.ResourceD
 	policy, statusCode, err := client.GetPolicyByID(ctx, id)
 
 	if err != nil {
-		d.SetId("")
 		if statusCode == http.StatusNotFound {
+			d.SetId("")
+		} else {
 			return diag.FromErr(err)
 		}
 	}
