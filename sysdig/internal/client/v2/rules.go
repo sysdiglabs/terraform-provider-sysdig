@@ -18,7 +18,7 @@ const (
 type RuleInterface interface {
 	Base
 	CreateRule(ctx context.Context, rule Rule) (Rule, error)
-	GetRuleByID(ctx context.Context, ruleID int) (Rule, error)
+	GetRuleByID(ctx context.Context, ruleID int) (Rule, error, int)
 	UpdateRule(ctx context.Context, rule Rule) (Rule, error)
 	DeleteRule(ctx context.Context, ruleID int) error
 	GetRuleGroup(ctx context.Context, ruleName string, ruleType string) ([]Rule, error)
@@ -43,18 +43,19 @@ func (client *Client) CreateRule(ctx context.Context, rule Rule) (Rule, error) {
 	return Unmarshal[Rule](response.Body)
 }
 
-func (client *Client) GetRuleByID(ctx context.Context, ruleID int) (Rule, error) {
+func (client *Client) GetRuleByID(ctx context.Context, ruleID int) (Rule, error, int) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.GetRuleByIDURL(ruleID), nil)
 	if err != nil {
-		return Rule{}, err
+		return Rule{}, err, 0
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return Rule{}, client.ErrorFromResponse(response)
+		return Rule{}, client.ErrorFromResponse(response), response.StatusCode
 	}
 
-	return Unmarshal[Rule](response.Body)
+	rule, err := Unmarshal[Rule](response.Body)
+	return rule, err, 0
 }
 
 func (client *Client) UpdateRule(ctx context.Context, rule Rule) (Rule, error) {

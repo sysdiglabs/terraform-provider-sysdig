@@ -79,10 +79,14 @@ func resourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	rule, err := client.GetRuleByID(ctx, id)
+	rule, err, statusCode := client.GetRuleByID(ctx, id)
 
 	if err != nil {
-		d.SetId("")
+		if statusCode == 404 {
+			d.SetId("")
+		} else {
+			return diag.FromErr(err)
+		}
 	}
 
 	if rule.Details.Containers == nil {
