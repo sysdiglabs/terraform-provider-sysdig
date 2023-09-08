@@ -112,8 +112,9 @@ func resourceSysdigManagedPolicyRead(ctx context.Context, d *schema.ResourceData
 	policy, statusCode, err := client.GetPolicyByID(ctx, id)
 
 	if err != nil {
-		d.SetId("")
 		if statusCode == http.StatusNotFound {
+			d.SetId("")
+		} else {
 			return diag.FromErr(err)
 		}
 	}
@@ -134,8 +135,9 @@ func resourceSysdigManagedPolicyDelete(ctx context.Context, d *schema.ResourceDa
 	// Reset everything back to default values for managed policy
 	policy, statusCode, err := client.GetPolicyByID(ctx, id)
 	if err != nil {
-		d.SetId("")
 		if statusCode == http.StatusNotFound {
+			d.SetId("")
+		} else {
 			return diag.FromErr(err)
 		}
 	}
@@ -169,8 +171,9 @@ func resourceSysdigManagedPolicyUpdate(ctx context.Context, d *schema.ResourceDa
 	policy, statusCode, err := client.GetPolicyByID(ctx, id)
 
 	if err != nil {
-		d.SetId("")
 		if statusCode == http.StatusNotFound {
+			d.SetId("")
+		} else {
 			return diag.FromErr(err)
 		}
 	}

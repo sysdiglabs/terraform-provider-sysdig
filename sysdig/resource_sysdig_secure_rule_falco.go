@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -135,7 +136,7 @@ func resourceSysdigRuleFalcoRead(ctx context.Context, d *schema.ResourceData, me
 
 	rule, statusCode, err := client.GetRuleByID(ctx, id)
 	if err != nil {
-		if statusCode == 404 {
+		if statusCode == http.StatusNotFound {
 			d.SetId("")
 		} else {
 			return diag.FromErr(err)

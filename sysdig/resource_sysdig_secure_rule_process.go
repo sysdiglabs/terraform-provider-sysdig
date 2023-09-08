@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -82,7 +83,7 @@ func resourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, 
 	rule, statusCode, err := client.GetRuleByID(ctx, id)
 
 	if err != nil {
-		if statusCode == 404 {
+		if statusCode == http.StatusNotFound {
 			d.SetId("")
 		} else {
 			return diag.FromErr(err)

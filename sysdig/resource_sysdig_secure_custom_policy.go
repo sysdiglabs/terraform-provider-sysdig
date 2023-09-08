@@ -141,8 +141,9 @@ func resourceSysdigCustomPolicyRead(ctx context.Context, d *schema.ResourceData,
 	policy, statusCode, err := client.GetPolicyByID(ctx, id)
 
 	if err != nil {
-		d.SetId("")
 		if statusCode == http.StatusNotFound {
+			d.SetId("")
+		} else {
 			return diag.FromErr(err)
 		}
 	}
