@@ -416,7 +416,9 @@ type CloudAccountSecure struct {
 	WorkLoadIdentityAccountAlias string `json:"workLoadIdentityAccountAlias,omitempty"`
 }
 
-type CloudauthAccountSecure cloudauth.CloudAccount
+type CloudauthAccountSecure struct {
+	cloudauth.CloudAccount
+}
 
 type ScanningPolicy struct {
 	ID             string         `json:"id,omitempty"`

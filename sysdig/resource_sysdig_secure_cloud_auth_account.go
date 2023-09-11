@@ -32,14 +32,15 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 			"cloud_provider_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 			"cloud_provider_type": {
-				Type:         schema.TypeInt,
+				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{cloudauth.Provider_PROVIDER_AWS.String(), cloudauth.Provider_PROVIDER_GCP.String(), cloudauth.Provider_PROVIDER_AZURE.String()}, false),
 			},
@@ -69,6 +70,7 @@ func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, data *schem
 	}
 
 	data.SetId(cloudauthAccount.Id)
+	data.Set("cloud_provider_type", cloudauthAccount.Provider.String())
 
 	return nil
 }
@@ -135,9 +137,11 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
 	return &v2.CloudauthAccountSecure{
-		Enabled:    data.Get("enabled").(bool),
-		ProviderId: data.Get("cloud_provider_id").(string),
-		Provider:   data.Get("cloud_provider_type").(cloudauth.Provider),
+		CloudAccount: cloudauth.CloudAccount{
+			Enabled:    data.Get("enabled").(bool),
+			ProviderId: data.Get("cloud_provider_id").(string),
+			Provider:   cloudauth.Provider(cloudauth.Provider_value[data.Get("cloud_provider_type").(string)]),
+		},
 	}
 }
 
@@ -160,8 +164,7 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		return err
 	}
 
-	err = data.Set("cloud_provider_type", cloudAccount.Provider)
-
+	err = data.Set("cloud_provider_type", cloudAccount.Provider.String())
 	if err != nil {
 		return err
 	}
