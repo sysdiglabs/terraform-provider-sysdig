@@ -48,6 +48,10 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Type:     schema.TypeBool,
 				Required: true,
 			},
+			"components": {
+				Type: schema.TypeList,
+				Required: true,
+			},
 		},
 	}
 }
