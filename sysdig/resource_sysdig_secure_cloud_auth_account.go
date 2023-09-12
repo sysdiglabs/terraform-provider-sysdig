@@ -49,8 +49,11 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Required: true,
 			},
 			"components": {
-				Type: schema.TypeList,
+				Type:     schema.TypeList,
 				Required: true,
+				Elem: &schema.Schema{
+					Type: v2.CloudauthAccountComponent,
+				},
 			},
 		},
 	}
