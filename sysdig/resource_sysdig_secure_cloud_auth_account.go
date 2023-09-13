@@ -185,7 +185,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 			Enabled:    data.Get("enabled").(bool),
 			ProviderId: data.Get("cloud_provider_id").(string),
 			Provider:   cloudauth.Provider(cloudauth.Provider_value[data.Get("cloud_provider_type").(string)]),
-			Components: cloudauth.FeatureComponents(data.Get("components").([]map[string]interface{})),
+			Components: []*cloudauth.AccountComponent{},
 		},
 	}
 }
