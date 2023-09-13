@@ -51,8 +51,45 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			"components": {
 				Type:     schema.TypeList,
 				Required: true,
-				Elem: &schema.Schema{
-					Type: v2.CloudauthAccountComponent,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"instance": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"cloudConnectorMetadata": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"trustedRoleMetadata": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"eventBridgeMetadata": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"servicePrincipalMetadata": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"webhookDatasourceMetadata": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"cryptoKeyMetadata": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"cloudLogsMetadata": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
 				},
 			},
 		},
@@ -148,6 +185,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 			Enabled:    data.Get("enabled").(bool),
 			ProviderId: data.Get("cloud_provider_id").(string),
 			Provider:   cloudauth.Provider(cloudauth.Provider_value[data.Get("cloud_provider_type").(string)]),
+			Components: cloudauth.FeatureComponents(data.Get("components").([]map[string]interface{})),
 		},
 	}
 }
@@ -172,6 +210,13 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 	}
 
 	err = data.Set("cloud_provider_type", cloudAccount.Provider.String())
+
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("components", cloudAccount.Components)
+
 	if err != nil {
 		return err
 	}
