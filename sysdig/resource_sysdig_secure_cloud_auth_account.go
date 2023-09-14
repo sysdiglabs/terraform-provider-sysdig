@@ -381,35 +381,17 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 }
 
 func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudauthAccountSecure) error {
-	err := data.Set("id", cloudAccount.Id)
-
-	if err != nil {
-		return err
+	for _, err := range []error{
+		data.Set("id", cloudAccount.Id),
+		data.Set("enabled", cloudAccount.Enabled),
+		data.Set("cloud_provider_id", cloudAccount.ProviderId),
+		data.Set("cloud_provider_type", cloudAccount.Provider.String()),
+		data.Set("components", cloudAccount.Components),
+		data.Set("feature", cloudAccount.Feature),
+	} {
+		if err != nil {
+			return err
+		}
 	}
-
-	err = data.Set("enabled", cloudAccount.Enabled)
-
-	if err != nil {
-		return err
-	}
-
-	err = data.Set("cloud_provider_id", cloudAccount.ProviderId)
-
-	if err != nil {
-		return err
-	}
-
-	err = data.Set("cloud_provider_type", cloudAccount.Provider.String())
-
-	if err != nil {
-		return err
-	}
-
-	err = data.Set("components", cloudAccount.Components)
-
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
