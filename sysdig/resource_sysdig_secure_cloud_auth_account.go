@@ -56,7 +56,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			},
 			"components": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
@@ -130,11 +130,11 @@ var accountFeature = &schema.Resource{
 	Schema: map[string]*schema.Schema{
 		"type": {
 			Type:     schema.TypeString,
-			Optional: true,
+			Computed: true,
 		},
 		"enabled": {
 			Type:     schema.TypeBool,
-			Optional: true,
+			Required: true,
 		},
 		"components": {
 			Type: schema.TypeList,
