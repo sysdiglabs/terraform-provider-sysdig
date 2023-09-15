@@ -39,29 +39,29 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 	var accountFeatures = &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"secure_config_posture": {
-				Type: schema.TypeSet,
+				Type:     schema.TypeSet,
 				Optional: true,
-				Elem: accountFeature,
+				Elem:     accountFeature,
 			},
 			"secure_identity_entitlement": {
-				Type: schema.TypeSet,
+				Type:     schema.TypeSet,
 				Optional: true,
-				Elem: accountFeature,
+				Elem:     accountFeature,
 			},
 			"secure_threat_detection": {
-				Type: schema.TypeSet,
+				Type:     schema.TypeSet,
 				Optional: true,
-				Elem: accountFeature,
+				Elem:     accountFeature,
 			},
 			"secure_agentless_scanning": {
-				Type: schema.TypeSet,
+				Type:     schema.TypeSet,
 				Optional: true,
-				Elem: accountFeature,
+				Elem:     accountFeature,
 			},
 			"monitor_cloud_metrics": {
-				Type: schema.TypeSet,
+				Type:     schema.TypeSet,
 				Optional: true,
-				Elem: accountFeature,
+				Elem:     accountFeature,
 			},
 		},
 	}
@@ -237,10 +237,24 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 	return nil
 }
 
+func convertSchemaSetToMap(set *schema.Set) map[string]interface{} {
+	result := make(map[string]interface{})
+
+	for _, element := range set.List() {
+		if entry, ok := element.(map[string]interface{}); ok {
+			for key, value := range entry {
+				result[key] = value
+			}
+		}
+	}
+
+	return result
+}
+
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
 	components := []*cloudauth.AccountComponent{}
 
-	for _, rc := range data.Get("component").([]interface{}) {
+	for _, rc := range data.Get("components").([]interface{}) {
 		resourceComponent := rc.(map[string]interface{})
 		component := &cloudauth.AccountComponent{}
 
@@ -305,11 +319,22 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 	}
 
 	accountFeatures := &cloudauth.AccountFeatures{}
-	for name, value := range data.Get("feature").(map[string]interface{}) {
+
+	featureData := data.Get("feature")
+
+	var featureMap map[string]interface{}
+
+	featureMap = convertSchemaSetToMap(featureData.(*schema.Set))
+
+	for name, value := range featureMap {
+		var valueMap map[string]interface{}
+
+		valueMap = convertSchemaSetToMap(value.(*schema.Set))
 		switch name {
 		case "secure_config_posture":
 			accountFeatures.SecureConfigPosture = &cloudauth.AccountFeature{}
-			for name2, value2 := range value.(map[string]interface{}) {
+
+			for name2, value2 := range valueMap {
 				switch name2 {
 				case "type":
 					accountFeatures.SecureConfigPosture.Type = cloudauth.Feature(cloudauth.Feature_value[value2.(string)])
@@ -323,7 +348,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 			}
 		case "secure_identity_entitlement":
 			accountFeatures.SecureIdentityEntitlement = &cloudauth.AccountFeature{}
-			for name2, value2 := range value.(map[string]interface{}) {
+			for name2, value2 := range valueMap {
 				switch name2 {
 				case "type":
 					accountFeatures.SecureIdentityEntitlement.Type = cloudauth.Feature(cloudauth.Feature_value[value2.(string)])
@@ -337,7 +362,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 			}
 		case "secure_threat_detection":
 			accountFeatures.SecureThreatDetection = &cloudauth.AccountFeature{}
-			for name2, value2 := range value.(map[string]interface{}) {
+			for name2, value2 := range valueMap {
 				switch name2 {
 				case "type":
 					accountFeatures.SecureThreatDetection.Type = cloudauth.Feature(cloudauth.Feature_value[value2.(string)])
@@ -351,7 +376,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 			}
 		case "secure_agentless_scanning":
 			accountFeatures.SecureAgentlessScanning = &cloudauth.AccountFeature{}
-			for name2, value2 := range value.(map[string]interface{}) {
+			for name2, value2 := range valueMap {
 				switch name2 {
 				case "type":
 					accountFeatures.SecureAgentlessScanning.Type = cloudauth.Feature(cloudauth.Feature_value[value2.(string)])
@@ -365,7 +390,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 			}
 		case "monitor_cloud_metrics":
 			accountFeatures.MonitorCloudMetrics = &cloudauth.AccountFeature{}
-			for name2, value2 := range value.(map[string]interface{}) {
+			for name2, value2 := range valueMap {
 				switch name2 {
 				case "type":
 					accountFeatures.MonitorCloudMetrics.Type = cloudauth.Feature(cloudauth.Feature_value[value2.(string)])
@@ -397,7 +422,7 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		data.Set("enabled", cloudAccount.Enabled),
 		data.Set("cloud_provider_id", cloudAccount.ProviderId),
 		data.Set("cloud_provider_type", cloudAccount.Provider.String()),
-		data.Set("component", cloudAccount.Components),
+		data.Set("components", cloudAccount.Components),
 		data.Set("feature", cloudAccount.Feature),
 	} {
 		if err != nil {
