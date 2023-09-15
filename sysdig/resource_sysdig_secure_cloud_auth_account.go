@@ -16,6 +16,92 @@ import (
 func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 	timeout := 5 * time.Minute
 
+	var accountFeature = &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"enabled": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"components": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+		},
+	}
+
+	var accountFeatures = &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"secure_config_posture": {
+				Type: schema.TypeSet,
+				Elem: accountFeature,
+			},
+			"secure_identity_entitlement": {
+				Type: schema.TypeSet,
+				Elem: accountFeature,
+			},
+			"secure_threat_detection": {
+				Type: schema.TypeSet,
+				Elem: accountFeature,
+			},
+			"secure_agentless_scanning": {
+				Type: schema.TypeSet,
+				Elem: accountFeature,
+			},
+			"monitor_cloud_metrics": {
+				Type: schema.TypeSet,
+				Elem: accountFeature,
+			},
+		},
+	}
+
+	var accountComponents = &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"type": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"instance": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"cloud_connector_metadata": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"trusted_role_metadata": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"event_bridge_metadata": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"service_principal_metadata": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"webhook_datasource_metadata": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"crypto_key_metadata": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"cloud_logs_metadata": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+		},
+	}
+
 	return &schema.Resource{
 		CreateContext: resourceSysdigSecureCloudauthAccountCreate,
 		UpdateContext: resourceSysdigSecureCloudauthAccountUpdate,
@@ -57,92 +143,10 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			"components": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"type": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"instance": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"cloudConnectorMetadata": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"trustedRoleMetadata": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"eventBridgeMetadata": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"servicePrincipalMetadata": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"webhookDatasourceMetadata": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"cryptoKeyMetadata": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"cloudLogsMetadata": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
+				Elem:     accountComponents,
 			},
 		},
 	}
-}
-
-var accountFeatures = &schema.Resource{
-	Schema: map[string]*schema.Schema{
-		"secureConfigPosture": {
-			Type: schema.TypeSet,
-			Elem: accountFeature,
-		},
-		"secureIdentityEntitlement": {
-			Type: schema.TypeSet,
-			Elem: accountFeature,
-		},
-		"secureThreatDetection": {
-			Type: schema.TypeSet,
-			Elem: accountFeature,
-		},
-		"secureAgentlessScanning": {
-			Type: schema.TypeSet,
-			Elem: accountFeature,
-		},
-		"monitorCloudMetrics": {
-			Type: schema.TypeSet,
-			Elem: accountFeature,
-		},
-	},
-}
-var accountFeature = &schema.Resource{
-	Schema: map[string]*schema.Schema{
-		"type": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"enabled": {
-			Type:     schema.TypeBool,
-			Required: true,
-		},
-		"components": {
-			Type: schema.TypeList,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-		},
-	},
 }
 
 func getSecureCloudauthAccountClient(client SysdigClients) (v2.CloudauthAccountSecureInterface, error) {
@@ -230,58 +234,60 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
 	components := []*cloudauth.AccountComponent{}
-	for _, rc := range data.Get("components").([]interface{}) {
+
+	for _, rc := range data.Get("component").([]interface{}) {
 		resourceComponent := rc.(map[string]interface{})
 		component := &cloudauth.AccountComponent{}
+
 		for key, value := range resourceComponent {
 			switch key {
 			case "type":
 				component.Type = cloudauth.Component(cloudauth.Component_value[value.(string)])
 			case "instance":
 				component.Instance = value.(string)
-			case "cloudConnectorMetadata":
+			case "cloud_connector_metadata":
 				cloudConnectorMetadata := &cloudauth.CloudConnectorMetadata{}
 				if err := protojson.Unmarshal([]byte(value.(string)), cloudConnectorMetadata); err == nil {
 					component.Metadata = &cloudauth.AccountComponent_CloudConnectorMetadata{
 						CloudConnectorMetadata: cloudConnectorMetadata,
 					}
 				}
-			case "trustedRoleMetadata":
+			case "trusted_role_metadata":
 				metadata := &cloudauth.TrustedRoleMetadata{}
 				if err := protojson.Unmarshal([]byte(value.(string)), metadata); err == nil {
 					component.Metadata = &cloudauth.AccountComponent_TrustedRoleMetadata{
 						TrustedRoleMetadata: metadata,
 					}
 				}
-			case "eventBridgeMetadata":
+			case "event_bridge_metadata":
 				metadata := &cloudauth.EventBridgeMetadata{}
 				if err := protojson.Unmarshal([]byte(value.(string)), metadata); err == nil {
 					component.Metadata = &cloudauth.AccountComponent_EventBridgeMetadata{
 						EventBridgeMetadata: metadata,
 					}
 				}
-			case "servicePrincipalMetadata":
+			case "service_principal_metadata":
 				metadata := &cloudauth.CloudConnectorMetadata{}
 				if err := protojson.Unmarshal([]byte(value.(string)), metadata); err == nil {
 					component.Metadata = &cloudauth.AccountComponent_CloudConnectorMetadata{
 						CloudConnectorMetadata: metadata,
 					}
 				}
-			case "webhookDatasourceMetadata":
+			case "webhook_datasource_metadata":
 				metadata := &cloudauth.WebhookDatasourceMetadata{}
 				if err := protojson.Unmarshal([]byte(value.(string)), metadata); err == nil {
 					component.Metadata = &cloudauth.AccountComponent_WebhookDatasourceMetadata{
 						WebhookDatasourceMetadata: metadata,
 					}
 				}
-			case "cryptoKeyMetadata":
+			case "crypto_key_metadata":
 				metadata := &cloudauth.CryptoKeyMetadata{}
 				if err := protojson.Unmarshal([]byte(value.(string)), metadata); err == nil {
 					component.Metadata = &cloudauth.AccountComponent_CryptoKeyMetadata{
 						CryptoKeyMetadata: metadata,
 					}
 				}
-			case "cloudLogsMetadata":
+			case "cloud_logs_metadata":
 				metadata := &cloudauth.CloudLogsMetadata{}
 				if err := protojson.Unmarshal([]byte(value.(string)), metadata); err == nil {
 					component.Metadata = &cloudauth.AccountComponent_CloudLogsMetadata{
@@ -296,7 +302,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 	accountFeatures := &cloudauth.AccountFeatures{}
 	for name, value := range data.Get("feature").(map[string]interface{}) {
 		switch name {
-		case "secureConfigPosture":
+		case "secure_config_posture":
 			accountFeatures.SecureConfigPosture = &cloudauth.AccountFeature{}
 			for name2, value2 := range value.(map[string]interface{}) {
 				switch name2 {
@@ -310,7 +316,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 					}
 				}
 			}
-		case "secureIdentityEntitlement":
+		case "secure_identity_entitlement":
 			accountFeatures.SecureIdentityEntitlement = &cloudauth.AccountFeature{}
 			for name2, value2 := range value.(map[string]interface{}) {
 				switch name2 {
@@ -324,7 +330,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 					}
 				}
 			}
-		case "secureThreatDetection":
+		case "secure_threat_detection":
 			accountFeatures.SecureThreatDetection = &cloudauth.AccountFeature{}
 			for name2, value2 := range value.(map[string]interface{}) {
 				switch name2 {
@@ -338,7 +344,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 					}
 				}
 			}
-		case "secureAgentlessScanning":
+		case "secure_agentless_scanning":
 			accountFeatures.SecureAgentlessScanning = &cloudauth.AccountFeature{}
 			for name2, value2 := range value.(map[string]interface{}) {
 				switch name2 {
@@ -352,7 +358,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 					}
 				}
 			}
-		case "monitorCloudMetrics":
+		case "monitor_cloud_metrics":
 			accountFeatures.MonitorCloudMetrics = &cloudauth.AccountFeature{}
 			for name2, value2 := range value.(map[string]interface{}) {
 				switch name2 {
@@ -386,7 +392,7 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		data.Set("enabled", cloudAccount.Enabled),
 		data.Set("cloud_provider_id", cloudAccount.ProviderId),
 		data.Set("cloud_provider_type", cloudAccount.Provider.String()),
-		data.Set("components", cloudAccount.Components),
+		data.Set("component", cloudAccount.Components),
 		data.Set("feature", cloudAccount.Feature),
 	} {
 		if err != nil {
