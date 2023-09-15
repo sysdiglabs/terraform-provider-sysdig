@@ -40,22 +40,27 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"secure_config_posture": {
 				Type: schema.TypeSet,
+				Optional: true,
 				Elem: accountFeature,
 			},
 			"secure_identity_entitlement": {
 				Type: schema.TypeSet,
+				Optional: true,
 				Elem: accountFeature,
 			},
 			"secure_threat_detection": {
 				Type: schema.TypeSet,
+				Optional: true,
 				Elem: accountFeature,
 			},
 			"secure_agentless_scanning": {
 				Type: schema.TypeSet,
+				Optional: true,
 				Elem: accountFeature,
 			},
 			"monitor_cloud_metrics": {
 				Type: schema.TypeSet,
+				Optional: true,
 				Elem: accountFeature,
 			},
 		},
