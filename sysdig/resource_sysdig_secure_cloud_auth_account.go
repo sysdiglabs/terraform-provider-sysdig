@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func resourceSysdigSecureCloudauthAccount() *schema.Resource {
@@ -259,62 +258,63 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 		component := &cloudauth.AccountComponent{}
 
 		for key, value := range resourceComponent {
-			switch key {
-			case "type":
-				component.Type = cloudauth.Component(cloudauth.Component_value[value.(string)])
-			case "instance":
-				component.Instance = value.(string)
-			case "cloud_connector_metadata":
-				cloudConnectorMetadata := &cloudauth.CloudConnectorMetadata{}
-				if err := protojson.Unmarshal([]byte(value.(string)), cloudConnectorMetadata); err == nil {
+
+			if value != nil {
+				switch key {
+				case "type":
+					component.Type = cloudauth.Component(cloudauth.Component_value[value.(string)])
+				case "instance":
+					component.Instance = value.(string)
+				case "cloud_connector_metadata":
 					component.Metadata = &cloudauth.AccountComponent_CloudConnectorMetadata{
-						CloudConnectorMetadata: cloudConnectorMetadata,
+						CloudConnectorMetadata: &cloudauth.CloudConnectorMetadata{},
 					}
-				}
-			case "trusted_role_metadata":
-				metadata := &cloudauth.TrustedRoleMetadata{}
-				if err := protojson.Unmarshal([]byte(value.(string)), metadata); err == nil {
+				case "trusted_role_metadata":
+					// TODO: Make it more generic than just for GCP
 					component.Metadata = &cloudauth.AccountComponent_TrustedRoleMetadata{
-						TrustedRoleMetadata: metadata,
+						TrustedRoleMetadata: &cloudauth.TrustedRoleMetadata{
+							Provider: &cloudauth.TrustedRoleMetadata_Gcp{
+								Gcp: &cloudauth.TrustedRoleMetadata_GCP{
+									RoleName: value.(string),
+								},
+							},
+						},
 					}
-				}
-			case "event_bridge_metadata":
-				metadata := &cloudauth.EventBridgeMetadata{}
-				if err := protojson.Unmarshal([]byte(value.(string)), metadata); err == nil {
+				case "event_bridge_metadata":
 					component.Metadata = &cloudauth.AccountComponent_EventBridgeMetadata{
-						EventBridgeMetadata: metadata,
+						EventBridgeMetadata: &cloudauth.EventBridgeMetadata{},
 					}
-				}
-			case "service_principal_metadata":
-				metadata := &cloudauth.CloudConnectorMetadata{}
-				if err := protojson.Unmarshal([]byte(value.(string)), metadata); err == nil {
-					component.Metadata = &cloudauth.AccountComponent_CloudConnectorMetadata{
-						CloudConnectorMetadata: metadata,
+				case "service_principal_metadata":
+					// TODO: Make it more generic than just for GCP
+					component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
+						ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
+							Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
+								Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
+									Key: &cloudauth.ServicePrincipalMetadata_GCP_Key{
+										ProjectId:    data.Get("cloud_provider_id").(string),
+										PrivateKeyId: "deadbeef",
+										PrivateKey:   "cert thangs",
+									},
+								},
+							},
+						},
 					}
-				}
-			case "webhook_datasource_metadata":
-				metadata := &cloudauth.WebhookDatasourceMetadata{}
-				if err := protojson.Unmarshal([]byte(value.(string)), metadata); err == nil {
+				case "webhook_datasource_metadata":
 					component.Metadata = &cloudauth.AccountComponent_WebhookDatasourceMetadata{
-						WebhookDatasourceMetadata: metadata,
+						WebhookDatasourceMetadata: &cloudauth.WebhookDatasourceMetadata{},
 					}
-				}
-			case "crypto_key_metadata":
-				metadata := &cloudauth.CryptoKeyMetadata{}
-				if err := protojson.Unmarshal([]byte(value.(string)), metadata); err == nil {
+				case "crypto_key_metadata":
 					component.Metadata = &cloudauth.AccountComponent_CryptoKeyMetadata{
-						CryptoKeyMetadata: metadata,
+						CryptoKeyMetadata: &cloudauth.CryptoKeyMetadata{},
 					}
-				}
-			case "cloud_logs_metadata":
-				metadata := &cloudauth.CloudLogsMetadata{}
-				if err := protojson.Unmarshal([]byte(value.(string)), metadata); err == nil {
+				case "cloud_logs_metadata":
 					component.Metadata = &cloudauth.AccountComponent_CloudLogsMetadata{
-						CloudLogsMetadata: metadata,
+						CloudLogsMetadata: &cloudauth.CloudLogsMetadata{},
 					}
 				}
 			}
 		}
+
 		components = append(components, component)
 	}
 
