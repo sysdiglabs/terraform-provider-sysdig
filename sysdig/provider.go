@@ -10,6 +10,11 @@ import (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
+			"sysdig_secure_skip_policyv2msg": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_SECURE_SKIP_POLICYV2MSG", false),
+			},
 			"sysdig_secure_api_token": {
 				Type:        schema.TypeString,
 				Optional:    true,

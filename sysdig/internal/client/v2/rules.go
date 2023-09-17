@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	CreateRulePath   = "%s/api/secure/rules"
+	CreateRulePath   = "%s/api/secure/rules?skipPolicyV2Msg=%t"
 	GetRuleByIDPath  = "%s/api/secure/rules/%d"
-	UpdateRulePath   = "%s/api/secure/rules/%d"
-	DeleteURLPath    = "%s/api/secure/rules/%d"
+	UpdateRulePath   = "%s/api/secure/rules/%d?skipPolicyV2Msg=%t"
+	DeleteURLPath    = "%s/api/secure/rules/%d?skipPolicyV2Msg=%t"
 	GetRuleGroupPath = "%s/api/secure/rules/groups?name=%s&type=%s"
 )
 
@@ -108,7 +108,7 @@ func (client *Client) GetRuleGroup(ctx context.Context, ruleName string, ruleTyp
 }
 
 func (client *Client) CreateRuleURL() string {
-	return fmt.Sprintf(CreateRulePath, client.config.url)
+	return fmt.Sprintf(CreateRulePath, client.config.url, client.config.secureSkipPolicyV2Msg)
 }
 
 func (client *Client) GetRuleByIDURL(ruleID int) string {
@@ -116,11 +116,11 @@ func (client *Client) GetRuleByIDURL(ruleID int) string {
 }
 
 func (client *Client) UpdateRuleURL(ruleID int) string {
-	return fmt.Sprintf(UpdateRulePath, client.config.url, ruleID)
+	return fmt.Sprintf(UpdateRulePath, client.config.url, ruleID, client.config.secureSkipPolicyV2Msg)
 }
 
 func (client *Client) DeleteRuleURL(ruleID int) string {
-	return fmt.Sprintf(DeleteURLPath, client.config.url, ruleID)
+	return fmt.Sprintf(DeleteURLPath, client.config.url, ruleID, client.config.secureSkipPolicyV2Msg)
 }
 
 func (client *Client) GetRuleGroupURL(ruleName string, ruleType string) string {

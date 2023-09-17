@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	CreatePolicyPath = "%s/api/v2/policies"
-	DeletePolicyPath = "%s/api/v2/policies/%d"
-	UpdatePolicyPath = "%s/api/v2/policies/%d"
+	CreatePolicyPath = "%s/api/v2/policies?skipPolicyV2Msg=%t"
+	DeletePolicyPath = "%s/api/v2/policies/%d?skipPolicyV2Msg=%t"
+	UpdatePolicyPath = "%s/api/v2/policies/%d?skipPolicyV2Msg=%t"
 	GetPolicyPath    = "%s/api/v2/policies/%d"
 	GetPoliciesPath  = "%s/api/v2/policies"
 )
@@ -116,15 +116,15 @@ func (client *Client) GetPolicies(ctx context.Context) ([]Policy, int, error) {
 }
 
 func (client *Client) CreatePolicyURL() string {
-	return fmt.Sprintf(CreatePolicyPath, client.config.url)
+	return fmt.Sprintf(CreatePolicyPath, client.config.url, client.config.secureSkipPolicyV2Msg)
 }
 
 func (client *Client) DeletePolicyURL(policyID int) string {
-	return fmt.Sprintf(DeletePolicyPath, client.config.url, policyID)
+	return fmt.Sprintf(DeletePolicyPath, client.config.url, policyID, client.config.secureSkipPolicyV2Msg)
 }
 
 func (client *Client) UpdatePolicyURL(policyID int) string {
-	return fmt.Sprintf(UpdatePolicyPath, client.config.url, policyID)
+	return fmt.Sprintf(UpdatePolicyPath, client.config.url, policyID, client.config.secureSkipPolicyV2Msg)
 }
 
 func (client *Client) GetPolicyURL(policyID int) string {
