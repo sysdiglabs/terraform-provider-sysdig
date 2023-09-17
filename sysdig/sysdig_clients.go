@@ -109,9 +109,7 @@ func getSysdigSecureVariables(data *schema.ResourceData) (*sysdigSecureVariables
 	}
 
 	skipPolicyV2Msg := false
-	if skipPolicyV2MsgValue, ok := data.GetOk("sysdig_secure_skip_policyv2msg"); !ok {
-		return nil, errors.New("missing skip value")
-	} else {
+	if skipPolicyV2MsgValue, ok := data.GetOk("sysdig_secure_skip_policyv2msg"); ok {
 		skipPolicyV2Msg = skipPolicyV2MsgValue.(bool)
 	}
 
