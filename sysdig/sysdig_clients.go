@@ -49,10 +49,9 @@ type sysdigClients struct {
 }
 
 type globalVariables struct {
-	apiURL          string
-	insecure        bool
-	extraHeaders    map[string]string
-	skipPolicyV2Msg bool
+	apiURL       string
+	insecure     bool
+	extraHeaders map[string]string
 }
 
 type sysdigVariables struct {
