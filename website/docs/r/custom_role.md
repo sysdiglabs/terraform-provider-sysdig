@@ -47,7 +47,7 @@ Permissions block is required and supports:
 
 Permissions can have dependencies and dependee. Since the dependencies graph can be hard to determine manually were introduced 
 
-[`sysdig_secure_custom_role_permissions`](../d/secure_custom_role_permissions.md) and [`sysdig_monitor_custom_role_permissions`](../d/monitor_custom_role_permissions.md)
+[`sysdig_secure_custom_role_permissions`](../data-sources/secure_custom_role_permissions.md) and [`sysdig_monitor_custom_role_permissions`](../data-sources/monitor_custom_role_permissions.md)
 
 Please check the relative documentation to see how to use them.
 
