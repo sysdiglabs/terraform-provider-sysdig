@@ -237,6 +237,9 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 	return nil
 }
 
+/*
+This function converts a schema set to map for iteration.
+*/
 func convertSchemaSetToMap(set *schema.Set) map[string]interface{} {
 	result := make(map[string]interface{})
 
@@ -251,6 +254,9 @@ func convertSchemaSetToMap(set *schema.Set) map[string]interface{} {
 	return result
 }
 
+/*
+This helper function dynamically populates the account features object for account creation
+*/
 func setAccountFeature(accountFeatures *cloudauth.AccountFeatures, fieldName string, featureType cloudauth.Feature, valueMap map[string]interface{}) {
 	target := reflect.ValueOf(accountFeatures).Elem().FieldByName(fieldName)
 	target.Elem().FieldByName("Type").Set(reflect.ValueOf(cloudauth.Feature(featureType)))
@@ -267,8 +273,44 @@ func setAccountFeature(accountFeatures *cloudauth.AccountFeatures, fieldName str
 	}
 }
 
-func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
-	components := []*cloudauth.AccountComponent{}
+/*
+This helper function aggregates the account features object that will be used in the
+cloudauthAccountFromResourceData() function
+*/
+func constructAccountFeatures(accountFeatures *cloudauth.AccountFeatures, featureData interface{}) *cloudauth.AccountFeatures {
+	featureMap := convertSchemaSetToMap(featureData.(*schema.Set))
+
+	for name, value := range featureMap {
+		if value != nil && value.(*schema.Set) != nil {
+			valueMap := convertSchemaSetToMap(value.(*schema.Set))
+			switch name {
+			case "secure_config_posture":
+				accountFeatures.SecureConfigPosture = &cloudauth.AccountFeature{}
+				setAccountFeature(accountFeatures, "SecureConfigPosture", cloudauth.Feature_FEATURE_SECURE_CONFIG_POSTURE, valueMap)
+			case "secure_identity_entitlement":
+				accountFeatures.SecureIdentityEntitlement = &cloudauth.AccountFeature{}
+				setAccountFeature(accountFeatures, "SecureIdentityEntitlement", cloudauth.Feature_FEATURE_SECURE_IDENTITY_ENTITLEMENT, valueMap)
+			case "secure_threat_detection":
+				accountFeatures.SecureThreatDetection = &cloudauth.AccountFeature{}
+				setAccountFeature(accountFeatures, "SecureThreatDetection", cloudauth.Feature_FEATURE_SECURE_THREAT_DETECTION, valueMap)
+			case "secure_agentless_scanning":
+				accountFeatures.SecureAgentlessScanning = &cloudauth.AccountFeature{}
+				setAccountFeature(accountFeatures, "SecureAgentlessScanning", cloudauth.Feature_FEATURE_SECURE_AGENTLESS_SCANNING, valueMap)
+			case "monitor_cloud_metrics":
+				accountFeatures.MonitorCloudMetrics = &cloudauth.AccountFeature{}
+				setAccountFeature(accountFeatures, "MonitorCloudMetrics", cloudauth.Feature_FEATURE_MONITOR_CLOUD_METRICS, valueMap)
+			}
+		}
+	}
+
+	return accountFeatures
+}
+
+/*
+This helper function aggregates the account components list that will be used in the
+cloudauthAccountFromResourceData() function
+*/
+func constructAccountComponents(accountComponents []*cloudauth.AccountComponent, data *schema.ResourceData) []*cloudauth.AccountComponent {
 	provider := data.Get("cloud_provider_type").(string)
 
 	for _, rc := range data.Get("components").([]interface{}) {
@@ -276,7 +318,6 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 		component := &cloudauth.AccountComponent{}
 
 		for key, value := range resourceComponent {
-
 			if value != nil && value.(string) != "" {
 				switch key {
 				case "type":
@@ -335,50 +376,24 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 			}
 		}
 
-		components = append(components, component)
+		accountComponents = append(accountComponents, component)
 	}
 
-	accountFeatures := &cloudauth.AccountFeatures{}
+	return accountComponents
+}
 
-	featureData := data.Get("feature")
+func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
+	accountComponents := constructAccountComponents([]*cloudauth.AccountComponent{}, data)
 
-	var featureMap map[string]interface{}
-
-	featureMap = convertSchemaSetToMap(featureData.(*schema.Set))
-
-	for name, value := range featureMap {
-
-		if value != nil && value.(*schema.Set) != nil {
-
-			var valueMap map[string]interface{}
-
-			valueMap = convertSchemaSetToMap(value.(*schema.Set))
-			switch name {
-			case "secure_config_posture":
-				accountFeatures.SecureConfigPosture = &cloudauth.AccountFeature{}
-				setAccountFeature(accountFeatures, "SecureConfigPosture", cloudauth.Feature_FEATURE_SECURE_CONFIG_POSTURE, valueMap)
-			case "secure_identity_entitlement":
-				accountFeatures.SecureIdentityEntitlement = &cloudauth.AccountFeature{}
-				setAccountFeature(accountFeatures, "SecureIdentityEntitlement", cloudauth.Feature_FEATURE_SECURE_IDENTITY_ENTITLEMENT, valueMap)
-			case "secure_threat_detection":
-				accountFeatures.SecureThreatDetection = &cloudauth.AccountFeature{}
-				setAccountFeature(accountFeatures, "SecureThreatDetection", cloudauth.Feature_FEATURE_SECURE_THREAT_DETECTION, valueMap)
-			case "secure_agentless_scanning":
-				accountFeatures.SecureAgentlessScanning = &cloudauth.AccountFeature{}
-				setAccountFeature(accountFeatures, "SecureAgentlessScanning", cloudauth.Feature_FEATURE_SECURE_AGENTLESS_SCANNING, valueMap)
-			case "monitor_cloud_metrics":
-				accountFeatures.MonitorCloudMetrics = &cloudauth.AccountFeature{}
-				setAccountFeature(accountFeatures, "MonitorCloudMetrics", cloudauth.Feature_FEATURE_MONITOR_CLOUD_METRICS, valueMap)
-			}
-		}
-	}
+	featureData := data.Get("feature").(interface{})
+	accountFeatures := constructAccountFeatures(&cloudauth.AccountFeatures{}, featureData)
 
 	return &v2.CloudauthAccountSecure{
 		CloudAccount: cloudauth.CloudAccount{
 			Enabled:    data.Get("enabled").(bool),
 			ProviderId: data.Get("cloud_provider_id").(string),
 			Provider:   cloudauth.Provider(cloudauth.Provider_value[data.Get("cloud_provider_type").(string)]),
-			Components: components,
+			Components: accountComponents,
 			Feature:    accountFeatures,
 		},
 	}
