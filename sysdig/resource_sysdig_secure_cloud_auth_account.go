@@ -259,7 +259,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 
 		for key, value := range resourceComponent {
 
-			if value != nil {
+			if value != nil && value.(string) != "" {
 				switch key {
 				case "type":
 					component.Type = cloudauth.Component(cloudauth.Component_value[value.(string)])
@@ -333,72 +333,85 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 		switch name {
 		case "secure_config_posture":
 			accountFeatures.SecureConfigPosture = &cloudauth.AccountFeature{}
+			if value != nil {
+				accountFeatures.SecureConfigPosture.Type = cloudauth.Feature(cloudauth.Feature_FEATURE_SECURE_CONFIG_POSTURE)
 
-			for name2, value2 := range valueMap {
-				switch name2 {
-				case "type":
-					accountFeatures.SecureConfigPosture.Type = cloudauth.Feature(cloudauth.Feature_value[value2.(string)])
-				case "enabled":
-					accountFeatures.SecureConfigPosture.Enabled = value2.(bool)
-				case "components":
-					for _, componentID := range value2.([]interface{}) {
-						accountFeatures.SecureConfigPosture.Components = append(accountFeatures.SecureConfigPosture.Components, componentID.(string))
+				for name2, value2 := range valueMap {
+					switch name2 {
+					case "enabled":
+						accountFeatures.SecureConfigPosture.Enabled = value2.(bool)
+					case "components":
+						for _, componentID := range value2.([]interface{}) {
+							accountFeatures.SecureConfigPosture.Components = append(accountFeatures.SecureConfigPosture.Components, componentID.(string))
+						}
 					}
 				}
 			}
 		case "secure_identity_entitlement":
 			accountFeatures.SecureIdentityEntitlement = &cloudauth.AccountFeature{}
-			for name2, value2 := range valueMap {
-				switch name2 {
-				case "type":
-					accountFeatures.SecureIdentityEntitlement.Type = cloudauth.Feature(cloudauth.Feature_value[value2.(string)])
-				case "enabled":
-					accountFeatures.SecureIdentityEntitlement.Enabled = value2.(bool)
-				case "components":
-					for _, componentID := range value2.([]interface{}) {
-						accountFeatures.SecureIdentityEntitlement.Components = append(accountFeatures.SecureIdentityEntitlement.Components, componentID.(string))
+
+			if value != nil {
+				accountFeatures.SecureIdentityEntitlement.Type = cloudauth.Feature(cloudauth.Feature_FEATURE_SECURE_IDENTITY_ENTITLEMENT)
+
+				for name2, value2 := range valueMap {
+					switch name2 {
+					case "enabled":
+						accountFeatures.SecureIdentityEntitlement.Enabled = value2.(bool)
+					case "components":
+						for _, componentID := range value2.([]interface{}) {
+							accountFeatures.SecureIdentityEntitlement.Components = append(accountFeatures.SecureIdentityEntitlement.Components, componentID.(string))
+						}
 					}
 				}
 			}
 		case "secure_threat_detection":
 			accountFeatures.SecureThreatDetection = &cloudauth.AccountFeature{}
-			for name2, value2 := range valueMap {
-				switch name2 {
-				case "type":
-					accountFeatures.SecureThreatDetection.Type = cloudauth.Feature(cloudauth.Feature_value[value2.(string)])
-				case "enabled":
-					accountFeatures.SecureThreatDetection.Enabled = value2.(bool)
-				case "components":
-					for _, componentID := range value2.([]interface{}) {
-						accountFeatures.SecureThreatDetection.Components = append(accountFeatures.SecureThreatDetection.Components, componentID.(string))
+
+			if value != nil {
+				accountFeatures.SecureThreatDetection.Type = cloudauth.Feature(cloudauth.Feature_FEATURE_SECURE_THREAT_DETECTION)
+
+				for name2, value2 := range valueMap {
+					switch name2 {
+					case "enabled":
+						accountFeatures.SecureThreatDetection.Enabled = value2.(bool)
+					case "components":
+						for _, componentID := range value2.([]interface{}) {
+							accountFeatures.SecureThreatDetection.Components = append(accountFeatures.SecureThreatDetection.Components, componentID.(string))
+						}
 					}
 				}
 			}
 		case "secure_agentless_scanning":
 			accountFeatures.SecureAgentlessScanning = &cloudauth.AccountFeature{}
-			for name2, value2 := range valueMap {
-				switch name2 {
-				case "type":
-					accountFeatures.SecureAgentlessScanning.Type = cloudauth.Feature(cloudauth.Feature_value[value2.(string)])
-				case "enabled":
-					accountFeatures.SecureAgentlessScanning.Enabled = value2.(bool)
-				case "components":
-					for _, componentID := range value2.([]interface{}) {
-						accountFeatures.SecureAgentlessScanning.Components = append(accountFeatures.SecureAgentlessScanning.Components, componentID.(string))
+
+			if value != nil {
+				accountFeatures.SecureAgentlessScanning.Type = cloudauth.Feature(cloudauth.Feature_FEATURE_SECURE_AGENTLESS_SCANNING)
+
+				for name2, value2 := range valueMap {
+					switch name2 {
+					case "enabled":
+						accountFeatures.SecureAgentlessScanning.Enabled = value2.(bool)
+					case "components":
+						for _, componentID := range value2.([]interface{}) {
+							accountFeatures.SecureAgentlessScanning.Components = append(accountFeatures.SecureAgentlessScanning.Components, componentID.(string))
+						}
 					}
 				}
 			}
 		case "monitor_cloud_metrics":
 			accountFeatures.MonitorCloudMetrics = &cloudauth.AccountFeature{}
-			for name2, value2 := range valueMap {
-				switch name2 {
-				case "type":
-					accountFeatures.MonitorCloudMetrics.Type = cloudauth.Feature(cloudauth.Feature_value[value2.(string)])
-				case "enabled":
-					accountFeatures.MonitorCloudMetrics.Enabled = value2.(bool)
-				case "components":
-					for _, componentID := range value2.([]interface{}) {
-						accountFeatures.MonitorCloudMetrics.Components = append(accountFeatures.MonitorCloudMetrics.Components, componentID.(string))
+
+			if value != nil {
+				accountFeatures.MonitorCloudMetrics.Type = cloudauth.Feature(cloudauth.Feature_FEATURE_MONITOR_CLOUD_METRICS)
+
+				for name2, value2 := range valueMap {
+					switch name2 {
+					case "enabled":
+						accountFeatures.MonitorCloudMetrics.Enabled = value2.(bool)
+					case "components":
+						for _, componentID := range value2.([]interface{}) {
+							accountFeatures.MonitorCloudMetrics.Components = append(accountFeatures.MonitorCloudMetrics.Components, componentID.(string))
+						}
 					}
 				}
 			}
