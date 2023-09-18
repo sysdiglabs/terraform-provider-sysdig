@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"reflect"
 	"strings"
 	"time"
 
@@ -250,8 +251,25 @@ func convertSchemaSetToMap(set *schema.Set) map[string]interface{} {
 	return result
 }
 
+func setAccountFeature(accountFeatures *cloudauth.AccountFeatures, fieldName string, featureType cloudauth.Feature, valueMap map[string]interface{}) {
+	target := reflect.ValueOf(accountFeatures).Elem().FieldByName(fieldName)
+	target.Elem().FieldByName("Type").Set(reflect.ValueOf(cloudauth.Feature(featureType)))
+
+	for name, value := range valueMap {
+		switch name {
+		case "enabled":
+			target.Elem().FieldByName("Enabled").SetBool(value.(bool))
+		case "components":
+			for _, componentID := range value.([]interface{}) {
+				target.Elem().FieldByName("Components").Set(reflect.Append(target.Elem().FieldByName("Components"), reflect.ValueOf(componentID.(string))))
+			}
+		}
+	}
+}
+
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
 	components := []*cloudauth.AccountComponent{}
+	provider := data.Get("cloud_provider_type").(string)
 
 	for _, rc := range data.Get("components").([]interface{}) {
 		resourceComponent := rc.(map[string]interface{})
@@ -271,14 +289,16 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 					}
 				case "trusted_role_metadata":
 					// TODO: Make it more generic than just for GCP
-					component.Metadata = &cloudauth.AccountComponent_TrustedRoleMetadata{
-						TrustedRoleMetadata: &cloudauth.TrustedRoleMetadata{
-							Provider: &cloudauth.TrustedRoleMetadata_Gcp{
-								Gcp: &cloudauth.TrustedRoleMetadata_GCP{
-									RoleName: value.(string),
+					if provider == cloudauth.Provider_PROVIDER_GCP.String() {
+						component.Metadata = &cloudauth.AccountComponent_TrustedRoleMetadata{
+							TrustedRoleMetadata: &cloudauth.TrustedRoleMetadata{
+								Provider: &cloudauth.TrustedRoleMetadata_Gcp{
+									Gcp: &cloudauth.TrustedRoleMetadata_GCP{
+										RoleName: value.(string),
+									},
 								},
 							},
-						},
+						}
 					}
 				case "event_bridge_metadata":
 					component.Metadata = &cloudauth.AccountComponent_EventBridgeMetadata{
@@ -327,93 +347,28 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 	featureMap = convertSchemaSetToMap(featureData.(*schema.Set))
 
 	for name, value := range featureMap {
-		var valueMap map[string]interface{}
 
-		valueMap = convertSchemaSetToMap(value.(*schema.Set))
-		switch name {
-		case "secure_config_posture":
-			accountFeatures.SecureConfigPosture = &cloudauth.AccountFeature{}
-			if value != nil {
-				accountFeatures.SecureConfigPosture.Type = cloudauth.Feature(cloudauth.Feature_FEATURE_SECURE_CONFIG_POSTURE)
+		if value != nil && value.(*schema.Set) != nil {
 
-				for name2, value2 := range valueMap {
-					switch name2 {
-					case "enabled":
-						accountFeatures.SecureConfigPosture.Enabled = value2.(bool)
-					case "components":
-						for _, componentID := range value2.([]interface{}) {
-							accountFeatures.SecureConfigPosture.Components = append(accountFeatures.SecureConfigPosture.Components, componentID.(string))
-						}
-					}
-				}
-			}
-		case "secure_identity_entitlement":
-			accountFeatures.SecureIdentityEntitlement = &cloudauth.AccountFeature{}
+			var valueMap map[string]interface{}
 
-			if value != nil {
-				accountFeatures.SecureIdentityEntitlement.Type = cloudauth.Feature(cloudauth.Feature_FEATURE_SECURE_IDENTITY_ENTITLEMENT)
-
-				for name2, value2 := range valueMap {
-					switch name2 {
-					case "enabled":
-						accountFeatures.SecureIdentityEntitlement.Enabled = value2.(bool)
-					case "components":
-						for _, componentID := range value2.([]interface{}) {
-							accountFeatures.SecureIdentityEntitlement.Components = append(accountFeatures.SecureIdentityEntitlement.Components, componentID.(string))
-						}
-					}
-				}
-			}
-		case "secure_threat_detection":
-			accountFeatures.SecureThreatDetection = &cloudauth.AccountFeature{}
-
-			if value != nil {
-				accountFeatures.SecureThreatDetection.Type = cloudauth.Feature(cloudauth.Feature_FEATURE_SECURE_THREAT_DETECTION)
-
-				for name2, value2 := range valueMap {
-					switch name2 {
-					case "enabled":
-						accountFeatures.SecureThreatDetection.Enabled = value2.(bool)
-					case "components":
-						for _, componentID := range value2.([]interface{}) {
-							accountFeatures.SecureThreatDetection.Components = append(accountFeatures.SecureThreatDetection.Components, componentID.(string))
-						}
-					}
-				}
-			}
-		case "secure_agentless_scanning":
-			accountFeatures.SecureAgentlessScanning = &cloudauth.AccountFeature{}
-
-			if value != nil {
-				accountFeatures.SecureAgentlessScanning.Type = cloudauth.Feature(cloudauth.Feature_FEATURE_SECURE_AGENTLESS_SCANNING)
-
-				for name2, value2 := range valueMap {
-					switch name2 {
-					case "enabled":
-						accountFeatures.SecureAgentlessScanning.Enabled = value2.(bool)
-					case "components":
-						for _, componentID := range value2.([]interface{}) {
-							accountFeatures.SecureAgentlessScanning.Components = append(accountFeatures.SecureAgentlessScanning.Components, componentID.(string))
-						}
-					}
-				}
-			}
-		case "monitor_cloud_metrics":
-			accountFeatures.MonitorCloudMetrics = &cloudauth.AccountFeature{}
-
-			if value != nil {
-				accountFeatures.MonitorCloudMetrics.Type = cloudauth.Feature(cloudauth.Feature_FEATURE_MONITOR_CLOUD_METRICS)
-
-				for name2, value2 := range valueMap {
-					switch name2 {
-					case "enabled":
-						accountFeatures.MonitorCloudMetrics.Enabled = value2.(bool)
-					case "components":
-						for _, componentID := range value2.([]interface{}) {
-							accountFeatures.MonitorCloudMetrics.Components = append(accountFeatures.MonitorCloudMetrics.Components, componentID.(string))
-						}
-					}
-				}
+			valueMap = convertSchemaSetToMap(value.(*schema.Set))
+			switch name {
+			case "secure_config_posture":
+				accountFeatures.SecureConfigPosture = &cloudauth.AccountFeature{}
+				setAccountFeature(accountFeatures, "SecureConfigPosture", cloudauth.Feature_FEATURE_SECURE_CONFIG_POSTURE, valueMap)
+			case "secure_identity_entitlement":
+				accountFeatures.SecureIdentityEntitlement = &cloudauth.AccountFeature{}
+				setAccountFeature(accountFeatures, "SecureIdentityEntitlement", cloudauth.Feature_FEATURE_SECURE_IDENTITY_ENTITLEMENT, valueMap)
+			case "secure_threat_detection":
+				accountFeatures.SecureThreatDetection = &cloudauth.AccountFeature{}
+				setAccountFeature(accountFeatures, "SecureThreatDetection", cloudauth.Feature_FEATURE_SECURE_THREAT_DETECTION, valueMap)
+			case "secure_agentless_scanning":
+				accountFeatures.SecureAgentlessScanning = &cloudauth.AccountFeature{}
+				setAccountFeature(accountFeatures, "SecureAgentlessScanning", cloudauth.Feature_FEATURE_SECURE_AGENTLESS_SCANNING, valueMap)
+			case "monitor_cloud_metrics":
+				accountFeatures.MonitorCloudMetrics = &cloudauth.AccountFeature{}
+				setAccountFeature(accountFeatures, "MonitorCloudMetrics", cloudauth.Feature_FEATURE_MONITOR_CLOUD_METRICS, valueMap)
 			}
 		}
 	}
