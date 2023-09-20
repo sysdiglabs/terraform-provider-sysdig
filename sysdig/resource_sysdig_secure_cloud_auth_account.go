@@ -2,6 +2,9 @@ package sysdig
 
 import (
 	"context"
+	b64 "encoding/base64"
+	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -172,7 +175,6 @@ func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, data *schem
 	}
 
 	data.SetId(cloudauthAccount.Id)
-	data.Set("cloud_provider_type", cloudauthAccount.Provider.String())
 
 	return nil
 }
@@ -347,14 +349,15 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 					}
 				case "service_principal_metadata":
 					// TODO: Make it more generic than just for GCP
+					service_principal_private_key := getServicePrincipalKeyObject(value.(string))
 					component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
 						ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
 							Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
 								Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
 									Key: &cloudauth.ServicePrincipalMetadata_GCP_Key{
 										ProjectId:    data.Get("cloud_provider_id").(string),
-										PrivateKeyId: "deadbeef",
-										PrivateKey:   "cert thangs",
+										PrivateKeyId: service_principal_private_key["private_key_id"],
+										PrivateKey:   service_principal_private_key["private_key"],
 									},
 								},
 							},
@@ -413,4 +416,20 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		}
 	}
 	return nil
+}
+
+func getServicePrincipalKeyObject(value string) map[string]string {
+	bytes, err := b64.StdEncoding.DecodeString(value)
+	if err != nil {
+		fmt.Printf("Failed to decode service principal key: %v", err)
+		return nil
+	}
+	var privateKeyJSON map[string]string
+	err = json.Unmarshal(bytes, &privateKeyJSON)
+	if err != nil {
+		fmt.Printf("Failed to parse service principal key: %v", err)
+		return nil
+	}
+
+	return privateKeyJSON
 }
