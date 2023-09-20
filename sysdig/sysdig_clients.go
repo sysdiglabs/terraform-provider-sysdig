@@ -1,19 +1,25 @@
 package sysdig
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"io"
 	"sync"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 type SysdigClients interface {
+	io.Closer
 	GetClientType() ClientType
 	GetSecureEndpoint() (string, error)
 	GetSecureApiToken() (string, error)
+
+	Configure(context.Context, *schema.ResourceData)
 
 	// v2
 	sysdigMonitorClientV2() (v2.SysdigMonitor, error)
@@ -22,6 +28,10 @@ type SysdigClients interface {
 	ibmSecureClient() (v2.IBMSecure, error)
 	commonClientV2() (v2.Common, error)
 	sysdigCommonClientV2() (v2.SysdigCommon, error)
+}
+
+func NewSysdigClients() SysdigClients {
+	return &sysdigClients{}
 }
 
 //go:generate stringer -type ClientType
@@ -35,6 +45,7 @@ const (
 )
 
 type sysdigClients struct {
+	ctx      context.Context
 	d        *schema.ResourceData
 	mu       sync.Mutex
 	commonMu sync.Mutex
@@ -171,6 +182,16 @@ func getIBMMonitorVariables(data *schema.ResourceData) (*ibmVariables, error) {
 
 func getIBMSecureVariables(data *schema.ResourceData) (*ibmVariables, error) {
 	return getIBMVariables("secure", data)
+}
+
+func (c *sysdigClients) Configure(ctx context.Context, d *schema.ResourceData) {
+	c.ctx = ctx
+	c.d = d
+}
+
+func (c *sysdigClients) Close() error {
+	tflog.Warn(c.ctx, "[WARN] Closing sysdig clients - check for need to send request to forward policyv2")
+	return nil
 }
 
 func (c *sysdigClients) GetSecureEndpoint() (string, error) {
