@@ -2,8 +2,9 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -175,7 +176,6 @@ func resourceSysdigScanningPolicyDelete(ctx context.Context, d *schema.ResourceD
 }
 
 func scanningPolicyToResourceData(scanningPolicy *v2.ScanningPolicy, d *schema.ResourceData) {
-
 	d.SetId(scanningPolicy.ID)
 	_ = d.Set("name", scanningPolicy.Name)
 	_ = d.Set("version", scanningPolicy.Version)
@@ -191,7 +191,6 @@ func scanningPolicyToResourceData(scanningPolicy *v2.ScanningPolicy, d *schema.R
 	}
 
 	_ = d.Set("rules", rules)
-
 }
 
 func scanningPolicyRulesToResourceData(scanningPolicyRule v2.ScanningGate) map[string]interface{} {

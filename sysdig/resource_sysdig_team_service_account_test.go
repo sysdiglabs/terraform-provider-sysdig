@@ -4,10 +4,11 @@ package sysdig_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"testing"
 )
 
 func TestAccTeamServiceAccount(t *testing.T) {

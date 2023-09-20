@@ -3,9 +3,10 @@ package sysdig
 import (
 	"context"
 	"fmt"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -174,7 +175,6 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 
 	id, _ := strconv.Atoi(d.Id())
 	t, err := client.GetTeamById(ctx, id)
-
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)

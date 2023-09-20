@@ -2,12 +2,13 @@ package sysdig
 
 import (
 	"context"
+	"time"
+
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"time"
 )
 
 func resourceSysdigSecureOrganization() *schema.Resource {
@@ -100,6 +101,7 @@ func resourceSysdigSecureOrganizationRead(ctx context.Context, data *schema.Reso
 
 	return nil
 }
+
 func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
 	client, err := getSecureOrganizationClient(i.(SysdigClients))
 	if err != nil {

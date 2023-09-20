@@ -163,13 +163,11 @@ func getSecureCloudauthAccountClient(client SysdigClients) (v2.CloudauthAccountS
 
 func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountClient((meta.(SysdigClients)))
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	cloudauthAccount, err := client.CreateCloudauthAccountSecure(ctx, cloudauthAccountFromResourceData(data))
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -181,13 +179,11 @@ func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, data *schem
 
 func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountClient(meta.(SysdigClients))
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	cloudauthAccount, err := client.GetCloudauthAccountSecure(ctx, data.Id())
-
 	if err != nil {
 		if strings.Contains(err.Error(), "404") {
 			return nil
@@ -206,7 +202,6 @@ func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.
 
 func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountClient(meta.(SysdigClients))
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -225,7 +220,6 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 
 func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountClient(meta.(SysdigClients))
-
 	if err != nil {
 		return diag.FromErr(err)
 	}

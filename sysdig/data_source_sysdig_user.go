@@ -51,7 +51,6 @@ func dataSourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	u, err := client.GetUserByEmail(ctx, d.Get("email").(string))
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -63,5 +62,4 @@ func dataSourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta 
 	_ = d.Set("last_name", u.LastName)
 
 	return nil
-
 }

@@ -2,9 +2,10 @@ package sysdig
 
 import (
 	"context"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"strconv"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -93,7 +94,6 @@ func resourceSysdigAlertPromqlRead(ctx context.Context, data *schema.ResourceDat
 	}
 
 	alert, err := client.GetAlertByID(ctx, id)
-
 	if err != nil {
 		data.SetId("")
 		return nil

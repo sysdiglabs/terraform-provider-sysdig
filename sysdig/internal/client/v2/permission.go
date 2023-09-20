@@ -34,7 +34,6 @@ func (client *Client) getPermissionsDependencies(ctx context.Context, url string
 	}
 
 	dependencies, err := Unmarshal[Dependencies](response.Body)
-
 	if err != nil {
 		return []Dependency{}, err
 	}

@@ -127,7 +127,6 @@ func resourceSysdigMonitorSilenceRuleRead(ctx context.Context, d *schema.Resourc
 	}
 
 	silenceRule, err := client.GetSilenceRule(ctx, id)
-
 	if err != nil {
 		if err == v2.SilenceRuleNotFound {
 			d.SetId("")

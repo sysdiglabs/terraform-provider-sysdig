@@ -80,7 +80,6 @@ func resourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	rule, err := client.GetRuleByID(ctx, id)
-
 	if err != nil {
 		d.SetId("")
 	}
@@ -149,5 +148,4 @@ func resourceSysdigRuleProcessFromResourceData(d *schema.ResourceData) v2.Rule {
 	}
 
 	return rule
-
 }

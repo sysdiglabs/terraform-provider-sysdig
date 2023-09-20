@@ -147,7 +147,6 @@ func resourceSysdigManagedRulesetRead(ctx context.Context, d *schema.ResourceDat
 
 	id, _ := strconv.Atoi(d.Id())
 	policy, statusCode, err := client.GetPolicyByID(ctx, id)
-
 	if err != nil {
 		d.SetId("")
 		if statusCode == http.StatusNotFound {
@@ -185,7 +184,6 @@ func resourceSysdigManagedRulesetUpdate(ctx context.Context, d *schema.ResourceD
 	id, _ := strconv.Atoi(d.Id())
 
 	policy, statusCode, err := client.GetPolicyByID(ctx, id)
-
 	if err != nil {
 		d.SetId("")
 		if statusCode == http.StatusNotFound {

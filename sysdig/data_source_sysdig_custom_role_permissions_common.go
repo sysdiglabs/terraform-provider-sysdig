@@ -4,10 +4,11 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"strings"
+
 	"github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strings"
 )
 
 func dataSourceSysdigCustomRoleSchema() map[string]*schema.Schema {
@@ -32,7 +33,6 @@ func dataSourceSysdigCustomRoleSchema() map[string]*schema.Schema {
 func getDataSourceSysdigCustomRoleMonitorPermissionsRead(product v2.Product) schema.ReadContextFunc {
 	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 		client, err := m.(SysdigClients).sysdigCommonClientV2()
-
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -40,7 +40,6 @@ func getDataSourceSysdigCustomRoleMonitorPermissionsRead(product v2.Product) sch
 
 		rps := readPermissions(rp)
 		dependencies, err := client.GetPermissionsDependencies(ctx, product, rps)
-
 		if err != nil {
 			return diag.FromErr(err)
 		}

@@ -48,7 +48,6 @@ func dataSourceSysdigSecureRuleFalco() *schema.Resource {
 				Optional: true,
 			},
 			"append": {
-
 				Type:     schema.TypeBool,
 				Computed: true,
 			},

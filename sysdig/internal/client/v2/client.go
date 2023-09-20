@@ -32,9 +32,7 @@ const (
 	SysdigProductHeader        = "X-Sysdig-Product"
 )
 
-var (
-	errMissingCurrentTeam = errors.New("missing user's current team")
-)
+var errMissingCurrentTeam = errors.New("missing user's current team")
 
 type Base interface {
 	CurrentTeamID(ctx context.Context) (int, error)

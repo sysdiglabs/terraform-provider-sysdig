@@ -79,7 +79,6 @@ func (client *Client) GetPolicyByID(ctx context.Context, policyID int) (Policy, 
 	response, err := client.requester.Request(ctx, http.MethodGet, client.GetPolicyURL(policyID), nil)
 	if err != nil {
 		return Policy{}, 0, err
-
 	}
 	defer response.Body.Close()
 
@@ -99,7 +98,6 @@ func (client *Client) GetPolicies(ctx context.Context) ([]Policy, int, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.GetPoliciesURL(), nil)
 	if err != nil {
 		return []Policy{}, 0, err
-
 	}
 	defer response.Body.Close()
 

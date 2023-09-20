@@ -119,7 +119,6 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	rule, err := client.GetRuleByID(ctx, id)
-
 	if err != nil {
 		d.SetId("")
 	}

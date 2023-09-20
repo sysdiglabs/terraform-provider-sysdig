@@ -129,7 +129,6 @@ func (client *Client) GetCustomRoleByName(ctx context.Context, name string) (*Cu
 	}
 
 	return nil, fmt.Errorf("custom role with name: %s does not exist", name)
-
 }
 
 func (client *Client) CreateCustomRoleURL() string {
