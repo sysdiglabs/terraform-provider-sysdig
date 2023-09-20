@@ -6,6 +6,7 @@ import (
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"time"
 )
 
@@ -27,22 +28,19 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 		Schema: map[string]*schema.Schema{
-			"cloud_provider_id": {
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"management_account_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 			"cloud_provider_type": {
-				Type:     schema.TypeInt,
-				Required: true,
-				//ValidateFunc: validation.StringInSlice([]string{cloudauth.Provider_PROVIDER_AWS.String(), cloudauth.Provider_PROVIDER_GCP.String(), cloudauth.Provider_PROVIDER_AZURE.String()}, false),
-			},
-			"customer_id": {
-				Type:     schema.TypeInt,
-				Required: true,
-			},
-			"organization_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{cloudauth.Provider_PROVIDER_AWS.String(), cloudauth.Provider_PROVIDER_GCP.String(), cloudauth.Provider_PROVIDER_AZURE.String()}, false),
 			},
 		},
 	}
@@ -118,13 +116,12 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 	return nil
 }
 
-/* TODO: Make sure these are right inputs for the api */
 func secureOrganizationFromResourceData(data *schema.ResourceData) v2.OrganizationSecure {
 	return v2.OrganizationSecure{
-		Id:         data.Get("organization_id").(string),
-		ProviderId: data.Get("cloud_provider_id").(string),
-		Provider:   cloudauth.Provider(data.Get("cloud_provider_type").(int32)),
-		CustomerId: data.Get("customer_id").(uint64),
+		CloudOrganization: cloudauth.CloudOrganization{
+			ManagementAccountId: data.Get("management_account_id").(string),
+			Provider:            cloudauth.Provider(cloudauth.Provider_value[data.Get("cloud_provider_type").(string)]),
+		},
 	}
 }
 
@@ -139,12 +136,7 @@ func secureOrganizationToResourceData(data *schema.ResourceData, org *v2.Organiz
 		return err
 	}
 
-	err = data.Set("customer_id", org.CustomerId)
-	if err != nil {
-		return err
-	}
-
-	err = data.Set("organization_id", org.Id)
+	err = data.Set("id", org.Id)
 	if err != nil {
 		return err
 	}

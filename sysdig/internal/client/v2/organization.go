@@ -1,8 +1,11 @@
 package v2
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"google.golang.org/protobuf/encoding/protojson"
+	"io"
 	"net/http"
 )
 
@@ -20,7 +23,7 @@ type OrganizationSecureInterface interface {
 }
 
 func (client *Client) CreateOrganizationSecure(ctx context.Context, org *OrganizationSecure) (*OrganizationSecure, error) {
-	payload, err := Marshal(org)
+	payload, err := client.marshalOrg(org)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +39,7 @@ func (client *Client) CreateOrganizationSecure(ctx context.Context, org *Organiz
 		return nil, err
 	}
 
-	return Unmarshal[*OrganizationSecure](response.Body)
+	return client.unmarshalOrg(response.Body)
 }
 
 func (client *Client) GetOrganizationSecure(ctx context.Context, orgID string) (*OrganizationSecure, error) {
@@ -50,7 +53,7 @@ func (client *Client) GetOrganizationSecure(ctx context.Context, orgID string) (
 		return nil, client.ErrorFromResponse(response)
 	}
 
-	return Unmarshal[*OrganizationSecure](response.Body)
+	return client.unmarshalOrg(response.Body)
 }
 
 func (client *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) error {
@@ -83,13 +86,31 @@ func (client *Client) UpdateOrganizationSecure(ctx context.Context, orgID string
 		return nil, err
 	}
 
-	return Unmarshal[*OrganizationSecure](response.Body)
+	return client.unmarshalOrg(response.Body)
 }
 
 func (client *Client) organizationsURL() string {
-	return fmt.Sprintf(organizationPath, client.config.url)
+	return fmt.Sprintf(organizationsPath, client.config.url)
 }
 
 func (client *Client) organizationURL(orgId string) string {
 	return fmt.Sprintf(organizationPath, client.config.url, orgId)
+}
+
+// local function for protojson based marshal/unmarshal of organization proto
+func (client *Client) marshalOrg(data *OrganizationSecure) (io.Reader, error) {
+	payload, err := protojson.Marshal(data)
+	return bytes.NewBuffer(payload), err
+}
+
+func (client *Client) unmarshalOrg(data io.ReadCloser) (*OrganizationSecure, error) {
+	result := &OrganizationSecure{}
+
+	body, err := io.ReadAll(data)
+	if err != nil {
+		return result, err
+	}
+
+	err = protojson.Unmarshal(body, result)
+	return result, err
 }

@@ -787,4 +787,6 @@ type SilenceRule struct {
 	ID      int `json:"id,omitempty"`
 }
 
-type OrganizationSecure cloudauth.CloudOrganization
+type OrganizationSecure struct {
+	cloudauth.CloudOrganization
+}
