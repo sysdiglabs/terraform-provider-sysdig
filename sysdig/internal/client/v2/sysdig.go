@@ -76,6 +76,7 @@ func newSysdigClient(opts ...ClientOption) *Client {
 			config:     cfg,
 			httpClient: newHTTPClient(cfg),
 		},
+		policiesChanged: false,
 	}
 }
 

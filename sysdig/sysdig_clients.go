@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -190,7 +190,11 @@ func (c *sysdigClients) Configure(ctx context.Context, d *schema.ResourceData) {
 }
 
 func (c *sysdigClients) Close() error {
-	tflog.Warn(c.ctx, "[WARN] Closing sysdig clients - check for need to send request to forward policyv2")
+	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(15*time.Second))
+	err := c.secureClientV2.SendPoliciesToAgents(ctx)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

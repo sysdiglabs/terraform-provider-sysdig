@@ -37,6 +37,8 @@ func (client *Client) CreateList(ctx context.Context, list List) (List, error) {
 		return List{}, client.ErrorFromResponse(response)
 	}
 
+	client.policiesChanged = true
+
 	return Unmarshal[List](response.Body)
 }
 
@@ -79,6 +81,8 @@ func (client *Client) UpdateList(ctx context.Context, list List) (List, error) {
 		return List{}, client.ErrorFromResponse(response)
 	}
 
+	client.policiesChanged = true
+
 	return Unmarshal[List](response.Body)
 }
 
@@ -92,6 +96,8 @@ func (client *Client) DeleteList(ctx context.Context, id int) error {
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
 		return client.ErrorFromResponse(response)
 	}
+
+	client.policiesChanged = true
 
 	return nil
 }

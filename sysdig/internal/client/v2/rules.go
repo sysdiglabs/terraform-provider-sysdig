@@ -40,6 +40,8 @@ func (client *Client) CreateRule(ctx context.Context, rule Rule) (Rule, error) {
 		return Rule{}, client.ErrorFromResponse(response)
 	}
 
+	client.policiesChanged = true
+
 	return Unmarshal[Rule](response.Body)
 }
 
@@ -75,6 +77,8 @@ func (client *Client) UpdateRule(ctx context.Context, rule Rule) (Rule, error) {
 		return Rule{}, client.ErrorFromResponse(response)
 	}
 
+	client.policiesChanged = true
+
 	return Unmarshal[Rule](response.Body)
 }
 
@@ -88,6 +92,8 @@ func (client *Client) DeleteRule(ctx context.Context, ruleID int) error {
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
 		return client.ErrorFromResponse(response)
 	}
+
+	client.policiesChanged = true
 
 	return err
 }

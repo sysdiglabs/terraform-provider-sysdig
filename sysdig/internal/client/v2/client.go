@@ -65,8 +65,9 @@ type Requester interface {
 }
 
 type Client struct {
-	config    *config
-	requester Requester
+	config          *config
+	requester       Requester
+	policiesChanged bool
 }
 
 func (client *Client) ErrorFromResponse(response *http.Response) error {
