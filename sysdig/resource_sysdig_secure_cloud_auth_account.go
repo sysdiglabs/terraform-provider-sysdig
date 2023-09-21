@@ -344,15 +344,17 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 					}
 				case "service_principal_metadata":
 					// TODO: Make it more generic than just for GCP
-					service_principal_private_key := getServicePrincipalKeyObject(value.(string))
+					// service_principal_private_key := getServicePrincipalKeyObject(value.(string))
 					component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
 						ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
 							Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
 								Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
 									Key: &cloudauth.ServicePrincipalMetadata_GCP_Key{
 										ProjectId:    data.Get("cloud_provider_id").(string),
-										PrivateKeyId: service_principal_private_key["private_key_id"],
-										PrivateKey:   service_principal_private_key["private_key"],
+										PrivateKeyId: "testKeyID",
+										PrivateKey:   "testKey",
+										// PrivateKeyId: service_principal_private_key["private_key_id"],
+										// PrivateKey:   service_principal_private_key["private_key"],
 									},
 								},
 							},
@@ -400,52 +402,61 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 func AccountFeatureToMap(feature *cloudauth.AccountFeature) map[string]interface{} {
 	log.Printf("DEBUG individual feature => %v", feature)
 	log.Printf("DEBUG individual feature components => %v", feature.Components)
-	featureMap := make(map[string]interface{})
+	// featureMap := make(map[string]interface{})
+	objectMap := make(map[string]interface{})
 
-	featureMap["type"] = feature.Type.String()
-	featureMap["enabled"] = feature.Enabled
-	featureMap["components"] = feature.Components
+	objectMap["type"] = feature.Type.String()
+	objectMap["enabled"] = feature.Enabled
+	objectMap["components"] = feature.Components
 
-	if feature.CreatedAt != nil {
-		featureMap["createdAt"] = feature.CreatedAt.AsTime().Format(time.RFC3339)
-	}
+	// if feature.CreatedAt != nil {
+	// 	objectMap["createdAt"] = feature.CreatedAt.AsTime().Format(time.RFC3339)
+	// }
 
-	log.Printf("DEBUg featureMap => %v", featureMap)
+	// featureMap["secure_config_posture"] = objectMap
 
-	return featureMap
+	log.Printf("DEBUG objectMap => %v", objectMap)
+
+	return objectMap
 }
 
-func mapToSet(features *cloudauth.AccountFeatures) *schema.Set {
+func mapToSet(features *cloudauth.AccountFeatures) map[string]interface{} {
 	// featuresMap := featureToResourceData(features)
-	set := schema.NewSet(schema.HashString, []interface{}{})
+	// set := schema.NewSet(schema.HashString, []interface{})
 
-	if features.SecureThreatDetection != nil {
-		set.Add(AccountFeatureToMap(features.SecureThreatDetection))
+	return map[string]interface{}{
+		"secure_config_posture": AccountFeatureToMap(features.SecureConfigPosture),
 	}
 
-	if features.SecureConfigPosture != nil {
-		jsonData, _ := json.Marshal(AccountFeatureToMap(features.SecureConfigPosture))
-		log.Printf("DEBUG JSON data => %v", jsonData)
-		log.Printf("DEBUG string JSON data => %v", string(jsonData))
+	// if features.SecureThreatDetection != nil {
+	// 	set.Add(AccountFeatureToMap(features.SecureThreatDetection))
+	// }
 
-		set.Add(string(jsonData))
-	}
+	// if features.SecureConfigPosture != nil {
+	// 	featureMap := AccountFeatureToMap(features.SecureConfigPosture)
+	// 	jsonData, _ := json.Marshal(featureMap)
+	// 	log.Printf("DEBUG JSON data => %v", jsonData)
+	// 	log.Printf("DEBUG string JSON data => %v", string(jsonData))
 
-	if features.SecureIdentityEntitlement != nil {
-		set.Add(AccountFeatureToMap(features.SecureIdentityEntitlement))
-	}
+	// 	// set.Add(string(jsonData))
+	// 	set.Add(featureMap)
+	// }
 
-	if features.MonitorCloudMetrics != nil {
-		set.Add(AccountFeatureToMap(features.MonitorCloudMetrics))
-	}
+	// if features.SecureIdentityEntitlement != nil {
+	// 	set.Add(AccountFeatureToMap(features.SecureIdentityEntitlement))
+	// }
 
-	if features.SecureAgentlessScanning != nil {
-		set.Add(AccountFeatureToMap(features.SecureAgentlessScanning))
-	}
+	// if features.MonitorCloudMetrics != nil {
+	// 	set.Add(AccountFeatureToMap(features.MonitorCloudMetrics))
+	// }
 
-	log.Printf("DEBUG feature set => %v", set)
-	log.Printf("DEBUG feature set type => %T", set)
-	return set
+	// if features.SecureAgentlessScanning != nil {
+	// 	set.Add(AccountFeatureToMap(features.SecureAgentlessScanning))
+	// }
+
+	// log.Printf("DEBUG feature set => %v", set)
+	// log.Printf("DEBUG feature set type => %T", set)
+	// return set
 }
 
 func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudauthAccountSecure) error {
@@ -456,7 +467,9 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		data.Set("cloud_provider_type", cloudAccount.Provider.String()),
 		data.Set("components", cloudAccount.Components),
 		// data.Set("feature", cloudAccount.Feature),
-		data.Set("feature", mapToSet(cloudAccount.Feature)),
+		data.Set("feature", []map[string]interface{}{
+			mapToSet(cloudAccount.Feature),
+		}),
 	} {
 		if err != nil {
 			return err
