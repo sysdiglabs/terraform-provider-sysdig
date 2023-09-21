@@ -343,19 +343,26 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 					}
 				case SchemaServicePrincipalMetadata:
 					// TODO: Make it more generic than just for GCP
-					service_principal_private_key := getServicePrincipalKeyObject(value.(string))
-					component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
-						ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
-							Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
-								Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
-									Key: &cloudauth.ServicePrincipalMetadata_GCP_Key{
-										ProjectId:    data.Get(SchemaCloudProviderId).(string),
-										PrivateKeyId: service_principal_private_key["private_key_id"],
-										PrivateKey:   service_principal_private_key["private_key"],
+					servicePrincipalMetadata := parseMetadataJson(value.(string))
+					if provider == cloudauth.Provider_PROVIDER_GCP.String() {
+						encodedServicePrincipalKey, ok := servicePrincipalMetadata["gcp"].(map[string]interface{})["key"].(string)
+						if !ok {
+							fmt.Printf("Component metadata for provider %s is invalid and not as expected", provider)
+						}
+						servicePrincipalKey := getGcpServicePrincipalKey(encodedServicePrincipalKey)
+						component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
+							ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
+								Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
+									Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
+										Key: &cloudauth.ServicePrincipalMetadata_GCP_Key{
+											ProjectId:    data.Get(SchemaCloudProviderId).(string),
+											PrivateKeyId: servicePrincipalKey["private_key_id"],
+											PrivateKey:   servicePrincipalKey["private_key"],
+										},
 									},
 								},
 							},
-						},
+						}
 					}
 				case SchemaWebhookDatasourceMetadata:
 					component.Metadata = &cloudauth.AccountComponent_WebhookDatasourceMetadata{
@@ -377,6 +384,40 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 	}
 
 	return accountComponents
+}
+
+/*
+This helper function parses the provided component metadata in opaque Json string format into a map
+*/
+func parseMetadataJson(value string) map[string]interface{} {
+	var metadataJSON map[string]interface{}
+	err := json.Unmarshal([]byte(value), &metadataJSON)
+	if err != nil {
+		fmt.Printf("Failed to parse component metadata: %v", err)
+		return nil
+	}
+
+	return metadataJSON
+}
+
+/*
+This helper function decodes the base64 encoded Service Principal Key returned by GCP
+and parses it from Json format into a map
+*/
+func getGcpServicePrincipalKey(key string) map[string]string {
+	bytes, err := b64.StdEncoding.DecodeString(key)
+	if err != nil {
+		fmt.Printf("Failed to decode service principal key: %v", err)
+		return nil
+	}
+	var privateKeyJSON map[string]string
+	err = json.Unmarshal(bytes, &privateKeyJSON)
+	if err != nil {
+		fmt.Printf("Failed to parse service principal key: %v", err)
+		return nil
+	}
+
+	return privateKeyJSON
 }
 
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
@@ -483,20 +524,4 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 	}
 
 	return nil
-}
-
-func getServicePrincipalKeyObject(value string) map[string]string {
-	bytes, err := b64.StdEncoding.DecodeString(value)
-	if err != nil {
-		fmt.Printf("Failed to decode service principal key: %v", err)
-		return nil
-	}
-	var privateKeyJSON map[string]string
-	err = json.Unmarshal(bytes, &privateKeyJSON)
-	if err != nil {
-		fmt.Printf("Failed to parse service principal key: %v", err)
-		return nil
-	}
-
-	return privateKeyJSON
 }
