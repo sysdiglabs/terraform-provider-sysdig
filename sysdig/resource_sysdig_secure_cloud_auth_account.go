@@ -5,7 +5,6 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
-	"hash/fnv"
 	"reflect"
 	"strings"
 	"time"
@@ -398,32 +397,32 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 }
 
 /*
-	This helper function converts values from *cloudauth.AccountFeature to map[string]interface{} for
-	iteration and data.Set() functionalities.
+	This helper function converts feature values from *cloudauth.AccountFeature to resource data schema.
 */
 
-func featureTypeToMap(name string, feature *cloudauth.AccountFeature) map[string]interface{} {
-	featureMap := make(map[string]interface{})
+func featureValuesToResourceData(name string, feature *cloudauth.AccountFeature) map[string]interface{} {
 	valuesMap := make(map[string]interface{})
 
 	valuesMap["type"] = feature.Type.String()
 	valuesMap["enabled"] = feature.Enabled
 	valuesMap["components"] = feature.Components
 
-	featureMap[name] = schema.NewSet(customHash, []interface{}{
-		valuesMap,
-	})
+	featureMap := map[string]interface{}{
+		name: []map[string]interface{}{
+			valuesMap,
+		},
+	}
 
 	return featureMap
 }
 
 /*
-	This helper function creates a new *schema.NewSet() to hold the values of *cloudauth.AccountFeatures.
+	This helper function converts the features data from *cloudauth.AccountFeatures to resource data schema.
 	This is needed to set the value in cloudauthAccountToResourceData().
 */
 
-func featureTypeToSet(features *cloudauth.AccountFeatures) *schema.Set {
-	set := schema.NewSet(customHash, []interface{}{})
+func featureToResourceData(features *cloudauth.AccountFeatures) []map[string]interface{} {
+	featureMap := []map[string]interface{}{}
 
 	featureFields := map[string]*cloudauth.AccountFeature{
 		"secure_threat_detection":     features.SecureThreatDetection,
@@ -435,34 +434,12 @@ func featureTypeToSet(features *cloudauth.AccountFeatures) *schema.Set {
 
 	for name, feature := range featureFields {
 		if feature != nil {
-			featureMap := featureTypeToMap(name, feature)
-			set.Add(featureMap)
+			value := featureValuesToResourceData(name, feature)
+			featureMap = append(featureMap, value)
 		}
 	}
 
-	return set
-}
-
-/*
-	This helper function constructs a custom hash for creating a new schema.NewSet().
-	This is needed to support storing map[string]interface{} types in the set.
-*/
-
-func customHash(v interface{}) int {
-	h := fnv.New32a()
-	switch val := v.(type) {
-	case map[string]interface{}:
-		for key, value := range val {
-			keyStr := fmt.Sprintf("%v", key)
-			valueStr := fmt.Sprintf("%v", value)
-			h.Write([]byte(keyStr))
-			h.Write([]byte(valueStr))
-		}
-	default:
-		return schema.HashString(v)
-	}
-
-	return int(h.Sum32())
+	return featureMap
 }
 
 func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudauthAccountSecure) error {
@@ -486,7 +463,7 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		return err
 	}
 
-	err = data.Set("feature", featureTypeToSet(cloudAccount.Feature))
+	err = data.Set("feature", featureToResourceData(cloudAccount.Feature))
 	if err != nil {
 		return err
 	}
