@@ -5,7 +5,7 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
+	"hash/fnv"
 	"reflect"
 	"strings"
 	"time"
@@ -344,17 +344,15 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 					}
 				case "service_principal_metadata":
 					// TODO: Make it more generic than just for GCP
-					// service_principal_private_key := getServicePrincipalKeyObject(value.(string))
+					service_principal_private_key := getServicePrincipalKeyObject(value.(string))
 					component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
 						ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
 							Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
 								Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
 									Key: &cloudauth.ServicePrincipalMetadata_GCP_Key{
 										ProjectId:    data.Get("cloud_provider_id").(string),
-										PrivateKeyId: "testKeyID",
-										PrivateKey:   "testKey",
-										// PrivateKeyId: service_principal_private_key["private_key_id"],
-										// PrivateKey:   service_principal_private_key["private_key"],
+										PrivateKeyId: service_principal_private_key["private_key_id"],
+										PrivateKey:   service_principal_private_key["private_key"],
 									},
 								},
 							},
@@ -399,82 +397,114 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 	}
 }
 
-func AccountFeatureToMap(feature *cloudauth.AccountFeature) map[string]interface{} {
-	log.Printf("DEBUG individual feature => %v", feature)
-	log.Printf("DEBUG individual feature components => %v", feature.Components)
-	// featureMap := make(map[string]interface{})
-	objectMap := make(map[string]interface{})
+/*
+	This helper function converts values from *cloudauth.AccountFeature to map[string]interface{} for
+	iteration and data.Set() functionalities.
+*/
 
-	objectMap["type"] = feature.Type.String()
-	objectMap["enabled"] = feature.Enabled
-	objectMap["components"] = feature.Components
+func featureTypeToMap(feature *cloudauth.AccountFeature) map[string]interface{} {
+	featureMap := make(map[string]interface{})
+	valuesMap := make(map[string]interface{})
 
-	// if feature.CreatedAt != nil {
-	// 	objectMap["createdAt"] = feature.CreatedAt.AsTime().Format(time.RFC3339)
-	// }
+	valuesMap["type"] = feature.Type.String()
+	valuesMap["enabled"] = feature.Enabled
+	valuesMap["components"] = feature.Components
 
-	// featureMap["secure_config_posture"] = objectMap
+	featureMap["secure_config_posture"] = schema.NewSet(customHash, []interface{}{
+		valuesMap,
+	})
 
-	log.Printf("DEBUG objectMap => %v", objectMap)
-
-	return objectMap
+	return featureMap
 }
 
-func mapToSet(features *cloudauth.AccountFeatures) map[string]interface{} {
-	// featuresMap := featureToResourceData(features)
-	// set := schema.NewSet(schema.HashString, []interface{})
+/*
+	This helper function creates a new *schema.NewSet() to hold the values of *cloudauth.AccountFeatures.
+	This is needed to set the value in cloudauthAccountToResourceData().
+*/
 
-	return map[string]interface{}{
-		"secure_config_posture": AccountFeatureToMap(features.SecureConfigPosture),
+func featureTypeToSet(features *cloudauth.AccountFeatures) *schema.Set {
+	set := schema.NewSet(customHash, []interface{}{})
+
+	featureFields := []*cloudauth.AccountFeature{
+		features.SecureThreatDetection,
+		features.SecureConfigPosture,
+		features.SecureIdentityEntitlement,
+		features.MonitorCloudMetrics,
+		features.SecureAgentlessScanning,
 	}
 
-	// if features.SecureThreatDetection != nil {
-	// 	set.Add(AccountFeatureToMap(features.SecureThreatDetection))
-	// }
+	for _, feature := range featureFields {
+		if feature != nil {
+			featureMap := featureTypeToMap(feature)
+			set.Add(featureMap)
+		}
+	}
 
-	// if features.SecureConfigPosture != nil {
-	// 	featureMap := AccountFeatureToMap(features.SecureConfigPosture)
-	// 	jsonData, _ := json.Marshal(featureMap)
-	// 	log.Printf("DEBUG JSON data => %v", jsonData)
-	// 	log.Printf("DEBUG string JSON data => %v", string(jsonData))
+	return set
+}
 
-	// 	// set.Add(string(jsonData))
-	// 	set.Add(featureMap)
-	// }
+/*
+	This helper function constructs a custom hash for creating a new schema.NewSet().
+	This is needed to support storing map[string]interface{} types in the set.
+*/
 
-	// if features.SecureIdentityEntitlement != nil {
-	// 	set.Add(AccountFeatureToMap(features.SecureIdentityEntitlement))
-	// }
+func customHash(v interface{}) int {
+	h := fnv.New32a()
+	switch val := v.(type) {
+	case map[string]interface{}:
+		for key, value := range val {
+			keyStr := fmt.Sprintf("%v", key)
+			valueStr := fmt.Sprintf("%v", value)
+			h.Write([]byte(keyStr))
+			h.Write([]byte(valueStr))
+		}
+	default:
+		return schema.HashString(v)
+	}
 
-	// if features.MonitorCloudMetrics != nil {
-	// 	set.Add(AccountFeatureToMap(features.MonitorCloudMetrics))
-	// }
-
-	// if features.SecureAgentlessScanning != nil {
-	// 	set.Add(AccountFeatureToMap(features.SecureAgentlessScanning))
-	// }
-
-	// log.Printf("DEBUG feature set => %v", set)
-	// log.Printf("DEBUG feature set type => %T", set)
-	// return set
+	return int(h.Sum32())
 }
 
 func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudauthAccountSecure) error {
-	for _, err := range []error{
-		data.Set("id", cloudAccount.Id),
-		data.Set("enabled", cloudAccount.Enabled),
-		data.Set("cloud_provider_id", cloudAccount.ProviderId),
-		data.Set("cloud_provider_type", cloudAccount.Provider.String()),
-		data.Set("components", cloudAccount.Components),
-		// data.Set("feature", cloudAccount.Feature),
-		data.Set("feature", []map[string]interface{}{
-			mapToSet(cloudAccount.Feature),
-		}),
-	} {
-		if err != nil {
-			return err
-		}
+	err := data.Set("id", cloudAccount.Id)
+	if err != nil {
+		return err
 	}
+
+	err = data.Set("enabled", cloudAccount.Enabled)
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("cloud_provider_id", cloudAccount.ProviderId)
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("cloud_provider_type", cloudAccount.Provider.String())
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("feature", featureTypeToSet(cloudAccount.Feature))
+	if err != nil {
+		return err
+	}
+
+	components := []map[string]interface{}{}
+
+	for _, comp := range cloudAccount.Components {
+		components = append(components, map[string]interface{}{
+			"type":     comp.Type.String(),
+			"instance": comp.Instance,
+		})
+	}
+
+	err = data.Set("components", components)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
