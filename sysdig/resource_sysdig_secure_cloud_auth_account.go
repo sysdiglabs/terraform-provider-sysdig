@@ -402,7 +402,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 	iteration and data.Set() functionalities.
 */
 
-func featureTypeToMap(feature *cloudauth.AccountFeature) map[string]interface{} {
+func featureTypeToMap(name string, feature *cloudauth.AccountFeature) map[string]interface{} {
 	featureMap := make(map[string]interface{})
 	valuesMap := make(map[string]interface{})
 
@@ -410,7 +410,7 @@ func featureTypeToMap(feature *cloudauth.AccountFeature) map[string]interface{} 
 	valuesMap["enabled"] = feature.Enabled
 	valuesMap["components"] = feature.Components
 
-	featureMap["secure_config_posture"] = schema.NewSet(customHash, []interface{}{
+	featureMap[name] = schema.NewSet(customHash, []interface{}{
 		valuesMap,
 	})
 
@@ -425,17 +425,17 @@ func featureTypeToMap(feature *cloudauth.AccountFeature) map[string]interface{} 
 func featureTypeToSet(features *cloudauth.AccountFeatures) *schema.Set {
 	set := schema.NewSet(customHash, []interface{}{})
 
-	featureFields := []*cloudauth.AccountFeature{
-		features.SecureThreatDetection,
-		features.SecureConfigPosture,
-		features.SecureIdentityEntitlement,
-		features.MonitorCloudMetrics,
-		features.SecureAgentlessScanning,
+	featureFields := map[string]*cloudauth.AccountFeature{
+		"secure_threat_detection":     features.SecureThreatDetection,
+		"secure_config_posture":       features.SecureConfigPosture,
+		"secure_identity_entitlement": features.SecureIdentityEntitlement,
+		"monitor_cloud_metrics":       features.MonitorCloudMetrics,
+		"secure_agentless_scanning":   features.SecureAgentlessScanning,
 	}
 
-	for _, feature := range featureFields {
+	for name, feature := range featureFields {
 		if feature != nil {
-			featureMap := featureTypeToMap(feature)
+			featureMap := featureTypeToMap(name, feature)
 			set.Add(featureMap)
 		}
 	}
