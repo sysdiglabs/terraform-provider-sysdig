@@ -148,7 +148,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Optional: true,
 				Elem:     accountFeatures,
 			},
-			SchemaComponents: {
+			SchemaComponent: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     accountComponents,
@@ -309,7 +309,7 @@ cloudauthAccountFromResourceData() function
 func constructAccountComponents(accountComponents []*cloudauth.AccountComponent, data *schema.ResourceData) []*cloudauth.AccountComponent {
 	provider := data.Get(SchemaCloudProviderType).(string)
 
-	for _, rc := range data.Get(SchemaComponents).([]interface{}) {
+	for _, rc := range data.Get(SchemaComponent).([]interface{}) {
 		resourceComponent := rc.(map[string]interface{})
 		component := &cloudauth.AccountComponent{}
 
@@ -518,7 +518,7 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		})
 	}
 
-	err = data.Set(SchemaComponents, components)
+	err = data.Set(SchemaComponent, components)
 	if err != nil {
 		return err
 	}
