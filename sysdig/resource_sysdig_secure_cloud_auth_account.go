@@ -16,29 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-const (
-	SchemaSecureThreatDetection     = "secure_threat_detection"
-	SchemaSecureConfigPosture       = "secure_config_posture"
-	SchemaSecureIdentityEntitlement = "secure_identity_entitlement"
-	SchemaSecureAgentlessScanning   = "secure_agentless_scanning"
-	SchemaMonitorCloudMetrics       = "monitor_cloud_metrics"
-	SchemaType                      = "type"
-	SchemaInstance                  = "instance"
-	SchemaCloudConnectorMetadata    = "cloud_connector_metadata"
-	SchemaTrustedRoleMetadata       = "trusted_role_metadata"
-	SchemaEventBridgeMetadata       = "event_bridge_metadata"
-	SchemaServicePrincipalMetadata  = "service_principal_metadata"
-	SchemaWebhookDatasourceMetadata = "webhook_datasource_metadata"
-	SchemaCryptoKeyMetadata         = "crypto_key_metadata"
-	SchemaCloudLogsMetadata         = "cloud_logs_metadata"
-	SchemaEnabled                   = "enabled"
-	SchemaComponents                = "components"
-	SchemaId                        = "id"
-	SchemaCloudProviderId           = "cloud_provider_id"
-	SchemaCloudProviderType         = "cloud_provider_type"
-	SchemaFeature                   = "feature"
-)
-
 func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 	timeout := 5 * time.Minute
 
