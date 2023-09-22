@@ -24,7 +24,7 @@ type CloudauthAccountSecureInterface interface {
 }
 
 func (client *Client) CreateCloudauthAccountSecure(ctx context.Context, cloudAccount *CloudauthAccountSecure) (*CloudauthAccountSecure, error) {
-	payload, err := marshal(cloudAccount)
+	payload, err := client.marshalProto(cloudAccount)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (client *Client) CreateCloudauthAccountSecure(ctx context.Context, cloudAcc
 		return nil, err
 	}
 
-	return unmarshal(response.Body)
+	return client.unmarshalProto(response.Body)
 }
 
 func (client *Client) GetCloudauthAccountSecure(ctx context.Context, accountID string) (*CloudauthAccountSecure, error) {
@@ -54,7 +54,7 @@ func (client *Client) GetCloudauthAccountSecure(ctx context.Context, accountID s
 		return nil, client.ErrorFromResponse(response)
 	}
 
-	return unmarshal(response.Body)
+	return client.unmarshalProto(response.Body)
 }
 
 func (client *Client) DeleteCloudauthAccountSecure(ctx context.Context, accountID string) error {
@@ -71,7 +71,7 @@ func (client *Client) DeleteCloudauthAccountSecure(ctx context.Context, accountI
 }
 
 func (client *Client) UpdateCloudauthAccountSecure(ctx context.Context, accountID string, cloudAccount *CloudauthAccountSecure) (*CloudauthAccountSecure, error) {
-	payload, err := marshal(cloudAccount)
+	payload, err := client.marshalProto(cloudAccount)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (client *Client) UpdateCloudauthAccountSecure(ctx context.Context, accountI
 		return nil, err
 	}
 
-	return unmarshal(response.Body)
+	return client.unmarshalProto(response.Body)
 }
 
 func (client *Client) cloudauthAccountsURL() string {
@@ -99,12 +99,12 @@ func (client *Client) cloudauthAccountURL(accountID string) string {
 }
 
 // local function for protojson based marshal/unmarshal of cloudauthAccount proto
-func marshal(data *CloudauthAccountSecure) (io.Reader, error) {
+func (client *Client) marshalProto(data *CloudauthAccountSecure) (io.Reader, error) {
 	payload, err := protojson.Marshal(data)
 	return bytes.NewBuffer(payload), err
 }
 
-func unmarshal(data io.ReadCloser) (*CloudauthAccountSecure, error) {
+func (client *Client) unmarshalProto(data io.ReadCloser) (*CloudauthAccountSecure, error) {
 	result := &CloudauthAccountSecure{}
 
 	body, err := io.ReadAll(data)
