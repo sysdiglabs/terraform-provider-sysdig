@@ -4,14 +4,17 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/pkg/errors"
 )
 
 const (
-	CreatePolicyPath = "%s/api/v2/policies?skipPolicyV2Msg=%t"
-	DeletePolicyPath = "%s/api/v2/policies/%d?skipPolicyV2Msg=%t"
-	UpdatePolicyPath = "%s/api/v2/policies/%d?skipPolicyV2Msg=%t"
-	GetPolicyPath    = "%s/api/v2/policies/%d"
-	GetPoliciesPath  = "%s/api/v2/policies"
+	CreatePolicyPath         = "%s/api/v2/policies?skipPolicyV2Msg=%t"
+	DeletePolicyPath         = "%s/api/v2/policies/%d?skipPolicyV2Msg=%t"
+	UpdatePolicyPath         = "%s/api/v2/policies/%d?skipPolicyV2Msg=%t"
+	GetPolicyPath            = "%s/api/v2/policies/%d"
+	GetPoliciesPath          = "%s/api/v2/policies"
+	SendPoliciesToAgentsPath = "%s/api/v2/policies/actions?action=forwardPolicyV2Msg"
 )
 
 type PolicyInterface interface {
@@ -21,6 +24,7 @@ type PolicyInterface interface {
 	UpdatePolicy(ctx context.Context, policy Policy) (Policy, error)
 	GetPolicyByID(ctx context.Context, policyID int) (Policy, int, error)
 	GetPolicies(ctx context.Context) ([]Policy, int, error)
+	SendPoliciesToAgents(ctx context.Context) error
 }
 
 func (client *Client) CreatePolicy(ctx context.Context, policy Policy) (Policy, error) {
@@ -115,6 +119,22 @@ func (client *Client) GetPolicies(ctx context.Context) ([]Policy, int, error) {
 	return policies, http.StatusOK, nil
 }
 
+func (client *Client) SendPoliciesToAgents(ctx context.Context) error {
+	if client.config.secureSkipPolicyV2Msg {
+		// We only need to send policies if we've been configured to skip sending them during updates
+		response, err := client.requester.Request(ctx, http.MethodPost, client.SendPoliciesToAgentsURL(), nil)
+		if err != nil {
+			return err
+		}
+		defer response.Body.Close()
+
+		if response.StatusCode != http.StatusOK {
+			return errors.Errorf("Unexpected response when sending policies to agents: %s", response.Status)
+		}
+	}
+	return nil
+}
+
 func (client *Client) CreatePolicyURL() string {
 	return fmt.Sprintf(CreatePolicyPath, client.config.url, client.config.secureSkipPolicyV2Msg)
 }
@@ -133,4 +153,8 @@ func (client *Client) GetPolicyURL(policyID int) string {
 
 func (client *Client) GetPoliciesURL() string {
 	return fmt.Sprintf(GetPoliciesPath, client.config.url)
+}
+
+func (client *Client) SendPoliciesToAgentsURL() string {
+	return fmt.Sprintf(SendPoliciesToAgentsPath, client.config.url)
 }

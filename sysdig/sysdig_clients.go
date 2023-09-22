@@ -9,7 +9,6 @@ import (
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -20,6 +19,7 @@ type SysdigClients interface {
 	GetSecureApiToken() (string, error)
 
 	Configure(context.Context, *schema.ResourceData)
+	AddCleanupHook(func(context.Context, SysdigClients) error)
 
 	// v2
 	sysdigMonitorClientV2() (v2.SysdigMonitor, error)
@@ -49,6 +49,8 @@ type sysdigClients struct {
 	d        *schema.ResourceData
 	mu       sync.Mutex
 	commonMu sync.Mutex
+
+	cleanupHooks []func(context.Context, SysdigClients) error
 
 	// v2
 	monitorClientV2  v2.SysdigMonitor
@@ -189,8 +191,16 @@ func (c *sysdigClients) Configure(ctx context.Context, d *schema.ResourceData) {
 	c.d = d
 }
 
+func (c *sysdigClients) AddCleanupHook(cleanupHook func(context.Context, SysdigClients) error) {
+	c.cleanupHooks = append(c.cleanupHooks, cleanupHook)
+}
+
 func (c *sysdigClients) Close() error {
-	tflog.Warn(c.ctx, "[WARN] Closing sysdig clients - check for need to send request to forward policyv2")
+	for _, cleanup := range c.cleanupHooks {
+		if err := cleanup(c.ctx, c); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
