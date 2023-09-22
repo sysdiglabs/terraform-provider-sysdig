@@ -16,20 +16,43 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+const (
+	SchemaSecureThreatDetection     = "secure_threat_detection"
+	SchemaSecureConfigPosture       = "secure_config_posture"
+	SchemaSecureIdentityEntitlement = "secure_identity_entitlement"
+	SchemaSecureAgentlessScanning   = "secure_agentless_scanning"
+	SchemaMonitorCloudMetrics       = "monitor_cloud_metrics"
+	SchemaType                      = "type"
+	SchemaInstance                  = "instance"
+	SchemaCloudConnectorMetadata    = "cloud_connector_metadata"
+	SchemaTrustedRoleMetadata       = "trusted_role_metadata"
+	SchemaEventBridgeMetadata       = "event_bridge_metadata"
+	SchemaServicePrincipalMetadata  = "service_principal_metadata"
+	SchemaWebhookDatasourceMetadata = "webhook_datasource_metadata"
+	SchemaCryptoKeyMetadata         = "crypto_key_metadata"
+	SchemaCloudLogsMetadata         = "cloud_logs_metadata"
+	SchemaEnabled                   = "enabled"
+	SchemaComponents                = "components"
+	SchemaId                        = "id"
+	SchemaCloudProviderId           = "cloud_provider_id"
+	SchemaCloudProviderType         = "cloud_provider_type"
+	SchemaFeature                   = "feature"
+)
+
 func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	var accountFeature = &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"type": {
+			SchemaType: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"enabled": {
+			SchemaEnabled: {
 				Type:     schema.TypeBool,
 				Required: true,
 			},
-			"components": {
+			SchemaComponents: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -41,27 +64,27 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 
 	var accountFeatures = &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"secure_config_posture": {
+			SchemaSecureConfigPosture: {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     accountFeature,
 			},
-			"secure_identity_entitlement": {
+			SchemaSecureIdentityEntitlement: {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     accountFeature,
 			},
-			"secure_threat_detection": {
+			SchemaSecureThreatDetection: {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     accountFeature,
 			},
-			"secure_agentless_scanning": {
+			SchemaSecureAgentlessScanning: {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     accountFeature,
 			},
-			"monitor_cloud_metrics": {
+			SchemaMonitorCloudMetrics: {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     accountFeature,
@@ -71,39 +94,39 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 
 	var accountComponents = &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"type": {
+			SchemaType: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"instance": {
+			SchemaInstance: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"cloud_connector_metadata": {
+			SchemaCloudConnectorMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"trusted_role_metadata": {
+			SchemaTrustedRoleMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"event_bridge_metadata": {
+			SchemaEventBridgeMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"service_principal_metadata": {
+			SchemaServicePrincipalMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"webhook_datasource_metadata": {
+			SchemaWebhookDatasourceMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"crypto_key_metadata": {
+			SchemaCryptoKeyMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"cloud_logs_metadata": {
+			SchemaCloudLogsMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -125,30 +148,30 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 		Schema: map[string]*schema.Schema{
-			"id": {
+			SchemaId: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"cloud_provider_id": {
+			SchemaCloudProviderId: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"cloud_provider_type": {
+			SchemaCloudProviderType: {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{cloudauth.Provider_PROVIDER_AWS.String(), cloudauth.Provider_PROVIDER_GCP.String(), cloudauth.Provider_PROVIDER_AZURE.String()}, false),
 			},
-			"enabled": {
+			SchemaEnabled: {
 				Type:     schema.TypeBool,
 				Required: true,
 			},
-			"feature": {
+			SchemaFeature: {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     accountFeatures,
 			},
-			"components": {
+			SchemaComponents: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     accountComponents,
@@ -259,9 +282,9 @@ func setAccountFeature(accountFeatures *cloudauth.AccountFeatures, fieldName str
 
 	for name, value := range valueMap {
 		switch name {
-		case "enabled":
+		case SchemaEnabled:
 			target.Elem().FieldByName("Enabled").SetBool(value.(bool))
-		case "components":
+		case SchemaComponents:
 			for _, componentID := range value.([]interface{}) {
 				target.Elem().FieldByName("Components").Set(reflect.Append(target.Elem().FieldByName("Components"), reflect.ValueOf(componentID.(string))))
 			}
@@ -280,19 +303,19 @@ func constructAccountFeatures(accountFeatures *cloudauth.AccountFeatures, featur
 		if featureValues := value.(*schema.Set).List(); len(featureValues) > 0 {
 			valueMap := convertSchemaSetToMap(value.(*schema.Set))
 			switch name {
-			case "secure_config_posture":
+			case SchemaSecureConfigPosture:
 				accountFeatures.SecureConfigPosture = &cloudauth.AccountFeature{}
 				setAccountFeature(accountFeatures, "SecureConfigPosture", cloudauth.Feature_FEATURE_SECURE_CONFIG_POSTURE, valueMap)
-			case "secure_identity_entitlement":
+			case SchemaSecureIdentityEntitlement:
 				accountFeatures.SecureIdentityEntitlement = &cloudauth.AccountFeature{}
 				setAccountFeature(accountFeatures, "SecureIdentityEntitlement", cloudauth.Feature_FEATURE_SECURE_IDENTITY_ENTITLEMENT, valueMap)
-			case "secure_threat_detection":
+			case SchemaSecureThreatDetection:
 				accountFeatures.SecureThreatDetection = &cloudauth.AccountFeature{}
 				setAccountFeature(accountFeatures, "SecureThreatDetection", cloudauth.Feature_FEATURE_SECURE_THREAT_DETECTION, valueMap)
-			case "secure_agentless_scanning":
+			case SchemaSecureAgentlessScanning:
 				accountFeatures.SecureAgentlessScanning = &cloudauth.AccountFeature{}
 				setAccountFeature(accountFeatures, "SecureAgentlessScanning", cloudauth.Feature_FEATURE_SECURE_AGENTLESS_SCANNING, valueMap)
-			case "monitor_cloud_metrics":
+			case SchemaMonitorCloudMetrics:
 				accountFeatures.MonitorCloudMetrics = &cloudauth.AccountFeature{}
 				setAccountFeature(accountFeatures, "MonitorCloudMetrics", cloudauth.Feature_FEATURE_MONITOR_CLOUD_METRICS, valueMap)
 			}
@@ -307,24 +330,24 @@ This helper function aggregates the account components list that will be used in
 cloudauthAccountFromResourceData() function
 */
 func constructAccountComponents(accountComponents []*cloudauth.AccountComponent, data *schema.ResourceData) []*cloudauth.AccountComponent {
-	provider := data.Get("cloud_provider_type").(string)
+	provider := data.Get(SchemaCloudProviderType).(string)
 
-	for _, rc := range data.Get("components").([]interface{}) {
+	for _, rc := range data.Get(SchemaComponents).([]interface{}) {
 		resourceComponent := rc.(map[string]interface{})
 		component := &cloudauth.AccountComponent{}
 
 		for key, value := range resourceComponent {
 			if value != nil && value.(string) != "" {
 				switch key {
-				case "type":
+				case SchemaType:
 					component.Type = cloudauth.Component(cloudauth.Component_value[value.(string)])
-				case "instance":
+				case SchemaInstance:
 					component.Instance = value.(string)
-				case "cloud_connector_metadata":
+				case SchemaCloudConnectorMetadata:
 					component.Metadata = &cloudauth.AccountComponent_CloudConnectorMetadata{
 						CloudConnectorMetadata: &cloudauth.CloudConnectorMetadata{},
 					}
-				case "trusted_role_metadata":
+				case SchemaTrustedRoleMetadata:
 					// TODO: Make it more generic than just for GCP
 					if provider == cloudauth.Provider_PROVIDER_GCP.String() {
 						component.Metadata = &cloudauth.AccountComponent_TrustedRoleMetadata{
@@ -337,11 +360,11 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 							},
 						}
 					}
-				case "event_bridge_metadata":
+				case SchemaEventBridgeMetadata:
 					component.Metadata = &cloudauth.AccountComponent_EventBridgeMetadata{
 						EventBridgeMetadata: &cloudauth.EventBridgeMetadata{},
 					}
-				case "service_principal_metadata":
+				case SchemaServicePrincipalMetadata:
 					// TODO: Make it more generic than just for GCP
 					service_principal_private_key := getServicePrincipalKeyObject(value.(string))
 					component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
@@ -349,7 +372,7 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 							Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
 								Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
 									Key: &cloudauth.ServicePrincipalMetadata_GCP_Key{
-										ProjectId:    data.Get("cloud_provider_id").(string),
+										ProjectId:    data.Get(SchemaCloudProviderId).(string),
 										PrivateKeyId: service_principal_private_key["private_key_id"],
 										PrivateKey:   service_principal_private_key["private_key"],
 									},
@@ -357,15 +380,15 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 							},
 						},
 					}
-				case "webhook_datasource_metadata":
+				case SchemaWebhookDatasourceMetadata:
 					component.Metadata = &cloudauth.AccountComponent_WebhookDatasourceMetadata{
 						WebhookDatasourceMetadata: &cloudauth.WebhookDatasourceMetadata{},
 					}
-				case "crypto_key_metadata":
+				case SchemaCryptoKeyMetadata:
 					component.Metadata = &cloudauth.AccountComponent_CryptoKeyMetadata{
 						CryptoKeyMetadata: &cloudauth.CryptoKeyMetadata{},
 					}
-				case "cloud_logs_metadata":
+				case SchemaCloudLogsMetadata:
 					component.Metadata = &cloudauth.AccountComponent_CloudLogsMetadata{
 						CloudLogsMetadata: &cloudauth.CloudLogsMetadata{},
 					}
@@ -382,14 +405,14 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
 	accountComponents := constructAccountComponents([]*cloudauth.AccountComponent{}, data)
 
-	featureData := data.Get("feature").(interface{})
+	featureData := data.Get(SchemaFeature).(interface{})
 	accountFeatures := constructAccountFeatures(&cloudauth.AccountFeatures{}, featureData)
 
 	return &v2.CloudauthAccountSecure{
 		CloudAccount: cloudauth.CloudAccount{
-			Enabled:    data.Get("enabled").(bool),
-			ProviderId: data.Get("cloud_provider_id").(string),
-			Provider:   cloudauth.Provider(cloudauth.Provider_value[data.Get("cloud_provider_type").(string)]),
+			Enabled:    data.Get(SchemaEnabled).(bool),
+			ProviderId: data.Get(SchemaCloudProviderId).(string),
+			Provider:   cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
 			Components: accountComponents,
 			Feature:    accountFeatures,
 		},
@@ -425,11 +448,11 @@ func featureToResourceData(features *cloudauth.AccountFeatures) []map[string]int
 	featureMap := []map[string]interface{}{}
 
 	featureFields := map[string]*cloudauth.AccountFeature{
-		"secure_threat_detection":     features.SecureThreatDetection,
-		"secure_config_posture":       features.SecureConfigPosture,
-		"secure_identity_entitlement": features.SecureIdentityEntitlement,
-		"monitor_cloud_metrics":       features.MonitorCloudMetrics,
-		"secure_agentless_scanning":   features.SecureAgentlessScanning,
+		SchemaSecureThreatDetection:     features.SecureThreatDetection,
+		SchemaSecureConfigPosture:       features.SecureConfigPosture,
+		SchemaSecureIdentityEntitlement: features.SecureIdentityEntitlement,
+		SchemaMonitorCloudMetrics:       features.MonitorCloudMetrics,
+		SchemaSecureAgentlessScanning:   features.SecureAgentlessScanning,
 	}
 
 	for name, feature := range featureFields {
@@ -443,27 +466,27 @@ func featureToResourceData(features *cloudauth.AccountFeatures) []map[string]int
 }
 
 func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudauthAccountSecure) error {
-	err := data.Set("id", cloudAccount.Id)
+	err := data.Set(SchemaId, cloudAccount.Id)
 	if err != nil {
 		return err
 	}
 
-	err = data.Set("enabled", cloudAccount.Enabled)
+	err = data.Set(SchemaEnabled, cloudAccount.Enabled)
 	if err != nil {
 		return err
 	}
 
-	err = data.Set("cloud_provider_id", cloudAccount.ProviderId)
+	err = data.Set(SchemaCloudProviderId, cloudAccount.ProviderId)
 	if err != nil {
 		return err
 	}
 
-	err = data.Set("cloud_provider_type", cloudAccount.Provider.String())
+	err = data.Set(SchemaCloudProviderType, cloudAccount.Provider.String())
 	if err != nil {
 		return err
 	}
 
-	err = data.Set("feature", featureToResourceData(cloudAccount.Feature))
+	err = data.Set(SchemaFeature, featureToResourceData(cloudAccount.Feature))
 	if err != nil {
 		return err
 	}
@@ -472,12 +495,12 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 
 	for _, comp := range cloudAccount.Components {
 		components = append(components, map[string]interface{}{
-			"type":     comp.Type.String(),
-			"instance": comp.Instance,
+			SchemaType:     comp.Type.String(),
+			SchemaInstance: comp.Instance,
 		})
 	}
 
-	err = data.Set("components", components)
+	err = data.Set(SchemaComponents, components)
 	if err != nil {
 		return err
 	}
