@@ -55,6 +55,9 @@ func TestAccAlertV2Change(t *testing.T) {
 				Config: alertV2ChangeWithEnabled(rText()),
 			},
 			{
+				Config: alertV2ChangeWithUnreportedAlertNotificationsRetentionSec(rText()),
+			},
+			{
 				Config: alertV2ChangeWithWarningThreshold(rText()),
 			},
 			{
@@ -291,6 +294,22 @@ resource "sysdig_monitor_alert_v2_change" "sample" {
 	shorter_time_range_seconds = 300
 	longer_time_range_seconds = 3600
 	enabled = false
+}
+`, name)
+}
+
+func alertV2ChangeWithUnreportedAlertNotificationsRetentionSec(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_change" "sample" {
+	name = "TERRAFORM TEST - CHANGE %s"
+	metric = "sysdig_container_cpu_used_percent"
+	group_aggregation = "avg"
+	time_aggregation = "avg"
+	operator = ">="
+	threshold = 50
+	shorter_time_range_seconds = 300
+	longer_time_range_seconds = 3600
+	unreported_alert_notifications_retention_seconds = 60 * 60 * 24 * 30
 }
 `, name)
 }

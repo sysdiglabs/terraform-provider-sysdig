@@ -104,6 +104,7 @@ By defining this field, the user can add link to notifications.
 * `warning_threshold` - (Optional) Warning threshold used together with `op` to trigger the alert if crossed. Must be a number that triggers the alert before reaching the main `threshold`.
 * `shorter_time_range_seconds` - (Required) Time range for which data is compared to a longer, previous period. Can be one of `300` (5 minutes), `600` (10 minutes), `3600` (1 hour), `14400` (4 hours), `86400` (1 day).
 * `longer_time_range_seconds` - (Required) Time range for which data will be used as baseline for comparisons with data in the time range defined in `shorter_time_range_seconds`. Possible values depend on `shorter_time_range_seconds`: for a shorter time range of 5 minutes, longer time range can be 1, 2 or 3 hours, for a shorter time range or 10 minutes, it can be from 1 to 8 hours, for a shorter time range or one hour, it can be from 4 to 24 hours, for a shorter time range of 4 hours, it can be from 1 to 7 days, for a shorter time range of one day, it can only be 7 days.
+* `unreported_alert_notifications_retention_seconds` - (Optional) Period after which any alerts triggered for entities (such as containers or hosts) that are no longer reporting data will be automatically marked as 'deactivated'. By default there is no deactivation.
 
 ### `scope`
 

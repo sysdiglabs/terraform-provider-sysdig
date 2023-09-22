@@ -96,6 +96,7 @@ Enables the creation of a capture file of the syscalls during the event.
 * `group_by` - (Optional) List of segments to trigger a separate alert on. Example: `["kube_cluster_name", "kube_pod_name"]`.
 * `metric` - (Required) Metric the alert will act upon. Can be: `sysdig_container_up`, `sysdig_program_up`, `sysdig_host_up`.
 * `threshold` - (Required) Below of this percentage of downtime the alert will be triggered. Defaults to 100.
+* `unreported_alert_notifications_retention_seconds` - (Optional) Period after which any alerts triggered for entities (such as containers or hosts) that are no longer reporting data will be automatically marked as 'deactivated'. By default there is no deactivation.
 
 ### `scope`
 
