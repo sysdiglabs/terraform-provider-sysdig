@@ -54,8 +54,9 @@ const (
 	SchemaCloudLogsMetadata         = "cloud_logs_metadata"
 	SchemaEnabled                   = "enabled"
 	SchemaComponents                = "components"
+	SchemaComponent                 = "component"
 	SchemaId                        = "id"
-	SchemaCloudProviderId           = "cloud_provider_id"
-	SchemaCloudProviderType         = "cloud_provider_type"
+	SchemaCloudProviderId           = "provider_id"
+	SchemaCloudProviderType         = "provider_type"
 	SchemaFeature                   = "feature"
 )
