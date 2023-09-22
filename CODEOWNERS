@@ -12,3 +12,11 @@
 
 # policies/rules
 *secure*policy* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig
+
+# internal components
+/sysdig/internal/client/v2/client.go @filiptubic @mbarbieri @draraksysdig
+/sysdig/internal/client/v2/config.go @filiptubic @mbarbieri @draraksysdig
+/sysdig/internal/client/v2/ibm.go @filiptubic @mbarbieri @draraksysdig
+/main.go @filiptubic @mbarbieri @draraksysdig
+/.goreleaser.yml @filiptubic @mbarbieri @draraksysdig
+/.github/ @filiptubic @mbarbieri @draraksysdig
