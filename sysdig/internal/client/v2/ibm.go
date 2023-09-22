@@ -206,7 +206,6 @@ func newIBMClient(opts ...ClientOption) *Client {
 			httpClient: newHTTPClient(cfg),
 			teamID:     cfg.sysdigTeamID,
 		},
-		policiesChanged: false,
 	}
 }
 

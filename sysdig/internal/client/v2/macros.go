@@ -37,8 +37,6 @@ func (client *Client) CreateMacro(ctx context.Context, macro Macro) (Macro, erro
 		return Macro{}, client.ErrorFromResponse(response)
 	}
 
-	client.policiesChanged = true
-
 	return Unmarshal[Macro](response.Body)
 }
 
@@ -81,8 +79,6 @@ func (client *Client) UpdateMacro(ctx context.Context, macro Macro) (Macro, erro
 		return Macro{}, client.ErrorFromResponse(response)
 	}
 
-	client.policiesChanged = true
-
 	return Unmarshal[Macro](response.Body)
 }
 
@@ -96,9 +92,6 @@ func (client *Client) DeleteMacro(ctx context.Context, id int) error {
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
 		return client.ErrorFromResponse(response)
 	}
-
-	client.policiesChanged = true
-
 	return nil
 }
 
