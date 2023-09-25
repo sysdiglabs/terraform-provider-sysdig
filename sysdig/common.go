@@ -58,4 +58,5 @@ const (
 	SchemaCloudProviderId           = "provider_id"
 	SchemaCloudProviderType         = "provider_type"
 	SchemaFeature                   = "feature"
+	SchemaManagementAccountId       = "management_account_id"
 )

@@ -16,13 +16,13 @@ Creates a Sysdig Secure Organization.
 
 ```terraform
 resource "sysdig_secure_cloud_auth_account" "sample" {
-  provider_id   = "google_cloud_project_id>"
+  provider_id   = "google_cloud_project_id"
   provider_type = "PROVIDER_GCP"
   enabled       = "true"
 }
 resource "sysdig_secure_organization" "sample" {
-  management_account_id		= sysdig_secure_cloud_auth_account.sample.id 
-  provider_type		= "PROVIDER_GCP"
+  management_account_id	    = sysdig_secure_cloud_auth_account.sample.id 
+  provider_type		        = "PROVIDER_GCP"
 }
 ```
 
