@@ -362,7 +362,8 @@ func sendPoliciesToAgents(ctx context.Context, clients SysdigClients) error {
 
 		// When running as a cleanup hook, the terraform context is in a cancelled state.
 		// Using a background context with a deadline will allow us to complete this request.
-		backgroundCtx, _ := context.WithDeadline(context.Background(), time.Now().Add(15*time.Second))
+		backgroundCtx, cancel := context.WithDeadline(context.Background(), time.Now().Add(15*time.Second))
+		defer cancel()
 		err = client.SendPoliciesToAgents(backgroundCtx)
 	})
 	if err != nil {
