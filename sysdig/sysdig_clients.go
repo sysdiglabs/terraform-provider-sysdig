@@ -192,7 +192,9 @@ func (c *sysdigClients) Configure(ctx context.Context, d *schema.ResourceData) {
 }
 
 func (c *sysdigClients) AddCleanupHook(cleanupHook func(context.Context, SysdigClients) error) {
+	c.mu.Lock()
 	c.cleanupHooks = append(c.cleanupHooks, cleanupHook)
+	c.mu.Unlock()
 }
 
 func (c *sysdigClients) Close() error {
