@@ -128,6 +128,11 @@ func resourceSysdigMonitorAlertV2Change() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
+			"unreported_alert_notifications_retention_seconds": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(60),
+			},
 		})),
 
 		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
@@ -300,10 +305,17 @@ func buildAlertV2ChangeStruct(d *schema.ResourceData) (*v2.AlertV2Change, error)
 	//LongerRangeSec
 	config.LongerRangeSec = d.Get("longer_time_range_seconds").(int)
 
+	var unreportedAlertNotificationsRetentionSec *int
+	if unreportedAlertNotificationsRetentionSecInterface, ok := d.GetOk("unreported_alert_notifications_retention_seconds"); ok {
+		u := unreportedAlertNotificationsRetentionSecInterface.(int)
+		unreportedAlertNotificationsRetentionSec = &u
+	}
+
 	alert := &v2.AlertV2Change{
-		AlertV2Common: *alertV2Common,
-		DurationSec:   0,
-		Config:        config,
+		AlertV2Common:                            *alertV2Common,
+		DurationSec:                              0,
+		Config:                                   config,
+		UnreportedAlertNotificationsRetentionSec: unreportedAlertNotificationsRetentionSec,
 	}
 	return alert, nil
 }
@@ -336,6 +348,12 @@ func updateAlertV2ChangeState(d *schema.ResourceData, alert *v2.AlertV2Change) e
 	_ = d.Set("shorter_time_range_seconds", alert.Config.ShorterRangeSec)
 
 	_ = d.Set("longer_time_range_seconds", alert.Config.LongerRangeSec)
+
+	if alert.UnreportedAlertNotificationsRetentionSec != nil {
+		_ = d.Set("unreported_alert_notifications_retention_seconds", *alert.UnreportedAlertNotificationsRetentionSec)
+	} else {
+		_ = d.Set("unreported_alert_notifications_retention_seconds", nil)
+	}
 
 	return nil
 }

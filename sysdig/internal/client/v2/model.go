@@ -597,8 +597,9 @@ type AlertV2ConfigMetric struct {
 
 type AlertV2Metric struct {
 	AlertV2Common
-	DurationSec int                 `json:"durationSec"`
-	Config      AlertV2ConfigMetric `json:"config"`
+	DurationSec                              int                 `json:"durationSec"`
+	Config                                   AlertV2ConfigMetric `json:"config"`
+	UnreportedAlertNotificationsRetentionSec *int                `json:"unreportedAlertNotificationsRetentionSec"`
 }
 
 type alertV2MetricWrapper struct {
@@ -619,8 +620,9 @@ type AlertV2ConfigDowntime struct {
 
 type AlertV2Downtime struct {
 	AlertV2Common
-	DurationSec int                   `json:"durationSec"`
-	Config      AlertV2ConfigDowntime `json:"config"`
+	DurationSec                              int                   `json:"durationSec"`
+	Config                                   AlertV2ConfigDowntime `json:"config"`
+	UnreportedAlertNotificationsRetentionSec *int                  `json:"unreportedAlertNotificationsRetentionSec"`
 }
 
 type alertV2DowntimeWrapper struct {
@@ -656,8 +658,9 @@ type AlertV2ConfigFormBasedPrometheus struct {
 
 type AlertV2FormBasedPrometheus struct {
 	AlertV2Common
-	DurationSec int                              `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
-	Config      AlertV2ConfigFormBasedPrometheus `json:"config"`
+	DurationSec                              int                              `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
+	Config                                   AlertV2ConfigFormBasedPrometheus `json:"config"`
+	UnreportedAlertNotificationsRetentionSec *int                             `json:"unreportedAlertNotificationsRetentionSec"`
 }
 
 type alertV2FormBasedPrometheusWrapper struct {
@@ -666,8 +669,9 @@ type alertV2FormBasedPrometheusWrapper struct {
 
 type AlertV2Change struct {
 	AlertV2Common
-	DurationSec int                 `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
-	Config      AlertV2ConfigChange `json:"config"`
+	DurationSec                              int                 `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
+	Config                                   AlertV2ConfigChange `json:"config"`
+	UnreportedAlertNotificationsRetentionSec *int                `json:"unreportedAlertNotificationsRetentionSec"`
 }
 
 type alertV2ChangeWrapper struct {
