@@ -38,7 +38,7 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"cloud_provider_type": {
+			"provider_type": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{cloudauth.Provider_PROVIDER_AWS.String(), cloudauth.Provider_PROVIDER_GCP.String(), cloudauth.Provider_PROVIDER_AZURE.String()}, false),
@@ -122,7 +122,7 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) v2.Organizati
 	return v2.OrganizationSecure{
 		CloudOrganization: cloudauth.CloudOrganization{
 			ManagementAccountId: data.Get("management_account_id").(string),
-			Provider:            cloudauth.Provider(cloudauth.Provider_value[data.Get("cloud_provider_type").(string)]),
+			Provider:            cloudauth.Provider(cloudauth.Provider_value[data.Get("provider_type").(string)]),
 		},
 	}
 }
@@ -133,7 +133,7 @@ func secureOrganizationToResourceData(data *schema.ResourceData, org *v2.Organiz
 		return err
 	}
 
-	err = data.Set("cloud_provider_type", org.Provider)
+	err = data.Set("provider_type", org.Provider)
 	if err != nil {
 		return err
 	}

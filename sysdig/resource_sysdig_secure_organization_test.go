@@ -45,7 +45,7 @@ func secureOrgWithAccountID(accountID string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_organization" "sample" {
   management_account_id		= sample-%s
-  cloud_provider_type		= "PROVIDER_GCP"
+  provider_type		= "PROVIDER_GCP"
 }
 `, accountID)
 }

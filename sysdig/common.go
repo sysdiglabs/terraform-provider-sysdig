@@ -55,7 +55,6 @@ const (
 	SchemaEnabled                   = "enabled"
 	SchemaComponents                = "components"
 	SchemaComponent                 = "component"
-	SchemaId                        = "id"
 	SchemaCloudProviderId           = "provider_id"
 	SchemaCloudProviderType         = "provider_type"
 	SchemaFeature                   = "feature"
