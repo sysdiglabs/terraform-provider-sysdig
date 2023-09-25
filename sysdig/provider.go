@@ -11,6 +11,13 @@ type SysdigProvider struct {
 	SysdigClient SysdigClients
 }
 
+// Used by tests to get the provider
+func Provider() *schema.Provider {
+	sysdigClient := NewSysdigClients()
+	provider := &SysdigProvider{SysdigClient: sysdigClient}
+	return provider.Provider()
+}
+
 func (p *SysdigProvider) Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
