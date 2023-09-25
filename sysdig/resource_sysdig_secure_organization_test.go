@@ -44,8 +44,8 @@ func TestAccSecureOrganization(t *testing.T) {
 func secureOrgWithAccountID(accountID string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_organization" "sample" {
-  management_account_id          = sample-%s
-  cloud_provider_type      		 = "PROVIDER_GCP"
+  management_account_id		= sample-%s
+  cloud_provider_type		= "PROVIDER_GCP"
 }
 `, accountID)
 }
