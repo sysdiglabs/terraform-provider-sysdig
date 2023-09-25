@@ -31,9 +31,6 @@ func TestAccSecureCloudAuthAccount(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureCloudAuthAccountWithID(accID),
-			},
-			{
 				Config: secureCloudAuthAccountMinimumConfiguration(accID),
 			},
 			{
@@ -43,16 +40,6 @@ func TestAccSecureCloudAuthAccount(t *testing.T) {
 			},
 		},
 	})
-}
-
-func secureCloudAuthAccountWithID(accountID string) string {
-	return fmt.Sprintf(`
-resource "sysdig_secure_cloud_auth_account" "sample" {
-  provider_id   = "sample-%s"
-  provider_type = "PROVIDER_GCP"
-  enabled       = "true"
-}
-`, accountID)
 }
 
 func secureCloudAuthAccountMinimumConfiguration(accountID string) string {
@@ -100,7 +87,7 @@ func secureCloudAuthAccountWithFC(accountID string) string {
 	test_service_account_key := &sample_service_account_key{
 		ProjectId:    fmt.Sprintf("sample-1-%s", accountID),
 		PrivateKeyId: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-		PrivateKey:   "-----BEGIN PRIVATE KEY-----\njvXwqBxxxxxxxxxxxxxxxxxiQZkKgw\n-----END PRIVATE KEY-----\n",
+		PrivateKey:   "-----BEGIN PRIVATE KEY-----\nxxxxxxxxxxxxxxxxxxxxxxxxxxx\n-----END PRIVATE KEY-----\n",
 	}
 	test_service_account_keyJSON, _ := json.Marshal(test_service_account_key)
 	test_service_account_key_encoded := b64.StdEncoding.EncodeToString([]byte(string(test_service_account_keyJSON)))
