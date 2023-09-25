@@ -1,8 +1,10 @@
 package sysdig
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"io"
 	"sync"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -11,9 +13,13 @@ import (
 )
 
 type SysdigClients interface {
+	io.Closer
 	GetClientType() ClientType
 	GetSecureEndpoint() (string, error)
 	GetSecureApiToken() (string, error)
+
+	Configure(context.Context, *schema.ResourceData)
+	AddCleanupHook(func(context.Context, SysdigClients) error)
 
 	// v2
 	sysdigMonitorClientV2() (v2.SysdigMonitor, error)
@@ -22,6 +28,10 @@ type SysdigClients interface {
 	ibmSecureClient() (v2.IBMSecure, error)
 	commonClientV2() (v2.Common, error)
 	sysdigCommonClientV2() (v2.SysdigCommon, error)
+}
+
+func NewSysdigClients() SysdigClients {
+	return &sysdigClients{}
 }
 
 //go:generate stringer -type ClientType
@@ -35,9 +45,12 @@ const (
 )
 
 type sysdigClients struct {
+	ctx      context.Context
 	d        *schema.ResourceData
 	mu       sync.Mutex
 	commonMu sync.Mutex
+
+	cleanupHooks []func(context.Context, SysdigClients) error
 
 	// v2
 	monitorClientV2  v2.SysdigMonitor
@@ -171,6 +184,24 @@ func getIBMMonitorVariables(data *schema.ResourceData) (*ibmVariables, error) {
 
 func getIBMSecureVariables(data *schema.ResourceData) (*ibmVariables, error) {
 	return getIBMVariables("secure", data)
+}
+
+func (c *sysdigClients) Configure(ctx context.Context, d *schema.ResourceData) {
+	c.ctx = ctx
+	c.d = d
+}
+
+func (c *sysdigClients) AddCleanupHook(cleanupHook func(context.Context, SysdigClients) error) {
+	c.cleanupHooks = append(c.cleanupHooks, cleanupHook)
+}
+
+func (c *sysdigClients) Close() error {
+	for _, cleanup := range c.cleanupHooks {
+		if err := cleanup(c.ctx, c); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *sysdigClients) GetSecureEndpoint() (string, error) {

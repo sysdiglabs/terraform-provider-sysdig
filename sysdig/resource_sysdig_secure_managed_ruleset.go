@@ -77,7 +77,8 @@ func resourceSysdigSecureManagedRuleset() *schema.Resource {
 }
 
 func resourceSysdigManagedRulesetCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecurePolicyClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -101,6 +102,7 @@ func resourceSysdigManagedRulesetCreate(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	managedRulesetToResourceData(&createdPolicy, d)
 
@@ -162,7 +164,8 @@ func resourceSysdigManagedRulesetRead(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceSysdigManagedRulesetDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecurePolicyClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -173,12 +176,14 @@ func resourceSysdigManagedRulesetDelete(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	return nil
 }
 
 func resourceSysdigManagedRulesetUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecurePolicyClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -201,6 +206,8 @@ func resourceSysdigManagedRulesetUpdate(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
+
 	return nil
 }
 

@@ -7,13 +7,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func Provider() *schema.Provider {
+type SysdigProvider struct {
+	SysdigClient SysdigClients
+}
+
+func (p *SysdigProvider) Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"sysdig_secure_skip_policyv2msg": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_SECURE_SKIP_POLICYV2MSG", false),
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_SECURE_SKIP_POLICYV2MSG", true),
 			},
 			"sysdig_secure_api_token": {
 				Type:        schema.TypeString,
@@ -219,11 +223,11 @@ func Provider() *schema.Provider {
 			"sysdig_monitor_notification_channel_ibm_function":             dataSourceSysdigMonitorNotificationChannelIBMFunction(),
 			"sysdig_monitor_custom_role_permissions":                       dataSourceSysdigMonitorCustomRolePermissions(),
 		},
-		ConfigureContextFunc: providerConfigure,
+		ConfigureContextFunc: p.providerConfigure,
 	}
 }
 
-func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	sysdigClient := &sysdigClients{d: d}
-	return sysdigClient, nil
+func (p *SysdigProvider) providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	p.SysdigClient.Configure(ctx, d)
+	return p.SysdigClient, nil
 }
