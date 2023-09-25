@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 
 	"google.golang.org/protobuf/encoding/protojson"
@@ -101,7 +100,6 @@ func (client *Client) organizationURL(orgId string) string {
 
 // local function for protojson based marshal/unmarshal of organization proto
 func (client *Client) marshalOrg(data *OrganizationSecure) (io.Reader, error) {
-	log.Printf("Payload %v", data)
 	payload, err := protojson.Marshal(data)
 	return bytes.NewBuffer(payload), err
 }
@@ -115,6 +113,5 @@ func (client *Client) unmarshalOrg(data io.ReadCloser) (*OrganizationSecure, err
 	}
 
 	err = protojson.Unmarshal(body, result)
-	log.Printf("Result: %v", result)
 	return result, err
 }
