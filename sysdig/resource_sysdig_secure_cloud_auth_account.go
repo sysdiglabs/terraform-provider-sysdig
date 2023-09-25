@@ -347,7 +347,8 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 					if provider == cloudauth.Provider_PROVIDER_GCP.String() {
 						encodedServicePrincipalKey, ok := servicePrincipalMetadata["gcp"].(map[string]interface{})["key"].(string)
 						if !ok {
-							fmt.Printf("Component metadata for provider %s is invalid and not as expected", provider)
+							fmt.Printf("Resource input for component metadata for provider %s is invalid and not as expected", provider)
+							break
 						}
 						servicePrincipalKey := getGcpServicePrincipalKey(encodedServicePrincipalKey)
 						component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
@@ -355,9 +356,16 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 								Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
 									Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
 										Key: &cloudauth.ServicePrincipalMetadata_GCP_Key{
-											ProjectId:    data.Get(SchemaCloudProviderId).(string),
-											PrivateKeyId: servicePrincipalKey["private_key_id"],
-											PrivateKey:   servicePrincipalKey["private_key"],
+											Type:                    servicePrincipalKey["type"],
+											ProjectId:               servicePrincipalKey["project_id"],
+											PrivateKeyId:            servicePrincipalKey["private_key_id"],
+											PrivateKey:              servicePrincipalKey["private_key"],
+											ClientEmail:             servicePrincipalKey["client_email"],
+											ClientId:                servicePrincipalKey["client_id"],
+											AuthUri:                 servicePrincipalKey["auth_uri"],
+											TokenUri:                servicePrincipalKey["token_uri"],
+											AuthProviderX509CertUrl: servicePrincipalKey["auth_provider_x509_cert_url"],
+											ClientX509CertUrl:       servicePrincipalKey["client_x509_cert_url"],
 										},
 									},
 								},
