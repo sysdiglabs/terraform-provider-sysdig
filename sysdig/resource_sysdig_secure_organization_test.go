@@ -4,12 +4,11 @@ package sysdig_test
 
 import (
 	"fmt"
-	"os"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"os"
+	"testing"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
@@ -43,8 +42,13 @@ func TestAccSecureOrganization(t *testing.T) {
 
 func secureOrgWithAccountID(accountID string) string {
 	return fmt.Sprintf(`
+resource "sysdig_secure_cloud_auth_account" "sample" {
+  provider_id   = "sample-%s"
+  provider_type = "PROVIDER_GCP"
+  enabled       = "true"
+}
 resource "sysdig_secure_organization" "sample" {
-  management_account_id		= sample-%s
+  management_account_id		= sysdig_secure_cloud_auth_account.sample.id
   provider_type				= "PROVIDER_GCP"
 }
 `, accountID)
