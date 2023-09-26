@@ -29,16 +29,16 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 		Schema: map[string]*schema.Schema{
-			"id": {
+			SchemaIDKey: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"management_account_id": {
+			SchemaManagementAccountId: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"cloud_provider_type": {
+			SchemaCloudProviderType: {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{cloudauth.Provider_PROVIDER_AWS.String(), cloudauth.Provider_PROVIDER_GCP.String(), cloudauth.Provider_PROVIDER_AZURE.String()}, false),
@@ -121,24 +121,24 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 func secureOrganizationFromResourceData(data *schema.ResourceData) v2.OrganizationSecure {
 	return v2.OrganizationSecure{
 		CloudOrganization: cloudauth.CloudOrganization{
-			ManagementAccountId: data.Get("management_account_id").(string),
-			Provider:            cloudauth.Provider(cloudauth.Provider_value[data.Get("cloud_provider_type").(string)]),
+			ManagementAccountId: data.Get(SchemaManagementAccountId).(string),
+			Provider:            cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
 		},
 	}
 }
 
 func secureOrganizationToResourceData(data *schema.ResourceData, org *v2.OrganizationSecure) error {
-	err := data.Set("cloud_provider_id", org.ProviderId)
+	err := data.Set(SchemaCloudProviderId, org.ProviderId)
 	if err != nil {
 		return err
 	}
 
-	err = data.Set("cloud_provider_type", org.Provider)
+	err = data.Set(SchemaCloudProviderType, org.Provider)
 	if err != nil {
 		return err
 	}
 
-	err = data.Set("id", org.Id)
+	err = data.Set(SchemaIDKey, org.Id)
 	if err != nil {
 		return err
 	}
