@@ -86,7 +86,8 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 }
 
 func resourceSysdigRuleNetworkCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -100,6 +101,7 @@ func resourceSysdigRuleNetworkCreate(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	d.SetId(strconv.Itoa(rule.ID))
 	_ = d.Set("version", rule.Version)
@@ -174,7 +176,8 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceSysdigRuleNetworkUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -191,12 +194,14 @@ func resourceSysdigRuleNetworkUpdate(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	return nil
 }
 
 func resourceSysdigRuleNetworkDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -210,6 +215,7 @@ func resourceSysdigRuleNetworkDelete(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	return nil
 }

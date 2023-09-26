@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	CreateListPath = "%s/api/secure/falco/lists"
+	CreateListPath = "%s/api/secure/falco/lists?skipPolicyV2Msg=%t"
 	GetListPath    = "%s/api/secure/falco/lists/%d"
-	UpdateListPath = "%s/api/secure/falco/lists/%d"
-	DeleteListPath = "%s/api/secure/falco/lists/%d"
+	UpdateListPath = "%s/api/secure/falco/lists/%d?skipPolicyV2Msg=%t"
+	DeleteListPath = "%s/api/secure/falco/lists/%d?skipPolicyV2Msg=%t"
 )
 
 type ListInterface interface {
@@ -97,7 +97,7 @@ func (client *Client) DeleteList(ctx context.Context, id int) error {
 }
 
 func (client *Client) CreateListURL() string {
-	return fmt.Sprintf(CreateListPath, client.config.url)
+	return fmt.Sprintf(CreateListPath, client.config.url, client.config.secureSkipPolicyV2Msg)
 }
 
 func (client *Client) GetListURL(id int) string {
@@ -105,9 +105,9 @@ func (client *Client) GetListURL(id int) string {
 }
 
 func (client *Client) UpdateListURL(id int) string {
-	return fmt.Sprintf(UpdateListPath, client.config.url, id)
+	return fmt.Sprintf(UpdateListPath, client.config.url, id, client.config.secureSkipPolicyV2Msg)
 }
 
 func (client *Client) DeleteListURL(id int) string {
-	return fmt.Sprintf(DeleteListPath, client.config.url, id)
+	return fmt.Sprintf(DeleteListPath, client.config.url, id, client.config.secureSkipPolicyV2Msg)
 }
