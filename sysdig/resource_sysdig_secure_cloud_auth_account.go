@@ -125,7 +125,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 		Schema: map[string]*schema.Schema{
-			SchemaId: {
+			SchemaIDKey: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -492,7 +492,7 @@ func featureToResourceData(features *cloudauth.AccountFeatures) []map[string]int
 }
 
 func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudauthAccountSecure) error {
-	err := data.Set(SchemaId, cloudAccount.Id)
+	err := data.Set(SchemaIDKey, cloudAccount.Id)
 	if err != nil {
 		return err
 	}
