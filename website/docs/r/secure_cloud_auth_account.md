@@ -1,0 +1,54 @@
+---
+subcategory: "Sysdig Secure"
+layout: "sysdig"
+page_title: "Sysdig: sysdig_secure_cloud_auth_account"
+description: |-
+  Creates a Sysdig Secure Cloud Account using Cloudauth APIs.
+---
+
+# Resource: sysdig_secure_cloud_auth_account
+
+Creates a Sysdig Secure Cloud Account using Cloudauth APIs.
+
+-> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
+
+## Example Usage
+
+```terraform
+resource "sysdig_secure_cloud_auth_account" "sample" {
+  provider_id   = "mygcpproject"
+  provider_type = "PROVIDER_GCP"
+  enabled       = true
+  feature {
+      secure_config_posture {
+        enabled    = "true"
+        components = ["COMPONENT_SERVICE_PRINCIPAL/secure-service-principal"]
+      }
+  }
+  component {
+      type                       = "COMPONENT_SERVICE_PRINCIPAL"
+      instance                   = "secure-service-principal"
+      service_principal_metadata = jsonencode({
+        gcp = {
+          key = <private key json of the GCP service account created by secure posture (cspm) module>
+        }
+      })
+  }
+}
+```
+
+## Argument Reference
+
+* `provider_id` - (Required) The unique identifier of the cloud account. e.g. for GCP: `mygcpproject`,
+
+* `provider_type` - (Required) The cloud provider in which the account exists. Currently supported provider is `PROVIDER_GCP`.
+
+* `enabled` - (Required) Whether or not to enable sysdig provisioning of resources on this cloud account.
+
+* `feature` - (Optional) The name and configuration of each feature along with the respective components to enable on this cloud account.
+
+* `component` - (Optional) The component configuration to enable on this cloud account.
+
+## Attributes Reference
+
+No additional attributes are exported.
