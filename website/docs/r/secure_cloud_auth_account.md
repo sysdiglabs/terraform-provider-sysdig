@@ -21,16 +21,16 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
   enabled       = true
   feature {
       secure_config_posture {
-        enabled    = "true"
-        components = ["COMPONENT_SERVICE_PRINCIPAL/secure-service-principal"]
+        enabled    = true
+        components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
       }
   }
   component {
       type                       = "COMPONENT_SERVICE_PRINCIPAL"
-      instance                   = "secure-service-principal"
+      instance                   = "secure-posture"
       service_principal_metadata = jsonencode({
         gcp = {
-          key = <private key json of the GCP service account created by secure posture (cspm) module>
+          key = <private key in JSON format base64 encoded, of the GCP service account created for secure posture>
         }
       })
   }
@@ -47,7 +47,7 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 
 * `feature` - (Optional) The name and configuration of each feature along with the respective components to enable on this cloud account.
 
-* `component` - (Optional) The component configuration to enable on this cloud account.
+* `component` - (Optional) The component configuration to enable on this cloud account. There can be multiple component blocks for a feature, one for each component to be enabled.
 
 ## Attributes Reference
 
