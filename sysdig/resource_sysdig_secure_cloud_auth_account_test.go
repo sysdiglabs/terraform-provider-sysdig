@@ -109,7 +109,7 @@ resource "sysdig_secure_cloud_auth_account" "sample-1" {
 	instance                   = "secure-service-principal"
 	service_principal_metadata = jsonencode({
       gcp = {
-        key = %s
+        key = "%s"
       }
     })
   }
