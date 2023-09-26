@@ -4,6 +4,7 @@ package sysdig_test
 
 import (
 	b64 "encoding/base64"
+	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
