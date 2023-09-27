@@ -19,21 +19,6 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
   provider_id   = "mygcpproject"
   provider_type = "PROVIDER_GCP"
   enabled       = true
-  feature {
-      secure_config_posture {
-        enabled    = true
-        components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
-      }
-  }
-  component {
-      type                       = "COMPONENT_SERVICE_PRINCIPAL"
-      instance                   = "secure-posture"
-      service_principal_metadata = jsonencode({
-        gcp = {
-          key = <private key in JSON format base64 encoded, of the GCP service account created for secure posture>
-        }
-      })
-  }
 }
 ```
 
