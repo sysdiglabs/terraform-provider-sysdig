@@ -24,7 +24,7 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 
 ## Argument Reference
 
-* `provider_id` - (Required) The unique identifier of the cloud account. e.g. for GCP: `mygcpproject`,
+* `provider_id` - (Required) The unique identifier of the cloud account. e.g. for GCP: `mygcpproject`.
 
 * `provider_type` - (Required) The cloud provider in which the account exists. Currently supported provider is `PROVIDER_GCP`.
 
@@ -33,6 +33,8 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 * `feature` - (Optional) The name and configuration of each feature along with the respective components to enable on this cloud account.
 
 * `component` - (Optional) The component configuration to enable on this cloud account. There can be multiple component blocks for a feature, one for each component to be enabled.
+
+-> **Note:** Please refer to Sysdig Secure API Documentation for the Cloud Accounts API for providing `feature` & `component`.
 
 ## Attributes Reference
 
