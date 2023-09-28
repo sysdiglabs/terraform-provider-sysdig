@@ -517,5 +517,19 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		return err
 	}
 
+	components := []map[string]interface{}{}
+
+	for _, comp := range cloudAccount.Components {
+		components = append(components, map[string]interface{}{
+			SchemaType:     comp.Type.String(),
+			SchemaInstance: comp.Instance,
+		})
+	}
+
+	err = data.Set(SchemaComponent, components)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

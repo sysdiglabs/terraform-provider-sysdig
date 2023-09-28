@@ -71,10 +71,9 @@ func TestAccSecureCloudAuthAccountFC(t *testing.T) {
 				Config: secureCloudAuthAccountWithFC(accID),
 			},
 			{
-				ResourceName:            "sysdig_secure_cloud_auth_account.sample-1",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"component"},
+				ResourceName:      "sysdig_secure_cloud_auth_account.sample-1",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -113,6 +112,9 @@ resource "sysdig_secure_cloud_auth_account" "sample-1" {
         key = "%s"
       }
     })
+  }
+  lifecycle {
+	ignore_changes = [component]
   }
 }
 `, accountID, test_service_account_key_encoded)
