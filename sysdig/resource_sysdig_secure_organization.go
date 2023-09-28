@@ -8,7 +8,6 @@ import (
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceSysdigSecureOrganization() *schema.Resource {
@@ -37,11 +36,6 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 			SchemaManagementAccountId: {
 				Type:     schema.TypeString,
 				Required: true,
-			},
-			SchemaCloudProviderType: {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{cloudauth.Provider_PROVIDER_AWS.String(), cloudauth.Provider_PROVIDER_GCP.String(), cloudauth.Provider_PROVIDER_AZURE.String()}, false),
 			},
 		},
 	}
@@ -122,18 +116,12 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) v2.Organizati
 	return v2.OrganizationSecure{
 		CloudOrganization: cloudauth.CloudOrganization{
 			ManagementAccountId: data.Get(SchemaManagementAccountId).(string),
-			Provider:            cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
 		},
 	}
 }
 
 func secureOrganizationToResourceData(data *schema.ResourceData, org *v2.OrganizationSecure) error {
 	err := data.Set(SchemaCloudProviderId, org.ProviderId)
-	if err != nil {
-		return err
-	}
-
-	err = data.Set(SchemaCloudProviderType, org.Provider)
 	if err != nil {
 		return err
 	}
