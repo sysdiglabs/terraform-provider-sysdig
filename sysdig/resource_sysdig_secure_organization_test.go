@@ -49,7 +49,6 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 }
 resource "sysdig_secure_organization" "sample" {
   management_account_id		= sysdig_secure_cloud_auth_account.sample.id
-  provider_type				= "PROVIDER_GCP"
 }
 `, accountID)
 }
