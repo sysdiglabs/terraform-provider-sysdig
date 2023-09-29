@@ -22,14 +22,12 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 }
 resource "sysdig_secure_organization" "sample" {
   management_account_id	    = sysdig_secure_cloud_auth_account.sample.id 
-  provider_type	            = "PROVIDER_GCP"
 }
 ```
 
 ## Argument Reference
 
 * `management_account_id` - (Required) Cloud Account created using resource sysdig_secure_cloud_auth_account.
-* `provider_type` - (Required) Only `PROVIDER_GCP` is currently supported.
 
 ## Attributes Reference
 
