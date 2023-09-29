@@ -3,6 +3,8 @@
 package sysdig_test
 
 import (
+	b64 "encoding/base64"
+	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -50,8 +52,6 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 }`, accountID)
 }
 
-// TODO: uncomment the below test when the issue of TF refresh with component block is resolved
-/*
 func TestAccSecureCloudAuthAccountFC(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	accID := rText()
@@ -113,7 +113,9 @@ resource "sysdig_secure_cloud_auth_account" "sample-1" {
       }
     })
   }
+  lifecycle {
+	ignore_changes = [component]
+  }
 }
 `, accountID, test_service_account_key_encoded)
 }
-*/
