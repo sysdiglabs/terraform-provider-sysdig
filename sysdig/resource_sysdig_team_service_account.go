@@ -34,19 +34,23 @@ func resourceSysdigTeamServiceAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "ROLE_TEAM_READ",
+				ForceNew: true,
 			},
 			SchemaExpirationDateKey: {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: true,
 			},
 			SchemaTeamIDKey: {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: true,
 			},
 			SchemaSystemRoleKey: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "ROLE_SERVICE_ACCOUNT",
+				ForceNew: true,
 			},
 			SchemaCreatedDateKey: {
 				Type:     schema.TypeInt,
