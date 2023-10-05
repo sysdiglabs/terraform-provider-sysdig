@@ -36,6 +36,33 @@ func TestAccTeamServiceAccount(t *testing.T) {
 						"role",
 						"ROLE_TEAM_READ",
 					),
+					resource.TestCheckResourceAttrSet("sysdig_team_service_account.service-account-monitor",
+						"api_key",
+					),
+					resource.TestCheckResourceAttr("sysdig_team_service_account.service-account-monitor",
+						"expiration_date",
+						"4070908800",
+					),
+				),
+			},
+			{
+				Config: teamServiceAccountMonitorTeamNewExpirationDate(monitorsvc),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sysdig_team_service_account.service-account-monitor",
+						"name",
+						monitorsvc,
+					),
+					resource.TestCheckResourceAttr("sysdig_team_service_account.service-account-monitor",
+						"role",
+						"ROLE_TEAM_READ",
+					),
+					resource.TestCheckResourceAttrSet("sysdig_team_service_account.service-account-monitor",
+						"api_key",
+					),
+					resource.TestCheckResourceAttr("sysdig_team_service_account.service-account-monitor",
+						"expiration_date",
+						"4070995200",
+					),
 				),
 			},
 			{
@@ -49,6 +76,9 @@ func TestAccTeamServiceAccount(t *testing.T) {
 						"role",
 						"ROLE_TEAM_READ",
 					),
+					resource.TestCheckResourceAttrSet("sysdig_team_service_account.service-account-secure",
+						"api_key",
+					),
 				),
 			},
 		},
@@ -59,6 +89,28 @@ func teamServiceAccountMonitorTeam(name string) string {
 	return fmt.Sprintf(`
 resource "time_static" "example" {
   rfc3339 = "2099-01-01T00:00:00Z"
+}
+
+resource "sysdig_monitor_team" "sample" {
+  name      = "monitor-sample-%s"
+
+  entrypoint {
+	type = "Explore"
+  }
+}
+
+resource "sysdig_team_service_account" "service-account-monitor" {
+  name = "%s"
+  expiration_date = time_static.example.unix
+  team_id = sysdig_monitor_team.sample.id
+}
+`, name, name)
+}
+
+func teamServiceAccountMonitorTeamNewExpirationDate(name string) string {
+	return fmt.Sprintf(`
+resource "time_static" "example" {
+  rfc3339 = "2099-01-02T00:00:00Z"
 }
 
 resource "sysdig_monitor_team" "sample" {
