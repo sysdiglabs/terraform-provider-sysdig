@@ -19,7 +19,7 @@ func TestMarshalProto(t *testing.T) {
 			Provider:   cloudauth.Provider_PROVIDER_GCP,
 		},
 	}
-	expected := `{"enabled":true, "providerId":"test-project", "provider":"PROVIDER_GCP"}`
+	expected := `{"enabled":true, "providerId":"test-project","provider":"PROVIDER_GCP"}`
 
 	payload, err := c.marshalProto(given)
 	if err != nil {

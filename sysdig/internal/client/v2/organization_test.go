@@ -19,7 +19,7 @@ func TestMarshalOrg(t *testing.T) {
 			Provider:            cloudauth.Provider_PROVIDER_GCP,
 		},
 	}
-	expected := `{"managementAccountId":"58ca66a5-ac87-497b-a501-7a4c934b3017", "provider":"PROVIDER_GCP"}`
+	expected := `{"managementAccountId":"58ca66a5-ac87-497b-a501-7a4c934b3017","provider":"PROVIDER_GCP"}`
 
 	payload, err := c.marshalOrg(given)
 	if err != nil {
