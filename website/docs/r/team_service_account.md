@@ -31,7 +31,7 @@ resource "sysdig_team_service_account" "service-account" {
   name = "read only"
   role = "ROLE_TEAM_READ"
   expiration_date = time_static.example.unix
-  team_id = sysdig_monitor_teamt.sample.id
+  team_id = sysdig_monitor_team.devops.id
 }
 
 ```
@@ -64,4 +64,3 @@ Sysdig team service account can be imported using the ID, e.g.
 ```
 $ terraform import sysdig_team_service_account.my_team_service_account 10
 ```
-

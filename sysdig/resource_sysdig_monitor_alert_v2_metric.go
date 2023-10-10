@@ -71,6 +71,11 @@ func resourceSysdigMonitorAlertV2Metric() *schema.Resource {
 				Default:      "DO_NOTHING",
 				ValidateFunc: validation.StringInSlice([]string{"DO_NOTHING", "TRIGGER"}, false),
 			},
+			"unreported_alert_notifications_retention_seconds": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(60),
+			},
 		})),
 	}
 }
@@ -214,10 +219,17 @@ func buildAlertV2MetricStruct(d *schema.ResourceData) (*v2.AlertV2Metric, error)
 
 	config.NoDataBehaviour = d.Get("no_data_behaviour").(string)
 
+	var unreportedAlertNotificationsRetentionSec *int
+	if unreportedAlertNotificationsRetentionSecInterface, ok := d.GetOk("unreported_alert_notifications_retention_seconds"); ok {
+		u := unreportedAlertNotificationsRetentionSecInterface.(int)
+		unreportedAlertNotificationsRetentionSec = &u
+	}
+
 	alert := &v2.AlertV2Metric{
-		AlertV2Common: *alertV2Common,
-		DurationSec:   minutesToSeconds(d.Get("trigger_after_minutes").(int)),
-		Config:        config,
+		AlertV2Common:                            *alertV2Common,
+		DurationSec:                              minutesToSeconds(d.Get("trigger_after_minutes").(int)),
+		Config:                                   config,
+		UnreportedAlertNotificationsRetentionSec: unreportedAlertNotificationsRetentionSec,
 	}
 	return alert, nil
 }
@@ -250,6 +262,12 @@ func updateAlertV2MetricState(d *schema.ResourceData, alert *v2.AlertV2Metric) e
 	_ = d.Set("metric", alert.Config.Metric.ID)
 
 	_ = d.Set("no_data_behaviour", alert.Config.NoDataBehaviour)
+
+	if alert.UnreportedAlertNotificationsRetentionSec != nil {
+		_ = d.Set("unreported_alert_notifications_retention_seconds", *alert.UnreportedAlertNotificationsRetentionSec)
+	} else {
+		_ = d.Set("unreported_alert_notifications_retention_seconds", nil)
+	}
 
 	return nil
 }

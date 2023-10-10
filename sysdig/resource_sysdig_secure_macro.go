@@ -62,7 +62,8 @@ func getSecureMacroClient(c SysdigClients) (v2.MacroInterface, error) {
 }
 
 func resourceSysdigMacroCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureMacroClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureMacroClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -72,6 +73,7 @@ func resourceSysdigMacroCreate(ctx context.Context, d *schema.ResourceData, meta
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	d.SetId(strconv.Itoa(macro.ID))
 	_ = d.Set("version", macro.Version)
@@ -80,7 +82,8 @@ func resourceSysdigMacroCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceSysdigMacroUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureMacroClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureMacroClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -95,6 +98,8 @@ func resourceSysdigMacroUpdate(ctx context.Context, d *schema.ResourceData, meta
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
+
 	return nil
 }
 
@@ -122,7 +127,8 @@ func resourceSysdigMacroRead(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func resourceSysdigMacroDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureMacroClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureMacroClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -133,6 +139,8 @@ func resourceSysdigMacroDelete(ctx context.Context, d *schema.ResourceData, meta
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
+
 	return nil
 }
 

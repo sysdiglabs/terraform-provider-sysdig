@@ -1,8 +1,10 @@
 package sysdig
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"io"
 	"sync"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -11,9 +13,13 @@ import (
 )
 
 type SysdigClients interface {
+	io.Closer
 	GetClientType() ClientType
 	GetSecureEndpoint() (string, error)
 	GetSecureApiToken() (string, error)
+
+	Configure(context.Context, *schema.ResourceData)
+	AddCleanupHook(func(context.Context, SysdigClients) error)
 
 	// v2
 	sysdigMonitorClientV2() (v2.SysdigMonitor, error)
@@ -22,6 +28,10 @@ type SysdigClients interface {
 	ibmSecureClient() (v2.IBMSecure, error)
 	commonClientV2() (v2.Common, error)
 	sysdigCommonClientV2() (v2.SysdigCommon, error)
+}
+
+func NewSysdigClients() SysdigClients {
+	return &sysdigClients{}
 }
 
 //go:generate stringer -type ClientType
@@ -35,9 +45,12 @@ const (
 )
 
 type sysdigClients struct {
+	ctx      context.Context
 	d        *schema.ResourceData
 	mu       sync.Mutex
 	commonMu sync.Mutex
+
+	cleanupHooks []func(context.Context, SysdigClients) error
 
 	// v2
 	monitorClientV2  v2.SysdigMonitor
@@ -57,6 +70,11 @@ type globalVariables struct {
 type sysdigVariables struct {
 	*globalVariables
 	token string
+}
+
+type sysdigSecureVariables struct {
+	*sysdigVariables
+	skipPolicyV2Msg bool
 }
 
 type ibmVariables struct {
@@ -90,7 +108,7 @@ func getSysdigMonitorVariables(data *schema.ResourceData) (*sysdigVariables, err
 	}, nil
 }
 
-func getSysdigSecureVariables(data *schema.ResourceData) (*sysdigVariables, error) {
+func getSysdigSecureVariables(data *schema.ResourceData) (*sysdigSecureVariables, error) {
 	var ok bool
 	var apiURL, token interface{}
 
@@ -102,13 +120,21 @@ func getSysdigSecureVariables(data *schema.ResourceData) (*sysdigVariables, erro
 		return nil, errors.New("missing sysdig secure token")
 	}
 
-	return &sysdigVariables{
-		globalVariables: &globalVariables{
-			apiURL:       apiURL.(string),
-			insecure:     data.Get("sysdig_secure_insecure_tls").(bool),
-			extraHeaders: getExtraHeaders(data),
+	skipPolicyV2Msg := false
+	if skipPolicyV2MsgValue, ok := data.GetOk("sysdig_secure_skip_policyv2msg"); ok {
+		skipPolicyV2Msg = skipPolicyV2MsgValue.(bool)
+	}
+
+	return &sysdigSecureVariables{
+		sysdigVariables: &sysdigVariables{
+			globalVariables: &globalVariables{
+				apiURL:       apiURL.(string),
+				insecure:     data.Get("sysdig_secure_insecure_tls").(bool),
+				extraHeaders: getExtraHeaders(data),
+			},
+			token: token.(string),
 		},
-		token: token.(string),
+		skipPolicyV2Msg: skipPolicyV2Msg,
 	}, nil
 }
 
@@ -158,6 +184,26 @@ func getIBMMonitorVariables(data *schema.ResourceData) (*ibmVariables, error) {
 
 func getIBMSecureVariables(data *schema.ResourceData) (*ibmVariables, error) {
 	return getIBMVariables("secure", data)
+}
+
+func (c *sysdigClients) Configure(ctx context.Context, d *schema.ResourceData) {
+	c.ctx = ctx
+	c.d = d
+}
+
+func (c *sysdigClients) AddCleanupHook(cleanupHook func(context.Context, SysdigClients) error) {
+	c.mu.Lock()
+	c.cleanupHooks = append(c.cleanupHooks, cleanupHook)
+	c.mu.Unlock()
+}
+
+func (c *sysdigClients) Close() error {
+	for _, cleanup := range c.cleanupHooks {
+		if err := cleanup(c.ctx, c); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *sysdigClients) GetSecureEndpoint() (string, error) {
@@ -217,6 +263,7 @@ func (c *sysdigClients) sysdigSecureClientV2() (v2.SysdigSecure, error) {
 		v2.WithURL(vars.apiURL),
 		v2.WithInsecure(vars.insecure),
 		v2.WithExtraHeaders(vars.extraHeaders),
+		v2.WithSkipPolicyV2Msg(vars.skipPolicyV2Msg),
 	)
 
 	return c.secureClientV2, nil

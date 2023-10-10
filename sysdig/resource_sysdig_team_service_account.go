@@ -35,19 +35,23 @@ func resourceSysdigTeamServiceAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "ROLE_TEAM_READ",
+				ForceNew: true,
 			},
 			SchemaExpirationDateKey: {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: true,
 			},
 			SchemaTeamIDKey: {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: true,
 			},
 			SchemaSystemRoleKey: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "ROLE_SERVICE_ACCOUNT",
+				ForceNew: true,
 			},
 			SchemaCreatedDateKey: {
 				Type:     schema.TypeInt,
@@ -105,6 +109,10 @@ func resourceSysdigTeamServiceAccountCreate(ctx context.Context, d *schema.Resou
 	}
 
 	d.SetId(strconv.Itoa(teamServiceAccount.ID))
+	err = d.Set(SchemaApiKeyKey, teamServiceAccount.ApiKey)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	resourceSysdigTeamServiceAccountRead(ctx, d, m)
 
@@ -187,10 +195,6 @@ func teamServiceAccountToResourceData(teamServiceAccount *v2.TeamServiceAccount,
 		return err
 	}
 	err = d.Set(SchemaCreatedDateKey, teamServiceAccount.DateCreated)
-	if err != nil {
-		return err
-	}
-	err = d.Set(SchemaApiKeyKey, teamServiceAccount.ApiKey)
 	if err != nil {
 		return err
 	}

@@ -72,7 +72,8 @@ func resourceSysdigSecureCustomPolicy() *schema.Resource {
 }
 
 func resourceSysdigCustomPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecurePolicyClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -82,6 +83,7 @@ func resourceSysdigCustomPolicyCreate(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	customPolicyToResourceData(&policy, d)
 
@@ -140,8 +142,9 @@ func resourceSysdigCustomPolicyRead(ctx context.Context, d *schema.ResourceData,
 	id, _ := strconv.Atoi(d.Id())
 	policy, statusCode, err := client.GetPolicyByID(ctx, id)
 	if err != nil {
-		d.SetId("")
 		if statusCode == http.StatusNotFound {
+			d.SetId("")
+		} else {
 			return diag.FromErr(err)
 		}
 	}
@@ -152,7 +155,8 @@ func resourceSysdigCustomPolicyRead(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceSysdigCustomPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecurePolicyClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -163,12 +167,14 @@ func resourceSysdigCustomPolicyDelete(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	return nil
 }
 
 func resourceSysdigCustomPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecurePolicyClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -183,6 +189,8 @@ func resourceSysdigCustomPolicyUpdate(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
+
 	return nil
 }
 

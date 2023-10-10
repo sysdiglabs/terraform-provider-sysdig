@@ -62,7 +62,8 @@ func getSecureListClient(c SysdigClients) (v2.ListInterface, error) {
 }
 
 func resourceSysdigListCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureListClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureListClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -72,6 +73,7 @@ func resourceSysdigListCreate(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	d.SetId(strconv.Itoa(list.ID))
 	_ = d.Set("version", list.Version)
@@ -80,7 +82,8 @@ func resourceSysdigListCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceSysdigListUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureListClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureListClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -95,6 +98,8 @@ func resourceSysdigListUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
+
 	return nil
 }
 
@@ -119,7 +124,8 @@ func resourceSysdigListRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSysdigListDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureListClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureListClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -130,6 +136,8 @@ func resourceSysdigListDelete(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
+
 	return nil
 }
 

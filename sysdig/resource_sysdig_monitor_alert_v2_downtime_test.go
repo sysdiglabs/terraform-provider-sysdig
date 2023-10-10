@@ -28,6 +28,9 @@ func TestAccAlertV2Downtime(t *testing.T) {
 				Config: alertV2DowntimeWithName(rText()),
 			},
 			{
+				Config: alertV2DowntimeWithWithUnreportedAlertNotificationsRetentionSec(rText()),
+			},
+			{
 				Config: alertV2DowntimeWithGroupBy(rText()),
 			},
 			{
@@ -54,6 +57,28 @@ resource "sysdig_monitor_alert_v2_downtime" "sample" {
 	}
 
 	trigger_after_minutes = 15
+
+}
+
+`, name)
+}
+
+func alertV2DowntimeWithWithUnreportedAlertNotificationsRetentionSec(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_downtime" "sample" {
+
+	name = "TERRAFORM TEST - DOWNTIMEV2 %s"
+  metric = "sysdig_container_up"
+  threshold = 75
+
+	scope {
+		label = "kube_cluster_name"
+		operator = "in"
+		values = ["thom-cluster1", "demo-env-prom"]
+	}
+
+	trigger_after_minutes = 15
+	unreported_alert_notifications_retention_seconds = 60 * 60 * 24 * 30
 
 }
 

@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -77,7 +78,8 @@ func resourceSysdigSecureRuleFilesystem() *schema.Resource {
 }
 
 func resourceSysdigRuleFilesystemCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -91,6 +93,7 @@ func resourceSysdigRuleFilesystemCreate(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	d.SetId(strconv.Itoa(rule.ID))
 	_ = d.Set("version", rule.Version)
@@ -110,9 +113,13 @@ func resourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	rule, err := client.GetRuleByID(ctx, id)
+	rule, statusCode, err := client.GetRuleByID(ctx, id)
 	if err != nil {
-		d.SetId("")
+		if statusCode == http.StatusNotFound {
+			d.SetId("")
+		} else {
+			return diag.FromErr(err)
+		}
 	}
 
 	updateResourceDataForRule(d, rule)
@@ -142,7 +149,8 @@ func resourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceSysdigRuleFilesystemUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -159,12 +167,14 @@ func resourceSysdigRuleFilesystemUpdate(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	return nil
 }
 
 func resourceSysdigRuleFilesystemDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -178,6 +188,7 @@ func resourceSysdigRuleFilesystemDelete(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	return nil
 }
