@@ -431,7 +431,7 @@ func getGcpServicePrincipalKey(key string) map[string]string {
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
 	accountComponents := constructAccountComponents([]*cloudauth.AccountComponent{}, data)
 
-	featureData := data.Get(SchemaFeature).(interface{})
+	featureData := data.Get(SchemaFeature)
 	accountFeatures := constructAccountFeatures(&cloudauth.AccountFeatures{}, featureData)
 
 	return &v2.CloudauthAccountSecure{

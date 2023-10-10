@@ -19,7 +19,7 @@ func TestMarshalOrg(t *testing.T) {
 			Provider:            cloudauth.Provider_PROVIDER_GCP,
 		},
 	}
-	expected := `{"managementAccountId":"58ca66a5-ac87-497b-a501-7a4c934b3017","provider":"PROVIDER_GCP"}`
+	expected := `{"managementAccountId":"58ca66a5-ac87-497b-a501-7a4c934b3017", "provider":"PROVIDER_GCP"}`
 
 	payload, err := c.marshalOrg(given)
 	if err != nil {
@@ -33,7 +33,7 @@ func TestMarshalOrg(t *testing.T) {
 	}
 	marshaled := buf.String()
 
-	if marshaled != expected {
+	if strings.Replace(marshaled, " ", "", -1) != strings.Replace(expected, " ", "", -1) {
 		t.Errorf("expected %v, got %v", expected, marshaled)
 	}
 }
