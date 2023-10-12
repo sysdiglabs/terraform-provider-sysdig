@@ -101,12 +101,12 @@ resource "sysdig_secure_cloud_auth_account" "sample-1" {
   feature {
 	secure_config_posture {
 	  enabled    = "true"
-	  components = ["COMPONENT_SERVICE_PRINCIPAL/secure-service-principal"]
+	  components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
 	}
   }
   component {
 	type                       = "COMPONENT_SERVICE_PRINCIPAL"
-	instance                   = "secure-service-principal"
+	instance                   = "secure-posture"
 	service_principal_metadata = jsonencode({
       gcp = {
         key = "%s"
