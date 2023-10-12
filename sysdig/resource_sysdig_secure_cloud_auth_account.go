@@ -183,9 +183,9 @@ func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.
 		return diag.FromErr(err)
 	}
 
-	cloudauthAccount, err := client.GetCloudauthAccountSecure(ctx, data.Id())
+	cloudauthAccount, errStatus, err := client.GetCloudauthAccountSecure(ctx, data.Id())
 	if err != nil {
-		if strings.Contains(err.Error(), "404") {
+		if strings.Contains(errStatus, "404") {
 			return nil
 		}
 		return diag.FromErr(err)
@@ -206,10 +206,10 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 		return diag.FromErr(err)
 	}
 
-	_, err = client.UpdateCloudauthAccountSecure(ctx, data.Id(), cloudauthAccountFromResourceData(data))
+	_, errStatus, err := client.UpdateCloudauthAccountSecure(ctx, data.Id(), cloudauthAccountFromResourceData(data))
 
 	if err != nil {
-		if strings.Contains(err.Error(), "404") {
+		if strings.Contains(errStatus, "404") {
 			return nil
 		}
 		return diag.FromErr(err)
@@ -224,9 +224,12 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteCloudauthAccountSecure(ctx, data.Id())
+	errStatus, err := client.DeleteCloudauthAccountSecure(ctx, data.Id())
 
 	if err != nil {
+		if strings.Contains(errStatus, "404") {
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 

@@ -18,9 +18,9 @@ const (
 type OrganizationSecureInterface interface {
 	Base
 	CreateOrganizationSecure(ctx context.Context, org *OrganizationSecure) (*OrganizationSecure, error)
-	GetOrganizationSecure(ctx context.Context, orgID string) (*OrganizationSecure, error)
-	DeleteOrganizationSecure(ctx context.Context, orgID string) error
-	UpdateOrganizationSecure(ctx context.Context, orgID string, org *OrganizationSecure) (*OrganizationSecure, error)
+	GetOrganizationSecure(ctx context.Context, orgID string) (*OrganizationSecure, string, error)
+	DeleteOrganizationSecure(ctx context.Context, orgID string) (string, error)
+	UpdateOrganizationSecure(ctx context.Context, orgID string, org *OrganizationSecure) (*OrganizationSecure, string, error)
 }
 
 func (client *Client) CreateOrganizationSecure(ctx context.Context, org *OrganizationSecure) (*OrganizationSecure, error) {
@@ -43,51 +43,61 @@ func (client *Client) CreateOrganizationSecure(ctx context.Context, org *Organiz
 	return client.unmarshalOrg(response.Body)
 }
 
-func (client *Client) GetOrganizationSecure(ctx context.Context, orgID string) (*OrganizationSecure, error) {
+func (client *Client) GetOrganizationSecure(ctx context.Context, orgID string) (*OrganizationSecure, string, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.organizationURL(orgID), nil)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		return nil, errStatus, err
 	}
 
-	return client.unmarshalOrg(response.Body)
+	organization, err := client.unmarshalOrg(response.Body)
+	if err != nil {
+		return nil, "", err
+	}
+	return organization, "", nil
 }
 
-func (client *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) error {
+func (client *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) (string, error) {
 	response, err := client.requester.Request(ctx, http.MethodDelete, client.organizationURL(orgID), nil)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return client.ErrorFromResponse(response)
+		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		return errStatus, err
 	}
-	return nil
+	return "", nil
 }
 
-func (client *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org *OrganizationSecure) (*OrganizationSecure, error) {
+func (client *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org *OrganizationSecure) (*OrganizationSecure, string, error) {
 	payload, err := Marshal(org)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	response, err := client.requester.Request(ctx, http.MethodPut, client.organizationURL(orgID), payload)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		err = client.ErrorFromResponse(response)
-		return nil, err
+		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		return nil, errStatus, err
 	}
 
-	return client.unmarshalOrg(response.Body)
+	organization, err := client.unmarshalOrg(response.Body)
+	if err != nil {
+		return nil, "", err
+	}
+	return organization, "", nil
 }
 
 func (client *Client) organizationsURL() string {

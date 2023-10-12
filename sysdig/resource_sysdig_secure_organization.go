@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -69,8 +70,11 @@ func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.Re
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteOrganizationSecure(ctx, data.Id())
+	errStatus, err := client.DeleteOrganizationSecure(ctx, data.Id())
 	if err != nil {
+		if strings.Contains(errStatus, "404") {
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -83,8 +87,11 @@ func resourceSysdigSecureOrganizationRead(ctx context.Context, data *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	org, err := client.GetOrganizationSecure(ctx, data.Id())
+	org, errStatus, err := client.GetOrganizationSecure(ctx, data.Id())
 	if err != nil {
+		if strings.Contains(errStatus, "404") {
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -104,8 +111,11 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 
 	org := secureOrganizationFromResourceData(data)
 
-	_, err = client.UpdateOrganizationSecure(ctx, data.Id(), &org)
+	_, errStatus, err := client.UpdateOrganizationSecure(ctx, data.Id(), &org)
 	if err != nil {
+		if strings.Contains(errStatus, "404") {
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
