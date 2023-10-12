@@ -121,7 +121,7 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) v2.Organizati
 }
 
 func secureOrganizationToResourceData(data *schema.ResourceData, org *v2.OrganizationSecure) error {
-	err := data.Set(SchemaCloudProviderId, org.ProviderId)
+	err := data.Set(SchemaManagementAccountId, org.ManagementAccountId)
 	if err != nil {
 		return err
 	}

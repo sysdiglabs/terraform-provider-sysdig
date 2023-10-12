@@ -31,7 +31,7 @@ func TestAccSecureOrganization(t *testing.T) {
 				Config: secureOrgWithAccountID(accID),
 			},
 			{
-				ResourceName:      "sysdig_secure_organization.sample",
+				ResourceName:      "sysdig_secure_organization.sample-org",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
