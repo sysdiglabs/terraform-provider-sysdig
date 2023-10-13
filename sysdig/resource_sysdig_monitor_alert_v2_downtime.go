@@ -13,7 +13,6 @@ import (
 )
 
 func resourceSysdigMonitorAlertV2Downtime() *schema.Resource {
-
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
@@ -160,19 +159,19 @@ func buildAlertV2DowntimeStruct(d *schema.ResourceData) *v2.AlertV2Downtime {
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
 
-	//TimeAggregation
+	// TimeAggregation
 	config.TimeAggregation = "timeAvg"
 
-	//GroupAggregation
+	// GroupAggregation
 	config.GroupAggregation = "avg"
 
-	//ConditionOperator
+	// ConditionOperator
 	config.ConditionOperator = "<="
 
-	//threshold
+	// threshold
 	config.Threshold = 1 - d.Get("threshold").(float64)/100
 
-	//Downtime
+	// Downtime
 	metric := d.Get("metric").(string)
 	config.Metric.ID = metric
 

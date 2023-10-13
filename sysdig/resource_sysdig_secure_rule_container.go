@@ -161,5 +161,4 @@ func resourceSysdigRuleContainerFromResourceData(d *schema.ResourceData) v2.Rule
 	}
 
 	return rule
-
 }

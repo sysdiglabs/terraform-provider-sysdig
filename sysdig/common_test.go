@@ -1,10 +1,11 @@
 package sysdig_test
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
 const (

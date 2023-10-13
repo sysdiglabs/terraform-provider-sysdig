@@ -2,11 +2,12 @@ package sysdig
 
 import (
 	"context"
+	"strconv"
+	"time"
+
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strconv"
-	"time"
 )
 
 func resourceSysdigTeamServiceAccount() *schema.Resource {

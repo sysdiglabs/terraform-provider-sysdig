@@ -111,7 +111,6 @@ func resourceSysdigListRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	id, _ := strconv.Atoi(d.Id())
 	list, err := client.GetListByID(ctx, id)
-
 	if err != nil {
 		d.SetId("")
 	}

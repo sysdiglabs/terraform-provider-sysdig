@@ -3,14 +3,14 @@
 package sysdig_test
 
 import (
+	"testing"
+
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"testing"
 )
 
 func TestAccGroupMappingConfig(t *testing.T) {
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){

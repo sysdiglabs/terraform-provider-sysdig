@@ -3,8 +3,9 @@ package sysdig
 import (
 	"context"
 	"errors"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -234,7 +235,6 @@ func scanningPolicyAssignmentListFromResourceData(d *schema.ResourceData) v2.Sca
 	scanningPolicyAssignmentList.Items = scanningPolicyAssignmentFromResourceData(d)
 
 	return scanningPolicyAssignmentList
-
 }
 
 func scanningPolicyAssignmentFromResourceData(d *schema.ResourceData) (scanningPolicyAssignmentItems []v2.ScanningPolicyAssignment) {

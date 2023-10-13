@@ -4,12 +4,12 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceSysdigSecureConnection() *schema.Resource {
-
 	return &schema.Resource{
 		ReadContext: dataSourceSecureConnectionRead,
 		Schema: map[string]*schema.Schema{
@@ -29,7 +29,6 @@ func dataSourceSysdigSecureConnection() *schema.Resource {
 }
 
 func dataSourceSecureConnectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	endpoint, err := meta.(SysdigClients).GetSecureEndpoint()
 	if err != nil {
 		return diag.FromErr(err)

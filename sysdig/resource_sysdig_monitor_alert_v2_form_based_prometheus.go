@@ -14,7 +14,6 @@ import (
 )
 
 func resourceSysdigMonitorAlertV2FormBasedPrometheus() *schema.Resource {
-
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
@@ -177,13 +176,13 @@ func buildAlertV2FormBasedPrometheusStruct(d *schema.ResourceData) (*v2.AlertV2F
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
 
-	//ConditionOperator
+	// ConditionOperator
 	config.ConditionOperator = d.Get("operator").(string)
 
-	//threshold
+	// threshold
 	config.Threshold = d.Get("threshold").(float64)
 
-	//WarningThreshold
+	// WarningThreshold
 	if warningThreshold, ok := d.GetOk("warning_threshold"); ok {
 		wts := warningThreshold.(string)
 		wt, err := strconv.ParseFloat(wts, 64)
@@ -194,7 +193,7 @@ func buildAlertV2FormBasedPrometheusStruct(d *schema.ResourceData) (*v2.AlertV2F
 		config.WarningConditionOperator = config.ConditionOperator
 	}
 
-	//Query
+	// Query
 	config.Query = d.Get("query").(string)
 
 	config.NoDataBehaviour = d.Get("no_data_behaviour").(string)

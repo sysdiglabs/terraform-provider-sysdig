@@ -104,7 +104,6 @@ func (client *Client) GetRuleGroup(ctx context.Context, ruleName string, ruleTyp
 	}
 
 	return Unmarshal[[]Rule](response.Body)
-
 }
 
 func (client *Client) CreateRuleURL() string {

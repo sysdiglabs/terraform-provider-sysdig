@@ -111,7 +111,6 @@ func resourceSysdigMacroRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	id, _ := strconv.Atoi(d.Id())
 	macro, err := client.GetMacroByID(ctx, id)
-
 	if err != nil {
 		d.SetId("")
 	}

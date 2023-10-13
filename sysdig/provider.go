@@ -149,6 +149,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_cloud_account":                                 resourceSysdigSecureCloudAccount(),
 			"sysdig_secure_scanning_policy":                               resourceSysdigSecureScanningPolicy(),
 			"sysdig_secure_scanning_policy_assignment":                    resourceSysdigSecureScanningPolicyAssignment(),
+			"sysdig_secure_cloud_auth_account":                            resourceSysdigSecureCloudauthAccount(),
 
 			"sysdig_monitor_silence_rule":                                  resourceSysdigMonitorSilenceRule(),
 			"sysdig_monitor_alert_downtime":                                resourceSysdigMonitorAlertDowntime(),
@@ -181,6 +182,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_monitor_team":                                          resourceSysdigMonitorTeam(),
 			"sysdig_monitor_cloud_account":                                 resourceSysdigMonitorCloudAccount(),
 			"sysdig_secure_posture_zone":                                   resourceSysdigSecurePostureZone(),
+			"sysdig_secure_organization":                                   resourceSysdigSecureOrganization(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_trusted_cloud_identity":                        dataSourceSysdigSecureTrustedCloudIdentity(),

@@ -61,7 +61,6 @@ func sortAndCompare(t *testing.T, expected []byte, actual []byte) {
 
 func TestECStransformation(t *testing.T) {
 	inputfile, err := os.ReadFile("testfiles/ECSinput.json")
-
 	if err != nil {
 		t.Fatalf("Cannot find testfiles/ECSinput.json")
 	}

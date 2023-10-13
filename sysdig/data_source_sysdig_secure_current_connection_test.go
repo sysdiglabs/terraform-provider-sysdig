@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccSecureConnection(t *testing.T) {
-
 	dataSourceResourceName := "data.sysdig_secure_connection.current"
 
 	apiToken := os.Getenv("SYSDIG_SECURE_API_TOKEN")
@@ -23,7 +22,6 @@ func TestAccSecureConnection(t *testing.T) {
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
-
 		PreCheck: func() {
 			if apiToken == "" {
 				t.Fatal("SYSDIG_SECURE_API_TOKEN and must be set for acceptance tests")

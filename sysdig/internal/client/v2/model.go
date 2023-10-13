@@ -1,5 +1,9 @@
 package v2
 
+import (
+	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
+)
+
 type Team struct {
 	UserRoles           []UserRoles       `json:"userRoles,omitempty"`
 	Description         string            `json:"description"`
@@ -411,6 +415,11 @@ type CloudAccountSecure struct {
 	WorkLoadIdentityAccountID    string `json:"workloadIdentityAccountId,omitempty"`
 	WorkLoadIdentityAccountAlias string `json:"workLoadIdentityAccountAlias,omitempty"`
 }
+
+type CloudauthAccountSecure struct {
+	cloudauth.CloudAccount
+}
+
 type ScanningPolicy struct {
 	ID             string         `json:"id,omitempty"`
 	Version        string         `json:"version,omitempty"`
@@ -780,4 +789,8 @@ type SilenceRule struct {
 
 	Version int `json:"version,omitempty"`
 	ID      int `json:"id,omitempty"`
+}
+
+type OrganizationSecure struct {
+	cloudauth.CloudOrganization
 }

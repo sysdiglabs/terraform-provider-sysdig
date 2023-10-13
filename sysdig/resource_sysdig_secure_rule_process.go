@@ -161,5 +161,4 @@ func resourceSysdigRuleProcessFromResourceData(d *schema.ResourceData) v2.Rule {
 	}
 
 	return rule
-
 }

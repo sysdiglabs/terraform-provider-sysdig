@@ -243,7 +243,6 @@ resource "sysdig_secure_rule_falco" "falco_rule_with_exceptions" {
 }
 
 func existingFalcoRuleWithExceptions(name string) string {
-
 	return `
 resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role_exceptions" {
     name = "Terminal shell in container" # Sysdig-provided
