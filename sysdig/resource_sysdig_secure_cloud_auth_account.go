@@ -480,9 +480,9 @@ func featureToResourceData(features *cloudauth.AccountFeatures) []interface{} {
 	}
 
 	allFeatures := make(map[string]interface{})
-	featureBlock := make([]map[string]interface{}, 0)
 	for name, feature := range featureFields {
 		if feature != nil {
+			featureBlock := make([]map[string]interface{}, 0)
 			value := featureValuesToResourceData(feature)
 			featureBlock = append(featureBlock, value)
 
