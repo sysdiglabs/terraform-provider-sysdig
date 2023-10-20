@@ -122,6 +122,6 @@ func (client *Client) unmarshalOrg(data io.ReadCloser) (*OrganizationSecure, err
 		return result, err
 	}
 
-	err = protojson.Unmarshal(body, result)
+	err = protojson.UnmarshalOptions{DiscardUnknown: true}.Unmarshal(body, result)
 	return result, err
 }
