@@ -452,29 +452,24 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 	This helper function converts feature values from *cloudauth.AccountFeature to resource data schema.
 */
 
-func featureValuesToResourceData(name string, feature *cloudauth.AccountFeature) map[string]interface{} {
+func featureValuesToResourceData(feature *cloudauth.AccountFeature) map[string]interface{} {
 	valuesMap := make(map[string]interface{})
 
 	valuesMap["type"] = feature.Type.String()
 	valuesMap["enabled"] = feature.Enabled
 	valuesMap["components"] = feature.Components
 
-	featureMap := map[string]interface{}{
-		name: []map[string]interface{}{
-			valuesMap,
-		},
-	}
-
-	return featureMap
+	return valuesMap
 }
 
 /*
-	This helper function converts the features data from *cloudauth.AccountFeatures to resource data schema.
-	This is needed to set the value in cloudauthAccountToResourceData().
+This helper function converts the features data from *cloudauth.AccountFeatures to resource data schema.
+This is needed to set the value in cloudauthAccountToResourceData().
 */
-
-func featureToResourceData(features *cloudauth.AccountFeatures) []map[string]interface{} {
-	featureMap := []map[string]interface{}{}
+func featureToResourceData(features *cloudauth.AccountFeatures) []interface{} {
+	// In the resource data, SchemaFeature field is a nested set[] of sets[] of individual features
+	// Hence we need to return this uber level set[] to cloudauthAccountToResourceData
+	featureMap := []interface{}{}
 
 	featureFields := map[string]*cloudauth.AccountFeature{
 		SchemaSecureThreatDetection:     features.SecureThreatDetection,
@@ -484,14 +479,23 @@ func featureToResourceData(features *cloudauth.AccountFeatures) []map[string]int
 		SchemaSecureAgentlessScanning:   features.SecureAgentlessScanning,
 	}
 
+	allFeatures := make(map[string]interface{})
+	featureBlock := make([]map[string]interface{}, 0)
 	for name, feature := range featureFields {
 		if feature != nil {
-			value := featureValuesToResourceData(name, feature)
-			featureMap = append(featureMap, value)
+			value := featureValuesToResourceData(feature)
+			featureBlock = append(featureBlock, value)
+
+			allFeatures[name] = featureBlock
 		}
 	}
 
-	return featureMap
+	// return featureMap only if there is any features data from *cloudauth.AccountFeatures, else return nil
+	if len(allFeatures) > 0 {
+		featureMap = append(featureMap, allFeatures)
+		return featureMap
+	}
+	return nil
 }
 
 func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudauthAccountSecure) error {
