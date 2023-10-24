@@ -88,6 +88,12 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"bare_pdig_on_containers": {
+				Type:        schema.TypeList,
+				Description: "use bare pdig to instrument the containers in the list",
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"log_configuration": {
 				Type:        schema.TypeSet,
 				MaxItems:    1,
@@ -146,11 +152,19 @@ type cfnStack struct {
 	Resources map[string]cfnResource `json:"Resources"`
 }
 
-// fargatePostKiltModifications performs any additional changes needed after
-// Kilt has applied it's transformations
-func fargatePostKiltModifications(patchedBytes []byte, logConfig map[string]interface{}) ([]byte, error) {
-	if len(logConfig) == 0 {
-		// no log configuration provided, nothing to do
+func contains(items []string, target string) bool {
+	for _, item := range items {
+		if item == target {
+			return true
+		}
+	}
+	return false
+}
+
+// fargatePostKiltModifications performs any additional changes needed after Kilt has applied it's transformations
+func fargatePostKiltModifications(patchedBytes []byte, patchOpts *patchOptions) ([]byte, error) {
+	if len(patchOpts.LogConfiguration) == 0 && len(patchOpts.BarePdigOnContainers) == 0 {
+		// nothing to do
 		return patchedBytes, nil
 	}
 
@@ -160,23 +174,41 @@ func fargatePostKiltModifications(patchedBytes []byte, logConfig map[string]inte
 	}
 
 	for _, container := range containers.Children() {
+		// Skip unnamed containers
+		// Note that lowercase "name" tags have been replaced by "Name" during TaskDefinition patching
 		containerName, ok := container.Search("Name").Data().(string)
-		if !ok || containerName != "SysdigInstrumentation" {
-			// not the instrumentation container, skip it
+		if !ok {
 			continue
 		}
 
-		awsLogConfig := &ecs.LogConfiguration{
-			LogDriver: aws.String("awslogs"),
-			Options: map[string]*string{
-				"awslogs-group":         aws.String(logConfig["group"].(string)),
-				"awslogs-stream-prefix": aws.String(logConfig["stream_prefix"].(string)),
-				"awslogs-region":        aws.String(logConfig["region"].(string)),
-			},
-		}
-		_, err = container.Set(awsLogConfig, "LogConfiguration")
-		if err != nil {
-			return nil, fmt.Errorf("failed to set log configuration: %s", err)
+		if containerName == "SysdigInstrumentation" {
+			// Add log configuration to the SysdigInstrumentation sidecar container
+			if len(patchOpts.LogConfiguration) != 0 {
+				awsLogConfig := &ecs.LogConfiguration{
+					LogDriver: aws.String("awslogs"),
+					Options: map[string]*string{
+						"awslogs-group":         aws.String(patchOpts.LogConfiguration["group"].(string)),
+						"awslogs-stream-prefix": aws.String(patchOpts.LogConfiguration["stream_prefix"].(string)),
+						"awslogs-region":        aws.String(patchOpts.LogConfiguration["region"].(string)),
+					},
+				}
+				_, err = container.Set(awsLogConfig, "LogConfiguration")
+				if err != nil {
+					return nil, fmt.Errorf("failed to set log configuration: %s", err)
+				}
+			}
+		} else {
+			// Use bare pdig in the current workload container if instrumented
+			if contains(patchOpts.BarePdigOnContainers, containerName) && !contains(patchOpts.IgnoreContainers, containerName) {
+				envars := map[string]interface{}{
+					"Name":  "__INSTRUMENTATION_WRAPPER",
+					"Value": "/opt/draios/bin/pdig,-C,-t,-1",
+				}
+				err := container.ArrayAppend(envars, "Environment")
+				if err != nil {
+					return nil, fmt.Errorf("failed to extend environment variables: %s", err)
+				}
+			}
 		}
 	}
 
@@ -184,7 +216,7 @@ func fargatePostKiltModifications(patchedBytes []byte, logConfig map[string]inte
 }
 
 // PatchFargateTaskDefinition modifies the container definitions
-func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string, kiltConfig *cfnpatcher.Configuration, logConfig map[string]interface{}, ignoreContainers *[]string) (patched *string, err error) {
+func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string, kiltConfig *cfnpatcher.Configuration, patchOpts *patchOptions) (patched *string, err error) {
 	var cdefs []map[string]interface{}
 	err = json.Unmarshal([]byte(containerDefinitions), &cdefs)
 	if err != nil {
@@ -193,8 +225,8 @@ func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string
 
 	// Convert the ignore containers list into Kilt tags for the patcher
 	tags := []cfnTag{}
-	if len(*ignoreContainers) > 0 {
-		containerTagValue := strings.Join(*ignoreContainers, ":")
+	if len(patchOpts.IgnoreContainers) > 0 {
+		containerTagValue := strings.Join(patchOpts.IgnoreContainers, ":")
 		tags = append(tags, cfnTag{
 			Key:   "kilt-ignore-containers",
 			Value: containerTagValue,
@@ -252,7 +284,7 @@ func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string
 		return nil, err
 	}
 
-	patchedBytes, err = fargatePostKiltModifications(patchedBytes, logConfig)
+	patchedBytes, err = fargatePostKiltModifications(patchedBytes, patchOpts)
 
 	patchedString := string(patchedBytes)
 	return &patchedString, nil
@@ -266,6 +298,42 @@ type KiltRecipeConfig struct {
 	CollectorHost    string `json:"collector_host"`
 	CollectorPort    string `json:"collector_port"`
 	SysdigLogging    string `json:"sysdig_logging"`
+}
+
+type patchOptions struct {
+	BarePdigOnContainers []string
+	IgnoreContainers     []string
+	LogConfiguration     map[string]interface{}
+}
+
+func newPatchOptions(d *schema.ResourceData) *patchOptions {
+	opts := &patchOptions{
+		BarePdigOnContainers: []string{},
+		IgnoreContainers:     []string{},
+		LogConfiguration:     map[string]interface{}{},
+	}
+
+	if items := d.Get("bare_pdig_on_containers"); items != nil {
+		for _, itemRaw := range items.([]interface{}) {
+			if itemStr, ok := itemRaw.(string); ok {
+				opts.BarePdigOnContainers = append(opts.BarePdigOnContainers, strings.TrimSpace(itemStr))
+			}
+		}
+	}
+
+	if items := d.Get("ignore_containers"); items != nil {
+		for _, itemRaw := range items.([]interface{}) {
+			if itemStr, ok := itemRaw.(string); ok {
+				opts.IgnoreContainers = append(opts.IgnoreContainers, strings.TrimSpace(itemStr))
+			}
+		}
+	}
+
+	if logConfiguration := d.Get("log_configuration").(*schema.Set).List(); len(logConfiguration) > 0 {
+		opts.LogConfiguration = logConfiguration[0].(map[string]interface{})
+	}
+
+	return opts
 }
 
 func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -294,23 +362,9 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 
 	containerDefinitions := d.Get("container_definitions").(string)
 
-	ignoreContainersField := d.Get("ignore_containers")
-	ignoreContainers := []string{}
-	if ignoreContainersField != nil {
-		for _, value := range ignoreContainersField.([]interface{}) {
-			if value_str, ok := value.(string); ok {
-				value_str = strings.TrimSpace(value_str)
-				ignoreContainers = append(ignoreContainers, value_str)
-			}
-		}
-	}
+	patchOpts := newPatchOptions(d)
 
-	logConfig := map[string]interface{}{}
-	if logConfiguration := d.Get("log_configuration").(*schema.Set).List(); len(logConfiguration) > 0 {
-		logConfig = logConfiguration[0].(map[string]interface{})
-	}
-
-	outputContainerDefinitions, err := patchFargateTaskDefinition(ctx, containerDefinitions, kiltConfig, logConfig, &ignoreContainers)
+	outputContainerDefinitions, err := patchFargateTaskDefinition(ctx, containerDefinitions, kiltConfig, patchOpts)
 	if err != nil {
 		return diag.Errorf("Error applying configuration patch: %v", err.Error())
 	}

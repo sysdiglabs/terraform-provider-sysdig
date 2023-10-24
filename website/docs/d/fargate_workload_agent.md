@@ -43,6 +43,7 @@ data "sysdig_fargate_workload_agent" "instrumented_containers" {
   * `region` - The AWS region where the target log group resides
 * `sysdig_logging` - (Optional) The instrumentation logging level: `trace`, `debug`, `info`, `warning`, `error`, `silent`.
 * `ignore_containers` - (Optional) A list of containers in this data source that should not be instrumented.
+* `bare_pdig_on_containers` - (Optional) A list of containers in this data source to be instrumented with bare pdig.
 
 
 ## Attributes Reference
