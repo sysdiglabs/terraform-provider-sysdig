@@ -2,13 +2,16 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -150,7 +153,8 @@ func getSecurePolicyClient(c SysdigClients) (v2.PolicyInterface, error) {
 }
 
 func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecurePolicyClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -160,6 +164,7 @@ func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, met
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	policyToResourceData(&policy, d)
 
@@ -183,7 +188,7 @@ func commonPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 		if action.Type != "POLICY_ACTION_CAPTURE" {
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
 			actions[0]["container"] = strings.ToLower(action)
-			//d.Set("actions.0.container", strings.ToLower(action))
+			// d.Set("actions.0.container", strings.ToLower(action))
 		} else {
 			actions[0]["capture"] = []map[string]interface{}{{
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
@@ -289,7 +294,6 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	id, _ := strconv.Atoi(d.Id())
 	policy, statusCode, err := client.GetPolicyByID(ctx, id)
-
 	if err != nil {
 		if statusCode == http.StatusNotFound {
 			d.SetId("")
@@ -304,7 +308,8 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecurePolicyClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -315,12 +320,14 @@ func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, met
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	return nil
 }
 
 func resourceSysdigPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecurePolicyClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -335,5 +342,31 @@ func resourceSysdigPolicyUpdate(ctx context.Context, d *schema.ResourceData, met
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
+
 	return nil
+}
+
+var sendPoliciesToAgentsOnce sync.Once
+
+func sendPoliciesToAgents(ctx context.Context, clients SysdigClients) error {
+	var err error
+	sendPoliciesToAgentsOnce.Do(func() {
+		tflog.Info(ctx, "Sending policies to agents")
+		var client v2.PolicyInterface
+		client, err = getSecurePolicyClient(clients)
+		if err != nil {
+			return
+		}
+
+		// When running as a cleanup hook, the terraform context is in a cancelled state.
+		// Using a background context with a deadline will allow us to complete this request.
+		backgroundCtx, cancel := context.WithDeadline(context.Background(), time.Now().Add(15*time.Second))
+		defer cancel()
+		err = client.SendPoliciesToAgents(backgroundCtx)
+	})
+	if err != nil {
+		tflog.Error(ctx, fmt.Sprintf("Error in sendPoliciesToAgents: %s", err.Error()))
+	}
+	return err
 }

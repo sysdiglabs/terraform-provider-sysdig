@@ -12,7 +12,6 @@ import (
 )
 
 func TestAccMonitorCustomRolePermissionsDataSource(t *testing.T) {
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){

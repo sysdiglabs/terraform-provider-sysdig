@@ -14,7 +14,6 @@ import (
 )
 
 func resourceSysdigMonitorAlertV2Event() *schema.Resource {
-
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
@@ -174,13 +173,13 @@ func buildAlertV2EventStruct(d *schema.ResourceData) (*v2.AlertV2Event, error) {
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
 
-	//ConditionOperator
+	// ConditionOperator
 	config.ConditionOperator = d.Get("operator").(string)
 
-	//threshold
+	// threshold
 	config.Threshold = d.Get("threshold").(float64)
 
-	//WarningThreshold
+	// WarningThreshold
 	if warningThreshold, ok := d.GetOk("warning_threshold"); ok {
 		wts := warningThreshold.(string)
 		wt, err := strconv.ParseFloat(wts, 64)
@@ -191,10 +190,10 @@ func buildAlertV2EventStruct(d *schema.ResourceData) (*v2.AlertV2Event, error) {
 		config.WarningConditionOperator = config.ConditionOperator
 	}
 
-	//filter
+	// filter
 	config.Filter = d.Get("filter").(string)
 
-	//tags
+	// tags
 	tags := make([]string, 0)
 	if sources, ok := d.GetOk("sources"); ok {
 		sourcesList := sources.(*schema.Set).List()

@@ -17,6 +17,7 @@ func minutesToSeconds(minutes int) (seconds int) {
 	durationMinutes := time.Duration(minutes) * time.Minute
 	return int(durationMinutes.Seconds())
 }
+
 func secondsToMinutes(seconds int) (minutes int) {
 	durationMinutes := time.Duration(seconds) * time.Second
 	return int(durationMinutes.Minutes())
@@ -70,7 +71,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 					},
 					"type": {
 						Type:       schema.TypeString,
-						Optional:   true, //for retro compatibility, content will be discarded, remove this is the next major release
+						Optional:   true, // for retro compatibility, content will be discarded, remove this is the next major release
 						Default:    "",
 						Deprecated: "no need to define \"type\" attribute anymore, please remove it",
 					},
@@ -137,7 +138,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 					"filename": {
 						Type:         schema.TypeString,
 						Required:     true,
-						ValidateFunc: validation.StringMatch(regexp.MustCompile(AlertV2CaptureFilenameRegexp), "the filename must end in .scap"), //otherwise the api will silently add .scap at the end
+						ValidateFunc: validation.StringMatch(regexp.MustCompile(AlertV2CaptureFilenameRegexp), "the filename must end in .scap"), // otherwise the api will silently add .scap at the end
 					},
 					"filter": {
 						Type:     schema.TypeString,
@@ -199,7 +200,6 @@ func AlertLinkV2TypeValues() []string {
 }
 
 func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
-
 	alert := &v2.AlertV2Common{
 		Name:     d.Get("name").(string),
 		Type:     "MANUAL",
@@ -230,7 +230,7 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 			channelMap := channel.(map[string]interface{})
 			newChannel := v2.NotificationChannelConfigV2{
 				ChannelID: channelMap["id"].(int),
-				//Type: will be added by the sysdig client before the put/post
+				// Type: will be added by the sysdig client before the put/post
 			}
 
 			if renotifyEveryMinutes, ok := channelMap["renotify_every_minutes"]; ok {
@@ -295,7 +295,7 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 			alert.Links = append(alert.Links, v2.AlertLinkV2{
 				Type: linkMap["type"].(string),
 				Href: linkMap["href"].(string),
-				ID:   linkMap["id"].(string), //TODO(dbonf) if referencing a non existing dashboard, API will silently fail (status code: 200) not saving the link, add validation?
+				ID:   linkMap["id"].(string), // TODO(dbonf) if referencing a non existing dashboard, API will silently fail (status code: 200) not saving the link, add validation?
 			})
 		}
 	}
@@ -417,7 +417,8 @@ func createScopedSegmentedAlertV2Schema(original map[string]*schema.Schema) map[
 			Type:     schema.TypeList,
 			Optional: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
-		}}
+		},
+	}
 
 	for k, v := range original {
 		sysdigAlertSchema[k] = v
@@ -427,7 +428,7 @@ func createScopedSegmentedAlertV2Schema(original map[string]*schema.Schema) map[
 }
 
 func buildScopedSegmentedConfigStruct(d *schema.ResourceData, config *v2.ScopedSegmentedConfig) {
-	//scope
+	// scope
 	expressions := make([]v2.ScopeExpressionV2, 0)
 	for _, scope := range d.Get("scope").(*schema.Set).List() {
 		scopeMap := scope.(map[string]interface{})
@@ -438,7 +439,7 @@ func buildScopedSegmentedConfigStruct(d *schema.ResourceData, config *v2.ScopedS
 			value = append(value, v.(string))
 		}
 		expressions = append(expressions, v2.ScopeExpressionV2{
-			Operand:  operand, //the sysdig client will rewrite this to be in dot notation
+			Operand:  operand, // the sysdig client will rewrite this to be in dot notation
 			Operator: operator,
 			Value:    value,
 		})
@@ -449,13 +450,13 @@ func buildScopedSegmentedConfigStruct(d *schema.ResourceData, config *v2.ScopedS
 		}
 	}
 
-	//SegmentBy
+	// SegmentBy
 	config.SegmentBy = make([]v2.AlertLabelDescriptorV2, 0)
 	labels, ok := d.GetOk("group_by")
 	if ok {
 		for _, l := range labels.([]interface{}) {
 			config.SegmentBy = append(config.SegmentBy, v2.AlertLabelDescriptorV2{
-				ID: l.(string), //the sysdig client will rewrite this to be in dot notation
+				ID: l.(string), // the sysdig client will rewrite this to be in dot notation
 			})
 		}
 	}

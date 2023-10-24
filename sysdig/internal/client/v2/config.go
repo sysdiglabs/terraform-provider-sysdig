@@ -1,16 +1,17 @@
 package v2
 
 type config struct {
-	url            string
-	token          string
-	insecure       bool
-	extraHeaders   map[string]string
-	ibmInstanceID  string
-	ibmAPIKey      string
-	ibmIamURL      string
-	sysdigTeamName string
-	sysdigTeamID   *int
-	product        string
+	url                   string
+	token                 string
+	insecure              bool
+	extraHeaders          map[string]string
+	ibmInstanceID         string
+	ibmAPIKey             string
+	ibmIamURL             string
+	sysdigTeamName        string
+	sysdigTeamID          *int
+	product               string
+	secureSkipPolicyV2Msg bool
 }
 
 type Product string
@@ -94,4 +95,10 @@ func configure(opts ...ClientOption) *config {
 		opt(cfg)
 	}
 	return cfg
+}
+
+func WithSkipPolicyV2Msg(skipPolicyV2Msg bool) ClientOption {
+	return func(c *config) {
+		c.secureSkipPolicyV2Msg = skipPolicyV2Msg
+	}
 }

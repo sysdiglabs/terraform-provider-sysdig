@@ -12,9 +12,11 @@ import (
 
 var AlertV2NotFound = errors.New("alert not found")
 
-type AlertV2Type string
-type AlertV2Severity string
-type AlertLinkV2Type string
+type (
+	AlertV2Type     string
+	AlertV2Severity string
+	AlertLinkV2Type string
+)
 
 const (
 	alertsV2Path            = "%s/api/v2/alerts"

@@ -12,7 +12,6 @@ import (
 )
 
 func TestAccSecureCustomRolePermissionsDataSource(t *testing.T) {
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){

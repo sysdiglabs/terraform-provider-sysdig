@@ -1,9 +1,10 @@
 package sysdig
 
 import (
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"reflect"
 	"sort"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -67,7 +68,6 @@ func updateResourceDataForRule(d *schema.ResourceData, rule v2.Rule) {
 		_ = d.Set("tags", rule.Tags)
 	}
 	_ = d.Set("version", rule.Version)
-
 }
 
 func getTagsFromResourceData(d *schema.ResourceData) []string {

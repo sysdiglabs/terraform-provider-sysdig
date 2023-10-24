@@ -14,7 +14,6 @@ import (
 )
 
 func resourceSysdigMonitorAlertV2FormBasedPrometheus() *schema.Resource {
-
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
@@ -57,6 +56,11 @@ func resourceSysdigMonitorAlertV2FormBasedPrometheus() *schema.Resource {
 				Optional:     true,
 				Default:      "DO_NOTHING",
 				ValidateFunc: validation.StringInSlice([]string{"DO_NOTHING", "TRIGGER"}, false),
+			},
+			"unreported_alert_notifications_retention_seconds": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(60),
 			},
 		})),
 	}
@@ -172,13 +176,13 @@ func buildAlertV2FormBasedPrometheusStruct(d *schema.ResourceData) (*v2.AlertV2F
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
 
-	//ConditionOperator
+	// ConditionOperator
 	config.ConditionOperator = d.Get("operator").(string)
 
-	//threshold
+	// threshold
 	config.Threshold = d.Get("threshold").(float64)
 
-	//WarningThreshold
+	// WarningThreshold
 	if warningThreshold, ok := d.GetOk("warning_threshold"); ok {
 		wts := warningThreshold.(string)
 		wt, err := strconv.ParseFloat(wts, 64)
@@ -189,15 +193,22 @@ func buildAlertV2FormBasedPrometheusStruct(d *schema.ResourceData) (*v2.AlertV2F
 		config.WarningConditionOperator = config.ConditionOperator
 	}
 
-	//Query
+	// Query
 	config.Query = d.Get("query").(string)
 
 	config.NoDataBehaviour = d.Get("no_data_behaviour").(string)
 
+	var unreportedAlertNotificationsRetentionSec *int
+	if unreportedAlertNotificationsRetentionSecInterface, ok := d.GetOk("unreported_alert_notifications_retention_seconds"); ok {
+		u := unreportedAlertNotificationsRetentionSecInterface.(int)
+		unreportedAlertNotificationsRetentionSec = &u
+	}
+
 	alert := &v2.AlertV2FormBasedPrometheus{
-		AlertV2Common: *alertV2Common,
-		DurationSec:   0,
-		Config:        config,
+		AlertV2Common:                            *alertV2Common,
+		DurationSec:                              0,
+		Config:                                   config,
+		UnreportedAlertNotificationsRetentionSec: unreportedAlertNotificationsRetentionSec,
 	}
 	return alert, nil
 }
@@ -224,6 +235,12 @@ func updateAlertV2FormBasedPrometheusState(d *schema.ResourceData, alert *v2.Ale
 	_ = d.Set("query", alert.Config.Query)
 
 	_ = d.Set("no_data_behaviour", alert.Config.NoDataBehaviour)
+
+	if alert.UnreportedAlertNotificationsRetentionSec != nil {
+		_ = d.Set("unreported_alert_notifications_retention_seconds", *alert.UnreportedAlertNotificationsRetentionSec)
+	} else {
+		_ = d.Set("unreported_alert_notifications_retention_seconds", nil)
+	}
 
 	return nil
 }

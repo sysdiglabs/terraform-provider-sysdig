@@ -61,6 +61,9 @@ func TestAccAlertV2Metric(t *testing.T) {
 				Config: alertV2MetricWithEnabled(rText()),
 			},
 			{
+				Config: alertV2MetricWithUnreportedAlertNotificationsRetentionSec(rText()),
+			},
+			{
 				Config: alertV2MetricWithWarningThreshold(rText()),
 			},
 			{
@@ -340,6 +343,22 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	trigger_after_minutes = 15
 	enabled = false
 
+}
+`, name)
+}
+
+func alertV2MetricWithUnreportedAlertNotificationsRetentionSec(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_metric" "sample" {
+
+	name = "TERRAFORM TEST - METRICV2 %s"
+	metric = "sysdig_container_cpu_used_percent"
+	group_aggregation = "avg"
+	time_aggregation = "avg"
+	operator = ">="
+	threshold = 50
+	trigger_after_minutes = 15
+	unreported_alert_notifications_retention_seconds = 60 * 60 * 24 * 30
 }
 `, name)
 }

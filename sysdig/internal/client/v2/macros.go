@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	CreateMacroPath  = "%s/api/secure/falco/macros"
+	CreateMacroPath  = "%s/api/secure/falco/macros?skipPolicyV2Msg=%t"
 	GetMacroByIDPath = "%s/api/secure/falco/macros/%d"
-	UpdateMacroPath  = "%s/api/secure/falco/macros/%d"
-	DeleteMacroPath  = "%s/api/secure/falco/macros/%d"
+	UpdateMacroPath  = "%s/api/secure/falco/macros/%d?skipPolicyV2Msg=%t"
+	DeleteMacroPath  = "%s/api/secure/falco/macros/%d?skipPolicyV2Msg=%t"
 )
 
 type MacroInterface interface {
@@ -96,7 +96,7 @@ func (client *Client) DeleteMacro(ctx context.Context, id int) error {
 }
 
 func (client *Client) CreateMacroURL() string {
-	return fmt.Sprintf(CreateMacroPath, client.config.url)
+	return fmt.Sprintf(CreateMacroPath, client.config.url, client.config.secureSkipPolicyV2Msg)
 }
 
 func (client *Client) GetMacroByIDURL(id int) string {
@@ -104,9 +104,9 @@ func (client *Client) GetMacroByIDURL(id int) string {
 }
 
 func (client *Client) UpdateMacroURL(id int) string {
-	return fmt.Sprintf(UpdateMacroPath, client.config.url, id)
+	return fmt.Sprintf(UpdateMacroPath, client.config.url, id, client.config.secureSkipPolicyV2Msg)
 }
 
 func (client *Client) DeleteMacroURL(id int) string {
-	return fmt.Sprintf(DeleteMacroPath, client.config.url, id)
+	return fmt.Sprintf(DeleteMacroPath, client.config.url, id, client.config.secureSkipPolicyV2Msg)
 }

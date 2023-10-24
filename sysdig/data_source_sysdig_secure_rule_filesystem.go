@@ -92,14 +92,12 @@ func dataSourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceD
 			"matching": rule.Details.ReadPaths.MatchItems,
 			"paths":    rule.Details.ReadPaths.Items,
 		}})
-
 	}
 	if len(rule.Details.ReadWritePaths.Items) > 0 {
 		_ = d.Set("read_write", []map[string]interface{}{{
 			"matching": rule.Details.ReadWritePaths.MatchItems,
 			"paths":    rule.Details.ReadWritePaths.Items,
 		}})
-
 	}
 
 	return nil

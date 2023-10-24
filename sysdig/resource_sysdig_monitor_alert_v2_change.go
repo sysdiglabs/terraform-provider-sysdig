@@ -72,7 +72,6 @@ var allowedTimeRanges = map[int]map[int]struct{}{ // for each shorter time range
 }
 
 func resourceSysdigMonitorAlertV2Change() *schema.Resource {
-
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
@@ -127,6 +126,11 @@ func resourceSysdigMonitorAlertV2Change() *schema.Resource {
 			"longer_time_range_seconds": {
 				Type:     schema.TypeInt,
 				Required: true,
+			},
+			"unreported_alert_notifications_retention_seconds": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(60),
 			},
 		})),
 
@@ -267,13 +271,13 @@ func buildAlertV2ChangeStruct(d *schema.ResourceData) (*v2.AlertV2Change, error)
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
 
-	//ConditionOperator
+	// ConditionOperator
 	config.ConditionOperator = d.Get("operator").(string)
 
-	//threshold
+	// threshold
 	config.Threshold = d.Get("threshold").(float64)
 
-	//WarningThreshold
+	// WarningThreshold
 	if warningThreshold, ok := d.GetOk("warning_threshold"); ok {
 		wts := warningThreshold.(string)
 		wt, err := strconv.ParseFloat(wts, 64)
@@ -284,26 +288,33 @@ func buildAlertV2ChangeStruct(d *schema.ResourceData) (*v2.AlertV2Change, error)
 		config.WarningConditionOperator = config.ConditionOperator
 	}
 
-	//TimeAggregation
+	// TimeAggregation
 	config.TimeAggregation = d.Get("time_aggregation").(string)
 
-	//GroupAggregation
+	// GroupAggregation
 	config.GroupAggregation = d.Get("group_aggregation").(string)
 
-	//Metric
+	// Metric
 	metric := d.Get("metric").(string)
 	config.Metric.ID = metric
 
-	//ShorterRangeSec
+	// ShorterRangeSec
 	config.ShorterRangeSec = d.Get("shorter_time_range_seconds").(int)
 
-	//LongerRangeSec
+	// LongerRangeSec
 	config.LongerRangeSec = d.Get("longer_time_range_seconds").(int)
 
+	var unreportedAlertNotificationsRetentionSec *int
+	if unreportedAlertNotificationsRetentionSecInterface, ok := d.GetOk("unreported_alert_notifications_retention_seconds"); ok {
+		u := unreportedAlertNotificationsRetentionSecInterface.(int)
+		unreportedAlertNotificationsRetentionSec = &u
+	}
+
 	alert := &v2.AlertV2Change{
-		AlertV2Common: *alertV2Common,
-		DurationSec:   0,
-		Config:        config,
+		AlertV2Common:                            *alertV2Common,
+		DurationSec:                              0,
+		Config:                                   config,
+		UnreportedAlertNotificationsRetentionSec: unreportedAlertNotificationsRetentionSec,
 	}
 	return alert, nil
 }
@@ -336,6 +347,12 @@ func updateAlertV2ChangeState(d *schema.ResourceData, alert *v2.AlertV2Change) e
 	_ = d.Set("shorter_time_range_seconds", alert.Config.ShorterRangeSec)
 
 	_ = d.Set("longer_time_range_seconds", alert.Config.LongerRangeSec)
+
+	if alert.UnreportedAlertNotificationsRetentionSec != nil {
+		_ = d.Set("unreported_alert_notifications_retention_seconds", *alert.UnreportedAlertNotificationsRetentionSec)
+	} else {
+		_ = d.Set("unreported_alert_notifications_retention_seconds", nil)
+	}
 
 	return nil
 }

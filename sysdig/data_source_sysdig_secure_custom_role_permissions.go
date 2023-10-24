@@ -1,9 +1,10 @@
 package sysdig
 
 import (
+	"time"
+
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"time"
 )
 
 func dataSourceSysdigSecureCustomRolePermissions() *schema.Resource {

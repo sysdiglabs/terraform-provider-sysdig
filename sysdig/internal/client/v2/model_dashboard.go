@@ -107,7 +107,8 @@ func NewFormat(
 	decimals int,
 	yAxis string,
 	minInterval string,
-	nullValueDisplayMode string) *Format {
+	nullValueDisplayMode string,
+) *Format {
 	return &Format{
 		Unit:                 unit,
 		InputFormat:          &inputFormat,

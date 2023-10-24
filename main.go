@@ -7,5 +7,9 @@ import (
 )
 
 func main() {
-	plugin.Serve(&plugin.ServeOpts{ProviderFunc: sysdig.Provider})
+	sysdigClient := sysdig.NewSysdigClients()
+	defer sysdigClient.Close()
+
+	provider := &sysdig.SysdigProvider{SysdigClient: sysdigClient}
+	plugin.Serve(&plugin.ServeOpts{ProviderFunc: provider.Provider})
 }

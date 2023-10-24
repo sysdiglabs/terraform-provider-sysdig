@@ -72,6 +72,7 @@ func setupRuleFalcoDataSourceWithAppends(name string) string {
 	}
 `, ruleFalcoTerminalShell(name), name)
 }
+
 func ruleFalcoDataSourceWithAppends(name string) string {
 	return fmt.Sprintf(`
 data "sysdig_secure_rule_falco_count" "terminal_shell_count" {

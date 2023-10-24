@@ -7,9 +7,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+type SysdigProvider struct {
+	SysdigClient SysdigClients
+}
+
+// Used by tests to get the provider
 func Provider() *schema.Provider {
+	sysdigClient := NewSysdigClients()
+	provider := &SysdigProvider{SysdigClient: sysdigClient}
+	return provider.Provider()
+}
+
+func (p *SysdigProvider) Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
+			"sysdig_secure_skip_policyv2msg": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_SECURE_SKIP_POLICYV2MSG", true),
+			},
 			"sysdig_secure_api_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -133,6 +149,7 @@ func Provider() *schema.Provider {
 			"sysdig_secure_cloud_account":                                 resourceSysdigSecureCloudAccount(),
 			"sysdig_secure_scanning_policy":                               resourceSysdigSecureScanningPolicy(),
 			"sysdig_secure_scanning_policy_assignment":                    resourceSysdigSecureScanningPolicyAssignment(),
+			"sysdig_secure_cloud_auth_account":                            resourceSysdigSecureCloudauthAccount(),
 
 			"sysdig_monitor_silence_rule":                                  resourceSysdigMonitorSilenceRule(),
 			"sysdig_monitor_alert_downtime":                                resourceSysdigMonitorAlertDowntime(),
@@ -165,6 +182,7 @@ func Provider() *schema.Provider {
 			"sysdig_monitor_team":                                          resourceSysdigMonitorTeam(),
 			"sysdig_monitor_cloud_account":                                 resourceSysdigMonitorCloudAccount(),
 			"sysdig_secure_posture_zone":                                   resourceSysdigSecurePostureZone(),
+			"sysdig_secure_organization":                                   resourceSysdigSecureOrganization(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_trusted_cloud_identity":                        dataSourceSysdigSecureTrustedCloudIdentity(),
@@ -214,11 +232,11 @@ func Provider() *schema.Provider {
 			"sysdig_monitor_notification_channel_ibm_function":             dataSourceSysdigMonitorNotificationChannelIBMFunction(),
 			"sysdig_monitor_custom_role_permissions":                       dataSourceSysdigMonitorCustomRolePermissions(),
 		},
-		ConfigureContextFunc: providerConfigure,
+		ConfigureContextFunc: p.providerConfigure,
 	}
 }
 
-func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	sysdigClient := &sysdigClients{d: d}
-	return sysdigClient, nil
+func (p *SysdigProvider) providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	p.SysdigClient.Configure(ctx, d)
+	return p.SysdigClient, nil
 }

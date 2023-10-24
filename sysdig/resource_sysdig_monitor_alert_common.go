@@ -2,10 +2,11 @@ package sysdig
 
 import (
 	"errors"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"regexp"
 	"strings"
 	"time"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -123,7 +124,6 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 }
 
 func alertFromResourceData(d *schema.ResourceData) (alert *v2.Alert, err error) {
-
 	trigger_after_minutes := time.Duration(d.Get("trigger_after_minutes").(int)) * time.Minute
 	alert = &v2.Alert{
 		Name:                   d.Get("name").(string),

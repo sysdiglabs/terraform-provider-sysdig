@@ -101,7 +101,8 @@ func resourceSysdigSecureRuleFalco() *schema.Resource {
 }
 
 func resourceSysdigRuleFalcoCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -115,6 +116,7 @@ func resourceSysdigRuleFalcoCreate(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	d.SetId(strconv.Itoa(rule.ID))
 	_ = d.Set("version", rule.Version)
@@ -217,7 +219,8 @@ func fieldOrCompsToStringSlice(fields any) ([]string, error) {
 }
 
 func resourceSysdigRuleFalcoUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -234,12 +237,14 @@ func resourceSysdigRuleFalcoUpdate(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	return nil
 }
 
 func resourceSysdigRuleFalcoDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -253,6 +258,8 @@ func resourceSysdigRuleFalcoDelete(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
+
 	return nil
 }
 

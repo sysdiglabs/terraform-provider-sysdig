@@ -37,8 +37,10 @@ type IBMSecure interface {
 	SecureCommon
 }
 
-type IBMAccessToken string
-type UnixTimestamp int64
+type (
+	IBMAccessToken string
+	UnixTimestamp  int64
+)
 
 type IBMRequest struct {
 	config     *config

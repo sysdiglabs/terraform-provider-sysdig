@@ -1,5 +1,9 @@
 package v2
 
+import (
+	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
+)
+
 type Team struct {
 	UserRoles           []UserRoles       `json:"userRoles,omitempty"`
 	Description         string            `json:"description"`
@@ -411,6 +415,11 @@ type CloudAccountSecure struct {
 	WorkLoadIdentityAccountID    string `json:"workloadIdentityAccountId,omitempty"`
 	WorkLoadIdentityAccountAlias string `json:"workLoadIdentityAccountAlias,omitempty"`
 }
+
+type CloudauthAccountSecure struct {
+	cloudauth.CloudAccount
+}
+
 type ScanningPolicy struct {
 	ID             string         `json:"id,omitempty"`
 	Version        string         `json:"version,omitempty"`
@@ -597,8 +606,9 @@ type AlertV2ConfigMetric struct {
 
 type AlertV2Metric struct {
 	AlertV2Common
-	DurationSec int                 `json:"durationSec"`
-	Config      AlertV2ConfigMetric `json:"config"`
+	DurationSec                              int                 `json:"durationSec"`
+	Config                                   AlertV2ConfigMetric `json:"config"`
+	UnreportedAlertNotificationsRetentionSec *int                `json:"unreportedAlertNotificationsRetentionSec"`
 }
 
 type alertV2MetricWrapper struct {
@@ -619,8 +629,9 @@ type AlertV2ConfigDowntime struct {
 
 type AlertV2Downtime struct {
 	AlertV2Common
-	DurationSec int                   `json:"durationSec"`
-	Config      AlertV2ConfigDowntime `json:"config"`
+	DurationSec                              int                   `json:"durationSec"`
+	Config                                   AlertV2ConfigDowntime `json:"config"`
+	UnreportedAlertNotificationsRetentionSec *int                  `json:"unreportedAlertNotificationsRetentionSec"`
 }
 
 type alertV2DowntimeWrapper struct {
@@ -656,8 +667,9 @@ type AlertV2ConfigFormBasedPrometheus struct {
 
 type AlertV2FormBasedPrometheus struct {
 	AlertV2Common
-	DurationSec int                              `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
-	Config      AlertV2ConfigFormBasedPrometheus `json:"config"`
+	DurationSec                              int                              `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
+	Config                                   AlertV2ConfigFormBasedPrometheus `json:"config"`
+	UnreportedAlertNotificationsRetentionSec *int                             `json:"unreportedAlertNotificationsRetentionSec"`
 }
 
 type alertV2FormBasedPrometheusWrapper struct {
@@ -666,8 +678,9 @@ type alertV2FormBasedPrometheusWrapper struct {
 
 type AlertV2Change struct {
 	AlertV2Common
-	DurationSec int                 `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
-	Config      AlertV2ConfigChange `json:"config"`
+	DurationSec                              int                 `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
+	Config                                   AlertV2ConfigChange `json:"config"`
+	UnreportedAlertNotificationsRetentionSec *int                `json:"unreportedAlertNotificationsRetentionSec"`
 }
 
 type alertV2ChangeWrapper struct {
@@ -776,4 +789,8 @@ type SilenceRule struct {
 
 	Version int `json:"version,omitempty"`
 	ID      int `json:"id,omitempty"`
+}
+
+type OrganizationSecure struct {
+	cloudauth.CloudOrganization
 }

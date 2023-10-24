@@ -14,7 +14,6 @@ import (
 )
 
 func resourceSysdigMonitorAlertV2Metric() *schema.Resource {
-
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
@@ -71,6 +70,11 @@ func resourceSysdigMonitorAlertV2Metric() *schema.Resource {
 				Optional:     true,
 				Default:      "DO_NOTHING",
 				ValidateFunc: validation.StringInSlice([]string{"DO_NOTHING", "TRIGGER"}, false),
+			},
+			"unreported_alert_notifications_retention_seconds": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(60),
 			},
 		})),
 	}
@@ -186,13 +190,13 @@ func buildAlertV2MetricStruct(d *schema.ResourceData) (*v2.AlertV2Metric, error)
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
 
-	//ConditionOperator
+	// ConditionOperator
 	config.ConditionOperator = d.Get("operator").(string)
 
-	//threshold
+	// threshold
 	config.Threshold = d.Get("threshold").(float64)
 
-	//WarningThreshold
+	// WarningThreshold
 	if warningThreshold, ok := d.GetOk("warning_threshold"); ok {
 		wts := warningThreshold.(string)
 		wt, err := strconv.ParseFloat(wts, 64)
@@ -203,22 +207,29 @@ func buildAlertV2MetricStruct(d *schema.ResourceData) (*v2.AlertV2Metric, error)
 		config.WarningConditionOperator = config.ConditionOperator
 	}
 
-	//TimeAggregation
+	// TimeAggregation
 	config.TimeAggregation = d.Get("time_aggregation").(string)
 
-	//GroupAggregation
+	// GroupAggregation
 	config.GroupAggregation = d.Get("group_aggregation").(string)
 
-	//Metric
+	// Metric
 	metric := d.Get("metric").(string)
 	config.Metric.ID = metric
 
 	config.NoDataBehaviour = d.Get("no_data_behaviour").(string)
 
+	var unreportedAlertNotificationsRetentionSec *int
+	if unreportedAlertNotificationsRetentionSecInterface, ok := d.GetOk("unreported_alert_notifications_retention_seconds"); ok {
+		u := unreportedAlertNotificationsRetentionSecInterface.(int)
+		unreportedAlertNotificationsRetentionSec = &u
+	}
+
 	alert := &v2.AlertV2Metric{
-		AlertV2Common: *alertV2Common,
-		DurationSec:   minutesToSeconds(d.Get("trigger_after_minutes").(int)),
-		Config:        config,
+		AlertV2Common:                            *alertV2Common,
+		DurationSec:                              minutesToSeconds(d.Get("trigger_after_minutes").(int)),
+		Config:                                   config,
+		UnreportedAlertNotificationsRetentionSec: unreportedAlertNotificationsRetentionSec,
 	}
 	return alert, nil
 }
@@ -251,6 +262,12 @@ func updateAlertV2MetricState(d *schema.ResourceData, alert *v2.AlertV2Metric) e
 	_ = d.Set("metric", alert.Config.Metric.ID)
 
 	_ = d.Set("no_data_behaviour", alert.Config.NoDataBehaviour)
+
+	if alert.UnreportedAlertNotificationsRetentionSec != nil {
+		_ = d.Set("unreported_alert_notifications_retention_seconds", *alert.UnreportedAlertNotificationsRetentionSec)
+	} else {
+		_ = d.Set("unreported_alert_notifications_retention_seconds", nil)
+	}
 
 	return nil
 }

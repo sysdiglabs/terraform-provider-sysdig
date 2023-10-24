@@ -13,7 +13,6 @@ import (
 )
 
 func resourceSysdigMonitorAlertV2Downtime() *schema.Resource {
-
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
@@ -46,6 +45,11 @@ func resourceSysdigMonitorAlertV2Downtime() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"sysdig_container_up", "sysdig_program_up", "sysdig_host_up"}, true),
+			},
+			"unreported_alert_notifications_retention_seconds": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(60),
 			},
 		})),
 	}
@@ -155,28 +159,35 @@ func buildAlertV2DowntimeStruct(d *schema.ResourceData) *v2.AlertV2Downtime {
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
 
-	//TimeAggregation
+	// TimeAggregation
 	config.TimeAggregation = "timeAvg"
 
-	//GroupAggregation
+	// GroupAggregation
 	config.GroupAggregation = "avg"
 
-	//ConditionOperator
+	// ConditionOperator
 	config.ConditionOperator = "<="
 
-	//threshold
+	// threshold
 	config.Threshold = 1 - d.Get("threshold").(float64)/100
 
-	//Downtime
+	// Downtime
 	metric := d.Get("metric").(string)
 	config.Metric.ID = metric
 
 	config.NoDataBehaviour = "DO_NOTHING"
 
+	var unreportedAlertNotificationsRetentionSec *int
+	if unreportedAlertNotificationsRetentionSecInterface, ok := d.GetOk("unreported_alert_notifications_retention_seconds"); ok {
+		u := unreportedAlertNotificationsRetentionSecInterface.(int)
+		unreportedAlertNotificationsRetentionSec = &u
+	}
+
 	alert := &v2.AlertV2Downtime{
-		AlertV2Common: *alertV2Common,
-		DurationSec:   minutesToSeconds(d.Get("trigger_after_minutes").(int)),
-		Config:        config,
+		AlertV2Common:                            *alertV2Common,
+		DurationSec:                              minutesToSeconds(d.Get("trigger_after_minutes").(int)),
+		Config:                                   config,
+		UnreportedAlertNotificationsRetentionSec: unreportedAlertNotificationsRetentionSec,
 	}
 	return alert
 }
@@ -197,6 +208,12 @@ func updateAlertV2DowntimeState(d *schema.ResourceData, alert *v2.AlertV2Downtim
 	_ = d.Set("threshold", (1-alert.Config.Threshold)*100)
 
 	_ = d.Set("metric", alert.Config.Metric.ID)
+
+	if alert.UnreportedAlertNotificationsRetentionSec != nil {
+		_ = d.Set("unreported_alert_notifications_retention_seconds", *alert.UnreportedAlertNotificationsRetentionSec)
+	} else {
+		_ = d.Set("unreported_alert_notifications_retention_seconds", nil)
+	}
 
 	return nil
 }

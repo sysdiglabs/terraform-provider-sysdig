@@ -78,7 +78,8 @@ func resourceSysdigSecureRuleFilesystem() *schema.Resource {
 }
 
 func resourceSysdigRuleFilesystemCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -92,6 +93,7 @@ func resourceSysdigRuleFilesystemCreate(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	d.SetId(strconv.Itoa(rule.ID))
 	_ = d.Set("version", rule.Version)
@@ -135,21 +137,20 @@ func resourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceDat
 			"matching": rule.Details.ReadPaths.MatchItems,
 			"paths":    rule.Details.ReadPaths.Items,
 		}})
-
 	}
 	if len(rule.Details.ReadWritePaths.Items) > 0 {
 		_ = d.Set("read_write", []map[string]interface{}{{
 			"matching": rule.Details.ReadWritePaths.MatchItems,
 			"paths":    rule.Details.ReadWritePaths.Items,
 		}})
-
 	}
 
 	return nil
 }
 
 func resourceSysdigRuleFilesystemUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -166,12 +167,14 @@ func resourceSysdigRuleFilesystemUpdate(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	return nil
 }
 
 func resourceSysdigRuleFilesystemDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
+	sysdigClients := meta.(SysdigClients)
+	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -185,6 +188,7 @@ func resourceSysdigRuleFilesystemDelete(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	return nil
 }
