@@ -178,7 +178,10 @@ func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, data *schem
 	}
 
 	data.SetId(cloudauthAccount.Id)
-	data.Set(SchemaOrganizationIDKey, cloudauthAccount.OrganizationId)
+	err = data.Set(SchemaOrganizationIDKey, cloudauthAccount.OrganizationId)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
