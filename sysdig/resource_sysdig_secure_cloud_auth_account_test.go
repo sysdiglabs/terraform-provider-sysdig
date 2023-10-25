@@ -80,19 +80,6 @@ func TestAccSecureCloudAuthAccountFC(t *testing.T) {
 }
 
 func secureCloudAuthAccountWithFC(accountID string) string {
-	type sample_service_account_key struct {
-		ProjectId    string `json:"project_id"`
-		PrivateKeyId string `json:"private_key_id"`
-		PrivateKey   string `json:"private_key"`
-	}
-	test_service_account_key := &sample_service_account_key{
-		ProjectId:    fmt.Sprintf("sample-1-%s", accountID),
-		PrivateKeyId: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-		PrivateKey:   "-----BEGIN PRIVATE KEY-----\nxxxxxxxxxxxxxxxxxxxxxxxxxxx\n-----END PRIVATE KEY-----\n",
-	}
-	test_service_account_keyJSON, _ := json.Marshal(test_service_account_key)
-	test_service_account_key_encoded := b64.StdEncoding.EncodeToString([]byte(string(test_service_account_keyJSON)))
-
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "sample-1" {
   provider_id   = "sample-1-%s"
@@ -121,5 +108,23 @@ resource "sysdig_secure_cloud_auth_account" "sample-1" {
 	ignore_changes = [component]
   }
 }
-`, accountID, test_service_account_key_encoded)
+`, accountID, getEncodedServiceAccountKey("sample-1", accountID))
+}
+
+func getEncodedServiceAccountKey(resourceName string, accountID string) string {
+	type sample_service_account_key struct {
+		Type         string `json:"type"`
+		ProjectId    string `json:"project_id"`
+		PrivateKeyId string `json:"private_key_id"`
+		PrivateKey   string `json:"private_key"`
+	}
+	test_service_account_key := &sample_service_account_key{
+		Type:         "service_account",
+		ProjectId:    fmt.Sprintf("%s-%s", resourceName, accountID),
+		PrivateKeyId: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+		PrivateKey:   "-----BEGIN PRIVATE KEY-----\nxxxxxxxxxxxxxxxxxxxxxxxxxxx\n-----END PRIVATE KEY-----\n",
+	}
+	test_service_account_keyJSON, _ := json.Marshal(test_service_account_key)
+	test_service_account_key_encoded := b64.StdEncoding.EncodeToString([]byte(string(test_service_account_keyJSON)))
+	return test_service_account_key_encoded
 }
