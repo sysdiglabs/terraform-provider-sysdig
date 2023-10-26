@@ -38,6 +38,13 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			SchemaOrganizationalUnitIds: {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -54,7 +61,7 @@ func resourceSysdigSecureOrganizationCreate(ctx context.Context, data *schema.Re
 
 	org := secureOrganizationFromResourceData(data)
 
-	orgCreated, err := client.CreateOrganizationSecure(ctx, &org)
+	orgCreated, err := client.CreateOrganizationSecure(ctx, org)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -111,7 +118,7 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 
 	org := secureOrganizationFromResourceData(data)
 
-	_, errStatus, err := client.UpdateOrganizationSecure(ctx, data.Id(), &org)
+	_, errStatus, err := client.UpdateOrganizationSecure(ctx, data.Id(), org)
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -122,16 +129,23 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 	return nil
 }
 
-func secureOrganizationFromResourceData(data *schema.ResourceData) v2.OrganizationSecure {
-	return v2.OrganizationSecure{
-		CloudOrganization: cloudauth.CloudOrganization{
-			ManagementAccountId: data.Get(SchemaManagementAccountId).(string),
-		},
-	}
+func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.OrganizationSecure {
+	secureOrganization := &v2.OrganizationSecure{CloudOrganization: cloudauth.CloudOrganization{}}
+	secureOrganization.CloudOrganization.ManagementAccountId = data.Get(SchemaManagementAccountId).(string)
+	secureOrganization.CloudOrganization.OrganizationalUnitIds = append(
+		secureOrganization.CloudOrganization.OrganizationalUnitIds,
+		data.Get(SchemaOrganizationalUnitIds).([]string)...,
+	)
+	return secureOrganization
 }
 
 func secureOrganizationToResourceData(data *schema.ResourceData, org *v2.OrganizationSecure) error {
 	err := data.Set(SchemaManagementAccountId, org.ManagementAccountId)
+	if err != nil {
+		return err
+	}
+
+	err = data.Set(SchemaOrganizationalUnitIds, org.OrganizationalUnitIds)
 	if err != nil {
 		return err
 	}
