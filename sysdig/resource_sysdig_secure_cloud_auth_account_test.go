@@ -124,7 +124,7 @@ func getEncodedServiceAccountKey(resourceName string, accountID string) string {
 		PrivateKeyId: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
 		PrivateKey:   "-----BEGIN PRIVATE KEY-----\nxxxxxxxxxxxxxxxxxxxxxxxxxxx\n-----END PRIVATE KEY-----\n",
 	}
-	test_service_account_keyJSON, _ := json.Marshal(test_service_account_key)
-	test_service_account_key_encoded := b64.StdEncoding.EncodeToString([]byte(string(test_service_account_keyJSON)))
+	test_service_account_key_bytes, _ := json.Marshal(test_service_account_key)
+	test_service_account_key_encoded := b64.StdEncoding.EncodeToString(test_service_account_key_bytes)
 	return test_service_account_key_encoded
 }
