@@ -28,6 +28,7 @@ resource "sysdig_secure_organization" "sample" {
 ## Argument Reference
 
 * `management_account_id` - (Required) Cloud Account created using resource sysdig_secure_cloud_auth_account.
+* `organizational_unit_ids` - (Optional) List of organizational unit identifiers from which to onboard. If empty, the entire organization is onboarded. 
 
 ## Attributes Reference
 
