@@ -38,4 +38,8 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 
 ## Attributes Reference
 
-No additional attributes are exported.
+In addition to all arguments above, the following attributes are exported:
+
+* `id` - (Computed) The ID of the cloud account.
+
+* `organization_id` - (Computed) The ID of the organization, if the cloud account is part of any organization.

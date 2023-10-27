@@ -4,6 +4,7 @@ import (
 	"context"
 	b64 "encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -153,6 +154,10 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Optional: true,
 				Elem:     accountComponents,
 			},
+			SchemaOrganizationIDKey: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -173,6 +178,10 @@ func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, data *schem
 	}
 
 	data.SetId(cloudauthAccount.Id)
+	err = data.Set(SchemaOrganizationIDKey, cloudauthAccount.OrganizationId)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -206,8 +215,23 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 		return diag.FromErr(err)
 	}
 
-	_, errStatus, err := client.UpdateCloudauthAccountSecure(ctx, data.Id(), cloudauthAccountFromResourceData(data))
+	existingCloudAccount, errStatus, err := client.GetCloudauthAccountSecure(ctx, data.Id())
+	if err != nil {
+		if strings.Contains(errStatus, "404") {
+			return nil
+		}
+		return diag.FromErr(err)
+	}
 
+	newCloudAccount := cloudauthAccountFromResourceData(data)
+
+	// validate and reject non-updatable resource schema fields upfront
+	err = validateCloudauthAccountUpdate(existingCloudAccount, newCloudAccount)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	_, errStatus, err = client.UpdateCloudauthAccountSecure(ctx, data.Id(), newCloudAccount)
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -231,6 +255,19 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 			return nil
 		}
 		return diag.FromErr(err)
+	}
+
+	return nil
+}
+
+/*
+This function validates and restricts any fields not allowed to be updated during resource updates.
+*/
+func validateCloudauthAccountUpdate(existingCloudAccount *v2.CloudauthAccountSecure, newCloudAccount *v2.CloudauthAccountSecure) error {
+	if existingCloudAccount.Enabled != newCloudAccount.Enabled || existingCloudAccount.Provider != newCloudAccount.Provider ||
+		existingCloudAccount.ProviderId != newCloudAccount.ProviderId || existingCloudAccount.OrganizationId != newCloudAccount.OrganizationId {
+		errorInvalidResourceUpdate := fmt.Sprintf("Bad Request. Updating restricted fields not allowed: %s", []string{"enabled", "provider_type", "provider_id", "organization_id"})
+		return errors.New(errorInvalidResourceUpdate)
 	}
 
 	return nil
@@ -439,11 +476,12 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 
 	return &v2.CloudauthAccountSecure{
 		CloudAccount: cloudauth.CloudAccount{
-			Enabled:    data.Get(SchemaEnabled).(bool),
-			ProviderId: data.Get(SchemaCloudProviderId).(string),
-			Provider:   cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
-			Components: accountComponents,
-			Feature:    accountFeatures,
+			Enabled:        data.Get(SchemaEnabled).(bool),
+			OrganizationId: data.Get(SchemaOrganizationIDKey).(string),
+			ProviderId:     data.Get(SchemaCloudProviderId).(string),
+			Provider:       cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
+			Components:     accountComponents,
+			Feature:        accountFeatures,
 		},
 	}
 }
@@ -498,6 +536,19 @@ func featureToResourceData(features *cloudauth.AccountFeatures) []interface{} {
 	return nil
 }
 
+func componentsToResourceData(components []*cloudauth.AccountComponent) []map[string]interface{} {
+	componentsList := []map[string]interface{}{}
+
+	for _, comp := range components {
+		componentsList = append(componentsList, map[string]interface{}{
+			SchemaType:     comp.Type.String(),
+			SchemaInstance: comp.Instance,
+		})
+	}
+
+	return componentsList
+}
+
 func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudauthAccountSecure) error {
 	err := data.Set(SchemaIDKey, cloudAccount.Id)
 	if err != nil {
@@ -524,16 +575,12 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		return err
 	}
 
-	components := []map[string]interface{}{}
-
-	for _, comp := range cloudAccount.Components {
-		components = append(components, map[string]interface{}{
-			SchemaType:     comp.Type.String(),
-			SchemaInstance: comp.Instance,
-		})
+	err = data.Set(SchemaComponent, componentsToResourceData(cloudAccount.Components))
+	if err != nil {
+		return err
 	}
 
-	err = data.Set(SchemaComponent, components)
+	err = data.Set(SchemaOrganizationIDKey, cloudAccount.OrganizationId)
 	if err != nil {
 		return err
 	}
