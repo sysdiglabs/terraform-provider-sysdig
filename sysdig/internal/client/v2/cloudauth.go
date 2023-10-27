@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	cloudauthAccountsPath = "%s/api/cloudauth/v1/accounts"
-	cloudauthAccountPath  = "%s/api/cloudauth/v1/accounts/%s"
+	cloudauthAccountsPath   = "%s/api/cloudauth/v1/accounts"
+	cloudauthAccountPath    = "%s/api/cloudauth/v1/accounts/%s"
+	getCloudauthAccountPath = "%s/api/cloudauth/v1/accounts/%s?decrypt=%s"
 )
 
 type CloudauthAccountSecureInterface interface {
@@ -45,7 +46,8 @@ func (client *Client) CreateCloudauthAccountSecure(ctx context.Context, cloudAcc
 }
 
 func (client *Client) GetCloudauthAccountSecure(ctx context.Context, accountID string) (*CloudauthAccountSecure, string, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.cloudauthAccountURL(accountID), nil)
+	// get the cloud account with decrypt query param true to fetch decrypted details on the cloud account
+	response, err := client.requester.Request(ctx, http.MethodGet, client.getCloudauthAccountURL(accountID, "true"), nil)
 	if err != nil {
 		return nil, "", err
 	}
@@ -107,6 +109,10 @@ func (client *Client) cloudauthAccountsURL() string {
 
 func (client *Client) cloudauthAccountURL(accountID string) string {
 	return fmt.Sprintf(cloudauthAccountPath, client.config.url, accountID)
+}
+
+func (client *Client) getCloudauthAccountURL(accountID string, decrypt string) string {
+	return fmt.Sprintf(getCloudauthAccountPath, client.config.url, accountID, decrypt)
 }
 
 // local function for protojson based marshal/unmarshal of cloudauthAccount proto
