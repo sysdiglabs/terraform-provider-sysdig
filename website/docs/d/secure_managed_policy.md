@@ -63,4 +63,9 @@ The actions block is optional and supports:
     amount of seconds before the policy was triggered.
     * `seconds_after_event` - (Required) Captures the system calls for the amount
     of seconds after the policy was triggered.
-    * `name` - (Optional) The name of the capture file
+    * `name` - (Required) The name of the capture file
+    * `filter` - (Optional) Additional filter to apply to the capture. For example: `proc.name=cat`
+    * `bucket_name` - (Optional) Custom bucket to store capture in, 
+    bucket should be onboarded in Integrations > S3 Capture Storage. Default is to use Sysdig Secure Storage 
+    * `folder` - (Optional) Name of folder to store capture inside the bucket. 
+    By default we will store the capture file at the root of the bucket

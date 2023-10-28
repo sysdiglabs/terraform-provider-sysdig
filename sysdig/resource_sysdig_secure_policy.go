@@ -91,6 +91,21 @@ var policyActionBlockSchema = &schema.Schema{
 							Type:     schema.TypeString,
 							Required: true,
 						},
+						"filter": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "",
+						},
+						"bucket_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "",
+						},
+						"folder": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "/",
+						},
 					},
 				},
 			},
@@ -194,6 +209,9 @@ func commonPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
 				"name":                 action.Name,
+				"filter":               action.Filter,
+				"bucket_name":          action.BucketName,
+				"folder":               action.Folder,
 			}}
 		}
 	}
@@ -276,12 +294,19 @@ func addActionsToPolicy(d *schema.ResourceData, policy *v2.Policy) {
 		afterEventNs := d.Get("actions.0.capture.0.seconds_after_event").(int) * 1000000000
 		beforeEventNs := d.Get("actions.0.capture.0.seconds_before_event").(int) * 1000000000
 		name := d.Get("actions.0.capture.0.name").(string)
+		filter := d.Get("actions.0.capture.0.filter").(string)
+		bucketName := d.Get("actions.0.capture.0.bucket_name").(string)
+		folder := d.Get("actions.0.capture.0.folder").(string)
 		policy.Actions = append(policy.Actions, v2.Action{
 			Type:                 "POLICY_ACTION_CAPTURE",
 			IsLimitedToContainer: false,
 			AfterEventNs:         afterEventNs,
 			BeforeEventNs:        beforeEventNs,
 			Name:                 name,
+			Filter:               filter,
+			StorageType:          "S3",
+			BucketName:           bucketName,
+			Folder:               folder,
 		})
 	}
 }

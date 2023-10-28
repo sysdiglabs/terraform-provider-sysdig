@@ -79,6 +79,9 @@ resource "sysdig_secure_policy" "sample" {
       seconds_before_event = 5
       seconds_after_event = 10
       name = "testcapture"
+      filter = "proc.name=cat"
+      bucket_name = "testbucket"
+      folder = "testfolder"
     }
   }
 
@@ -147,6 +150,8 @@ resource "sysdig_secure_policy" "sample_%d" {
       seconds_before_event = 5
       seconds_after_event = 10
       name = "capture_name"
+      filter = "proc.name=cat"
+      bucket_name = "testbucket"
     }
   }
 }

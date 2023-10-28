@@ -98,6 +98,18 @@ func createPolicyDataSourceSchema() map[string]*schema.Schema {
 									Type:     schema.TypeString,
 									Computed: true,
 								},
+								"filter": {
+									Type:     schema.TypeString,
+									Computed: true,
+								},
+								"bucket_name": {
+									Type:     schema.TypeString,
+									Computed: true,
+								},
+								"folder": {
+									Type:     schema.TypeString,
+									Computed: true,
+								},
 							},
 						},
 					},
@@ -134,6 +146,9 @@ func policyDataSourceToResourceData(policy v2.Policy, d *schema.ResourceData) {
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
 				"name":                 action.Name,
+				"filter":               action.Filter,
+				"bucket_name":          action.BucketName,
+				"folder":               action.Folder,
 			}}
 		}
 	}
