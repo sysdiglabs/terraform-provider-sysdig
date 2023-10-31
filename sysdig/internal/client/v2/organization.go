@@ -35,7 +35,7 @@ func (client *Client) CreateOrganizationSecure(ctx context.Context, org *Organiz
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
 		err = client.ErrorFromResponse(response)
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (client *Client) UpdateOrganizationSecure(ctx context.Context, orgID string
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
 		errStatus, err := client.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}

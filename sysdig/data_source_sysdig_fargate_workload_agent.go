@@ -50,7 +50,7 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 			"sysdig_access_key": {
 				Type:        schema.TypeString,
 				Description: "the Sysdig access key",
-				Required:    true,
+				Optional:    true,
 			},
 			"workload_agent_image": {
 				Type:        schema.TypeString,

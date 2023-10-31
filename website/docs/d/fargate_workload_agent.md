@@ -22,8 +22,7 @@ data "sysdig_fargate_workload_agent" "instrumented_containers" {
 
   image_auth_secret    = ""
   workload_agent_image = "quay.io/sysdig/workload-agent:latest"
-
-  sysdig_access_key = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+  
   orchestrator_host    = module.fargate-orchestrator-agent.orchestrator_host
   orchestrator_port    = module.fargate-orchestrator-agent.orchestrator_port
 }
@@ -32,7 +31,6 @@ data "sysdig_fargate_workload_agent" "instrumented_containers" {
 ## Argument Reference
 
 * `container_definitions` - (Required) The input Fargate container definitions to instrument with the Sysdig workload agent.
-* `sysdig_access_key` - (Required) The Sysdig Access Key (Agent token).
 * `orchestrator_host` - (Required) The orchestrator host to connect to.
 * `orchestrator_port` - (Required) The orchestrator port to connect to.
 * `workload_agent_image` - (Required) The Sysdig workload agent image.
