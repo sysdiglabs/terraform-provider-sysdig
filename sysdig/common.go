@@ -60,4 +60,5 @@ const (
 	SchemaFeature                   = "feature"
 	SchemaManagementAccountId       = "management_account_id"
 	SchemaOrganizationIDKey         = "organization_id"
+	SchemaOrganizationalUnitIds     = "organizational_unit_ids"
 )
