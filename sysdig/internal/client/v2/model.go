@@ -260,10 +260,15 @@ type PolicyRule struct {
 	Enabled bool   `json:"enabled"`
 }
 
+// Did not add support storageId because FE does not support it yet
 type Action struct {
 	AfterEventNs         int    `json:"afterEventNs,omitempty"`
 	BeforeEventNs        int    `json:"beforeEventNs,omitempty"`
 	Name                 string `json:"name,omitempty"`
+	Filter               string `json:"filter,omitempty"`
+	StorageType          string `json:"storageType,omitempty"`
+	BucketName           string `json:"bucketName,omitempty"`
+	Folder               string `json:"folder,omitempty"`
 	IsLimitedToContainer bool   `json:"isLimitedToContainer"`
 	Type                 string `json:"type"`
 }
