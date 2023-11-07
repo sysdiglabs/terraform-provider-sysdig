@@ -40,7 +40,7 @@ func resourceSysdigSecurePostureZone() *schema.Resource {
 			},
 			SchemaPolicyIDsKey: {
 				Optional: true,
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
@@ -106,7 +106,7 @@ func getPostureZoneClient(c SysdigClients) (v2.PostureZoneInterface, error) {
 }
 
 func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	policiesData := d.Get(SchemaPolicyIDsKey).([]interface{})
+	policiesData := d.Get(SchemaPolicyIDsKey).(*schema.Set).List()
 	policies := make([]string, len(policiesData))
 	for i, p := range policiesData {
 		policies[i] = strconv.Itoa(p.(int))
