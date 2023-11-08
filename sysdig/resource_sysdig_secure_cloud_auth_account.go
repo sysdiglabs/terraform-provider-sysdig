@@ -159,6 +159,10 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			SchemaCloudProviderTenantId: {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 		},
 	}
 }
@@ -408,6 +412,30 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 											TokenUri:                servicePrincipalGcpKey["token_uri"],
 											AuthProviderX509CertUrl: servicePrincipalGcpKey["auth_provider_x509_cert_url"],
 											ClientX509CertUrl:       servicePrincipalGcpKey["client_x509_cert_url"],
+										},
+									},
+								},
+							},
+						}
+					} else if provider == cloudauth.Provider_PROVIDER_AZURE.String() {
+						servicePrincipalAzureKey, ok := servicePrincipalMetadata["azure"].(map[string]interface{})["active_directory_service_principal"].(map[string]interface{})
+
+						if !ok {
+							fmt.Printf("Resource input for component metadata for provider %s is invalid and not as expected\n\n\n", provider)
+							break
+						}
+
+						component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
+							ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
+								Provider: &cloudauth.ServicePrincipalMetadata_Azure_{
+									Azure: &cloudauth.ServicePrincipalMetadata_Azure{
+										ActiveDirectoryServicePrincipal: &cloudauth.ServicePrincipalMetadata_Azure_ActiveDirectoryServicePrincipal{
+											AccountEnabled:         servicePrincipalAzureKey["account_enabled"].(bool),
+											AppDisplayName:         servicePrincipalAzureKey["app_display_name"].(string),
+											AppId:                  servicePrincipalAzureKey["app_id"].(string),
+											AppOwnerOrganizationId: servicePrincipalAzureKey["app_owner_organization_id"].(string),
+											DisplayName:            servicePrincipalAzureKey["display_name"].(string),
+											Id:                     servicePrincipalAzureKey["id"].(string),
 										},
 									},
 								},
