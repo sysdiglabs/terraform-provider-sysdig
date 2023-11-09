@@ -2,8 +2,6 @@
 
 package sysdig_test
 
-// TODO: Enable tests back once the BE is released with latest API changes
-/*
 import (
 	"bytes"
 	b64 "encoding/base64"
@@ -148,4 +146,3 @@ func getEncodedServiceAccountKey(resourceName string, accountID string) string {
 	test_service_account_key_encoded := b64.StdEncoding.EncodeToString(out.Bytes())
 	return test_service_account_key_encoded
 }
-*/
