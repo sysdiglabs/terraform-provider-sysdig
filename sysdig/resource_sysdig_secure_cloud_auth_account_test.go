@@ -138,9 +138,16 @@ func getEncodedServiceAccountKey(resourceName string, accountID string) string {
 		UniverseDomain:          "googleapis.com",
 	}
 
-	test_service_account_key_bytes, _ := json.Marshal(test_service_account_key)
+	test_service_account_key_bytes, err := json.Marshal(test_service_account_key)
+	if err != nil {
+		fmt.Errorf("Failed to marshal test_service_account_key: %v", err)
+	}
+
 	var out bytes.Buffer
-	json.Indent(&out, test_service_account_key_bytes, "", "  ")
+	err = json.Indent(&out, test_service_account_key_bytes, "", "  ")
+	if err != nil {
+		fmt.Errorf("Failed to indent test_service_account_key: %v", err)
+	}
 	out.WriteByte('\n')
 
 	test_service_account_key_encoded := b64.StdEncoding.EncodeToString(out.Bytes())
