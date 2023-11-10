@@ -140,13 +140,13 @@ func getEncodedServiceAccountKey(resourceName string, accountID string) string {
 
 	test_service_account_key_bytes, err := json.Marshal(test_service_account_key)
 	if err != nil {
-		fmt.Errorf("Failed to marshal test_service_account_key: %v", err)
+		fmt.Printf("Failed to marshal test_service_account_key: %v", err)
 	}
 
 	var out bytes.Buffer
 	err = json.Indent(&out, test_service_account_key_bytes, "", "  ")
 	if err != nil {
-		fmt.Errorf("Failed to indent test_service_account_key: %v", err)
+		fmt.Printf("Failed to indent test_service_account_key: %v", err)
 	}
 	out.WriteByte('\n')
 
