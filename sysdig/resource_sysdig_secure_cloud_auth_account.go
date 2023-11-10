@@ -161,7 +161,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			},
 			SchemaCloudProviderTenantId: {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 		},
 	}
@@ -435,7 +435,7 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 											AppId:                  servicePrincipalAzureKey["app_id"].(string),
 											AppOwnerOrganizationId: servicePrincipalAzureKey["app_owner_organization_id"].(string),
 											DisplayName:            servicePrincipalAzureKey["display_name"].(string),
-											Id:                     servicePrincipalAzureKey["id"].(string),
+											Id: servicePrincipalAzureKey["id"].(string),
 										},
 									},
 								},
@@ -690,7 +690,7 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 
 					schema, err := json.Marshal(map[string]interface{}{
 						"azure": map[string]interface{}{
-							"key": out.Bytes(),
+							"active_directory_service_principal": out.Bytes(),
 						},
 					})
 					if err != nil {
