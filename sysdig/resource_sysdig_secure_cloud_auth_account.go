@@ -435,7 +435,7 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 											AppId:                  servicePrincipalAzureKey["app_id"].(string),
 											AppOwnerOrganizationId: servicePrincipalAzureKey["app_owner_organization_id"].(string),
 											DisplayName:            servicePrincipalAzureKey["display_name"].(string),
-											Id: servicePrincipalAzureKey["id"].(string),
+											Id:                     servicePrincipalAzureKey["id"].(string),
 										},
 									},
 								},
@@ -512,21 +512,16 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 	featureData := data.Get(SchemaFeature)
 	accountFeatures := constructAccountFeatures(&cloudauth.AccountFeatures{}, featureData)
 
-	cloudAccount := &cloudauth.CloudAccount{
-		Enabled:        data.Get(SchemaEnabled).(bool),
-		OrganizationId: data.Get(SchemaOrganizationIDKey).(string),
-		ProviderId:     data.Get(SchemaCloudProviderId).(string),
-		Provider:       cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
-		Components:     accountComponents,
-		Feature:        accountFeatures,
-	}
-
-	if cloudAccount.Provider == cloudauth.Provider_PROVIDER_AZURE {
-		cloudAccount.ProviderTenantId = data.Get(SchemaCloudProviderTenantId).(string)
-	}
-
 	return &v2.CloudauthAccountSecure{
-		CloudAccount: *cloudAccount,
+		CloudAccount: cloudauth.CloudAccount{
+			Enabled:          data.Get(SchemaEnabled).(bool),
+			OrganizationId:   data.Get(SchemaOrganizationIDKey).(string),
+			ProviderId:       data.Get(SchemaCloudProviderId).(string),
+			Provider:         cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
+			Components:       accountComponents,
+			Feature:          accountFeatures,
+			ProviderTenantId: data.Get(SchemaCloudProviderTenantId).(string),
+		},
 	}
 }
 
