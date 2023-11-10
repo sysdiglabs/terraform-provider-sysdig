@@ -512,7 +512,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 	featureData := data.Get(SchemaFeature)
 	accountFeatures := constructAccountFeatures(&cloudauth.AccountFeatures{}, featureData)
 
-	cloudAccount := cloudauth.CloudAccount{
+	cloudAccount := &cloudauth.CloudAccount{
 		Enabled:        data.Get(SchemaEnabled).(bool),
 		OrganizationId: data.Get(SchemaOrganizationIDKey).(string),
 		ProviderId:     data.Get(SchemaCloudProviderId).(string),
@@ -526,7 +526,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 	}
 
 	return &v2.CloudauthAccountSecure{
-		CloudAccount: cloudAccount,
+		CloudAccount: *cloudAccount,
 	}
 }
 
