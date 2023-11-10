@@ -421,7 +421,7 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 						servicePrincipalAzureKey, ok := servicePrincipalMetadata["azure"].(map[string]interface{})["active_directory_service_principal"].(map[string]interface{})
 
 						if !ok {
-							fmt.Printf("Resource input for component metadata for provider %s is invalid and not as expected\n\n\n", provider)
+							fmt.Printf("Resource input for component metadata for provider %s is invalid and not as expected", provider)
 							break
 						}
 
@@ -512,15 +512,21 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 	featureData := data.Get(SchemaFeature)
 	accountFeatures := constructAccountFeatures(&cloudauth.AccountFeatures{}, featureData)
 
+	cloudAccount := cloudauth.CloudAccount{
+		Enabled:        data.Get(SchemaEnabled).(bool),
+		OrganizationId: data.Get(SchemaOrganizationIDKey).(string),
+		ProviderId:     data.Get(SchemaCloudProviderId).(string),
+		Provider:       cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
+		Components:     accountComponents,
+		Feature:        accountFeatures,
+	}
+
+	if cloudAccount.Provider == cloudauth.Provider_PROVIDER_AZURE {
+		cloudAccount.ProviderTenantId = data.Get(SchemaCloudProviderTenantId).(string)
+	}
+
 	return &v2.CloudauthAccountSecure{
-		CloudAccount: cloudauth.CloudAccount{
-			Enabled:        data.Get(SchemaEnabled).(bool),
-			OrganizationId: data.Get(SchemaOrganizationIDKey).(string),
-			ProviderId:     data.Get(SchemaCloudProviderId).(string),
-			Provider:       cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
-			Components:     accountComponents,
-			Feature:        accountFeatures,
-		},
+		CloudAccount: cloudAccount,
 	}
 }
 
@@ -650,6 +656,50 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 
 					componentBlock[SchemaServicePrincipalMetadata] = string(schema)
 				}
+
+				if providerKey, ok := provider.(*cloudauth.ServicePrincipalMetadata_Azure_); ok {
+					jsonifiedKey := struct {
+						AccountEnabled         bool   `json:"account_enabled"`
+						AppDisplayName         string `json:"app_display_name"`
+						AppId                  string `json:"app_id"`
+						AppOwnerOrganizationId string `json:"app_owner_organization_id"`
+						DisplayName            string `json:"display_name"`
+						Id                     string `json:"id"`
+					}{
+						AccountEnabled:         providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAccountEnabled(),
+						AppDisplayName:         providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppDisplayName(),
+						AppId:                  providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppId(),
+						AppOwnerOrganizationId: providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppOwnerOrganizationId(),
+						DisplayName:            providerKey.Azure.GetActiveDirectoryServicePrincipal().GetDisplayName(),
+						Id:                     providerKey.Azure.GetActiveDirectoryServicePrincipal().GetId(),
+					}
+
+					bytesKey, err := json.Marshal(jsonifiedKey)
+					if err != nil {
+						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
+						break
+					}
+
+					// update the json with proper indentation
+					var out bytes.Buffer
+					if err := json.Indent(&out, bytesKey, "", "  "); err != nil {
+						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
+						break
+					}
+					out.WriteByte('\n')
+
+					schema, err := json.Marshal(map[string]interface{}{
+						"azure": map[string]interface{}{
+							"key": out.Bytes(),
+						},
+					})
+					if err != nil {
+						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
+						break
+					}
+
+					componentBlock[SchemaServicePrincipalMetadata] = string(schema)
+				}
 			}
 		}
 
@@ -713,6 +763,13 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 	err = data.Set(SchemaOrganizationIDKey, cloudAccount.OrganizationId)
 	if err != nil {
 		return err
+	}
+
+	if cloudAccount.Provider == cloudauth.Provider_PROVIDER_AZURE {
+		err = data.Set(SchemaCloudProviderTenantId, cloudAccount.ProviderTenantId)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
