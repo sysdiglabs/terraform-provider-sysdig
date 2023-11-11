@@ -17,7 +17,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccSecureCloudAuthAccount(t *testing.T) {
+func TestAccGCPSecureCloudAuthAccount(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	accID := rText()
 	resource.ParallelTest(t, resource.TestCase{
@@ -33,7 +33,7 @@ func TestAccSecureCloudAuthAccount(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureCloudAuthAccountMinimumConfiguration(accID),
+				Config: secureGCPCloudAuthAccountMinimumConfiguration(accID),
 			},
 			{
 				ResourceName:      "sysdig_secure_cloud_auth_account.sample",
@@ -44,7 +44,7 @@ func TestAccSecureCloudAuthAccount(t *testing.T) {
 	})
 }
 
-func secureCloudAuthAccountMinimumConfiguration(accountID string) string {
+func secureGCPCloudAuthAccountMinimumConfiguration(accountID string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "sample" {
   provider_id   = "sample-%s"
@@ -53,7 +53,7 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 }`, accountID)
 }
 
-func TestAccSecureCloudAuthAccountFC(t *testing.T) {
+func TestAccGCPSecureCloudAuthAccountFC(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	accID := rText()
 	resource.ParallelTest(t, resource.TestCase{
@@ -69,7 +69,7 @@ func TestAccSecureCloudAuthAccountFC(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureCloudAuthAccountWithFC(accID),
+				Config: secureGCPCloudAuthAccountWithFC(accID),
 			},
 			{
 				ResourceName:            "sysdig_secure_cloud_auth_account.sample-1",
@@ -81,7 +81,7 @@ func TestAccSecureCloudAuthAccountFC(t *testing.T) {
 	})
 }
 
-func secureCloudAuthAccountWithFC(accountID string) string {
+func secureGCPCloudAuthAccountWithFC(accountID string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "sample-1" {
   provider_id   = "sample-1-%s"
@@ -152,4 +152,103 @@ func getEncodedServiceAccountKey(resourceName string, accountID string) string {
 
 	test_service_account_key_encoded := b64.StdEncoding.EncodeToString(out.Bytes())
 	return test_service_account_key_encoded
+}
+
+func TestAccAzureSecureCloudAccount(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+	accID := rText()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: secureCloudAuthAccountMinimumConfigurationAzure(accID),
+			},
+			{
+				ResourceName:      "sysdig_secure_cloud_auth_account.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func secureCloudAuthAccountMinimumConfigurationAzure(accountId string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_cloud_auth_account" "sample" {
+	  provider_id   = "sample-%s"
+	  provider_type = "PROVIDER_AZURE"
+	  enabled       = "true"
+	}`, accountId)
+}
+
+func TestAccAzureSecureCloudAccountFC(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+	accID := rText()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: secureAzureCloudAuthAccountWithFC(accID),
+			},
+			{
+				ResourceName:            "sysdig_secure_cloud_auth_account.sample-1",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"component"},
+			},
+		},
+	})
+}
+
+func secureAzureCloudAuthAccountWithFC(accountID string) string {
+	rID := func() string { return acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum) }
+	randomId := rID()
+	randomAppId := rID()
+	randomAppOrgId := rID()
+	return fmt.Sprintf(`
+resource "sysdig_secure_cloud_auth_account" "sample-1" {
+	  provider_id   = "sample-1-%s"
+	  provider_type = "PROVIDER_AZURE"
+	  enabled       = "true"
+	  feature {
+		secure_config_posture {
+			enabled    = "true"
+			components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
+		}
+	  }
+	  component {
+		type                       = "COMPONENT_SERVICE_PRINCIPAL"
+		instance                   = "secure-posture"
+		service_principal_metadata = jsonencode({
+			azure = {
+				active_directory_service_principal = {
+					id = "%s"
+					account_enabled = true
+					display_name = "test-name"
+					app_display_name = "test-app-name"
+					app_id = %s
+					app_owner_organization_id = %s
+				}
+			}
+		})
+	}
+}`, accountID, randomId, randomAppId, randomAppOrgId)
 }
