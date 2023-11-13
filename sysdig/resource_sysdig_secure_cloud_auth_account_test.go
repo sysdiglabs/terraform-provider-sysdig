@@ -182,12 +182,15 @@ func TestAccAzureSecureCloudAccount(t *testing.T) {
 }
 
 func secureCloudAuthAccountMinimumConfigurationAzure(accountId string) string {
+	rID := func() string { return acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum) }
+	randomTenantId := rID()
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "sample" {
 	  provider_id   = "sample-%s"
 	  provider_type = "PROVIDER_AZURE"
 	  enabled       = "true"
-	}`, accountId)
+	  provider_tenant_id = "%s"
+	}`, accountId, randomTenantId)
 }
 
 func TestAccAzureSecureCloudAccountFC(t *testing.T) {
@@ -220,6 +223,7 @@ func TestAccAzureSecureCloudAccountFC(t *testing.T) {
 
 func secureAzureCloudAuthAccountWithFC(accountID string) string {
 	rID := func() string { return acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum) }
+	randomTenantId := rID()
 	randomId := rID()
 	randomAppId := rID()
 	randomAppOrgId := rID()
@@ -228,9 +232,11 @@ resource "sysdig_secure_cloud_auth_account" "sample-1" {
 	  provider_id   = "sample-1-%s"
 	  provider_type = "PROVIDER_AZURE"
 	  enabled       = "true"
+	  provider_tenant_id = "%s"
+
 	  feature {
 		secure_config_posture {
-			enabled    = "true"
+			enabled    = true
 			components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
 		}
 	  }
@@ -244,11 +250,11 @@ resource "sysdig_secure_cloud_auth_account" "sample-1" {
 					account_enabled = true
 					display_name = "test-name"
 					app_display_name = "test-app-name"
-					app_id = %s
-					app_owner_organization_id = %s
+					app_id = "%s"
+					app_owner_organization_id = "%s"
 				}
 			}
 		})
 	}
-}`, accountID, randomId, randomAppId, randomAppOrgId)
+}`, accountID, randomTenantId, randomId, randomAppId, randomAppOrgId)
 }
