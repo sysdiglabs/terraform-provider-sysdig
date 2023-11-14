@@ -159,6 +159,10 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			SchemaCloudProviderTenantId: {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -413,6 +417,30 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 								},
 							},
 						}
+					} else if provider == cloudauth.Provider_PROVIDER_AZURE.String() {
+						servicePrincipalAzureKey, ok := servicePrincipalMetadata["azure"].(map[string]interface{})["active_directory_service_principal"].(map[string]interface{})
+
+						if !ok {
+							fmt.Printf("Resource input for component metadata for provider %s is invalid and not as expected", provider)
+							break
+						}
+
+						component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
+							ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
+								Provider: &cloudauth.ServicePrincipalMetadata_Azure_{
+									Azure: &cloudauth.ServicePrincipalMetadata_Azure{
+										ActiveDirectoryServicePrincipal: &cloudauth.ServicePrincipalMetadata_Azure_ActiveDirectoryServicePrincipal{
+											AccountEnabled:         servicePrincipalAzureKey["account_enabled"].(bool),
+											AppDisplayName:         servicePrincipalAzureKey["app_display_name"].(string),
+											AppId:                  servicePrincipalAzureKey["app_id"].(string),
+											AppOwnerOrganizationId: servicePrincipalAzureKey["app_owner_organization_id"].(string),
+											DisplayName:            servicePrincipalAzureKey["display_name"].(string),
+											Id:                     servicePrincipalAzureKey["id"].(string),
+										},
+									},
+								},
+							},
+						}
 					}
 				case SchemaWebhookDatasourceMetadata:
 					component.Metadata = &cloudauth.AccountComponent_WebhookDatasourceMetadata{
@@ -454,13 +482,13 @@ This helper function decodes the base64 encoded Service Principal Key obtained f
 and parses it from Json format into a map
 */
 func decodeServicePrincipalKeyToMap(encodedKey string) map[string]string {
-	bytes, err := b64.StdEncoding.DecodeString(encodedKey)
+	bytesData, err := b64.StdEncoding.DecodeString(encodedKey)
 	if err != nil {
 		fmt.Printf("Failed to decode service principal key: %v", err)
 		return nil
 	}
 	var privateKeyMap map[string]string
-	err = json.Unmarshal(bytes, &privateKeyMap)
+	err = json.Unmarshal(bytesData, &privateKeyMap)
 	if err != nil {
 		fmt.Printf("Failed to parse service principal key: %v", err)
 		return nil
@@ -486,12 +514,13 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 
 	return &v2.CloudauthAccountSecure{
 		CloudAccount: cloudauth.CloudAccount{
-			Enabled:        data.Get(SchemaEnabled).(bool),
-			OrganizationId: data.Get(SchemaOrganizationIDKey).(string),
-			ProviderId:     data.Get(SchemaCloudProviderId).(string),
-			Provider:       cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
-			Components:     accountComponents,
-			Feature:        accountFeatures,
+			Enabled:          data.Get(SchemaEnabled).(bool),
+			OrganizationId:   data.Get(SchemaOrganizationIDKey).(string),
+			ProviderId:       data.Get(SchemaCloudProviderId).(string),
+			Provider:         cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
+			Components:       accountComponents,
+			Feature:          accountFeatures,
+			ProviderTenantId: data.Get(SchemaCloudProviderTenantId).(string),
 		},
 	}
 }
@@ -610,7 +639,7 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 					out.WriteByte('\n')
 
 					// encode the key to base64 and add to the component block
-					schema, err := json.Marshal(map[string]interface{}{
+					schemaData, err := json.Marshal(map[string]interface{}{
 						"gcp": map[string]interface{}{
 							"key": encodeServicePrincipalKey(out.Bytes()),
 						},
@@ -620,7 +649,28 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 						break
 					}
 
-					componentBlock[SchemaServicePrincipalMetadata] = string(schema)
+					componentBlock[SchemaServicePrincipalMetadata] = string(schemaData)
+				}
+
+				if providerKey, ok := provider.(*cloudauth.ServicePrincipalMetadata_Azure_); ok {
+					schemaData, err := json.Marshal(map[string]interface{}{
+						"azure": map[string]interface{}{
+							"active_directory_service_principal": map[string]interface{}{
+								"account_enabled":           providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAccountEnabled(),
+								"app_display_name":          providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppDisplayName(),
+								"app_id":                    providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppId(),
+								"app_owner_organization_id": providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppOwnerOrganizationId(),
+								"display_name":              providerKey.Azure.GetActiveDirectoryServicePrincipal().GetDisplayName(),
+								"id":                        providerKey.Azure.GetActiveDirectoryServicePrincipal().GetId(),
+							},
+						},
+					})
+					if err != nil {
+						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
+						break
+					}
+
+					componentBlock[SchemaServicePrincipalMetadata] = string(schemaData)
 				}
 			}
 		}
@@ -685,6 +735,13 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 	err = data.Set(SchemaOrganizationIDKey, cloudAccount.OrganizationId)
 	if err != nil {
 		return err
+	}
+
+	if cloudAccount.Provider == cloudauth.Provider_PROVIDER_AZURE {
+		err = data.Set(SchemaCloudProviderTenantId, cloudAccount.ProviderTenantId)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
