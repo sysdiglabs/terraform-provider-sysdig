@@ -49,7 +49,7 @@ func secureGCPCloudAuthAccountMinimumConfiguration(accountID string) string {
 resource "sysdig_secure_cloud_auth_account" "sample" {
   provider_id   = "sample-%s"
   provider_type = "PROVIDER_GCP"
-  enabled       = "true"
+  enabled       = true
 }`, accountID)
 }
 
@@ -86,10 +86,10 @@ func secureGCPCloudAuthAccountWithFC(accountID string) string {
 resource "sysdig_secure_cloud_auth_account" "sample-1" {
   provider_id   = "sample-1-%s"
   provider_type = "PROVIDER_GCP"
-  enabled       = "true"
+  enabled       = true
   feature {
 	secure_config_posture {
-	  enabled    = "true"
+	  enabled    = true
 	  components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
 	}
 	secure_identity_entitlement {
@@ -188,7 +188,7 @@ func secureCloudAuthAccountMinimumConfigurationAzure(accountId string) string {
 resource "sysdig_secure_cloud_auth_account" "sample" {
 	  provider_id   = "sample-%s"
 	  provider_type = "PROVIDER_AZURE"
-	  enabled       = "true"
+	  enabled       = true
 	  provider_tenant_id = "%s"
 	}`, accountId, randomTenantId)
 }
@@ -229,11 +229,11 @@ func secureAzureCloudAuthAccountWithFC(accountID string) string {
 		resource "sysdig_secure_cloud_auth_account" "sample-1" {
 			provider_id   = "sample-1-%s"
 			provider_type = "PROVIDER_AZURE"
-			enabled       = "true"
+			enabled       = true
 			provider_tenant_id = "%s"
 			feature {
 				secure_config_posture {
-					enabled    = "true"
+					enabled    = true
 					components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
 				}
 			}
