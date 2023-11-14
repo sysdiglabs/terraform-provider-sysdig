@@ -224,37 +224,34 @@ func TestAccAzureSecureCloudAccountFC(t *testing.T) {
 func secureAzureCloudAuthAccountWithFC(accountID string) string {
 	rID := func() string { return acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum) }
 	randomTenantId := rID()
-	randomId := rID()
-	randomAppId := rID()
-	randomAppOrgId := rID()
-	return fmt.Sprintf(`
-resource "sysdig_secure_cloud_auth_account" "sample-1" {
-	  provider_id   = "sample-1-%s"
-	  provider_type = "PROVIDER_AZURE"
-	  enabled       = "true"
-	  provider_tenant_id = "%s"
 
-	  feature {
-		secure_config_posture {
-			enabled    = true
-			components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
-		}
-	  }
-	  component {
-		type                       = "COMPONENT_SERVICE_PRINCIPAL"
-		instance                   = "secure-posture"
-		service_principal_metadata = jsonencode({
-			azure = {
-				active_directory_service_principal = {
-					id = "%s"
-					account_enabled = true
-					display_name = "test-name"
-					app_display_name = "test-app-name"
-					app_id = "%s"
-					app_owner_organization_id = "%s"
+	return fmt.Sprintf(`
+		resource "sysdig_secure_cloud_auth_account" "sample-1" {
+			provider_id   = "sample-1-%s"
+			provider_type = "PROVIDER_AZURE"
+			enabled       = "true"
+			provider_tenant_id = "%s"
+			feature {
+				secure_config_posture {
+					enabled    = "true"
+					components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
 				}
 			}
-		})
-	}
-}`, accountID, randomTenantId, randomId, randomAppId, randomAppOrgId)
+			component {
+				type                       = "COMPONENT_SERVICE_PRINCIPAL"
+				instance                   = "secure-posture"
+				service_principal_metadata = jsonencode({
+					azure = {
+						active_directory_service_principal = {
+							id                        = "some-id"
+							account_enabled           = true
+							display_name              = "some-display-name"
+							app_display_name          = "some-app-display-name"
+							app_id                    = "some-app-id"
+							app_owner_organization_id = "some-app-owner-organization-id"
+						}
+					}
+				})
+			}
+		}`, accountID, randomTenantId)
 }

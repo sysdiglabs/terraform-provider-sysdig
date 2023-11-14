@@ -482,13 +482,13 @@ This helper function decodes the base64 encoded Service Principal Key obtained f
 and parses it from Json format into a map
 */
 func decodeServicePrincipalKeyToMap(encodedKey string) map[string]string {
-	bytes, err := b64.StdEncoding.DecodeString(encodedKey)
+	bytesData, err := b64.StdEncoding.DecodeString(encodedKey)
 	if err != nil {
 		fmt.Printf("Failed to decode service principal key: %v", err)
 		return nil
 	}
 	var privateKeyMap map[string]string
-	err = json.Unmarshal(bytes, &privateKeyMap)
+	err = json.Unmarshal(bytesData, &privateKeyMap)
 	if err != nil {
 		fmt.Printf("Failed to parse service principal key: %v", err)
 		return nil
@@ -639,7 +639,7 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 					out.WriteByte('\n')
 
 					// encode the key to base64 and add to the component block
-					schema, err := json.Marshal(map[string]interface{}{
+					schemaData, err := json.Marshal(map[string]interface{}{
 						"gcp": map[string]interface{}{
 							"key": encodeServicePrincipalKey(out.Bytes()),
 						},
@@ -649,43 +649,20 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 						break
 					}
 
-					componentBlock[SchemaServicePrincipalMetadata] = string(schema)
+					componentBlock[SchemaServicePrincipalMetadata] = string(schemaData)
 				}
 
 				if providerKey, ok := provider.(*cloudauth.ServicePrincipalMetadata_Azure_); ok {
-					jsonifiedKey := struct {
-						AccountEnabled         bool   `json:"account_enabled"`
-						AppDisplayName         string `json:"app_display_name"`
-						AppId                  string `json:"app_id"`
-						AppOwnerOrganizationId string `json:"app_owner_organization_id"`
-						DisplayName            string `json:"display_name"`
-						Id                     string `json:"id"`
-					}{
-						AccountEnabled:         providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAccountEnabled(),
-						AppDisplayName:         providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppDisplayName(),
-						AppId:                  providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppId(),
-						AppOwnerOrganizationId: providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppOwnerOrganizationId(),
-						DisplayName:            providerKey.Azure.GetActiveDirectoryServicePrincipal().GetDisplayName(),
-						Id:                     providerKey.Azure.GetActiveDirectoryServicePrincipal().GetId(),
-					}
-
-					bytesKey, err := json.Marshal(jsonifiedKey)
-					if err != nil {
-						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
-						break
-					}
-
-					// update the json with proper indentation
-					var out bytes.Buffer
-					if err := json.Indent(&out, bytesKey, "", "  "); err != nil {
-						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
-						break
-					}
-					out.WriteByte('\n')
-
-					schema, err := json.Marshal(map[string]interface{}{
+					schemaData, err := json.Marshal(map[string]interface{}{
 						"azure": map[string]interface{}{
-							"active_directory_service_principal": out.Bytes(),
+							"active_directory_service_principal": map[string]interface{}{
+								"account_enabled":           providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAccountEnabled(),
+								"app_display_name":          providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppDisplayName(),
+								"app_id":                    providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppId(),
+								"app_owner_organization_id": providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppOwnerOrganizationId(),
+								"display_name":              providerKey.Azure.GetActiveDirectoryServicePrincipal().GetDisplayName(),
+								"id":                        providerKey.Azure.GetActiveDirectoryServicePrincipal().GetId(),
+							},
 						},
 					})
 					if err != nil {
@@ -693,7 +670,7 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 						break
 					}
 
-					componentBlock[SchemaServicePrincipalMetadata] = string(schema)
+					componentBlock[SchemaServicePrincipalMetadata] = string(schemaData)
 				}
 			}
 		}
