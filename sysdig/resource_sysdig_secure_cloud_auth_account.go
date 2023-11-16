@@ -163,6 +163,10 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			SchemaCloudProviderAlias: {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -521,6 +525,7 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 			Components:       accountComponents,
 			Feature:          accountFeatures,
 			ProviderTenantId: data.Get(SchemaCloudProviderTenantId).(string),
+			ProviderAlias:    data.Get(SchemaCloudProviderAlias).(string),
 		},
 	}
 }
@@ -739,6 +744,11 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 
 	if cloudAccount.Provider == cloudauth.Provider_PROVIDER_AZURE {
 		err = data.Set(SchemaCloudProviderTenantId, cloudAccount.ProviderTenantId)
+		if err != nil {
+			return err
+		}
+
+		err = data.Set(SchemaCloudProviderAlias, cloudAccount.ProviderAlias)
 		if err != nil {
 			return err
 		}
