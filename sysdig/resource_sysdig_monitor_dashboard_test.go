@@ -384,6 +384,7 @@ resource "sysdig_monitor_dashboard" "dashboard_2" {
 			unit = "percent"
 
             format {
+				decimals= 2
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
@@ -439,6 +440,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			unit = "percent"
 
             format {
+				decimals= 2
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
@@ -450,6 +452,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			unit = "number"
 
             format {
+				decimals= 2
                 display_format = "auto"
                 input_format = "1"
                 y_axis = "auto"
@@ -472,6 +475,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			unit = "time"
 
             format {
+				decimals= 2
                 display_format = "auto"
                 input_format = "ns"
                 y_axis = "auto"
@@ -522,6 +526,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			unit = "percent"
 
             format {
+				decimals= 2
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
@@ -533,6 +538,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			unit = "number"
 
             format {
+				decimals= 2
                 display_format = "auto"
                 input_format = "1"
                 y_axis = "auto"
@@ -607,6 +613,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			unit = "percent"
 
             format {
+				decimals= 2
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
@@ -674,6 +681,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			}
 
             format {
+				decimals= 2
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"
@@ -689,6 +697,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			}
 
             format {
+				decimals= 2
                 display_format = "auto"
                 input_format = "1"
                 y_axis = "auto"
@@ -711,6 +720,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			unit = "time"
 
             format {
+				decimals= 2
                 display_format = "auto"
                 input_format = "ns"
                 y_axis = "auto"
@@ -785,6 +795,7 @@ resource "sysdig_monitor_dashboard" "dashboard" {
 			}
 
             format {
+				decimals= 2
                 display_format = "auto"
                 input_format = "0-100"
                 y_axis = "auto"

@@ -120,7 +120,7 @@ func NewFormat(
 	}
 }
 
-func newPercentFormat() Format {
+func NewPercentFormat() Format {
 	return *NewFormat(
 		FormatUnitPercentage,
 		"0-100",
@@ -132,7 +132,7 @@ func newPercentFormat() Format {
 	)
 }
 
-func newDataFormat() Format {
+func NewDataFormat() Format {
 	return *NewFormat(
 		FormatUnitData,
 		"B",
@@ -144,7 +144,7 @@ func newDataFormat() Format {
 	)
 }
 
-func newDataRateFormat() Format {
+func NewDataRateFormat() Format {
 	return *NewFormat(
 		FormatUnitDataRate,
 		"B/s",
@@ -156,7 +156,7 @@ func newDataRateFormat() Format {
 	)
 }
 
-func newNumberFormat() Format {
+func NewNumberFormat() Format {
 	return *NewFormat(
 		FormatUnitNumber,
 		"1",
@@ -168,7 +168,7 @@ func newNumberFormat() Format {
 	)
 }
 
-func newNumberRateFormat() Format {
+func NewNumberRateFormat() Format {
 	return *NewFormat(
 		FormatUnitNumberRate,
 		"/s",
@@ -180,7 +180,7 @@ func newNumberRateFormat() Format {
 	)
 }
 
-func newTimeFormat() Format {
+func NewTimeFormat() Format {
 	return *NewFormat(
 		FormatUnitTime,
 		"ns",
@@ -209,7 +209,7 @@ func NewPromqlQuery(query string, parentPanel *Panels, displayInfo DisplayInfo) 
 			TimeSeriesDisplayNameTemplate: displayInfo.TimeSeriesDisplayNameTemplate,
 			Type:                          displayInfo.Type,
 		},
-		Format:      newPercentFormat(),
+		Format:      NewPercentFormat(),
 		Query:       query,
 		ID:          0,
 		ParentPanel: parentPanel,
@@ -263,37 +263,37 @@ func (q *AdvancedQueries) updateFormat(f *Format) {
 }
 
 func (q *AdvancedQueries) WithPercentFormat(f *Format) *AdvancedQueries {
-	q.Format = newPercentFormat()
+	q.Format = NewPercentFormat()
 	q.updateFormat(f)
 	return q
 }
 
 func (q *AdvancedQueries) WithDataFormat(f *Format) *AdvancedQueries {
-	q.Format = newDataFormat()
+	q.Format = NewDataFormat()
 	q.updateFormat(f)
 	return q
 }
 
 func (q *AdvancedQueries) WithDataRateFormat(f *Format) *AdvancedQueries {
-	q.Format = newDataRateFormat()
+	q.Format = NewDataRateFormat()
 	q.updateFormat(f)
 	return q
 }
 
 func (q *AdvancedQueries) WithNumberFormat(f *Format) *AdvancedQueries {
-	q.Format = newNumberFormat()
+	q.Format = NewNumberFormat()
 	q.updateFormat(f)
 	return q
 }
 
 func (q *AdvancedQueries) WithNumberRateFormat(f *Format) *AdvancedQueries {
-	q.Format = newNumberRateFormat()
+	q.Format = NewNumberRateFormat()
 	q.updateFormat(f)
 	return q
 }
 
 func (q *AdvancedQueries) WithTimeFormat(f *Format) *AdvancedQueries {
-	q.Format = newTimeFormat()
+	q.Format = NewTimeFormat()
 	q.updateFormat(f)
 	return q
 }
