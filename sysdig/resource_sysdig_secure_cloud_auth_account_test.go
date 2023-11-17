@@ -190,6 +190,7 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 	  provider_type = "PROVIDER_AZURE"
 	  enabled       = true
 	  provider_tenant_id = "%s"
+	  provider_alias = "some-alias"
 	}`, accountId, randomTenantId)
 }
 
@@ -231,6 +232,7 @@ func secureAzureCloudAuthAccountWithFC(accountID string) string {
 			provider_type = "PROVIDER_AZURE"
 			enabled       = true
 			provider_tenant_id = "%s"
+			provider_alias = "some-alias"
 			feature {
 				secure_config_posture {
 					enabled    = true
