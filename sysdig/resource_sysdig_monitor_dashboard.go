@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -450,20 +451,24 @@ func panelsFromResourceData(data *schema.ResourceData) (panels []*v2.Panels, err
 	return
 }
 
-func legendFromResourceData(data interface{}) *v2.LegendConfiguration {
-	defaultLegend := &v2.LegendConfiguration{
-		Position: "bottom",
-		Layout:   "table",
+func defaultLegendConfiguration() *v2.LegendConfiguration {
+	return &v2.LegendConfiguration{
+		Enabled:     false,
+		Position:    "bottom",
+		Layout:      "table",
+		ShowCurrent: false,
 	}
+}
 
+func legendFromResourceData(data interface{}) *v2.LegendConfiguration {
 	if data == nil {
-		return defaultLegend
+		return defaultLegendConfiguration()
 	}
 
 	legendList := data.(*schema.Set).List()
 
 	if len(legendList) == 0 {
-		return defaultLegend
+		return defaultLegendConfiguration()
 	}
 
 	legend := legendList[0].(map[string]interface{})
@@ -727,8 +732,14 @@ func dashboardToResourceData(dashboard *v2.Dashboard, data *schema.ResourceData)
 	_ = data.Set("public_token", dashboard.PublicToken)
 
 	var panels []map[string]interface{}
-	for _, panel := range dashboard.Panels {
-		dPanel, err := panelToResourceData(panel, dashboard.Layout)
+	for i, panel := range dashboard.Panels {
+		panelsData := data.Get("panel").(*schema.Set).List()
+		panelData := map[string]interface{}{}
+		if len(panelsData) > i {
+			panelData = panelsData[i].(map[string]interface{})
+		}
+
+		dPanel, err := panelToResourceData(panel, dashboard.Layout, panelData)
 		if err != nil {
 			return err
 		}
@@ -824,7 +835,7 @@ func scopeFromResourceData(data *schema.ResourceData) ([]*v2.ScopeExpressionList
 	return scopes, nil
 }
 
-func panelToResourceData(panel *v2.Panels, layout []*v2.Layout) (map[string]interface{}, error) {
+func panelToResourceData(panel *v2.Panels, layout []*v2.Layout, panelData map[string]interface{}) (map[string]interface{}, error) {
 	var panelLayout *v2.Layout
 
 	for _, l := range layout {
@@ -838,9 +849,9 @@ func panelToResourceData(panel *v2.Panels, layout []*v2.Layout) (map[string]inte
 
 	switch panel.Type {
 	case v2.PanelTypeTimechart:
-		return timechartPanelToResourceData(panel, panelLayout)
+		return timechartPanelToResourceData(panel, panelLayout, panelData)
 	case v2.PanelTypeNumber:
-		return numberPanelToResourceData(panel, panelLayout)
+		return numberPanelToResourceData(panel, panelLayout, panelData)
 	case v2.PanelTypeText:
 		return textPanelToResourceData(panel, panelLayout)
 	default:
@@ -848,8 +859,8 @@ func panelToResourceData(panel *v2.Panels, layout []*v2.Layout) (map[string]inte
 	}
 }
 
-func timechartPanelToResourceData(panel *v2.Panels, panelLayout *v2.Layout) (map[string]interface{}, error) {
-	queries, err := queriesToResourceData(panel.AdvancedQueries)
+func timechartPanelToResourceData(panel *v2.Panels, panelLayout *v2.Layout, panelData map[string]interface{}) (map[string]interface{}, error) {
+	queries, err := queriesToResourceData(panel.AdvancedQueries, panelData)
 	if err != nil {
 		return nil, err
 	}
@@ -863,23 +874,31 @@ func timechartPanelToResourceData(panel *v2.Panels, panelLayout *v2.Layout) (map
 		"description": panel.Description,
 		"type":        "timechart",
 		"query":       queries,
-		"legend": []map[string]interface{}{
-			legendConfigurationToResourceData(panel.LegendConfiguration),
-		},
+		"legend":      legendConfigurationToResourceData(panel.LegendConfiguration, panelData),
 	}, nil
 }
 
-func legendConfigurationToResourceData(legend *v2.LegendConfiguration) map[string]interface{} {
-	return map[string]interface{}{
+func legendConfigurationToResourceData(legend *v2.LegendConfiguration, panelData map[string]interface{}) []map[string]interface{} {
+
+	legendData := panelData["legend"]
+	// If legend is not defined in the user configuration and the dashboard legend is the same as the default one
+	// we don't set the legend in the resource data to avoid drifts
+	if legendData == nil || len(legendData.(*schema.Set).List()) == 0 {
+		if *legend == *defaultLegendConfiguration() {
+			return nil
+		}
+	}
+
+	return []map[string]interface{}{{
 		"enabled":      legend.Enabled,
 		"show_current": legend.ShowCurrent,
 		"position":     legend.Position,
 		"layout":       legend.Layout,
-	}
+	}}
 }
 
-func numberPanelToResourceData(panel *v2.Panels, panelLayout *v2.Layout) (map[string]interface{}, error) {
-	queries, err := queriesToResourceData(panel.AdvancedQueries)
+func numberPanelToResourceData(panel *v2.Panels, panelLayout *v2.Layout, panelData map[string]interface{}) (map[string]interface{}, error) {
+	queries, err := queriesToResourceData(panel.AdvancedQueries, panelData)
 	if err != nil {
 		return nil, err
 	}
@@ -911,23 +930,30 @@ func textPanelToResourceData(panel *v2.Panels, panelLayout *v2.Layout) (map[stri
 	}, nil
 }
 
-func queriesToResourceData(advancedQueries []*v2.AdvancedQueries) ([]map[string]interface{}, error) {
+func queriesToResourceData(advancedQueries []*v2.AdvancedQueries, panelsData map[string]interface{}) ([]map[string]interface{}, error) {
 	var queries []map[string]interface{}
-	for _, query := range advancedQueries {
+	for queryIndex, query := range advancedQueries {
 		unit := ""
+		var defaultFormat v2.Format
 		switch query.Format.Unit {
 		case v2.FormatUnitPercentage:
 			unit = "percent"
+			defaultFormat = v2.NewPercentFormat()
 		case v2.FormatUnitData:
 			unit = "data"
+			defaultFormat = v2.NewDataFormat()
 		case v2.FormatUnitDataRate:
 			unit = "data rate"
+			defaultFormat = v2.NewDataRateFormat()
 		case v2.FormatUnitNumber:
 			unit = "number"
+			defaultFormat = v2.NewNumberFormat()
 		case v2.FormatUnitNumberRate:
 			unit = "number rate"
+			defaultFormat = v2.NewNumberRateFormat()
 		case v2.FormatUnitTime:
 			unit = "time"
+			defaultFormat = v2.NewTimeFormat()
 		default:
 			return nil, fmt.Errorf("unsupported query format unit: %s", query.Format.Unit)
 		}
@@ -953,6 +979,21 @@ func queriesToResourceData(advancedQueries []*v2.AdvancedQueries) ([]map[string]
 			"null_value_display_mode": query.Format.NullValueDisplayMode,
 			"y_axis":                  query.Format.YAxis,
 		}}
+
+		queriesData := panelsData["query"]
+		queryData := map[string]interface{}{}
+		if queriesData != nil && queriesData.(*schema.Set).Len() > queryIndex {
+			queryData = queriesData.(*schema.Set).List()[queryIndex].(map[string]interface{})
+		}
+		formatData := queryData["format"]
+
+		// If format is not defined in the user configuration and the dashboard format is the same as the default one
+		// we don't set the format in the resource data to avoid drifts
+		if formatData == nil || formatData.(*schema.Set).Len() == 0 {
+			if reflect.DeepEqual(query.Format, defaultFormat) {
+				q["format"] = nil
+			}
+		}
 
 		queries = append(queries, q)
 	}
