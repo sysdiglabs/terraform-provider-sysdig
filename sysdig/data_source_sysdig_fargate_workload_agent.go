@@ -11,9 +11,9 @@ import (
 	"github.com/Jeffail/gabs/v2"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/falcosecurity/kilt/runtimes/cloudformation/cfnpatcher"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/sysdiglabs/agent-kilt/runtimes/cloudformation/cfnpatcher"
 )
 
 const agentinoKiltDefinition = `build {
