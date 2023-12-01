@@ -12,8 +12,8 @@ import (
 	"testing"
 
 	"github.com/Jeffail/gabs/v2"
-	"github.com/falcosecurity/kilt/runtimes/cloudformation/cfnpatcher"
 	"github.com/stretchr/testify/assert"
+	"github.com/sysdiglabs/agent-kilt/runtimes/cloudformation/cfnpatcher"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
