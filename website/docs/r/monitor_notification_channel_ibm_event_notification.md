@@ -15,6 +15,7 @@ Creates a Sysdig Monitor Notification Channel of type IBM Event Notification (on
 ## Example Usage
 
 ```terraform
+# IBM event notification registering in the same account 
 resource "sysdig_monitor_notification_channel_ibm_event_notification" "sample" {
 	name                    = "Example Channel - IBM Event Notification"
 	enabled                 = true
@@ -25,11 +26,23 @@ resource "sysdig_monitor_notification_channel_ibm_event_notification" "sample" {
 }
 ```
 
+```terraform
+# IBM event notification registering in different account 
+resource "sysdig_monitor_notification_channel_ibm_event_notification" "sample" {
+	name                    = "Example Channel - IBM Event Notification"
+	enabled                 = true
+	instance_id             = "crn:v1:bluemix:public:event-notifications:global:a/59bcbfa6ea2f006b4ed7094c1a08dcdd:1a0ec336-f391-4091-a6fb-5e084a4c56f4::"
+	notify_when_ok          = false
+	notify_when_resolved    = false
+	share_with_current_team = true
+}
+```
+
 ## Argument Reference
 
 * `name` - (Required) The name of the Notification Channel. Must be unique.
 
-* `instance_id` - (Required) id of the Event Notifications Instance.
+* `instance_id` - (Required) id of the Event Notifications Instance. Id value can be either an instance id or CRN. If the event notification instance is within the same account, use the acutal instance id. If it is in a different accout, then use the Event Notifications Instance's [CRN](https://cloud.ibm.com/docs/account?topic=account-crn).   
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
