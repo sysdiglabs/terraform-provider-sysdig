@@ -305,12 +305,12 @@ func secureAzureCloudAuthAccountWithFCThreatDetection(accountID string) string {
 			component {
 				type                       = "COMPONENT_EVENT_BRIDGE"
 				instance                   = "secure-runtime"
-				service_principal_metadata = jsonencode({
+				event_bridge_metadata = jsonencode({
 					azure = {
-						event_hub_metadata = {
-							consumer_group      = "consumer-group"
+						event_hub_metadata= {
 							event_hub_name      = "event-hub-name"
 							event_hub_namespace = "event-hub-namespace"
+							consumer_group      = "consumer-group"
 						}
 					}
 				})
