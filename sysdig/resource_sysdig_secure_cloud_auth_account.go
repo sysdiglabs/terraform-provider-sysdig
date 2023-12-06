@@ -181,9 +181,9 @@ func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, data *schem
 		return diag.FromErr(err)
 	}
 
-	cloudauthAccount, err := client.CreateCloudauthAccountSecure(ctx, cloudauthAccountFromResourceData(data))
+	cloudauthAccount, errStatus, err := client.CreateCloudauthAccountSecure(ctx, cloudauthAccountFromResourceData(data))
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("Error creating resource: %s %s", errStatus, err)
 	}
 
 	data.SetId(cloudauthAccount.Id)
@@ -206,11 +206,10 @@ func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.
 		if strings.Contains(errStatus, "404") {
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
 
 	err = cloudauthAccountToResourceData(data, cloudauthAccount)
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -229,7 +228,7 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 		if strings.Contains(errStatus, "404") {
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
 
 	newCloudAccount := cloudauthAccountFromResourceData(data)
@@ -237,7 +236,7 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 	// validate and reject non-updatable resource schema fields upfront
 	err = validateCloudauthAccountUpdate(existingCloudAccount, newCloudAccount)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("Error updating resource: %s", err)
 	}
 
 	_, errStatus, err = client.UpdateCloudauthAccountSecure(ctx, data.Id(), newCloudAccount)
@@ -245,7 +244,7 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 		if strings.Contains(errStatus, "404") {
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 
 	return nil
@@ -263,7 +262,7 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 		if strings.Contains(errStatus, "404") {
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.Errorf("Error deleting resource: %s %s", errStatus, err)
 	}
 
 	return nil
