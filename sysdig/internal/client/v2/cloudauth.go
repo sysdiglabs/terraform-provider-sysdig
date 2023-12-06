@@ -19,30 +19,34 @@ const (
 
 type CloudauthAccountSecureInterface interface {
 	Base
-	CreateCloudauthAccountSecure(ctx context.Context, cloudAccount *CloudauthAccountSecure) (*CloudauthAccountSecure, error)
+	CreateCloudauthAccountSecure(ctx context.Context, cloudAccount *CloudauthAccountSecure) (*CloudauthAccountSecure, string, error)
 	GetCloudauthAccountSecure(ctx context.Context, accountID string) (*CloudauthAccountSecure, string, error)
 	DeleteCloudauthAccountSecure(ctx context.Context, accountID string) (string, error)
 	UpdateCloudauthAccountSecure(ctx context.Context, accountID string, cloudAccount *CloudauthAccountSecure) (*CloudauthAccountSecure, string, error)
 }
 
-func (client *Client) CreateCloudauthAccountSecure(ctx context.Context, cloudAccount *CloudauthAccountSecure) (*CloudauthAccountSecure, error) {
+func (client *Client) CreateCloudauthAccountSecure(ctx context.Context, cloudAccount *CloudauthAccountSecure) (*CloudauthAccountSecure, string, error) {
 	payload, err := client.marshalProto(cloudAccount)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	response, err := client.requester.Request(ctx, http.MethodPost, client.cloudauthAccountsURL(), payload)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		err = client.ErrorFromResponse(response)
-		return nil, err
+		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		return nil, errStatus, err
 	}
 
-	return client.unmarshalProto(response.Body)
+	cloudauthAccount, err := client.unmarshalProto(response.Body)
+	if err != nil {
+		return nil, "", err
+	}
+	return cloudauthAccount, "", nil
 }
 
 func (client *Client) GetCloudauthAccountSecure(ctx context.Context, accountID string) (*CloudauthAccountSecure, string, error) {
