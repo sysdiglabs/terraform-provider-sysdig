@@ -42,7 +42,7 @@ resource "sysdig_monitor_notification_channel_ibm_event_notification" "sample" {
 
 * `name` - (Required) The name of the Notification Channel. Must be unique.
 
-* `instance_id` - (Required) id of the Event Notifications Instance. Id value can be either an instance id or CRN. If the event notification instance is within the same account, use the acutal instance id. If it is in a different accout, then use the Event Notifications Instance's [CRN](https://cloud.ibm.com/docs/account?topic=account-crn).   
+* `instance_id` - (Required) id of the Event Notifications Instance. Id value can be either an instance id or CRN. If the event notification instance is within the same account, use the actual instance id. If it is in a different account, then use the Event Notifications Instance's [CRN](https://cloud.ibm.com/docs/account?topic=account-crn).   
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
