@@ -27,6 +27,7 @@ const agentinoKiltDefinition = `build {
         "SYSDIG_ACCESS_KEY": ${config.sysdig_access_key}
         "SYSDIG_LOGGING": ${config.sysdig_logging}
     }
+    capabilities: ["SYS_PTRACE"]
     mount: [
         {
             name: "SysdigInstrumentation"
@@ -269,7 +270,8 @@ func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string
 	// ECS JSON modifications
 	patchedStack, _ = terraformPreModifications(ctx, patchedStack)
 
-	patchedBytes, err := cfnpatcher.Patch(ctx, kiltConfig, patchedStack)
+	templateParameters := make([]byte, 0)
+	patchedBytes, err := cfnpatcher.Patch(ctx, kiltConfig, patchedStack, templateParameters)
 	if err != nil {
 		return nil, err
 	}
