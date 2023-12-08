@@ -30,6 +30,10 @@
                 "Value": "sysdig_logging"
             },
             {
+                "Name": "SYSDIG_SIDECAR",
+                "Value": ""
+            },
+            {
                 "Name": "SYSDIG_ORCHESTRATOR",
                 "Value": "orchestrator_host"
             },
@@ -85,6 +89,10 @@
             {
                 "Name": "SYSDIG_LOGGING",
                 "Value": "sysdig_logging"
+            },
+            {
+                "Name": "SYSDIG_SIDECAR",
+                "Value": ""
             },
             {
                 "Name": "SYSDIG_ORCHESTRATOR",
@@ -163,6 +171,10 @@
             {
                 "Name": "SYSDIG_LOGGING",
                 "Value": "sysdig_logging"
+            },
+            {
+                "Name": "SYSDIG_SIDECAR",
+                "Value": ""
             },
             {
                 "Name": "SYSDIG_ORCHESTRATOR",

@@ -26,6 +26,7 @@ const agentinoKiltDefinition = `build {
         "SYSDIG_COLLECTOR_PORT": ${config.collector_port}
         "SYSDIG_ACCESS_KEY": ${config.sysdig_access_key}
         "SYSDIG_LOGGING": ${config.sysdig_logging}
+        "SYSDIG_SIDECAR": ${config.sidecar}
     }
     capabilities: ["SYS_PTRACE"]
     mount: [
@@ -123,6 +124,12 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 			"sysdig_logging": {
 				Type:        schema.TypeString,
 				Description: "the instrumentation logging level",
+				Optional:    true,
+			},
+			"sidecar": {
+				Type:        schema.TypeString,
+				Description: "Sidecar mode: auto/force/(empty string)",
+				Default:     "", // we will want to change this to "auto" eventually
 				Optional:    true,
 			},
 			"output_container_definitions": {
@@ -300,6 +307,7 @@ type KiltRecipeConfig struct {
 	CollectorHost    string `json:"collector_host"`
 	CollectorPort    string `json:"collector_port"`
 	SysdigLogging    string `json:"sysdig_logging"`
+	Sidecar          string `json:"sidecar"`
 }
 
 type patchOptions struct {
@@ -347,6 +355,7 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 		CollectorHost:    d.Get("collector_host").(string),
 		CollectorPort:    d.Get("collector_port").(string),
 		SysdigLogging:    d.Get("sysdig_logging").(string),
+		Sidecar:          d.Get("sidecar").(string),
 	}
 
 	jsonConf, err := json.Marshal(&recipeConfig)
