@@ -59,8 +59,8 @@ func TestAccSecureOrganization(t *testing.T) {
 }
 
 func secureOrgWithAccountID(accountID string) string {
-	// this is a base64 encoded service account key, that should exist apriori in the project (mycapitalprojet)
-	test_service_account_key_encoded := getEncodedServiceAccountKey("sample", accountID)
+	// this is a base64 encoded service account key
+	test_service_account_key_encoded := getEncodedGCPServiceAccountKeyForOrg("sample", accountID)
 
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "sample" {
@@ -102,35 +102,21 @@ resource "sysdig_secure_organization" "sample-org" {
 `, accountID, test_service_account_key_encoded, test_service_account_key_encoded)
 }
 
-func getEncodedServiceAccountKey(resourceName string, accountID string) string {
-	type sample_service_account_key struct {
-		Type                    string `json:"type"`
-		ProjectId               string `json:"project_id"`
-		PrivateKeyId            string `json:"private_key_id"`
-		PrivateKey              string `json:"private_key"`
-		ClientEmail             string `json:"client_email"`
-		ClientId                string `json:"client_id"`
-		AuthUri                 string `json:"auth_uri"`
-		TokenUri                string `json:"token_uri"`
-		AuthProviderX509CertUrl string `json:"auth_provider_x509_cert_url"`
-		ClientX509CertUrl       string `json:"client_x509_cert_url"`
-		UniverseDomain          string `json:"universe_domain"`
-	}
-	test_service_account_key := &sample_service_account_key{
-		Type:                    "service_account",
-		ProjectId:               fmt.Sprintf("%s-%s", resourceName, accountID),
-		PrivateKeyId:            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-		PrivateKey:              "-----BEGIN PRIVATE KEY-----\nxxxxxxxxxxxxxxxxxxxxxxxxxxx\n-----END PRIVATE KEY-----\n",
-		ClientEmail:             fmt.Sprintf("some-sa-name@%s-%s.iam.gserviceaccount.com", resourceName, accountID),
-		ClientId:                "some-client-id",
-		AuthUri:                 "https://some-auth-uri",
-		TokenUri:                "https://some-token-uri",
-		AuthProviderX509CertUrl: "https://some-authprovider-cert-url",
-		ClientX509CertUrl:       "https://some-client-cert-url",
-		UniverseDomain:          "googleapis.com",
-	}
+func getEncodedGCPServiceAccountKeyForOrg(resourceName string, accountID string) string {
 
-	test_service_account_key_bytes, err := json.Marshal(test_service_account_key)
+	test_service_account_key_bytes, err := json.Marshal(map[string]interface{}{
+		"type":                        "service_account",
+		"project_id":                  fmt.Sprintf("%s-%s", resourceName, accountID),
+		"private_key_id":              "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+		"private_key":                 "-----BEGIN PRIVATE KEY-----\nxxxxxxxxxxxxxxxxxxxxxxxxxxx\n-----END PRIVATE KEY-----\n",
+		"client_email":                fmt.Sprintf("some-sa-name@%s-%s.iam.gserviceaccount.com", resourceName, accountID),
+		"client_id":                   "some-client-id",
+		"auth_uri":                    "https://some-auth-uri",
+		"token_uri":                   "https://some-token-uri",
+		"auth_provider_x509_cert_url": "https://some-authprovider-cert-url",
+		"client_x509_cert_url":        "https://some-client-cert-url",
+		"universe_domain":             "googleapis.com",
+	})
 	if err != nil {
 		fmt.Printf("Failed to marshal test_service_account_key: %v", err)
 	}
@@ -142,6 +128,5 @@ func getEncodedServiceAccountKey(resourceName string, accountID string) string {
 	}
 	out.WriteByte('\n')
 
-	test_service_account_key_encoded := b64.StdEncoding.EncodeToString(out.Bytes())
-	return test_service_account_key_encoded
+	return b64.StdEncoding.EncodeToString(out.Bytes())
 }
