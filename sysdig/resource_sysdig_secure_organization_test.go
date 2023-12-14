@@ -87,9 +87,9 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
     })
   }
   component {
-    type     				   = "COMPONENT_SERVICE_PRINCIPAL"
-    instance 				   = "secure-onboarding"
-    service_principal_metadata = jsonencode({
+        type                       = "COMPONENT_SERVICE_PRINCIPAL"
+        instance                   = "secure-onboarding"
+        service_principal_metadata = jsonencode({
       gcp = {
         key = "%s"
       }
