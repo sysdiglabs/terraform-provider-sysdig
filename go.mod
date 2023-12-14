@@ -14,7 +14,7 @@ require (
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/cast v1.5.1
 	github.com/stretchr/testify v1.8.4
-	github.com/sysdiglabs/agent-kilt/runtimes/cloudformation v0.0.0-20231124134841-96a4feb9adb9
+	github.com/sysdiglabs/agent-kilt/runtimes/cloudformation v0.0.0-20231207110334-1d6c07239b4c
 	google.golang.org/protobuf v1.30.0
 )
 
@@ -63,7 +63,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.0-rc3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/sysdiglabs/agent-kilt/pkg v0.0.0-20231124131820-71542fa7267c // indirect
+	github.com/sysdiglabs/agent-kilt/pkg v0.0.0-20231207110334-1d6c07239b4c // indirect
 	github.com/vbatts/tar-split v0.11.3 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/vmihailenco/msgpack/v4 v4.3.12 // indirect
@@ -73,7 +73,7 @@ require (
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.9.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20221207170731-23e4bf6bdc37 // indirect
