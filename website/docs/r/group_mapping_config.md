@@ -29,7 +29,7 @@ resource "sysdig_group_mapping_config" "resolution_strategies" {
 
 * `no_mapping_strategy` - (Required) Sets how the system behaves when no group mapping information received from the IdP or Group information received, but the user is not a member of any mapped group. Possible values are: `UNAUTHORIZED`, `DEFAULT_TEAM_DEFAULT_ROLE`
 
-* `different_team_same_role_strategy` - (Required) Sets how the system behaves when conflicting group mapping information received. Possible values are: `UNAUTHORIZED`, `FIRST_MATCH`, `WEIGHTED`
+* `different_team_same_role_strategy` - (Required) Sets how the system behaves when conflicting group mapping information received. Possible values are: `UNAUTHORIZED`, `FIRST_MATCH`, `WEIGHTED`, `WEIGHTED_BY_TEAM`
 
 ## Attributes Reference
 
