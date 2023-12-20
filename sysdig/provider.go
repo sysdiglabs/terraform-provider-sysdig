@@ -164,6 +164,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_monitor_alert_v2_prometheus":                           resourceSysdigMonitorAlertV2Prometheus(),
 			"sysdig_monitor_alert_v2_change":                               resourceSysdigMonitorAlertV2Change(),
 			"sysdig_monitor_alert_v2_form_based_prometheus":                resourceSysdigMonitorAlertV2FormBasedPrometheus(),
+			"sysdig_monitor_alert_v2_group_outlier":                        resourceSysdigMonitorAlertV2GroupOutlier(),
 			"sysdig_monitor_dashboard":                                     resourceSysdigMonitorDashboard(),
 			"sysdig_monitor_notification_channel_email":                    resourceSysdigMonitorNotificationChannelEmail(),
 			"sysdig_monitor_notification_channel_opsgenie":                 resourceSysdigMonitorNotificationChannelOpsGenie(),

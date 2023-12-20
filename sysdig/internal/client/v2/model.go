@@ -681,6 +681,31 @@ type alertV2FormBasedPrometheusWrapper struct {
 	Alert AlertV2FormBasedPrometheus `json:"alert"`
 }
 
+type AlertV2ConfigGroupOutlier struct {
+	ScopedSegmentedConfig
+
+	Algorithm       string  `json:"algorithm"`
+	MadThreshold    float64 `json:"madThreshold,omitempty"`
+	MadTolerance    float64 `json:"madTolerance,omitempty"`
+	DbscanTolerance float64 `json:"dbscanTolerance,omitempty"`
+
+	GroupAggregation string                  `json:"groupAggregation"`
+	TimeAggregation  string                  `json:"timeAggregation"`
+	Metric           AlertMetricDescriptorV2 `json:"metric"`
+	NoDataBehaviour  string                  `json:"noDataBehaviour"`
+}
+
+type AlertV2GroupOutlier struct {
+	AlertV2Common
+	DurationSec                              int                       `json:"durationSec"` // Observation window should be greater than or equal to 10 minutes
+	Config                                   AlertV2ConfigGroupOutlier `json:"config"`
+	UnreportedAlertNotificationsRetentionSec *int                      `json:"unreportedAlertNotificationsRetentionSec"`
+}
+
+type alertV2GroupOutlierWrapper struct {
+	Alert AlertV2GroupOutlier `json:"alert"`
+}
+
 type AlertV2Change struct {
 	AlertV2Common
 	DurationSec                              int                 `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
