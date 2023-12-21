@@ -20,6 +20,10 @@
         "Value": "sysdig_logging"
       },
       {
+        "Name": "SYSDIG_SIDECAR",
+        "Value": ""
+      },
+      {
         "Name": "SYSDIG_ENDPOINT",
         "Value": "value"
       },
@@ -85,6 +89,10 @@
       {
         "Name": "SYSDIG_LOGGING",
         "Value": "sysdig_logging"
+      },
+      {
+        "Name": "SYSDIG_SIDECAR",
+        "Value": ""
       },
       {
         "Name": "SYSDIG_ENDPOINT",
