@@ -275,6 +275,11 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"min_interval": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "60s",
+			},
 		},
 	}
 }
@@ -407,7 +412,7 @@ func dashboardFromResourceData(data *schema.ResourceData) (dashboard *v2.Dashboa
 		return nil, err
 	}
 	dashboard.SharingSettings = shares
-
+	dashboard.MinInterval = data.Get("min_interval").(string)
 	return dashboard, nil
 }
 
