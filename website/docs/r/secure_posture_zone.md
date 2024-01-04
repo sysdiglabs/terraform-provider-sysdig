@@ -68,7 +68,7 @@ resource "sysdig_secure_posture_zone" "example" {
   - `=`, `!=`
   - `>`, `>=`, `<`, `<=`
   - `in`
-  - `contains` and `startsWith` to check partial values of attributes
+  - `contains` to check partial values of attributes
   
   List of supported fields by target type:
   - `aws`:
