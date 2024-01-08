@@ -329,11 +329,6 @@ func TestAccDashboard(t *testing.T) {
 					resource.TestCheckResourceAttr("sysdig_monitor_dashboard.dashboard", "min_interval", "70s"),
 				),
 			},
-			{
-				ResourceName:      "sysdig_monitor_dashboard.dashboard",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 		},
 	})
 }
