@@ -278,7 +278,6 @@ func resourceSysdigMonitorDashboard() *schema.Resource {
 			"min_interval": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "60s",
 			},
 		},
 	}
