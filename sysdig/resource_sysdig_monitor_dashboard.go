@@ -393,6 +393,7 @@ func dashboardFromResourceData(data *schema.ResourceData) (dashboard *v2.Dashboa
 	dashboard = v2.NewDashboard(data.Get("name").(string), data.Get("description").(string)).AsPublic(data.Get("public").(bool))
 	dashboard.Version = cast.ToInt(data.Get("version"))
 	dashboard.PublicToken = data.Get("public_token").(string)
+	dashboard.MinInterval = data.Get("min_interval").(string)
 
 	panels, err := panelsFromResourceData(data)
 	if err != nil {
@@ -412,7 +413,6 @@ func dashboardFromResourceData(data *schema.ResourceData) (dashboard *v2.Dashboa
 		return nil, err
 	}
 	dashboard.SharingSettings = shares
-	dashboard.MinInterval = data.Get("min_interval").(string)
 	return dashboard, nil
 }
 
@@ -735,6 +735,7 @@ func dashboardToResourceData(dashboard *v2.Dashboard, data *schema.ResourceData)
 	_ = data.Set("description", dashboard.Description)
 	_ = data.Set("public", dashboard.Public)
 	_ = data.Set("public_token", dashboard.PublicToken)
+	_ = data.Set("min_interval", dashboard.MinInterval)
 
 	var panels []map[string]interface{}
 	for i, panel := range dashboard.Panels {
