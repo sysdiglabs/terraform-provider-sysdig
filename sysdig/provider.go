@@ -120,6 +120,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_group_mapping_config": resourceSysdigGroupMappingConfig(),
 			"sysdig_custom_role":          resourceSysdigCustomRole(),
 			"sysdig_team_service_account": resourceSysdigTeamServiceAccount(),
+			"sysdig_agent_access_key":     resourceSysdigAgentAccessKey(),
 
 			"sysdig_secure_custom_policy":                                 resourceSysdigSecureCustomPolicy(),
 			"sysdig_secure_managed_policy":                                resourceSysdigSecureManagedPolicy(),

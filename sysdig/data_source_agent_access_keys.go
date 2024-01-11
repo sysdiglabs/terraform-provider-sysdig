@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"time"
@@ -58,15 +57,16 @@ func dataSourceSysdigAgentAccessKey() *schema.Resource {
 // Retrieves the information of a resource form the file and loads it in Terraform
 func dataSourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).commonClientV2()
-	agentKeyId := d.Get("agent_key").(string)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	agentKeyId := d.Get("agent_key").(string)
+
 	agentAccessKey, err := client.GetAgentAccessKeyById(ctx, agentKeyId)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	fmt.Println(agentAccessKey)
 	d.SetId(agentAccessKey.AgentAccessKeyId)
 	_ = d.Set("reservation", agentAccessKey.Reservation)
 	_ = d.Set("limit", agentAccessKey.Limit)

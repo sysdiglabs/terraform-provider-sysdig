@@ -836,6 +836,10 @@ type AgentAccessKeyReadWrapper struct {
 	CustomerAccessKey []AgentAccessKey `json:"customerAccessKeys"`
 }
 
+type AgentAccessKeyWriteWrapper struct {
+	CustomerAccessKey AgentAccessKey `json:"customerAccessKey"`
+}
+
 type OrganizationSecure struct {
 	cloudauth.CloudOrganization
 }
