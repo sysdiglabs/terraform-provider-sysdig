@@ -52,6 +52,9 @@ func (client *Client) GetAgentAccessKeyById(ctx context.Context, id string) (*Ag
 func (client *Client) CreateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey) (*AgentAccessKey, error) {
 	agentAccessKeyWriteWrapper := AgentAccessKeyWriteWrapper{CustomerAccessKey: *agentAccessKey}
 	payload, err := Marshal(agentAccessKeyWriteWrapper)
+	if err != nil {
+		return nil, err
+	}
 	response, err := client.requester.Request(ctx, http.MethodPost, client.PostAgentAccessKeyUrl(), payload)
 	if err != nil {
 		return nil, err
@@ -74,10 +77,13 @@ func (client *Client) CreateAgentAccessKey(ctx context.Context, agentAccessKey *
 
 func (client *Client) UpdateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey) (*AgentAccessKey, error) {
 	agentAccessKeyWriteWrapper := AgentAccessKeyWriteWrapper{CustomerAccessKey: *agentAccessKey}
-	fmt.Println("agent config: ", agentAccessKeyWriteWrapper.CustomerAccessKey)
+
 	agentAccessKeyId := agentAccessKeyWriteWrapper.CustomerAccessKey.AgentAccessKeyId
 	fmt.Println("ID: ", agentAccessKeyId)
 	payload, err := Marshal(agentAccessKeyWriteWrapper)
+	if err != nil {
+		return nil, err
+	}
 	response, err := client.requester.Request(ctx, http.MethodPut, client.PutAgentAccessKeyUrl(agentAccessKeyId), payload)
 	if err != nil {
 		return nil, err
