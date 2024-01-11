@@ -43,6 +43,7 @@ type Common interface {
 	TeamInterface
 	NotificationChannelInterface
 	IdentityContextInterface
+	AgentAccessKeyInterface
 }
 
 type MonitorCommon interface {

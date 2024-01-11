@@ -211,11 +211,11 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_posture_policies":                              dataSourceSysdigSecurePosturePolicies(),
 			"sysdig_secure_custom_role_permissions":                       dataSourceSysdigSecureCustomRolePermissions(),
 
-			"sysdig_current_user":      dataSourceSysdigCurrentUser(),
-			"sysdig_user":              dataSourceSysdigUser(),
-			"sysdig_secure_connection": dataSourceSysdigSecureConnection(),
-			"sysdig_custom_role":       dataSourceSysdigCustomRole(),
-
+			"sysdig_current_user":                                          dataSourceSysdigCurrentUser(),
+			"sysdig_user":                                                  dataSourceSysdigUser(),
+			"sysdig_secure_connection":                                     dataSourceSysdigSecureConnection(),
+			"sysdig_custom_role":                                           dataSourceSysdigCustomRole(),
+			"sysdig_agent_access_key":                                      dataSourceSysdigAgentAccessKey(),
 			"sysdig_fargate_workload_agent":                                dataSourceSysdigFargateWorkloadAgent(),
 			"sysdig_monitor_notification_channel_pagerduty":                dataSourceSysdigMonitorNotificationChannelPagerduty(),
 			"sysdig_monitor_notification_channel_email":                    dataSourceSysdigMonitorNotificationChannelEmail(),

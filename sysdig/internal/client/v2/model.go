@@ -821,6 +821,21 @@ type SilenceRule struct {
 	ID      int `json:"id,omitempty"`
 }
 
+type AgentAccessKey struct {
+	Reservation      int               `json:"reservation"`
+	Limit            int               `json:"limit"`
+	TeamID           int               `json:"teamId"`
+	TeamName         string            `json:"teamName"`
+	Metadata         map[string]string `json:"metadata"`
+	AgentAccessKeyId string            `json:"accessKey"`
+	AgentsConnected  int               `json:"agentsConnected"`
+	Enabled          bool              `json:"enabled"`
+}
+
+type AgentAccessKeyReadWrapper struct {
+	CustomerAccessKey []AgentAccessKey `json:"customerAccessKeys"`
+}
+
 type OrganizationSecure struct {
 	cloudauth.CloudOrganization
 }
