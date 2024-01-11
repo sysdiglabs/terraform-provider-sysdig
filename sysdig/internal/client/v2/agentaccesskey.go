@@ -99,7 +99,7 @@ func (client *Client) UpdateAgentAccessKey(ctx context.Context, agentAccessKey *
 
 func (client *Client) EnableOrDisableAgentAccessKey(ctx context.Context, id string, enable bool) error {
 	var url string
-	if enable == true {
+	if enable {
 		url = client.EnableAgentAccessKeyUrl(id)
 	} else {
 		url = client.DisableAgentAccessKeyUrl(id)
