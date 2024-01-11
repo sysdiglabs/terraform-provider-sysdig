@@ -2,9 +2,10 @@ package sysdig
 
 import (
 	"context"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"time"
 )
 
 func dataSourceSysdigAgentAccessKey() *schema.Resource {
