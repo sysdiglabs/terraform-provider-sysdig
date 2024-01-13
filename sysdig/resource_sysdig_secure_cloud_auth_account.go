@@ -470,8 +470,33 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 						}
 					}
 				case SchemaWebhookDatasourceMetadata:
-					component.Metadata = &cloudauth.AccountComponent_WebhookDatasourceMetadata{
-						WebhookDatasourceMetadata: &cloudauth.WebhookDatasourceMetadata{},
+					webhookDatasourceMetadata := parseResourceMetadataJson(value.(string))
+
+					if provider == cloudauth.Provider_PROVIDER_GCP.String() {
+						webhookDatasourceGcpIngestion, ok := webhookDatasourceMetadata["gcp"].(map[string]interface{})["webhook_datasource"].(map[string]interface{})
+						if !ok {
+							fmt.Printf("Resource input for component metadata for provider %s is invalid and not as expected", provider)
+							break
+						}
+
+						component.Metadata = &cloudauth.AccountComponent_WebhookDatasourceMetadata{
+							WebhookDatasourceMetadata: &cloudauth.WebhookDatasourceMetadata{
+								Provider: &cloudauth.WebhookDatasourceMetadata_Gcp_{
+									Gcp: &cloudauth.WebhookDatasourceMetadata_Gcp{
+										WebhookDatasource: &cloudauth.WebhookDatasourceMetadata_Gcp_WebhookDatasource{
+											PubsubTopicName:      webhookDatasourceGcpIngestion["pubsub_topic_name"].(string),
+											SinkName:             webhookDatasourceGcpIngestion["sink_name"].(string),
+											PushSubscriptionName: webhookDatasourceGcpIngestion["push_subscription_name"].(string),
+											PushEndpoint:         webhookDatasourceGcpIngestion["push_endpoint"].(string),
+										},
+									},
+								},
+							},
+						}
+					} else {
+						component.Metadata = &cloudauth.AccountComponent_WebhookDatasourceMetadata{
+							WebhookDatasourceMetadata: &cloudauth.WebhookDatasourceMetadata{},
+						}
 					}
 				case SchemaCryptoKeyMetadata:
 					component.Metadata = &cloudauth.AccountComponent_CryptoKeyMetadata{
@@ -719,6 +744,27 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 					}
 
 					componentBlock[SchemaEventBridgeMetadata] = string(schemaData)
+				}
+			case *cloudauth.AccountComponent_WebhookDatasourceMetadata:
+				provider := metadata.(*cloudauth.AccountComponent_WebhookDatasourceMetadata).WebhookDatasourceMetadata.GetProvider()
+
+				if providerKey, ok := provider.(*cloudauth.WebhookDatasourceMetadata_Gcp_); ok {
+					schemaData, err := json.Marshal(map[string]interface{}{
+						"gcp": map[string]interface{}{
+							"webhook_datasource": map[string]interface{}{
+								"pubsub_topic_name":      providerKey.Gcp.GetWebhookDatasource().GetPubsubTopicName(),
+								"sink_name":              providerKey.Gcp.GetWebhookDatasource().GetSinkName(),
+								"push_subscription_name": providerKey.Gcp.GetWebhookDatasource().GetPushSubscriptionName(),
+								"push_endpoint":          providerKey.Gcp.GetWebhookDatasource().GetPushEndpoint(),
+							},
+						},
+					})
+					if err != nil {
+						fmt.Printf("Failed to populate %s: %v", SchemaWebhookDatasourceMetadata, err)
+						break
+					}
+
+					componentBlock[SchemaWebhookDatasourceMetadata] = string(schemaData)
 				}
 			}
 		}
