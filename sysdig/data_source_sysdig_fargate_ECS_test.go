@@ -164,6 +164,7 @@ func TestNewPatchOptions(t *testing.T) {
 			"stream_prefix": "fried",
 			"region":        "chicken",
 		},
+		Essential: true,
 	}
 	actualPatchOptions := newPatchOptions(data)
 
@@ -265,6 +266,7 @@ func TestPatchFargateTaskDefinition(t *testing.T) {
 					"stream_prefix": "test_prefix",
 					"region":        "test_region",
 				},
+				Essential: true,
 			},
 		},
 		{
@@ -278,6 +280,7 @@ func TestPatchFargateTaskDefinition(t *testing.T) {
 			patchOpts: &patchOptions{
 				BarePdigOnContainers: []string{"barePdig"},
 				IgnoreContainers:     []string{"skipped"},
+				Essential:            true,
 			},
 		},
 	}
