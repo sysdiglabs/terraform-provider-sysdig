@@ -298,7 +298,7 @@ resource "sysdig_secure_rule_falco" "awscloudtrail" {
   tags = ["awscloudtrail"]
 
   condition = "ct.name=\"CreateApp\""
-  output = "AWSCloudtrail Event received (requesting user=%ct.user)"
+  output = "AWSCloudtrail Event received (requesting user=%%ct.user)"
   priority = "debug"
   source = "awscloudtrail"
 }`, name, name)
@@ -326,7 +326,7 @@ resource "sysdig_secure_rule_falco" "okta" {
   tags = ["okta"]
 
   condition = "okta.evt.type=\"user.account.update_password\""
-  output = "Okta Event received (okta.severity=%okta.severity)"
+  output = "Okta Event received (okta.severity=%%okta.severity)"
   priority = "debug"
   source = "okta"
 }`, name, name)
@@ -354,7 +354,7 @@ resource "sysdig_secure_rule_falco" "github" {
   tags = ["github"]
 
   condition = "github.action=\"delete\""
-  output = "Github Event received (github.user=%github.user)"
+  output = "Github Event received (github.user=%%github.user)"
   priority = "debug"
   source = "github"
 }`, name, name)
