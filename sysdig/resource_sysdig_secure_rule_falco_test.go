@@ -306,7 +306,7 @@ resource "sysdig_secure_rule_falco" "awscloudtrail" {
 
 func ruleFalcoCloudAWSCloudtrailWithAppend() string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_rule_falco" "awscloudtrail" {
+resource "sysdig_secure_rule_falco" "awscloudtrail_append" {
   name = "Amplify Create App"
   source = "awscloudtrail"
   append = true
@@ -335,7 +335,7 @@ resource "sysdig_secure_rule_falco" "okta" {
 
 func ruleOktaWithAppend() string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_rule_falco" "okta" {
+resource "sysdig_secure_rule_falco" "okta_append" {
   name = "User changing password in to Okta"
   source = "okta"
   append = true
@@ -364,7 +364,7 @@ resource "sysdig_secure_rule_falco" "github" {
 
 func ruleGithubWithAppend() string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_rule_falco" "github" {
+resource "sysdig_secure_rule_falco" "github_append" {
   name = "Github Webhook Connected"
   source = "github"
   append = true
