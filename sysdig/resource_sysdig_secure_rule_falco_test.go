@@ -111,7 +111,7 @@ func TestAccRuleFalco(t *testing.T) {
 			},
 			{
 				Config: ruleGithubWithAppend(randomText),
-			}
+			},
 		},
 	})
 }

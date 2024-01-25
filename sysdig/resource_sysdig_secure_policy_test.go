@@ -56,15 +56,15 @@ func TestAccPolicy(t *testing.T) {
 			{
 				Config: policiesForAzurePlatformlogs(rText()),
 			},
-      {
-        Config: policiesForFalcoCloudAWSCloudtrail(rText()),
-      },
-      {
-        Config: policiesForOkta(rText()),
-      },
-      {
-        Config: policiesForGithub(rText()),
-      }
+			{
+				Config: policiesForFalcoCloudAWSCloudtrail(rText()),
+			},
+			{
+				Config: policiesForOkta(rText()),
+			},
+			{
+				Config: policiesForGithub(rText()),
+			},
 		},
 	})
 }
