@@ -98,19 +98,19 @@ func TestAccRuleFalco(t *testing.T) {
 				Config: ruleFalcoCloudAWSCloudtrail(randomText),
 			},
 			{
-				Config: ruleFalcoCloudAWSCloudtrailWithAppend(randomText),
+				Config: ruleFalcoCloudAWSCloudtrailWithAppend(),
 			},
 			{
 				Config: ruleOkta(randomText),
 			},
 			{
-				Config: ruleOktaWithAppend(randomText),
+				Config: ruleOktaWithAppend(),
 			},
 			{
 				Config: ruleGithub(randomText),
 			},
 			{
-				Config: ruleGithubWithAppend(randomText),
+				Config: ruleGithubWithAppend(),
 			},
 		},
 	})
@@ -304,10 +304,10 @@ resource "sysdig_secure_rule_falco" "awscloudtrail" {
 }`, name, name)
 }
 
-func ruleFalcoCloudAWSCloudtrailWithAppend(name string) string {
+func ruleFalcoCloudAWSCloudtrailWithAppend() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "awscloudtrail" {
-  name = "TERRAFORM TEST %[1]s - AWSCloudtrail"
+  name = "Amplify Create App"
   source = "awscloudtrail"
   append = true
   exceptions {
@@ -316,7 +316,7 @@ resource "sysdig_secure_rule_falco" "awscloudtrail" {
 	comps = ["="]
 	values = jsonencode([ ["user_a"] ])
    }
-}`, name)
+}`)
 }
 
 func ruleOkta(name string) string {
@@ -333,10 +333,10 @@ resource "sysdig_secure_rule_falco" "okta" {
 }`, name, name)
 }
 
-func ruleOktaWithAppend(name string) string {
+func ruleOktaWithAppend() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "okta" {
-  name = "TERRAFORM TEST %[1]s - Okta"
+  name = "User changing password in to Okta"
   source = "okta"
   append = true
   exceptions {
@@ -345,7 +345,7 @@ resource "sysdig_secure_rule_falco" "okta" {
 	comps = ["="]
 	values = jsonencode([ ["user_b"] ])
    }
-}`, name)
+}`)
 }
 
 func ruleGithub(name string) string {
@@ -362,10 +362,10 @@ resource "sysdig_secure_rule_falco" "github" {
 }`, name, name)
 }
 
-func ruleGithubWithAppend(name string) string {
+func ruleGithubWithAppend() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "github" {
-  name = "TERRAFORM TEST %[1]s - Github"
+  name = "Github Webhook Connected"
   source = "github"
   append = true
   exceptions {
@@ -374,5 +374,5 @@ resource "sysdig_secure_rule_falco" "github" {
 	comps = ["="]
 	values = jsonencode([ ["user_c"] ])
    }
-}`, name)
+}`)
 }
