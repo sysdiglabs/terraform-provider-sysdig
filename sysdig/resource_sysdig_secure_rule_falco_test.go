@@ -309,6 +309,7 @@ func ruleFalcoCloudAWSCloudtrailWithAppend(name string) string {
 resource "sysdig_secure_rule_falco" "awscloudtrail" {
   name = "TERRAFORM TEST %[1]s - AWSCloudtrail"
   source = "awscloudtrail"
+  append = true
   exceptions {
 	name = "user_name"
 	fields = ["ct.user"]
@@ -337,6 +338,7 @@ func ruleOktaWithAppend(name string) string {
 resource "sysdig_secure_rule_falco" "okta" {
   name = "TERRAFORM TEST %[1]s - Okta"
   source = "okta"
+  append = true
   exceptions {
 	name = "actor_name"
 	fields = ["okta.actor.name"]
@@ -365,6 +367,7 @@ func ruleGithubWithAppend(name string) string {
 resource "sysdig_secure_rule_falco" "github" {
   name = "TERRAFORM TEST %[1]s - Github"
   source = "github"
+  append = true
   exceptions {
 	name = "user_name"
 	fields = ["github.user"]
