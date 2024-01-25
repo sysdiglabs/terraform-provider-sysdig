@@ -56,6 +56,15 @@ func TestAccPolicy(t *testing.T) {
 			{
 				Config: policiesForAzurePlatformlogs(rText()),
 			},
+      {
+        Config: policiesForFalcoCloudAWSCloudtrail(rText()),
+      },
+      {
+        Config: policiesForOkta(rText()),
+      },
+      {
+        Config: policiesForGithub(rText()),
+      }
 		},
 	})
 }
@@ -206,6 +215,39 @@ resource "sysdig_secure_policy" "sample6" {
   name = "TERRAFORM TEST %s"
   description = "TERRAFORM TEST %s"
   type = "azure_platformlogs"
+  actions {}
+}
+`, name, name)
+}
+
+func policiesForFalcoCloudAWSCloudtrail(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_policy" "sample7" {
+  name = "TERRAFORM TEST 4 %s"
+  description = "TERRAFORM TEST %s"
+  type = "awscloudtrail"
+  actions {}
+}
+`, name, name)
+}
+
+func policiesForOkta(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_policy" "sample8" {
+  name = "TERRAFORM TEST 4 %s"
+  description = "TERRAFORM TEST %s"
+  type = "okta"
+  actions {}
+}
+`, name, name)
+}
+
+func policiesForGithub(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_policy" "sample9" {
+  name = "TERRAFORM TEST 4 %s"
+  description = "TERRAFORM TEST %s"
+  type = "github"
   actions {}
 }
 `, name, name)

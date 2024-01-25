@@ -94,6 +94,24 @@ func TestAccRuleFalco(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: ruleFalcoCloudAWSCloudtrail(randomText),
+			},
+			{
+				Config: ruleFalcoCloudAWSCloudtrailWithAppend(randomText),
+			},
+			{
+				Config: ruleOkta(randomText),
+			},
+			{
+				Config: ruleOktaWithAppend(randomText),
+			},
+			{
+				Config: ruleGithub(randomText),
+			},
+			{
+				Config: ruleGithubWithAppend(randomText),
+			}
 		},
 	})
 }
@@ -270,4 +288,88 @@ resource "sysdig_secure_rule_falco" "terminal_shell" {
   priority = "notice"
   source = "syscall" // syscall or k8s_audit
 }`, name, name)
+}
+
+func ruleFalcoCloudAWSCloudtrail(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "awscloudtrail" {
+  name = "TERRAFORM TEST %[1]s - AWSCloudtrail"
+  description = "TERRAFORM TEST %[1]s"
+  tags = ["awscloudtrail"]
+
+  condition = "ct.name=\"CreateApp\""
+  output = "AWSCloudtrail Event received (requesting user=%ct.user)"
+  priority = "debug"
+  source = "awscloudtrail"
+}`, name)
+}
+
+func ruleFalcoCloudAWSCloudtrailWithAppend(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "awscloudtrail" {
+  name = "TERRAFORM TEST %[1]s - AWSCloudtrail"
+  source = "awscloudtrail"
+  exceptions {
+	name = "user_name"
+	fields = ["ct.user"]
+	comps = ["="]
+	values = jsonencode([ ["user_a"] ])
+   }
+}`, name)
+}
+
+func ruleOkta(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "okta" {
+  name = "TERRAFORM TEST %[1]s - Okta"
+  description = "TERRAFORM TEST %[1]s"
+  tags = ["okta"]
+
+  condition = "okta.evt.type=\"user.account.update_password\""
+  output = "Okta Event received (okta.severity=%okta.severity)"
+  priority = "debug"
+  source = "okta"
+}`, name)
+}
+
+func ruleOktaWithAppend(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "okta" {
+  name = "TERRAFORM TEST %[1]s - Okta"
+  source = "okta"
+  exceptions {
+	name = "actor_name"
+	fields = ["okta.actor.name"]
+	comps = ["="]
+	values = jsonencode([ ["user_b"] ])
+   }
+}`, name)
+}
+
+func ruleGithub(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "github" {
+  name = "TERRAFORM TEST %[1]s - Github"
+  description = "TERRAFORM TEST %[1]s"
+  tags = ["github"]
+
+  condition = "github.action=\"delete\""
+  output = "Github Event received (github.user=%github.user)"
+  priority = "debug"
+  source = "github"
+}`, name)
+}
+
+func ruleGithubWithAppend(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_rule_falco" "github" {
+  name = "TERRAFORM TEST %[1]s - Github"
+  source = "github"
+  exceptions {
+	name = "user_name"
+	fields = ["github.user"]
+	comps = ["="]
+	values = jsonencode([ ["user_c"] ])
+   }
+}`, name)
 }

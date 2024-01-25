@@ -26,7 +26,7 @@ data "sysdig_secure_custom_policy" "example" {
 * `name` - (Required) The name of the Secure custom policy.
 
 * `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`,
-  `aws_cloudtrail`, `gcp_auditlog`, `azure_platformlogs`. By default it is `falco`.
+  `aws_cloudtrail`, `gcp_auditlog`, `azure_platformlogs`, `awscloudtrail`, `okta`, `github`. By default it is `falco`.
 
 ## Attributes Reference
 
