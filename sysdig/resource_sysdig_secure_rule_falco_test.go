@@ -301,7 +301,7 @@ resource "sysdig_secure_rule_falco" "awscloudtrail" {
   output = "AWSCloudtrail Event received (requesting user=%ct.user)"
   priority = "debug"
   source = "awscloudtrail"
-}`, name)
+}`, name, name)
 }
 
 func ruleFalcoCloudAWSCloudtrailWithAppend(name string) string {
@@ -329,7 +329,7 @@ resource "sysdig_secure_rule_falco" "okta" {
   output = "Okta Event received (okta.severity=%okta.severity)"
   priority = "debug"
   source = "okta"
-}`, name)
+}`, name, name)
 }
 
 func ruleOktaWithAppend(name string) string {
@@ -357,7 +357,7 @@ resource "sysdig_secure_rule_falco" "github" {
   output = "Github Event received (github.user=%github.user)"
   priority = "debug"
   source = "github"
-}`, name)
+}`, name, name)
 }
 
 func ruleGithubWithAppend(name string) string {
