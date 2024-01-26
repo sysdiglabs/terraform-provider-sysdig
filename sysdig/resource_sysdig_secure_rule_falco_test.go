@@ -305,7 +305,7 @@ resource "sysdig_secure_rule_falco" "awscloudtrail" {
 }
 
 func ruleFalcoCloudAWSCloudtrailWithAppend() string {
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_secure_rule_falco" "awscloudtrail_append" {
   name = "Amplify Create App"
   source = "awscloudtrail"
@@ -316,7 +316,7 @@ resource "sysdig_secure_rule_falco" "awscloudtrail_append" {
 	comps = ["="]
 	values = jsonencode([ ["user_a"] ])
    }
-}`)
+}`
 }
 
 func ruleOkta(name string) string {
@@ -334,7 +334,7 @@ resource "sysdig_secure_rule_falco" "okta" {
 }
 
 func ruleOktaWithAppend() string {
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_secure_rule_falco" "okta_append" {
   name = "User changing password in to Okta"
   source = "okta"
@@ -345,7 +345,7 @@ resource "sysdig_secure_rule_falco" "okta_append" {
 	comps = ["="]
 	values = jsonencode([ ["user_b"] ])
    }
-}`)
+}`
 }
 
 func ruleGithub(name string) string {
@@ -363,7 +363,7 @@ resource "sysdig_secure_rule_falco" "github" {
 }
 
 func ruleGithubWithAppend() string {
-	return fmt.Sprintf(`
+	return `
 resource "sysdig_secure_rule_falco" "github_append" {
   name = "Github Webhook Connected"
   source = "github"
@@ -374,5 +374,5 @@ resource "sysdig_secure_rule_falco" "github_append" {
 	comps = ["="]
 	values = jsonencode([ ["user_c"] ])
    }
-}`)
+}`
 }
