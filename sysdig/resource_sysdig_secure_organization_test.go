@@ -7,12 +7,13 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"os"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
@@ -103,7 +104,6 @@ resource "sysdig_secure_organization" "sample-org" {
 }
 
 func getEncodedGCPServiceAccountKeyForOrg(resourceName string, accountID string) string {
-
 	test_service_account_key_bytes, err := json.Marshal(map[string]interface{}{
 		"type":                        "service_account",
 		"project_id":                  fmt.Sprintf("%s-%s", resourceName, accountID),

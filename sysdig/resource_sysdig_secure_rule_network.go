@@ -122,7 +122,6 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	rule, statusCode, err := client.GetRuleByID(ctx, id)
-
 	if err != nil {
 		if statusCode == http.StatusNotFound {
 			d.SetId("")
