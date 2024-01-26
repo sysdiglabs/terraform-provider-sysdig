@@ -330,12 +330,12 @@ func (r *RuntimePolicyRule) UnmarshalJSON(b []byte) error {
 	// 	d = &ProcessRuleDetails{}
 	// case "SYSCALL":
 	// 	d = &SyscallRuleDetails{}
-	// case "DRIFT":
-	// 	d = &DriftRuleDetails{}
-	// case "MACHINE_LEARNING":
-	// 	d = &MLRuleDetails{}
-	// case "AWS_MACHINE_LEARNING":
-	// 	d = &AWSMLRuleDetails{}
+	case "DRIFT":
+		d = &DriftRuleDetails{}
+	case "MACHINE_LEARNING":
+		d = &MLRuleDetails{}
+	case "AWS_MACHINE_LEARNING":
+		d = &AWSMLRuleDetails{}
 	case "MALWARE":
 		d = &MalwareRuleDetails{}
 	// case "OKTA_MACHINE_LEARNING":

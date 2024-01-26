@@ -14,10 +14,9 @@ const (
 	CreateCompositePolicyPath = "%s/api/v2/policies/batch?%s=%t"
 	DeleteCompositePolicyPath = "%s/api/v2/policies/batch/%d?%s=%t"
 	UpdateCompositePolicyPath = "%s/api/v2/policies/batch/%d?%s=%t"
-	// TODO: Add skip query param
-	GetCompositePolicyPath   = "%s/api/v2/policies/%d"
-	// FIXME: Remove hard-coded filter
-	GetCompositePoliciesPath = "%s/api/v2/policies?policyType=malware&limit=200&filter=Test+Malware+Policy" // TODO: Implement pagination
+
+	GetCompositePolicyPath   = "%s/api/v2/policies/%d" // TODO: Add skip query param
+	GetCompositePoliciesPath = "%s/api/v2/policies?%s" // TODO: Implement pagination
 
 	GetCompositePolicyRulesPath = "%s/api/policies/v3/rules/groups?%s"
 	getPoliciesLimit            = 200 // What is a sane limit?

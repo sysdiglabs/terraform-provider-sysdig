@@ -151,10 +151,6 @@ func compositePolicyDataSourceToResourceData(policy v2.PolicyRulesComposite, d *
 			})
 		}
 
-		if len(additionalHashes) == 0 {
-			panic("additional hashes is 0")
-		}
-
 		// TODO: Refactor
 		ignoreHashes := []map[string]interface{}{}
 		for k, v := range rule.Details.(*v2.MalwareRuleDetails).IgnoreHashes {
@@ -173,7 +169,7 @@ func compositePolicyDataSourceToResourceData(policy v2.PolicyRulesComposite, d *
 			"details": []map[string]interface{}{{
 				"use_managed_hashes": rule.Details.(*v2.MalwareRuleDetails).UseManagedHashes,
 				"additional_hashes":  additionalHashes,
-				// "ignore_hashes":      ignoreHashes,
+				"ignore_hashes":      ignoreHashes,
 			}},
 		})
 	}
@@ -198,7 +194,8 @@ func commonCompositePolicyDataSourceSecurePolicyRead(ctx context.Context, d *sch
 
 	var policy v2.PolicyRulesComposite
 	for _, existingPolicy := range policies {
-		tflog.Info(ctx, "***", map[string]interface{}{"->": existingPolicy.Policy.Name})
+		tflog.Debug(ctx, "Filtered policies", map[string]interface{}{"name": existingPolicy.Policy.Name})
+
 		if existingPolicy.Policy.Name == policyName && existingPolicy.Policy.Type == policyType {
 			if !validationFunc(existingPolicy) {
 				return diag.Errorf("policy is not a %s", resourceName)
