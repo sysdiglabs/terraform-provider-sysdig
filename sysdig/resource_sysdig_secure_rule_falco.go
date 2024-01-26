@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-var validateFalcoRuleSource = validation.StringInSlice([]string{"syscall", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs"}, false)
+var validateFalcoRuleSource = validation.StringInSlice([]string{"syscall", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs", "awscloudtrail", "okta", "github"}, false)
 
 func resourceSysdigSecureRuleFalco() *schema.Resource {
 	timeout := 5 * time.Minute
