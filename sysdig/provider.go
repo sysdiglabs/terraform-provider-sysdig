@@ -199,6 +199,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_notification_channel_msteams":                  dataSourceSysdigSecureNotificationChannelMSTeams(),
 			"sysdig_secure_notification_channel_prometheus_alert_manager": dataSourceSysdigSecureNotificationChannelPrometheusAlertManager(),
 			"sysdig_secure_notification_channel_team_email":               dataSourceSysdigSecureNotificationChannelTeamEmail(),
+			"sysdig_secure_malware_policy":                                dataSourceSysdigSecureCompositePolicy(),
 			"sysdig_secure_custom_policy":                                 dataSourceSysdigSecureCustomPolicy(),
 			"sysdig_secure_managed_policy":                                dataSourceSysdigSecureManagedPolicy(),
 			"sysdig_secure_managed_ruleset":                               dataSourceSysdigSecureManagedRuleset(),
