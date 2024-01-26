@@ -191,7 +191,7 @@ func commonCompositePolicyDataSourceSecurePolicyRead(ctx context.Context, d *sch
 	policyName := d.Get("name").(string)
 	policyType := "malware" // d.Get("type").(string) // TODO: Okay to assume it's "malware" type
 
-	policies, _, err := client.GetCompositePolicies(ctx)
+	policies, _, err := client.FilterCompositePoliciesByNameAndType(ctx, policyType, policyName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

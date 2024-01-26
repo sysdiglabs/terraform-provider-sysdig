@@ -20,6 +20,7 @@ const (
 	GetCompositePoliciesPath = "%s/api/v2/policies?policyType=malware&limit=200&filter=Test+Malware+Policy" // TODO: Implement pagination
 
 	GetCompositePolicyRulesPath = "%s/api/policies/v3/rules/groups?%s"
+	getPoliciesLimit            = 200 // What is a sane limit?
 )
 
 type CompositePolicyInterface interface {
@@ -27,9 +28,8 @@ type CompositePolicyInterface interface {
 	CreateCompositePolicy(ctx context.Context, policy PolicyRulesComposite) (PolicyRulesComposite, error)
 	DeleteCompositePolicy(ctx context.Context, policyID int) error
 	UpdateCompositePolicy(ctx context.Context, policy PolicyRulesComposite) (PolicyRulesComposite, error)
-	// TODO
 	GetCompositePolicyByID(ctx context.Context, policyID int) (PolicyRulesComposite, int, error)
-	GetCompositePolicies(ctx context.Context) ([]PolicyRulesComposite, int, error)
+	FilterCompositePoliciesByNameAndType(ctx context.Context, policyType string, policyName string) ([]PolicyRulesComposite, int, error)
 }
 
 func (client *Client) CreateCompositePolicy(ctx context.Context, policy PolicyRulesComposite) (PolicyRulesComposite, error) {
@@ -152,8 +152,10 @@ func (client *Client) GetCompositePolicyRulesByName(ctx context.Context, names [
 
 // This method is used in a data source to retrieve a policy by name and type.
 // We must retrieve and iterate over all policies, as there is no endpoint to get a policy by name.
-func (client *Client) GetCompositePolicies(ctx context.Context) ([]PolicyRulesComposite, int, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetCompositePoliciesURL(), nil)
+func (client *Client) FilterCompositePoliciesByNameAndType(ctx context.Context, policyType string, policyName string) ([]PolicyRulesComposite, int, error) {
+	// TODO: Implement pagination in order to get all policies?
+	q := GetPoliciesQueryParams{policyType, policyName, getPoliciesLimit}
+	response, err := client.requester.Request(ctx, http.MethodGet, client.GetCompositePoliciesURL(q), nil)
 	if err != nil {
 		return []PolicyRulesComposite{}, 0, err
 	}
@@ -224,9 +226,8 @@ func (client *Client) GetCompositePolicyURL(policyID int) string {
 	return fmt.Sprintf(GetCompositePolicyPath, client.config.url, policyID)
 }
 
-// TODO: Allow filtering by name
-func (client *Client) GetCompositePoliciesURL() string {
-	return fmt.Sprintf(GetCompositePoliciesPath, client.config.url)
+func (client *Client) GetCompositePoliciesURL(queryParams GetPoliciesQueryParams) string {
+	return fmt.Sprintf(GetCompositePoliciesPath, client.config.url, queryParams.Encode())
 }
 
 func (client *Client) GetCompositePolicyRulesURL(names []string) string {
@@ -235,4 +236,14 @@ func (client *Client) GetCompositePolicyRulesURL(names []string) string {
 		items = append(items, fmt.Sprintf("names=%s", name))
 	}
 	return fmt.Sprintf(GetCompositePolicyRulesPath, client.config.url, strings.Join(items[:], "&"))
+}
+
+type GetPoliciesQueryParams struct {
+	PolicyType string
+	Filter     string
+	Limit      int
+}
+
+func (q *GetPoliciesQueryParams) Encode() string {
+	return fmt.Sprintf("policyType=%s&filter=%s&limit=%d", q.PolicyType, strings.Replace(q.Filter, " ", "+", -1), q.Limit)
 }
