@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	// "github.com/hashicorp/terraform-plugin-log/tflog"
+	// "github.com/hashicorp/terraform-plugin-log/tflog" // TODO: Add debug logs?
 )
 
 const (
@@ -14,8 +14,9 @@ const (
 	CreateCompositePolicyPath = "%s/api/v2/policies/batch?%s=%t"
 	DeleteCompositePolicyPath = "%s/api/v2/policies/batch/%d?%s=%t"
 	UpdateCompositePolicyPath = "%s/api/v2/policies/batch/%d?%s=%t"
-	// TODO
+	// TODO: Add skip query param
 	GetCompositePolicyPath   = "%s/api/v2/policies/%d"
+	// FIXME: Remove hard-coded filter
 	GetCompositePoliciesPath = "%s/api/v2/policies?policyType=malware&limit=200&filter=Test+Malware+Policy" // TODO: Implement pagination
 
 	GetCompositePolicyRulesPath = "%s/api/policies/v3/rules/groups?%s"
@@ -219,12 +220,11 @@ func (client *Client) UpdateCompositePolicyURL(policyID int) string {
 	return fmt.Sprintf(UpdateCompositePolicyPath, client.config.url, policyID, skipPolicyV2MsgFlag, client.config.secureSkipPolicyV2Msg)
 }
 
-// TODO
 func (client *Client) GetCompositePolicyURL(policyID int) string {
 	return fmt.Sprintf(GetCompositePolicyPath, client.config.url, policyID)
 }
 
-// TODO
+// TODO: Allow filtering by name
 func (client *Client) GetCompositePoliciesURL() string {
 	return fmt.Sprintf(GetCompositePoliciesPath, client.config.url)
 }
