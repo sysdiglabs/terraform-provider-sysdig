@@ -16,10 +16,11 @@ func resourceSysdigSecureScanningPolicyAssignment() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigScanningPolicyAssignmentCreate,
-		ReadContext:   resourceSysdigScanningPolicyAssignmentRead,
-		UpdateContext: resourceSysdigScanningPolicyAssignmentUpdate,
-		DeleteContext: resourceSysdigScanningPolicyAssignmentDelete,
+		DeprecationMessage: "The legacy scanning engine has been deprecated. This resource will be removed in future releases.",
+		CreateContext:      resourceSysdigScanningPolicyAssignmentCreate,
+		ReadContext:        resourceSysdigScanningPolicyAssignmentRead,
+		UpdateContext:      resourceSysdigScanningPolicyAssignmentUpdate,
+		DeleteContext:      resourceSysdigScanningPolicyAssignmentDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
