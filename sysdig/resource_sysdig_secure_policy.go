@@ -18,100 +18,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-var validatePolicyType = validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs"}, false)
-
-// Creates the common policy schema that is shared between policy resources
-func createPolicySchema(original map[string]*schema.Schema) map[string]*schema.Schema {
-	policySchema := map[string]*schema.Schema{
-		"name": {
-			Type:     schema.TypeString,
-			Required: true,
-		},
-		"enabled": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
-		},
-		"scope": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "",
-		},
-		"version": {
-			Type:     schema.TypeInt,
-			Computed: true,
-		},
-		"notification_channels": {
-			Type:     schema.TypeSet,
-			Optional: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeInt,
-			},
-		},
-		"runbook": {
-			Type:     schema.TypeString,
-			Optional: true,
-		},
-		"actions": policyActionBlockSchema,
-	}
-
-	for k, v := range original {
-		policySchema[k] = v
-	}
-
-	return policySchema
-}
-
-var policyActionBlockSchema = &schema.Schema{
-	Type:     schema.TypeList,
-	Optional: true,
-	Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"container": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"stop", "pause", "kill"}, false),
-			},
-			"capture": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"seconds_after_event": {
-							Type:             schema.TypeInt,
-							Required:         true,
-							ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
-						},
-						"seconds_before_event": {
-							Type:             schema.TypeInt,
-							Required:         true,
-							ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"filter": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "",
-						},
-						"bucket_name": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "",
-						},
-						"folder": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "/",
-						},
-					},
-				},
-			},
-		},
-	},
-}
+var validatePolicyType = validation.StringInSlice([]string{
+	"falco",
+	"list_matching",
+	"k8s_audit",
+	"aws_cloudtrail",
+	"gcp_auditlog",
+	"azure_platformlogs",
+	"malware",
+	"drift",
+	"aws_machine_learning",
+	"machine_learning",
+}, false)
 
 func resourceSysdigSecurePolicy() *schema.Resource {
 	timeout := 5 * time.Minute
@@ -281,6 +199,11 @@ func addActionsToPolicy(d *schema.ResourceData, policy *v2.Policy) {
 	actions := d.Get("actions").([]interface{})
 	if len(actions) == 0 {
 		return
+	}
+
+	preventMalwareAction, ok := d.GetOkExists("actions.0.prevent_malware")
+	if ok && preventMalwareAction.(bool) {
+		policy.Actions = append(policy.Actions, v2.Action{Type: "POLICY_ACTION_PREVENT_MALWARE"})
 	}
 
 	containerAction := d.Get("actions.0.container").(string)
