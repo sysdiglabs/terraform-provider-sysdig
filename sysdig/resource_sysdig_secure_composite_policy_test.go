@@ -70,7 +70,7 @@ rules {
     }
   }
 }
-`, name, name)
+`, name)
 }
 
 // TODO: Specify only a single rule type!
