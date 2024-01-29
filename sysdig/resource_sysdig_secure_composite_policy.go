@@ -61,7 +61,8 @@ func resourceSysdigSecureCompositePolicy() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"id":          ReadOnlyIntSchema(),
 						"name":        ReadOnlyStringSchema(),
-						"enabled":     EnabledSchema(),
+						// Do not allow switching off individual rules
+						// "enabled":     EnabledSchema(),
 						"description": DescriptionSchema(),
 						"tags":        TagsSchema(),
 						"details": {
@@ -174,10 +175,11 @@ func compositePolicyFromResourceData(d *schema.ResourceData) v2.PolicyRulesCompo
 		}
 		policy.Rules = append(policy.Rules, rule)
 
-		policy.Policy.Rules = append(policy.Policy.Rules, &v2.PolicyRule{
-			Name:    d.Get("rules.0.name").(string),
-			Enabled: d.Get("rules.0.enabled").(bool),
-		})
+		// Do not allow switching off individual rules
+		// policy.Policy.Rules = append(policy.Policy.Rules, &v2.PolicyRule{
+		// 	Name:    d.Get("rules.0.name").(string),
+		// 	Enabled: d.Get("rules.0.enabled").(bool),
+		// })
 
 		return *policy
 	}
@@ -192,6 +194,7 @@ func compositePolicyToResourceData(policy *v2.PolicyRulesComposite, d *schema.Re
 
 	_ = d.Set("description", policy.Policy.Description)
 	_ = d.Set("severity", policy.Policy.Severity)
+	_ = d.Set("version", policy.Policy.Version)
 	if policy.Policy.Type != "" {
 		_ = d.Set("type", policy.Policy.Type)
 	} else {
@@ -199,12 +202,7 @@ func compositePolicyToResourceData(policy *v2.PolicyRulesComposite, d *schema.Re
 	}
 
 	actions := compositePolicyDataSourceActionsToResourceData(policy.Policy.Actions)
-	d.Set("actions", actions)
-
-	enabledByRuleName := map[string]bool{}
-	for _, rule := range policy.Policy.Rules {
-		enabledByRuleName[rule.Name] = rule.Enabled
-	}
+	_ = d.Set("actions", actions)
 
 	if len(policy.Rules) > 0 {
 		// TODO: Extract into a function
@@ -238,7 +236,6 @@ func compositePolicyToResourceData(policy *v2.PolicyRulesComposite, d *schema.Re
 			rules = append(rules, map[string]interface{}{
 				"id":          *policy.Rules[0].Id,
 				"name":        policy.Rules[0].Name,
-				"enabled":     enabledByRuleName[policy.Rules[0].Name],
 				"description": policy.Rules[0].Description,
 				"tags":        policy.Rules[0].Tags,
 				"details":     details,

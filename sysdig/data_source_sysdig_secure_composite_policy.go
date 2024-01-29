@@ -56,7 +56,6 @@ func createCompositePolicyDataSourceSchema() map[string]*schema.Schema {
 				Schema: map[string]*schema.Schema{
 					"id":          ReadOnlyIntSchema(),
 					"name":        ReadOnlyStringSchema(),
-					"enabled":     EnabledComputedSchema(),
 					"description": DescriptionComputedSchema(),
 					"tags":        TagsComputedSchema(),
 					"details": {
@@ -134,12 +133,6 @@ func compositePolicyDataSourceToResourceData(policy v2.PolicyRulesComposite, d *
 		panic("policy.Rules is 0")
 	}
 
-	// TODO: Exract into a func
-	enabledByRuleName := map[string]bool{}
-	for _, rule := range policy.Policy.Rules {
-		enabledByRuleName[rule.Name] = rule.Enabled
-	}
-
 	// TODO: Extract into a function and reuse in resource impl
 	rules := []map[string]interface{}{}
 	for _, rule := range policy.Rules {
@@ -163,7 +156,6 @@ func compositePolicyDataSourceToResourceData(policy v2.PolicyRulesComposite, d *
 		rules = append(rules, map[string]interface{}{
 			"id":          rule.Id,
 			"name":        rule.Name,
-			"enabled":     enabledByRuleName[rule.Name],
 			"description": rule.Description,
 			"tags":        rule.Tags,
 			"details": []map[string]interface{}{{
