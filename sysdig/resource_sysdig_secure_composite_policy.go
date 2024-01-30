@@ -158,14 +158,10 @@ func resourceSysdigCompositePolicyUpdate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	policy := compositePolicyFromResourceData(d)
-	if err = validateCompositePolicy(&policy); err != nil {
+	policy, err := compositePolicyFromResourceData(d)
+	if err != nil {
 		return diag.FromErr(err)
 	}
-	policy.Policy.Version = d.Get("version").(int)
-
-	id, _ := strconv.Atoi(d.Id())
-	policy.Policy.ID = id
 
 	_, err = client.UpdateCompositePolicy(ctx, policy)
 	if err != nil {
@@ -207,9 +203,16 @@ func resourceSysdigCompositePolicyDelete(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	id, _ := strconv.Atoi(d.Id())
+	policy, err := compositePolicyFromResourceData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err = client.DeleteCompositePolicy(ctx, id)
+	if policy.Policy.ID == 0 {
+		return diag.FromErr(errors.New("Policy ID is missing"))
+	}
+
+	err = client.DeleteCompositePolicy(ctx, policy.Policy.ID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -224,12 +227,16 @@ func resourceSysdigSecureCompositePolicyImportState(ctx context.Context, d *sche
 		return nil, err
 	}
 
-	id, err := strconv.Atoi(d.Id())
+	policy, err := compositePolicyFromResourceData(d)
 	if err != nil {
 		return nil, err
 	}
 
-	policy, _, err := client.GetCompositePolicyByID(ctx, id)
+	if policy.Policy.ID == 0 {
+		return nil, errors.New("Policy ID is missing")
+	}
+
+	policy, _, err = client.GetCompositePolicyByID(ctx, policy.Policy.ID)
 	if err != nil {
 		return nil, err
 	}
