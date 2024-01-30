@@ -2,8 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"strconv"
-	"strings"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -86,88 +84,9 @@ func createCompositePolicyDataSourceSchema() map[string]*schema.Schema {
 	}
 }
 
-// TODO: Move into common repo
-func compositePolicyDataSourceActionsToResourceData(items []v2.Action) []map[string]interface{} {
-	actions := []map[string]interface{}{{}}
-	for _, action := range items {
-		if action.Type == "POLICY_ACTION_PREVENT_MALWARE" {
-			actions[0]["prevent_malware"] = true // TODO
-		} else if action.Type == "POLICY_ACTION_PAUSE" || action.Type == "POLICY_ACTION_STOP" || action.Type == "POLICY_ACTION_KILL" { // TODO: Refactor
-			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
-			actions[0]["container"] = strings.ToLower(action)
-		} else {
-			actions[0]["capture"] = []map[string]interface{}{{
-				"seconds_after_event":  action.AfterEventNs / 1000000000,
-				"seconds_before_event": action.BeforeEventNs / 1000000000,
-				"name":                 action.Name,
-				"filter":               action.Filter,
-				"bucket_name":          action.BucketName,
-				"folder":               action.Folder,
-			}}
-		}
-	}
-	return actions
-}
-
+// TODO: Swap arg order
 func compositePolicyDataSourceToResourceData(policy v2.PolicyRulesComposite, d *schema.ResourceData) {
-	d.SetId(strconv.Itoa(policy.Policy.ID))
-
-	_ = d.Set("name", policy.Policy.Name)
-	if policy.Policy.Type != "" {
-		_ = d.Set("type", policy.Policy.Type)
-	} else {
-		// _ = d.Set("type", "falco") // TODO
-	}
-
-	_ = d.Set("description", policy.Policy.Description)
-	_ = d.Set("severity", policy.Policy.Severity)
-	_ = d.Set("enabled", policy.Policy.Enabled)
-	_ = d.Set("scope", policy.Policy.Scope)
-	_ = d.Set("notification_channels", policy.Policy.NotificationChannelIds)
-	_ = d.Set("runbook", policy.Policy.Runbook)
-
-	actions := compositePolicyDataSourceActionsToResourceData(policy.Policy.Actions)
-	_ = d.Set("actions", actions)
-
-	if len(policy.Rules) == 0 {
-		panic("policy.Rules is 0")
-	}
-
-	// TODO: Extract into a function and reuse in resource impl
-	rules := []map[string]interface{}{}
-	for _, rule := range policy.Rules {
-		additionalHashes := []map[string]interface{}{}
-		for k, v := range rule.Details.(*v2.MalwareRuleDetails).AdditionalHashes {
-			additionalHashes = append(additionalHashes, map[string]interface{}{
-				"hash":         k,
-				"hash_aliases": v,
-			})
-		}
-
-		// TODO: Refactor
-		ignoreHashes := []map[string]interface{}{}
-		for k, v := range rule.Details.(*v2.MalwareRuleDetails).IgnoreHashes {
-			ignoreHashes = append(ignoreHashes, map[string]interface{}{
-				"hash":         k,
-				"hash_aliases": v,
-			})
-		}
-
-		rules = append(rules, map[string]interface{}{
-			"id":          rule.Id,
-			"name":        rule.Name,
-			"description": rule.Description,
-			"tags":        rule.Tags,
-			"details": []map[string]interface{}{{
-				"use_managed_hashes": rule.Details.(*v2.MalwareRuleDetails).UseManagedHashes,
-				"additional_hashes":  additionalHashes,
-				"ignore_hashes":      ignoreHashes,
-			}},
-		})
-	}
-
-	// TODO
-	_ = d.Set("rules", rules)
+	malwareTFResourceReducer(d, policy)
 }
 
 func commonCompositePolicyDataSourceSecurePolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {

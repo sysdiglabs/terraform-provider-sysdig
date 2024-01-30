@@ -59,8 +59,8 @@ func resourceSysdigSecureCompositePolicy() *schema.Resource {
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id":          ReadOnlyIntSchema(),
-						"name":        ReadOnlyStringSchema(),
+						"id":   ReadOnlyIntSchema(),
+						"name": ReadOnlyStringSchema(),
 						// Do not allow switching off individual rules
 						// "enabled":     EnabledSchema(),
 						"description": DescriptionSchema(),
@@ -99,6 +99,7 @@ func getSecureCompositePolicyClient(c SysdigClients) (v2.CompositePolicyInterfac
 	return c.sysdigSecureClientV2()
 }
 
+// TODO: Move
 func schemaSetToList(values interface{}) []string {
 	v := values.(*schema.Set).List()
 
@@ -109,151 +110,22 @@ func schemaSetToList(values interface{}) []string {
 	return x
 }
 
-func compositePolicyFromResourceData(d *schema.ResourceData) v2.PolicyRulesComposite {
+func compositePolicyFromResourceData(d *schema.ResourceData) (v2.PolicyRulesComposite, error) {
 	policy := &v2.PolicyRulesComposite{
 		Policy: &v2.Policy{},
 		Rules:  []*v2.RuntimePolicyRule{},
 	}
-	commonPolicyFromResourceData(policy.Policy, d)
-
-	policy.Policy.Description = d.Get("description").(string)
-	policy.Policy.Severity = d.Get("severity").(int)
-	// policy.Policy.Version = ???
-
-	policy.Policy.Rules = []*v2.PolicyRule{}
-	policy.Rules = []*v2.RuntimePolicyRule{}
-	if _, ok := d.GetOk("rules"); ok {
-		// TODO: Iterate over a list of rules instead of hard-coding the index values
-		// TODO: Should we assume that only a single Malware rule can be attached to a policy?
-
-		policy.Policy.Type = "malware"
-		// TODO: What origin should we use?
-		// https://github.com/draios/secure-backend/blob/main/policies/model/model.go#L1576
-		// policy.Policy.Origin = "Terraform"
-
-		additionalHashes := map[string][]string{}
-		if items, ok := d.GetOk("rules.0.details.0.additional_hashes"); ok { // TODO: Do not hardcode the indexes
-			for _, item := range items.([]interface{}) {
-				item := item.(map[string]interface{})
-				k := item["hash"].(string)
-				v := schemaSetToList(item["hash_aliases"])
-				additionalHashes[k] = v
-			}
-		}
-
-		// TODO: Extract into a function
-		ignoreHashes := map[string][]string{}
-		if items, ok := d.GetOk("rules.0.details.0.ignore_hashes"); ok { // TODO: Do not hardcode the indexes
-			for _, item := range items.([]interface{}) {
-				item := item.(map[string]interface{})
-				k := item["hash"].(string)
-				v := schemaSetToList(item["hash_aliases"])
-				ignoreHashes[k] = v
-			}
-		}
-
-		tags := schemaSetToList(d.Get("rules.0.tags"))
-		rule := &v2.RuntimePolicyRule{
-			// TODO: Do not hardcode the indexes
-			Name:        d.Get("rules.0.name").(string),
-			Description: d.Get("rules.0.description").(string),
-			Tags:        tags,
-			Details: v2.MalwareRuleDetails{
-				RuleType:         v2.ElementType("MALWARE"), // TODO: Use const
-				UseManagedHashes: d.Get("rules.0.details.0.use_managed_hashes").(bool),
-				AdditionalHashes: additionalHashes,
-				IgnoreHashes:     ignoreHashes,
-			},
-		}
-
-		id := v2.FlexInt(d.Get("rules.0.id").(int))
-		if int(id) != 0 {
-			rule.Id = &id
-		} else {
-			// TODO: Panic?
-			// panic(fmt.Sprintf("id is nil: %s, %s", d.Get("rules.0.name"), d.Get("rules.0.id")))
-		}
-		policy.Rules = append(policy.Rules, rule)
-
-		// Do not allow switching off individual rules
-		// policy.Policy.Rules = append(policy.Policy.Rules, &v2.PolicyRule{
-		// 	Name:    d.Get("rules.0.name").(string),
-		// 	Enabled: d.Get("rules.0.enabled").(bool),
-		// })
-
-		return *policy
+	err := malwarePolicyReducer(policy, *d)
+	if err != nil {
+		return *policy, err
 	}
 
-	// TODO: Add other types: ML, AWS_ML, DRIFT, etc.
-
-	return *policy
+	return *policy, nil
 }
 
-func compositePolicyToResourceData(policy *v2.PolicyRulesComposite, d *schema.ResourceData) {
-	commonPolicyToResourceData(policy.Policy, d)
-
-	_ = d.Set("description", policy.Policy.Description)
-	_ = d.Set("severity", policy.Policy.Severity)
-	_ = d.Set("version", policy.Policy.Version)
-	if policy.Policy.Type != "" {
-		_ = d.Set("type", policy.Policy.Type)
-	} else {
-		// _ = d.Set("type", "malware") // TODO
-	}
-
-	actions := compositePolicyDataSourceActionsToResourceData(policy.Policy.Actions)
-	_ = d.Set("actions", actions)
-
-	if len(policy.Rules) > 0 {
-		// TODO: Extract into a function
-		rules := []map[string]interface{}{}
-
-		for _, r := range policy.Rules {
-			// TODO: Single element only
-			additionalHashes := []map[string]interface{}{}
-			for k, v := range r.Details.(*v2.MalwareRuleDetails).AdditionalHashes {
-				additionalHashes = append(additionalHashes, map[string]interface{}{
-					"hash":         k,
-					"hash_aliases": v,
-				})
-			}
-
-			ignoreHashes := []map[string]interface{}{}
-			for k, v := range r.Details.(*v2.MalwareRuleDetails).IgnoreHashes {
-				ignoreHashes = append(ignoreHashes, map[string]interface{}{
-					"hash":         k,
-					"hash_aliases": v,
-				})
-			}
-
-			details := []map[string]interface{}{{}}
-			details[0] = map[string]interface{}{
-				"use_managed_hashes": r.Details.(*v2.MalwareRuleDetails).UseManagedHashes,
-				"additional_hashes":  additionalHashes,
-				"ignore_hashes":      ignoreHashes,
-			}
-
-			rules = append(rules, map[string]interface{}{
-				"id":          *policy.Rules[0].Id,
-				"name":        policy.Rules[0].Name,
-				"description": policy.Rules[0].Description,
-				"tags":        policy.Rules[0].Tags,
-				"details":     details,
-			})
-
-		}
-
-		_ = d.Set("rules", rules)
-	}
-	// TODO: Add other policy rule type: ML, AWS ML, DRIFT, etc.
-}
-
-func validateCompositePolicy(policy *v2.PolicyRulesComposite) error {
-	// TODO: Add other validation rules
-	if len(policy.Rules) == 0 {
-		return errors.New("Policy is missing rules")
-	}
-	return nil
+// TODO: Rename
+func compositePolicyToResourceData(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
+	return malwareTFResourceReducer(d, *policy)
 }
 
 func resourceSysdigCompositePolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -263,10 +135,11 @@ func resourceSysdigCompositePolicyCreate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	policy := compositePolicyFromResourceData(d)
-	if err = validateCompositePolicy(&policy); err != nil {
+	policy, err := compositePolicyFromResourceData(d)
+	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	policy, err = client.CreateCompositePolicy(ctx, policy)
 	if err != nil {
 		return diag.FromErr(err)
@@ -319,7 +192,10 @@ func resourceSysdigCompositePolicyRead(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
-	compositePolicyToResourceData(&policy, d)
+	err = compositePolicyToResourceData(&policy, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -360,6 +236,11 @@ func resourceSysdigSecureCompositePolicyImportState(ctx context.Context, d *sche
 
 	if policy.Policy.IsDefault || policy.Policy.TemplateId != 0 {
 		return nil, errors.New("unable to import policy that is not a custom policy")
+	}
+
+	err = compositePolicyToResourceData(&policy, d)
+	if err != nil {
+		return nil, err
 	}
 
 	return []*schema.ResourceData{d}, nil
