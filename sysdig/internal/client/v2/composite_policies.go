@@ -137,9 +137,7 @@ func (client *Client) GetCompositePolicyRulesByName(ctx context.Context, names [
 
 	rules := []*RuntimePolicyRule{}
 	for _, arr := range unmarshalled {
-		for _, item := range arr {
-			rules = append(rules, item)
-		}
+		rules = append(rules, arr...)
 	}
 
 	if len(rules) == 0 {

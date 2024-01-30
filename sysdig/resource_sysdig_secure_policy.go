@@ -203,7 +203,7 @@ func addActionsToPolicy(d *schema.ResourceData, policy *v2.Policy) {
 		return
 	}
 
-	preventMalwareAction, ok := d.GetOkExists("actions.0.prevent_malware")
+	preventMalwareAction, ok := d.GetOk("actions.0.prevent_malware")
 	if ok && preventMalwareAction.(bool) {
 		policy.Actions = append(policy.Actions, v2.Action{Type: "POLICY_ACTION_PREVENT_MALWARE"})
 	}
