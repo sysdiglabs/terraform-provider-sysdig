@@ -10,29 +10,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceSysdigSecureMalwarePolicy() *schema.Resource {
+func dataSourceSysdigSecureDriftPolicy() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		ReadContext: dataSourceSysdigSecureMalwarePolicyRead,
+		ReadContext: dataSourceSysdigSecureDriftPolicyRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),
 		},
 
-		Schema: createMalwarePolicyDataSourceSchema(),
+		Schema: createDriftPolicyDataSourceSchema(),
 	}
 }
 
-func dataSourceSysdigSecureMalwarePolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return malwarePolicyDataSourceRead(ctx, d, meta, "custom policy", isCustomCompositePolicy)
+func dataSourceSysdigSecureDriftPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return driftPolicyDataSourceRead(ctx, d, meta, "custom policy", isCustomCompositePolicy)
 }
 
-func isCustomCompositePolicy(policy v2.PolicyRulesComposite) bool {
-	return !policy.Policy.IsDefault && policy.Policy.TemplateId == 0
-}
-
-func createMalwarePolicyDataSourceSchema() map[string]*schema.Schema {
+func createDriftPolicyDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		// IMPORTANT: Type is implicit: It's automatically added upon conversion to JSON
 		"type": {
@@ -61,9 +57,9 @@ func createMalwarePolicyDataSourceSchema() map[string]*schema.Schema {
 						Computed: true,
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
-								"use_managed_hashes": BoolComputedSchema(),
-								"additional_hashes":  HashesComputedSchema(),
-								"ignore_hashes":      HashesComputedSchema(),
+								"mode":                DriftModeComputedSchema(),
+								"exceptions":          ExceptionsComputedSchema(),
+								"prohibited_binaries": ExceptionsComputedSchema(),
 							},
 						},
 					},
@@ -75,23 +71,23 @@ func createMalwarePolicyDataSourceSchema() map[string]*schema.Schema {
 			Computed: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"prevent_malware": PreventActionComputedSchema(),
-					"container":       ContainerActionComputedSchema(),
-					"capture":         CaptureActionComputedSchema(),
+					"prevent_drift": PreventActionComputedSchema(),
+					"container":     ContainerActionComputedSchema(),
+					"capture":       CaptureActionComputedSchema(),
 				},
 			},
 		},
 	}
 }
 
-func malwarePolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {
+func driftPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {
 	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	policyName := d.Get("name").(string)
-	policyType := "malware" // assume it's "malware" type
+	policyType := "drift" // assume it's "drift" type
 
 	policies, _, err := client.FilterCompositePoliciesByNameAndType(ctx, policyType, policyName)
 	if err != nil {
@@ -119,7 +115,7 @@ func malwarePolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, me
 		return diag.Errorf("unable to find %s", resourceName)
 	}
 
-	err = malwarePolicyToResourceData(&policy, d)
+	err = driftPolicyToResourceData(&policy, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}

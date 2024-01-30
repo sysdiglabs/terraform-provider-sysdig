@@ -182,7 +182,7 @@ func SeverityComputedSchema() *schema.Schema {
 	}
 }
 
-func PreventMalwareActionSchema() *schema.Schema {
+func PreventActionSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeBool,
 		Optional: true,
@@ -190,7 +190,7 @@ func PreventMalwareActionSchema() *schema.Schema {
 	}
 }
 
-func PreventMalwareActionComputedSchema() *schema.Schema {
+func PreventActionComputedSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeBool,
 		Computed: true,
@@ -343,6 +343,63 @@ func TagsComputedSchema() *schema.Schema {
 		Computed: true,
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
+		},
+	}
+}
+
+func DriftModeSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+		// TODO: Validation?
+	}
+}
+
+func DriftModeComputedSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeString,
+		Computed: true,
+	}
+}
+
+func ExceptionsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		MaxItems: 1,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"items": {
+					Type:     schema.TypeSet,
+					Required: true,
+					Elem:     &schema.Schema{Type: schema.TypeString},
+				},
+				"match_items": {
+					Type:     schema.TypeBool,
+					Optional: true,
+					Default:  false,
+				},
+			},
+		},
+	}
+}
+
+func ExceptionsComputedSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"match_items": {
+					Type:     schema.TypeBool,
+					Computed: true,
+				},
+				"items": {
+					Type:     schema.TypeSet,
+					Computed: true,
+					Elem:     &schema.Schema{Type: schema.TypeString},
+				},
+			},
 		},
 	}
 }

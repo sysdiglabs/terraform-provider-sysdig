@@ -7,25 +7,22 @@ import (
 	"strconv"
 	"time"
 
-	// debug
-	// "fmt"
-
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceSysdigSecureMalwarePolicy() *schema.Resource {
+func resourceSysdigSecureDriftPolicy() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigMalwarePolicyCreate,
-		ReadContext:   resourceSysdigMalwarePolicyRead,
-		UpdateContext: resourceSysdigMalwarePolicyUpdate,
-		DeleteContext: resourceSysdigMalwarePolicyDelete,
+		CreateContext: resourceSysdigDriftPolicyCreate,
+		ReadContext:   resourceSysdigDriftPolicyRead,
+		UpdateContext: resourceSysdigDriftPolicyUpdate,
+		DeleteContext: resourceSysdigDriftPolicyDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceSysdigSecureMalwarePolicyImportState,
+			StateContext: resourceSysdigSecureDriftPolicyImportState,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -43,8 +40,8 @@ func resourceSysdigSecureMalwarePolicy() *schema.Resource {
 			"type": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "malware",
-				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"malware"}, false)),
+				Default:          "drift",
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{"drift"}, false)),
 			},
 			"name":                  NameSchema(),
 			"description":           DescriptionSchema(),
@@ -71,9 +68,9 @@ func resourceSysdigSecureMalwarePolicy() *schema.Resource {
 							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"use_managed_hashes": BoolSchema(),
-									"additional_hashes":  HashesSchema(),
-									"ignore_hashes":      HashesSchema(),
+									"mode":                DriftModeSchema(),
+									"exceptions":          ExceptionsSchema(),
+									"prohibited_binaries": ExceptionsSchema(),
 								},
 							},
 						},
@@ -85,9 +82,9 @@ func resourceSysdigSecureMalwarePolicy() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"prevent_malware": PreventActionSchema(),
-						"container":       ContainerActionSchema(),
-						"capture":         CaptureActionSchema(),
+						"prevent_drift": PreventActionSchema(),
+						"container":     ContainerActionSchema(),
+						"capture":       CaptureActionSchema(),
 					},
 				},
 			},
@@ -95,16 +92,12 @@ func resourceSysdigSecureMalwarePolicy() *schema.Resource {
 	}
 }
 
-func getSecureCompositePolicyClient(c SysdigClients) (v2.CompositePolicyInterface, error) {
-	return c.sysdigSecureClientV2()
-}
-
-func malwarePolicyFromResourceData(d *schema.ResourceData) (v2.PolicyRulesComposite, error) {
+func driftPolicyFromResourceData(d *schema.ResourceData) (v2.PolicyRulesComposite, error) {
 	policy := &v2.PolicyRulesComposite{
 		Policy: &v2.Policy{},
 		Rules:  []*v2.RuntimePolicyRule{},
 	}
-	err := malwarePolicyReducer(policy, d)
+	err := driftPolicyReducer(policy, d)
 	if err != nil {
 		return *policy, err
 	}
@@ -113,18 +106,18 @@ func malwarePolicyFromResourceData(d *schema.ResourceData) (v2.PolicyRulesCompos
 }
 
 // TODO: Rename
-func malwarePolicyToResourceData(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
-	return malwareTFResourceReducer(d, *policy)
+func driftPolicyToResourceData(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
+	return driftTFResourceReducer(d, *policy)
 }
 
-func resourceSysdigMalwarePolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigDriftPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureCompositePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	policy, err := malwarePolicyFromResourceData(d)
+	policy, err := driftPolicyFromResourceData(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -135,22 +128,19 @@ func resourceSysdigMalwarePolicyCreate(ctx context.Context, d *schema.ResourceDa
 	}
 	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
-	err = malwarePolicyToResourceData(&policy, d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	driftPolicyToResourceData(&policy, d)
 
 	return nil
 }
 
-func resourceSysdigMalwarePolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigDriftPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureCompositePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	policy, err := malwarePolicyFromResourceData(d)
+	policy, err := driftPolicyFromResourceData(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -164,7 +154,7 @@ func resourceSysdigMalwarePolicyUpdate(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceSysdigMalwarePolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigDriftPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -180,7 +170,7 @@ func resourceSysdigMalwarePolicyRead(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	err = malwarePolicyToResourceData(&policy, d)
+	err = driftPolicyToResourceData(&policy, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -188,14 +178,14 @@ func resourceSysdigMalwarePolicyRead(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigMalwarePolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigDriftPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureCompositePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	policy, err := malwarePolicyFromResourceData(d)
+	policy, err := driftPolicyFromResourceData(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -213,13 +203,13 @@ func resourceSysdigMalwarePolicyDelete(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceSysdigSecureMalwarePolicyImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceSysdigSecureDriftPolicyImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return nil, err
 	}
 
-	policy, err := malwarePolicyFromResourceData(d)
+	policy, err := driftPolicyFromResourceData(d)
 	if err != nil {
 		return nil, err
 	}
@@ -237,7 +227,7 @@ func resourceSysdigSecureMalwarePolicyImportState(ctx context.Context, d *schema
 		return nil, errors.New("unable to import policy that is not a custom policy")
 	}
 
-	err = malwarePolicyToResourceData(&policy, d)
+	err = driftPolicyToResourceData(&policy, d)
 	if err != nil {
 		return nil, err
 	}

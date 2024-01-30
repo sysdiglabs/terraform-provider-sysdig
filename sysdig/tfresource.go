@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -13,6 +12,16 @@ import (
 
 const (
 	policyTypeMalware = "malware"
+	policyTypeDrift   = "drift"
+	policyTypeML      = "machine_learning"
+	policyTypeAWSML   = "aws_machine_learning"
+
+	preventMalwareKey = "prevent_malware"
+	preventDriftKey   = "prevent_drift"
+
+	defaultMalwareTag = "malware"
+	defaultDriftTag   = "drift"
+	defaultMLTag      = "machine_learning"
 )
 
 type Target interface {
@@ -43,6 +52,16 @@ func Reduce[T Target, S Source](target T, source S, reducers ...func(T, S) error
 	return nil
 }
 
+func schemaSetToList(values interface{}) []string {
+	v := values.(*schema.Set).List()
+
+	x := make([]string, len(v))
+	for i := range v {
+		x[i] = v[i].(string)
+	}
+	return x
+}
+
 func setTFResourceBaseAttrs(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
 	d.SetId(strconv.Itoa(policy.Policy.ID))
 
@@ -60,14 +79,16 @@ func setTFResourceBaseAttrs(d *schema.ResourceData, policy v2.PolicyRulesComposi
 	return nil
 }
 
-func setTFResourceAdditionalAttrsMalware(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
-	if policy.Policy.Type != "" {
-		_ = d.Set("type", policy.Policy.Type)
-	} else {
-		_ = d.Set("type", policyTypeMalware)
-	}
+func setTFResourcePolicyType(policyType string) func(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
+	return func(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
+		if policy.Policy.Type != "" {
+			_ = d.Set("type", policy.Policy.Type)
+		} else {
+			_ = d.Set("type", policyType)
+		}
 
-	return nil
+		return nil
+	}
 }
 
 func setTFResourcePolicyRulesMalware(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
@@ -111,79 +132,126 @@ func setTFResourcePolicyRulesMalware(d *schema.ResourceData, policy v2.PolicyRul
 	return nil
 }
 
-func setTFResourcePolicyActionsMalware(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
-	actions := []map[string]interface{}{{}}
-	preventMalware := false
-	for _, action := range policy.Policy.Actions {
-		if action.Type == "POLICY_ACTION_PREVENT_MALWARE" {
-			actions[0]["prevent_malware"] = true
-			preventMalware = true
-		} else if action.Type == "POLICY_ACTION_PAUSE" || action.Type == "POLICY_ACTION_STOP" || action.Type == "POLICY_ACTION_KILL" { // TODO: Refactor
-			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
-			actions[0]["container"] = strings.ToLower(action)
-		} else {
-			actions[0]["capture"] = []map[string]interface{}{{
-				"seconds_after_event":  action.AfterEventNs / 1000000000,
-				"seconds_before_event": action.BeforeEventNs / 1000000000,
-				"name":                 action.Name,
-				"filter":               action.Filter,
-				"bucket_name":          action.BucketName,
-				"folder":               action.Folder,
-			}}
+func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
+	if len(policy.Rules) == 0 {
+		return errors.New("The policy must have at least one rule attached to it")
+	}
+
+	rules := []map[string]interface{}{}
+	for _, rule := range policy.Rules {
+		exceptions := map[string]interface{}{
+			"items":       rule.Details.(*v2.DriftRuleDetails).Exceptions.Items,
+			"match_items": rule.Details.(*v2.DriftRuleDetails).Exceptions.MatchItems,
 		}
+
+		prohibitedBinaries := map[string]interface{}{
+			"items":       rule.Details.(*v2.DriftRuleDetails).ProhibitedBinaries.Items,
+			"match_items": rule.Details.(*v2.DriftRuleDetails).ProhibitedBinaries.MatchItems,
+		}
+
+		rules = append(rules, map[string]interface{}{
+			"id":          rule.Id,
+			"name":        rule.Name,
+			"description": rule.Description,
+			"tags":        rule.Tags,
+			"details": []map[string]interface{}{{
+				"mode":               rule.Details.(*v2.DriftRuleDetails).Mode,
+				"exceptions":         exceptions,
+				"prohibitedBinaries": prohibitedBinaries,
+			}},
+		})
 	}
 
-	// If prevent_malware was updated from true to false, ensure TF resource knows that
-	if !preventMalware {
-		actions[0]["prevent_malware"] = false
-	}
-
-	currentContainerAction := d.Get("actions.0.container").(string)
-	currentCaptureAction := d.Get("actions.0.capture").([]interface{})
-	// If the policy retrieved from service has no actions and the current state is default values,
-	// then do not set the "actions" key as it may cause terraform to think there has been a state change
-	if len(policy.Policy.Actions) > 0 || currentContainerAction != "" || len(currentCaptureAction) > 0 {
-		_ = d.Set("actions", actions)
-	}
+	_ = d.Set("rules", rules)
 
 	return nil
+}
+
+// TODO: Split this func into smaller composable functions
+func setTFResourcePolicyActions(key string) func(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
+	return func(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
+		actions := []map[string]interface{}{{}}
+		prevent := false
+		for _, action := range policy.Policy.Actions {
+			if action.Type == "POLICY_ACTION_PREVENT_MALWARE" || action.Type == "POLICY_ACTION_PREVENT_DRIFT" {
+				actions[0][key] = true
+				prevent = true
+			} else if action.Type == "POLICY_ACTION_PAUSE" || action.Type == "POLICY_ACTION_STOP" || action.Type == "POLICY_ACTION_KILL" { // TODO: Refactor
+				action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
+				actions[0]["container"] = strings.ToLower(action)
+			} else {
+				actions[0]["capture"] = []map[string]interface{}{{
+					"seconds_after_event":  action.AfterEventNs / 1000000000,
+					"seconds_before_event": action.BeforeEventNs / 1000000000,
+					"name":                 action.Name,
+					"filter":               action.Filter,
+					"bucket_name":          action.BucketName,
+					"folder":               action.Folder,
+				}}
+			}
+		}
+
+		// If prevent_malware was updated from true to false, ensure TF resource knows that
+		if !prevent {
+			actions[0][key] = false
+		}
+
+		currentContainerAction := d.Get("actions.0.container").(string)
+		currentCaptureAction := d.Get("actions.0.capture").([]interface{})
+		// If the policy retrieved from service has no actions and the current state is default values,
+		// then do not set the "actions" key as it may cause terraform to think there has been a state change
+		if len(policy.Policy.Actions) > 0 || currentContainerAction != "" || len(currentCaptureAction) > 0 {
+			_ = d.Set("actions", actions)
+		}
+
+		return nil
+	}
 }
 
 var malwareTFResourceReducer = Reducer(
 	setTFResourceBaseAttrs,
-	setTFResourceAdditionalAttrsMalware,
-	setTFResourcePolicyActionsMalware,
+	setTFResourcePolicyType(policyTypeMalware),
+	setTFResourcePolicyActions(preventMalwareKey),
 	setTFResourcePolicyRulesMalware,
 )
 
-func setPolicyBaseAttrs(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
-	id, err := strconv.Atoi(d.Id())
-	if err == nil && id != 0 {
-		policy.Policy.ID = id
-		policy.Policy.Version = d.Get("version").(int)
+var driftTFResourceReducer = Reducer(
+	setTFResourceBaseAttrs,
+	setTFResourcePolicyType(policyTypeDrift),
+	setTFResourcePolicyActions(preventDriftKey),
+	setTFResourcePolicyRulesDrift,
+)
+
+func setPolicyBaseAttrs(policyType string) func(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
+	return func(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
+		id, err := strconv.Atoi(d.Id())
+		if err == nil && id != 0 {
+			policy.Policy.ID = id
+			policy.Policy.Version = d.Get("version").(int)
+		}
+
+		policy.Policy.Type = policyType
+
+		policy.Policy.Name = d.Get("name").(string)
+		policy.Policy.Enabled = d.Get("enabled").(bool)
+
+		policy.Policy.Description = d.Get("description").(string)
+		policy.Policy.Severity = d.Get("severity").(int)
+
+		policy.Policy.Runbook = d.Get("runbook").(string)
+		policy.Policy.Scope = d.Get("scope").(string)
+
+		policy.Policy.NotificationChannelIds = []int{}
+		notificationChannelIdSet := d.Get("notification_channels").(*schema.Set)
+		for _, id := range notificationChannelIdSet.List() {
+			policy.Policy.NotificationChannelIds = append(policy.Policy.NotificationChannelIds, id.(int))
+		}
+
+		return nil
 	}
-
-	policy.Policy.Type = policyTypeMalware
-
-	policy.Policy.Name = d.Get("name").(string)
-	policy.Policy.Enabled = d.Get("enabled").(bool)
-
-	policy.Policy.Description = d.Get("description").(string)
-	policy.Policy.Severity = d.Get("severity").(int)
-
-	policy.Policy.Runbook = d.Get("runbook").(string)
-	policy.Policy.Scope = d.Get("scope").(string)
-
-	policy.Policy.NotificationChannelIds = []int{}
-	notificationChannelIdSet := d.Get("notification_channels").(*schema.Set)
-	for _, id := range notificationChannelIdSet.List() {
-		policy.Policy.NotificationChannelIds = append(policy.Policy.NotificationChannelIds, id.(int))
-	}
-
-	return nil
 }
 
-func setPolicyActionsMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
+func setPolicyActions(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
 	addActionsToPolicy(d, policy.Policy)
 	return nil
 }
@@ -217,6 +285,10 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 		}
 
 		tags := schemaSetToList(d.Get("rules.0.tags"))
+		// Set default tags as field tags must not be null
+		if len(tags) == 0 {
+			tags = []string{defaultMalwareTag}
+		}
 		rule := &v2.RuntimePolicyRule{
 			// TODO: Do not hardcode the indexes
 			Name:        d.Get("rules.0.name").(string),
@@ -233,8 +305,54 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 		id := v2.FlexInt(d.Get("rules.0.id").(int))
 		if int(id) != 0 {
 			rule.Id = &id
-		} else {
-			return fmt.Errorf("id is nil: %s, %s", d.Get("rules.0.name"), d.Get("rules.0.id"))
+		}
+
+		policy.Rules = append(policy.Rules, rule)
+	}
+	return nil
+}
+
+func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
+	policy.Policy.Rules = []*v2.PolicyRule{}
+	policy.Rules = []*v2.RuntimePolicyRule{}
+	if _, ok := d.GetOk("rules"); ok {
+		// TODO: Iterate over a list of rules instead of hard-coding the index values
+		// TODO: Should we assume that only a single Malware rule can be attached to a policy?
+
+		exceptions := &v2.RuntimePolicyRuleList{}
+		if _, ok := d.GetOk("rules.0.details.0.exceptions"); ok { // TODO: Do not hardcode the indexes
+			exceptions.Items = schemaSetToList(d.Get("rules.0.details.0.exceptions.0.items"))
+			exceptions.MatchItems = d.Get("rules.0.details.0.exceptions.0.match_items").(bool)
+		}
+
+		// TODO: Extract into a function
+		prohibitedBinaries := &v2.RuntimePolicyRuleList{}
+		if _, ok := d.GetOk("rules.0.details.0.prohibited_binaries"); ok { // TODO: Do not hardcode the indexes
+			exceptions.Items = schemaSetToList(d.Get("rules.0.details.0.prohibited_binaries.0.items"))
+			exceptions.MatchItems = d.Get("rules.0.details.0.prohibited_binaries.0.match_items").(bool)
+		}
+
+		tags := schemaSetToList(d.Get("rules.0.tags"))
+		// Set default tags as field tags must not be null
+		if len(tags) == 0 {
+			tags = []string{defaultDriftTag}
+		}
+		rule := &v2.RuntimePolicyRule{
+			// TODO: Do not hardcode the indexes
+			Name:        d.Get("rules.0.name").(string),
+			Description: d.Get("rules.0.description").(string),
+			Tags:        tags,
+			Details: v2.DriftRuleDetails{
+				RuleType:           v2.ElementType("DRIFT"), // TODO: Use const
+				Mode:               d.Get("rules.0.details.0.mode").(string),
+				Exceptions:         exceptions,
+				ProhibitedBinaries: prohibitedBinaries,
+			},
+		}
+
+		id := v2.FlexInt(d.Get("rules.0.id").(int))
+		if int(id) != 0 {
+			rule.Id = &id
 		}
 
 		policy.Rules = append(policy.Rules, rule)
@@ -243,7 +361,13 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 }
 
 var malwarePolicyReducer = Reducer(
-	setPolicyBaseAttrs,
-	setPolicyActionsMalware,
+	setPolicyBaseAttrs(policyTypeMalware),
+	setPolicyActions,
 	setPolicyRulesMalware,
+)
+
+var driftPolicyReducer = Reducer(
+	setPolicyBaseAttrs(policyTypeDrift),
+	setPolicyActions,
+	setPolicyRulesDrift,
 )
