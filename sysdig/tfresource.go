@@ -149,7 +149,6 @@ func setTFResourcePolicyActionsMalware(d *schema.ResourceData, policy v2.PolicyR
 	return nil
 }
 
-// var malwareTFResourceReducer interface{}// func(*schema.ResourceData, v2.PolicyRulesComposite)
 var malwareTFResourceReducer = Reducer(
 	setTFResourceBaseAttrs,
 	setTFResourceAdditionalAttrsMalware,
@@ -235,7 +234,7 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 		if int(id) != 0 {
 			rule.Id = &id
 		} else {
-			return errors.New((fmt.Sprintf("id is nil: %s, %s", d.Get("rules.0.name"), d.Get("rules.0.id"))))
+			return fmt.Errorf("id is nil: %s, %s", d.Get("rules.0.name"), d.Get("rules.0.id"))
 		}
 
 		policy.Rules = append(policy.Rules, rule)
@@ -243,7 +242,6 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 	return nil
 }
 
-// var malwarePolicyReducer func(*v2.PolicyRulesComposite, schema.ResourceData)
 var malwarePolicyReducer = Reducer(
 	setPolicyBaseAttrs,
 	setPolicyActionsMalware,
