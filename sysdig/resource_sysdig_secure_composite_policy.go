@@ -115,7 +115,7 @@ func compositePolicyFromResourceData(d *schema.ResourceData) (v2.PolicyRulesComp
 		Policy: &v2.Policy{},
 		Rules:  []*v2.RuntimePolicyRule{},
 	}
-	err := malwarePolicyReducer(policy, *d)
+	err := malwarePolicyReducer(policy, d)
 	if err != nil {
 		return *policy, err
 	}

@@ -20,7 +20,9 @@ type Target interface {
 }
 
 type Source interface {
-	schema.ResourceData | v2.PolicyRulesComposite
+	// copylocks: Do not pass lock by value:
+	// schema.ResourceData contains sync.Once contains sync.Mutex (govet)
+	*schema.ResourceData | v2.PolicyRulesComposite
 }
 
 func Reducer[T Target, S Source](reducers ...func(T, S) error) func(T, S) error {
@@ -155,7 +157,7 @@ var malwareTFResourceReducer = Reducer(
 	setTFResourcePolicyRulesMalware,
 )
 
-func setPolicyBaseAttrs(policy *v2.PolicyRulesComposite, d schema.ResourceData) error {
+func setPolicyBaseAttrs(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
 	id, err := strconv.Atoi(d.Id())
 	if err == nil && id != 0 {
 		policy.Policy.ID = id
@@ -182,12 +184,12 @@ func setPolicyBaseAttrs(policy *v2.PolicyRulesComposite, d schema.ResourceData) 
 	return nil
 }
 
-func setPolicyActionsMalware(policy *v2.PolicyRulesComposite, d schema.ResourceData) error {
-	addActionsToPolicy(&d, policy.Policy)
+func setPolicyActionsMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
+	addActionsToPolicy(d, policy.Policy)
 	return nil
 }
 
-func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d schema.ResourceData) error {
+func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
 	policy.Policy.Rules = []*v2.PolicyRule{}
 	policy.Rules = []*v2.RuntimePolicyRule{}
 	if _, ok := d.GetOk("rules"); ok {
