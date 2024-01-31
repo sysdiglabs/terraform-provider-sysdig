@@ -36,41 +36,36 @@ func driftPolicyWithName(name string) string {
 %s
 
 resource "sysdig_secure_drift_policy" "sample" {
-  name = "Test Malware Policy %s"
-  description = "Test Malware Policy Description %s"
-  enabled = true
-  severity = 4
-  
-  %s
-  
+  name        = "Test Drift Policy %s"
+  description = "Test Drift Policy Description"
+  enabled     = true
+  severity    = 4
+
+  rules {
+    description = "Test Drift Rule Description"
+
+    details {
+      mode = "enabled"
+
+      exceptions {
+        items       = ["304ef4cdda3463b24bf53f9cdd69ad3ecdab0842e7e70e2f3cfbb9f14e1c4ae6"]
+        match_items = true
+      }
+      prohibited_binaries {
+        items       = ["304ef4cdda3463b24bf53f9cdd69ad3ecdab0842e7e70e2f3cfbb9f14e1c4ae6"]
+        match_items = true
+      }
+    }
+  }
+
   actions {
     prevent_drift = true
   }
-  
+
   notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
 }
-`, secureNotificationChannelEmailWithName(name), name, name, ruleDrift(name))
-}
 
-func ruleDrift(name string) string {
-	return fmt.Sprintf(`
-rules {
-  description = "Test Malware Rule Description %s"
-  tags = ["tag1", "tag2"]
-
-  details {
-    mode = "enabled"
-    exceptions {
-      items = ["304ef4cdda3463b24bf53f9cdd69ad3ecdab0842e7e70e2f3cfbb9f14e1c4ae6"]
-      match_items = true
-    }
-    prohibited_binaries {
-      items = ["304ef4cdda3463b24bf53f9cdd69ad3ecdab0842e7e70e2f3cfbb9f14e1c4ae6"]
-      match_items = true
-    }
-  }
-}
-`, name)
+`, secureNotificationChannelEmailWithName(name), name)
 }
 
 // TODO: Specify only a single rule type!
