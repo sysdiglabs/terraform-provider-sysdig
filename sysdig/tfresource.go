@@ -236,7 +236,7 @@ func setTFResourcePolicyRulesAWSML(d *schema.ResourceData, policy v2.PolicyRules
 			"version":     rule.Version,
 			"tags":        rule.Tags,
 			"details": []map[string]interface{}{{
-				"anomolous_console_login": anomalousConsoleLogin,
+				"anomalous_console_login": anomalousConsoleLogin,
 			}},
 		})
 	}
