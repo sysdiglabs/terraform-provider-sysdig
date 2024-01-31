@@ -225,7 +225,7 @@ func policiesForFalcoCloudAWSCloudtrail(name string) string {
 resource "sysdig_secure_policy" "sample7" {
   name = "TERRAFORM TEST 4 %s"
   description = "TERRAFORM TEST %s"
-  type = "awscloudtrail"
+  type = "aws_cloudtrail"
   actions {}
 }
 `, name, name)
