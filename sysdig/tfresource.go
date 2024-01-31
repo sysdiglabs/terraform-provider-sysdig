@@ -318,7 +318,12 @@ func setPolicyBaseAttrs(policyType string) func(policy *v2.PolicyRulesComposite,
 		id, err := strconv.Atoi(d.Id())
 		if err == nil && id != 0 {
 			policy.Policy.ID = id
-			policy.Policy.Version = d.Get("version").(int)
+		}
+
+		v := d.Get("version").(int)
+		if v != 0 {
+			// Version can only be provided when updating existing policies
+			policy.Policy.Version = v
 		}
 
 		policy.Policy.Type = policyType
@@ -385,7 +390,6 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 			// TODO: Do not hardcode the indexes
 			Name:        d.Get("rules.0.name").(string),
 			Description: d.Get("rules.0.description").(string),
-			Version:     toIntPtr(d.Get("rules.0.version")),
 			Tags:        tags,
 			Details: v2.MalwareRuleDetails{
 				RuleType:         v2.ElementType("MALWARE"), // TODO: Use const
@@ -398,6 +402,12 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 		id := v2.FlexInt(d.Get("rules.0.id").(int))
 		if int(id) != 0 {
 			rule.Id = &id
+		}
+
+		v := toIntPtr(d.Get("rules.0.version"))
+		if *v != 0 {
+			// Version can only be provided when updating existing rules
+			rule.Version = v
 		}
 
 		policy.Rules = append(policy.Rules, rule)
@@ -435,7 +445,6 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 			// TODO: Do not hardcode the indexes
 			Name:        d.Get("rules.0.name").(string),
 			Description: d.Get("rules.0.description").(string),
-			Version:     toIntPtr(d.Get("rules.0.version")),
 			Tags:        tags,
 			Details: v2.DriftRuleDetails{
 				RuleType:           v2.ElementType("DRIFT"), // TODO: Use const
@@ -448,6 +457,12 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 		id := v2.FlexInt(d.Get("rules.0.id").(int))
 		if int(id) != 0 {
 			rule.Id = &id
+		}
+
+		v := toIntPtr(d.Get("rules.0.version"))
+		if *v != 0 {
+			// Version can only be provided when updating existing rules
+			rule.Version = v
 		}
 
 		policy.Rules = append(policy.Rules, rule)
@@ -483,8 +498,7 @@ func setPolicyRulesML(policy *v2.PolicyRulesComposite, d *schema.ResourceData) e
 			Description: d.Get("rules.0.description").(string),
 			// IMPORTANT: In order to update an ML policy,
 			// correct version number must be provided
-			Version: toIntPtr(d.Get("rules.0.version")),
-			Tags:    tags,
+			Tags: tags,
 			Details: v2.MLRuleDetails{
 				RuleType:                v2.ElementType("MACHINE_LEARNING"), // TODO: Use const
 				CryptominingTrigger:     cryptominingTrigger,
@@ -495,6 +509,12 @@ func setPolicyRulesML(policy *v2.PolicyRulesComposite, d *schema.ResourceData) e
 		id := v2.FlexInt(d.Get("rules.0.id").(int))
 		if int(id) != 0 {
 			rule.Id = &id
+		}
+
+		v := toIntPtr(d.Get("rules.0.version"))
+		if *v != 0 {
+			// Version can only be provided when updating existing rules
+			rule.Version = v
 		}
 
 		policy.Rules = append(policy.Rules, rule)
@@ -528,8 +548,7 @@ func setPolicyRulesAWSML(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 			Description: d.Get("rules.0.description").(string),
 			// IMPORTANT: In order to update an ML policy,
 			// correct version number must be provided
-			Version: toIntPtr(d.Get("rules.0.version")),
-			Tags:    tags,
+			Tags: tags,
 			Details: v2.AWSMLRuleDetails{
 				RuleType:              v2.ElementType("AWS_MACHINE_LEARNING"), // TODO: Use const
 				AnomalousConsoleLogin: anomalousConsoleLogin,
@@ -539,6 +558,12 @@ func setPolicyRulesAWSML(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 		id := v2.FlexInt(d.Get("rules.0.id").(int))
 		if int(id) != 0 {
 			rule.Id = &id
+		}
+
+		v := toIntPtr(d.Get("rules.0.version"))
+		if *v != 0 {
+			// Version can only be provided when updating existing rules
+			rule.Version = v
 		}
 
 		policy.Rules = append(policy.Rules, rule)
