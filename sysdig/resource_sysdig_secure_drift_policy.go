@@ -129,7 +129,10 @@ func resourceSysdigDriftPolicyCreate(ctx context.Context, d *schema.ResourceData
 	}
 	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
-	driftPolicyToResourceData(&policy, d)
+	err = driftPolicyToResourceData(&policy, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
