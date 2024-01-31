@@ -56,15 +56,12 @@ func resourceSysdigSecureDriftPolicy() *schema.Resource {
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id":   ReadOnlyIntSchema(),
-						"name": ReadOnlyStringSchema(),
-						// Do not allow switching off individual rules
-						// "enabled":     EnabledSchema(),
-						"description": DescriptionSchema(),
-						"tags":        TagsSchema(),
-						"version":     VersionSchema(),
-						// Enable maps to mode rule attribute
-						"enabled":             BoolSchema(),
+						"id":                  ReadOnlyIntSchema(),
+						"name":                ReadOnlyStringSchema(),
+						"description":         DescriptionSchema(),
+						"tags":                TagsSchema(),
+						"version":             VersionSchema(),
+						"enabled":             BoolSchema(), // Enable maps to mode rule attribute
 						"exceptions":          ExceptionsSchema(),
 						"prohibited_binaries": ExceptionsSchema(),
 					},
