@@ -167,9 +167,9 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 			"version":     rule.Version,
 			"tags":        rule.Tags,
 			"details": []map[string]interface{}{{
-				"mode":               rule.Details.(*v2.DriftRuleDetails).Mode,
-				"exceptions":         exceptions,
-				"prohibitedBinaries": prohibitedBinaries,
+				"mode":                rule.Details.(*v2.DriftRuleDetails).Mode,
+				"exceptions":          exceptions,
+				"prohibited_binaries": prohibitedBinaries,
 			}},
 		})
 	}
