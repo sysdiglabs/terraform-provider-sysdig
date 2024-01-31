@@ -437,8 +437,8 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 		// TODO: Extract into a function
 		prohibitedBinaries := &v2.RuntimePolicyRuleList{}
 		if _, ok := d.GetOk("rules.0.details.0.prohibited_binaries"); ok { // TODO: Do not hardcode the indexes
-			exceptions.Items = schemaSetToList(d.Get("rules.0.details.0.prohibited_binaries.0.items"))
-			exceptions.MatchItems = d.Get("rules.0.details.0.prohibited_binaries.0.match_items").(bool)
+			prohibitedBinaries.Items = schemaSetToList(d.Get("rules.0.details.0.prohibited_binaries.0.items"))
+			prohibitedBinaries.MatchItems = d.Get("rules.0.details.0.prohibited_binaries.0.match_items").(bool)
 		}
 
 		tags := schemaSetToList(d.Get("rules.0.tags"))
