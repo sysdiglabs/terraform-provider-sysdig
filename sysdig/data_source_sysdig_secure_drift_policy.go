@@ -80,7 +80,7 @@ func driftPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	policyName := d.Get("name").(string)
-	policyType := "drift" // assume it's "drift" type
+	policyType := policyTypeDrift
 
 	policies, _, err := client.FilterCompositePoliciesByNameAndType(ctx, policyType, policyName)
 	if err != nil {
