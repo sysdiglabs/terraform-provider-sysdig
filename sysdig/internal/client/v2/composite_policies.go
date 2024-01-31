@@ -166,6 +166,10 @@ func (client *Client) FilterCompositePoliciesByNameAndType(ctx context.Context, 
 		return []PolicyRulesComposite{}, 0, err
 	}
 
+	if len(policies) == 0 {
+		return []PolicyRulesComposite{}, 0, fmt.Errorf("Policy was not found: %s %s", policyType, policyName)
+	}
+
 	compositePoliciesByPolicyID := map[int]PolicyRulesComposite{}
 	policyIDByRuleName := map[string]int{}
 	names := []string{}

@@ -45,7 +45,6 @@ resource "sysdig_secure_drift_policy" "policy_1" {
 
   rule {
     description = "Test Drift Rule Description"
-
     enabled = false
 
     exceptions {
@@ -63,7 +62,8 @@ resource "sysdig_secure_drift_policy" "policy_1" {
 }
 	
 data "sysdig_secure_drift_policy" "policy_2" {
-	name = sysdig_secure_drift_policy.policy_1.name
+  name       = sysdig_secure_drift_policy.policy_1.name
+  depends_on = [sysdig_secure_drift_policy.policy_1]
 }
 `
 }
