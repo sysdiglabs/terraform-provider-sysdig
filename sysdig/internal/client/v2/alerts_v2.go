@@ -29,6 +29,7 @@ const (
 	AlertV2TypeEvent               AlertV2Type = "EVENT"
 	AlertV2TypeChange              AlertV2Type = "PERCENTAGE_OF_CHANGE"
 	AlertV2TypeFormBasedPrometheus AlertV2Type = "FORM_BASED_PROMETHEUS"
+	AlertV2TypeGroupOutlier        AlertV2Type = "GROUP_OUTLIERS"
 
 	AlertV2SeverityHigh   AlertV2Severity = "high"
 	AlertV2SeverityMedium AlertV2Severity = "medium"
@@ -52,6 +53,7 @@ type AlertV2Interface interface {
 	AlertV2DowntimeInterface
 	AlertV2ChangeInterface
 	AlertV2FormBasedPrometheusInterface
+	AlertV2GroupOutlierInterface
 }
 
 type AlertV2PrometheusInterface interface {
@@ -92,6 +94,14 @@ type AlertV2FormBasedPrometheusInterface interface {
 	UpdateAlertV2FormBasedPrometheus(ctx context.Context, alert AlertV2FormBasedPrometheus) (AlertV2FormBasedPrometheus, error)
 	GetAlertV2FormBasedPrometheus(ctx context.Context, alertID int) (AlertV2FormBasedPrometheus, error)
 	DeleteAlertV2FormBasedPrometheus(ctx context.Context, alertID int) error
+}
+
+type AlertV2GroupOutlierInterface interface {
+	Base
+	CreateAlertV2GroupOutlier(ctx context.Context, alert AlertV2GroupOutlier) (AlertV2GroupOutlier, error)
+	UpdateAlertV2GroupOutlier(ctx context.Context, alert AlertV2GroupOutlier) (AlertV2GroupOutlier, error)
+	GetAlertV2GroupOutlier(ctx context.Context, alertID int) (AlertV2GroupOutlier, error)
+	DeleteAlertV2GroupOutlier(ctx context.Context, alertID int) error
 }
 
 type AlertV2DowntimeInterface interface {
@@ -544,6 +554,82 @@ func (client *Client) GetAlertV2FormBasedPrometheus(ctx context.Context, alertID
 }
 
 func (client *Client) DeleteAlertV2FormBasedPrometheus(ctx context.Context, alertID int) error {
+	return client.deleteAlertV2(ctx, alertID)
+}
+
+func (client *Client) CreateAlertV2GroupOutlier(ctx context.Context, alert AlertV2GroupOutlier) (AlertV2GroupOutlier, error) {
+	err := client.addNotificationChannelType(ctx, alert.NotificationChannelConfigList)
+	if err != nil {
+		return AlertV2GroupOutlier{}, err
+	}
+
+	err = client.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig)
+	if err != nil {
+		return AlertV2GroupOutlier{}, err
+	}
+
+	payload, err := Marshal(alertV2GroupOutlierWrapper{Alert: alert})
+	if err != nil {
+		return AlertV2GroupOutlier{}, err
+	}
+
+	body, err := client.createAlertV2(ctx, payload)
+	if err != nil {
+		return AlertV2GroupOutlier{}, err
+	}
+
+	wrapper, err := Unmarshal[alertV2GroupOutlierWrapper](body)
+	if err != nil {
+		return AlertV2GroupOutlier{}, err
+	}
+
+	return wrapper.Alert, nil
+}
+
+func (client *Client) UpdateAlertV2GroupOutlier(ctx context.Context, alert AlertV2GroupOutlier) (AlertV2GroupOutlier, error) {
+	err := client.addNotificationChannelType(ctx, alert.NotificationChannelConfigList)
+	if err != nil {
+		return AlertV2GroupOutlier{}, err
+	}
+
+	err = client.translateScopeSegmentLabels(ctx, &alert.Config.ScopedSegmentedConfig)
+	if err != nil {
+		return AlertV2GroupOutlier{}, err
+	}
+
+	payload, err := Marshal(alertV2GroupOutlierWrapper{Alert: alert})
+	if err != nil {
+		return AlertV2GroupOutlier{}, err
+	}
+
+	body, err := client.updateAlertV2(ctx, alert.ID, payload)
+	if err != nil {
+		return AlertV2GroupOutlier{}, err
+	}
+
+	wrapper, err := Unmarshal[alertV2GroupOutlierWrapper](body)
+	if err != nil {
+		return AlertV2GroupOutlier{}, err
+	}
+
+	return wrapper.Alert, nil
+}
+
+func (client *Client) GetAlertV2GroupOutlier(ctx context.Context, alertID int) (AlertV2GroupOutlier, error) {
+	body, err := client.getAlertV2(ctx, alertID)
+	if err != nil {
+		return AlertV2GroupOutlier{}, err
+	}
+
+	wrapper, err := Unmarshal[alertV2GroupOutlierWrapper](body)
+	if err != nil {
+		return AlertV2GroupOutlier{}, err
+	}
+
+	return wrapper.Alert, nil
+}
+
+func (client *Client) DeleteAlertV2GroupOutlier(ctx context.Context, alertID int) error {
 	return client.deleteAlertV2(ctx, alertID)
 }
 

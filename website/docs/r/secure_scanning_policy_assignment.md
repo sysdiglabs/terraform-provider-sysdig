@@ -8,9 +8,9 @@ description: |-
 
 # Resource: sysdig_secure_scanning_policy_assignment
 
-Creates a Sysdig Secure Policy Assignment.
+Creates a Sysdig Secure Policy Assignment (legacy scanning engine).
 
--> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.  
+-> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
@@ -52,7 +52,7 @@ resource "sysdig_secure_scanning_policy_assignment" "assignment_example" {
 
     policy_ids = [sysdig_secure_scanning_policy.scanning_policy_example.id, "default"]
   }
-  
+
 }
 ```
 

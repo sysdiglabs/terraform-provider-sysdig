@@ -30,6 +30,10 @@
                 "Value": "sysdig_logging"
             },
             {
+                "Name": "SYSDIG_SIDECAR",
+                "Value": ""
+            },
+            {
                 "Name": "SYSDIG_ORCHESTRATOR",
                 "Value": "orchestrator_host"
             },
@@ -87,6 +91,10 @@
                 "Value": "sysdig_logging"
             },
             {
+                "Name": "SYSDIG_SIDECAR",
+                "Value": ""
+            },
+            {
                 "Name": "SYSDIG_ORCHESTRATOR",
                 "Value": "orchestrator_host"
             },
@@ -142,6 +150,44 @@
         "Name": "SysdigInstrumentation",
         "RepositoryCredentials": {
             "CredentialsParameter": "image_auth_secret"
-        }
+        },
+        "Environment": [
+            {
+                "Name": "SYSDIG_ORCHESTRATOR_PORT",
+                "Value": "orchestrator_port"
+            },
+            {
+                "Name": "SYSDIG_COLLECTOR",
+                "Value": "collector_host"
+            },
+            {
+                "Name": "SYSDIG_COLLECTOR_PORT",
+                "Value": "collector_port"
+            },
+            {
+                "Name": "SYSDIG_ACCESS_KEY",
+                "Value": "sysdig_access_key"
+            },
+            {
+                "Name": "SYSDIG_LOGGING",
+                "Value": "sysdig_logging"
+            },
+            {
+                "Name": "SYSDIG_SIDECAR",
+                "Value": ""
+            },
+            {
+                "Name": "SYSDIG_ORCHESTRATOR",
+                "Value": "orchestrator_host"
+            },
+            {
+                "Name": "GIMME",
+                "Value": "friedChicken"
+            },
+            {
+                "Name": "THE_ANSWER_IS",
+                "Value": "42"
+            }
+        ]
     }
 ]

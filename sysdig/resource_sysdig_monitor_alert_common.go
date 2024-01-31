@@ -61,7 +61,7 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 			Default:  true,
 		},
 		"notification_channels": {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Elem:     &schema.Schema{Type: schema.TypeInt},
 			Optional: true,
 		},
@@ -170,7 +170,8 @@ func alertFromResourceData(d *schema.ResourceData) (alert *v2.Alert, err error) 
 	}
 
 	if channels, ok := d.GetOk("notification_channels"); ok {
-		for _, channel := range channels.([]interface{}) {
+		channelSet := channels.(*schema.Set)
+		for _, channel := range channelSet.List() {
 			alert.NotificationChannelIds = append(alert.NotificationChannelIds, channel.(int))
 		}
 	}

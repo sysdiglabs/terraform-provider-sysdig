@@ -61,9 +61,9 @@ func resourceSysdigSecureOrganizationCreate(ctx context.Context, data *schema.Re
 
 	org := secureOrganizationFromResourceData(data)
 
-	orgCreated, err := client.CreateOrganizationSecure(ctx, org)
+	orgCreated, errStatus, err := client.CreateOrganizationSecure(ctx, org)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("Error creating resource: %s %s", errStatus, err)
 	}
 
 	data.SetId(orgCreated.Id)
@@ -82,7 +82,7 @@ func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.Re
 		if strings.Contains(errStatus, "404") {
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.Errorf("Error deleting resource: %s %s", errStatus, err)
 	}
 
 	return nil
@@ -99,7 +99,7 @@ func resourceSysdigSecureOrganizationRead(ctx context.Context, data *schema.Reso
 		if strings.Contains(errStatus, "404") {
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
 
 	err = secureOrganizationToResourceData(data, org)
@@ -123,7 +123,7 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 		if strings.Contains(errStatus, "404") {
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 
 	return nil

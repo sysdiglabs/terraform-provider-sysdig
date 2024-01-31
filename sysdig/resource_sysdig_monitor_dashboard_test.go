@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig_monitor || tf_acc_ibm_monitor
+//go:build tf_acc_sysdig_monitor || tf_acc_ibm_monitor || tf_acc_onprem_monitor
 
 package sysdig_test
 
@@ -323,6 +323,12 @@ func TestAccDashboard(t *testing.T) {
 					),
 				),
 			},
+			{
+				Config: minimumDashboardWithMinInterval(rText(), "70s"), // Assuming this function returns the desired Terraform config
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sysdig_monitor_dashboard.dashboard", "min_interval", "70s"),
+				),
+			},
 		},
 	})
 }
@@ -394,6 +400,43 @@ resource "sysdig_monitor_dashboard" "dashboard_2" {
 	}
 }
 `, name, name)
+}
+
+func minimumDashboardWithMinInterval(name string, minInterval string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_dashboard" "dashboard" {
+	name = "TERRAFORM TEST - METRIC %s"
+	description = "TERRAFORM TEST - METRIC %s"
+	min_interval = "%s"
+	panel {
+		pos_x = 0
+		pos_y = 0
+		width = 12 # Maximum size: 24
+		height = 6
+		type = "timechart"
+		name = "example panel"
+		description = "description"
+
+        legend {
+            show_current = true
+            position = "bottom"
+            layout = "inline"
+        }
+
+		query {
+			promql = "avg(avg_over_time(sysdig_host_cpu_used_percent[$__interval]))"
+			unit = "percent"
+
+            format {
+                display_format = "auto"
+                input_format = "0-100"
+                y_axis = "auto"
+                null_value_display_mode = "nullGap"
+            }
+		}
+	}
+}
+`, name, name, minInterval)
 }
 
 func multiplePanelsDashboard(name string) string {

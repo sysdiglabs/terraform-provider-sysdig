@@ -17,30 +17,34 @@ const (
 
 type OrganizationSecureInterface interface {
 	Base
-	CreateOrganizationSecure(ctx context.Context, org *OrganizationSecure) (*OrganizationSecure, error)
+	CreateOrganizationSecure(ctx context.Context, org *OrganizationSecure) (*OrganizationSecure, string, error)
 	GetOrganizationSecure(ctx context.Context, orgID string) (*OrganizationSecure, string, error)
 	DeleteOrganizationSecure(ctx context.Context, orgID string) (string, error)
 	UpdateOrganizationSecure(ctx context.Context, orgID string, org *OrganizationSecure) (*OrganizationSecure, string, error)
 }
 
-func (client *Client) CreateOrganizationSecure(ctx context.Context, org *OrganizationSecure) (*OrganizationSecure, error) {
+func (client *Client) CreateOrganizationSecure(ctx context.Context, org *OrganizationSecure) (*OrganizationSecure, string, error) {
 	payload, err := client.marshalOrg(org)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	response, err := client.requester.Request(ctx, http.MethodPost, client.organizationsURL(), payload)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
-		err = client.ErrorFromResponse(response)
-		return nil, err
+		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		return nil, errStatus, err
 	}
 
-	return client.unmarshalOrg(response.Body)
+	organization, err := client.unmarshalOrg(response.Body)
+	if err != nil {
+		return nil, "", err
+	}
+	return organization, "", nil
 }
 
 func (client *Client) GetOrganizationSecure(ctx context.Context, orgID string) (*OrganizationSecure, string, error) {

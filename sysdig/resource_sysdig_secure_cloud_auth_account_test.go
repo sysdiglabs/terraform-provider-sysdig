@@ -257,3 +257,63 @@ func secureAzureCloudAuthAccountWithFC(accountID string) string {
 			}
 		}`, accountID, randomTenantId)
 }
+
+func TestAccAzureSecureCloudAccountFCThreatDetection(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+	accID := rText()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: secureAzureCloudAuthAccountWithFCThreatDetection(accID),
+			},
+			{
+				ResourceName:            "sysdig_secure_cloud_auth_account.sample-1",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"component"},
+			},
+		},
+	})
+}
+
+func secureAzureCloudAuthAccountWithFCThreatDetection(accountID string) string {
+	rID := func() string { return acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum) }
+	randomTenantId := rID()
+
+	return fmt.Sprintf(`
+		resource "sysdig_secure_cloud_auth_account" "sample-1" {
+			provider_id   = "sample-1-%s"
+			provider_type = "PROVIDER_AZURE"
+			enabled       = true
+			provider_tenant_id = "%s"
+			feature {
+				secure_threat_detection {
+					enabled    = true
+					components = ["COMPONENT_EVENT_BRIDGE/secure-runtime"]
+				  }
+			}
+			component {
+				type                       = "COMPONENT_EVENT_BRIDGE"
+				instance                   = "secure-runtime"
+				event_bridge_metadata = jsonencode({
+					azure = {
+						event_hub_metadata= {
+							event_hub_name      = "event-hub-name"
+							event_hub_namespace = "event-hub-namespace"
+							consumer_group      = "consumer-group"
+						}
+					}
+				})
+			}
+		}`, accountID, randomTenantId)
+}

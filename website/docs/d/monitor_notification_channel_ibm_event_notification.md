@@ -30,7 +30,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The Notification Channel ID.
 * `name` - The Notification Channel Name.
-* `instance_id` - id of the Event Notifications Instance.
+* `instance_id` - id of the Event Notifications Instance. Id value can be either an instance id or CRN. If the event notification instance is within the same account, then it is the instance id. If it is in a different account, then the Event Notifications Instance's [CRN](https://cloud.ibm.com/docs/account?topic=account-crn).
 * `enabled` - Whether the Notification Channel is active or not.
 * `notify_when_ok` - Whether the Notification Channel sends a notification when the condition is no longer triggered.
 * `notify_when_resolved` - Whether the Notification Channel sends a notification if it's manually acknowledged by a

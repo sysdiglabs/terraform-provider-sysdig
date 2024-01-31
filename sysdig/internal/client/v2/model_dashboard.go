@@ -433,6 +433,7 @@ type Dashboard struct {
 	CreatedOnDate           string                 `json:"createdOnDate"`
 	ModifiedOnDate          string                 `json:"modifiedOnDate"`
 	TeamSharingOptions      TeamSharingOptions     `json:"teamSharingOptions"`
+	MinInterval             string                 `json:"minInterval"`
 }
 
 type dashboardWrapper struct {

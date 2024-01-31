@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig_monitor || tf_acc_ibm_monitor
+//go:build tf_acc_sysdig_monitor || tf_acc_ibm_monitor || tf_acc_onprem_monitor
 
 package sysdig_test
 
@@ -50,6 +50,9 @@ func TestAccAlertV2FormBasedPrometheusTest(t *testing.T) {
 			},
 			{
 				Config: alertV2FormBasedPrometheusTestWithEnabled(rText()),
+			},
+			{
+				Config: alertV2FormBasedWithUnreportedAlertNotificationsRetentionSec(rText()),
 			},
 			{
 				Config: alertV2FormBasedPrometheusTestWithWarningThreshold(rText()),
@@ -228,6 +231,18 @@ resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 	operator = ">="
 	threshold = 50
 	enabled = false
+}
+`, name)
+}
+
+func alertV2FormBasedWithUnreportedAlertNotificationsRetentionSec(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
+	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
+	operator = ">="
+	threshold = 50
+	unreported_alert_notifications_retention_seconds = 60 * 60 * 24 * 30
 }
 `, name)
 }

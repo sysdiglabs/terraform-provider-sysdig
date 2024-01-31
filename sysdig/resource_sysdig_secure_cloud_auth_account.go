@@ -181,9 +181,9 @@ func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, data *schem
 		return diag.FromErr(err)
 	}
 
-	cloudauthAccount, err := client.CreateCloudauthAccountSecure(ctx, cloudauthAccountFromResourceData(data))
+	cloudauthAccount, errStatus, err := client.CreateCloudauthAccountSecure(ctx, cloudauthAccountFromResourceData(data))
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("Error creating resource: %s %s", errStatus, err)
 	}
 
 	data.SetId(cloudauthAccount.Id)
@@ -206,11 +206,10 @@ func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.
 		if strings.Contains(errStatus, "404") {
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
 
 	err = cloudauthAccountToResourceData(data, cloudauthAccount)
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -229,7 +228,7 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 		if strings.Contains(errStatus, "404") {
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
 
 	newCloudAccount := cloudauthAccountFromResourceData(data)
@@ -237,7 +236,7 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 	// validate and reject non-updatable resource schema fields upfront
 	err = validateCloudauthAccountUpdate(existingCloudAccount, newCloudAccount)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("Error updating resource: %s", err)
 	}
 
 	_, errStatus, err = client.UpdateCloudauthAccountSecure(ctx, data.Id(), newCloudAccount)
@@ -245,7 +244,7 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 		if strings.Contains(errStatus, "404") {
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 
 	return nil
@@ -263,7 +262,7 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 		if strings.Contains(errStatus, "404") {
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.Errorf("Error deleting resource: %s %s", errStatus, err)
 	}
 
 	return nil
@@ -387,8 +386,32 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 						}
 					}
 				case SchemaEventBridgeMetadata:
-					component.Metadata = &cloudauth.AccountComponent_EventBridgeMetadata{
-						EventBridgeMetadata: &cloudauth.EventBridgeMetadata{},
+					if provider == cloudauth.Provider_PROVIDER_AZURE.String() {
+						eventBridgeMetadata := parseResourceMetadataJson(value.(string))
+						eventHubMetadata, ok := eventBridgeMetadata["azure"].(map[string]interface{})["event_hub_metadata"].(map[string]interface{})
+
+						if !ok {
+							fmt.Printf("Resource input for component metadata for provider %s is invalid and not as expected", provider)
+							break
+						}
+
+						component.Metadata = &cloudauth.AccountComponent_EventBridgeMetadata{
+							EventBridgeMetadata: &cloudauth.EventBridgeMetadata{
+								Provider: &cloudauth.EventBridgeMetadata_Azure_{
+									Azure: &cloudauth.EventBridgeMetadata_Azure{
+										EventHubMetadata: &cloudauth.EventBridgeMetadata_Azure_EventHubMetadata{
+											EventHubName:      eventHubMetadata["event_hub_name"].(string),
+											EventHubNamespace: eventHubMetadata["event_hub_namespace"].(string),
+											ConsumerGroup:     eventHubMetadata["consumer_group"].(string),
+										},
+									},
+								},
+							},
+						}
+					} else {
+						component.Metadata = &cloudauth.AccountComponent_EventBridgeMetadata{
+							EventBridgeMetadata: &cloudauth.EventBridgeMetadata{},
+						}
 					}
 				case SchemaServicePrincipalMetadata:
 					// TODO: Make it more generic than just for GCP
@@ -676,6 +699,26 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 					}
 
 					componentBlock[SchemaServicePrincipalMetadata] = string(schemaData)
+				}
+			case *cloudauth.AccountComponent_EventBridgeMetadata:
+				provider := metadata.(*cloudauth.AccountComponent_EventBridgeMetadata).EventBridgeMetadata.GetProvider()
+
+				if providerKey, ok := provider.(*cloudauth.EventBridgeMetadata_Azure_); ok {
+					schemaData, err := json.Marshal(map[string]interface{}{
+						"azure": map[string]interface{}{
+							"event_hub_metadata": map[string]interface{}{
+								"event_hub_name":      providerKey.Azure.GetEventHubMetadata().GetEventHubName(),
+								"event_hub_namespace": providerKey.Azure.GetEventHubMetadata().GetEventHubNamespace(),
+								"consumer_group":      providerKey.Azure.GetEventHubMetadata().GetConsumerGroup(),
+							},
+						},
+					})
+					if err != nil {
+						fmt.Printf("Failed to populate %s: %v", SchemaEventBridgeMetadata, err)
+						break
+					}
+
+					componentBlock[SchemaEventBridgeMetadata] = string(schemaData)
 				}
 			}
 		}

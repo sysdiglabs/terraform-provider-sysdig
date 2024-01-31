@@ -18,7 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-var validatePolicyType = validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs"}, false)
+var validatePolicyType = validation.StringInSlice([]string{"falco", "list_matching", "k8s_audit", "aws_cloudtrail", "gcp_auditlog", "azure_platformlogs", "awscloudtrail", "okta", "github"}, false)
 
 // Creates the common policy schema that is shared between policy resources
 func createPolicySchema(original map[string]*schema.Schema) map[string]*schema.Schema {
