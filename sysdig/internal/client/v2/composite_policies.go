@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -245,5 +246,5 @@ type GetPoliciesQueryParams struct {
 }
 
 func (q *GetPoliciesQueryParams) Encode() string {
-	return fmt.Sprintf("policyType=%s&filter=%s&limit=%d", q.PolicyType, strings.Replace(q.Filter, " ", "+", -1), q.Limit)
+	return fmt.Sprintf("policyType=%s&filter=%s&limit=%d", q.PolicyType, url.QueryEscape(q.Filter), q.Limit)
 }
