@@ -43,25 +43,17 @@ func createMLPolicyDataSourceSchema() map[string]*schema.Schema {
 		"version":               VersionSchema(),
 		"notification_channels": NotificationChannelsComputedSchema(),
 		"runbook":               RunbookComputedSchema(),
-		"rules": {
+		"rule": {
 			Type:     schema.TypeList,
 			Computed: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"id":          ReadOnlyIntSchema(),
-					"name":        ReadOnlyStringSchema(),
-					"description": DescriptionComputedSchema(),
-					"tags":        TagsSchema(),
-					"version":     VersionSchema(),
-					"details": {
-						Type:     schema.TypeList,
-						Computed: true,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"cryptomining_trigger": MLRuleThresholdAndSeverityComputedSchema(),
-							},
-						},
-					},
+					"id":                   ReadOnlyIntSchema(),
+					"name":                 ReadOnlyStringSchema(),
+					"description":          DescriptionComputedSchema(),
+					"tags":                 TagsSchema(),
+					"version":              VersionSchema(),
+					"cryptomining_trigger": MLRuleThresholdAndSeverityComputedSchema(),
 				},
 			},
 		},

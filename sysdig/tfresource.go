@@ -124,20 +124,18 @@ func setTFResourcePolicyRulesMalware(d *schema.ResourceData, policy v2.PolicyRul
 		}
 
 		rules = append(rules, map[string]interface{}{
-			"id":          rule.Id,
-			"name":        rule.Name,
-			"description": rule.Description,
-			"version":     rule.Version,
-			"tags":        rule.Tags,
-			"details": []map[string]interface{}{{
-				"use_managed_hashes": rule.Details.(*v2.MalwareRuleDetails).UseManagedHashes,
-				"additional_hashes":  additionalHashes,
-				"ignore_hashes":      ignoreHashes,
-			}},
+			"id":                 rule.Id,
+			"name":               rule.Name,
+			"description":        rule.Description,
+			"version":            rule.Version,
+			"tags":               rule.Tags,
+			"use_managed_hashes": rule.Details.(*v2.MalwareRuleDetails).UseManagedHashes,
+			"additional_hashes":  additionalHashes,
+			"ignore_hashes":      ignoreHashes,
 		})
 	}
 
-	_ = d.Set("rules", rules)
+	_ = d.Set("rule", rules)
 
 	return nil
 }
@@ -167,20 +165,18 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 		}
 
 		rules = append(rules, map[string]interface{}{
-			"id":          rule.Id,
-			"name":        rule.Name,
-			"description": rule.Description,
-			"version":     rule.Version,
-			"tags":        rule.Tags,
-			"details": []map[string]interface{}{{
-				"enabled":             enabled,
-				"exceptions":          exceptions,
-				"prohibited_binaries": prohibitedBinaries,
-			}},
+			"id":                  rule.Id,
+			"name":                rule.Name,
+			"description":         rule.Description,
+			"version":             rule.Version,
+			"tags":                rule.Tags,
+			"enabled":             enabled,
+			"exceptions":          exceptions,
+			"prohibited_binaries": prohibitedBinaries,
 		})
 	}
 
-	_ = d.Set("rules", rules)
+	_ = d.Set("rule", rules)
 
 	return nil
 }
@@ -206,18 +202,16 @@ func setTFResourcePolicyRulesML(d *schema.ResourceData, policy v2.PolicyRulesCom
 		}}
 
 		rules = append(rules, map[string]interface{}{
-			"id":          rule.Id,
-			"name":        rule.Name,
-			"description": rule.Description,
-			"version":     rule.Version,
-			"tags":        rule.Tags,
-			"details": []map[string]interface{}{{
-				"cryptomining_trigger": cryptominingTrigger,
-			}},
+			"id":                   rule.Id,
+			"name":                 rule.Name,
+			"description":          rule.Description,
+			"version":              rule.Version,
+			"tags":                 rule.Tags,
+			"cryptomining_trigger": cryptominingTrigger,
 		})
 	}
 
-	_ = d.Set("rules", rules)
+	_ = d.Set("rule", rules)
 
 	return nil
 }
@@ -236,18 +230,16 @@ func setTFResourcePolicyRulesAWSML(d *schema.ResourceData, policy v2.PolicyRules
 		}}
 
 		rules = append(rules, map[string]interface{}{
-			"id":          rule.Id,
-			"name":        rule.Name,
-			"description": rule.Description,
-			"version":     rule.Version,
-			"tags":        rule.Tags,
-			"details": []map[string]interface{}{{
-				"anomalous_console_login": anomalousConsoleLogin,
-			}},
+			"id":                      rule.Id,
+			"name":                    rule.Name,
+			"description":             rule.Description,
+			"version":                 rule.Version,
+			"tags":                    rule.Tags,
+			"anomalous_console_login": anomalousConsoleLogin,
 		})
 	}
 
-	_ = d.Set("rules", rules)
+	_ = d.Set("rule", rules)
 
 	return nil
 }
@@ -361,12 +353,12 @@ func setPolicyActions(policy *v2.PolicyRulesComposite, d *schema.ResourceData) e
 func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
 	policy.Policy.Rules = []*v2.PolicyRule{}
 	policy.Rules = []*v2.RuntimePolicyRule{}
-	if _, ok := d.GetOk("rules"); ok {
+	if _, ok := d.GetOk("rule"); ok {
 		// TODO: Iterate over a list of rules instead of hard-coding the index values
 		// TODO: Should we assume that only a single Malware rule can be attached to a policy?
 
 		additionalHashes := map[string][]string{}
-		if items, ok := d.GetOk("rules.0.details.0.additional_hashes"); ok { // TODO: Do not hardcode the indexes
+		if items, ok := d.GetOk("rule.0.additional_hashes"); ok { // TODO: Do not hardcode the indexes
 			for _, item := range items.([]interface{}) {
 				item := item.(map[string]interface{})
 				k := item["hash"].(string)
@@ -377,7 +369,7 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 
 		// TODO: Extract into a function
 		ignoreHashes := map[string][]string{}
-		if items, ok := d.GetOk("rules.0.details.0.ignore_hashes"); ok { // TODO: Do not hardcode the indexes
+		if items, ok := d.GetOk("rule.0.ignore_hashes"); ok { // TODO: Do not hardcode the indexes
 			for _, item := range items.([]interface{}) {
 				item := item.(map[string]interface{})
 				k := item["hash"].(string)
@@ -386,7 +378,7 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 			}
 		}
 
-		tags := schemaSetToList(d.Get("rules.0.tags"))
+		tags := schemaSetToList(d.Get("rule.0.tags"))
 		// Set default tags as field tags must not be null
 		if len(tags) == 0 {
 			tags = []string{defaultMalwareTag}
@@ -394,23 +386,23 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 
 		rule := &v2.RuntimePolicyRule{
 			// TODO: Do not hardcode the indexes
-			Name:        d.Get("rules.0.name").(string),
-			Description: d.Get("rules.0.description").(string),
+			Name:        d.Get("rule.0.name").(string),
+			Description: d.Get("rule.0.description").(string),
 			Tags:        tags,
 			Details: v2.MalwareRuleDetails{
 				RuleType:         v2.ElementType("MALWARE"), // TODO: Use const
-				UseManagedHashes: d.Get("rules.0.details.0.use_managed_hashes").(bool),
+				UseManagedHashes: d.Get("rule.0.use_managed_hashes").(bool),
 				AdditionalHashes: additionalHashes,
 				IgnoreHashes:     ignoreHashes,
 			},
 		}
 
-		id := v2.FlexInt(d.Get("rules.0.id").(int))
+		id := v2.FlexInt(d.Get("rule.0.id").(int))
 		if int(id) != 0 {
 			rule.Id = &id
 		}
 
-		v := toIntPtr(d.Get("rules.0.version"))
+		v := toIntPtr(d.Get("rule.0.version"))
 		if *v != 0 {
 			// Version can only be provided when updating existing rules
 			rule.Version = v
@@ -424,30 +416,30 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
 	policy.Policy.Rules = []*v2.PolicyRule{}
 	policy.Rules = []*v2.RuntimePolicyRule{}
-	if _, ok := d.GetOk("rules"); ok {
+	if _, ok := d.GetOk("rule"); ok {
 		// TODO: Iterate over a list of rules instead of hard-coding the index values
 		// TODO: Should we assume that only a single Malware rule can be attached to a policy?
 
 		exceptions := &v2.RuntimePolicyRuleList{}
-		if _, ok := d.GetOk("rules.0.details.0.exceptions"); ok { // TODO: Do not hardcode the indexes
-			exceptions.Items = schemaSetToList(d.Get("rules.0.details.0.exceptions.0.items"))
-			exceptions.MatchItems = d.Get("rules.0.details.0.exceptions.0.match_items").(bool)
+		if _, ok := d.GetOk("rule.0.exceptions"); ok { // TODO: Do not hardcode the indexes
+			exceptions.Items = schemaSetToList(d.Get("rule.0.exceptions.0.items"))
+			exceptions.MatchItems = d.Get("rule.0.exceptions.0.match_items").(bool)
 		}
 
 		// TODO: Extract into a function
 		prohibitedBinaries := &v2.RuntimePolicyRuleList{}
-		if _, ok := d.GetOk("rules.0.details.0.prohibited_binaries"); ok { // TODO: Do not hardcode the indexes
-			prohibitedBinaries.Items = schemaSetToList(d.Get("rules.0.details.0.prohibited_binaries.0.items"))
-			prohibitedBinaries.MatchItems = d.Get("rules.0.details.0.prohibited_binaries.0.match_items").(bool)
+		if _, ok := d.GetOk("rule.0.prohibited_binaries"); ok { // TODO: Do not hardcode the indexes
+			prohibitedBinaries.Items = schemaSetToList(d.Get("rule.0.prohibited_binaries.0.items"))
+			prohibitedBinaries.MatchItems = d.Get("rule.0.prohibited_binaries.0.match_items").(bool)
 		}
 
-		tags := schemaSetToList(d.Get("rules.0.tags"))
+		tags := schemaSetToList(d.Get("rule.0.tags"))
 		// Set default tags as field tags must not be null
 		if len(tags) == 0 {
 			tags = []string{defaultDriftTag}
 		}
 
-		enabled := d.Get("rules.0.details.0.enabled").(bool)
+		enabled := d.Get("rule.0.enabled").(bool)
 		mode := "enabled"
 		if !enabled {
 			mode = "disabled"
@@ -455,8 +447,8 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 
 		rule := &v2.RuntimePolicyRule{
 			// TODO: Do not hardcode the indexes
-			Name:        d.Get("rules.0.name").(string),
-			Description: d.Get("rules.0.description").(string),
+			Name:        d.Get("rule.0.name").(string),
+			Description: d.Get("rule.0.description").(string),
 			Tags:        tags,
 			Details: v2.DriftRuleDetails{
 				RuleType:           v2.ElementType("DRIFT"), // TODO: Use const
@@ -466,12 +458,12 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 			},
 		}
 
-		id := v2.FlexInt(d.Get("rules.0.id").(int))
+		id := v2.FlexInt(d.Get("rule.0.id").(int))
 		if int(id) != 0 {
 			rule.Id = &id
 		}
 
-		v := toIntPtr(d.Get("rules.0.version"))
+		v := toIntPtr(d.Get("rule.0.version"))
 		if *v != 0 {
 			// Version can only be provided when updating existing rules
 			rule.Version = v
@@ -485,20 +477,20 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 func setPolicyRulesML(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
 	policy.Policy.Rules = []*v2.PolicyRule{}
 	policy.Rules = []*v2.RuntimePolicyRule{}
-	if _, ok := d.GetOk("rules"); ok {
+	if _, ok := d.GetOk("rule"); ok {
 		// TODO: Iterate over a list of rules instead of hard-coding the index values
 		// TODO: Should we assume that only a single Malware rule can be attached to a policy?
 
 		// TODO: Extract into a function
 		cryptominingTrigger := &v2.MLRuleThresholdAndSeverity{}
-		if _, ok := d.GetOk("rules.0.details.0.cryptomining_trigger"); ok { // TODO: Do not hardcode the indexes
-			cryptominingTrigger.Enabled = d.Get("rules.0.details.0.cryptomining_trigger.0.enabled").(bool)
-			cryptominingTrigger.Threshold = float64(d.Get("rules.0.details.0.cryptomining_trigger.0.threshold").(int))
-			cryptominingTrigger.Severity = float64(d.Get("rules.0.details.0.cryptomining_trigger.0.severity").(int))
+		if _, ok := d.GetOk("rule.0.cryptomining_trigger"); ok { // TODO: Do not hardcode the indexes
+			cryptominingTrigger.Enabled = d.Get("rule.0.cryptomining_trigger.0.enabled").(bool)
+			cryptominingTrigger.Threshold = float64(d.Get("rule.0.cryptomining_trigger.0.threshold").(int))
+			cryptominingTrigger.Severity = float64(d.Get("rule.0.cryptomining_trigger.0.severity").(int))
 		}
 		anomalyDetectionTrigger := &v2.MLRuleThresholdAndSeverity{}
 
-		tags := schemaSetToList(d.Get("rules.0.tags"))
+		tags := schemaSetToList(d.Get("rule.0.tags"))
 		// Set default tags as field tags must not be null
 		if len(tags) == 0 {
 			tags = []string{defaultMLTag}
@@ -506,8 +498,8 @@ func setPolicyRulesML(policy *v2.PolicyRulesComposite, d *schema.ResourceData) e
 
 		rule := &v2.RuntimePolicyRule{
 			// TODO: Do not hardcode the indexes
-			Name:        d.Get("rules.0.name").(string),
-			Description: d.Get("rules.0.description").(string),
+			Name:        d.Get("rule.0.name").(string),
+			Description: d.Get("rule.0.description").(string),
 			// IMPORTANT: In order to update an ML policy,
 			// correct version number must be provided
 			Tags: tags,
@@ -518,12 +510,12 @@ func setPolicyRulesML(policy *v2.PolicyRulesComposite, d *schema.ResourceData) e
 			},
 		}
 
-		id := v2.FlexInt(d.Get("rules.0.id").(int))
+		id := v2.FlexInt(d.Get("rule.0.id").(int))
 		if int(id) != 0 {
 			rule.Id = &id
 		}
 
-		v := toIntPtr(d.Get("rules.0.version"))
+		v := toIntPtr(d.Get("rule.0.version"))
 		if *v != 0 {
 			// Version can only be provided when updating existing rules
 			rule.Version = v
@@ -537,18 +529,18 @@ func setPolicyRulesML(policy *v2.PolicyRulesComposite, d *schema.ResourceData) e
 func setPolicyRulesAWSML(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
 	policy.Policy.Rules = []*v2.PolicyRule{}
 	policy.Rules = []*v2.RuntimePolicyRule{}
-	if _, ok := d.GetOk("rules"); ok {
+	if _, ok := d.GetOk("rule"); ok {
 		// TODO: Iterate over a list of rules instead of hard-coding the index values
 		// TODO: Should we assume that only a single Malware rule can be attached to a policy?
 
 		anomalousConsoleLogin := &v2.MLRuleThresholdAndSeverity{}
-		if _, ok := d.GetOk("rules.0.details.0.anomalous_console_login"); ok { // TODO: Do not hardcode the indexes
-			anomalousConsoleLogin.Enabled = d.Get("rules.0.details.0.anomalous_console_login.0.enabled").(bool)
-			anomalousConsoleLogin.Threshold = float64(d.Get("rules.0.details.0.anomalous_console_login.0.threshold").(int))
-			anomalousConsoleLogin.Severity = float64(d.Get("rules.0.details.0.anomalous_console_login.0.severity").(int))
+		if _, ok := d.GetOk("rule.0.anomalous_console_login"); ok { // TODO: Do not hardcode the indexes
+			anomalousConsoleLogin.Enabled = d.Get("rule.0.anomalous_console_login.0.enabled").(bool)
+			anomalousConsoleLogin.Threshold = float64(d.Get("rule.0.anomalous_console_login.0.threshold").(int))
+			anomalousConsoleLogin.Severity = float64(d.Get("rule.0.anomalous_console_login.0.severity").(int))
 		}
 
-		tags := schemaSetToList(d.Get("rules.0.tags"))
+		tags := schemaSetToList(d.Get("rule.0.tags"))
 		// Set default tags as field tags must not be null
 		if len(tags) == 0 {
 			tags = []string{defaultMLTag}
@@ -556,8 +548,8 @@ func setPolicyRulesAWSML(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 
 		rule := &v2.RuntimePolicyRule{
 			// TODO: Do not hardcode the indexes
-			Name:        d.Get("rules.0.name").(string),
-			Description: d.Get("rules.0.description").(string),
+			Name:        d.Get("rule.0.name").(string),
+			Description: d.Get("rule.0.description").(string),
 			// IMPORTANT: In order to update an ML policy,
 			// correct version number must be provided
 			Tags: tags,
@@ -567,12 +559,12 @@ func setPolicyRulesAWSML(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 			},
 		}
 
-		id := v2.FlexInt(d.Get("rules.0.id").(int))
+		id := v2.FlexInt(d.Get("rule.0.id").(int))
 		if int(id) != 0 {
 			rule.Id = &id
 		}
 
-		v := toIntPtr(d.Get("rules.0.version"))
+		v := toIntPtr(d.Get("rule.0.version"))
 		if *v != 0 {
 			// Version can only be provided when updating existing rules
 			rule.Version = v

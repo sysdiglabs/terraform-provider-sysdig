@@ -43,27 +43,19 @@ func createDriftPolicyDataSourceSchema() map[string]*schema.Schema {
 		"version":               VersionSchema(),
 		"notification_channels": NotificationChannelsComputedSchema(),
 		"runbook":               RunbookComputedSchema(),
-		"rules": {
+		"rule": {
 			Type:     schema.TypeList,
 			Computed: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"id":          ReadOnlyIntSchema(),
-					"name":        ReadOnlyStringSchema(),
-					"description": DescriptionComputedSchema(),
-					"tags":        TagsSchema(),
-					"version":     VersionSchema(),
-					"details": {
-						Type:     schema.TypeList,
-						Computed: true,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"enabled":             BoolComputedSchema(),
-								"exceptions":          ExceptionsComputedSchema(),
-								"prohibited_binaries": ExceptionsComputedSchema(),
-							},
-						},
-					},
+					"id":                  ReadOnlyIntSchema(),
+					"name":                ReadOnlyStringSchema(),
+					"description":         DescriptionComputedSchema(),
+					"tags":                TagsSchema(),
+					"version":             VersionSchema(),
+					"enabled":             BoolComputedSchema(),
+					"exceptions":          ExceptionsComputedSchema(),
+					"prohibited_binaries": ExceptionsComputedSchema(),
 				},
 			},
 		},

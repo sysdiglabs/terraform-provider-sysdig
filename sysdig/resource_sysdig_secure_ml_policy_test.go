@@ -13,7 +13,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccMalwarePolicy(t *testing.T) {
+func TestAccMLPolicy(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -25,41 +25,30 @@ func TestAccMalwarePolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: malwarePolicyWithName(rText()),
+				Config: mlPolicyWithName(rText()),
 			},
 		},
 	})
 }
 
-func malwarePolicyWithName(name string) string {
+func mlPolicyWithName(name string) string {
 	return fmt.Sprintf(`
 %s
 
-resource "sysdig_secure_malware_policy" "sample" {
-  name        = "Test Malware Policy %s"
-  description = "Test Malware Policy Description"
+resource "sysdig_secure_ml_policy" "sample" {
+  name        = "Test ML Policy %s"
+  description = "Test ML Policy Description"
   enabled     = true
   severity    = 4
 
   rule {
-    description = "Test Malware Rule Description"
+    description = "Test ML Rule Description"
 
-    use_managed_hashes = true
-
-    additional_hashes {
-      hash         = "304ef4cdda3463b24bf53f9cdd69ad3ecdab0842e7e70e2f3cfbb9f14e1c4ae6"
-      hash_aliases = ["hash_name", "hash_name_2"]
+    cryptomining_trigger {
+      enabled   = true
+      threshold = 2
+      severity  = 1
     }
-
-    ignore_hashes {
-      hash         = "6ac3c336e4094835293a3fed8a4b5fedde1b5e2626d9838fed50693bba00af0e"
-      hash_aliases = ["ignore_hashes", "ignore_hashes_2"]
-    }
-  }
-
-  actions {
-    prevent_malware = true
-    container       = "stop"
   }
 
   notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
@@ -67,5 +56,3 @@ resource "sysdig_secure_malware_policy" "sample" {
 
 `, secureNotificationChannelEmailWithName(name), name)
 }
-
-// TODO: Specify only a single rule type!

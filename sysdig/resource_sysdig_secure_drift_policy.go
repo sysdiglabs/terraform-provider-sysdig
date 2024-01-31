@@ -51,7 +51,7 @@ func resourceSysdigSecureDriftPolicy() *schema.Resource {
 			"version":               VersionSchema(),
 			"notification_channels": NotificationChannelsSchema(),
 			"runbook":               RunbookSchema(),
-			"rules": {
+			"rule": {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
@@ -63,19 +63,10 @@ func resourceSysdigSecureDriftPolicy() *schema.Resource {
 						"description": DescriptionSchema(),
 						"tags":        TagsSchema(),
 						"version":     VersionSchema(),
-						"details": {
-							Type:     schema.TypeList,
-							MaxItems: 1, // There can only ever be a single details block per rule
-							Required: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									// Enable maps to mode rule attribute
-									"enabled":             BoolSchema(),
-									"exceptions":          ExceptionsSchema(),
-									"prohibited_binaries": ExceptionsSchema(),
-								},
-							},
-						},
+						// Enable maps to mode rule attribute
+						"enabled":             BoolSchema(),
+						"exceptions":          ExceptionsSchema(),
+						"prohibited_binaries": ExceptionsSchema(),
 					},
 				},
 			},

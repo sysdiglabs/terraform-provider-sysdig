@@ -51,7 +51,7 @@ func resourceSysdigSecureAWSMLPolicy() *schema.Resource {
 			"version":               VersionSchema(),
 			"notification_channels": NotificationChannelsSchema(),
 			"runbook":               RunbookSchema(),
-			"rules": {
+			"rule": {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
@@ -60,19 +60,10 @@ func resourceSysdigSecureAWSMLPolicy() *schema.Resource {
 						"name": ReadOnlyStringSchema(),
 						// Do not allow switching off individual rules
 						// "enabled":     EnabledSchema(),
-						"description": DescriptionSchema(),
-						"tags":        TagsSchema(),
-						"version":     VersionSchema(),
-						"details": {
-							Type:     schema.TypeList,
-							MaxItems: 1, // There can only ever be a single details block per rule
-							Required: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"anomalous_console_login": MLRuleThresholdAndSeveritySchema(),
-								},
-							},
-						},
+						"description":             DescriptionSchema(),
+						"tags":                    TagsSchema(),
+						"version":                 VersionSchema(),
+						"anomalous_console_login": MLRuleThresholdAndSeveritySchema(),
 					},
 				},
 			},

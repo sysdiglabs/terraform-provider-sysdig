@@ -3,7 +3,7 @@
 package sysdig_test
 
 import (
-	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -13,11 +13,15 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccDriftPolicy(t *testing.T) {
-	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+func TestAccDriftPolicyDataSource(t *testing.T) {
+	rText := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -25,18 +29,16 @@ func TestAccDriftPolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: driftPolicyWithName(rText()),
+				Config: driftPolicyDataSource(rText),
 			},
 		},
 	})
 }
 
-func driftPolicyWithName(name string) string {
-	return fmt.Sprintf(`
-%s
-
-resource "sysdig_secure_drift_policy" "sample" {
-  name        = "Test Drift Policy %s"
+func driftPolicyDataSource(name string) string {
+	return `
+resource "sysdig_secure_drift_policy" "policy_1" {
+  name        = "Test Drift Policy 81z7b1xng6"
   description = "Test Drift Policy Description"
   enabled     = true
   severity    = 4
@@ -44,7 +46,7 @@ resource "sysdig_secure_drift_policy" "sample" {
   rule {
     description = "Test Drift Rule Description"
 
-    enabled = true
+    enabled = false
 
     exceptions {
       items = ["/usr/bin/sh"]
@@ -58,10 +60,10 @@ resource "sysdig_secure_drift_policy" "sample" {
     prevent_drift = true
   }
 
-  notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
 }
-
-`, secureNotificationChannelEmailWithName(name), name)
+	
+data "sysdig_secure_drift_policy" "policy_2" {
+	name = sysdig_secure_drift_policy.policy_1.name
 }
-
-// TODO: Specify only a single rule type!
+`
+}
