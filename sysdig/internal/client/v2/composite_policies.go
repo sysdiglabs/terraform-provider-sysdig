@@ -6,20 +6,19 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	// "github.com/hashicorp/terraform-plugin-log/tflog" // TODO: Add debug logs?
 )
 
 const (
 	skipPolicyV2MsgFlag       = "skipPolicyV2Msg"
 	CreateCompositePolicyPath = "%s/api/v2/policies/batch?%s=%t"
 	DeleteCompositePolicyPath = "%s/api/v2/policies/batch/%d?%s=%t"
-	UpdateCompositePolicyPath = "%s/api/v2/policies/batch/%d?%s=%t"
+	UpdateCompositePolicyPath = "%s/api/v2/policies/batch/%d"
 
 	GetCompositePolicyPath   = "%s/api/v2/policies/%d" // TODO: Add skip query param
-	GetCompositePoliciesPath = "%s/api/v2/policies?%s" // TODO: Implement pagination
+	GetCompositePoliciesPath = "%s/api/v2/policies?%s" // TODO: Implement pagination otherwise up to getPoliciesLimit number of policies will be returned
 
 	GetCompositePolicyRulesPath = "%s/api/policies/v3/rules/groups?%s"
-	getPoliciesLimit            = 200 // What is a sane limit?
+	getPoliciesLimit            = 1000 // TODO: What is a good limit?
 )
 
 type CompositePolicyInterface interface {
@@ -216,7 +215,7 @@ func (client *Client) DeleteCompositePolicyURL(policyID int) string {
 }
 
 func (client *Client) UpdateCompositePolicyURL(policyID int) string {
-	return fmt.Sprintf(UpdateCompositePolicyPath, client.config.url, policyID, skipPolicyV2MsgFlag, client.config.secureSkipPolicyV2Msg)
+	return fmt.Sprintf(UpdateCompositePolicyPath, client.config.url, policyID)
 }
 
 func (client *Client) GetCompositePolicyURL(policyID int) string {

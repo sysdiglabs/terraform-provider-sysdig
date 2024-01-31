@@ -404,6 +404,54 @@ func ExceptionsComputedSchema() *schema.Schema {
 	}
 }
 
+func MLRuleThresholdAndSeveritySchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		MaxItems: 1,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"enabled": {
+					Type:     schema.TypeBool,
+					Optional: true,
+					Default:  true,
+				},
+				"threshold": {
+					Type:     schema.TypeInt,
+					Required: true,
+				},
+				"severity": {
+					Type:     schema.TypeInt,
+					Required: true,
+				},
+			},
+		},
+	}
+}
+
+func MLRuleThresholdAndSeverityComputedSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"enabled": {
+					Type:     schema.TypeBool,
+					Computed: true,
+				},
+				"threshold": {
+					Type:     schema.TypeInt,
+					Computed: true,
+				},
+				"severity": {
+					Type:     schema.TypeInt,
+					Computed: true,
+				},
+			},
+		},
+	}
+}
+
 // Creates the common policy schema that is shared between policy resources
 func createPolicySchema(original map[string]*schema.Schema) map[string]*schema.Schema {
 	policySchema := map[string]*schema.Schema{

@@ -1,0 +1,57 @@
+---
+subcategory: "Sysdig Secure"
+layout: "sysdig"
+page_title: "Sysdig: sysdig_secure_ml_policy"
+description: |-
+  Retrieves a Sysdig Secure ML Policy.
+---
+
+# Data Source: sysdig_secure_ml_policy
+
+Retrieves the information of an existing Sysdig Secure ML Policy.
+
+-> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
+
+## Example Usage
+
+```terraform
+data "sysdig_secure_ml_policy" "policy" {
+  name = "ML Policy 1"
+}
+```
+
+## Argument Reference
+
+* `name` - (Required) The name of the Secure managed policy.
+
+## Attributes Reference
+
+In addition to all arguments above, the following attributes are exported:
+
+* `id` - The id for the managed policy.
+
+* `description` - The description for the managed policy.
+
+* `severity` -  The severity of Secure policy. The accepted values
+    are: 0, 1, 2, 3 (High), 4, 5 (Medium), 6 (Low) and 7 (Info).
+
+* `enabled` - Whether the policy is enabled or not.
+
+* `runbook` - Customer provided url that provides a runbook for a given policy.
+
+* `scope` - The application scope for the policy.
+
+* `notification_channels` - IDs of the notification channels to send alerts to
+    when the policy is fired.
+
+### `rules` block
+
+The rules block is required and supports:
+
+* `description` - (Required) The description of the ml rule.
+* `details` - (Required) The list of hashes to use for the ml rule.
+    * `cryptomining_trigger` - (Required) Cryptomining detection: Detect unusual activity in the Activity Audit based on the set confidence level.
+        * `threshold` - (Required) Trigger at or above confidence level.
+        * `severity` - (Optional) **TODO**.
+
+
