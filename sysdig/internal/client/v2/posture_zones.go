@@ -13,33 +13,38 @@ const (
 
 type PostureZoneInterface interface {
 	Base
-	CreateOrUpdatePostureZone(ctx context.Context, z *PostureZoneRequest) (*PostureZone, error)
+	CreateOrUpdatePostureZone(ctx context.Context, z *PostureZoneRequest) (*PostureZone, string, error)
 	GetPostureZone(ctx context.Context, id int) (*PostureZone, error)
 	DeletePostureZone(ctx context.Context, id int) error
 }
 
-func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZoneRequest) (*PostureZone, error) {
+func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZoneRequest) (*PostureZone, string, error) {
 	if r.ID == "" {
 		r.ID = "0"
 	}
 
 	payload, err := Marshal(r)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	response, err := client.requester.Request(ctx, http.MethodPost, client.createZoneURL(), payload)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer response.Body.Close()
 
-	wrapper, err := Unmarshal[PostureZoneResponse](response.Body)
-	if err != nil {
-		return nil, err
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
+		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		return nil, errStatus, err
 	}
 
-	return &wrapper.Data, nil
+	wrapper, err := Unmarshal[PostureZoneResponse](response.Body)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return &wrapper.Data, "", nil
 }
 
 func (client *Client) GetPostureZone(ctx context.Context, id int) (*PostureZone, error) {
