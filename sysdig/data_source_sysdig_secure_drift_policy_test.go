@@ -38,7 +38,7 @@ func TestAccDriftPolicyDataSource(t *testing.T) {
 func driftPolicyDataSource(name string) string {
 	return `
 resource "sysdig_secure_drift_policy" "policy_1" {
-  name        = "Test Drift Policy 81z7b1xng6"
+  name        = "Test Drift Policy 0"
   description = "Test Drift Policy Description"
   enabled     = true
   severity    = 4
