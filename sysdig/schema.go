@@ -351,9 +351,10 @@ func ExceptionsSchema() *schema.Schema {
 					Elem:     &schema.Schema{Type: schema.TypeString},
 				},
 				"match_items": {
-					Type:     schema.TypeBool,
-					Optional: true,
-					Default:  false,
+					Type: schema.TypeBool,
+					// The match_items attribute is controlled by the mode attribute value.
+					// Follow the UI - it doesn't update match_items attribute.
+					Computed: true,
 				},
 			},
 		},
@@ -366,14 +367,14 @@ func ExceptionsComputedSchema() *schema.Schema {
 		Computed: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"match_items": {
-					Type:     schema.TypeBool,
-					Computed: true,
-				},
 				"items": {
 					Type:     schema.TypeSet,
 					Computed: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
+				},
+				"match_items": {
+					Type:     schema.TypeBool,
+					Computed: true,
 				},
 			},
 		},

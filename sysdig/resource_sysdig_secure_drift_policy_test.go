@@ -48,12 +48,10 @@ resource "sysdig_secure_drift_policy" "sample" {
       enabled = true
 
       exceptions {
-        items       = ["304ef4cdda3463b24bf53f9cdd69ad3ecdab0842e7e70e2f3cfbb9f14e1c4ae6"]
-        match_items = true
+        items       = ["/usr/bin/sh"]
       }
       prohibited_binaries {
-        items       = ["304ef4cdda3463b24bf53f9cdd69ad3ecdab0842e7e70e2f3cfbb9f14e1c4ae6"]
-        match_items = true
+        items       = ["/usr/bin/curl"]
       }
     }
   }
