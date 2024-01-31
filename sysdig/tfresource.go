@@ -512,8 +512,8 @@ func setPolicyRulesAWSML(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 		anomalousConsoleLogin := &v2.MLRuleThresholdAndSeverity{}
 		if _, ok := d.GetOk("rules.0.details.0.anomalous_console_login"); ok { // TODO: Do not hardcode the indexes
 			anomalousConsoleLogin.Enabled = d.Get("rules.0.details.0.anomalous_console_login.0.enabled").(bool)
-			anomalousConsoleLogin.Threshold = d.Get("rules.0.details.0.anomalous_console_login.0.threshold").(float64)
-			anomalousConsoleLogin.Severity = d.Get("rules.0.details.0.anomalous_console_login.0.severity").(float64)
+			anomalousConsoleLogin.Threshold = float64(d.Get("rules.0.details.0.anomalous_console_login.0.threshold").(int))
+			anomalousConsoleLogin.Severity = float64(d.Get("rules.0.details.0.anomalous_console_login.0.severity").(int))
 		}
 
 		tags := schemaSetToList(d.Get("rules.0.tags"))
