@@ -6,7 +6,7 @@ description: |-
   Retrieves a Sysdig Secure Drift Policy.
 ---
 
-# Resource: sysdig_secure_drift_policy
+# Data Source: sysdig_secure_drift_policy
 
 Retrieves the information of an existing Sysdig Secure Drift Policy.
 
