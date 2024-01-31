@@ -51,7 +51,7 @@ func createMLPolicyDataSourceSchema() map[string]*schema.Schema {
 					"id":          ReadOnlyIntSchema(),
 					"name":        ReadOnlyStringSchema(),
 					"description": DescriptionComputedSchema(),
-					"tags":        TagsComputedSchema(),
+					"tags":        TagsSchema(),
 					"version":     VersionSchema(),
 					"details": {
 						Type:     schema.TypeList,

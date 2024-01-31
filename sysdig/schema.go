@@ -327,17 +327,8 @@ func HashesComputedSchema() *schema.Schema {
 	}
 }
 
+// Tags are always set automatically by Sysdig
 func TagsSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeSet,
-		Optional: true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
-		},
-	}
-}
-
-func TagsComputedSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeSet,
 		Computed: true,
