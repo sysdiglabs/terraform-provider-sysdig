@@ -52,6 +52,7 @@ func createDriftPolicyDataSourceSchema() map[string]*schema.Schema {
 					"name":        ReadOnlyStringSchema(),
 					"description": DescriptionComputedSchema(),
 					"tags":        TagsComputedSchema(),
+					"version":     VersionSchema(),
 					"details": {
 						Type:     schema.TypeList,
 						Computed: true,

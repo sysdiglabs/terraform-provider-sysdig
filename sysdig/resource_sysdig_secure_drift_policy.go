@@ -62,6 +62,7 @@ func resourceSysdigSecureDriftPolicy() *schema.Resource {
 						// "enabled":     EnabledSchema(),
 						"description": DescriptionSchema(),
 						"tags":        TagsSchema(),
+						"version":     VersionSchema(),
 						"details": {
 							Type:     schema.TypeList,
 							MaxItems: 1, // There can only ever be a single details block per rule
