@@ -121,6 +121,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_custom_role":          resourceSysdigCustomRole(),
 			"sysdig_team_service_account": resourceSysdigTeamServiceAccount(),
 
+			"sysdig_secure_aws_ml_policy":                                 resourceSysdigSecureAWSMLPolicy(),
 			"sysdig_secure_custom_policy":                                 resourceSysdigSecureCustomPolicy(),
 			"sysdig_secure_drift_policy":                                  resourceSysdigSecureDriftPolicy(),
 			"sysdig_secure_malware_policy":                                resourceSysdigSecureMalwarePolicy(),
@@ -201,6 +202,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_notification_channel_msteams":                  dataSourceSysdigSecureNotificationChannelMSTeams(),
 			"sysdig_secure_notification_channel_prometheus_alert_manager": dataSourceSysdigSecureNotificationChannelPrometheusAlertManager(),
 			"sysdig_secure_notification_channel_team_email":               dataSourceSysdigSecureNotificationChannelTeamEmail(),
+			"sysdig_secure_aws_ml_policy":                                 dataSourceSysdigSecureAWSMLPolicy(),
 			"sysdig_secure_custom_policy":                                 dataSourceSysdigSecureCustomPolicy(),
 			"sysdig_secure_drift_policy":                                  dataSourceSysdigSecureDriftPolicy(),
 			"sysdig_secure_malware_policy":                                dataSourceSysdigSecureMalwarePolicy(),
