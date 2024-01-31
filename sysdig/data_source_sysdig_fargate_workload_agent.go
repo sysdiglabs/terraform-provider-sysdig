@@ -445,12 +445,27 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 		return diag.Errorf("Failed to serialize configuration: %v", err.Error())
 	}
 
+	scObj := gabs.New()
+	imageAuth := d.Get("image_auth_secret").(string)
+	if imageAuth != "" {
+		_, err := scObj.Set(imageAuth, "RepositoryCredentials", "CredentialsParameter")
+		if err != nil {
+			return diag.Errorf("cannot set image auth secret in sidecar config: %v", err.Error())
+		}
+	}
+
+	sc, err := json.Marshal(scObj)
+	if err != nil {
+		panic("cannot marshal sidecar config: " + err.Error())
+	}
+	sidecarConfig := string(sc)
+
 	kiltConfig := &cfnpatcher.Configuration{
 		Kilt:               agentinoKiltDefinition,
-		ImageAuthSecret:    d.Get("image_auth_secret").(string),
 		OptIn:              false,
 		UseRepositoryHints: true,
 		RecipeConfig:       string(jsonConf),
+		SidecarConfig:      sidecarConfig,
 	}
 
 	containerDefinitions := d.Get("container_definitions").(string)

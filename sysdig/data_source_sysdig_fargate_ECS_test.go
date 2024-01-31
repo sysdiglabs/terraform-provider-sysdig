@@ -173,6 +173,16 @@ func TestNewPatchOptions(t *testing.T) {
 	}
 }
 
+func getSidecarConfig() string {
+	scObj := gabs.New()
+	_, err := scObj.Set("image_auth_secret", "RepositoryCredentials", "CredentialsParameter")
+	if err != nil {
+		panic("cannot set image auth secret in sidecar config: " + err.Error())
+	}
+	sc, _ := json.Marshal(scObj)
+	return string(sc)
+}
+
 func TestECStransformation(t *testing.T) {
 	inputfile, err := os.ReadFile("testfiles/ECSinput.json")
 	if err != nil {
@@ -181,10 +191,10 @@ func TestECStransformation(t *testing.T) {
 
 	kiltConfig := &cfnpatcher.Configuration{
 		Kilt:               agentinoKiltDefinition,
-		ImageAuthSecret:    "image_auth_secret",
 		OptIn:              false,
 		UseRepositoryHints: true,
 		RecipeConfig:       getKiltRecipe(t),
+		SidecarConfig:      getSidecarConfig(),
 	}
 
 	patchOpts := &patchOptions{}
@@ -206,10 +216,10 @@ func TestPatchFargateTaskDefinition(t *testing.T) {
 	// Kilt Configuration, test invariant
 	kiltConfig := &cfnpatcher.Configuration{
 		Kilt:               agentinoKiltDefinition,
-		ImageAuthSecret:    "image_auth_secret",
 		OptIn:              false,
 		UseRepositoryHints: true,
 		RecipeConfig:       getKiltRecipe(t),
+		SidecarConfig:      getSidecarConfig(),
 	}
 
 	// File readers
