@@ -66,19 +66,15 @@ The actions block is optional and supports:
     * `folder` - (Optional) Name of folder to store capture inside the bucket. 
     By default we will store the capture file at the root of the bucket
 
-### `rules` block
+### `rule` block
 
-The rules block is required and supports:
+The rule block is required and supports:
 
 * `description` - (Required) The description of the drift rule.
-* `tags` - (Optional) The tags associated with the drift rule.
-* `details` - (Required) The list of hashes to use for the drift rule.
-    * `mode` - (Required) **TODO*.
-    * `exceptions` - (Optional) The block contains a single hash that should be matched.
-        * `items` - (Required) Specify comma separated list of prohibited binaries, e.g. `/usr/bin/rm, /usr/bin/curl`.
-        * `match_items` - (Optional) **TODO**.
-    * `prohibited_binaries` - (Optional) A prohibited binary can be a known harmful binary or one that facilitates discovery of your environment.
-        * `items` - (Required) Specify comma separated list of prohibited binaries, e.g. `/usr/bin/rm, /usr/bin/curl`.
-        * `match_items` - (Optional) **TODO**.
+* `enabled` - (Required) Toggle to dynamically detect execution of drifted binaries. A drifted binary is any binary that was not part of the original image of the container. It is typically downloaded or compiled into a running container.
+* `exceptions` - (Optional) Specify comma separated list of exceptions.
+    * `items` - (Required) Specify comma separated list of exceptions, e.g. `/usr/bin/rm, /usr/bin/curl`.
+* `prohibited_binaries` - (Optional) A prohibited binary can be a known harmful binary or one that facilitates discovery of your environment.
+    * `items` - (Required) Specify comma separated list of prohibited binaries, e.g. `/usr/bin/rm, /usr/bin/curl`.
 
 

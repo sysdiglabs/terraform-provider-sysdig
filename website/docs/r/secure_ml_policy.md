@@ -21,7 +21,7 @@ resource "sysdig_secure_ml_policy" "policy" {
   enabled     = true
   severity    = 4
 
-  rules {
+  rule {
     description = "Test ML Rule Description"
 
     cryptomining_trigger {
@@ -56,15 +56,14 @@ In addition to all arguments above, the following attributes are exported:
 * `notification_channels` - IDs of the notification channels to send alerts to
     when the policy is fired.
 
-### `rules` block
+### `rule` block
 
-The rules block is required and supports:
+The rule block is required and supports:
 
-* `description` - (Required) The description of the ml rule.
-* `details` - (Required) The list of hashes to use for the ml rule.
-    * `cryptomining_trigger` - (Required) Cryptomining detection: Detect unusual activity in the Activity Audit based on the set confidence level.
-        * `threshold` - (Required) Trigger at or above confidence level.
-        * `severity` - (Optional) **TODO**.
+* `description` - (Required) Rule description.
+* `cryptomining_trigger` - (Required) Cryptomining detection: Detect unusual activity in the Activity Audit based on the set confidence level.
+    * `threshold` - (Required) Trigger at or above confidence level.
+    * `severity` - (Optional) Severity level associated with this rule.
 
 
 
