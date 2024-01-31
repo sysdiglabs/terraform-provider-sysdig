@@ -6,7 +6,7 @@ description: |-
   Retrieves a Sysdig Secure ML Policy.
 ---
 
-# Reource: sysdig_secure_ml_policy
+# Resource: sysdig_secure_ml_policy
 
 Retrieves the information of an existing Sysdig Secure ML Policy.
 
