@@ -160,6 +160,12 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 			"match_items": rule.Details.(*v2.DriftRuleDetails).ProhibitedBinaries.MatchItems,
 		}}
 
+		mode := rule.Details.(*v2.DriftRuleDetails).Mode
+		enabled := true
+		if mode == "disabled" {
+			enabled = false
+		}
+
 		rules = append(rules, map[string]interface{}{
 			"id":          rule.Id,
 			"name":        rule.Name,
@@ -167,7 +173,7 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 			"version":     rule.Version,
 			"tags":        rule.Tags,
 			"details": []map[string]interface{}{{
-				"mode":                rule.Details.(*v2.DriftRuleDetails).Mode,
+				"enabled":             enabled,
 				"exceptions":          exceptions,
 				"prohibited_binaries": prohibitedBinaries,
 			}},
@@ -441,6 +447,12 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 			tags = []string{defaultDriftTag}
 		}
 
+		enabled := d.Get("rules.0.details.0.enabled").(bool)
+		mode := "enabled"
+		if !enabled {
+			mode = "disabled"
+		}
+
 		rule := &v2.RuntimePolicyRule{
 			// TODO: Do not hardcode the indexes
 			Name:        d.Get("rules.0.name").(string),
@@ -448,7 +460,7 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 			Tags:        tags,
 			Details: v2.DriftRuleDetails{
 				RuleType:           v2.ElementType("DRIFT"), // TODO: Use const
-				Mode:               d.Get("rules.0.details.0.mode").(string),
+				Mode:               mode,
 				Exceptions:         exceptions,
 				ProhibitedBinaries: prohibitedBinaries,
 			},

@@ -58,7 +58,7 @@ func createDriftPolicyDataSourceSchema() map[string]*schema.Schema {
 						Computed: true,
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
-								"mode":                DriftModeComputedSchema(),
+								"enabled":             BoolComputedSchema(),
 								"exceptions":          ExceptionsComputedSchema(),
 								"prohibited_binaries": ExceptionsComputedSchema(),
 							},

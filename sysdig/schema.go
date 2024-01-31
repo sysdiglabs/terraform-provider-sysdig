@@ -338,21 +338,6 @@ func TagsSchema() *schema.Schema {
 	}
 }
 
-func DriftModeSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
-		// TODO: Validation?
-	}
-}
-
-func DriftModeComputedSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeString,
-		Computed: true,
-	}
-}
-
 func ExceptionsSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,

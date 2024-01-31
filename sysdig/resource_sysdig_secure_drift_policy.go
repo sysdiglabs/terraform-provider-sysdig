@@ -69,7 +69,8 @@ func resourceSysdigSecureDriftPolicy() *schema.Resource {
 							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"mode":                DriftModeSchema(),
+									// Enable maps to mode rule attribute
+									"enabled":             BoolSchema(),
 									"exceptions":          ExceptionsSchema(),
 									"prohibited_binaries": ExceptionsSchema(),
 								},
