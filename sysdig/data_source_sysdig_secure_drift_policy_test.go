@@ -3,6 +3,7 @@
 package sysdig_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -36,16 +37,16 @@ func TestAccDriftPolicyDataSource(t *testing.T) {
 }
 
 func driftPolicyDataSource(name string) string {
-	return `
+	return fmt.Sprintf(`
 resource "sysdig_secure_drift_policy" "policy_1" {
-  name        = "Test Drift Policy 0"
-  description = "Test Drift Policy Description"
+  name        = "Test Drift Policy %s"
+  description = "Test Drift Policy Description %s"
   enabled     = true
   severity    = 4
 
   rule {
     description = "Test Drift Rule Description"
-    enabled = false
+    enabled = true
 
     exceptions {
       items = ["/usr/bin/sh"]
@@ -65,5 +66,5 @@ data "sysdig_secure_drift_policy" "policy_2" {
   name       = sysdig_secure_drift_policy.policy_1.name
   depends_on = [sysdig_secure_drift_policy.policy_1]
 }
-`
+`, name, name)
 }

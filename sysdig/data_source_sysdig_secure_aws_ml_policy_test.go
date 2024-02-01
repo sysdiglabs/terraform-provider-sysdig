@@ -3,6 +3,7 @@
 package sysdig_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -36,10 +37,10 @@ func TestAccAWSMLPolicyDataSource(t *testing.T) {
 }
 
 func awsAWSMLPolicyDataSource(name string) string {
-	return `
+	return fmt.Sprintf(`
 resource "sysdig_secure_aws_ml_policy" "policy_1" {
-  name        = "Test AWS ML Policy 81z7b1xng6"
-  description = "Test AWS ML Policy Description"
+  name        = "Test AWS ML Policy %s"
+  description = "Test AWS ML Policy Description %s"
   enabled     = true
   severity    = 4
 
@@ -59,5 +60,5 @@ data "sysdig_secure_aws_ml_policy" "policy_2" {
   name       = sysdig_secure_aws_ml_policy.policy_1.name
   depends_on = [sysdig_secure_aws_ml_policy.policy_1]
 }
-`
+`, name, name)
 }
