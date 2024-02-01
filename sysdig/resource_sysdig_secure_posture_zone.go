@@ -138,9 +138,9 @@ func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	zone, err := zoneClient.CreateOrUpdatePostureZone(ctx, req)
+	zone, errStatus, err := zoneClient.CreateOrUpdatePostureZone(ctx, req)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("Error creating resource: %s %s", errStatus, err)
 	}
 
 	d.SetId(zone.ID)
