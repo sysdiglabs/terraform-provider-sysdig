@@ -27,6 +27,9 @@ func TestAccMLPolicy(t *testing.T) {
 			{
 				Config: mlPolicyWithName(rText()),
 			},
+			{
+				Config: mlPolicyWithoutNotificationChannel(rText()),
+			},
 		},
 	})
 }
@@ -55,4 +58,27 @@ resource "sysdig_secure_ml_policy" "sample" {
 }
 
 `, secureNotificationChannelEmailWithName(name), name)
+}
+
+func mlPolicyWithoutNotificationChannel(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_ml_policy" "sample" {
+  name        = "Test ML Policy %s"
+  description = "Test ML Policy Description"
+  enabled     = true
+  severity    = 4
+
+  rule {
+    description = "Test ML Rule Description"
+
+    cryptomining_trigger {
+      enabled   = true
+      threshold = 2
+      severity  = 1
+    }
+  }
+
+}
+
+`, name)
 }

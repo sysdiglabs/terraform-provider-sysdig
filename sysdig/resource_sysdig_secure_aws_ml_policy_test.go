@@ -27,6 +27,9 @@ func TestAccAWSMLPolicy(t *testing.T) {
 			{
 				Config: awsMLPolicyWithName(rText()),
 			},
+			{
+				Config: awsMLPolicyWithoutNotificationChannel(rText()),
+			},
 		},
 	})
 }
@@ -55,4 +58,27 @@ resource "sysdig_secure_aws_ml_policy" "sample" {
 }
 
 `, secureNotificationChannelEmailWithName(name), name)
+}
+
+func awsMLPolicyWithoutNotificationChannel(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_aws_ml_policy" "sample" {
+  name        = "Test AWS ML Policy %s"
+  description = "Test AWS ML Policy Description"
+  enabled     = true
+  severity    = 4
+
+  rule {
+    description = "Test AWS ML Rule Description"
+
+    anomalous_console_login {
+      enabled   = true
+      threshold = 2
+      severity  = 1
+    }
+  }
+
+}
+
+`, name)
 }

@@ -27,6 +27,15 @@ func TestAccDriftPolicy(t *testing.T) {
 			{
 				Config: driftPolicyWithName(rText()),
 			},
+			{
+				Config: driftPolicyWithAllActions(rText()),
+			},
+			{
+				Config: driftPolicyWithoutActions(rText()),
+			},
+			{
+				Config: driftPolicyWithoutNotificationChannel(rText()),
+			},
 		},
 	})
 }
@@ -64,4 +73,101 @@ resource "sysdig_secure_drift_policy" "sample" {
 `, secureNotificationChannelEmailWithName(name), name)
 }
 
-// TODO: Specify only a single rule type!
+func driftPolicyWithAllActions(name string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "sysdig_secure_drift_policy" "sample" {
+  name        = "Test Drift Policy %s"
+  description = "Test Drift Policy Description"
+  enabled     = true
+  severity    = 4
+
+  rule {
+    description = "Test Drift Rule Description"
+
+    enabled = true
+
+    exceptions {
+      items = ["/usr/bin/sh"]
+    }
+    prohibited_binaries {
+      items = ["/usr/bin/curl"]
+    }
+  }
+
+  actions {
+    prevent_drift = true
+    container = "stop"
+    capture {
+      seconds_before_event = 5
+      seconds_after_event = 10
+      name = "testcapture"
+    }
+  }
+
+  notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
+}
+
+`, secureNotificationChannelEmailWithName(name), name)
+}
+
+func driftPolicyWithoutActions(name string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "sysdig_secure_drift_policy" "sample" {
+  name        = "Test Drift Policy %s"
+  description = "Test Drift Policy Description"
+  enabled     = true
+  severity    = 4
+
+  rule {
+    description = "Test Drift Rule Description"
+
+    enabled = true
+
+    exceptions {
+      items = ["/usr/bin/sh"]
+    }
+    prohibited_binaries {
+      items = ["/usr/bin/curl"]
+    }
+  }
+
+  actions {}
+
+  notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
+}
+
+`, secureNotificationChannelEmailWithName(name), name)
+}
+
+func driftPolicyWithoutNotificationChannel(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_drift_policy" "sample" {
+  name        = "Test Drift Policy %s"
+  description = "Test Drift Policy Description"
+  enabled     = true
+  severity    = 4
+
+  rule {
+    description = "Test Drift Rule Description"
+
+    enabled = true
+
+    exceptions {
+      items = ["/usr/bin/sh"]
+    }
+    prohibited_binaries {
+      items = ["/usr/bin/curl"]
+    }
+  }
+
+  actions {
+    prevent_drift = true
+  }
+}
+
+`, name)
+}
