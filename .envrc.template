@@ -1,5 +1,5 @@
 # whether to run local acc test
-TF_ACC=false
+export TF_ACC=false
 
 # credentials
 export SYSDIG_SECURE_API_TOKEN=
