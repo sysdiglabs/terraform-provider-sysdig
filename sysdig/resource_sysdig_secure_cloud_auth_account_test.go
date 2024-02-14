@@ -317,3 +317,65 @@ func secureAzureCloudAuthAccountWithFCThreatDetection(accountID string) string {
 			}
 		}`, accountID, randomTenantId)
 }
+
+func TestGCPAgentlesScanningOnboarding(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+	accID := rText()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: getResourceForGCPAgentlessScan(accID),
+			},
+			{
+				ResourceName:      "sysdig_secure_cloud_auth_account.gcp-agentless-scanning",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func getResourceForGCPAgentlessScan(projectID string) string {
+	randomID := acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum)
+
+	// TODO. check what provider_tenant_id is for
+
+	return fmt.Sprintf(`
+		resource "sysdig_secure_cloud_auth_account" "gcp-agentless-scanning" {
+			provider_id   = "gcp-agentless-test-%s"
+			provider_type = "PROVIDER_GCP"
+			enabled       = true
+
+			provider_tenant_id = "%s"
+
+		    feature {
+			  secure_agentless_scanning {
+			    enabled    = true
+			    components = ["COMPONENT_SERVICE_PRINCIPAL/secure-scanning"]
+			  }
+		    }
+
+			component {
+				type                       = "COMPONENT_SERVICE_PRINCIPAL"
+				instance                   = "secure-scanning"
+				service_principal_metadata = jsonencode({
+					gcp = {
+						workload_identity_federation = {
+							pool_provider_id = "pool-provider-id"
+						}
+						email = "cocotero"
+					}
+				})
+			}
+		}`, projectID, randomID)
+}

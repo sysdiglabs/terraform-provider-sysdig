@@ -9,4 +9,4 @@ export SYSDIG_MONITOR_API_TOKEN=
 export TF_ACC=false
 
 # terraform log level
-export TF_LOG=TRACE
+export TF_LOG=DEBUG

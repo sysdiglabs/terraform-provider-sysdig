@@ -11,11 +11,12 @@ import (
 	"strings"
 	"time"
 
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
-	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
+	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
 
 func resourceSysdigSecureCloudauthAccount() *schema.Resource {
@@ -418,32 +419,10 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 					servicePrincipalMetadata := parseResourceMetadataJson(value.(string))
 
 					if provider == cloudauth.Provider_PROVIDER_GCP.String() {
-						encodedServicePrincipalGcpKey, ok := servicePrincipalMetadata["gcp"].(map[string]interface{})["key"].(string)
-						if !ok {
-							fmt.Printf("Resource input for component metadata for provider %s is invalid and not as expected", provider)
-							break
+						if metadata, err := getServicePrincipalMetadataForGCP(servicePrincipalMetadata); err == nil {
+							component.Metadata = metadata
 						}
-						servicePrincipalGcpKey := decodeServicePrincipalKeyToMap(encodedServicePrincipalGcpKey)
-						component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
-							ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
-								Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
-									Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
-										Key: &cloudauth.ServicePrincipalMetadata_GCP_Key{
-											Type:                    servicePrincipalGcpKey["type"],
-											ProjectId:               servicePrincipalGcpKey["project_id"],
-											PrivateKeyId:            servicePrincipalGcpKey["private_key_id"],
-											PrivateKey:              servicePrincipalGcpKey["private_key"],
-											ClientEmail:             servicePrincipalGcpKey["client_email"],
-											ClientId:                servicePrincipalGcpKey["client_id"],
-											AuthUri:                 servicePrincipalGcpKey["auth_uri"],
-											TokenUri:                servicePrincipalGcpKey["token_uri"],
-											AuthProviderX509CertUrl: servicePrincipalGcpKey["auth_provider_x509_cert_url"],
-											ClientX509CertUrl:       servicePrincipalGcpKey["client_x509_cert_url"],
-										},
-									},
-								},
-							},
-						}
+
 					} else if provider == cloudauth.Provider_PROVIDER_AZURE.String() {
 						servicePrincipalAzureKey, ok := servicePrincipalMetadata["azure"].(map[string]interface{})["active_directory_service_principal"].(map[string]interface{})
 
@@ -488,6 +467,59 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 	}
 
 	return accountComponents
+}
+
+func getServicePrincipalMetadataForGCP(servicePrincipalMetadata map[string]interface{}) (*cloudauth.AccountComponent_ServicePrincipalMetadata, error) {
+
+	encodedServicePrincipal, ok := servicePrincipalMetadata["gcp"].(map[string]interface{})
+	if !ok {
+		fmt.Printf("Failed to parse service principal metadata, for provider GCP")
+		return nil, fmt.Errorf("failed to parse service principal metadata, for provider GCP")
+	}
+
+	rawKeyData, okKey := encodedServicePrincipal["key"].(string)
+	wifData, okWif := encodedServicePrincipal["workload_identity_federation"].(map[string]interface{})
+
+	if !okKey && !okWif {
+		fmt.Printf("Failed to parse on of either service principal types, key or workload_identity_federation")
+		return nil, fmt.Errorf("failed to parse on of either service principal types, key or workload_identity_federation")
+	}
+
+	servcicePrincipalMetadata := &cloudauth.AccountComponent_ServicePrincipalMetadata{
+		ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
+			Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
+				Gcp: &cloudauth.ServicePrincipalMetadata_GCP{},
+			},
+		},
+	}
+
+	if okKey {
+		keyData := decodeServicePrincipalKeyToMap(rawKeyData)
+		servcicePrincipalMetadata.ServicePrincipalMetadata.GetGcp().Key = &cloudauth.ServicePrincipalMetadata_GCP_Key{
+			Type:                    keyData["type"],
+			ProjectId:               keyData["project_id"],
+			PrivateKeyId:            keyData["private_key_id"],
+			PrivateKey:              keyData["private_key"],
+			ClientEmail:             keyData["client_email"],
+			ClientId:                keyData["client_id"],
+			AuthUri:                 keyData["auth_uri"],
+			TokenUri:                keyData["token_uri"],
+			AuthProviderX509CertUrl: keyData["auth_provider_x509_cert_url"],
+			ClientX509CertUrl:       keyData["client_x509_cert_url"],
+		}
+	}
+
+	if okWif {
+		servcicePrincipalMetadata.ServicePrincipalMetadata.GetGcp().WorkloadIdentityFederation = &cloudauth.ServicePrincipalMetadata_GCP_WorkloadIdentityFederation{
+			//PoolId:         wifData["pool_id"].(string),
+			PoolId:         "bananas",
+			PoolProviderId: wifData["pool_provider_id"].(string),
+		}
+	}
+
+	servcicePrincipalMetadata.ServicePrincipalMetadata.GetGcp().Email = encodedServicePrincipal["email"].(string)
+
+	return servcicePrincipalMetadata, nil
 }
 
 /*
