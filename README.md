@@ -1,5 +1,5 @@
 <a href="https://terraform.io">
-    <img src="https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/main/.github/terraform_logo.svg" alt="Terraform logo" title="Terraform" align="right" height="50" />
+    <img src="https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/main/.github/terraform_logo.svg" alt="Terraform logo" title="Terraform" height="50" />
 </a>
 
 
@@ -15,7 +15,7 @@
 - [Develop](#develop)
 - [Compile](#compile)
 - [Test](#tests)
-- [Install](#install)
+- [Install](#install-local)
 - [Proposing PR's](#proposing-prs)
 - [Release](#release)
 
@@ -42,7 +42,7 @@ If you're a rookie, check [Official Terraform Provider development guides](https
 TL;DR;
 - Create the resource/data source item
 - Add the created item into the `provider.go` resource or datasource map with its wiring
-- With its [acceptance **test**](#acceptance-tests)
+- With its [acceptance **test**](#tests)
 - Add its **documentation** page on `./website/docs/`
 
 ## Compile
