@@ -515,9 +515,8 @@ func getServicePrincipalMetadataForGCP(servicePrincipalMetadata map[string]inter
 			PoolId:         "bananas",
 			PoolProviderId: wifData["pool_provider_id"].(string),
 		}
+		servcicePrincipalMetadata.ServicePrincipalMetadata.GetGcp().Email = encodedServicePrincipal["email"].(string)
 	}
-
-	servcicePrincipalMetadata.ServicePrincipalMetadata.GetGcp().Email = encodedServicePrincipal["email"].(string)
 
 	return servcicePrincipalMetadata, nil
 }
