@@ -511,8 +511,6 @@ func getServicePrincipalMetadataForGCP(servicePrincipalMetadata map[string]inter
 
 	if okWif {
 		servcicePrincipalMetadata.ServicePrincipalMetadata.GetGcp().WorkloadIdentityFederation = &cloudauth.ServicePrincipalMetadata_GCP_WorkloadIdentityFederation{
-			//PoolId:         wifData["pool_id"].(string),
-			PoolId:         "bananas",
 			PoolProviderId: wifData["pool_provider_id"].(string),
 		}
 		servcicePrincipalMetadata.ServicePrincipalMetadata.GetGcp().Email = encodedServicePrincipal["email"].(string)
@@ -656,53 +654,33 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 			case *cloudauth.AccountComponent_ServicePrincipalMetadata:
 				provider := metadata.(*cloudauth.AccountComponent_ServicePrincipalMetadata).ServicePrincipalMetadata.GetProvider()
 				// TODO: Make it more generic than just for GCP
-				if providerKey, ok := provider.(*cloudauth.ServicePrincipalMetadata_Gcp); ok {
-					// convert key struct to jsonified key with all the expected fields
-					jsonifiedKey := struct {
-						Type                    string `json:"type"`
-						ProjectId               string `json:"project_id"`
-						PrivateKeyId            string `json:"private_key_id"`
-						PrivateKey              string `json:"private_key"`
-						ClientEmail             string `json:"client_email"`
-						ClientId                string `json:"client_id"`
-						AuthUri                 string `json:"auth_uri"`
-						TokenUri                string `json:"token_uri"`
-						AuthProviderX509CertUrl string `json:"auth_provider_x509_cert_url"`
-						ClientX509CertUrl       string `json:"client_x509_cert_url"`
-						UniverseDomain          string `json:"universe_domain"`
-					}{
-						Type:                    providerKey.Gcp.GetKey().GetType(),
-						ProjectId:               providerKey.Gcp.GetKey().GetProjectId(),
-						PrivateKeyId:            providerKey.Gcp.GetKey().GetPrivateKeyId(),
-						PrivateKey:              providerKey.Gcp.GetKey().GetPrivateKey(),
-						ClientEmail:             providerKey.Gcp.GetKey().GetClientEmail(),
-						ClientId:                providerKey.Gcp.GetKey().GetClientId(),
-						AuthUri:                 providerKey.Gcp.GetKey().GetAuthUri(),
-						TokenUri:                providerKey.Gcp.GetKey().GetTokenUri(),
-						AuthProviderX509CertUrl: providerKey.Gcp.GetKey().GetAuthProviderX509CertUrl(),
-						ClientX509CertUrl:       providerKey.Gcp.GetKey().GetClientX509CertUrl(),
-						UniverseDomain:          "googleapis.com",
-					}
-					bytesKey, err := json.Marshal(jsonifiedKey)
-					if err != nil {
-						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
-						break
+				if servicePrincipalMetadata, ok := provider.(*cloudauth.ServicePrincipalMetadata_Gcp); ok {
+
+					metadataContent := map[string]interface{}{
+						"gcp": map[string]interface{}{},
 					}
 
-					// update the json with proper indentation
-					var out bytes.Buffer
-					if err := json.Indent(&out, bytesKey, "", "  "); err != nil {
-						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
-						break
+					gcpKey := servicePrincipalMetadata.Gcp.GetKey()
+					if gcpKey != nil {
+						keyBytes, err := deserializeServiceMetadata_GCP_Key(servicePrincipalMetadata)
+						if err != nil {
+							fmt.Printf("Failed to deserializeServiceMetadata_GCP_Key %s: %v", SchemaServicePrincipalMetadata, err)
+							break
+						}
+						metadataContent["gcp"].(map[string]interface{})["key"] = keyBytes
 					}
-					out.WriteByte('\n')
+
+					workloadIdentityData := servicePrincipalMetadata.Gcp.GetWorkloadIdentityFederation()
+					if workloadIdentityData != nil {
+						metadataContent["gcp"].(map[string]interface{})["workload_identity_federation"] = map[string]interface{}{
+							"pool_provider_id": workloadIdentityData.GetPoolProviderId(),
+						}
+
+						metadataContent["gcp"].(map[string]interface{})["email"] = servicePrincipalMetadata.Gcp.GetEmail()
+					}
 
 					// encode the key to base64 and add to the component block
-					schemaData, err := json.Marshal(map[string]interface{}{
-						"gcp": map[string]interface{}{
-							"key": encodeServicePrincipalKey(out.Bytes()),
-						},
-					})
+					schemaData, err := json.Marshal(metadataContent)
 					if err != nil {
 						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
 						break
@@ -768,6 +746,49 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 	}
 
 	return nil
+}
+
+func deserializeServiceMetadata_GCP_Key(servicePrincipalMetadata *cloudauth.ServicePrincipalMetadata_Gcp) (string, error) {
+	// convert key struct to jsonified key with all the expected fields
+	jsonifiedKey := struct {
+		Type                    string `json:"type"`
+		ProjectId               string `json:"project_id"`
+		PrivateKeyId            string `json:"private_key_id"`
+		PrivateKey              string `json:"private_key"`
+		ClientEmail             string `json:"client_email"`
+		ClientId                string `json:"client_id"`
+		AuthUri                 string `json:"auth_uri"`
+		TokenUri                string `json:"token_uri"`
+		AuthProviderX509CertUrl string `json:"auth_provider_x509_cert_url"`
+		ClientX509CertUrl       string `json:"client_x509_cert_url"`
+		UniverseDomain          string `json:"universe_domain"`
+	}{
+		Type:                    servicePrincipalMetadata.Gcp.GetKey().GetType(),
+		ProjectId:               servicePrincipalMetadata.Gcp.GetKey().GetProjectId(),
+		PrivateKeyId:            servicePrincipalMetadata.Gcp.GetKey().GetPrivateKeyId(),
+		PrivateKey:              servicePrincipalMetadata.Gcp.GetKey().GetPrivateKey(),
+		ClientEmail:             servicePrincipalMetadata.Gcp.GetKey().GetClientEmail(),
+		ClientId:                servicePrincipalMetadata.Gcp.GetKey().GetClientId(),
+		AuthUri:                 servicePrincipalMetadata.Gcp.GetKey().GetAuthUri(),
+		TokenUri:                servicePrincipalMetadata.Gcp.GetKey().GetTokenUri(),
+		AuthProviderX509CertUrl: servicePrincipalMetadata.Gcp.GetKey().GetAuthProviderX509CertUrl(),
+		ClientX509CertUrl:       servicePrincipalMetadata.Gcp.GetKey().GetClientX509CertUrl(),
+		UniverseDomain:          "googleapis.com",
+	}
+	bytesKey, err := json.Marshal(jsonifiedKey)
+	if err != nil {
+		fmt.Errorf("failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
+	}
+
+	// update the json with proper indentation
+	var keyOut bytes.Buffer
+	if err := json.Indent(&keyOut, bytesKey, "", "  "); err != nil {
+		fmt.Errorf("failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
+	}
+	keyOut.WriteByte('\n')
+
+	keyBytes := encodeServicePrincipalKey(keyOut.Bytes())
+	return keyBytes, nil
 }
 
 func getResourceComponentsOrder(dataComponents interface{}) []string {
