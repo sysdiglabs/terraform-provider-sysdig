@@ -21,7 +21,7 @@ import (
 func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 	timeout := 5 * time.Minute
 
-	accountFeature := &schema.Resource{
+	var accountFeature = &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaType: {
 				Type:     schema.TypeString,
@@ -41,7 +41,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 		},
 	}
 
-	accountFeatures := &schema.Resource{
+	var accountFeatures = &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaSecureConfigPosture: {
 				Type:     schema.TypeSet,
@@ -71,7 +71,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 		},
 	}
 
-	accountComponents := &schema.Resource{
+	var accountComponents = &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaType: {
 				Type:     schema.TypeString,
@@ -257,6 +257,7 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 	}
 
 	errStatus, err := client.DeleteCloudauthAccountSecure(ctx, data.Id())
+
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil

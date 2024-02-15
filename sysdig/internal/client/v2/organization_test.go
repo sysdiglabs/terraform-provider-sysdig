@@ -3,11 +3,10 @@
 package v2
 
 import (
+	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"io"
 	"strings"
 	"testing"
-
-	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
 
 func TestMarshalOrg(t *testing.T) {

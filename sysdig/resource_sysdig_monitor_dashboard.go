@@ -884,6 +884,7 @@ func timechartPanelToResourceData(panel *v2.Panels, panelLayout *v2.Layout, pane
 }
 
 func legendConfigurationToResourceData(legend *v2.LegendConfiguration, panelData map[string]interface{}) []map[string]interface{} {
+
 	legendData := panelData["legend"]
 	// If legend is not defined in the user configuration and the dashboard legend is the same as the default one
 	// we don't set the legend in the resource data to avoid drifts
