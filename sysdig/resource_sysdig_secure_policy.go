@@ -23,6 +23,7 @@ var validatePolicyType = validation.StringInSlice([]string{
 	"list_matching",
 	"k8s_audit",
 	"aws_cloudtrail",
+	"awscloudtrail",
 	"gcp_auditlog",
 	"azure_platformlogs",
 	"okta",

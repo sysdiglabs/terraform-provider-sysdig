@@ -83,8 +83,7 @@ func (client *Client) DeleteCloudauthAccountSecure(ctx context.Context, accountI
 }
 
 func (client *Client) UpdateCloudauthAccountSecure(ctx context.Context, accountID string, cloudAccount *CloudauthAccountSecure) (
-	*CloudauthAccountSecure, string, error,
-) {
+	*CloudauthAccountSecure, string, error) {
 	payload, err := client.marshalProto(cloudAccount)
 	if err != nil {
 		return nil, "", err
