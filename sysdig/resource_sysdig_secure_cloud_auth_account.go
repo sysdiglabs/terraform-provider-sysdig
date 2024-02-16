@@ -22,7 +22,7 @@ import (
 func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 	timeout := 5 * time.Minute
 
-	var accountFeature = &schema.Resource{
+	accountFeature := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaType: {
 				Type:     schema.TypeString,
@@ -42,7 +42,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 		},
 	}
 
-	var accountFeatures = &schema.Resource{
+	accountFeatures := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaSecureConfigPosture: {
 				Type:     schema.TypeSet,
@@ -72,7 +72,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 		},
 	}
 
-	var accountComponents = &schema.Resource{
+	accountComponents := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaType: {
 				Type:     schema.TypeString,
@@ -258,7 +258,6 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 	}
 
 	errStatus, err := client.DeleteCloudauthAccountSecure(ctx, data.Id())
-
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -422,7 +421,6 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 						if metadata, err := getServicePrincipalMetadataForGCP(servicePrincipalMetadata); err == nil {
 							component.Metadata = metadata
 						}
-
 					} else if provider == cloudauth.Provider_PROVIDER_AZURE.String() {
 						servicePrincipalAzureKey, ok := servicePrincipalMetadata["azure"].(map[string]interface{})["active_directory_service_principal"].(map[string]interface{})
 
@@ -470,7 +468,6 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 }
 
 func getServicePrincipalMetadataForGCP(servicePrincipalMetadata map[string]interface{}) (*cloudauth.AccountComponent_ServicePrincipalMetadata, error) {
-
 	encodedServicePrincipal, ok := servicePrincipalMetadata["gcp"].(map[string]interface{})
 	if !ok {
 		fmt.Printf("Failed to parse service principal metadata, for provider GCP")
@@ -777,13 +774,13 @@ func deserializeServiceMetadata_GCP_Key(servicePrincipalMetadata *cloudauth.Serv
 	}
 	bytesKey, err := json.Marshal(jsonifiedKey)
 	if err != nil {
-		fmt.Errorf("failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
+		return "", fmt.Errorf("failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
 	}
 
 	// update the json with proper indentation
 	var keyOut bytes.Buffer
 	if err := json.Indent(&keyOut, bytesKey, "", "  "); err != nil {
-		fmt.Errorf("failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
+		return "", fmt.Errorf("failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
 	}
 	keyOut.WriteByte('\n')
 
