@@ -550,15 +550,6 @@ func decodeServicePrincipalKeyToMap(encodedKey string) map[string]string {
 	return privateKeyMap
 }
 
-/*
-This helper function encodes the Service Principal Key returned by Sysdig
-and returns a base64 encoded string
-*/
-func encodeServicePrincipalKey(key []byte) string {
-	encodedKey := b64.StdEncoding.EncodeToString(key)
-	return encodedKey
-}
-
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
 	accountComponents := constructAccountComponents([]*cloudauth.AccountComponent{}, data)
 
@@ -676,7 +667,6 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 						metadataContent["gcp"].(map[string]interface{})["email"] = servicePrincipalMetadata.Gcp.GetEmail()
 					}
 
-					// encode the key to base64 and add to the component block
 					schemaData, err := json.Marshal(metadataContent)
 					if err != nil {
 						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
@@ -786,6 +776,15 @@ func deserializeServiceMetadata_GCP_Key(servicePrincipalMetadata *cloudauth.Serv
 
 	keyBytes := encodeServicePrincipalKey(keyOut.Bytes())
 	return keyBytes, nil
+}
+
+/*
+This helper function encodes the Service Principal Key returned by Sysdig
+and returns a base64 encoded string
+*/
+func encodeServicePrincipalKey(key []byte) string {
+	encodedKey := b64.StdEncoding.EncodeToString(key)
+	return encodedKey
 }
 
 func getResourceComponentsOrder(dataComponents interface{}) []string {
