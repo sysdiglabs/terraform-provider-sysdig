@@ -299,7 +299,7 @@ func HashesSchema() *schema.Schema {
 				},
 				"hash_aliases": {
 					Type:     schema.TypeSet,
-					Required: true,
+					Optional: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 				},
 			},
@@ -319,7 +319,7 @@ func HashesComputedSchema() *schema.Schema {
 				},
 				"hash_aliases": {
 					Type:     schema.TypeSet,
-					Computed: true,
+					Optional: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 				},
 			},
