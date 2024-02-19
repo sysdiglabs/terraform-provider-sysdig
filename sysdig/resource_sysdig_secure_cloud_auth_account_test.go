@@ -347,9 +347,6 @@ func TestGCPAgentlesScanningOnboarding(t *testing.T) {
 }
 
 func getResourceForGCPAgentlessScan(projectID string) string {
-
-	// TODO. check what provider_tenant_id is for
-
 	return fmt.Sprintf(`
 		resource "sysdig_secure_cloud_auth_account" "gcp-agentless-scanning" {
 			provider_id   = "gcp-agentless-test-%s"
