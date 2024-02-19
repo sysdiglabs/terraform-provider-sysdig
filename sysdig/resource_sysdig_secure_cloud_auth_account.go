@@ -11,11 +11,12 @@ import (
 	"strings"
 	"time"
 
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
-	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
+	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
 
 func resourceSysdigSecureCloudauthAccount() *schema.Resource {
@@ -608,9 +609,6 @@ This helper function converts the components data from []*cloudauth.AccountCompo
 This is needed to set the value in cloudauthAccountToResourceData().
 */
 func componentsToResourceData(components []*cloudauth.AccountComponent, dataComponentsOrder []string) []map[string]interface{} {
-	// In the resource data, SchemaComponent field is a list of component sets[] / block
-	// Hence we need to return this uber level list in same order to cloudauthAccountToResourceData
-	componentsList := []map[string]interface{}{}
 
 	allComponents := make(map[string]interface{})
 	for _, comp := range components {
@@ -726,14 +724,28 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 		allComponents[comp.Instance] = componentBlock
 	}
 
-	// return componentsList only if there is any components data from *[]cloudauth.AccountComponent, else return nil
+	// In the resource data, SchemaComponent field is a list of component sets[] / block
+	// Hence we need to return this uber level list in same order to cloudauthAccountToResourceData
+	componentsList := []map[string]interface{}{}
+
 	if len(allComponents) > 0 {
-		// add the component blocks in same order to maintain ordering
-		for _, c := range dataComponentsOrder {
-			componentItem := allComponents[c].(map[string]interface{})
+
+		//if len(dataComponentsOrder) > 0 {
+		//	// add the component blocks in same order to maintain ordering
+		//	for _, c := range dataComponentsOrder {
+		//		componentItem := allComponents[c].(map[string]interface{})
+		//		componentsList = append(componentsList, componentItem)
+		//	}
+		//	return componentsList
+		//}
+
+		// if no ordering is provided, return all components in any order
+		for _, c := range allComponents {
+			componentItem := c.(map[string]interface{})
 			componentsList = append(componentsList, componentItem)
 		}
 		return componentsList
+
 	}
 
 	return nil

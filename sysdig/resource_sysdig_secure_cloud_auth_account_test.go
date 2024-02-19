@@ -72,10 +72,9 @@ func TestAccGCPSecureCloudAuthAccountFC(t *testing.T) {
 				Config: secureGCPCloudAuthAccountWithFC(accID),
 			},
 			{
-				ResourceName:            "sysdig_secure_cloud_auth_account.sample-1",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"component"},
+				ResourceName:      "sysdig_secure_cloud_auth_account.sample-1",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -213,10 +212,9 @@ func TestAccAzureSecureCloudAccountFC(t *testing.T) {
 				Config: secureAzureCloudAuthAccountWithFC(accID),
 			},
 			{
-				ResourceName:            "sysdig_secure_cloud_auth_account.sample-1",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"component"},
+				ResourceName:      "sysdig_secure_cloud_auth_account.sample-1",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -277,10 +275,9 @@ func TestAccAzureSecureCloudAccountFCThreatDetection(t *testing.T) {
 				Config: secureAzureCloudAuthAccountWithFCThreatDetection(accID),
 			},
 			{
-				ResourceName:            "sysdig_secure_cloud_auth_account.sample-1",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"component"},
+				ResourceName:      "sysdig_secure_cloud_auth_account.sample-1",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
