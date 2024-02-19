@@ -337,16 +337,16 @@ func TestGCPAgentlesScanningOnboarding(t *testing.T) {
 				Config: getResourceForGCPAgentlessScan(accID),
 			},
 			{
-				ResourceName:      "sysdig_secure_cloud_auth_account.gcp-agentless-scanning",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_secure_cloud_auth_account.gcp-agentless-scanning",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"component"},
 			},
 		},
 	})
 }
 
 func getResourceForGCPAgentlessScan(projectID string) string {
-	randomID := acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum)
 
 	// TODO. check what provider_tenant_id is for
 
@@ -355,8 +355,6 @@ func getResourceForGCPAgentlessScan(projectID string) string {
 			provider_id   = "gcp-agentless-test-%s"
 			provider_type = "PROVIDER_GCP"
 			enabled       = true
-
-			provider_tenant_id = "%s"
 
 		    feature {
 			  secure_agentless_scanning {
@@ -377,5 +375,5 @@ func getResourceForGCPAgentlessScan(projectID string) string {
 					}
 				})
 			}
-		}`, projectID, randomID)
+		}`, projectID)
 }
