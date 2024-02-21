@@ -730,14 +730,15 @@ func componentsToResourceData(components []*cloudauth.AccountComponent, dataComp
 
 	if len(allComponents) > 0 {
 
-		//if len(dataComponentsOrder) > 0 {
-		//	// add the component blocks in same order to maintain ordering
-		//	for _, c := range dataComponentsOrder {
-		//		componentItem := allComponents[c].(map[string]interface{})
-		//		componentsList = append(componentsList, componentItem)
-		//	}
-		//	return componentsList
-		//}
+		// add the component blocks in same order to maintain ordering
+		// note-request; why is this needed?
+		if len(dataComponentsOrder) > 0 {
+			for _, c := range dataComponentsOrder {
+				componentItem := allComponents[c].(map[string]interface{})
+				componentsList = append(componentsList, componentItem)
+			}
+			return componentsList
+		}
 
 		// if no ordering is provided, return all components in any order
 		for _, c := range allComponents {
