@@ -108,18 +108,16 @@ func setTFResourcePolicyRulesMalware(d *schema.ResourceData, policy v2.PolicyRul
 	rules := []map[string]interface{}{}
 	for _, rule := range policy.Rules {
 		additionalHashes := []map[string]interface{}{}
-		for k, v := range rule.Details.(*v2.MalwareRuleDetails).AdditionalHashes {
+		for k, _ := range rule.Details.(*v2.MalwareRuleDetails).AdditionalHashes {
 			additionalHashes = append(additionalHashes, map[string]interface{}{
-				"hash":         k,
-				"hash_aliases": v,
+				"hash": k,
 			})
 		}
 
 		ignoreHashes := []map[string]interface{}{}
-		for k, v := range rule.Details.(*v2.MalwareRuleDetails).IgnoreHashes {
+		for k, _ := range rule.Details.(*v2.MalwareRuleDetails).IgnoreHashes {
 			ignoreHashes = append(ignoreHashes, map[string]interface{}{
-				"hash":         k,
-				"hash_aliases": v,
+				"hash": k,
 			})
 		}
 
@@ -362,8 +360,7 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 			for _, item := range items.([]interface{}) {
 				item := item.(map[string]interface{})
 				k := item["hash"].(string)
-				v := schemaSetToList(item["hash_aliases"])
-				additionalHashes[k] = v
+				additionalHashes[k] = []string{}
 			}
 		}
 
@@ -373,8 +370,7 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 			for _, item := range items.([]interface{}) {
 				item := item.(map[string]interface{})
 				k := item["hash"].(string)
-				v := schemaSetToList(item["hash_aliases"])
-				ignoreHashes[k] = v
+				ignoreHashes[k] = []string{}
 			}
 		}
 

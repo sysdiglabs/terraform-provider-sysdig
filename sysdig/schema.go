@@ -297,11 +297,6 @@ func HashesSchema() *schema.Schema {
 					Type:     schema.TypeString,
 					Required: true,
 				},
-				"hash_aliases": {
-					Type:     schema.TypeSet,
-					Optional: true,
-					Elem:     &schema.Schema{Type: schema.TypeString},
-				},
 			},
 		},
 	}
@@ -316,11 +311,6 @@ func HashesComputedSchema() *schema.Schema {
 				"hash": {
 					Type:     schema.TypeString,
 					Computed: true,
-				},
-				"hash_aliases": {
-					Type:     schema.TypeSet,
-					Optional: true,
-					Elem:     &schema.Schema{Type: schema.TypeString},
 				},
 			},
 		},
@@ -399,7 +389,7 @@ func MLRuleThresholdAndSeveritySchema() *schema.Schema {
 				},
 				"severity": {
 					Type:     schema.TypeInt,
-					Required: true,
+					Optional: true,
 				},
 			},
 		},
