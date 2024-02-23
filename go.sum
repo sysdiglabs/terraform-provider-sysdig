@@ -225,10 +225,14 @@ github.com/sysdiglabs/agent-kilt/pkg v0.0.0-20231124131820-71542fa7267c h1:4EX48
 github.com/sysdiglabs/agent-kilt/pkg v0.0.0-20231124131820-71542fa7267c/go.mod h1:jxZJUWMw4eK8W9kyWeU0sJulx1KyEaIi6oZx4ATLobI=
 github.com/sysdiglabs/agent-kilt/pkg v0.0.0-20231207110334-1d6c07239b4c h1:VmKvTs0e7mmA+9QGIcTBZHkfyNwE5xFZIJ7UWWW86Vs=
 github.com/sysdiglabs/agent-kilt/pkg v0.0.0-20231207110334-1d6c07239b4c/go.mod h1:CTFbnFzGunvQCZKkewsx/XLSchikz9pHIq715Ao90Bw=
+github.com/sysdiglabs/agent-kilt/pkg v0.0.0-20240201123620-2272de6dee9f h1:2DsK+LfZ4oFOKg+hJ7VdYkYBOPLQhm2S3WYRG9sKjg4=
+github.com/sysdiglabs/agent-kilt/pkg v0.0.0-20240201123620-2272de6dee9f/go.mod h1:CTFbnFzGunvQCZKkewsx/XLSchikz9pHIq715Ao90Bw=
 github.com/sysdiglabs/agent-kilt/runtimes/cloudformation v0.0.0-20231124134841-96a4feb9adb9 h1:VWoep4GtewewjvveMxpvMUeJYMAnqj/mxH3rnFMpQr0=
 github.com/sysdiglabs/agent-kilt/runtimes/cloudformation v0.0.0-20231124134841-96a4feb9adb9/go.mod h1:ISt5TFdTW97q10cNZt3gpv8ejVSCuDrJGAu4CNZJcFw=
 github.com/sysdiglabs/agent-kilt/runtimes/cloudformation v0.0.0-20231207110334-1d6c07239b4c h1:hCF6/JBSV0ovF9RfMKMUiROeNzlLtnMWjW5MSbcwA2Q=
 github.com/sysdiglabs/agent-kilt/runtimes/cloudformation v0.0.0-20231207110334-1d6c07239b4c/go.mod h1:iJjZCFs4hKceZHVCFFfU+s46VfBfST6L6/oB4aHzu1s=
+github.com/sysdiglabs/agent-kilt/runtimes/cloudformation v0.0.0-20240201123620-2272de6dee9f h1:AJSUyLqKhSW+wrMnHcg2+8j/KG2++KwbRKzl+gwz6vk=
+github.com/sysdiglabs/agent-kilt/runtimes/cloudformation v0.0.0-20240201123620-2272de6dee9f/go.mod h1:iJjZCFs4hKceZHVCFFfU+s46VfBfST6L6/oB4aHzu1s=
 github.com/urfave/cli v1.22.12/go.mod h1:sSBEIC79qR6OvcmsD4U3KABeOTxDqQtdDnaFuUN30b8=
 github.com/vbatts/tar-split v0.11.3 h1:hLFqsOLQ1SsppQNTMpkpPXClLDfC2A3Zgy9OUU+RVck=
 github.com/vbatts/tar-split v0.11.3/go.mod h1:9QlHN18E+fEH7RdG+QAJJcuya3rqT7eXSTY7wGrAokY=
