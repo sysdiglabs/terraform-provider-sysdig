@@ -132,6 +132,32 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 				Default:     "", // we will want to change this to "auto" eventually
 				Optional:    true,
 			},
+
+			"instrumentation_essential": {
+				Type:        schema.TypeBool,
+				Description: "Should the instrumentation container be marked as essential",
+				Default:     true,
+				Optional:    true,
+			},
+			"instrumentation_cpu": {
+				Type:        schema.TypeInt,
+				Description: "The number of cpu units dedicated to the instrumentation container",
+				Default:     0,
+				Optional:    true,
+			},
+			"instrumentation_memory_limit": {
+				Type:        schema.TypeInt,
+				Description: "The maximum amount (in MiB) of memory used by the instrumentation container",
+				Default:     0,
+				Optional:    true,
+			},
+			"instrumentation_memory_reservation": {
+				Type:        schema.TypeInt,
+				Description: "The minimum amount (in MiB) of memory reserved for the instrumentation container",
+				Default:     0,
+				Optional:    true,
+			},
+
 			"output_container_definitions": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -203,6 +229,34 @@ func fargatePostKiltModifications(patchedBytes []byte, patchOpts *patchOptions) 
 				_, err = container.Set(awsLogConfig, "LogConfiguration")
 				if err != nil {
 					return nil, fmt.Errorf("failed to set log configuration: %s", err)
+				}
+			}
+
+			if !patchOpts.Essential {
+				_, err := container.Set(false, "essential")
+				if err != nil {
+					return nil, fmt.Errorf("failed to set essential flag: %s", err)
+				}
+			}
+
+			if patchOpts.CpuShares != 0 {
+				_, err := container.Set(patchOpts.CpuShares, "cpu")
+				if err != nil {
+					return nil, fmt.Errorf("failed to set cpu shares: %s", err)
+				}
+			}
+
+			if patchOpts.MemoryLimit != 0 {
+				_, err := container.Set(patchOpts.MemoryLimit, "memory")
+				if err != nil {
+					return nil, fmt.Errorf("failed to set memory limit: %s", err)
+				}
+			}
+
+			if patchOpts.MemoryReservation != 0 {
+				_, err := container.Set(patchOpts.MemoryReservation, "memoryReservation")
+				if err != nil {
+					return nil, fmt.Errorf("failed to set memory reservation: %s", err)
 				}
 			}
 		} else {
@@ -314,6 +368,10 @@ type patchOptions struct {
 	BarePdigOnContainers []string
 	IgnoreContainers     []string
 	LogConfiguration     map[string]interface{}
+	Essential            bool
+	CpuShares            int
+	MemoryLimit          int
+	MemoryReservation    int
 }
 
 func newPatchOptions(d *schema.ResourceData) *patchOptions {
@@ -343,6 +401,30 @@ func newPatchOptions(d *schema.ResourceData) *patchOptions {
 		opts.LogConfiguration = logConfiguration[0].(map[string]interface{})
 	}
 
+	if essential := d.Get("instrumentation_essential"); essential != nil {
+		opts.Essential = essential.(bool)
+	} else {
+		opts.Essential = true
+	}
+
+	if cpuShares := d.Get("instrumentation_cpu"); cpuShares != nil {
+		opts.CpuShares = cpuShares.(int)
+	} else {
+		opts.CpuShares = 0
+	}
+
+	if memoryLimit := d.Get("instrumentation_memory_limit"); memoryLimit != nil {
+		opts.MemoryLimit = memoryLimit.(int)
+	} else {
+		opts.MemoryLimit = 0
+	}
+
+	if memoryReservation := d.Get("instrumentation_memory_reservation"); memoryReservation != nil {
+		opts.MemoryReservation = memoryReservation.(int)
+	} else {
+		opts.MemoryReservation = 0
+	}
+
 	return opts
 }
 
@@ -363,12 +445,27 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 		return diag.Errorf("Failed to serialize configuration: %v", err.Error())
 	}
 
+	scObj := gabs.New()
+	imageAuth := d.Get("image_auth_secret").(string)
+	if imageAuth != "" {
+		_, err := scObj.Set(imageAuth, "RepositoryCredentials", "CredentialsParameter")
+		if err != nil {
+			return diag.Errorf("cannot set image auth secret in sidecar config: %v", err.Error())
+		}
+	}
+
+	sc, err := json.Marshal(scObj)
+	if err != nil {
+		panic("cannot marshal sidecar config: " + err.Error())
+	}
+	sidecarConfig := string(sc)
+
 	kiltConfig := &cfnpatcher.Configuration{
 		Kilt:               agentinoKiltDefinition,
-		ImageAuthSecret:    d.Get("image_auth_secret").(string),
 		OptIn:              false,
 		UseRepositoryHints: true,
 		RecipeConfig:       string(jsonConf),
+		SidecarConfig:      sidecarConfig,
 	}
 
 	containerDefinitions := d.Get("container_definitions").(string)
