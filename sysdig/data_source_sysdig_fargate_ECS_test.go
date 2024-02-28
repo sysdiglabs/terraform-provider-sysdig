@@ -49,6 +49,7 @@ func getKiltRecipe(t *testing.T) string {
 		CollectorHost:    "collector_host",
 		CollectorPort:    "collector_port",
 		SysdigLogging:    "sysdig_logging",
+		Priority:         "priority",
 	}
 
 	jsonRecipeConfig, err := json.Marshal(&recipeConfig)
