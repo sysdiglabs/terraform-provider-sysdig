@@ -164,12 +164,23 @@ func TestNewPatchOptions(t *testing.T) {
 			"stream_prefix": "fried",
 			"region":        "chicken",
 		},
+		Essential: true,
 	}
 	actualPatchOptions := newPatchOptions(data)
 
 	if !reflect.DeepEqual(expectedPatchOptions, actualPatchOptions) {
 		t.Errorf("patcConfigurations are not equal. Expected: %v, Actual: %v", expectedPatchOptions, actualPatchOptions)
 	}
+}
+
+func getSidecarConfig() string {
+	scObj := gabs.New()
+	_, err := scObj.Set("image_auth_secret", "RepositoryCredentials", "CredentialsParameter")
+	if err != nil {
+		panic("cannot set image auth secret in sidecar config: " + err.Error())
+	}
+	sc, _ := json.Marshal(scObj)
+	return string(sc)
 }
 
 func TestECStransformation(t *testing.T) {
@@ -180,10 +191,10 @@ func TestECStransformation(t *testing.T) {
 
 	kiltConfig := &cfnpatcher.Configuration{
 		Kilt:               agentinoKiltDefinition,
-		ImageAuthSecret:    "image_auth_secret",
 		OptIn:              false,
 		UseRepositoryHints: true,
 		RecipeConfig:       getKiltRecipe(t),
+		SidecarConfig:      getSidecarConfig(),
 	}
 
 	patchOpts := &patchOptions{}
@@ -205,10 +216,10 @@ func TestPatchFargateTaskDefinition(t *testing.T) {
 	// Kilt Configuration, test invariant
 	kiltConfig := &cfnpatcher.Configuration{
 		Kilt:               agentinoKiltDefinition,
-		ImageAuthSecret:    "image_auth_secret",
 		OptIn:              false,
 		UseRepositoryHints: true,
 		RecipeConfig:       getKiltRecipe(t),
+		SidecarConfig:      getSidecarConfig(),
 	}
 
 	// File readers
@@ -265,6 +276,7 @@ func TestPatchFargateTaskDefinition(t *testing.T) {
 					"stream_prefix": "test_prefix",
 					"region":        "test_region",
 				},
+				Essential: true,
 			},
 		},
 		{
@@ -278,6 +290,7 @@ func TestPatchFargateTaskDefinition(t *testing.T) {
 			patchOpts: &patchOptions{
 				BarePdigOnContainers: []string{"barePdig"},
 				IgnoreContainers:     []string{"skipped"},
+				Essential:            true,
 			},
 		},
 	}
