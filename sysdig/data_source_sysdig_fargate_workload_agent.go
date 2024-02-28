@@ -142,7 +142,7 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 			"instrumentation_essential": {
 				Type:        schema.TypeBool,
 				Description: "Should the instrumentation container be marked as essential",
-				Default:     true,
+				Default:     false,
 				Optional:    true,
 			},
 			"instrumentation_cpu": {
@@ -411,7 +411,8 @@ func newPatchOptions(d *schema.ResourceData) *patchOptions {
 	if essential := d.Get("instrumentation_essential"); essential != nil {
 		opts.Essential = essential.(bool)
 	} else {
-		opts.Essential = true
+		priority := d.Get("priority").(string)
+		opts.Essential = priority == "security"
 	}
 
 	if cpuShares := d.Get("instrumentation_cpu"); cpuShares != nil {
