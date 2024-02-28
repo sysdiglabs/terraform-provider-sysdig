@@ -129,7 +129,7 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 			"sidecar": {
 				Type:        schema.TypeString,
 				Description: "Sidecar mode: auto/force/(empty string)",
-				Default:     "", // we will want to change this to "auto" eventually
+				Default:     "auto",
 				Optional:    true,
 			},
 
