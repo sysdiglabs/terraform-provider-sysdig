@@ -140,6 +140,10 @@ resource "sysdig_secure_posture_zone" "example" {
       - Type: string
       - Description: Kubernetes distribution
       - Example query: `distribution in ("eks")`
+    - `agentTags`
+      - Type: string
+      - Description: Tags of the Sysdig Agent running in Kubernetes
+      - Example query: `agentTags in ("env:prod")` _(tag values are formatted as `key:value`)_
   - `host`:
     - `clusterId`
       - Type: string
