@@ -40,7 +40,7 @@ resource "sysdig_secure_ml_policy" "policy" {
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The id for the managed policy.
+* `id` - The id for the policy.
 
 * `description` - The description for the managed policy.
 
@@ -63,7 +63,6 @@ The rule block is required and supports:
 * `description` - (Required) Rule description.
 * `cryptomining_trigger` - (Required) Cryptomining detection: Detect unusual activity in the Activity Audit based on the set confidence level.
     * `threshold` - (Required) Trigger at or above confidence level.
-    * `severity` - (Optional) Severity level associated with this rule.
 
 
 

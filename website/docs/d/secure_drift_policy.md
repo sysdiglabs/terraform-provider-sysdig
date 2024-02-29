@@ -28,7 +28,7 @@ data "sysdig_secure_drift_policy" "policy" {
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The id for the managed policy.
+* `id` - The id for the policy.
 
 * `description` - The description for the managed policy.
 
@@ -46,7 +46,7 @@ In addition to all arguments above, the following attributes are exported:
 
 ### Actions block
 
-The actions block is optional and supports:
+The actions block is optional and supports the following for agent versions 12.20 and above:
 
 * `prevent_drift` - (Optional) Prevent the execution of drifted binaries and specified prohibited binaries.
 
