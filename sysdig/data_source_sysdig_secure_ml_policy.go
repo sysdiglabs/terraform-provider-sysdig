@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -95,7 +94,7 @@ func compositePolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, 
 
 		if existingPolicy.Policy.Name == policyName && existingPolicy.Policy.Type == policyType {
 			if !validationFunc(existingPolicy) {
-				return nil, errors.New(fmt.Sprintf("policy is not a %s", resourceName))
+				return nil, fmt.Errorf("policy is not a %s", resourceName)
 			}
 			policy = existingPolicy
 			break
@@ -103,11 +102,11 @@ func compositePolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if policy.Policy == nil {
-		return nil, errors.New(fmt.Sprintf("unable to find policy %s", resourceName))
+		return nil, fmt.Errorf("unable to find policy %s", resourceName)
 	}
 
 	if policy.Policy.ID == 0 {
-		return nil, errors.New(fmt.Sprintf("unable to find %s", resourceName))
+		return nil, fmt.Errorf("unable to find %s", resourceName)
 	}
 
 	return &policy, nil
