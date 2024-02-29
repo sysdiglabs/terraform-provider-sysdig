@@ -62,7 +62,7 @@ The rule block is required and supports:
 
 * `description` - (Required) Rule description.
 * `cryptomining_trigger` - (Required) Cryptomining detection: Detect unusual activity in the Activity Audit based on the set confidence level.
-    * `threshold` - (Required) Trigger at or above confidence level.
+    * `threshold` - (Required) Trigger at or above confidence level. Accepted values are 3 (Highest), 2 (Higher), 1 (Default)
 
 
 
