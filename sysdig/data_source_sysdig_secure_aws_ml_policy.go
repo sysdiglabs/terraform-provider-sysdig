@@ -61,6 +61,9 @@ func createAWSMLPolicyDataSourceSchema() map[string]*schema.Schema {
 
 func awsMLPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {
 	policy, err := compositePolicyDataSourceRead(ctx, d, meta, resourceName, policyTypeAWSML, validationFunc)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	err = awsMLPolicyToResourceData(policy, d)
 	if err != nil {

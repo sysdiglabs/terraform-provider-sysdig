@@ -74,6 +74,9 @@ func createDriftPolicyDataSourceSchema() map[string]*schema.Schema {
 
 func driftPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {
 	policy, err := compositePolicyDataSourceRead(ctx, d, meta, resourceName, policyTypeDrift, validationFunc)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	err = driftPolicyToResourceData(policy, d)
 	if err != nil {
