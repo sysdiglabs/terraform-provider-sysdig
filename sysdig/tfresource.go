@@ -196,7 +196,6 @@ func setTFResourcePolicyRulesML(d *schema.ResourceData, policy v2.PolicyRulesCom
 		cryptominingTrigger := []map[string]interface{}{{
 			"enabled":   rule.Details.(*v2.MLRuleDetails).CryptominingTrigger.Enabled,
 			"threshold": rule.Details.(*v2.MLRuleDetails).CryptominingTrigger.Threshold,
-			"severity":  rule.Details.(*v2.MLRuleDetails).CryptominingTrigger.Severity,
 		}}
 
 		rules = append(rules, map[string]interface{}{
@@ -224,7 +223,6 @@ func setTFResourcePolicyRulesAWSML(d *schema.ResourceData, policy v2.PolicyRules
 		anomalousConsoleLogin := []map[string]interface{}{{
 			"enabled":   rule.Details.(*v2.AWSMLRuleDetails).AnomalousConsoleLogin.Enabled,
 			"threshold": rule.Details.(*v2.AWSMLRuleDetails).AnomalousConsoleLogin.Threshold,
-			"severity":  rule.Details.(*v2.AWSMLRuleDetails).AnomalousConsoleLogin.Severity,
 		}}
 
 		rules = append(rules, map[string]interface{}{
@@ -482,7 +480,6 @@ func setPolicyRulesML(policy *v2.PolicyRulesComposite, d *schema.ResourceData) e
 		if _, ok := d.GetOk("rule.0.cryptomining_trigger"); ok { // TODO: Do not hardcode the indexes
 			cryptominingTrigger.Enabled = d.Get("rule.0.cryptomining_trigger.0.enabled").(bool)
 			cryptominingTrigger.Threshold = float64(d.Get("rule.0.cryptomining_trigger.0.threshold").(int))
-			cryptominingTrigger.Severity = float64(d.Get("rule.0.cryptomining_trigger.0.severity").(int))
 		}
 		anomalyDetectionTrigger := &v2.MLRuleThresholdAndSeverity{}
 
