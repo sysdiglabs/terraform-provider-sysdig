@@ -26,9 +26,15 @@ func TestAccAWSMLPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: awsMLPolicyWithName(rText()),
+				SkipFunc: func() (bool, error) {
+					return buildinfo.IBMSecure, nil
+				},
 			},
 			{
 				Config: awsMLPolicyWithoutNotificationChannel(rText()),
+				SkipFunc: func() (bool, error) {
+					return buildinfo.IBMSecure, nil
+				},
 			},
 		},
 	})

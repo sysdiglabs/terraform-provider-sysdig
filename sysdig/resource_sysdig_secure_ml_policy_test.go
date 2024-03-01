@@ -26,9 +26,15 @@ func TestAccMLPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: mlPolicyWithName(rText()),
+				SkipFunc: func() (bool, error) {
+					return buildinfo.IBMSecure, nil
+				},
 			},
 			{
 				Config: mlPolicyWithoutNotificationChannel(rText()),
+				SkipFunc: func() (bool, error) {
+					return buildinfo.IBMSecure, nil
+				},
 			},
 		},
 	})

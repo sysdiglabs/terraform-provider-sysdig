@@ -26,15 +26,27 @@ func TestAccDriftPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: driftPolicyWithName(rText()),
+				SkipFunc: func() (bool, error) {
+					return buildinfo.IBMSecure, nil
+				},
 			},
 			{
 				Config: driftPolicyWithAllActions(rText()),
+				SkipFunc: func() (bool, error) {
+					return buildinfo.IBMSecure, nil
+				},
 			},
 			{
 				Config: driftPolicyWithoutActions(rText()),
+				SkipFunc: func() (bool, error) {
+					return buildinfo.IBMSecure, nil
+				},
 			},
 			{
 				Config: driftPolicyWithoutNotificationChannel(rText()),
+				SkipFunc: func() (bool, error) {
+					return buildinfo.IBMSecure, nil
+				},
 			},
 		},
 	})
