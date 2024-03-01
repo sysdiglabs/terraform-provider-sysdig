@@ -42,6 +42,7 @@ resource "sysdig_secure_ml_policy" "sample" {
   name        = "Test ML Policy %s"
   description = "Test ML Policy Description"
   enabled     = true
+  severity    = 4
 
   rule {
     description = "Test ML Rule Description"
@@ -64,6 +65,7 @@ resource "sysdig_secure_ml_policy" "sample" {
   name        = "Test ML Policy %s"
   description = "Test ML Policy Description"
   enabled     = true
+  severity    = 4
 
   rule {
     description = "Test ML Rule Description"

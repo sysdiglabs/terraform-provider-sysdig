@@ -42,6 +42,7 @@ resource "sysdig_secure_aws_ml_policy" "policy_1" {
   name        = "Test AWS ML Policy %s"
   description = "Test AWS ML Policy Description %s"
   enabled     = true
+  severity    = 4
 
   rule {
     description = "Test AWS ML Rule Description"
