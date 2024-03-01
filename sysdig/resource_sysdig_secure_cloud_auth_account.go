@@ -790,15 +790,6 @@ func deserializeServiceMetadata_GCP_Key(servicePrincipalMetadata *cloudauth.Serv
 	return keyBytes, nil
 }
 
-/*
-This helper function encodes the Service Principal Key returned by Sysdig
-and returns a base64 encoded string
-*/
-func encodeServicePrincipalKey(key []byte) string {
-	encodedKey := b64.StdEncoding.EncodeToString(key)
-	return encodedKey
-}
-
 func getResourceComponentsOrder(dataComponents interface{}) []string {
 	var dataComponentsOrder []string
 	for _, rc := range dataComponents.([]interface{}) {
@@ -806,6 +797,15 @@ func getResourceComponentsOrder(dataComponents interface{}) []string {
 		dataComponentsOrder = append(dataComponentsOrder, resourceComponent[SchemaInstance].(string))
 	}
 	return dataComponentsOrder
+}
+
+/*
+This helper function encodes the Service Principal Key returned by Sysdig
+and returns a base64 encoded string
+*/
+func encodeServicePrincipalKey(key []byte) string {
+	encodedKey := b64.StdEncoding.EncodeToString(key)
+	return encodedKey
 }
 
 func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudauthAccountSecure) error {
