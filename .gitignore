@@ -25,6 +25,7 @@ website/node_modules
 .idea
 *.iml
 *.test
+*.iml
 
 vendor/
 
@@ -45,4 +46,6 @@ junit-report.xml
 terraform-provider-sysdig
 oanc
 .vscode/settings.json
-/.run/*
+
+# goland .run
+.run/
