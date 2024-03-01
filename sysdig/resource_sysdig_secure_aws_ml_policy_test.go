@@ -50,7 +50,6 @@ resource "sysdig_secure_aws_ml_policy" "sample" {
     anomalous_console_login {
       enabled   = true
       threshold = 2
-      severity  = 1
     }
   }
 
@@ -74,7 +73,6 @@ resource "sysdig_secure_aws_ml_policy" "sample" {
     anomalous_console_login {
       enabled   = true
       threshold = 2
-      severity  = 1
     }
   }
 
