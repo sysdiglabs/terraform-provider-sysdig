@@ -108,14 +108,14 @@ func setTFResourcePolicyRulesMalware(d *schema.ResourceData, policy v2.PolicyRul
 	rules := []map[string]interface{}{}
 	for _, rule := range policy.Rules {
 		additionalHashes := []map[string]interface{}{}
-		for k, _ := range rule.Details.(*v2.MalwareRuleDetails).AdditionalHashes {
+		for k := range rule.Details.(*v2.MalwareRuleDetails).AdditionalHashes {
 			additionalHashes = append(additionalHashes, map[string]interface{}{
 				"hash": k,
 			})
 		}
 
 		ignoreHashes := []map[string]interface{}{}
-		for k, _ := range rule.Details.(*v2.MalwareRuleDetails).IgnoreHashes {
+		for k := range rule.Details.(*v2.MalwareRuleDetails).IgnoreHashes {
 			ignoreHashes = append(ignoreHashes, map[string]interface{}{
 				"hash": k,
 			})
