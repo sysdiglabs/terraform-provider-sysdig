@@ -7,6 +7,7 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"os"
 	"testing"
 
@@ -72,10 +73,9 @@ func TestAccGCPSecureCloudAuthAccountFC(t *testing.T) {
 				Config: secureGCPCloudAuthAccountWithFC(accID),
 			},
 			{
-				ResourceName:            "sysdig_secure_cloud_auth_account.sample-1",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"component"},
+				ResourceName:      "sysdig_secure_cloud_auth_account.sample-1",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -213,10 +213,9 @@ func TestAccAzureSecureCloudAccountFC(t *testing.T) {
 				Config: secureAzureCloudAuthAccountWithFC(accID),
 			},
 			{
-				ResourceName:            "sysdig_secure_cloud_auth_account.sample-1",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"component"},
+				ResourceName:      "sysdig_secure_cloud_auth_account.sample-1",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -277,10 +276,9 @@ func TestAccAzureSecureCloudAccountFCThreatDetection(t *testing.T) {
 				Config: secureAzureCloudAuthAccountWithFCThreatDetection(accID),
 			},
 			{
-				ResourceName:            "sysdig_secure_cloud_auth_account.sample-1",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"component"},
+				ResourceName:      "sysdig_secure_cloud_auth_account.sample-1",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -316,4 +314,130 @@ func secureAzureCloudAuthAccountWithFCThreatDetection(accountID string) string {
 				})
 			}
 		}`, accountID, randomTenantId)
+}
+
+func TestAccAWSSecureCloudAccountFCThreatDetection(t *testing.T) {
+	accountID := fmt.Sprintf("%012d", rand.Intn(99999999999))
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(`
+				resource "sysdig_secure_cloud_auth_account" "aws_account_%s" {
+					enabled       = true
+					provider_id   = "%s"
+					provider_type = "PROVIDER_AWS"
+				
+					feature {
+				
+						secure_threat_detection {
+							enabled    = true
+							components = ["COMPONENT_EVENT_BRIDGE/secure-runtime"]
+						}
+					}
+					component {
+						type     = "COMPONENT_EVENT_BRIDGE"
+						instance = "secure-runtime"
+						event_bridge_metadata = jsonencode({
+							aws = {
+								role_name = "sysdig-secure-events-ezsz"
+								rule_name = "sysdig-secure-events-ezsz"
+							}
+						})
+					}
+				}`, accountID, accountID),
+			},
+			{
+				ResourceName:      fmt.Sprintf("sysdig_secure_cloud_auth_account.aws_account_%s", accountID),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccAWSSecureCloudAccountFCCSPM(t *testing.T) {
+	accountID := fmt.Sprintf("%012d", rand.Intn(99999999999))
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(`
+				resource "sysdig_secure_cloud_auth_account" "aws_account_%s" {
+					enabled       = true
+					provider_id   = "%s"
+					provider_type = "PROVIDER_AWS"
+				
+					feature {
+				
+						secure_config_posture {
+							enabled    = true
+							components = ["COMPONENT_TRUSTED_ROLE/secure-posture"]
+						}
+				
+						secure_agentless_scanning {
+							enabled    = true
+							components = ["COMPONENT_TRUSTED_ROLE/secure-scanning", "COMPONENT_CRYPTO_KEY/secure-scanning"]
+						}
+					}
+					component {
+						type     = "COMPONENT_TRUSTED_ROLE"
+						instance = "secure-scanning"
+						trusted_role_metadata = jsonencode({
+							aws = {
+								role_name = "sysdig-secure-scanning-ob1o"
+							}
+						})
+					}
+					component {
+						type     = "COMPONENT_CRYPTO_KEY"
+						instance = "secure-scanning"
+						crypto_key_metadata = jsonencode({
+							aws = {
+								kms = {
+									alias    = "alias/sysdig-secure-scanning-ob1o"
+									regions  = [
+										"us-east-1",
+										"us-west-2",
+									]
+								}
+							}
+						})
+					}
+					component {
+						type     = "COMPONENT_TRUSTED_ROLE"
+						instance = "secure-posture"
+						trusted_role_metadata = jsonencode({
+							aws = {
+								role_name = "sysdig-secure-bu1k"
+							}
+						})
+					}
+				}`, accountID, accountID),
+			},
+			{
+				ResourceName:      fmt.Sprintf("sysdig_secure_cloud_auth_account.aws_account_%s", accountID),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
