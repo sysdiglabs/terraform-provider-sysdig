@@ -11,7 +11,7 @@
 *monitor*groupmapping* @shadow649
 
 # policies/rules
-*secure*policy* @jacklongsd @kmvachhani @ben-m-lucas @ombellare @miguelgordo @ivanlysiuk-sysdig
+*secure*policy* @jacklongsd @kmvachhani @rosenbloomb-sysdig @ombellare @miguelgordo @ivanlysiuk-sysdig @daniel-almeida @jbainbridgesysdig @thierry-noumessi
 
 # internal components
 /sysdig/internal/client/v2/client.go @filiptubic @mbarbieri @draraksysdig
