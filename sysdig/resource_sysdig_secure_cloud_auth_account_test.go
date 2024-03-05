@@ -7,6 +7,7 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"os"
 	"testing"
 
@@ -315,9 +316,8 @@ func secureAzureCloudAuthAccountWithFCThreatDetection(accountID string) string {
 		}`, accountID, randomTenantId)
 }
 
-func TestGCPAgentlesScanningOnboarding(t *testing.T) {
-	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
-	accID := rText()
+func TestAccAWSSecureCloudAccountFCThreatDetection(t *testing.T) {
+	accountID := fmt.Sprintf("%012d", rand.Intn(99999999999))
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -331,52 +331,113 @@ func TestGCPAgentlesScanningOnboarding(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: getResourceForGCPAgentlessScan(accID),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "provider_type", "PROVIDER_GCP"),
-					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "enabled", "true"),
-					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "feature.0.secure_agentless_scanning.0.enabled", "true"),
-					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "feature.0.secure_agentless_scanning.0.components.0", "COMPONENT_SERVICE_PRINCIPAL/secure-scanning"),
-					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "component.0.type", "COMPONENT_SERVICE_PRINCIPAL"),
-					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "component.0.instance", "secure-scanning"),
-					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "component.0.service_principal_metadata", "{\"gcp\":{\"email\":\"email_value\",\"workload_identity_federation\":{\"pool_provider_id\":\"pool_provider_id_value\"}}}"),
-				),
+				Config: fmt.Sprintf(`
+				resource "sysdig_secure_cloud_auth_account" "aws_account_%s" {
+					enabled       = true
+					provider_id   = "%s"
+					provider_type = "PROVIDER_AWS"
+				
+					feature {
+				
+						secure_threat_detection {
+							enabled    = true
+							components = ["COMPONENT_EVENT_BRIDGE/secure-runtime"]
+						}
+					}
+					component {
+						type     = "COMPONENT_EVENT_BRIDGE"
+						instance = "secure-runtime"
+						event_bridge_metadata = jsonencode({
+							aws = {
+								role_name = "sysdig-secure-events-ezsz"
+								rule_name = "sysdig-secure-events-ezsz"
+							}
+						})
+					}
+				}`, accountID, accountID),
 			},
 			{
-				ResourceName:            "sysdig_secure_cloud_auth_account.gcp-agentless-scanning",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"component"},
+				ResourceName:      fmt.Sprintf("sysdig_secure_cloud_auth_account.aws_account_%s", accountID),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func getResourceForGCPAgentlessScan(projectID string) string {
-	return fmt.Sprintf(`
-		resource "sysdig_secure_cloud_auth_account" "gcp-agentless-scanning" {
-			provider_id   = "gcp-agentless-test-%s"
-			provider_type = "PROVIDER_GCP"
-			enabled       = true
-
-		    feature {
-			  secure_agentless_scanning {
-			    enabled    = true
-			    components = ["COMPONENT_SERVICE_PRINCIPAL/secure-scanning"]
-			  }
-		    }
-
-			component {
-				type                       = "COMPONENT_SERVICE_PRINCIPAL"
-				instance                   = "secure-scanning"
-				service_principal_metadata = jsonencode({
-					gcp = {
-						workload_identity_federation = {
-							pool_provider_id = "pool_provider_id_value"
-						}
-						email = "email_value"
-					}
-				})
+func TestAccAWSSecureCloudAccountFCCSPM(t *testing.T) {
+	accountID := fmt.Sprintf("%012d", rand.Intn(99999999999))
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
 			}
-		}`, projectID)
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(`
+				resource "sysdig_secure_cloud_auth_account" "aws_account_%s" {
+					enabled       = true
+					provider_id   = "%s"
+					provider_type = "PROVIDER_AWS"
+				
+					feature {
+				
+						secure_config_posture {
+							enabled    = true
+							components = ["COMPONENT_TRUSTED_ROLE/secure-posture"]
+						}
+				
+						secure_agentless_scanning {
+							enabled    = true
+							components = ["COMPONENT_TRUSTED_ROLE/secure-scanning", "COMPONENT_CRYPTO_KEY/secure-scanning"]
+						}
+					}
+					component {
+						type     = "COMPONENT_TRUSTED_ROLE"
+						instance = "secure-scanning"
+						trusted_role_metadata = jsonencode({
+							aws = {
+								role_name = "sysdig-secure-scanning-ob1o"
+							}
+						})
+					}
+					component {
+						type     = "COMPONENT_CRYPTO_KEY"
+						instance = "secure-scanning"
+						crypto_key_metadata = jsonencode({
+							aws = {
+								kms = {
+									alias    = "alias/sysdig-secure-scanning-ob1o"
+									regions  = [
+										"us-east-1",
+										"us-west-2",
+									]
+								}
+							}
+						})
+					}
+					component {
+						type     = "COMPONENT_TRUSTED_ROLE"
+						instance = "secure-posture"
+						trusted_role_metadata = jsonencode({
+							aws = {
+								role_name = "sysdig-secure-bu1k"
+							}
+						})
+					}
+				}`, accountID, accountID),
+			},
+			{
+				ResourceName:      fmt.Sprintf("sysdig_secure_cloud_auth_account.aws_account_%s", accountID),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
