@@ -441,3 +441,66 @@ func TestAccAWSSecureCloudAccountFCCSPM(t *testing.T) {
 		},
 	})
 }
+
+func XTestGCPAgentlesScanningOnboarding(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+	accID := rText()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: getResourceForGCPAgentlessScan(accID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "provider_type", "PROVIDER_GCP"),
+					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "enabled", "true"),
+					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "feature.0.secure_agentless_scanning.0.enabled", "true"),
+					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "feature.0.secure_agentless_scanning.0.components.0", "COMPONENT_SERVICE_PRINCIPAL/secure-scanning"),
+					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "component.0.type", "COMPONENT_SERVICE_PRINCIPAL"),
+					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "component.0.instance", "secure-scanning"),
+					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.gcp-agentless-scanning", "component.0.service_principal_metadata", "{\"gcp\":{\"email\":\"email_value\",\"workload_identity_federation\":{\"pool_provider_id\":\"pool_provider_id_value\"}}}"),
+				),
+			},
+			{
+				ResourceName:      "sysdig_secure_cloud_auth_account.gcp-agentless-scanning",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func getResourceForGCPAgentlessScan(projectID string) string {
+	return fmt.Sprintf(`
+		resource "sysdig_secure_cloud_auth_account" "gcp-agentless-scanning" {
+			provider_id   = "gcp-agentless-test-%s"
+			provider_type = "PROVIDER_GCP"
+			enabled       = true
+		    feature {
+			  secure_agentless_scanning {
+			    enabled    = true
+			    components = ["COMPONENT_SERVICE_PRINCIPAL/secure-scanning"]
+			  }
+		    }
+			component {
+				type                       = "COMPONENT_SERVICE_PRINCIPAL"
+				instance                   = "secure-scanning"
+				service_principal_metadata = jsonencode({
+					gcp = {
+						workload_identity_federation = {
+							pool_provider_id = "pool_provider_id_value"
+						}
+						email = "email_value"
+					}
+				})
+			}
+		}`, projectID)
+}
