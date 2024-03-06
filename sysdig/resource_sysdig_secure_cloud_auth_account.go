@@ -574,10 +574,12 @@ func componentsToResourceData(components []*cloudauth.AccountComponent) []map[st
 
 // internal type redefintion for GCP service principals.
 // This exists because in terraform, the key is originally provided in the form of a base64 encoded json string
+
+// note; caution with order of fields, they have to go in alphabetical ASC so that the json marshalled on the tf read phase produces no drift https://github.com/golang/go/issues/27179
 type internalServicePrincipalMetadata_GCP struct {
+	Email                      string                                                             `json:"email,omitempty"`
 	Key                        string                                                             `json:"key,omitempty"` // base64 encoded
 	WorkloadIdentityFederation *cloudauth.ServicePrincipalMetadata_GCP_WorkloadIdentityFederation `json:"workload_identity_federation,omitempty"`
-	Email                      string                                                             `json:"email,omitempty"`
 }
 type internalServicePrincipalMetadata struct {
 	Gcp *internalServicePrincipalMetadata_GCP `json:"gcp,omitempty"`
