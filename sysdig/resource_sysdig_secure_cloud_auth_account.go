@@ -387,24 +387,7 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 					if data.Get(SchemaCloudProviderType).(string) == cloudauth.Provider_PROVIDER_GCP.String() {
 						spGcp := &internalServicePrincipalMetadata{}
 						err = json.Unmarshal([]byte(value.(string)), spGcp)
-
-						hasKeyData := len(spGcp.Gcp.Key) > 0
-						hasWifData := spGcp.Gcp.WorkloadIdentityFederation != nil && len(spGcp.Gcp.Email) > 0
-
-						if !hasKeyData && !hasWifData {
-							diag.FromErr(fmt.Errorf("failed to parse one of either service principal types, 'key' or 'workload_identity_federation'+'email'"))
-							continue
-						}
-
-						metadata := &cloudauth.AccountComponent_ServicePrincipalMetadata{
-							ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
-								Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
-									Gcp: &cloudauth.ServicePrincipalMetadata_GCP{},
-								},
-							},
-						}
-
-						if hasKeyData {
+						if len(spGcp.Gcp.Key) > 0 {
 							var spGcpKeyBytes []byte
 							spGcpKeyBytes, err = base64.StdEncoding.DecodeString(spGcp.Gcp.Key)
 							if err != nil {
@@ -412,17 +395,18 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 							}
 							spGcpKey := &cloudauth.ServicePrincipalMetadata_GCP_Key{}
 							err = json.Unmarshal(spGcpKeyBytes, spGcpKey)
-							metadata.ServicePrincipalMetadata.GetGcp().Key = spGcpKey
-						}
-
-						if hasWifData {
-							metadata.ServicePrincipalMetadata.GetGcp().WorkloadIdentityFederation = &cloudauth.ServicePrincipalMetadata_GCP_WorkloadIdentityFederation{
-								PoolProviderId: spGcp.Gcp.WorkloadIdentityFederation.PoolProviderId,
+							component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
+								ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
+									Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
+										Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
+											Key:                        spGcpKey,
+											WorkloadIdentityFederation: spGcp.Gcp.WorkloadIdentityFederation,
+											Email:                      spGcp.Gcp.Email,
+										},
+									},
+								},
 							}
-							metadata.ServicePrincipalMetadata.GetGcp().Email = spGcp.Gcp.Email
 						}
-
-						component.Metadata = metadata
 					}
 				case SchemaWebhookDatasourceMetadata:
 					component.Metadata = &cloudauth.AccountComponent_WebhookDatasourceMetadata{WebhookDatasourceMetadata: &cloudauth.WebhookDatasourceMetadata{}}
