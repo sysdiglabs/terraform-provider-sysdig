@@ -1,12 +1,10 @@
-//go:build tf_acc_sysdig_secure || tf_acc_policies || tf_acc_onprem_secure
+//go:build (tf_acc_sysdig_secure || tf_acc_policies || tf_acc_onprem_secure) && !tf_acc_ibm_secure
 
 package sysdig_test
 
 import (
 	"fmt"
 	"testing"
-
-	"github.com/draios/terraform-provider-sysdig/buildinfo"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -28,27 +26,15 @@ func TestAccDriftPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: driftPolicyWithName(rText()),
-				SkipFunc: func() (bool, error) {
-					return buildinfo.IBMSecure, nil
-				},
 			},
 			{
 				Config: driftPolicyWithAllActions(rText()),
-				SkipFunc: func() (bool, error) {
-					return buildinfo.IBMSecure, nil
-				},
 			},
 			{
 				Config: driftPolicyWithoutActions(rText()),
-				SkipFunc: func() (bool, error) {
-					return buildinfo.IBMSecure, nil
-				},
 			},
 			{
 				Config: driftPolicyWithoutNotificationChannel(rText()),
-				SkipFunc: func() (bool, error) {
-					return buildinfo.IBMSecure, nil
-				},
 			},
 		},
 	})
