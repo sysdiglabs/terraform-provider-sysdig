@@ -357,17 +357,6 @@ func (r *RuntimePolicyRule) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	if findDetails.FindType.RuleType == "DRIFT" {
-		d1 := &DriftRuleDetails{}
-		err = json.Unmarshal(getRawDetails.RawDetails, d1)
-		if err != nil {
-			return err
-		}
-		if d1.Exceptions != nil && d1.ProhibitedBinaries != nil {
-			d = d1
-		}
-	}
-
 	var findDetailsIdPtr *FlexInt
 	if findDetails.Id != nil {
 		findDetailsId := FlexInt(*findDetails.Id)

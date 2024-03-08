@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -25,7 +26,7 @@ func dataSourceSysdigSecureMLPolicy() *schema.Resource {
 }
 
 func dataSourceSysdigSecureMLPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return mlPolicyDataSourceRead(ctx, d, meta, "custom policy", isCustomCompositePolicy)
+	return mlPolicyDataSourceRead(ctx, d, meta, "custom ML policy", isCustomCompositePolicy)
 }
 
 func createMLPolicyDataSourceSchema() map[string]*schema.Schema {
@@ -61,17 +62,30 @@ func createMLPolicyDataSourceSchema() map[string]*schema.Schema {
 }
 
 func mlPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {
-	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
+
+	policy, err := compositePolicyDataSourceRead(ctx, d, meta, resourceName, policyTypeML, validationFunc)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = mlPolicyToResourceData(policy, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
+	return nil
+}
+
+func compositePolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, policyType string, validationFunc func(v2.PolicyRulesComposite) bool) (*v2.PolicyRulesComposite, error) {
+	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
+	if err != nil {
+		return nil, err
+	}
+
 	policyName := d.Get("name").(string)
-	policyType := policyTypeML
 
 	policies, _, err := client.FilterCompositePoliciesByNameAndType(ctx, policyType, policyName)
 	if err != nil {
-		return diag.FromErr(err)
+		return nil, err
 	}
 
 	var policy v2.PolicyRulesComposite
@@ -80,7 +94,7 @@ func mlPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if existingPolicy.Policy.Name == policyName && existingPolicy.Policy.Type == policyType {
 			if !validationFunc(existingPolicy) {
-				return diag.Errorf("policy is not a %s", resourceName)
+				return nil, fmt.Errorf("policy is not a %s", resourceName)
 			}
 			policy = existingPolicy
 			break
@@ -88,17 +102,12 @@ func mlPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if policy.Policy == nil {
-		return diag.Errorf("unable to find policy %s", resourceName)
+		return nil, fmt.Errorf("unable to find policy %s", resourceName)
 	}
 
 	if policy.Policy.ID == 0 {
-		return diag.Errorf("unable to find %s", resourceName)
+		return nil, fmt.Errorf("unable to find %s", resourceName)
 	}
 
-	err = mlPolicyToResourceData(&policy, d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	return nil
+	return &policy, nil
 }
