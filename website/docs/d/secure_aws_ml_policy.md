@@ -3,7 +3,7 @@ subcategory: "Sysdig Secure"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_aws_ml_policy"
 description: |-
-  Retrieves a Sysdig Secure ML Policy.
+  Retrieves a Sysdig Secure AWS ML Policy.
 ---
 
 # Data Source: sysdig_secure_aws_ml_policy
@@ -28,7 +28,7 @@ data "sysdig_secure_aws_ml_policy" "policy" {
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The id for the managed policy.
+* `id` - The id for the policy.
 
 * `description` - The description for the managed policy.
 
@@ -51,5 +51,4 @@ The rule block is required and supports:
 * `description` - (Required) Rule description.
 * `anomalous_console_login` - (Required) This attribute allows you to activate anomaly detection for console logins and adjust its settings.
     * `threshold` - (Required) Trigger at or above confidence level.
-    * `severity` - (Optional) The severity associated with the rule.
 

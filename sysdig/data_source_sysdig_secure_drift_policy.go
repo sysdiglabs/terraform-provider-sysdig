@@ -5,7 +5,6 @@ import (
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -25,7 +24,7 @@ func dataSourceSysdigSecureDriftPolicy() *schema.Resource {
 }
 
 func dataSourceSysdigSecureDriftPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return driftPolicyDataSourceRead(ctx, d, meta, "custom policy", isCustomCompositePolicy)
+	return driftPolicyDataSourceRead(ctx, d, meta, "custom drift policy", isCustomCompositePolicy)
 }
 
 func createDriftPolicyDataSourceSchema() map[string]*schema.Schema {
@@ -74,41 +73,12 @@ func createDriftPolicyDataSourceSchema() map[string]*schema.Schema {
 }
 
 func driftPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {
-	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
+	policy, err := compositePolicyDataSourceRead(ctx, d, meta, resourceName, policyTypeDrift, validationFunc)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	policyName := d.Get("name").(string)
-	policyType := policyTypeDrift
-
-	policies, _, err := client.FilterCompositePoliciesByNameAndType(ctx, policyType, policyName)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	var policy v2.PolicyRulesComposite
-	for _, existingPolicy := range policies {
-		tflog.Debug(ctx, "Filtered policies", map[string]interface{}{"name": existingPolicy.Policy.Name})
-
-		if existingPolicy.Policy.Name == policyName && existingPolicy.Policy.Type == policyType {
-			if !validationFunc(existingPolicy) {
-				return diag.Errorf("policy is not a %s", resourceName)
-			}
-			policy = existingPolicy
-			break
-		}
-	}
-
-	if policy.Policy == nil {
-		return diag.Errorf("unable to find policy %s", resourceName)
-	}
-
-	if policy.Policy.ID == 0 {
-		return diag.Errorf("unable to find %s", resourceName)
-	}
-
-	err = driftPolicyToResourceData(&policy, d)
+	err = driftPolicyToResourceData(policy, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
