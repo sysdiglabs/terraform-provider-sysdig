@@ -387,7 +387,7 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 					if data.Get(SchemaCloudProviderType).(string) == cloudauth.Provider_PROVIDER_GCP.String() {
 						spGcp := &internalServicePrincipalMetadata{}
 						err = json.Unmarshal([]byte(value.(string)), spGcp)
-						if len(spGcp.Gcp.Key) >= 0 {
+						if len(spGcp.Gcp.Key) > 0 {
 							var spGcpKeyBytes []byte
 							spGcpKeyBytes, err = base64.StdEncoding.DecodeString(spGcp.Gcp.Key)
 							if err != nil {
