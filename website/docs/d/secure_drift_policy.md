@@ -46,13 +46,15 @@ In addition to all arguments above, the following attributes are exported:
 
 ### Actions block
 
-The actions block is optional and supports the following for agent versions 12.20 and above:
+The actions block is optional and supports the following actions:
 
 * `prevent_drift` - (Optional) Prevent the execution of drifted binaries and specified prohibited binaries.
 
+For agents 12.20 and above, these additional actions are supported: 
+
 * `container` - (Optional) The action applied to container when this Policy is
     triggered. Can be *stop*, *pause* or *kill*. If this is not specified,
-    no action will be applied at the container level.
+    no action will be applied at the container level. 
 
 * `capture` - (Optional) Captures with Sysdig the stream of system calls:
     * `seconds_before_event` - (Required) Captures the system calls during the
