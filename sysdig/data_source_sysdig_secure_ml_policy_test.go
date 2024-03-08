@@ -50,8 +50,7 @@ resource "sysdig_secure_ml_policy" "policy_1" {
     cryptomining_trigger {
       enabled   = true
       threshold = 1
-      severity  = 1
-    }
+     }
   }
 
 }

@@ -387,7 +387,7 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 					if data.Get(SchemaCloudProviderType).(string) == cloudauth.Provider_PROVIDER_GCP.String() {
 						spGcp := &internalServicePrincipalMetadata{}
 						err = json.Unmarshal([]byte(value.(string)), spGcp)
-						if len(spGcp.Gcp.Key) >= 0 {
+						if len(spGcp.Gcp.Key) > 0 {
 							var spGcpKeyBytes []byte
 							spGcpKeyBytes, err = base64.StdEncoding.DecodeString(spGcp.Gcp.Key)
 							if err != nil {
@@ -523,7 +523,10 @@ func componentsToResourceData(components []*cloudauth.AccountComponent) []map[st
 						diag.FromErr(err)
 					}
 					var gcpKeyBytesBuffer bytes.Buffer
-					json.Indent(&gcpKeyBytesBuffer, gcpKeyBytes, "", "  ")
+					err = json.Indent(&gcpKeyBytesBuffer, gcpKeyBytes, "", "  ")
+					if err != nil {
+						diag.FromErr(err)
+					}
 					gcpKeyBytes = append(gcpKeyBytesBuffer.Bytes(), '\n')
 				}
 				spGcpBytes, err := json.Marshal(&internalServicePrincipalMetadata{
@@ -572,7 +575,10 @@ func getComponentMetadataString(message protoreflect.ProtoMessage) string {
 	}
 	// re-marshal through encoding/json to get consistent key ordering, avoiding diff errors with TF internals
 	metadataMap := make(map[string]interface{})
-	json.Unmarshal(protoJsonMessage, &metadataMap)
+	err = json.Unmarshal(protoJsonMessage, &metadataMap)
+	if err != nil {
+		diag.FromErr(err)
+	}
 	jsonMessage, err := json.Marshal(metadataMap)
 	if err != nil {
 		diag.FromErr(err)

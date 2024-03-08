@@ -50,7 +50,6 @@ resource "sysdig_secure_aws_ml_policy" "policy_1" {
     anomalous_console_login {
       enabled   = true
       threshold = 2
-      severity  = 1
     }
   }
 

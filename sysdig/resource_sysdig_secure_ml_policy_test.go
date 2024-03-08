@@ -50,7 +50,6 @@ resource "sysdig_secure_ml_policy" "sample" {
     cryptomining_trigger {
       enabled   = true
       threshold = 2
-      severity  = 1
     }
   }
 
@@ -74,7 +73,6 @@ resource "sysdig_secure_ml_policy" "sample" {
     cryptomining_trigger {
       enabled   = true
       threshold = 2
-      severity  = 1
     }
   }
 
