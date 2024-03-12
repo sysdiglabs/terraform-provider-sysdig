@@ -250,7 +250,6 @@ func TestAccGCPSecureCloudAuthAccountAgentlesScanningWithInventory(t *testing.T)
 	})
 }
 
-// XXX: add project_number to this test
 func TestAccGCPSecureCloudAuthAccountThreatDetection(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	accountID := rText()
@@ -300,6 +299,7 @@ func TestAccGCPSecureCloudAuthAccountThreatDetection(t *testing.T) {
 						workload_identity_federation = {
 							pool_id          = "pool_id_value"
 							pool_provider_id = "pool_provider_id_value"
+							project_number   = "123456789011"
 						}
 						email = "email_value"
 					}
