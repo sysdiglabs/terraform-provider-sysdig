@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
@@ -391,7 +390,6 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 						// if GCP service principal key is present, decode and unmarshal it before populating metadata
 						var spGcpKey *cloudauth.ServicePrincipalMetadata_GCP_Key
 						if len(spGcp.Gcp.Key) > 0 {
-							log.Printf("SP component has a key...")
 							var spGcpKeyBytes []byte
 							spGcpKeyBytes, err = base64.StdEncoding.DecodeString(spGcp.Gcp.Key)
 							if err != nil {
@@ -399,7 +397,6 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 							}
 							err = json.Unmarshal(spGcpKeyBytes, &spGcpKey)
 						}
-						log.Printf("Setting key: %v ; wif: %v ; email: %v", spGcpKey, spGcp.Gcp.WorkloadIdentityFederation, spGcp.Gcp.Email)
 						component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
 							ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
 								Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
