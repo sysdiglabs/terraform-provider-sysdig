@@ -15,7 +15,7 @@ require (
 	github.com/spf13/cast v1.5.1
 	github.com/stretchr/testify v1.8.4
 	github.com/sysdiglabs/agent-kilt/runtimes/cloudformation v0.0.0-20240201123620-2272de6dee9f
-	google.golang.org/protobuf v1.30.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
