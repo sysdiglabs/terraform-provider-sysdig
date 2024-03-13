@@ -387,7 +387,7 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 					if data.Get(SchemaCloudProviderType).(string) == cloudauth.Provider_PROVIDER_GCP.String() {
 						spGcp := &internalServicePrincipalMetadata{}
 						err = json.Unmarshal([]byte(value.(string)), spGcp)
-						// if GCP service principal key is present, decode and unmarshal it before populating metadata
+						// special handling if GCP service principal key is present, decode and unmarshal it before populating all the metadata
 						var spGcpKey *cloudauth.ServicePrincipalMetadata_GCP_Key
 						if len(spGcp.Gcp.Key) > 0 {
 							var spGcpKeyBytes []byte
