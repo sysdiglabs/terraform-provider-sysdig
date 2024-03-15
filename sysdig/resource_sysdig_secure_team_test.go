@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig_secure || tf_acc_sysdig_common || tf_acc_ibm_secure || tf_acc_ibm_common
+//go:build tf_acc_sysdig_secure || tf_acc_sysdig_common || tf_acc_ibm_secure || tf_acc_ibm_common || tf_acc_onprem_secure
 
 package sysdig_test
 
@@ -38,9 +38,15 @@ func TestAccSecureTeam(t *testing.T) {
 			},
 			{
 				Config: secureTeamWithPostureZones(randomText(10)),
+				SkipFunc: func() (bool, error) {
+					return buildinfo.OnpremSecure, nil
+				},
 			},
 			{
 				Config: secureTeamWithPostureZonesAndAllZones(randomText(10)),
+				SkipFunc: func() (bool, error) {
+					return buildinfo.OnpremSecure, nil
+				},
 				ExpectError: regexp.MustCompile(
 					fmt.Sprintf("if %s is enabled, %s must be omitted",
 						sysdig.SchemaAllZones,

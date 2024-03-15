@@ -35,6 +35,7 @@ type SysdigSecure interface {
 	SysdigCommon
 	SecureCommon
 	PolicyInterface
+	CompositePolicyInterface
 	RuleInterface
 	ListInterface
 	MacroInterface

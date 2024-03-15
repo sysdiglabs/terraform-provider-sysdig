@@ -3,7 +3,7 @@ package sysdig
 import (
 	"bytes"
 	"context"
-	b64 "encoding/base64"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,17 +11,20 @@ import (
 	"strings"
 	"time"
 
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
-	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/reflect/protoreflect"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
+	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
 
 func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 	timeout := 5 * time.Minute
 
-	var accountFeature = &schema.Resource{
+	accountFeature := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaType: {
 				Type:     schema.TypeString,
@@ -41,7 +44,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 		},
 	}
 
-	var accountFeatures = &schema.Resource{
+	accountFeatures := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaSecureConfigPosture: {
 				Type:     schema.TypeSet,
@@ -71,7 +74,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 		},
 	}
 
-	var accountComponents = &schema.Resource{
+	accountComponents := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaType: {
 				Type:     schema.TypeString,
@@ -151,7 +154,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Elem:     accountFeatures,
 			},
 			SchemaComponent: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     accountComponents,
 			},
@@ -257,7 +260,6 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 	}
 
 	errStatus, err := client.DeleteCloudauthAccountSecure(ctx, data.Id())
-
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -321,8 +323,9 @@ func setAccountFeature(accountFeatures *cloudauth.AccountFeatures, fieldName str
 This helper function aggregates the account features object that will be used in the
 cloudauthAccountFromResourceData() function
 */
-func constructAccountFeatures(accountFeatures *cloudauth.AccountFeatures, featureData interface{}) *cloudauth.AccountFeatures {
-	featureMap := convertSchemaSetToMap(featureData.(*schema.Set))
+func constructAccountFeatures(data *schema.ResourceData) *cloudauth.AccountFeatures {
+	accountFeatures := &cloudauth.AccountFeatures{}
+	featureMap := convertSchemaSetToMap(data.Get(SchemaFeature).(*schema.Set))
 
 	for name, value := range featureMap {
 		if featureValues := value.(*schema.Set).List(); len(featureValues) > 0 {
@@ -354,12 +357,13 @@ func constructAccountFeatures(accountFeatures *cloudauth.AccountFeatures, featur
 This helper function aggregates the account components list that will be used in the
 cloudauthAccountFromResourceData() function
 */
-func constructAccountComponents(accountComponents []*cloudauth.AccountComponent, data *schema.ResourceData) []*cloudauth.AccountComponent {
-	provider := data.Get(SchemaCloudProviderType).(string)
+func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountComponent {
+	accountComponents := []*cloudauth.AccountComponent{}
 
-	for _, rc := range data.Get(SchemaComponent).([]interface{}) {
+	for _, rc := range data.Get(SchemaComponent).(*schema.Set).List() {
 		resourceComponent := rc.(map[string]interface{})
 		component := &cloudauth.AccountComponent{}
+		var err error
 
 		for key, value := range resourceComponent {
 			if value != nil && value.(string) != "" {
@@ -369,118 +373,53 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 				case SchemaInstance:
 					component.Instance = value.(string)
 				case SchemaCloudConnectorMetadata:
-					component.Metadata = &cloudauth.AccountComponent_CloudConnectorMetadata{
-						CloudConnectorMetadata: &cloudauth.CloudConnectorMetadata{},
-					}
+					component.Metadata = &cloudauth.AccountComponent_CloudConnectorMetadata{CloudConnectorMetadata: &cloudauth.CloudConnectorMetadata{}}
+					err = protojson.Unmarshal([]byte(value.(string)), component.GetCloudConnectorMetadata())
 				case SchemaTrustedRoleMetadata:
-					// TODO: Make it more generic than just for GCP
-					if provider == cloudauth.Provider_PROVIDER_GCP.String() {
-						component.Metadata = &cloudauth.AccountComponent_TrustedRoleMetadata{
-							TrustedRoleMetadata: &cloudauth.TrustedRoleMetadata{
-								Provider: &cloudauth.TrustedRoleMetadata_Gcp{
-									Gcp: &cloudauth.TrustedRoleMetadata_GCP{
-										RoleName: value.(string),
-									},
-								},
-							},
-						}
-					}
+					component.Metadata = &cloudauth.AccountComponent_TrustedRoleMetadata{TrustedRoleMetadata: &cloudauth.TrustedRoleMetadata{}}
+					err = protojson.Unmarshal([]byte(value.(string)), component.GetTrustedRoleMetadata())
 				case SchemaEventBridgeMetadata:
-					if provider == cloudauth.Provider_PROVIDER_AZURE.String() {
-						eventBridgeMetadata := parseResourceMetadataJson(value.(string))
-						eventHubMetadata, ok := eventBridgeMetadata["azure"].(map[string]interface{})["event_hub_metadata"].(map[string]interface{})
-
-						if !ok {
-							fmt.Printf("Resource input for component metadata for provider %s is invalid and not as expected", provider)
-							break
-						}
-
-						component.Metadata = &cloudauth.AccountComponent_EventBridgeMetadata{
-							EventBridgeMetadata: &cloudauth.EventBridgeMetadata{
-								Provider: &cloudauth.EventBridgeMetadata_Azure_{
-									Azure: &cloudauth.EventBridgeMetadata_Azure{
-										EventHubMetadata: &cloudauth.EventBridgeMetadata_Azure_EventHubMetadata{
-											EventHubName:      eventHubMetadata["event_hub_name"].(string),
-											EventHubNamespace: eventHubMetadata["event_hub_namespace"].(string),
-											ConsumerGroup:     eventHubMetadata["consumer_group"].(string),
-										},
-									},
-								},
-							},
-						}
-					} else {
-						component.Metadata = &cloudauth.AccountComponent_EventBridgeMetadata{
-							EventBridgeMetadata: &cloudauth.EventBridgeMetadata{},
-						}
-					}
+					component.Metadata = &cloudauth.AccountComponent_EventBridgeMetadata{EventBridgeMetadata: &cloudauth.EventBridgeMetadata{}}
+					err = protojson.Unmarshal([]byte(value.(string)), component.GetEventBridgeMetadata())
 				case SchemaServicePrincipalMetadata:
-					// TODO: Make it more generic than just for GCP
-					servicePrincipalMetadata := parseResourceMetadataJson(value.(string))
-
-					if provider == cloudauth.Provider_PROVIDER_GCP.String() {
-						encodedServicePrincipalGcpKey, ok := servicePrincipalMetadata["gcp"].(map[string]interface{})["key"].(string)
-						if !ok {
-							fmt.Printf("Resource input for component metadata for provider %s is invalid and not as expected", provider)
-							break
-						}
-						servicePrincipalGcpKey := decodeServicePrincipalKeyToMap(encodedServicePrincipalGcpKey)
-						component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
-							ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
-								Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
-									Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
-										Key: &cloudauth.ServicePrincipalMetadata_GCP_Key{
-											Type:                    servicePrincipalGcpKey["type"],
-											ProjectId:               servicePrincipalGcpKey["project_id"],
-											PrivateKeyId:            servicePrincipalGcpKey["private_key_id"],
-											PrivateKey:              servicePrincipalGcpKey["private_key"],
-											ClientEmail:             servicePrincipalGcpKey["client_email"],
-											ClientId:                servicePrincipalGcpKey["client_id"],
-											AuthUri:                 servicePrincipalGcpKey["auth_uri"],
-											TokenUri:                servicePrincipalGcpKey["token_uri"],
-											AuthProviderX509CertUrl: servicePrincipalGcpKey["auth_provider_x509_cert_url"],
-											ClientX509CertUrl:       servicePrincipalGcpKey["client_x509_cert_url"],
+					component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{}}
+					err = protojson.Unmarshal([]byte(value.(string)), component.GetServicePrincipalMetadata())
+					if data.Get(SchemaCloudProviderType).(string) == cloudauth.Provider_PROVIDER_GCP.String() {
+						spGcp := &internalServicePrincipalMetadata{}
+						err = json.Unmarshal([]byte(value.(string)), spGcp)
+						if len(spGcp.Gcp.Key) > 0 {
+							var spGcpKeyBytes []byte
+							spGcpKeyBytes, err = base64.StdEncoding.DecodeString(spGcp.Gcp.Key)
+							if err != nil {
+								diag.FromErr(err)
+							}
+							spGcpKey := &cloudauth.ServicePrincipalMetadata_GCP_Key{}
+							err = json.Unmarshal(spGcpKeyBytes, spGcpKey)
+							component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
+								ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
+									Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
+										Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
+											Key:                        spGcpKey,
+											WorkloadIdentityFederation: spGcp.Gcp.WorkloadIdentityFederation,
+											Email:                      spGcp.Gcp.Email,
 										},
 									},
 								},
-							},
-						}
-					} else if provider == cloudauth.Provider_PROVIDER_AZURE.String() {
-						servicePrincipalAzureKey, ok := servicePrincipalMetadata["azure"].(map[string]interface{})["active_directory_service_principal"].(map[string]interface{})
-
-						if !ok {
-							fmt.Printf("Resource input for component metadata for provider %s is invalid and not as expected", provider)
-							break
-						}
-
-						component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
-							ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
-								Provider: &cloudauth.ServicePrincipalMetadata_Azure_{
-									Azure: &cloudauth.ServicePrincipalMetadata_Azure{
-										ActiveDirectoryServicePrincipal: &cloudauth.ServicePrincipalMetadata_Azure_ActiveDirectoryServicePrincipal{
-											AccountEnabled:         servicePrincipalAzureKey["account_enabled"].(bool),
-											AppDisplayName:         servicePrincipalAzureKey["app_display_name"].(string),
-											AppId:                  servicePrincipalAzureKey["app_id"].(string),
-											AppOwnerOrganizationId: servicePrincipalAzureKey["app_owner_organization_id"].(string),
-											DisplayName:            servicePrincipalAzureKey["display_name"].(string),
-											Id:                     servicePrincipalAzureKey["id"].(string),
-										},
-									},
-								},
-							},
+							}
 						}
 					}
 				case SchemaWebhookDatasourceMetadata:
-					component.Metadata = &cloudauth.AccountComponent_WebhookDatasourceMetadata{
-						WebhookDatasourceMetadata: &cloudauth.WebhookDatasourceMetadata{},
-					}
+					component.Metadata = &cloudauth.AccountComponent_WebhookDatasourceMetadata{WebhookDatasourceMetadata: &cloudauth.WebhookDatasourceMetadata{}}
+					err = protojson.Unmarshal([]byte(value.(string)), component.GetWebhookDatasourceMetadata())
 				case SchemaCryptoKeyMetadata:
-					component.Metadata = &cloudauth.AccountComponent_CryptoKeyMetadata{
-						CryptoKeyMetadata: &cloudauth.CryptoKeyMetadata{},
-					}
+					component.Metadata = &cloudauth.AccountComponent_CryptoKeyMetadata{CryptoKeyMetadata: &cloudauth.CryptoKeyMetadata{}}
+					err = protojson.Unmarshal([]byte(value.(string)), component.GetCryptoKeyMetadata())
 				case SchemaCloudLogsMetadata:
-					component.Metadata = &cloudauth.AccountComponent_CloudLogsMetadata{
-						CloudLogsMetadata: &cloudauth.CloudLogsMetadata{},
-					}
+					component.Metadata = &cloudauth.AccountComponent_CloudLogsMetadata{CloudLogsMetadata: &cloudauth.CloudLogsMetadata{}}
+					err = protojson.Unmarshal([]byte(value.(string)), component.GetCloudLogsMetadata())
+				}
+				if err != nil {
+					diag.FromErr(err)
 				}
 			}
 		}
@@ -490,63 +429,15 @@ func constructAccountComponents(accountComponents []*cloudauth.AccountComponent,
 	return accountComponents
 }
 
-/*
-This helper function parses the provided component resource metadata in opaque Json string format into a map
-*/
-func parseResourceMetadataJson(value string) map[string]interface{} {
-	var metadataJSON map[string]interface{}
-	err := json.Unmarshal([]byte(value), &metadataJSON)
-	if err != nil {
-		fmt.Printf("Failed to parse component metadata: %v", err)
-		return nil
-	}
-
-	return metadataJSON
-}
-
-/*
-This helper function decodes the base64 encoded Service Principal Key obtained from cloud
-and parses it from Json format into a map
-*/
-func decodeServicePrincipalKeyToMap(encodedKey string) map[string]string {
-	bytesData, err := b64.StdEncoding.DecodeString(encodedKey)
-	if err != nil {
-		fmt.Printf("Failed to decode service principal key: %v", err)
-		return nil
-	}
-	var privateKeyMap map[string]string
-	err = json.Unmarshal(bytesData, &privateKeyMap)
-	if err != nil {
-		fmt.Printf("Failed to parse service principal key: %v", err)
-		return nil
-	}
-
-	return privateKeyMap
-}
-
-/*
-This helper function encodes the Service Principal Key returned by Sysdig
-and returns a base64 encoded string
-*/
-func encodeServicePrincipalKey(key []byte) string {
-	encodedKey := b64.StdEncoding.EncodeToString(key)
-	return encodedKey
-}
-
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
-	accountComponents := constructAccountComponents([]*cloudauth.AccountComponent{}, data)
-
-	featureData := data.Get(SchemaFeature)
-	accountFeatures := constructAccountFeatures(&cloudauth.AccountFeatures{}, featureData)
-
 	return &v2.CloudauthAccountSecure{
 		CloudAccount: cloudauth.CloudAccount{
 			Enabled:          data.Get(SchemaEnabled).(bool),
 			OrganizationId:   data.Get(SchemaOrganizationIDKey).(string),
 			ProviderId:       data.Get(SchemaCloudProviderId).(string),
 			Provider:         cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
-			Components:       accountComponents,
-			Feature:          accountFeatures,
+			Components:       constructAccountComponents(data),
+			Feature:          constructAccountFeatures(data),
 			ProviderTenantId: data.Get(SchemaCloudProviderTenantId).(string),
 			ProviderAlias:    data.Get(SchemaCloudProviderAlias).(string),
 		},
@@ -607,145 +498,94 @@ func featureToResourceData(features *cloudauth.AccountFeatures) []interface{} {
 This helper function converts the components data from []*cloudauth.AccountComponent to resource data schema.
 This is needed to set the value in cloudauthAccountToResourceData().
 */
-func componentsToResourceData(components []*cloudauth.AccountComponent, dataComponentsOrder []string) []map[string]interface{} {
-	// In the resource data, SchemaComponent field is a list of component sets[] / block
-	// Hence we need to return this uber level list in same order to cloudauthAccountToResourceData
-	componentsList := []map[string]interface{}{}
+func componentsToResourceData(components []*cloudauth.AccountComponent) []map[string]interface{} {
+	resourceList := []map[string]interface{}{}
+	for _, component := range components {
+		resourceData := map[string]interface{}{}
+		resourceData[SchemaType] = component.GetType().String()
+		resourceData[SchemaInstance] = component.GetInstance()
 
-	allComponents := make(map[string]interface{})
-	for _, comp := range components {
-		componentBlock := map[string]interface{}{}
-
-		componentBlock[SchemaType] = comp.Type.String()
-		componentBlock[SchemaInstance] = comp.Instance
-
-		metadata := comp.GetMetadata()
-		if metadata != nil {
-			switch metadata.(type) {
-			case *cloudauth.AccountComponent_ServicePrincipalMetadata:
-				provider := metadata.(*cloudauth.AccountComponent_ServicePrincipalMetadata).ServicePrincipalMetadata.GetProvider()
-				// TODO: Make it more generic than just for GCP
-				if providerKey, ok := provider.(*cloudauth.ServicePrincipalMetadata_Gcp); ok {
-					// convert key struct to jsonified key with all the expected fields
-					jsonifiedKey := struct {
-						Type                    string `json:"type"`
-						ProjectId               string `json:"project_id"`
-						PrivateKeyId            string `json:"private_key_id"`
-						PrivateKey              string `json:"private_key"`
-						ClientEmail             string `json:"client_email"`
-						ClientId                string `json:"client_id"`
-						AuthUri                 string `json:"auth_uri"`
-						TokenUri                string `json:"token_uri"`
-						AuthProviderX509CertUrl string `json:"auth_provider_x509_cert_url"`
-						ClientX509CertUrl       string `json:"client_x509_cert_url"`
-						UniverseDomain          string `json:"universe_domain"`
-					}{
-						Type:                    providerKey.Gcp.GetKey().GetType(),
-						ProjectId:               providerKey.Gcp.GetKey().GetProjectId(),
-						PrivateKeyId:            providerKey.Gcp.GetKey().GetPrivateKeyId(),
-						PrivateKey:              providerKey.Gcp.GetKey().GetPrivateKey(),
-						ClientEmail:             providerKey.Gcp.GetKey().GetClientEmail(),
-						ClientId:                providerKey.Gcp.GetKey().GetClientId(),
-						AuthUri:                 providerKey.Gcp.GetKey().GetAuthUri(),
-						TokenUri:                providerKey.Gcp.GetKey().GetTokenUri(),
-						AuthProviderX509CertUrl: providerKey.Gcp.GetKey().GetAuthProviderX509CertUrl(),
-						ClientX509CertUrl:       providerKey.Gcp.GetKey().GetClientX509CertUrl(),
-						UniverseDomain:          "googleapis.com",
-					}
-					bytesKey, err := json.Marshal(jsonifiedKey)
+		switch component.GetType() {
+		case cloudauth.Component_COMPONENT_CLOUD_CONNECTOR:
+			resourceData[SchemaCloudConnectorMetadata] = getComponentMetadataString(component.GetCloudConnectorMetadata())
+		case cloudauth.Component_COMPONENT_TRUSTED_ROLE:
+			resourceData[SchemaTrustedRoleMetadata] = getComponentMetadataString(component.GetTrustedRoleMetadata())
+		case cloudauth.Component_COMPONENT_EVENT_BRIDGE:
+			resourceData[SchemaEventBridgeMetadata] = getComponentMetadataString(component.GetEventBridgeMetadata())
+		case cloudauth.Component_COMPONENT_SERVICE_PRINCIPAL:
+			// XXX: handle GCP specially because keys are base64 encoded
+			if component.GetServicePrincipalMetadata().GetGcp() != nil {
+				var gcpKeyBytes []byte
+				if component.GetServicePrincipalMetadata().GetGcp().GetKey() != nil {
+					var err error
+					gcpKeyBytes, err = protojson.MarshalOptions{UseProtoNames: true}.Marshal(component.GetServicePrincipalMetadata().GetGcp().GetKey())
 					if err != nil {
-						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
-						break
+						diag.FromErr(err)
 					}
-
-					// update the json with proper indentation
-					var out bytes.Buffer
-					if err := json.Indent(&out, bytesKey, "", "  "); err != nil {
-						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
-						break
-					}
-					out.WriteByte('\n')
-
-					// encode the key to base64 and add to the component block
-					schemaData, err := json.Marshal(map[string]interface{}{
-						"gcp": map[string]interface{}{
-							"key": encodeServicePrincipalKey(out.Bytes()),
-						},
-					})
+					var gcpKeyBytesBuffer bytes.Buffer
+					err = json.Indent(&gcpKeyBytesBuffer, gcpKeyBytes, "", "  ")
 					if err != nil {
-						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
-						break
+						diag.FromErr(err)
 					}
-
-					componentBlock[SchemaServicePrincipalMetadata] = string(schemaData)
+					gcpKeyBytes = append(gcpKeyBytesBuffer.Bytes(), '\n')
 				}
-
-				if providerKey, ok := provider.(*cloudauth.ServicePrincipalMetadata_Azure_); ok {
-					schemaData, err := json.Marshal(map[string]interface{}{
-						"azure": map[string]interface{}{
-							"active_directory_service_principal": map[string]interface{}{
-								"account_enabled":           providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAccountEnabled(),
-								"app_display_name":          providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppDisplayName(),
-								"app_id":                    providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppId(),
-								"app_owner_organization_id": providerKey.Azure.GetActiveDirectoryServicePrincipal().GetAppOwnerOrganizationId(),
-								"display_name":              providerKey.Azure.GetActiveDirectoryServicePrincipal().GetDisplayName(),
-								"id":                        providerKey.Azure.GetActiveDirectoryServicePrincipal().GetId(),
-							},
-						},
-					})
-					if err != nil {
-						fmt.Printf("Failed to populate %s: %v", SchemaServicePrincipalMetadata, err)
-						break
-					}
-
-					componentBlock[SchemaServicePrincipalMetadata] = string(schemaData)
+				spGcpBytes, err := json.Marshal(&internalServicePrincipalMetadata{
+					Gcp: &internalServicePrincipalMetadata_GCP{
+						Key:                        base64.StdEncoding.EncodeToString(gcpKeyBytes),
+						WorkloadIdentityFederation: component.GetServicePrincipalMetadata().GetGcp().GetWorkloadIdentityFederation(),
+						Email:                      component.GetServicePrincipalMetadata().GetGcp().GetEmail(),
+					},
+				})
+				if err != nil {
+					diag.FromErr(err)
 				}
-			case *cloudauth.AccountComponent_EventBridgeMetadata:
-				provider := metadata.(*cloudauth.AccountComponent_EventBridgeMetadata).EventBridgeMetadata.GetProvider()
-
-				if providerKey, ok := provider.(*cloudauth.EventBridgeMetadata_Azure_); ok {
-					schemaData, err := json.Marshal(map[string]interface{}{
-						"azure": map[string]interface{}{
-							"event_hub_metadata": map[string]interface{}{
-								"event_hub_name":      providerKey.Azure.GetEventHubMetadata().GetEventHubName(),
-								"event_hub_namespace": providerKey.Azure.GetEventHubMetadata().GetEventHubNamespace(),
-								"consumer_group":      providerKey.Azure.GetEventHubMetadata().GetConsumerGroup(),
-							},
-						},
-					})
-					if err != nil {
-						fmt.Printf("Failed to populate %s: %v", SchemaEventBridgeMetadata, err)
-						break
-					}
-
-					componentBlock[SchemaEventBridgeMetadata] = string(schemaData)
-				}
+				resourceData[SchemaServicePrincipalMetadata] = string(spGcpBytes)
+			} else {
+				resourceData[SchemaServicePrincipalMetadata] = getComponentMetadataString(component.GetServicePrincipalMetadata())
 			}
+		case cloudauth.Component_COMPONENT_WEBHOOK_DATASOURCE:
+			resourceData[SchemaWebhookDatasourceMetadata] = getComponentMetadataString(component.GetWebhookDatasourceMetadata())
+		case cloudauth.Component_COMPONENT_CRYPTO_KEY:
+			resourceData[SchemaCryptoKeyMetadata] = getComponentMetadataString(component.GetCryptoKeyMetadata())
+		case cloudauth.Component_COMPONENT_CLOUD_LOGS:
+			resourceData[SchemaCloudLogsMetadata] = getComponentMetadataString(component.GetCloudLogsMetadata())
 		}
-
-		allComponents[comp.Instance] = componentBlock
+		resourceList = append(resourceList, resourceData)
 	}
 
-	// return componentsList only if there is any components data from *[]cloudauth.AccountComponent, else return nil
-	if len(allComponents) > 0 {
-		// add the component blocks in same order to maintain ordering
-		for _, c := range dataComponentsOrder {
-			componentItem := allComponents[c].(map[string]interface{})
-			componentsList = append(componentsList, componentItem)
-		}
-		return componentsList
-	}
-
-	return nil
+	return resourceList
 }
 
-func getResourceComponentsOrder(dataComponents interface{}) []string {
-	var dataComponentsOrder []string
-	for _, rc := range dataComponents.([]interface{}) {
-		resourceComponent := rc.(map[string]interface{})
-		dataComponentsOrder = append(dataComponentsOrder, resourceComponent[SchemaInstance].(string))
+// internal type redefintion for GCP service principals.
+// This exists because in terraform, the key is originally provided in the form of a base64 encoded json string
+
+// note; caution with order of fields, they have to go in alphabetical ASC so that the json marshalled on the tf read phase produces no drift https://github.com/golang/go/issues/27179
+type internalServicePrincipalMetadata_GCP struct {
+	Email                      string                                                             `json:"email,omitempty"`
+	Key                        string                                                             `json:"key,omitempty"` // base64 encoded
+	WorkloadIdentityFederation *cloudauth.ServicePrincipalMetadata_GCP_WorkloadIdentityFederation `json:"workload_identity_federation,omitempty"`
+}
+type internalServicePrincipalMetadata struct {
+	Gcp *internalServicePrincipalMetadata_GCP `json:"gcp,omitempty"`
+}
+
+func getComponentMetadataString(message protoreflect.ProtoMessage) string {
+	// marshal through protojson get correct snake case keys
+	protoJsonMessage, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(message)
+	if err != nil {
+		diag.FromErr(err)
 	}
-	return dataComponentsOrder
+	// re-marshal through encoding/json to get consistent key ordering, avoiding diff errors with TF internals
+	metadataMap := make(map[string]interface{})
+	err = json.Unmarshal(protoJsonMessage, &metadataMap)
+	if err != nil {
+		diag.FromErr(err)
+	}
+	jsonMessage, err := json.Marshal(metadataMap)
+	if err != nil {
+		diag.FromErr(err)
+	}
+	return string(jsonMessage)
 }
 
 func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudauthAccountSecure) error {
@@ -774,8 +614,8 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		return err
 	}
 
-	dataComponentsOrder := getResourceComponentsOrder(data.Get(SchemaComponent))
-	err = data.Set(SchemaComponent, componentsToResourceData(cloudAccount.Components, dataComponentsOrder))
+	// dataComponentsOrder := getResourceComponentsOrder(data.Get(SchemaComponent))
+	err = data.Set(SchemaComponent, componentsToResourceData(cloudAccount.GetComponents()))
 	if err != nil {
 		return err
 	}

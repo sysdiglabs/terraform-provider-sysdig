@@ -6,4 +6,6 @@ var (
 	SysdigSecure  bool
 	IBMMonitor    bool
 	IBMSecure     bool
+	OnpremMonitor bool
+	OnpremSecure  bool
 )

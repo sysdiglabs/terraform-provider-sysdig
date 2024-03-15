@@ -1,36 +1,31 @@
 <a href="https://terraform.io">
-    <img src="https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/main/.github/terraform_logo.svg" alt="Terraform logo" title="Terraform" align="right" height="50" />
+    <img src="https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/main/.github/terraform_logo.svg" alt="Terraform logo" title="Terraform" height="50" />
 </a>
 
 
 # Terraform Provider for Sysdig
 
-
 - **[Terraform Registry - Sysdig Provider Docs](https://registry.terraform.io/providers/sysdiglabs/sysdig/latest/docs)**
 - [Blog on how to use this provider with Sysdig Secure](https://sysdig.com/blog/using-terraform-for-container-security-as-code/)
-- Terraform
-  - Website https://www.terraform.io
-  - Mailing list on  [Google Groups](http://groups.google.com/group/terraform-tool)
-  - [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
 
 
-# Contribute
+## Contribute
 
-- [Initial Setup](#initial-setup)
+- [Requirements](#requirements)
+- [Develop](#develop)
+- [Compile](#compile)
+- [Test](#tests)
+- [Install](#install-local)
 - [Proposing PR's](#proposing-prs)
 - [Release](#release)
 
-## Initial Setup
-
-### Building
-
-#### Requirements
+## Requirements
 
 - [Terraform](https://www.terraform.io/downloads.html) > 0.12.x
 - [Go](https://golang.org/doc/install) > Go version specified in [go.mod](./go.mod#L3)
   - Correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
-### Develop
+## Develop
 
 First **clone** source repository to: `$GOPATH/src/github.com/draios/terraform-provider-sysdig`
 
@@ -40,37 +35,36 @@ $ cd terraform-provider-sysdig
 $ make build
 ```
 
-### Compile
+If you're a rookie, check [Official Terraform Provider development guides](https://developer.hashicorp.com/terraform/plugin/frameworkO)
+
+### Creating new resource / data sources
+
+TL;DR;
+- Create the resource/data source item
+- Add the created item into the `provider.go` resource or datasource map with its wiring
+- With its [acceptance **test**](#tests)
+- Add its **documentation** page on `./website/docs/`
+
+## Compile
 
 To **compile** the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
 ```sh
 $ make build
-...
 $ $GOPATH/bin/terraform-provider-sysdig
-...
 ```
 
-### Tests
-In order to **test** the provider, you can simply run `make test`.
+## Tests
 
-```sh
-$ make test
-```
+In order to **test** the provider, you can simply run `make test` to run unit-tests.
+For acceptance tests, you can run `make testacc`, but note that 
+- Sysdig Montir and/or Secure credentials are required, check [`/.envrc.template`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.envrc.template)
+- **acceptance tests rely on the creation of real infrastructure**, you should execute them in an environment where you can remove the resources easily.
 
-### Acceptance Tests
+If you're a rookie, check [Terraform acceptance test guidelines](https://developer.hashicorp.com/terraform/plugin/testing)
 
-If you want to execute the **acceptance tests**, you can run `make testacc`.
-- Follow [Terraform acceptance test guideliness](https://www.terraform.io/plugin/sdkv2/testing/acceptance-tests)
-- Please note that you need a token for Sysdig Monitor and another one for Sysdig Secure, and since the **acceptance tests create real infrastructure**
-you should execute them in an environment where you can remove the resources easily.
-- Acceptance tests are launched in [Sysdig production `+kubelab` test environment](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.github/workflows/ci-pull-request.yml#L82-L83)
 
-```sh
-$ make testacc
-```
-
-### Install (local)
+## Install (local)
 To use the local provider you just built, follow the instructions to [**install** it as a plugin.](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) in your machine with:
 
 ```sh
@@ -100,20 +94,6 @@ To uninstall the plugin:
 $ make uninstall
 ```
 
-### Creating new resource / data sources
-
-TL;DR;
-- Create the resource/data source item
-- Add the created item into the `provider.go` resource or datasource map with its wiring
-- With its [acceptance **test**](#acceptance-tests)
-- Add its **documentation** page on `./website/docs/`
-
-
-Interesting resources
-- https://www.terraform.io/plugin
-- https://www.hashicorp.com/blog/testing-hashicorp-terraform
-
-
 ## Proposing PR's
 
 * if it's your first time, validate you're taking into account every aspect of the [`./github/pull_request_template`](.github/pull_request_template.md)
@@ -122,7 +102,7 @@ Interesting resources
   - You can work on this before even pushing to remote, using [**pre-commit**](https://pre-commit.com) plugin
   
 * for the PR title use [conventional commit format](https://www.conventionalcommits.org/en/v1.0.0/) so when the branch is squashed to main branch it follows a convention
-* for Acceptance Tests `testacc` some credentials are required, check [`/.envrc.template`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.envrc.template)
+* acceptance tests are launched in [Sysdig production `+kubelab` test environment](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.github/workflows/ci-pull-request.yml#L82-L83)
 
 
 ## Release
@@ -134,6 +114,8 @@ github/workflows/release.yml`](https://github.com/sysdiglabs/terraform-provider-
 * For **tag**, use **[semver](https://semver.org)** 
 * Review Released Draft Note, and make it as clear as possible.
 * Notify Sysdig teams on our internal #release-announcements slack channel and optionally in #terraform-provider
+
+<br/><br/>
 
 Mange takk!
 

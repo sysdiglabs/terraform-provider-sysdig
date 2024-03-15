@@ -1,6 +1,9 @@
 package v2
 
 import (
+	"encoding/json"
+	"errors"
+
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
 
@@ -250,9 +253,185 @@ type Policy struct {
 	Version                int           `json:"version,omitempty"`
 	NotificationChannelIds []int         `json:"notificationChannelIds"`
 	Type                   string        `json:"type"`
+	Origin                 string        `json:"origin"`
 	Runbook                string        `json:"runbook"`
 	TemplateId             int           `json:"templateId"`
 	TemplateVersion        string        `json:"templateVersion"`
+}
+
+type PolicyRulesComposite struct {
+	Policy *Policy              `json:"policy"`
+	Rules  []*RuntimePolicyRule `json:"rules"`
+}
+
+type (
+	FlexInt                   int
+	RuntimePolicyObjectOrigin string // NOTE: This is an int in model_rules.go#L247
+	ElementType               string
+)
+
+type RuntimePolicyRuleDetails interface {
+	GetRuleType() ElementType
+}
+
+type RuntimePolicyRule struct {
+	Id          *FlexInt                   `json:"id"`
+	Name        string                     `json:"name"`
+	Origin      *RuntimePolicyObjectOrigin `json:"origin"`
+	VersionId   string                     `json:"versionId"`
+	Filename    string                     `json:"filename"`
+	Description string                     `json:"description"`
+	Details     RuntimePolicyRuleDetails   `json:"details"`
+	Tags        []string                   `json:"tags"`
+	Version     *int                       `json:"version"`
+	CreatedOn   int64                      `json:"createdOn"`
+	ModifiedOn  int64                      `json:"modifiedOn"`
+}
+
+// TODO: This should be exported into a common package
+// Copied from: https://github.com/draios/secure-backend/blob/main/policies/model/model_rules.go#L676C1-L779C2
+func (r *RuntimePolicyRule) UnmarshalJSON(b []byte) error {
+	type findType struct {
+		RuleType string `json:"ruleType"`
+	}
+	findDetails := struct {
+		FindType    findType                   `json:"details"`
+		Id          *FlexInt                   `json:"id"`
+		Name        string                     `json:"name"`
+		Origin      *RuntimePolicyObjectOrigin `json:"origin"`
+		VersionId   string                     `json:"versionId"`
+		Filename    string                     `json:"filename"`
+		Description string                     `json:"description"`
+		Tags        []string                   `json:"tags"`
+		Version     *int                       `json:"version"`
+		CreatedOn   int64                      `json:"createdOn"`
+		ModifiedOn  int64                      `json:"modifiedOn"`
+	}{}
+
+	err := json.Unmarshal(b, &findDetails)
+	if err != nil {
+		return err
+	}
+
+	var d RuntimePolicyRuleDetails
+	switch findDetails.FindType.RuleType {
+	// case "FALCO":
+	// 	d = &FalcoRuleDetails{}
+	// case "CONTAINER":
+	// 	d = &ContainerImageRuleDetails{}
+	// case "FILESYSTEM":
+	// 	d = &FilesystemRuleDetails{}
+	// case "NETWORK":
+	// 	d = &NetworkRuleDetails{
+	// 		AllInbound:  true,
+	// 		AllOutbound: true,
+	// 	}
+	// case "PROCESS":
+	// 	d = &ProcessRuleDetails{}
+	// case "SYSCALL":
+	// 	d = &SyscallRuleDetails{}
+	case "DRIFT":
+		d = &DriftRuleDetails{}
+	case "MACHINE_LEARNING":
+		d = &MLRuleDetails{}
+	case "AWS_MACHINE_LEARNING":
+		d = &AWSMLRuleDetails{}
+	case "MALWARE":
+		d = &MalwareRuleDetails{}
+	// case "OKTA_MACHINE_LEARNING":
+	// 	d = &OktaMLRuleDetails{}
+	default:
+		return errors.New("The field details has an unknown ruleType: " + findDetails.FindType.RuleType)
+	}
+
+	getRawDetails := struct {
+		RawDetails json.RawMessage `json:"details"`
+	}{}
+	err = json.Unmarshal(b, &getRawDetails)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(getRawDetails.RawDetails, d)
+	if err != nil {
+		return err
+	}
+
+	var findDetailsIdPtr *FlexInt
+	if findDetails.Id != nil {
+		findDetailsId := FlexInt(*findDetails.Id)
+		findDetailsIdPtr = &findDetailsId
+	}
+
+	r.Id = findDetailsIdPtr
+	r.Name = findDetails.Name
+	r.Origin = findDetails.Origin
+	r.VersionId = findDetails.VersionId
+	r.Filename = findDetails.Filename
+	r.Description = findDetails.Description
+	r.Tags = findDetails.Tags
+	r.Version = findDetails.Version
+	r.Details = d
+	r.CreatedOn = findDetails.CreatedOn
+	r.ModifiedOn = findDetails.ModifiedOn
+
+	return nil
+}
+
+type MLRuleThresholdAndSeverity struct {
+	Enabled   bool    `json:"enabled" yaml:"enabled"`
+	Threshold float64 `json:"threshold" yaml:"threshold"`
+	Severity  float64 `json:"severity" yaml:"severity"`
+}
+
+type MLRuleDetails struct {
+	RuleType                ElementType                 `json:"ruleType" yaml:"ruleType"`
+	AnomalyDetectionTrigger *MLRuleThresholdAndSeverity `json:"anomalyDetectionTrigger" yaml:"anomalyDetectionTrigger"`
+	CryptominingTrigger     *MLRuleThresholdAndSeverity `json:"cryptominingTrigger" yaml:"cryptominingTrigger"`
+	Details                 `json:"-"`
+}
+
+func (p MLRuleDetails) GetRuleType() ElementType {
+	return p.RuleType
+}
+
+type MalwareRuleDetails struct {
+	RuleType         ElementType         `json:"ruleType"`
+	UseManagedHashes bool                `json:"useManagedHashes"`
+	AdditionalHashes map[string][]string `json:"additionalHashes"`
+	IgnoreHashes     map[string][]string `json:"ignoreHashes"`
+	Details          `json:"-"`
+}
+
+func (p MalwareRuleDetails) GetRuleType() ElementType {
+	return p.RuleType
+}
+
+type RuntimePolicyRuleList struct {
+	Items      []string `json:"items"`
+	MatchItems bool     `json:"matchItems"`
+}
+
+type DriftRuleDetails struct {
+	RuleType           ElementType            `json:"ruleType"`
+	Exceptions         *RuntimePolicyRuleList `json:"exceptionList"`
+	ProhibitedBinaries *RuntimePolicyRuleList `json:"prohibitedBinaries"`
+	Mode               string                 `json:"mode"`
+	Details            `json:"-"`
+}
+
+func (p DriftRuleDetails) GetRuleType() ElementType {
+	return p.RuleType
+}
+
+type AWSMLRuleDetails struct {
+	RuleType              ElementType                 `json:"ruleType" yaml:"ruleType"`
+	AnomalousConsoleLogin *MLRuleThresholdAndSeverity `json:"anomalousConsoleLogin" yaml:"anomalousConsoleLogin"`
+	Details               `json:"-"`
+}
+
+func (p AWSMLRuleDetails) GetRuleType() ElementType {
+	return p.RuleType
 }
 
 type PolicyRule struct {
@@ -262,15 +441,16 @@ type PolicyRule struct {
 
 // Did not add support storageId because FE does not support it yet
 type Action struct {
-	AfterEventNs         int    `json:"afterEventNs,omitempty"`
-	BeforeEventNs        int    `json:"beforeEventNs,omitempty"`
-	Name                 string `json:"name,omitempty"`
-	Filter               string `json:"filter,omitempty"`
-	StorageType          string `json:"storageType,omitempty"`
-	BucketName           string `json:"bucketName,omitempty"`
-	Folder               string `json:"folder,omitempty"`
-	IsLimitedToContainer bool   `json:"isLimitedToContainer"`
-	Type                 string `json:"type"`
+	AfterEventNs         int     `json:"afterEventNs,omitempty"`
+	BeforeEventNs        int     `json:"beforeEventNs,omitempty"`
+	Name                 string  `json:"name,omitempty"`
+	Filter               string  `json:"filter,omitempty"`
+	StorageType          string  `json:"storageType,omitempty"`
+	BucketName           string  `json:"bucketName,omitempty"`
+	Folder               string  `json:"folder,omitempty"`
+	IsLimitedToContainer bool    `json:"isLimitedToContainer"`
+	Type                 string  `json:"type"`
+	Msg                  *string `json:"msg,omitempty"`
 }
 
 type List struct {

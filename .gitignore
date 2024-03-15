@@ -46,3 +46,6 @@ junit-report.xml
 terraform-provider-sysdig
 oanc
 .vscode/settings.json
+
+# goland .run
+.run/
