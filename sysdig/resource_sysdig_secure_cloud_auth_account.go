@@ -11,19 +11,20 @@ import (
 	"strings"
 	"time"
 
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
-	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/reflect/protoreflect"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
+	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
 
 func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 	timeout := 5 * time.Minute
 
-	var accountFeature = &schema.Resource{
+	accountFeature := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaType: {
 				Type:     schema.TypeString,
@@ -43,7 +44,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 		},
 	}
 
-	var accountFeatures = &schema.Resource{
+	accountFeatures := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaSecureConfigPosture: {
 				Type:     schema.TypeSet,
@@ -73,7 +74,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 		},
 	}
 
-	var accountComponents = &schema.Resource{
+	accountComponents := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaType: {
 				Type:     schema.TypeString,
@@ -259,7 +260,6 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 	}
 
 	errStatus, err := client.DeleteCloudauthAccountSecure(ctx, data.Id())
-
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -515,7 +515,7 @@ func componentsToResourceData(components []*cloudauth.AccountComponent) []map[st
 		case cloudauth.Component_COMPONENT_SERVICE_PRINCIPAL:
 			// XXX: handle GCP specially because keys are base64 encoded
 			if component.GetServicePrincipalMetadata().GetGcp() != nil {
-				gcpKeyBytes := []byte{}
+				var gcpKeyBytes []byte
 				if component.GetServicePrincipalMetadata().GetGcp().GetKey() != nil {
 					var err error
 					gcpKeyBytes, err = protojson.MarshalOptions{UseProtoNames: true}.Marshal(component.GetServicePrincipalMetadata().GetGcp().GetKey())
@@ -558,10 +558,12 @@ func componentsToResourceData(components []*cloudauth.AccountComponent) []map[st
 
 // internal type redefintion for GCP service principals.
 // This exists because in terraform, the key is originally provided in the form of a base64 encoded json string
+
+// note; caution with order of fields, they have to go in alphabetical ASC so that the json marshalled on the tf read phase produces no drift https://github.com/golang/go/issues/27179
 type internalServicePrincipalMetadata_GCP struct {
+	Email                      string                                                             `json:"email,omitempty"`
 	Key                        string                                                             `json:"key,omitempty"` // base64 encoded
 	WorkloadIdentityFederation *cloudauth.ServicePrincipalMetadata_GCP_WorkloadIdentityFederation `json:"workload_identity_federation,omitempty"`
-	Email                      string                                                             `json:"email,omitempty"`
 }
 type internalServicePrincipalMetadata struct {
 	Gcp *internalServicePrincipalMetadata_GCP `json:"gcp,omitempty"`

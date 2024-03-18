@@ -1,5 +1,12 @@
-# prod/kubelab
+# export SYSDIG_SECURE_URL=https://secure.sysdig.com
+
+# credentials
 export SYSDIG_SECURE_API_TOKEN=
 export SYSDIG_MONITOR_API_TOKEN=
 
-# export SYSDIG_SECURE_URL=https://secure.sysdig.com
+
+# whether to run local acc test
+export TF_ACC=false
+
+# terraform log level
+export TF_LOG=DEBUG
