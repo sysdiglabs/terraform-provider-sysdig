@@ -387,25 +387,26 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 					if data.Get(SchemaCloudProviderType).(string) == cloudauth.Provider_PROVIDER_GCP.String() {
 						spGcp := &internalServicePrincipalMetadata{}
 						err = json.Unmarshal([]byte(value.(string)), spGcp)
+						// special handling if GCP service principal key is present, decode and unmarshal it before populating all the metadata
+						var spGcpKey *cloudauth.ServicePrincipalMetadata_GCP_Key
 						if len(spGcp.Gcp.Key) > 0 {
 							var spGcpKeyBytes []byte
 							spGcpKeyBytes, err = base64.StdEncoding.DecodeString(spGcp.Gcp.Key)
 							if err != nil {
 								diag.FromErr(err)
 							}
-							spGcpKey := &cloudauth.ServicePrincipalMetadata_GCP_Key{}
-							err = json.Unmarshal(spGcpKeyBytes, spGcpKey)
-							component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
-								ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
-									Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
-										Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
-											Key:                        spGcpKey,
-											WorkloadIdentityFederation: spGcp.Gcp.WorkloadIdentityFederation,
-											Email:                      spGcp.Gcp.Email,
-										},
+							err = json.Unmarshal(spGcpKeyBytes, &spGcpKey)
+						}
+						component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
+							ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
+								Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
+									Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
+										Key:                        spGcpKey,
+										WorkloadIdentityFederation: spGcp.Gcp.WorkloadIdentityFederation,
+										Email:                      spGcp.Gcp.Email,
 									},
 								},
-							}
+							},
 						}
 					}
 				case SchemaWebhookDatasourceMetadata:
