@@ -1,7 +1,7 @@
 ---
 subcategory: "Sysdig Platform"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_agent_access_key"
+page_title: "Sysdig: sysdig_a[custom_role.md](custom_role.md)gent_access_key"
 description: |-
   Retrieves information about a agent access key from the access key id.
 ---
@@ -30,8 +30,6 @@ resource "sysdig_agent_access_key" "my_agent_access_key" {
 
 ## Argument Reference
 
-In addition to all arguments above, the following attributes are exported:
-
 * `metadata` - (Optional) The metadata of agent access key.
 
 * `team_id` - (Optional) The team id of the agent access key.
@@ -43,6 +41,8 @@ In addition to all arguments above, the following attributes are exported:
 * `enabled` - (Optional) Whether the agent access key is enabled or not. It is only used in update actions, an agent access keys can be deleted only if it's disabled.
 
 ## Attributes Reference
+
+In addition to all arguments above, the following attributes are exported:
 
 * `access_key` - The agent access key.
 
