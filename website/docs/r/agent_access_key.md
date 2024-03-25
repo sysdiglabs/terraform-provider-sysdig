@@ -28,7 +28,7 @@ resource "sysdig_agent_access_key" "my_agent_access_key" {
 }
 ```
 
-## Argument reference
+## Argument Reference
 
 In addition to all arguments above, the following attributes are exported:
 
