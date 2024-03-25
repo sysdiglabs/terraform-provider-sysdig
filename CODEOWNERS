@@ -17,6 +17,7 @@
 /sysdig/internal/client/v2/client.go @filiptubic @mbarbieri @draraksysdig
 /sysdig/internal/client/v2/config.go @filiptubic @mbarbieri @draraksysdig
 /sysdig/internal/client/v2/ibm.go @filiptubic @mbarbieri @draraksysdig
+/sysdig/internal/client/v2/agentaccesskey.go @igoreulalio
 /main.go @filiptubic @mbarbieri @draraksysdig
 /.goreleaser.yml @filiptubic @mbarbieri @draraksysdig
 /.github/ @filiptubic @mbarbieri @draraksysdig
