@@ -92,12 +92,11 @@ resource "sysdig_agent_access_key" "my_agent_access_key" {
   limit       = %d
   reservation = %d
   enabled     = %t
-  team_id     = 50012099
   %s
 }
 
 data "sysdig_agent_access_key" "data" {
-  agent_key = sysdig_agent_access_key.my_agent_access_key.id
+  id = sysdig_agent_access_key.my_agent_access_key.id
 }
 `, limit, reservation, enabled, metadataStr)
 }

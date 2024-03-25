@@ -7,12 +7,10 @@ import (
 )
 
 const (
-	GetAgentAccessKeyPath     = "%s/api/customer/accessKeys"
-	CreateAgentAccessKeyPath  = "%s/api/customer/accessKeys"
-	DeleteAgentAccessKeyPath  = "%s/api/customer/accessKeys/%s"
-	DisableAgentAccessKeyPath = "%s/api/customer/accessKeys/%s/disable"
-	EnableAgentAccessKeyPath  = "%s/api/customer/accessKeys/%s/enable"
-	PutAgentAccessKeyPath     = "%s/api/customer/accessKeys/%s"
+	GetAgentAccessKeyByIdPath = "%s/platform/v1/access-keys/%s"
+	CreateAgentAccessKeyPath  = "%s/platform/v1/access-keys"
+	DeleteAgentAccessKeyPath  = "%s/platform/v1/access-keys/%s"
+	PutAgentAccessKeyPath     = "%s/platform/v1/access-keys/%s"
 )
 
 type AgentAccessKeyInterface interface {
@@ -20,12 +18,11 @@ type AgentAccessKeyInterface interface {
 	GetAgentAccessKeyById(ctx context.Context, id string) (*AgentAccessKey, error)
 	CreateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey) (*AgentAccessKey, error)
 	DeleteAgentAccessKey(ctx context.Context, id string) error
-	UpdateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey) (*AgentAccessKey, error)
-	EnableOrDisableAgentAccessKey(ctx context.Context, id string, enable bool) error
+	UpdateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey, id string) (*AgentAccessKey, error)
 }
 
 func (client *Client) GetAgentAccessKeyById(ctx context.Context, id string) (*AgentAccessKey, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetAgentAccessKeyUrl(), nil)
+	response, err := client.requester.Request(ctx, http.MethodGet, client.GetAgentAccessKeyByIdUrl(id), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -36,22 +33,16 @@ func (client *Client) GetAgentAccessKeyById(ctx context.Context, id string) (*Ag
 		return nil, err
 	}
 
-	wrapper, err := Unmarshal[AgentAccessKeyReadWrapper](response.Body)
+	agentAccessKey, err := Unmarshal[AgentAccessKey](response.Body)
 	if err != nil {
 		return nil, err
 	}
-	for _, key := range wrapper.CustomerAccessKey {
-		if key.AgentAccessKeyId == id {
-			return &key, nil // Found the key, return it
-		}
-	}
-	fmt.Println("Trying to get agent access keys with id: ", id)
-	return nil, fmt.Errorf("no AgentAccessKey found with ID %s", id)
+
+	return &agentAccessKey, nil
 }
 
 func (client *Client) CreateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey) (*AgentAccessKey, error) {
-	agentAccessKeyWriteWrapper := AgentAccessKeyWriteWrapper{CustomerAccessKey: *agentAccessKey}
-	payload, err := Marshal(agentAccessKeyWriteWrapper)
+	payload, err := Marshal(agentAccessKey)
 	if err != nil {
 		return nil, err
 	}
@@ -61,30 +52,27 @@ func (client *Client) CreateAgentAccessKey(ctx context.Context, agentAccessKey *
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusCreated {
 		err = client.ErrorFromResponse(response)
 		return nil, err
 	}
 
-	created, err := Unmarshal[AgentAccessKeyWriteWrapper](response.Body)
+	createdAgentAccessKey, err := Unmarshal[AgentAccessKey](response.Body)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &created.CustomerAccessKey, nil
+	return &createdAgentAccessKey, nil
 }
 
-func (client *Client) UpdateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey) (*AgentAccessKey, error) {
-	agentAccessKeyWriteWrapper := AgentAccessKeyWriteWrapper{CustomerAccessKey: *agentAccessKey}
+func (client *Client) UpdateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey, id string) (*AgentAccessKey, error) {
 
-	agentAccessKeyId := agentAccessKeyWriteWrapper.CustomerAccessKey.AgentAccessKeyId
-	fmt.Println("ID: ", agentAccessKeyId)
-	payload, err := Marshal(agentAccessKeyWriteWrapper)
+	payload, err := Marshal(agentAccessKey)
 	if err != nil {
 		return nil, err
 	}
-	response, err := client.requester.Request(ctx, http.MethodPut, client.PutAgentAccessKeyUrl(agentAccessKeyId), payload)
+	response, err := client.requester.Request(ctx, http.MethodPut, client.PutAgentAccessKeyUrl(id), payload)
 	if err != nil {
 		return nil, err
 	}
@@ -95,38 +83,12 @@ func (client *Client) UpdateAgentAccessKey(ctx context.Context, agentAccessKey *
 		return nil, err
 	}
 
-	updated, err := Unmarshal[AgentAccessKeyWriteWrapper](response.Body)
+	updatedAgentAccessKey, err := Unmarshal[AgentAccessKey](response.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	return &updated.CustomerAccessKey, nil
-}
-
-func (client *Client) EnableOrDisableAgentAccessKey(ctx context.Context, id string, enable bool) error {
-	var url string
-	if enable {
-		url = client.EnableAgentAccessKeyUrl(id)
-	} else {
-		url = client.DisableAgentAccessKeyUrl(id)
-	}
-	response, err := client.requester.Request(ctx, http.MethodPost, url, nil)
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		err = client.ErrorFromResponse(response)
-		return err
-	}
-
-	_, err = Unmarshal[AgentAccessKeyWriteWrapper](response.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return &updatedAgentAccessKey, nil
 }
 
 func (client *Client) DeleteAgentAccessKey(ctx context.Context, id string) error {
@@ -143,8 +105,8 @@ func (client *Client) DeleteAgentAccessKey(ctx context.Context, id string) error
 	return nil
 }
 
-func (client *Client) GetAgentAccessKeyUrl() string {
-	return fmt.Sprintf(GetAgentAccessKeyPath, client.config.url)
+func (client *Client) GetAgentAccessKeyByIdUrl(id string) string {
+	return fmt.Sprintf(GetAgentAccessKeyByIdPath, client.config.url, id)
 }
 
 func (client *Client) PostAgentAccessKeyUrl() string {
@@ -157,12 +119,4 @@ func (client *Client) PutAgentAccessKeyUrl(id string) string {
 
 func (client *Client) DeleteAgentAccessKeyUrl(id string) string {
 	return fmt.Sprintf(DeleteAgentAccessKeyPath, client.config.url, id)
-}
-
-func (client *Client) DisableAgentAccessKeyUrl(id string) string {
-	return fmt.Sprintf(DisableAgentAccessKeyPath, client.config.url, id)
-}
-
-func (client *Client) EnableAgentAccessKeyUrl(id string) string {
-	return fmt.Sprintf(EnableAgentAccessKeyPath, client.config.url, id)
 }

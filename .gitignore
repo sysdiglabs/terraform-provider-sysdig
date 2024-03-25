@@ -49,3 +49,6 @@ oanc
 
 # goland .run
 .run/
+
+# Local test folder
+local-terraform-test/

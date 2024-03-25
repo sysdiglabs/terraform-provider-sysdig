@@ -3,6 +3,7 @@ package sysdig
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -49,13 +50,18 @@ func resourceSysdigAgentAccessKey() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
-			"team_name": {
+			"date_disabled": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"agents_connected": {
-				Type:     schema.TypeInt,
+			"date_created": {
+				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"access_key": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 		},
 	}
@@ -89,9 +95,9 @@ func resourceSysdigAgentAccessKeyCreate(ctx context.Context, data *schema.Resour
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	data.SetId(agentAccessKey.AgentAccessKeyId)
-
+	fmt.Println("setting id")
+	data.SetId(strconv.Itoa(agentAccessKey.Id))
+	fmt.Println("id set")
 	resourceSysdigAgentAccessKeyRead(ctx, data, meta)
 
 	return nil
@@ -107,19 +113,12 @@ func resourceSysdigAgentAccessKeyUpdate(ctx context.Context, data *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	agentAccessKey, err = client.UpdateAgentAccessKey(ctx, agentAccessKey)
+	agentAccessKey, err = client.UpdateAgentAccessKey(ctx, agentAccessKey, data.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if data.HasChange("enabled") {
-		enabled := data.Get("enabled").(bool)
-		err := client.EnableOrDisableAgentAccessKey(ctx, data.Id(), enabled)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-	}
-	data.SetId(agentAccessKey.AgentAccessKeyId)
+	data.SetId(strconv.Itoa(agentAccessKey.Id))
 
 	resourceSysdigAgentAccessKeyRead(ctx, data, meta)
 
@@ -127,26 +126,31 @@ func resourceSysdigAgentAccessKeyUpdate(ctx context.Context, data *schema.Resour
 }
 
 func agentAccessKeyFromResourceData(data *schema.ResourceData) (*v2.AgentAccessKey, error) {
-	metadataInterface := data.Get("metadata").(map[string]interface{})
+	metadataFromResourceData := data.Get("metadata").(map[string]interface{})
 	metadata := make(map[string]string)
 
-	for key, val := range metadataInterface {
+	for key, val := range metadataFromResourceData {
 		// Convert each value to a string, using fmt.Sprintf
 		strVal := fmt.Sprintf("%v", val)
 		metadata[key] = strVal
 	}
 
+	var enabled bool
+	if data.Get("enabled") != nil {
+		enabled = data.Get("enabled").(bool)
+	}
+
 	return &v2.AgentAccessKey{
-		Reservation:      data.Get("reservation").(int),
-		Limit:            data.Get("limit").(int),
-		TeamID:           data.Get("team_id").(int),
-		TeamName:         data.Get("team_name").(string),
-		AgentAccessKeyId: data.Id(),
-		Metadata:         metadata,
+		Reservation:  data.Get("reservation").(int),
+		Limit:        data.Get("limit").(int),
+		TeamID:       data.Get("team_id").(int),
+		Enabled:      enabled,
+		DateDisabled: data.Get("date_disabled").(string),
+		DateCreated:  data.Get("date_created").(string),
+		Metadata:     metadata,
 	}, nil
 }
 
-// Retrieves the information of a resource form the file and loads it in Terraform
 func resourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, err := meta.(SysdigClients).commonClientV2()
 	if err != nil {
@@ -160,13 +164,14 @@ func resourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	d.SetId(agentAccessKey.AgentAccessKeyId)
+	d.SetId(strconv.Itoa(agentAccessKey.Id))
 	_ = d.Set("reservation", agentAccessKey.Reservation)
 	_ = d.Set("limit", agentAccessKey.Limit)
 	_ = d.Set("team_id", agentAccessKey.TeamID)
 	_ = d.Set("metadata", agentAccessKey.Metadata)
-	_ = d.Set("team_name", agentAccessKey.TeamName)
 	_ = d.Set("enabled", agentAccessKey.Enabled)
-	_ = d.Set("agents_connected", agentAccessKey.AgentsConnected)
+	_ = d.Set("date_created", agentAccessKey.DateCreated)
+	_ = d.Set("date_disabled", agentAccessKey.DateDisabled)
+	_ = d.Set("access_key", agentAccessKey.AgentAccessKey)
 	return nil
 }

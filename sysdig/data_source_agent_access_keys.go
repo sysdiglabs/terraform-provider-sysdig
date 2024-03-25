@@ -2,6 +2,8 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -19,8 +21,8 @@ func dataSourceSysdigAgentAccessKey() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"agent_key": {
-				Type:     schema.TypeString,
+			"id": {
+				Type:     schema.TypeInt,
 				Required: true,
 			},
 			"reservation": {
@@ -35,20 +37,20 @@ func dataSourceSysdigAgentAccessKey() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"team_name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"metadata": {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
-			"agents_connected": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
 			"enabled": {
 				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"date_disabled": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"date_created": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -62,20 +64,20 @@ func dataSourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	agentKeyId := d.Get("agent_key").(string)
-
-	agentAccessKey, err := client.GetAgentAccessKeyById(ctx, agentKeyId)
+	agentKeyId := d.Get("id").(int)
+	fmt.Println(agentKeyId)
+	agentAccessKey, err := client.GetAgentAccessKeyById(ctx, strconv.Itoa(agentKeyId))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(agentAccessKey.AgentAccessKeyId)
+	d.SetId(strconv.Itoa(agentAccessKey.Id))
 	_ = d.Set("reservation", agentAccessKey.Reservation)
 	_ = d.Set("limit", agentAccessKey.Limit)
 	_ = d.Set("team_id", agentAccessKey.TeamID)
 	_ = d.Set("metadata", agentAccessKey.Metadata)
-	_ = d.Set("team_name", agentAccessKey.TeamName)
 	_ = d.Set("enabled", agentAccessKey.Enabled)
-	_ = d.Set("agents_connected", agentAccessKey.AgentsConnected)
+	_ = d.Set("date_disabled", agentAccessKey.DateDisabled)
+	_ = d.Set("date_created", agentAccessKey.DateCreated)
 
 	return nil
 }

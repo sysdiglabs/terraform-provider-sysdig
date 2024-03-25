@@ -1002,14 +1002,15 @@ type SilenceRule struct {
 }
 
 type AgentAccessKey struct {
-	Reservation      int               `json:"reservation"`
-	Limit            int               `json:"limit"`
-	TeamID           int               `json:"teamId"`
-	TeamName         string            `json:"teamName"`
-	Metadata         map[string]string `json:"metadata"`
-	AgentAccessKeyId string            `json:"accessKey"`
-	AgentsConnected  int               `json:"agentsConnected"`
-	Enabled          bool              `json:"enabled"`
+	Id             int               `json:"id,omitempty"`
+	Reservation    int               `json:"agentReservation"`
+	Limit          int               `json:"agentLimit"`
+	TeamID         int               `json:"teamId,omitempty"`
+	AgentAccessKey string            `json:"accessKey,omitempty"`
+	Metadata       map[string]string `json:"metadata,omitempty"`
+	Enabled        bool              `json:"isEnabled"`
+	DateCreated    string            `json:"dateCreated,omitempty"`
+	DateDisabled   string            `json:"dateDisabled,omitempty"`
 }
 
 type AgentAccessKeyReadWrapper struct {
