@@ -53,6 +53,10 @@ func dataSourceSysdigAgentAccessKey() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"access_key": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -78,6 +82,7 @@ func dataSourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceD
 	_ = d.Set("enabled", agentAccessKey.Enabled)
 	_ = d.Set("date_disabled", agentAccessKey.DateDisabled)
 	_ = d.Set("date_created", agentAccessKey.DateCreated)
+	_ = d.Set("access_key", agentAccessKey.AgentAccessKey)
 
 	return nil
 }
