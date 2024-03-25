@@ -6,7 +6,7 @@ description: |-
   Retrieves information about a agent access key from the access key id.
 ---
 
-# Resource: sysdig_custom_role
+# Resource: sysdig_agent_access_key
 
 Retrieves information about an agent access key from the access key id.
 
@@ -36,24 +36,24 @@ In addition to all arguments above, the following attributes are exported:
 
 * `team_id` - (Optional) The team id of the agent access key.
 
-* `team_name` - (Optional) The team name of the agent access key.
-
 * `limit` - (Optional) The limit of the agent access key.
 
 * `reservation` - (Optional) The reservation of the agent access key.
-
-* `agents_connected` - (Optional) The number of agents connected with that agent access key.
 
 * `enabled` - (Optional) Whether the agent access key is enabled or not. It is only used in update actions, an agent access keys can be deleted only if it's disabled.
 
 ## Attributes Reference
 
-No additional attributes are exported.
+* `access_key` - The agent access key.
+
+* `date_disabled` - Date when the agent key was last disabled.
+
+* `date_created` - Date when the agent key was created.
 
 ## Import
 
 Sysdig group mapping can be imported using the ID, e.g.
 
 ```
-$ terraform import sysdig_agent_access_key.my_agent_access_key "abcke91d-2495-4192-8721-0a6bae7deec9"
+$ terraform import sysdig_agent_access_key.my_agent_access_key "631123"
 ```

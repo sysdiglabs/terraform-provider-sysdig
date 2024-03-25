@@ -6,7 +6,7 @@ description: |-
   Retrieves information about a agent access key from the access key id.
 ---
 
-# Data Source: sysdig_custom_role
+# Data Source: sysdig_agent_access_key
 
 Retrieves information about a agent access key from the access key id.
 
@@ -16,7 +16,7 @@ Retrieves information about a agent access key from the access key id.
 
 ```terraform
 data "sysdig_agent_access_key" "sysdig_agent_access_key" {
-    agent_key = "abcke91d-2495-4192-8721-0a6bae7deec9"
+    id = "631123"
 }
 ```
 
@@ -24,18 +24,20 @@ data "sysdig_agent_access_key" "sysdig_agent_access_key" {
 
 In addition to all arguments above, the following attributes are exported:
 
+* `access_key` - The agent access key
+
 * `metadata` - The metadata of agent access key.
 
 * `team_id` - The team id of the agent access key.
-
-* `team_name` - The team name of the agent access key.
 
 * `limit` - The limit of the agent access key.
 
 * `reservation` - The reservation of the agent access key.
 
-* `agents_connected` - The number of agents connected with that agent access key.
-
 * `enabled` - Whether the agent access key is enabled or not.
+
+* `date_disabled` - Date when the agent key was last disabled.
+
+* `date_created` - Date when the agent key was created.
 
 
