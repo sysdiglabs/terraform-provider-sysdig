@@ -127,13 +127,11 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	rules := getPolicyRulesFromResourceData(d)
 	newRules := []map[string]interface{}{}
 	for _, rule := range policy.Rules {
-		fmt.Printf("policy.Rules: %+v", rule)
 		newRules = append(newRules, map[string]interface{}{
 			"name":    rule.Name,
 			"enabled": rule.Enabled,
 		})
 	}
-	fmt.Printf("new rules: %+v", newRules)
 	currentRules := []map[string]interface{}{}
 	for _, rule := range rules {
 		currentRules = append(currentRules, map[string]interface{}{
@@ -141,13 +139,10 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 			"enabled": rule.Enabled,
 		})
 	}
-	fmt.Printf("current rules: %+v", currentRules)
 	areRulesSame := reflect.DeepEqual(currentRules, newRules)
 	if !areRulesSame {
-		fmt.Printf("Setting rules to new rules: %+v", newRules)
 		_ = d.Set("rules", newRules)
 	} else {
-		fmt.Printf("Setting rules to current rules: %+v", currentRules)
 		_ = d.Set("rules", currentRules)
 	}
 }
