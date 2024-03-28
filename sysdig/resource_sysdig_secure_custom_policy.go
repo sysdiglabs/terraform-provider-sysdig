@@ -132,7 +132,7 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 			"enabled": rule.Enabled,
 		})
 	}
-	currentRules := make([]map[string]interface{}, len(policy.Rules))
+	currentRules := make([]map[string]interface{}, len(rules))
 	for _, rule := range rules {
 		currentRules = append(currentRules, map[string]interface{}{
 			"name":    rule.Name,
