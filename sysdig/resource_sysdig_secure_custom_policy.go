@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"reflect"
 	"strconv"
 	"time"
 
@@ -125,17 +124,10 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	}
 
 	currentRules := getPolicyRulesFromResourceData(d)
-	newRules := make([]map[string]interface{}, len(policy.Rules))
-	for _, rule := range policy.Rules {
-		newRules = append(newRules, map[string]interface{}{
-			"name":    rule.Name,
-			"enabled": rule.Enabled,
-		})
-	}
 
-	areRulesSame := reflect.DeepEqual(currentRules, newRules)
+	areRulesSame := comparePolicyRules(policy.Rules, currentRules)
 	if !areRulesSame {
-		_ = d.Set("rules", newRules)
+		_ = d.Set("rules", policy.Rules)
 	} else {
 		_ = d.Set("rules", currentRules)
 	}
@@ -237,4 +229,24 @@ func resourceSysdigSecureCustomPolicyImportState(ctx context.Context, d *schema.
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func comparePolicyRules(newRules []*v2.PolicyRule, oldRules []*v2.PolicyRule) bool {
+	if len(newRules) != len(oldRules) {
+		return false
+	}
+	oldRuleMap := make(map[string]bool, 0)
+	for _, oldRule := range oldRules {
+		oldRuleMap[oldRule.Name] = oldRule.Enabled
+	}
+	for _, newRule := range newRules {
+		if enabled, ok := oldRuleMap[newRule.Name]; ok {
+			if newRule.Enabled != enabled {
+				return false
+			}
+		} else {
+			return false
+		}
+	}
+	return true
 }
