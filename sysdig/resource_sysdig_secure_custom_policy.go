@@ -132,6 +132,7 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 			"enabled": rule.Enabled,
 		})
 	}
+	fmt.Printf("current rules: %+v", newRules)
 	currentRules := make([]map[string]interface{}, len(rules))
 	for _, rule := range rules {
 		currentRules = append(currentRules, map[string]interface{}{
@@ -139,7 +140,7 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 			"enabled": rule.Enabled,
 		})
 	}
-
+	fmt.Printf("current rules: %+v", currentRules)
 	areRulesSame := reflect.DeepEqual(currentRules, newRules)
 	if !areRulesSame {
 		_ = d.Set("rules", newRules)
