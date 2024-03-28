@@ -125,7 +125,7 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	}
 
 	rules := getPolicyRulesFromResourceData(d)
-	newRules := make([]map[string]interface{}, len(policy.Rules))
+	newRules := []map[string]interface{}{}
 	for _, rule := range policy.Rules {
 		fmt.Printf("policy.Rules: %+v", rule)
 		newRules = append(newRules, map[string]interface{}{
@@ -134,7 +134,7 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 		})
 	}
 	fmt.Printf("new rules: %+v", newRules)
-	currentRules := make([]map[string]interface{}, len(rules))
+	currentRules := []map[string]interface{}{}
 	for _, rule := range rules {
 		currentRules = append(currentRules, map[string]interface{}{
 			"name":    rule.Name,
