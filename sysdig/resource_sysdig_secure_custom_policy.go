@@ -125,7 +125,13 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	}
 
 	currentRules := getPolicyRulesFromResourceData(d)
-	newRules := policy.Rules
+	newRules := make([]map[string]interface{}, len(policy.Rules))
+	for _, rule := range policy.Rules {
+		newRules = append(newRules, map[string]interface{}{
+			"name":    rule.Name,
+			"enabled": rule.Enabled,
+		})
+	}
 
 	areRulesSame := reflect.DeepEqual(currentRules, newRules)
 	if !areRulesSame {
