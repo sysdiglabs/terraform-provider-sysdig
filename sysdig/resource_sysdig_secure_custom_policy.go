@@ -136,6 +136,8 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	areRulesSame := reflect.DeepEqual(currentRules, newRules)
 	if !areRulesSame {
 		_ = d.Set("rules", newRules)
+	} else {
+		_ = d.Set("rules", currentRules)
 	}
 }
 
