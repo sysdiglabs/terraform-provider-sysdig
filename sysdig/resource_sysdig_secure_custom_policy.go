@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -123,14 +124,46 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 		_ = d.Set("type", "falco")
 	}
 
-	rules := []map[string]interface{}{}
+	rules := getPolicyRulesFromResourceData(d)
+	newRules := []map[string]interface{}{}
 	for _, rule := range policy.Rules {
-		rules = append(rules, map[string]interface{}{
+		fmt.Printf("policy.Rules: %+v", rule)
+		newRules = append(newRules, map[string]interface{}{
 			"name":    rule.Name,
 			"enabled": rule.Enabled,
 		})
 	}
-	_ = d.Set("rules", rules)
+	fmt.Printf("new rules: %+v", newRules)
+	currentRules := []map[string]interface{}{}
+	for _, rule := range rules {
+		currentRules = append(currentRules, map[string]interface{}{
+			"name":    rule.Name,
+			"enabled": rule.Enabled,
+		})
+	}
+	fmt.Printf("current rules: %+v", currentRules)
+	areRulesSame := reflect.DeepEqual(currentRules, newRules)
+	if !areRulesSame {
+		fmt.Printf("Setting rules to new rules: %+v", newRules)
+		_ = d.Set("rules", newRules)
+	} else {
+		fmt.Printf("Setting rules to current rules: %+v", currentRules)
+		_ = d.Set("rules", currentRules)
+	}
+}
+
+func getPolicyRulesFromResourceData(d *schema.ResourceData) []*v2.PolicyRule {
+	rules := d.Get("rules").([]interface{})
+	policyRules := make([]*v2.PolicyRule, len(rules))
+
+	for i, rule := range rules {
+		policyRules[i] = &v2.PolicyRule{
+			Name:    rule.(map[string]interface{})["name"].(string),
+			Enabled: rule.(map[string]interface{})["enabled"].(bool),
+		}
+	}
+
+	return policyRules
 }
 
 func resourceSysdigCustomPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
