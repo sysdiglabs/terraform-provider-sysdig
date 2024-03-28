@@ -3,8 +3,9 @@ package sysdig
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
-	"sort"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -101,21 +102,12 @@ func customPolicyFromResourceData(d *schema.ResourceData) v2.Policy {
 	policy.Rules = []*v2.PolicyRule{}
 
 	rules := d.Get("rules").([]interface{})
-	ruleSlice := make([]map[string]interface{}, len(rules))
-	for i, r := range rules {
-		ruleSlice[i] = r.(map[string]interface{})
-	}
-
-	// Sort rules alphabetically by name
-	sort.Slice(ruleSlice, func(i, j int) bool {
-		return ruleSlice[i]["name"].(string) < ruleSlice[j]["name"].(string)
-	})
-
-	for _, rule := range ruleSlice {
-		policy.Rules = append(policy.Rules, &v2.PolicyRule{
-			Name:    rule["name"].(string),
-			Enabled: rule["enabled"].(bool),
-		})
+	for index := range rules {
+		rule := &v2.PolicyRule{
+			Name:    d.Get(fmt.Sprintf("rules.%d.name", index)).(string),
+			Enabled: d.Get(fmt.Sprintf("rules.%d.enabled", index)).(bool),
+		}
+		policy.Rules = append(policy.Rules, rule)
 	}
 
 	return *policy
@@ -132,20 +124,27 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 		_ = d.Set("type", "falco")
 	}
 
-	rules := make([]map[string]interface{}, len(policy.Rules))
-	for i, rule := range policy.Rules {
-		rules[i] = map[string]interface{}{
-			"name":    rule.Name,
-			"enabled": rule.Enabled,
+	currentRules := getPolicyRulesFromResourceData(d)
+	newRules := policy.Rules
+
+	areRulesSame := reflect.DeepEqual(currentRules, newRules)
+	if !areRulesSame {
+		_ = d.Set("rules", newRules)
+	}
+}
+
+func getPolicyRulesFromResourceData(d *schema.ResourceData) []*v2.PolicyRule {
+	rules := d.Get("rules").([]interface{})
+	policyRules := make([]*v2.PolicyRule, len(rules))
+
+	for i, rule := range rules {
+		policyRules[i] = &v2.PolicyRule{
+			Name:    rule.(map[string]interface{})["name"].(string),
+			Enabled: rule.(map[string]interface{})["enabled"].(bool),
 		}
 	}
 
-	// Sort rules alphabetically by name
-	sort.Slice(rules, func(i, j int) bool {
-		return rules[i]["name"].(string) < rules[j]["name"].(string)
-	})
-
-	_ = d.Set("rules", rules)
+	return policyRules
 }
 
 func resourceSysdigCustomPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

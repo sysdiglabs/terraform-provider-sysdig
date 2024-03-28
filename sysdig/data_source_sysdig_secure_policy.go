@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -155,10 +154,6 @@ func policyDataSourceToResourceData(policy v2.Policy, d *schema.ResourceData) {
 	}
 
 	_ = d.Set("actions", actions)
-
-	sort.SliceStable(policy.Rules, func(i, j int) bool {
-		return policy.Rules[i].Name < policy.Rules[j].Name
-	})
 
 	rules := []map[string]interface{}{}
 
