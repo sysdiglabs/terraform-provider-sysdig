@@ -139,6 +139,8 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 			"enabled": rule.Enabled,
 		})
 	}
+	fmt.Printf("Current rules: %+v", currentRules)
+	fmt.Printf("New rules: %+v", newRules)
 	areRulesSame := reflect.DeepEqual(currentRules, newRules)
 	if !areRulesSame {
 		_ = d.Set("rules", newRules)
