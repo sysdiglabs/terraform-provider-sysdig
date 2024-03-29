@@ -33,6 +33,14 @@ func TestAccCustomPolicy(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
+				Config: customPolicyWithName(rText()),
+			},
+			{
+				ResourceName:      "sysdig_secure_custom_policy.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: customPolicyWithoutActions(rText()),
 			},
 			{
@@ -76,7 +84,46 @@ resource "sysdig_secure_custom_policy" "sample" {
   runbook = "https://sysdig.com"
 
   rules {
+    name = "sysdig_secure_rule_falco.termimal_shell_in_container"
+    enabled = true
+  }
+  rules {
     name = sysdig_secure_rule_falco.terminal_shell.name
+    enabled = true
+  }
+
+  actions {
+    container = "stop"
+    capture {
+      seconds_before_event = 5
+      seconds_after_event = 10
+      name = "testcapture"
+    }
+  }
+
+  notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
+}
+`, secureNotificationChannelEmailWithName(name), ruleFalcoTerminalShell(name), name, name)
+}
+
+func customPolicyWithRulesOrderChange(name string) string {
+	return fmt.Sprintf(`
+%s
+%s
+resource "sysdig_secure_custom_policy" "sample" {
+  name = "TERRAFORM TEST 1 %s"
+  description = "TERRAFORM TEST %s"
+  enabled = true
+  severity = 4
+  scope = "container.id != \"\""
+  runbook = "https://sysdig.com"
+
+  rules {
+    name = sysdig_secure_rule_falco.terminal_shell.name
+    enabled = true
+  }
+  rules {
+    name = "sysdig_secure_rule_falco.termimal_shell_in_container"
     enabled = true
   }
 
