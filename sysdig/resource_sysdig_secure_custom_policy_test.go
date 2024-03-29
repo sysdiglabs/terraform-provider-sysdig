@@ -84,7 +84,7 @@ resource "sysdig_secure_custom_policy" "sample" {
   runbook = "https://sysdig.com"
 
   rules {
-    name = "sysdig_secure_rule_falco.write_below_etc.name"
+    name = "Write below etc"
     enabled = true
   }
   rules {
@@ -119,11 +119,11 @@ resource "sysdig_secure_custom_policy" "sample" {
   runbook = "https://sysdig.com"
 
   rules {
-    name = sysdig_secure_rule_falco.write_below_etc.name
+    name = sysdig_secure_rule_falco.terminal_shell.name
     enabled = true
   }
   rules {
-    name = "sysdig_secure_rule_falco.termimal_shell_in_container"
+    name = "Write below etc"
     enabled = true
   }
 
