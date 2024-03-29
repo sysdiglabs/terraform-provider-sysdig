@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"reflect"
 	"strconv"
 	"time"
 
@@ -141,7 +140,7 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	}
 	fmt.Printf("Current rules: %+v", currentRules)
 	fmt.Printf("New rules: %+v", newRules)
-	areRulesSame := reflect.DeepEqual(currentRules, newRules)
+	areRulesSame := arePolicyRulesEquivalent(currentRules, newRules)
 	if !areRulesSame {
 		_ = d.Set("rules", newRules)
 	} else {
@@ -161,6 +160,25 @@ func getPolicyRulesFromResourceData(d *schema.ResourceData) []*v2.PolicyRule {
 	}
 
 	return policyRules
+}
+
+func arePolicyRulesEquivalent(newRules []map[string]interface{}, currentRules []map[string]interface{}) bool {
+	currentRulesMap := make(map[string]bool, 0)
+	for _, rule := range currentRules {
+		ruleName := rule["name"].(string)
+		enabled := rule["enabled"].(bool)
+		currentRulesMap[ruleName] = enabled
+	}
+	for _, rule := range newRules {
+		newRuleEnabled := rule["enabled"].(bool)
+		newRulesName := rule["name"].(string)
+		if enabled, ok := currentRulesMap[newRulesName]; !ok {
+			return false
+		} else if enabled != newRuleEnabled {
+			return false
+		}
+	}
+	return true
 }
 
 func resourceSysdigCustomPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
