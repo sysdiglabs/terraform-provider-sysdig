@@ -25,7 +25,7 @@ func TestAccCustomPolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: customPolicyWithName(policy1()),
+				Config: customPolicyWithName(policy1),
 			},
 			{
 				ResourceName:      "sysdig_secure_custom_policy.sample",
@@ -33,7 +33,7 @@ func TestAccCustomPolicy(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: customPolicyWithRulesOrderChange(policy1()),
+				Config: customPolicyWithRulesOrderChange(policy1),
 			},
 			{
 				ResourceName:      "sysdig_secure_custom_policy.sample",
