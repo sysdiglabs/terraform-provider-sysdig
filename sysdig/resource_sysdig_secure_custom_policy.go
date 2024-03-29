@@ -142,6 +142,7 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	fmt.Printf("New rules: %+v", newRules)
 	areRulesSame := arePolicyRulesEquivalent(currentRules, newRules)
 	if !areRulesSame {
+		fmt.Printf("USING NEW RULES")
 		_ = d.Set("rules", newRules)
 	} else {
 		_ = d.Set("rules", currentRules)
