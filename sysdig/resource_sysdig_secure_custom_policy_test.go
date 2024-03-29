@@ -15,7 +15,7 @@ import (
 
 func TestAccCustomPolicy(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
-
+	policy1 := rText()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -25,7 +25,7 @@ func TestAccCustomPolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: customPolicyWithName(rText()),
+				Config: customPolicyWithName(policy1()),
 			},
 			{
 				ResourceName:      "sysdig_secure_custom_policy.sample",
@@ -33,7 +33,7 @@ func TestAccCustomPolicy(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: customPolicyWithName(rText()),
+				Config: customPolicyWithRulesOrderChange(policy1()),
 			},
 			{
 				ResourceName:      "sysdig_secure_custom_policy.sample",
