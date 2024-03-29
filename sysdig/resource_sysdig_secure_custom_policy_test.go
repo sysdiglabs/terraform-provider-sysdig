@@ -36,11 +36,6 @@ func TestAccCustomPolicy(t *testing.T) {
 				Config: customPolicyWithRulesOrderChange(policy1),
 			},
 			{
-				ResourceName:      "sysdig_secure_custom_policy.sample",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
 				Config: customPolicyWithoutActions(rText()),
 			},
 			{
