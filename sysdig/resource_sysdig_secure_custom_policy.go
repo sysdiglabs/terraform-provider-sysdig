@@ -164,6 +164,9 @@ func getPolicyRulesFromResourceData(d *schema.ResourceData) []*v2.PolicyRule {
 }
 
 func arePolicyRulesEquivalent(newRules []map[string]interface{}, currentRules []map[string]interface{}) bool {
+	if len(newRules) != len(currentRules) {
+		return false
+	}
 	currentRulesMap := make(map[string]bool, 0)
 	for _, rule := range currentRules {
 		ruleName := rule["name"].(string)
