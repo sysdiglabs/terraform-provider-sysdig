@@ -87,30 +87,37 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			SchemaCloudConnectorMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 			SchemaTrustedRoleMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 			SchemaEventBridgeMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 			SchemaServicePrincipalMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 			SchemaWebhookDatasourceMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 			SchemaCryptoKeyMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 			SchemaCloudLogsMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 		},
 	}
