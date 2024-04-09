@@ -387,10 +387,6 @@ func MLRuleThresholdAndSeveritySchema() *schema.Schema {
 					Type:     schema.TypeInt,
 					Required: true,
 				},
-				"severity": {
-					Type:     schema.TypeInt,
-					Optional: true,
-				},
 			},
 		},
 	}
@@ -407,10 +403,6 @@ func MLRuleThresholdAndSeverityComputedSchema() *schema.Schema {
 					Computed: true,
 				},
 				"threshold": {
-					Type:     schema.TypeInt,
-					Computed: true,
-				},
-				"severity": {
 					Type:     schema.TypeInt,
 					Computed: true,
 				},
