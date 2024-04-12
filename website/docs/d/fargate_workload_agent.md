@@ -42,7 +42,11 @@ data "sysdig_fargate_workload_agent" "instrumented_containers" {
 * `sysdig_logging` - (Optional) The instrumentation logging level: `trace`, `debug`, `info`, `warning`, `error`, `silent`.
 * `ignore_containers` - (Optional) A list of containers in this data source that should not be instrumented.
 * `bare_pdig_on_containers` - (Optional) A list of containers in this data source to be instrumented with bare pdig.
-
+* `priority` - (Optional) The priority mode for the workload agent. Can be `availability` (by default) or `security`.
+* `instrumentation_essential` - (Optional) `false` by default. If `true` the instrumentation container will be marked as essential.
+* `instrumentation_cpu` - (Optional) The number of CPU units for the instrumentation container.
+* `instrumentation_memory_limit` - (Optional) The maximum amount (in MiB) of memory for the instrumentation container.
+* `instrumentation_memory_reservation` - (Optional) The minimum amount (in MiB) of memory reserved for the instrumentation container.
 
 ## Attributes Reference
 

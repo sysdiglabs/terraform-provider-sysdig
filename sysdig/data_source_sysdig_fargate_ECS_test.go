@@ -49,6 +49,7 @@ func getKiltRecipe(t *testing.T) string {
 		CollectorHost:    "collector_host",
 		CollectorPort:    "collector_port",
 		SysdigLogging:    "sysdig_logging",
+		Priority:         "priority",
 	}
 
 	jsonRecipeConfig, err := json.Marshal(&recipeConfig)
@@ -121,6 +122,12 @@ func TestNewPatchOptions(t *testing.T) {
 						},
 					},
 				},
+				"priority": {
+					Type:        schema.TypeString,
+					Description: "The priority of the agent. Can be 'security' or 'availability'",
+					Default:     "availability",
+					Optional:    true,
+				},
 			},
 		}
 	}
@@ -164,9 +171,20 @@ func TestNewPatchOptions(t *testing.T) {
 			"stream_prefix": "fried",
 			"region":        "chicken",
 		},
-		Essential: true,
+		Essential: false,
 	}
 	actualPatchOptions := newPatchOptions(data)
+
+	if !reflect.DeepEqual(expectedPatchOptions, actualPatchOptions) {
+		t.Errorf("patcConfigurations are not equal. Expected: %v, Actual: %v", expectedPatchOptions, actualPatchOptions)
+	}
+
+	err = data.Set("priority", "security")
+	if err != nil {
+		assert.FailNow(t, fmt.Sprintf("Could not set priority, got error: %v", err))
+	}
+	expectedPatchOptions.Essential = true
+	actualPatchOptions = newPatchOptions(data)
 
 	if !reflect.DeepEqual(expectedPatchOptions, actualPatchOptions) {
 		t.Errorf("patcConfigurations are not equal. Expected: %v, Actual: %v", expectedPatchOptions, actualPatchOptions)

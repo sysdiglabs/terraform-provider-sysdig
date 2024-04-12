@@ -56,7 +56,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
 	enabled = true
 	scope = "container.id != \"\""
-	disabled_rules = ["Suspicious Cron Modification"]
+	disabled_rules = ["Dump memory for credentials"]
 	runbook = "https://sysdig.com"
 
 	actions {
@@ -80,7 +80,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
 	enabled = true
 	scope = "container.id != \"\""
-	disabled_rules = ["Suspicious Cron Modification"]
+	disabled_rules = ["Dump memory for credentials"]
 	runbook = "https://sysdig.com"
 
 	actions {}
@@ -96,7 +96,7 @@ resource "sysdig_secure_managed_policy" "sample" {
 	name = "Sysdig Runtime Threat Detection"
 	enabled = true
 	scope = "container.id != \"\""
-	disabled_rules = ["Suspicious Cron Modification"]
+	disabled_rules = ["Dump memory for credentials"]
 	runbook = "https://sysdig.com"
 
 	actions {
@@ -123,7 +123,7 @@ func managedPolicyWithKillAction() string {
 	name = "Sysdig Runtime Threat Detection"
 	enabled = true
 	scope = "container.id != \"\""
-	disabled_rules = ["Suspicious Cron Modification"]
+	disabled_rules = ["Dump memory for credentials"]
 	runbook = "https://sysdig.com"
 
 	actions {

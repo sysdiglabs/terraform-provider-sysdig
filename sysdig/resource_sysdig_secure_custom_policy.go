@@ -123,14 +123,63 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 		_ = d.Set("type", "falco")
 	}
 
-	rules := []map[string]interface{}{}
+	rules := getPolicyRulesFromResourceData(d)
+	newRules := []map[string]interface{}{}
 	for _, rule := range policy.Rules {
-		rules = append(rules, map[string]interface{}{
+		newRules = append(newRules, map[string]interface{}{
 			"name":    rule.Name,
 			"enabled": rule.Enabled,
 		})
 	}
-	_ = d.Set("rules", rules)
+	currentRules := []map[string]interface{}{}
+	for _, rule := range rules {
+		currentRules = append(currentRules, map[string]interface{}{
+			"name":    rule.Name,
+			"enabled": rule.Enabled,
+		})
+	}
+
+	if !arePolicyRulesEquivalent(currentRules, newRules) {
+		_ = d.Set("rules", newRules)
+	} else {
+		_ = d.Set("rules", currentRules)
+	}
+}
+
+func getPolicyRulesFromResourceData(d *schema.ResourceData) []*v2.PolicyRule {
+	rules := d.Get("rules").([]interface{})
+	policyRules := make([]*v2.PolicyRule, len(rules))
+
+	for i, rule := range rules {
+		policyRules[i] = &v2.PolicyRule{
+			Name:    rule.(map[string]interface{})["name"].(string),
+			Enabled: rule.(map[string]interface{})["enabled"].(bool),
+		}
+	}
+
+	return policyRules
+}
+
+func arePolicyRulesEquivalent(newRules []map[string]interface{}, currentRules []map[string]interface{}) bool {
+	if len(newRules) != len(currentRules) {
+		return false
+	}
+	currentRulesMap := make(map[string]bool, 0)
+	for _, rule := range currentRules {
+		ruleName := rule["name"].(string)
+		enabled := rule["enabled"].(bool)
+		currentRulesMap[ruleName] = enabled
+	}
+	for _, rule := range newRules {
+		newRuleEnabled := rule["enabled"].(bool)
+		newRulesName := rule["name"].(string)
+		if enabled, ok := currentRulesMap[newRulesName]; !ok {
+			return false
+		} else if enabled != newRuleEnabled {
+			return false
+		}
+	}
+	return true
 }
 
 func resourceSysdigCustomPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
