@@ -27,6 +27,7 @@ const agentinoKiltDefinition = `build {
         "SYSDIG_ACCESS_KEY": ${config.sysdig_access_key}
         "SYSDIG_LOGGING": ${config.sysdig_logging}
         "SYSDIG_SIDECAR": ${config.sidecar}
+        "SYSDIG_PRIORITY": ${config.priority}
     }
     capabilities: ["SYS_PTRACE"]
     mount: [
@@ -129,14 +130,19 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 			"sidecar": {
 				Type:        schema.TypeString,
 				Description: "Sidecar mode: auto/force/(empty string)",
-				Default:     "", // we will want to change this to "auto" eventually
+				Default:     "auto",
 				Optional:    true,
 			},
-
+			"priority": {
+				Type:        schema.TypeString,
+				Description: "The priority of the agent. Can be 'security' or 'availability'",
+				Default:     "availability",
+				Optional:    true,
+			},
 			"instrumentation_essential": {
 				Type:        schema.TypeBool,
 				Description: "Should the instrumentation container be marked as essential",
-				Default:     true,
+				Default:     false,
 				Optional:    true,
 			},
 			"instrumentation_cpu": {
@@ -362,6 +368,7 @@ type KiltRecipeConfig struct {
 	CollectorPort    string `json:"collector_port"`
 	SysdigLogging    string `json:"sysdig_logging"`
 	Sidecar          string `json:"sidecar"`
+	Priority         string `json:"priority"`
 }
 
 type patchOptions struct {
@@ -404,7 +411,8 @@ func newPatchOptions(d *schema.ResourceData) *patchOptions {
 	if essential := d.Get("instrumentation_essential"); essential != nil {
 		opts.Essential = essential.(bool)
 	} else {
-		opts.Essential = true
+		priority := d.Get("priority").(string)
+		opts.Essential = priority == "security"
 	}
 
 	if cpuShares := d.Get("instrumentation_cpu"); cpuShares != nil {
@@ -429,6 +437,11 @@ func newPatchOptions(d *schema.ResourceData) *patchOptions {
 }
 
 func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	priority := d.Get("priority").(string)
+	if priority != "security" && priority != "availability" {
+		return diag.Errorf("Invalid priority: %s. must be either \"security\" or \"availability\"", priority)
+	}
+
 	recipeConfig := KiltRecipeConfig{
 		SysdigAccessKey:  d.Get("sysdig_access_key").(string),
 		AgentImage:       d.Get("workload_agent_image").(string),
@@ -438,6 +451,7 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 		CollectorPort:    d.Get("collector_port").(string),
 		SysdigLogging:    d.Get("sysdig_logging").(string),
 		Sidecar:          d.Get("sidecar").(string),
+		Priority:         priority,
 	}
 
 	jsonConf, err := json.Marshal(&recipeConfig)
