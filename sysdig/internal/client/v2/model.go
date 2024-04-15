@@ -1001,6 +1001,26 @@ type SilenceRule struct {
 	ID      int `json:"id,omitempty"`
 }
 
+type AgentAccessKey struct {
+	ID             int               `json:"id,omitempty"`
+	Reservation    int               `json:"agentReservation"`
+	Limit          int               `json:"agentLimit"`
+	TeamID         int               `json:"teamId,omitempty"`
+	AgentAccessKey string            `json:"accessKey,omitempty"`
+	Metadata       map[string]string `json:"metadata,omitempty"`
+	Enabled        bool              `json:"isEnabled"`
+	DateCreated    string            `json:"dateCreated,omitempty"`
+	DateDisabled   string            `json:"dateDisabled,omitempty"`
+}
+
+type AgentAccessKeyReadWrapper struct {
+	CustomerAccessKey []AgentAccessKey `json:"customerAccessKeys"`
+}
+
+type AgentAccessKeyWriteWrapper struct {
+	CustomerAccessKey AgentAccessKey `json:"customerAccessKey"`
+}
+
 type OrganizationSecure struct {
 	cloudauth.CloudOrganization
 }
