@@ -1002,7 +1002,7 @@ type SilenceRule struct {
 }
 
 type AgentAccessKey struct {
-	Id             int               `json:"id,omitempty"`
+	ID             int               `json:"id,omitempty"`
 	Reservation    int               `json:"agentReservation"`
 	Limit          int               `json:"agentLimit"`
 	TeamID         int               `json:"teamId,omitempty"`

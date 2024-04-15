@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -69,12 +68,11 @@ func dataSourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	agentKeyId := d.Get("id").(int)
-	fmt.Println(agentKeyId)
-	agentAccessKey, err := client.GetAgentAccessKeyById(ctx, strconv.Itoa(agentKeyId))
+	agentAccessKey, err := client.GetAgentAccessKeyByID(ctx, strconv.Itoa(agentKeyId))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(strconv.Itoa(agentAccessKey.Id))
+	d.SetId(strconv.Itoa(agentAccessKey.ID))
 	_ = d.Set("reservation", agentAccessKey.Reservation)
 	_ = d.Set("limit", agentAccessKey.Limit)
 	_ = d.Set("team_id", agentAccessKey.TeamID)

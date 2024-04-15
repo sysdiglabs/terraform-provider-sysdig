@@ -95,9 +95,7 @@ func resourceSysdigAgentAccessKeyCreate(ctx context.Context, data *schema.Resour
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	fmt.Println("setting id")
-	data.SetId(strconv.Itoa(agentAccessKey.Id))
-	fmt.Println("id set")
+	data.SetId(strconv.Itoa(agentAccessKey.ID))
 	resourceSysdigAgentAccessKeyRead(ctx, data, meta)
 
 	return nil
@@ -118,7 +116,7 @@ func resourceSysdigAgentAccessKeyUpdate(ctx context.Context, data *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	data.SetId(strconv.Itoa(agentAccessKey.Id))
+	data.SetId(strconv.Itoa(agentAccessKey.ID))
 
 	resourceSysdigAgentAccessKeyRead(ctx, data, meta)
 
@@ -159,12 +157,12 @@ func resourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceDat
 
 	agentKeyId := d.Id()
 
-	agentAccessKey, err := client.GetAgentAccessKeyById(ctx, agentKeyId)
+	agentAccessKey, err := client.GetAgentAccessKeyByID(ctx, agentKeyId)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(strconv.Itoa(agentAccessKey.Id))
+	d.SetId(strconv.Itoa(agentAccessKey.ID))
 	_ = d.Set("reservation", agentAccessKey.Reservation)
 	_ = d.Set("limit", agentAccessKey.Limit)
 	_ = d.Set("team_id", agentAccessKey.TeamID)

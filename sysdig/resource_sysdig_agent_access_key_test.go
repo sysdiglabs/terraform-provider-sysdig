@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccAgentAccessKeyResource(t *testing.T) {
-
 	limit := 1
 	reservation := 0
 	metadata := map[string]string{

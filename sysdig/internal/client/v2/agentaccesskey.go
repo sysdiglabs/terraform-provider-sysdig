@@ -15,13 +15,13 @@ const (
 
 type AgentAccessKeyInterface interface {
 	Base
-	GetAgentAccessKeyById(ctx context.Context, id string) (*AgentAccessKey, error)
+	GetAgentAccessKeyByID(ctx context.Context, id string) (*AgentAccessKey, error)
 	CreateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey) (*AgentAccessKey, error)
 	DeleteAgentAccessKey(ctx context.Context, id string) error
 	UpdateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey, id string) (*AgentAccessKey, error)
 }
 
-func (client *Client) GetAgentAccessKeyById(ctx context.Context, id string) (*AgentAccessKey, error) {
+func (client *Client) GetAgentAccessKeyByID(ctx context.Context, id string) (*AgentAccessKey, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.GetAgentAccessKeyByIdUrl(id), nil)
 	if err != nil {
 		return nil, err
