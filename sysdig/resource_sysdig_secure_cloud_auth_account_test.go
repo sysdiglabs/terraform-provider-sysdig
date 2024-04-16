@@ -91,24 +91,46 @@ resource "sysdig_secure_cloud_auth_account" "gcp_config_posture" {
   provider_type = "PROVIDER_GCP"
   enabled       = true
   feature {
-	secure_config_posture {
-	  enabled    = true
-	  components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
-	}
-	secure_identity_entitlement {
-	  enabled    = true
-	  components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
-	}
+    secure_config_posture {
+      enabled    = true
+      components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
+    }
+    secure_identity_entitlement {
+      enabled    = true
+      components = ["COMPONENT_WEBHOOK_DATASOURCE/secure-runtime"]
+		}
   }
   component {
-	type                       = "COMPONENT_SERVICE_PRINCIPAL"
-	instance                   = "secure-posture"
-	service_principal_metadata = jsonencode({
+    type                       = "COMPONENT_SERVICE_PRINCIPAL"
+    instance                   = "secure-posture"
+    service_principal_metadata = jsonencode({
       gcp = {
         key = "%s"
       }
     })
   }
+	component {
+		type                        = "COMPONENT_WEBHOOK_DATASOURCE"
+		instance                    = "secure-runtime"
+		webhook_datasource_metadata = jsonencode({
+			gcp = {
+				webhook_datasource = {
+					pubsub_topic_name      = "pubsub_topic_name_value"
+					sink_name              = "sink_name_value"
+					push_subscription_name = "push_subscription_name_value"
+					push_endpoint          = "push_endpoint_value"
+				}
+			  service_principal = {
+					workload_identity_federation = {
+						pool_id          = "pool_id_value"
+						pool_provider_id = "pool_provider_id_value"
+						project_number   = "123456789011"
+					}
+					email = "email_value"
+				}
+			}
+		})
+	}
 }
 `, accountID, getEncodedServiceAccountKey("gcp-cspm-test", accountID))
 }
