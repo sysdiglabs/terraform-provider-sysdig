@@ -187,6 +187,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_monitor_team":                                          resourceSysdigMonitorTeam(),
 			"sysdig_monitor_cloud_account":                                 resourceSysdigMonitorCloudAccount(),
 			"sysdig_secure_posture_zone":                                   resourceSysdigSecurePostureZone(),
+			"sysdig_secure_posture_policy":                                 resourceSysdigSecurePosturePolicy(),
 			"sysdig_secure_organization":                                   resourceSysdigSecureOrganization(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
