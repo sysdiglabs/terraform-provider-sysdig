@@ -943,7 +943,7 @@ type RequirementsGroup struct {
 	Requirements              []Requirement       `json:"requirements,omitempty"`
 	Description               string              `json:"description,omitempty"`
 	Authors                   string              `json:"author,omitempty"`
-	Folders                   []RequirementsGroup `json:"groups,omitempty"`
+	Folders                   []RequirementsGroup `json:"folders,omitempty"`
 	RequirementFolderParentID string              `json:"requirementFolderParentId,omitempty"`
 }
 
@@ -967,6 +967,7 @@ type PosturePolicyResponse struct {
 }
 
 type CreatePosturePolicy struct {
+	Id                 string                    `json:"id,omitempty"`
 	Name               string                    `json:"name,omitempty"`
 	Description        string                    `json:"description,omitempty"`
 	Type               string                    `json:"type,omitempty"`
@@ -979,7 +980,7 @@ type CreatePosturePolicy struct {
 }
 
 type CreateRequirementsGroup struct {
-	Id                        int64                     `json:"id,omitempty"`
+	Id                        string                    `json:"id,omitempty"`
 	Name                      string                    `json:"name,omitempty"`
 	Requirements              []CreateRequirement       `json:"requirements,omitempty"`
 	Description               string                    `json:"description,omitempty"`
@@ -989,7 +990,7 @@ type CreateRequirementsGroup struct {
 }
 
 type CreateRequirement struct {
-	Id                  int64                      `json:"id,omitempty"`
+	Id                  string                     `json:"id,omitempty"`
 	Name                string                     `json:"name,omitempty"`
 	RequirementFolderId string                     `json:"requirementFolderId,omitempty"`
 	Description         string                     `json:"description,omitempty"`
@@ -998,7 +999,7 @@ type CreateRequirement struct {
 }
 
 type CreateRequirementControl struct {
-	ID      int64  `json:"id,omitempty"`
+	ID      string `json:"id,omitempty"`
 	Name    string `json:"name,omitempty"`
 	Enabled bool   `json:"enabled,omitempty"`
 }

@@ -15,10 +15,10 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigSecurePosturePolicyCreate,
+		CreateContext: resourceSysdigSecurePosturePolicyCreateOrUpdate,
 		ReadContext:   resourceSysdigSecurePosturePolicyRead,
 		DeleteContext: resourceSysdigSecurePosturePolicyDelete,
-		UpdateContext: resourceSysdigSecurePosturePolicyUpdate,
+		UpdateContext: resourceSysdigSecurePosturePolicyCreateOrUpdate,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -70,6 +70,7 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
 						},
 						"name": {
@@ -87,6 +88,7 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"id": {
 										Type:     schema.TypeString,
+										Optional: true,
 										Computed: true,
 									},
 									"name": {
@@ -121,6 +123,11 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
 									"name": {
 										Type:     schema.TypeString,
 										Required: true,
@@ -134,6 +141,11 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 										Optional: true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
+												"id": {
+													Type:     schema.TypeString,
+													Optional: true,
+													Computed: true,
+												},
 												"name": {
 													Type:     schema.TypeString,
 													Required: true,
@@ -316,7 +328,7 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 
 }
 
-func resourceSysdigSecurePosturePolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Extract 'groups' field from Terraform configuration
 	client, err := getPosturePolicyClient(meta.(SysdigClients))
 	if err != nil {
@@ -324,8 +336,8 @@ func resourceSysdigSecurePosturePolicyCreate(ctx context.Context, d *schema.Reso
 	}
 
 	groups := extractGroupsRecursive(d.Get(SchemaGroupsKey))
-
 	req := &v2.CreatePosturePolicy{
+		Id:                 getStringValue(d, SchemaIDKey),
 		Name:               getStringValue(d, SchemaNameKey),
 		Description:        getStringValue(d, SchemaDescriptionKey),
 		MinKubeVersion:     getFloatValue(d, SchemaMinKubeVersionKey),
@@ -336,7 +348,7 @@ func resourceSysdigSecurePosturePolicyCreate(ctx context.Context, d *schema.Reso
 		RequirementFolders: groups,
 	}
 	fmt.Println("requestttttttttttttttttttttttttttttttttttttttttt: ", req)
-	new, errStatus, err := client.CreatePosturePolicy(ctx, req)
+	new, errStatus, err := client.CreateOrUpdatePosturePolicy(ctx, req)
 	if err != nil {
 		return diag.Errorf("Error creating new policy with groups. error status: %s err: %s", errStatus, err)
 	}
@@ -409,18 +421,75 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	return nil
+	// Set groups
+	if err := setGroups(d, policy.RequirementsGroup); err != nil {
+		return diag.FromErr(err)
+	}
 
+	return nil
 }
 
+func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) error {
+	var groupsData []interface{}
+	for _, group := range groups {
+		groupData := map[string]interface{}{
+			"id":          group.Id,
+			"name":        group.Name,
+			"description": group.Description,
+		}
+
+		// Recursively set nested groups and requirements
+		if len(group.Requirements) > 0 {
+			requirementsData := setRequirements(group.Requirements)
+			groupData["requirements"] = requirementsData
+		}
+		if len(group.Folders) > 0 {
+			fmt.Println("group.Folders: ", group.Folders)
+			nestedGroupsData := setGroups(d, group.Folders)
+			groupData["groups"] = nestedGroupsData
+		}
+
+		groupsData = append(groupsData, groupData)
+	}
+	fmt.Println("groupsData: ", groupsData)
+	return d.Set(SchemaGroupsKey, groupsData)
+}
+
+func setRequirements(requirements []v2.Requirement) []interface{} {
+	var requirementsData []interface{}
+	for _, req := range requirements {
+		reqData := map[string]interface{}{
+			"id":          req.Id,
+			"name":        req.Name,
+			"description": req.Description,
+		}
+
+		// Set controls for each requirement
+		if len(req.Controls) > 0 {
+			controlsData := setControls(req.Controls)
+			reqData["controls"] = controlsData
+		}
+
+		requirementsData = append(requirementsData, reqData)
+	}
+	return requirementsData
+}
+
+func setControls(controls []v2.Control) []interface{} {
+	var controlsData []interface{}
+	for _, ctrl := range controls {
+		ctrlData := map[string]interface{}{
+			"name":    ctrl.Name,
+			"enabled": ctrl.Enabled,
+		}
+		controlsData = append(controlsData, ctrlData)
+	}
+	return controlsData
+}
 func resourceSysdigSecurePosturePolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	return nil
 
-}
-
-func resourceSysdigSecurePosturePolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return nil
 }
 
 // Helper function to retrieve string value from ResourceData and handle nil case
@@ -457,6 +526,7 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 		}
 	case map[string]interface{}:
 		group := v2.CreateRequirementsGroup{
+			Id:          d["id"].(string),
 			Name:        d["name"].(string),
 			Description: d["description"].(string),
 		}
@@ -465,6 +535,7 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 			for _, reqData := range reqs {
 				reqMap := reqData.(map[string]interface{})
 				requirement := v2.CreateRequirement{
+					Id:          d["id"].(string),
 					Name:        reqMap["name"].(string),
 					Description: reqMap["description"].(string),
 				}

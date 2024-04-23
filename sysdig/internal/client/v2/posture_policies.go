@@ -6,14 +6,16 @@ import (
 	"net/http"
 )
 
-const PosturePolicyListPath = "%s/api/cspm/v1/policy/policies/list"
-const PosturePolicyCreatePath = "%s/api/cspm/v1/policy"
-const PosturePolicyGetPath = "%s/api/cspm/v1/policy/policies/view/%d"
+const (
+	PosturePolicyListPath   = "%s/api/cspm/v1/policy/policies/list"
+	PosturePolicyCreatePath = "%s/api/cspm/v1/policy"
+	PosturePolicyGetPath    = "%s/api/cspm/v1/policy/policies/view/%d"
+)
 
 type PosturePolicyInterface interface {
 	Base
 	ListPosturePolicies(ctx context.Context) ([]PosturePolicy, error)
-	CreatePosturePolicy(ctx context.Context, p *CreatePosturePolicy) (*PosturePolicy, string, error)
+	CreateOrUpdatePosturePolicy(ctx context.Context, p *CreatePosturePolicy) (*PosturePolicy, string, error)
 	GetPosturePolicy(ctx context.Context, id int64) (*PosturePolicy, error)
 }
 
@@ -32,7 +34,7 @@ func (client *Client) ListPosturePolicies(ctx context.Context) ([]PosturePolicy,
 	return resp.Data, nil
 }
 
-func (client *Client) CreatePosturePolicy(ctx context.Context, p *CreatePosturePolicy) (*PosturePolicy, string, error) {
+func (client *Client) CreateOrUpdatePosturePolicy(ctx context.Context, p *CreatePosturePolicy) (*PosturePolicy, string, error) {
 	payload, err := Marshal(p)
 	if err != nil {
 		return nil, "", err
