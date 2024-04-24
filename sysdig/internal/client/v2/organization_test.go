@@ -50,7 +50,7 @@ func TestUnmarshalOrg(t *testing.T) {
 		},
 	}
 
-	unmarshalled := &OrganizationSecure
+	unmarshalled := &OrganizationSecure{}
 	err := c.unmarshalCloudauthProto(io.NopCloser(strings.NewReader(given)), unmarshalled)
 	if err != nil {
 		t.Errorf("got error while unmarshaling, err: %v", err)
