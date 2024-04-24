@@ -155,6 +155,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_scanning_policy":                               resourceSysdigSecureScanningPolicy(),
 			"sysdig_secure_scanning_policy_assignment":                    resourceSysdigSecureScanningPolicyAssignment(),
 			"sysdig_secure_cloud_auth_account":                            resourceSysdigSecureCloudauthAccount(),
+			"sysdig_secure_cloud_auth_account_component":                  resourceSysdigSecureCloudauthAccountComponent(),
 
 			"sysdig_monitor_silence_rule":                                  resourceSysdigMonitorSilenceRule(),
 			"sysdig_monitor_alert_downtime":                                resourceSysdigMonitorAlertDowntime(),

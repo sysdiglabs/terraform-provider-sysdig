@@ -7,12 +7,13 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"os"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
@@ -70,10 +71,6 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
   feature {
 	secure_config_posture {
 	  enabled    = "true"
-	  components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
-	}
-	secure_identity_entitlement {
-	  enabled    = true
 	  components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
 	}
   }

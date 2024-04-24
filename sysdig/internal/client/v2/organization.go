@@ -1,13 +1,9 @@
 package v2
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"net/http"
-
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const (
@@ -24,7 +20,7 @@ type OrganizationSecureInterface interface {
 }
 
 func (client *Client) CreateOrganizationSecure(ctx context.Context, org *OrganizationSecure) (*OrganizationSecure, string, error) {
-	payload, err := client.marshalOrg(org)
+	payload, err := client.marshalCloudauthProto(org)
 	if err != nil {
 		return nil, "", err
 	}
@@ -40,7 +36,8 @@ func (client *Client) CreateOrganizationSecure(ctx context.Context, org *Organiz
 		return nil, errStatus, err
 	}
 
-	organization, err := client.unmarshalOrg(response.Body)
+	organization := &OrganizationSecure{}
+	err = client.unmarshalCloudauthProto(response.Body, organization)
 	if err != nil {
 		return nil, "", err
 	}
@@ -59,7 +56,8 @@ func (client *Client) GetOrganizationSecure(ctx context.Context, orgID string) (
 		return nil, errStatus, err
 	}
 
-	organization, err := client.unmarshalOrg(response.Body)
+	organization := &OrganizationSecure{}
+	err = client.unmarshalCloudauthProto(response.Body, organization)
 	if err != nil {
 		return nil, "", err
 	}
@@ -97,7 +95,8 @@ func (client *Client) UpdateOrganizationSecure(ctx context.Context, orgID string
 		return nil, errStatus, err
 	}
 
-	organization, err := client.unmarshalOrg(response.Body)
+	organization := &OrganizationSecure{}
+	err = client.unmarshalCloudauthProto(response.Body, organization)
 	if err != nil {
 		return nil, "", err
 	}
@@ -110,22 +109,4 @@ func (client *Client) organizationsURL() string {
 
 func (client *Client) organizationURL(orgId string) string {
 	return fmt.Sprintf(organizationPath, client.config.url, orgId)
-}
-
-// local function for protojson based marshal/unmarshal of organization proto
-func (client *Client) marshalOrg(data *OrganizationSecure) (io.Reader, error) {
-	payload, err := protojson.Marshal(data)
-	return bytes.NewBuffer(payload), err
-}
-
-func (client *Client) unmarshalOrg(data io.ReadCloser) (*OrganizationSecure, error) {
-	result := &OrganizationSecure{}
-
-	body, err := io.ReadAll(data)
-	if err != nil {
-		return result, err
-	}
-
-	err = protojson.UnmarshalOptions{DiscardUnknown: true}.Unmarshal(body, result)
-	return result, err
 }

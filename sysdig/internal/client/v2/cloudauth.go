@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 const (
@@ -26,7 +27,7 @@ type CloudauthAccountSecureInterface interface {
 }
 
 func (client *Client) CreateCloudauthAccountSecure(ctx context.Context, cloudAccount *CloudauthAccountSecure) (*CloudauthAccountSecure, string, error) {
-	payload, err := client.marshalProto(cloudAccount)
+	payload, err := client.marshalCloudauthProto(cloudAccount)
 	if err != nil {
 		return nil, "", err
 	}
@@ -42,7 +43,8 @@ func (client *Client) CreateCloudauthAccountSecure(ctx context.Context, cloudAcc
 		return nil, errStatus, err
 	}
 
-	cloudauthAccount, err := client.unmarshalProto(response.Body)
+	cloudauthAccount := &CloudauthAccountSecure{}
+	err = client.unmarshalCloudauthProto(response.Body, cloudauthAccount)
 	if err != nil {
 		return nil, "", err
 	}
@@ -62,7 +64,8 @@ func (client *Client) GetCloudauthAccountSecure(ctx context.Context, accountID s
 		return nil, errStatus, err
 	}
 
-	cloudauthAccount, err := client.unmarshalProto(response.Body)
+	cloudauthAccount := &CloudauthAccountSecure{}
+	err = client.unmarshalCloudauthProto(response.Body, cloudauthAccount)
 	if err != nil {
 		return nil, "", err
 	}
@@ -84,7 +87,7 @@ func (client *Client) DeleteCloudauthAccountSecure(ctx context.Context, accountI
 
 func (client *Client) UpdateCloudauthAccountSecure(ctx context.Context, accountID string, cloudAccount *CloudauthAccountSecure) (
 	*CloudauthAccountSecure, string, error) {
-	payload, err := client.marshalProto(cloudAccount)
+	payload, err := client.marshalCloudauthProto(cloudAccount)
 	if err != nil {
 		return nil, "", err
 	}
@@ -100,7 +103,8 @@ func (client *Client) UpdateCloudauthAccountSecure(ctx context.Context, accountI
 		return nil, errStatus, err
 	}
 
-	cloudauthAccount, err := client.unmarshalProto(response.Body)
+	cloudauthAccount := &CloudauthAccountSecure{}
+	err = client.unmarshalCloudauthProto(response.Body, cloudauthAccount)
 	if err != nil {
 		return nil, "", err
 	}
@@ -119,22 +123,20 @@ func (client *Client) getCloudauthAccountURL(accountID string, decrypt string) s
 	return fmt.Sprintf(getCloudauthAccountPath, client.config.url, accountID, decrypt)
 }
 
-// local function for protojson based marshal/unmarshal of cloudauthAccount proto
-func (client *Client) marshalProto(data *CloudauthAccountSecure) (io.Reader, error) {
-	payload, err := protojson.Marshal(data)
+// common func for protojson based marshal/unmarshal of any cloudauth proto
+func (client *Client) marshalCloudauthProto(message protoreflect.ProtoMessage) (io.Reader, error) {
+	payload, err := protojson.Marshal(message)
 	return bytes.NewBuffer(payload), err
 }
 
-func (client *Client) unmarshalProto(data io.ReadCloser) (*CloudauthAccountSecure, error) {
-	result := &CloudauthAccountSecure{}
-
+func (client *Client) unmarshalCloudauthProto(data io.ReadCloser, message protoreflect.ProtoMessage) error {
 	body, err := io.ReadAll(data)
 	if err != nil {
-		return result, err
+		return err
 	}
 
-	err = protojson.UnmarshalOptions{DiscardUnknown: true}.Unmarshal(body, result)
-	return result, err
+	err = protojson.UnmarshalOptions{DiscardUnknown: true}.Unmarshal(body, message)
+	return err
 }
 
 func (client *Client) ErrorAndStatusFromResponse(response *http.Response) (string, error) {
