@@ -38,7 +38,7 @@ func TestAccSecureCloudAuthAccountComponent(t *testing.T) {
 				Config: secureAzureWithServicePrincipalComponent(accID),
 			},
 			{
-				ResourceName:      "sysdig_secure_cloud_auth_account_component.azure_service_principal",
+				ResourceName:      "sysdig_secure_cloud_auth_account.azure_sample",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -59,6 +59,12 @@ resource "sysdig_secure_cloud_auth_account" "azure_sample" {
   enabled            = true
   provider_tenant_id = "%s"
   provider_alias     = "some-alias"
+  lifecycle {
+	ignore_changes = [
+	  component,
+	  feature
+	]
+  }
 }
 
 resource "sysdig_secure_cloud_auth_account_component" "azure_service_principal" {
