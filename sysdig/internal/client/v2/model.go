@@ -919,21 +919,88 @@ type PosturePolicyZoneMeta struct {
 }
 
 type PosturePolicy struct {
-	ID             string                  `json:"id,omitempty"`
-	Name           string                  `json:"name"`
-	Type           int                     `json:"type"`
-	Kind           int                     `json:"kind"`
-	Description    string                  `json:"description"`
-	Version        string                  `json:"version"`
-	Link           string                  `json:"link"`
-	Authors        string                  `json:"authors"`
-	PublishedData  string                  `json:"publishedDate"`
-	MinKubeVersion float64                 `json:"minKubeVersion"`
-	MaxKubeVersion float64                 `json:"maxKubeVersion"`
-	IsCustom       bool                    `json:"isCustom"`
-	IsActive       bool                    `json:"isActive"`
-	Platform       string                  `json:"platform"`
-	Zones          []PosturePolicyZoneMeta `json:"zones"`
+	ID                string                  `json:"id,omitempty"`
+	Name              string                  `json:"name,omitempty"`
+	Type              int                     `json:"type,omitempty"`
+	Kind              int                     `json:"kind,omitempty"`
+	Description       string                  `json:"description,omitempty"`
+	Version           string                  `json:"version,omitempty"`
+	Link              string                  `json:"link,omitempty"`
+	Authors           string                  `json:"authors,omitempty"`
+	PublishedData     string                  `json:"publishedDate,omitempty"`
+	RequirementsGroup []RequirementsGroup     `json:"requirementFolders,omitempty"`
+	MinKubeVersion    float64                 `json:"minKubeVersion,omitempty"`
+	MaxKubeVersion    float64                 `json:"maxKubeVersion,omitempty"`
+	IsCustom          bool                    `json:"isCustom,omitempty"`
+	IsActive          bool                    `json:"isActive,omitempty"`
+	Platform          string                  `json:"platform,omitempty"`
+	Zones             []PosturePolicyZoneMeta `json:"zones,omitempty"`
+}
+
+type RequirementsGroup struct {
+	Id                        string              `json:"id,omitempty"`
+	Name                      string              `json:"name,omitempty"`
+	Requirements              []Requirement       `json:"requirements,omitempty"`
+	Description               string              `json:"description,omitempty"`
+	Authors                   string              `json:"author,omitempty"`
+	Folders                   []RequirementsGroup `json:"folders,omitempty"`
+	RequirementFolderParentID string              `json:"requirementFolderParentId,omitempty"`
+}
+
+type Requirement struct {
+	Id                  string    `json:"id,omitempty"`
+	Name                string    `json:"name,omitempty"`
+	RequirementFolderId string    `json:"requirementFolderId,omitempty"`
+	Description         string    `json:"description,omitempty"`
+	Controls            []Control `json:"controls,omitempty"`
+	Authors             string    `json:"authors,omitempty"`
+}
+
+type Control struct {
+	ID      string `json:"id,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Enabled bool   `json:"enabled,omitempty"`
+}
+
+type CreatePosturePolicy struct {
+	Id                 string                    `json:"id,omitempty"`
+	Name               string                    `json:"name,omitempty"`
+	Description        string                    `json:"description,omitempty"`
+	Type               string                    `json:"type,omitempty"`
+	Link               string                    `json:"link,omitempty"`
+	RequirementFolders []CreateRequirementsGroup `json:"groups,omitempty"`
+	MinKubeVersion     float64                   `json:"minKubeVersion,omitempty"`
+	MaxKubeVersion     float64                   `json:"maxKubeVersion,omitempty"`
+	IsActive           bool                      `json:"isActive,omitempty"`
+	Platform           string                    `json:"platform,omitempty"`
+}
+
+type CreateRequirementsGroup struct {
+	Id                        string                    `json:"id,omitempty"`
+	Name                      string                    `json:"name,omitempty"`
+	Requirements              []CreateRequirement       `json:"requirements,omitempty"`
+	Description               string                    `json:"description,omitempty"`
+	Authors                   string                    `json:"author,omitempty"`
+	Folders                   []CreateRequirementsGroup `json:"groups,omitempty"`
+	RequirementFolderParentID string                    `json:"requirementFolderParentId,omitempty"`
+}
+
+type CreateRequirement struct {
+	Id                  string                     `json:"id,omitempty"`
+	Name                string                     `json:"name,omitempty"`
+	RequirementFolderId string                     `json:"requirementFolderId,omitempty"`
+	Description         string                     `json:"description,omitempty"`
+	Controls            []CreateRequirementControl `json:"controls,omitempty"`
+	Authors             string                     `json:"authors,omitempty"`
+}
+
+type CreateRequirementControl struct {
+	ID      string `json:"id,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Enabled bool   `json:"enabled,omitempty"`
+}
+type PosturePolicyResponse struct {
+	Data PosturePolicy `json:"data"`
 }
 
 type PostureZonePolicyListResponse struct {
