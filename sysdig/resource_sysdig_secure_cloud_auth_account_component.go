@@ -35,56 +35,23 @@ func resourceSysdigSecureCloudauthAccountComponent() *schema.Resource {
 			Read:   schema.DefaultTimeout(timeout),
 			Delete: schema.DefaultTimeout(timeout),
 		},
-		Schema: map[string]*schema.Schema{
-			SchemaAccountId: {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			SchemaType: {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			SchemaInstance: {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			SchemaCloudConnectorMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaTrustedRoleMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaEventBridgeMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaServicePrincipalMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaWebhookDatasourceMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaCryptoKeyMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaCloudLogsMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
+		Schema: getAccountComponentSchema(),
+	}
+}
+
+func getAccountComponentSchema() map[string]*schema.Schema {
+	// for AccountComponent resource, account_id is needed additionally
+	componentSchema := map[string]*schema.Schema{
+		SchemaAccountId: {
+			Type:     schema.TypeString,
+			Required: true,
 		},
 	}
+
+	for field, schema := range accountComponents.Schema {
+		componentSchema[field] = schema
+	}
+	return componentSchema
 }
 
 func getSecureCloudauthAccountComponentClient(client SysdigClients) (v2.CloudauthAccountComponentSecureInterface, error) {

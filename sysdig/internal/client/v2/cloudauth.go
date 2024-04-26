@@ -9,7 +9,7 @@ import (
 	"net/http"
 
 	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -124,12 +124,12 @@ func (client *Client) getCloudauthAccountURL(accountID string, decrypt string) s
 }
 
 // common func for protojson based marshal/unmarshal of any cloudauth proto
-func (client *Client) marshalCloudauthProto(message protoreflect.ProtoMessage) (io.Reader, error) {
+func (client *Client) marshalCloudauthProto(message proto.Message) (io.Reader, error) {
 	payload, err := protojson.Marshal(message)
 	return bytes.NewBuffer(payload), err
 }
 
-func (client *Client) unmarshalCloudauthProto(data io.ReadCloser, message protoreflect.ProtoMessage) error {
+func (client *Client) unmarshalCloudauthProto(data io.ReadCloser, message proto.Message) error {
 	body, err := io.ReadAll(data)
 	if err != nil {
 		return err

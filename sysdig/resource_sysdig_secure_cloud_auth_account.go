@@ -19,6 +19,59 @@ import (
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
 
+/*
+declare common schemas used across resources here
+*/
+var (
+	accountComponents = &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			SchemaType: {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			SchemaInstance: {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			SchemaCloudConnectorMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaTrustedRoleMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaEventBridgeMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaServicePrincipalMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaWebhookDatasourceMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaCryptoKeyMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaCloudLogsMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+		},
+	}
+)
+
 func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 	timeout := 5 * time.Minute
 
@@ -68,54 +121,6 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     accountFeature,
-			},
-		},
-	}
-
-	accountComponents := &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			SchemaType: {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			SchemaInstance: {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			SchemaCloudConnectorMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaTrustedRoleMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaEventBridgeMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaServicePrincipalMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaWebhookDatasourceMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaCryptoKeyMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaCloudLogsMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
 			},
 		},
 	}
