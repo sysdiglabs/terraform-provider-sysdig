@@ -63,4 +63,5 @@ const (
 	SchemaOrganizationalUnitIds     = "organizational_unit_ids"
 	SchemaCloudProviderTenantId     = "provider_tenant_id"
 	SchemaCloudProviderAlias        = "provider_alias"
+	SchemaAccountId                 = "account_id"
 )
