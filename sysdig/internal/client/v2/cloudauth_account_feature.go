@@ -25,7 +25,7 @@ func (client *Client) CreateCloudauthAccountFeatureSecure(ctx context.Context, a
 		return nil, "", err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.cloudauthAccountFeatureURL(accountID, string(cloudAccountFeature.AccountFeature.Type)), payload)
+	response, err := client.requester.Request(ctx, http.MethodPut, client.cloudauthAccountFeatureURL(accountID, string(cloudAccountFeature.AccountFeature.Type)), payload)
 	if err != nil {
 		return nil, "", err
 	}
