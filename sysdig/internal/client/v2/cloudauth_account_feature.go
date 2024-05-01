@@ -12,20 +12,20 @@ const (
 
 type CloudauthAccountFeatureSecureInterface interface {
 	Base
-	CreateCloudauthAccountFeatureSecure(ctx context.Context, accountID string, cloudAccountFeature *CloudauthAccountFeatureSecure) (*CloudauthAccountFeatureSecure, string, error)
+	CreateOrUpdateCloudauthAccountFeatureSecure(ctx context.Context, accountID, featureType string, cloudAccountFeature *CloudauthAccountFeatureSecure) (*CloudauthAccountFeatureSecure, string, error)
 	GetCloudauthAccountFeatureSecure(ctx context.Context, accountID, featureType string) (*CloudauthAccountFeatureSecure, string, error)
 	DeleteCloudauthAccountFeatureSecure(ctx context.Context, accountID, featureType string) (string, error)
-	UpdateCloudauthAccountFeatureSecure(ctx context.Context, accountID, featureType string, cloudAccountFeature *CloudauthAccountFeatureSecure) (*CloudauthAccountFeatureSecure, string, error)
 }
 
-// create method acts as a PUT call to backend
-func (client *Client) CreateCloudauthAccountFeatureSecure(ctx context.Context, accountID string, cloudAccountFeature *CloudauthAccountFeatureSecure) (*CloudauthAccountFeatureSecure, string, error) {
+// both create and update makes a PUT call to backend
+func (client *Client) CreateOrUpdateCloudauthAccountFeatureSecure(ctx context.Context, accountID, featureType string, cloudAccountFeature *CloudauthAccountFeatureSecure) (
+	*CloudauthAccountFeatureSecure, string, error) {
 	payload, err := client.marshalCloudauthProto(cloudAccountFeature)
 	if err != nil {
 		return nil, "", err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.cloudauthAccountFeatureURL(accountID, cloudAccountFeature.AccountFeature.Type.String()), payload)
+	response, err := client.requester.Request(ctx, http.MethodPut, client.cloudauthAccountFeatureURL(accountID, featureType), payload)
 	if err != nil {
 		return nil, "", err
 	}
@@ -75,32 +75,6 @@ func (client *Client) DeleteCloudauthAccountFeatureSecure(ctx context.Context, a
 		return client.ErrorAndStatusFromResponse(response)
 	}
 	return "", nil
-}
-
-func (client *Client) UpdateCloudauthAccountFeatureSecure(ctx context.Context, accountID, featureType string, cloudAccountFeature *CloudauthAccountFeatureSecure) (
-	*CloudauthAccountFeatureSecure, string, error) {
-	payload, err := client.marshalCloudauthProto(cloudAccountFeature)
-	if err != nil {
-		return nil, "", err
-	}
-
-	response, err := client.requester.Request(ctx, http.MethodPut, client.cloudauthAccountFeatureURL(accountID, featureType), payload)
-	if err != nil {
-		return nil, "", err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
-		return nil, errStatus, err
-	}
-
-	cloudauthAccountFeature := &CloudauthAccountFeatureSecure{}
-	err = client.unmarshalCloudauthProto(response.Body, cloudauthAccountFeature)
-	if err != nil {
-		return nil, "", err
-	}
-	return cloudauthAccountFeature, "", nil
 }
 
 func (client *Client) cloudauthAccountFeatureURL(accountID string, featureType string) string {

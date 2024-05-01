@@ -77,7 +77,8 @@ func resourceSysdigSecureCloudauthAccountFeatureCreate(ctx context.Context, data
 	}
 
 	accountId := data.Get(SchemaAccountId).(string)
-	cloudauthAccountFeature, errStatus, err := client.CreateCloudauthAccountFeatureSecure(ctx, accountId, cloudauthAccountFeatureFromResourceData(data))
+	cloudauthAccountFeature, errStatus, err := client.CreateOrUpdateCloudauthAccountFeatureSecure(
+		ctx, accountId, data.Get(SchemaType).(string), cloudauthAccountFeatureFromResourceData(data))
 	if err != nil {
 		return diag.Errorf("Error creating resource: %s %s", errStatus, err)
 	}
@@ -140,7 +141,7 @@ func resourceSysdigSecureCloudauthAccountFeatureUpdate(ctx context.Context, data
 		return diag.Errorf("Error updating resource: %s", err)
 	}
 
-	_, errStatus, err = client.UpdateCloudauthAccountFeatureSecure(
+	_, errStatus, err = client.CreateOrUpdateCloudauthAccountFeatureSecure(
 		ctx, accountId, data.Get(SchemaType).(string), newCloudAccountFeature)
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
