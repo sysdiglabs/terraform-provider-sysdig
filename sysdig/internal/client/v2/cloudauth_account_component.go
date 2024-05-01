@@ -9,7 +9,6 @@ import (
 const (
 	cloudauthAccountComponentsPath = "%s/api/cloudauth/v1/accounts/%s/components"       // POST
 	cloudauthAccountComponentPath  = "%s/api/cloudauth/v1/accounts/%s/components/%s/%s" // GET, PUT, DEL
-	// getCloudauthAccountPath        = "%s/api/cloudauth/v1/accounts/%s?decrypt=%s" // does GET require decryption?
 )
 
 type CloudauthAccountComponentSecureInterface interface {

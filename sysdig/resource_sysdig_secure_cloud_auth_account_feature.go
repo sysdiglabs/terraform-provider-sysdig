@@ -2,10 +2,13 @@ package sysdig
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"strings"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
+	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -32,33 +35,34 @@ func resourceSysdigSecureCloudauthAccountFeature() *schema.Resource {
 }
 
 func getAccountFeatureSchema() map[string]*schema.Schema {
-	// for AccountFeature resource, account_id & featureType are needed additionally
+	// though the schema fields are already defined in cloud_auth_account resource, for AccountFeature
+	// calls they are required fields. Also, account_id & flags are needed additionally.
 	featureSchema := map[string]*schema.Schema{
 		SchemaAccountId: {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		SchemaFeatureType: {
+		SchemaType: {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		SchemaFeatureEnabled: {
+		SchemaEnabled: {
 			Type:     schema.TypeBool,
 			Required: true,
+		},
+		SchemaComponents: {
+			Type:     schema.TypeList,
+			Required: true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
 		},
 		SchemaFeatureFlags: {
 			Type:     schema.TypeMap,
 			Optional: true,
 		},
-		SchemaFeatureComponents: {
-			Type:     schema.TypeMap,
-			Required: true,
-		},
 	}
 
-	for field, schema := range accountFeature.Schema {
-		featureSchema[field] = schema
-	}
 	return featureSchema
 }
 
@@ -128,7 +132,7 @@ func resourceSysdigSecureCloudauthAccountFeatureUpdate(ctx context.Context, data
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
 
-	newCloudAccountFeature := cloudauthAccountFeaturetFromResourceData(data)
+	newCloudAccountFeature := cloudauthAccountFeatureFromResourceData(data)
 
 	// validate and reject non-updatable resource schema fields upfront
 	err = validateCloudauthAccountFeatureUpdate(existingCloudAccountFeature, newCloudAccountFeature)
@@ -161,6 +165,82 @@ func resourceSysdigSecureCloudauthAccountFeatureDelete(ctx context.Context, data
 			return nil
 		}
 		return diag.Errorf("Error deleting resource: %s %s", errStatus, err)
+	}
+
+	return nil
+}
+
+/*
+This function validates and restricts any fields not allowed to be updated during resource updates.
+*/
+func validateCloudauthAccountFeatureUpdate(existingFeature *v2.CloudauthAccountFeatureSecure, newFeature *v2.CloudauthAccountFeatureSecure) error {
+	if existingFeature.Type != newFeature.Type {
+		errorInvalidResourceUpdate := fmt.Sprintf("Bad Request. Updating restricted fields not allowed: %s", []string{"type"})
+		return errors.New(errorInvalidResourceUpdate)
+	}
+
+	return nil
+}
+
+func getFeatureComponentsList(data *schema.ResourceData) []string {
+	componentsList := []string{}
+	componentsResourceList := data.Get(SchemaComponents).([]interface{})
+	for _, componentID := range componentsResourceList {
+		componentsList = append(componentsList, componentID.(string))
+	}
+	return componentsList
+}
+
+func getFeatureFlags(data *schema.ResourceData) map[string]string {
+	featureFlags := map[string]string{}
+	flagsResource := data.Get(SchemaFeatureFlags).(map[string]interface{})
+	for name, value := range flagsResource {
+		featureFlags[name] = value.(string)
+	}
+	return featureFlags
+}
+
+func cloudauthAccountFeatureFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountFeatureSecure {
+	cloudAccountFeature := &v2.CloudauthAccountFeatureSecure{
+		AccountFeature: cloudauth.AccountFeature{
+			Type:       cloudauth.Feature(cloudauth.Feature_value[data.Get(SchemaType).(string)]),
+			Enabled:    data.Get(SchemaEnabled).(bool),
+			Components: getFeatureComponentsList(data),
+			Flags:      getFeatureFlags(data),
+		},
+	}
+
+	return cloudAccountFeature
+}
+
+func cloudauthAccountFeatureToResourceData(data *schema.ResourceData, cloudAccountFeature *v2.CloudauthAccountFeatureSecure) error {
+
+	accountId := data.Get(SchemaAccountId).(string)
+	data.SetId(accountId + "/" + cloudAccountFeature.GetType().String())
+
+	err := data.Set(SchemaAccountId, accountId)
+	if err != nil {
+		return err
+	}
+
+	err = data.Set(SchemaType, cloudAccountFeature.GetType().String())
+	if err != nil {
+		return err
+	}
+
+	err = data.Set(SchemaEnabled, cloudAccountFeature.GetEnabled())
+	if err != nil {
+		return err
+	}
+
+	err = data.Set(SchemaComponents, cloudAccountFeature.GetComponents())
+	if err != nil {
+		return err
+	}
+
+	err = data.Set(SchemaFeatureFlags, cloudAccountFeature.GetFlags())
+	if err != nil {
+		return err
 	}
 
 	return nil

@@ -48,7 +48,7 @@ func getAccountComponentSchema() map[string]*schema.Schema {
 		},
 	}
 
-	for field, schema := range accountComponents.Schema {
+	for field, schema := range accountComponent.Schema {
 		componentSchema[field] = schema
 	}
 	return componentSchema

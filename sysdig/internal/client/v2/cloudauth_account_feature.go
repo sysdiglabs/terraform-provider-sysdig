@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	cloudauthAccountFeaturePath = "%s/api/cloudauth/v1/accounts/%s/feature/%s" // PUT
-	// getCloudauthAccountPath        = "%s/api/cloudauth/v1/accounts/%s?decrypt=%s" // does GET require decryption?
+	cloudauthAccountFeaturePath = "%s/api/cloudauth/v1/accounts/%s/feature/%s" // GET, PUT, DEL
 )
 
 type CloudauthAccountFeatureSecureInterface interface {
@@ -19,13 +18,14 @@ type CloudauthAccountFeatureSecureInterface interface {
 	UpdateCloudauthAccountFeatureSecure(ctx context.Context, accountID, featureType string, cloudAccountFeature *CloudauthAccountFeatureSecure) (*CloudauthAccountFeatureSecure, string, error)
 }
 
+// create method acts as a PUT call to backend
 func (client *Client) CreateCloudauthAccountFeatureSecure(ctx context.Context, accountID string, cloudAccountFeature *CloudauthAccountFeatureSecure) (*CloudauthAccountFeatureSecure, string, error) {
 	payload, err := client.marshalCloudauthProto(cloudAccountFeature)
 	if err != nil {
 		return nil, "", err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.cloudauthAccountFeatureURL(accountID, string(cloudAccountFeature.AccountFeature.Type)), payload)
+	response, err := client.requester.Request(ctx, http.MethodPut, client.cloudauthAccountFeatureURL(accountID, cloudAccountFeature.AccountFeature.Type.String()), payload)
 	if err != nil {
 		return nil, "", err
 	}
