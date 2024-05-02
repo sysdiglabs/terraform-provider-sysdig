@@ -30,6 +30,7 @@ const (
 	AlertV2TypeChange              AlertV2Type = "PERCENTAGE_OF_CHANGE"
 	AlertV2TypeFormBasedPrometheus AlertV2Type = "FORM_BASED_PROMETHEUS"
 	AlertV2TypeGroupOutlier        AlertV2Type = "GROUP_OUTLIERS"
+	AlertV2TypeDowntime            AlertV2Type = "DOWNTIME"
 
 	AlertV2SeverityHigh   AlertV2Severity = "high"
 	AlertV2SeverityMedium AlertV2Severity = "medium"
