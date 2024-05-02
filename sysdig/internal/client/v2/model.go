@@ -609,6 +609,10 @@ type CloudauthAccountComponentSecure struct {
 	cloudauth.AccountComponent
 }
 
+type CloudauthAccountFeatureSecure struct {
+	cloudauth.AccountFeature
+}
+
 type ScanningPolicy struct {
 	ID             string         `json:"id,omitempty"`
 	Version        string         `json:"version,omitempty"`

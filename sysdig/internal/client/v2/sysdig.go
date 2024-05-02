@@ -47,6 +47,7 @@ type SysdigSecure interface {
 	CloudauthAccountSecureInterface
 	OrganizationSecureInterface
 	CloudauthAccountComponentSecureInterface
+	CloudauthAccountFeatureSecureInterface
 }
 
 func (sr *SysdigRequest) Request(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {

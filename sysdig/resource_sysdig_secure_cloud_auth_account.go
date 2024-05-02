@@ -23,7 +23,7 @@ import (
 declare common schemas used across resources here
 */
 var (
-	accountComponents = &schema.Resource{
+	accountComponent = &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaType: {
 				Type:     schema.TypeString,
@@ -166,7 +166,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			SchemaComponent: {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Elem:     accountComponents,
+				Elem:     accountComponent,
 			},
 			SchemaOrganizationIDKey: {
 				Type:     schema.TypeString,
