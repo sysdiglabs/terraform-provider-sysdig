@@ -175,8 +175,6 @@ func buildAlertV2DowntimeStruct(d *schema.ResourceData) *v2.AlertV2Downtime {
 	metric := d.Get("metric").(string)
 	config.Metric.ID = metric
 
-	config.NoDataBehaviour = "DO_NOTHING"
-
 	var unreportedAlertNotificationsRetentionSec *int
 	if unreportedAlertNotificationsRetentionSecInterface, ok := d.GetOk("unreported_alert_notifications_retention_seconds"); ok {
 		u := unreportedAlertNotificationsRetentionSecInterface.(int)

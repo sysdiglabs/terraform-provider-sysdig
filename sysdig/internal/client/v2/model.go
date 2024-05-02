@@ -813,7 +813,6 @@ type AlertV2ConfigDowntime struct {
 	GroupAggregation string                  `json:"groupAggregation"`
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
-	NoDataBehaviour  string                  `json:"noDataBehaviour"`
 }
 
 type AlertV2Downtime struct {
