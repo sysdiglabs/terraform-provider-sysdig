@@ -154,7 +154,7 @@ func resourceSysdigMonitorAlertV2DowntimeDelete(ctx context.Context, d *schema.R
 
 func buildAlertV2DowntimeStruct(d *schema.ResourceData) *v2.AlertV2Downtime {
 	alertV2Common := buildAlertV2CommonStruct(d)
-	alertV2Common.Type = string(v2.AlertV2TypeManual)
+	alertV2Common.Type = string(v2.AlertV2TypeDowntime)
 	config := v2.AlertV2ConfigDowntime{}
 
 	buildScopedSegmentedConfigStruct(d, &config.ScopedSegmentedConfig)
