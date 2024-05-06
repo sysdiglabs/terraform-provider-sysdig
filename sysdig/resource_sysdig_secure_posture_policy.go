@@ -11,6 +11,120 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func createGroupSchema(i int) *schema.Resource {
+	if i == 5 {
+		return &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"id": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+				"name": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"description": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"requirement": {
+					Type:     schema.TypeList,
+					Optional: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"id": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+							"name": {
+								Type:     schema.TypeString,
+								Required: true,
+							},
+							"description": {
+								Type:     schema.TypeString,
+								Required: true,
+							},
+							"control": {
+								Type:     schema.TypeList,
+								Optional: true,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"name": {
+											Type:     schema.TypeString,
+											Required: true,
+										},
+										"enabled": {
+											Type:     schema.TypeBool,
+											Optional: true,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+	}
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"group": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     createGroupSchema(i + 1),
+			},
+			"requirement": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"control": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"enabled": {
+										Type:     schema.TypeBool,
+										Optional: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func resourceSysdigSecurePosturePolicy() *schema.Resource {
 	timeout := 5 * time.Minute
 
@@ -22,7 +136,6 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
 		},
@@ -63,279 +176,23 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			SchemaGroupsKey: { // level1
+			SchemaGroupKey: {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"requirements": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									"description": {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									"controls": {
-										Type:     schema.TypeList,
-										Optional: true,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"name": {
-													Type:     schema.TypeString,
-													Required: true,
-												},
-												"enabled": {
-													Type:     schema.TypeBool,
-													Optional: true,
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-						"groups": { // level2
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									"description": {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									"requirements": {
-										Type:     schema.TypeList,
-										Optional: true,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"id": {
-													Type:     schema.TypeString,
-													Optional: true,
-													Computed: true,
-												},
-												"name": {
-													Type:     schema.TypeString,
-													Required: true,
-												},
-												"description": {
-													Type:     schema.TypeString,
-													Required: true,
-												},
-												"controls": {
-													Type:     schema.TypeList,
-													Optional: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"name": {
-																Type:     schema.TypeString,
-																Required: true,
-															},
-															"enabled": {
-																Type:     schema.TypeBool,
-																Optional: true,
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-									"groups": { //level3
-										Type:     schema.TypeList,
-										Optional: true,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"name": {
-													Type:     schema.TypeString,
-													Required: true,
-												},
-												"description": {
-													Type:     schema.TypeString,
-													Required: true,
-												},
-												"requirements": {
-													Type:     schema.TypeList,
-													Optional: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"name": {
-																Type:     schema.TypeString,
-																Required: true,
-															},
-															"description": {
-																Type:     schema.TypeString,
-																Required: true,
-															},
-															"controls": {
-																Type:     schema.TypeList,
-																Optional: true,
-																Elem: &schema.Resource{
-																	Schema: map[string]*schema.Schema{
-																		"name": {
-																			Type:     schema.TypeString,
-																			Required: true,
-																		},
-																		"enabled": {
-																			Type:     schema.TypeBool,
-																			Optional: true,
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-												"groups": { // level4
-													Type:     schema.TypeList,
-													Optional: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"name": {
-																Type:     schema.TypeString,
-																Required: true,
-															},
-															"description": {
-																Type:     schema.TypeString,
-																Required: true,
-															},
-															"requirements": {
-																Type:     schema.TypeList,
-																Optional: true,
-																Elem: &schema.Resource{
-																	Schema: map[string]*schema.Schema{
-																		"name": {
-																			Type:     schema.TypeString,
-																			Required: true,
-																		},
-																		"description": {
-																			Type:     schema.TypeString,
-																			Required: true,
-																		},
-																		"controls": {
-																			Type:     schema.TypeList,
-																			Optional: true,
-																			Elem: &schema.Resource{
-																				Schema: map[string]*schema.Schema{
-																					"name": {
-																						Type:     schema.TypeString,
-																						Required: true,
-																					},
-																					"enabled": {
-																						Type:     schema.TypeBool,
-																						Optional: true,
-																					},
-																				},
-																			},
-																		},
-																	},
-																},
-															},
-															"groups": {
-																Type:     schema.TypeList,
-																Optional: true,
-																Elem: &schema.Resource{
-																	Schema: map[string]*schema.Schema{
-																		"name": {
-																			Type:     schema.TypeString,
-																			Required: true,
-																		},
-																		"description": {
-																			Type:     schema.TypeString,
-																			Required: true,
-																		},
-																		"requirements": {
-																			Type:     schema.TypeList,
-																			Optional: true,
-																			Elem: &schema.Resource{
-																				Schema: map[string]*schema.Schema{
-																					"name": {
-																						Type:     schema.TypeString,
-																						Required: true,
-																					},
-																					"description": {
-																						Type:     schema.TypeString,
-																						Required: true,
-																					},
-																					"controls": {
-																						Type:     schema.TypeList,
-																						Optional: true,
-																						Elem: &schema.Resource{
-																							Schema: map[string]*schema.Schema{
-																								"name": {
-																									Type:     schema.TypeString,
-																									Required: true,
-																								},
-																								"enabled": {
-																									Type:     schema.TypeBool,
-																									Optional: true,
-																								},
-																							},
-																						},
-																					},
-																				},
-																			},
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
+				Elem:     createGroupSchema(1),
 			},
 		},
 	}
-
 }
 
 func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// Extract 'groups' field from Terraform configuration
+	// Extract 'group' field from Terraform configuration
 	client, err := getPosturePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	groups := extractGroupsRecursive(d.Get(SchemaGroupsKey))
+	groups := extractGroupsRecursive(d.Get(SchemaGroupKey))
 	req := &v2.CreatePosturePolicy{
 		Id:                 getStringValue(d, SchemaIDKey),
 		Name:               getStringValue(d, SchemaNameKey),
@@ -441,18 +298,17 @@ func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) error {
 		// Recursively set nested groups and requirements
 		if len(group.Requirements) > 0 {
 			requirementsData := setRequirements(group.Requirements)
-			groupData["requirements"] = requirementsData
+			groupData["requirement"] = requirementsData
 		}
 		if len(group.Folders) > 0 {
-			fmt.Println("group.Folders: ", group.Folders)
 			nestedGroupsData := setGroups(d, group.Folders)
-			groupData["groups"] = nestedGroupsData
+			groupData["group"] = nestedGroupsData
 		}
 
 		groupsData = append(groupsData, groupData)
 	}
 	fmt.Println("groupsData: ", groupsData)
-	return d.Set(SchemaGroupsKey, groupsData)
+	return d.Set(SchemaGroupKey, groupsData)
 }
 
 func setRequirements(requirements []v2.Requirement) []interface{} {
@@ -467,7 +323,7 @@ func setRequirements(requirements []v2.Requirement) []interface{} {
 		// Set controls for each requirement
 		if len(req.Controls) > 0 {
 			controlsData := setControls(req.Controls)
-			reqData["controls"] = controlsData
+			reqData["control"] = controlsData
 		}
 
 		requirementsData = append(requirementsData, reqData)
@@ -531,16 +387,16 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 			Description: d["description"].(string),
 		}
 
-		if reqs, ok := d["requirements"].([]interface{}); ok {
+		if reqs, ok := d["requirement"].([]interface{}); ok {
 			for _, reqData := range reqs {
 				reqMap := reqData.(map[string]interface{})
 				requirement := v2.CreateRequirement{
-					Id:          d["id"].(string),
+					Id:          reqMap["id"].(string),
 					Name:        reqMap["name"].(string),
 					Description: reqMap["description"].(string),
 				}
 
-				if controlsData, ok := reqMap["controls"].([]interface{}); ok {
+				if controlsData, ok := reqMap["control"].([]interface{}); ok {
 					for _, controlData := range controlsData {
 						controlMap := controlData.(map[string]interface{})
 						control := v2.CreateRequirementControl{
@@ -555,7 +411,7 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 			}
 		}
 
-		if subGroups, ok := d["groups"]; ok {
+		if subGroups, ok := d["group"]; ok {
 			group.Folders = extractGroupsRecursive(subGroups)
 		}
 

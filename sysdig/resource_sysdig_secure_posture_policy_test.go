@@ -53,3 +53,4 @@ resource "sysdig_secure_posture_policy" "z1" {
 	description = "new description"
   }
 }`, name)
+}

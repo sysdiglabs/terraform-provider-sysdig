@@ -36,21 +36,20 @@ func (client *Client) CreateOrUpdatePosturePolicy(ctx context.Context, p *Create
 	if err != nil {
 		return nil, "", err
 	}
+	fmt.Println("requestttttttttttttttttttttttttttttttttttttttttttttttttttt", p)
 	response, err := client.requester.Request(ctx, http.MethodPost, client.getPosturePolicyURL(PosturePolicyCreatePath), payload)
 	if err != nil {
 		return nil, "", err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
+		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		return nil, errStatus, err
 	}
 	resp, err := Unmarshal[PosturePolicyResponse](response.Body)
 	if err != nil {
 		return nil, "", err
 	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
-		return nil, errStatus, err
-	}
-
 	return &resp.Data, "", nil
 }
 
