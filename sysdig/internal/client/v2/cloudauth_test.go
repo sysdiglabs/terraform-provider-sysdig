@@ -3,10 +3,11 @@
 package v2
 
 import (
-	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"io"
 	"strings"
 	"testing"
+
+	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
 
 func TestMarshalProto(t *testing.T) {
@@ -21,7 +22,7 @@ func TestMarshalProto(t *testing.T) {
 	}
 	expected := `{"enabled":true, "providerId":"test-project", "provider":"PROVIDER_GCP"}`
 
-	payload, err := c.marshalProto(given)
+	payload, err := c.marshalCloudauthProto(given)
 	if err != nil {
 		t.Errorf("failed to marshal payload, err: %v", err)
 	}
@@ -50,7 +51,8 @@ func TestUnmarshalProto(t *testing.T) {
 		},
 	}
 
-	unmarshalled, err := c.unmarshalProto(io.NopCloser(strings.NewReader(given)))
+	unmarshalled := &CloudauthAccountSecure{}
+	err := c.unmarshalCloudauthProto(io.NopCloser(strings.NewReader(given)), unmarshalled)
 	if err != nil {
 		t.Errorf("got error while unmarshaling, err: %v", err)
 	}

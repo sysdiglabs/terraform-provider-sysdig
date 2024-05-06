@@ -1,9 +1,7 @@
 package sysdig
 
 import (
-	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,6 +17,59 @@ import (
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
+)
+
+/*
+declare common schemas used across resources here
+*/
+var (
+	accountComponent = &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			SchemaType: {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			SchemaInstance: {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			SchemaCloudConnectorMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaTrustedRoleMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaEventBridgeMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaServicePrincipalMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaWebhookDatasourceMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaCryptoKeyMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaCloudLogsMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+		},
+	}
 )
 
 func resourceSysdigSecureCloudauthAccount() *schema.Resource {
@@ -74,54 +125,6 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 		},
 	}
 
-	accountComponents := &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			SchemaType: {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			SchemaInstance: {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			SchemaCloudConnectorMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaTrustedRoleMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaEventBridgeMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaServicePrincipalMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaWebhookDatasourceMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaCryptoKeyMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			SchemaCloudLogsMetadata: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-		},
-	}
-
 	return &schema.Resource{
 		CreateContext: resourceSysdigSecureCloudauthAccountCreate,
 		UpdateContext: resourceSysdigSecureCloudauthAccountUpdate,
@@ -163,7 +166,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			SchemaComponent: {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Elem:     accountComponents,
+				Elem:     accountComponent,
 			},
 			SchemaOrganizationIDKey: {
 				Type:     schema.TypeString,
@@ -391,30 +394,9 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 				case SchemaServicePrincipalMetadata:
 					component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{}}
 					err = protojson.Unmarshal([]byte(value.(string)), component.GetServicePrincipalMetadata())
+					// special handling for GCP service principal if it has keys which are base64 encoded
 					if data.Get(SchemaCloudProviderType).(string) == cloudauth.Provider_PROVIDER_GCP.String() {
-						spGcp := &internalServicePrincipalMetadata{}
-						err = json.Unmarshal([]byte(value.(string)), spGcp)
-						// special handling if GCP service principal key is present, decode and unmarshal it before populating all the metadata
-						var spGcpKey *cloudauth.ServicePrincipalMetadata_GCP_Key
-						if len(spGcp.Gcp.Key) > 0 {
-							var spGcpKeyBytes []byte
-							spGcpKeyBytes, err = base64.StdEncoding.DecodeString(spGcp.Gcp.Key)
-							if err != nil {
-								diag.FromErr(err)
-							}
-							err = json.Unmarshal(spGcpKeyBytes, &spGcpKey)
-						}
-						component.Metadata = &cloudauth.AccountComponent_ServicePrincipalMetadata{
-							ServicePrincipalMetadata: &cloudauth.ServicePrincipalMetadata{
-								Provider: &cloudauth.ServicePrincipalMetadata_Gcp{
-									Gcp: &cloudauth.ServicePrincipalMetadata_GCP{
-										Key:                        spGcpKey,
-										WorkloadIdentityFederation: spGcp.Gcp.WorkloadIdentityFederation,
-										Email:                      spGcp.Gcp.Email,
-									},
-								},
-							},
-						}
+						component.Metadata = constructGcpServicePrincipalMetadata(value.(string))
 					}
 				case SchemaWebhookDatasourceMetadata:
 					component.Metadata = &cloudauth.AccountComponent_WebhookDatasourceMetadata{WebhookDatasourceMetadata: &cloudauth.WebhookDatasourceMetadata{}}
@@ -453,9 +435,8 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 }
 
 /*
-	This helper function converts feature values from *cloudauth.AccountFeature to resource data schema.
+This helper function converts feature values from *cloudauth.AccountFeature to resource data schema.
 */
-
 func featureValuesToResourceData(feature *cloudauth.AccountFeature) map[string]interface{} {
 	valuesMap := make(map[string]interface{})
 
@@ -521,33 +502,9 @@ func componentsToResourceData(components []*cloudauth.AccountComponent) []map[st
 		case cloudauth.Component_COMPONENT_EVENT_BRIDGE:
 			resourceData[SchemaEventBridgeMetadata] = getComponentMetadataString(component.GetEventBridgeMetadata())
 		case cloudauth.Component_COMPONENT_SERVICE_PRINCIPAL:
-			// XXX: handle GCP specially because keys are base64 encoded
+			// special handling for GCP service principal if it has keys which are to be base64 encoded
 			if component.GetServicePrincipalMetadata().GetGcp() != nil {
-				var gcpKeyBytes []byte
-				if component.GetServicePrincipalMetadata().GetGcp().GetKey() != nil {
-					var err error
-					gcpKeyBytes, err = protojson.MarshalOptions{UseProtoNames: true}.Marshal(component.GetServicePrincipalMetadata().GetGcp().GetKey())
-					if err != nil {
-						diag.FromErr(err)
-					}
-					var gcpKeyBytesBuffer bytes.Buffer
-					err = json.Indent(&gcpKeyBytesBuffer, gcpKeyBytes, "", "  ")
-					if err != nil {
-						diag.FromErr(err)
-					}
-					gcpKeyBytes = append(gcpKeyBytesBuffer.Bytes(), '\n')
-				}
-				spGcpBytes, err := json.Marshal(&internalServicePrincipalMetadata{
-					Gcp: &internalServicePrincipalMetadata_GCP{
-						Key:                        base64.StdEncoding.EncodeToString(gcpKeyBytes),
-						WorkloadIdentityFederation: component.GetServicePrincipalMetadata().GetGcp().GetWorkloadIdentityFederation(),
-						Email:                      component.GetServicePrincipalMetadata().GetGcp().GetEmail(),
-					},
-				})
-				if err != nil {
-					diag.FromErr(err)
-				}
-				resourceData[SchemaServicePrincipalMetadata] = string(spGcpBytes)
+				resourceData[SchemaServicePrincipalMetadata] = getGcpServicePrincipalMetadata(component.GetServicePrincipalMetadata())
 			} else {
 				resourceData[SchemaServicePrincipalMetadata] = getComponentMetadataString(component.GetServicePrincipalMetadata())
 			}
@@ -562,19 +519,6 @@ func componentsToResourceData(components []*cloudauth.AccountComponent) []map[st
 	}
 
 	return resourceList
-}
-
-// internal type redefintion for GCP service principals.
-// This exists because in terraform, the key is originally provided in the form of a base64 encoded json string
-
-// note; caution with order of fields, they have to go in alphabetical ASC so that the json marshalled on the tf read phase produces no drift https://github.com/golang/go/issues/27179
-type internalServicePrincipalMetadata_GCP struct {
-	Email                      string                                                             `json:"email,omitempty"`
-	Key                        string                                                             `json:"key,omitempty"` // base64 encoded
-	WorkloadIdentityFederation *cloudauth.ServicePrincipalMetadata_GCP_WorkloadIdentityFederation `json:"workload_identity_federation,omitempty"`
-}
-type internalServicePrincipalMetadata struct {
-	Gcp *internalServicePrincipalMetadata_GCP `json:"gcp,omitempty"`
 }
 
 func getComponentMetadataString(message protoreflect.ProtoMessage) string {
@@ -622,7 +566,6 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		return err
 	}
 
-	// dataComponentsOrder := getResourceComponentsOrder(data.Get(SchemaComponent))
 	err = data.Set(SchemaComponent, componentsToResourceData(cloudAccount.GetComponents()))
 	if err != nil {
 		return err

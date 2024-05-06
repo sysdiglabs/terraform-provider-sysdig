@@ -605,6 +605,14 @@ type CloudauthAccountSecure struct {
 	cloudauth.CloudAccount
 }
 
+type CloudauthAccountComponentSecure struct {
+	cloudauth.AccountComponent
+}
+
+type CloudauthAccountFeatureSecure struct {
+	cloudauth.AccountFeature
+}
+
 type ScanningPolicy struct {
 	ID             string         `json:"id,omitempty"`
 	Version        string         `json:"version,omitempty"`
@@ -809,7 +817,6 @@ type AlertV2ConfigDowntime struct {
 	GroupAggregation string                  `json:"groupAggregation"`
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
-	NoDataBehaviour  string                  `json:"noDataBehaviour"`
 }
 
 type AlertV2Downtime struct {
