@@ -58,14 +58,13 @@ func TestUnmarshal(t *testing.T) {
 
 func TestClient_ErrorFromResponse_non_json(t *testing.T) {
 
-	given := "non json body"
+	givenPayload := "non json body"
 	expected := "401 Unauthorized"
 	c := Client{}
-	payload := given
 
 	resp := &http.Response{
 		Status: "401 Unauthorized",
-		Body:   io.NopCloser(strings.NewReader(payload)),
+		Body:   io.NopCloser(strings.NewReader(givenPayload)),
 	}
 	err := c.ErrorFromResponse(resp)
 	if err.Error() != expected {
@@ -113,7 +112,7 @@ func TestClient_ErrorFromResponse_standard_error_format(t *testing.T) {
 
 func TestClient_ErrorFromResponse_standard_error_format_2(t *testing.T) {
 
-	given := `
+	givenPayload := `
 	{
 		"timestamp" : 1715255725613,
 		"status" : 401,
@@ -123,11 +122,10 @@ func TestClient_ErrorFromResponse_standard_error_format_2(t *testing.T) {
 	`
 	expected := "Unauthorized"
 	c := Client{}
-	payload := given
 
 	resp := &http.Response{
 		Status: "401 Unauthorized",
-		Body:   io.NopCloser(strings.NewReader(payload)),
+		Body:   io.NopCloser(strings.NewReader(givenPayload)),
 	}
 	err := c.ErrorFromResponse(resp)
 	if err.Error() != expected {
