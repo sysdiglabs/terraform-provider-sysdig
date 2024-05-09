@@ -56,6 +56,7 @@ func createGroupSchema(i int) *schema.Resource {
 										"enabled": {
 											Type:     schema.TypeBool,
 											Optional: true,
+											Default:  true,
 										},
 									},
 								},
@@ -114,6 +115,7 @@ func createGroupSchema(i int) *schema.Resource {
 									"enabled": {
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  true,
 									},
 								},
 							},
@@ -171,6 +173,7 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 			SchemaIsActiveKey: {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  true,
 			},
 			SchemaPlatformKey: {
 				Type:     schema.TypeString,
@@ -204,7 +207,6 @@ func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *sch
 		Link:               getStringValue(d, SchemaLinkKey),
 		RequirementFolders: groups,
 	}
-	fmt.Println("requestttttttttttttttttttttttttttttttttttttttttt: ", req)
 	new, errStatus, err := client.CreateOrUpdatePosturePolicy(ctx, req)
 	if err != nil {
 		return diag.Errorf("Error creating new policy with groups. error status: %s err: %s", errStatus, err)
@@ -230,9 +232,6 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	fmt.Println("get policyyyyyyyyyyyyyyyyyyyyyyyy: ", policy)
-
 	err = d.Set(SchemaIDKey, policy.ID)
 	if err != nil {
 		return diag.FromErr(err)

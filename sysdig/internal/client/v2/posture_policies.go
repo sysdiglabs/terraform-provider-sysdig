@@ -36,7 +36,6 @@ func (client *Client) CreateOrUpdatePosturePolicy(ctx context.Context, p *Create
 	if err != nil {
 		return nil, "", err
 	}
-	fmt.Println("requestttttttttttttttttttttttttttttttttttttttttttttttttttt", p)
 	response, err := client.requester.Request(ctx, http.MethodPost, client.getPosturePolicyURL(PosturePolicyCreatePath), payload)
 	if err != nil {
 		return nil, "", err
