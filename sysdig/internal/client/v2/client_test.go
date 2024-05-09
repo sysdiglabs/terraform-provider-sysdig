@@ -56,7 +56,24 @@ func TestUnmarshal(t *testing.T) {
 	}
 }
 
-func TestClient_ErrorFromResponse(t *testing.T) {
+func TestClient_ErrorFromResponse_non_json(t *testing.T) {
+
+	given := "non json body"
+	expected := "401 Unauthorized"
+	c := Client{}
+	payload := given
+
+	resp := &http.Response{
+		Status: "401 Unauthorized",
+		Body:   io.NopCloser(strings.NewReader(payload)),
+	}
+	err := c.ErrorFromResponse(resp)
+	if err.Error() != expected {
+		t.Errorf("expected err %v, got %v", expected, err)
+	}
+}
+
+func TestClient_ErrorFromResponse_standard_error_format(t *testing.T) {
 	type Error struct {
 		Reason  string `json:"reason"`
 		Message string `json:"message"`
@@ -87,6 +104,69 @@ func TestClient_ErrorFromResponse(t *testing.T) {
 
 	resp := &http.Response{
 		Body: io.NopCloser(strings.NewReader(string(payload))),
+	}
+	err = c.ErrorFromResponse(resp)
+	if err.Error() != expected {
+		t.Errorf("expected err %v, got %v", expected, err)
+	}
+}
+
+func TestClient_ErrorFromResponse_standard_error_format_2(t *testing.T) {
+
+	given := `
+	{
+		"timestamp" : 1715255725613,
+		"status" : 401,
+		"error" : "Unauthorized",
+		"path" : "/api/v2/alerts/46667521"
+	}
+	`
+	expected := "Unauthorized"
+	c := Client{}
+	payload := given
+
+	resp := &http.Response{
+		Status: "401 Unauthorized",
+		Body:   io.NopCloser(strings.NewReader(payload)),
+	}
+	err := c.ErrorFromResponse(resp)
+	if err.Error() != expected {
+		t.Errorf("expected err %v, got %v", expected, err)
+	}
+}
+
+func TestClient_ErrorFromResponse_json_nonStandard_error_format(t *testing.T) {
+	type Error struct {
+		Reason  string `json:"nonStandardFieldNameReason"`
+		Message string `json:"nonStandardFieldNameMessage"`
+	}
+
+	type Errors struct {
+		Errors []Error `json:"errors"`
+	}
+
+	given := Errors{
+		Errors: []Error{
+			{
+				Reason:  "error1",
+				Message: "message1",
+			},
+			{
+				Reason:  "error2",
+				Message: "message2",
+			},
+		},
+	}
+	expected := "401 Unauthorized"
+	c := Client{}
+	payload, err := json.Marshal(given)
+	if err != nil {
+		t.Errorf("failed to marshal errors, %v", err)
+	}
+
+	resp := &http.Response{
+		Status: "401 Unauthorized",
+		Body:   io.NopCloser(strings.NewReader(string(payload))),
 	}
 	err = c.ErrorFromResponse(resp)
 	if err.Error() != expected {
