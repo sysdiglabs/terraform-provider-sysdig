@@ -82,11 +82,11 @@ resource "sysdig_secure_custom_policy" "sample" {
   runbook = "https://sysdig.com"
 
   rules {
-    name = sysdig_secure_rule_falco.terminal_shell.name
+    name = "Write below etc"
     enabled = true
   }
   rules {
-    name = "Write below etc"
+    name = sysdig_secure_rule_falco.terminal_shell.name
     enabled = true
   }
 
