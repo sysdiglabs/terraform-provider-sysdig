@@ -92,8 +92,20 @@ resource "sysdig_secure_posture_policy" "example" {
 - `description` - (Required) The description of the Posture Policy Requirement.
 - `controls` -  (Optional) Controls block defines list of controls linked to requirments
 
-
 ### Controls block
 - `name` - (Required) The name of the Posture Control.
 - `enbbled` - (Optional) The 'Control is enabled' flag indicates whether the control will affect the policy evaluation or not. By default, it is set to true
 
+## Attributes Reference
+
+In addition to all arguments above, the following attributes are exported:
+
+- `author` - (Computed) The zone author.
+
+## Import
+
+Posture policy can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_secure_posture_policy.example p
+```
