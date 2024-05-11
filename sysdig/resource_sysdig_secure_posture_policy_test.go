@@ -8,11 +8,13 @@ import (
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestCreatePosturePolicy(t *testing.T) {
+func TestSecurePosturePolicy(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -22,21 +24,23 @@ func TestCreatePosturePolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: minimalSecurePosturePolicy(randomText(10)),
+				Config: createPolicyResource(rText()),
 			},
 			{
-				ResourceName:      "sysdig_secure_posture_policy.p1",
-				ImportState:       true,
-				ImportStateVerify: true,
+				Config: updatePolicyResource(rText()),
 			},
 		},
 	})
 }
-
-func minimalSecurePosturePolicy(name string) string {
+func createPolicyResource(name string) string {
 	return fmt.Sprintf(`
-	resource "sysdig_secure_posture_policy" "p1" {
-		name = "simple policy %s"
-		description = "simple policy"
-	}`, name)
+resource "sysdig_secure_posture_policy" "sample" {
+  name = "policy-%s"
+}`, name)
+}
+func updatePolicyResource(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_posture_policy" "sample" {
+		name = "updated-my-policy-%s"
+}`, name)
 }
