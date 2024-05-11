@@ -36,11 +36,13 @@ func createPolicyResource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_posture_policy" "sample" {
   name = "policy-%s"
+  description = "policy description"
 }`, name)
 }
 func updatePolicyResource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_posture_policy" "sample" {
 		name = "updated-my-policy-%s"
+		description = "updated policy description"
 }`, name)
 }
