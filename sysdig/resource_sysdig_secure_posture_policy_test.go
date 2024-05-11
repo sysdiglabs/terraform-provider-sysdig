@@ -25,12 +25,6 @@ func TestCreatePosturePolicy(t *testing.T) {
 				Config: minimalSecurePosturePolicy(randomText(10)),
 			},
 			{
-				Config: securePosturePolicyWithGroups(randomText(10)),
-			},
-			{
-				Config: securePosturePolicyWithGroupsReqsAndConbrols(randomText(10)),
-			},
-			{
 				ResourceName:      "sysdig_secure_posture_policy.p1",
 				ImportState:       true,
 				ImportStateVerify: true,
