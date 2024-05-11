@@ -41,83 +41,8 @@ func TestCreatePosturePolicy(t *testing.T) {
 
 func minimalSecurePosturePolicy(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_posture_policy" "p1" {
-  name = "%s"
-  description = "new description"
-}`, name)
-}
-
-func securePosturePolicyWithGroups(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_secure_posture_policy" "z1" {
-  name = "%s"
-  description = "new description"
-  group {
-	name = "group1"
-	description = "new description"
-  }
-}`, name)
-}
-
-func securePosturePolicyWithGroupsReqsAndConbrols(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_secure_posture_policy" "z1" {
-  name = "%s"
-  description = "new description"
-  group {
-	name = "g1"
-	description = "new group"
-	requirement {
-	  name = "r1"
-	  description = "r1"
-	  control {
-		name = "b"
-	  }
-	}
-	group {
-	  name = "g2"
-	  description = "new group"
-			requirement {
-	  name = "r2"
-	  description = "r1"
-	  control {
-		name = "b"
-	  }
-	}
-	  group {
-		name = "g3"
-		description = "new group"
-			  requirement {
-	  name = "r3"
-	  description = "r1"
-	  control {
-		name = "b"
-	  }
-	}
-		group {
-		  name = "g4"
-		  description = "new group"
-				requirement {
-	  name = "r4"
-	  description = "r1"
-	  control {
-		name = "b"
-	  }
-	}
-		  group {
-			name = "g5"
-		  description = "new group"
-				requirement {
-	  name = "r5"
-	  description = "r1"
-	  control {
-		name = "b"
-	  }
-	}
-		  }
-		}
-	  }
-	}
-  }
-}`, name)
+	resource "sysdig_secure_posture_policy" "p1" {
+		name = "simple policy %s"
+		description = "simple policy"
+	}`, name)
 }
