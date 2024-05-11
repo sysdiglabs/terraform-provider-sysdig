@@ -39,7 +39,7 @@ func TestAccSecureNotificationChannelTeamEmailDataSource(t *testing.T) {
 func secureNotificationChannelTeamEmail(name string) string {
 	return fmt.Sprintf(`
 	resource "sysdig_secure_team" "sample_data" {
-		name = "secure-sample-data"
+		name = "secure-sample-data-%s"
 		all_zones = "true"
 	}
 resource "sysdig_secure_notification_channel_team_email" "nc_team_email" {
@@ -50,5 +50,5 @@ resource "sysdig_secure_notification_channel_team_email" "nc_team_email" {
 data "sysdig_secure_notification_channel_team_email" "nc_team_email" {
 	name = sysdig_secure_notification_channel_team_email.nc_team_email.name
 }
-`, name)
+`, name, name)
 }
