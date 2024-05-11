@@ -54,7 +54,7 @@ resource "sysdig_secure_posture_policy" "example" {
 }
 ```
 
-## Arguments Reference
+## Argument Reference
 
 - `name` - (Required) The name of the Posture Policy, eg. `CIS Docker Benchmark`
 - `description` - (Required) The description of the Posture Poliy,  eg. `CIS Docker Benchmark`
