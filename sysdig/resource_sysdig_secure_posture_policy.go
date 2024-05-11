@@ -150,13 +150,13 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			SchemaTypeKey: {
-				Type:     schema.TypeInt,
-				Optional: true,
-			},
 			SchemaDescriptionKey: {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			SchemaTypeKey: {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			SchemaLinkKey: {
 				Type:     schema.TypeString,
@@ -176,6 +176,10 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 				Default:  true,
 			},
 			SchemaPlatformKey: {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			SchemaVersionKey: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -205,6 +209,7 @@ func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *sch
 		IsActive:           getBoolValue(d, SchemaIsActiveKey),
 		Platform:           getStringValue(d, SchemaPlatformKey),
 		Link:               getStringValue(d, SchemaLinkKey),
+		Version:            getStringValue(d, SchemaVersionKey),
 		RequirementFolders: groups,
 	}
 	new, errStatus, err := client.CreateOrUpdatePosturePolicy(ctx, req)
@@ -243,6 +248,11 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 	}
 
 	err = d.Set(SchemaDescriptionKey, policy.Description)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set(SchemaVersionKey, policy.Description)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -975,6 +975,7 @@ type CreatePosturePolicy struct {
 	Description        string                    `json:"description,omitempty"`
 	Type               string                    `json:"type,omitempty"`
 	Link               string                    `json:"link,omitempty"`
+	Version            string                    `json:"version,omitempty"`
 	RequirementFolders []CreateRequirementsGroup `json:"groups,omitempty"`
 	MinKubeVersion     float64                   `json:"minKubeVersion,omitempty"`
 	MaxKubeVersion     float64                   `json:"maxKubeVersion,omitempty"`
