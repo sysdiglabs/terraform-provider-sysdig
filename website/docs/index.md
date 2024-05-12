@@ -252,6 +252,8 @@ When IBM Workload Protection resources are to be created, this authentication mu
 > - `sysdig_monitor_alert_v2_group_outlier`
 > - `sysdig_monitor_dashboard`
 > - `sysdig_secure_posture_zone`
+> - `sysdig_secure_posture_policy`
+
 >
 > And data sources:
 > - `sysdig_monitor_notification_channel_pagerduty`

@@ -17,7 +17,6 @@ Creates a Sysdig Secure Posture Policy.
 ```terraform
 resource "sysdig_secure_posture_policy" "example" {
     name = "demo policy"
-    platform = "bla"
     type = "kuberenetes"
     platform = "vanilla"
     max_kube_version = 2.0
@@ -65,11 +64,11 @@ resource "sysdig_secure_posture_policy" "example" {
   - GCP - `gcp`
   - Azure - `azure`
   - Kubernetes - `kubernetes`
-  - Image - `image`
-  - Host - `host`
-  - Git - `git`
-* `min_kube_version` -  (Optional) Policy minimum Kubernetes version, eg. `1.16`
-* `max_kube_version` -  (Optional) Policy maximum Kubernetes version, eg. `1.18`
+  - Linux - `linux`
+  - Docker - `docker`
+  - OCI = `oci`
+* `min_kube_version` -  (Optional) Policy minimum Kubernetes version, eg. `1.24`
+* `max_kube_version` -  (Optional) Policy maximum Kubernetes version, eg. `1.26`
 * `is_active` -  (Optional) Policy is active flag (active means policy is published, not active means policy is draft). by default is true.
 * `platform` - (Optional) Policy platform: 
     - IKS -     `iks`,
@@ -94,7 +93,7 @@ resource "sysdig_secure_posture_policy" "example" {
 
 ### Controls block
 - `name` - (Required) The name of the Posture Control.
-- `enbbled` - (Optional) The 'Control is enabled' flag indicates whether the control will affect the policy evaluation or not. By default, it is set to true
+- `enabled` - (Optional) The 'Control is enabled' flag indicates whether the control will affect the policy evaluation or not. By default, it is set to true
 
 ## Attributes Reference
 
