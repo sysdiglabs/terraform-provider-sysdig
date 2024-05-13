@@ -32,7 +32,7 @@ resource "sysdig_secure_managed_policy" "sysdig_runtime_threat_detection" {
   scope = "container.id != \"\""
 
   // Disabling rules
-  disabled_rules = ["Suspicious Cron Modification"]
+  disabled_rules = ["Dump memory for credentials"]
 
   actions {
     container = "stop"

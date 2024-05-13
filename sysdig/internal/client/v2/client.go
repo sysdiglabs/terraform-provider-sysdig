@@ -43,6 +43,7 @@ type Common interface {
 	TeamInterface
 	NotificationChannelInterface
 	IdentityContextInterface
+	AgentAccessKeyInterface
 }
 
 type MonitorCommon interface {
@@ -74,7 +75,7 @@ func (client *Client) ErrorFromResponse(response *http.Response) error {
 		return errors.New(response.Status)
 	}
 
-	search, err := jmespath.Search("[message, errors[].[reason, message]][][] | join(', ', @)", data)
+	search, err := jmespath.Search("[message, error, errors[].[reason, message]][][] | join(', ', @)", data)
 	if err != nil {
 		return errors.New(response.Status)
 	}
@@ -83,7 +84,12 @@ func (client *Client) ErrorFromResponse(response *http.Response) error {
 		return errors.New(strings.Join(cast.ToStringSlice(searchArray), ", "))
 	}
 
-	return errors.New(cast.ToString(search))
+	searchString := cast.ToString(search)
+	if searchString != "" {
+		return errors.New(searchString)
+	}
+
+	return errors.New(response.Status)
 }
 
 func Unmarshal[T any](data io.ReadCloser) (T, error) {

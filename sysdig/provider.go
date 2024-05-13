@@ -120,6 +120,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_group_mapping_config": resourceSysdigGroupMappingConfig(),
 			"sysdig_custom_role":          resourceSysdigCustomRole(),
 			"sysdig_team_service_account": resourceSysdigTeamServiceAccount(),
+			"sysdig_agent_access_key":     resourceSysdigAgentAccessKey(),
 
 			"sysdig_secure_aws_ml_policy":                                 resourceSysdigSecureAWSMLPolicy(),
 			"sysdig_secure_custom_policy":                                 resourceSysdigSecureCustomPolicy(),
@@ -154,6 +155,8 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_scanning_policy":                               resourceSysdigSecureScanningPolicy(),
 			"sysdig_secure_scanning_policy_assignment":                    resourceSysdigSecureScanningPolicyAssignment(),
 			"sysdig_secure_cloud_auth_account":                            resourceSysdigSecureCloudauthAccount(),
+			"sysdig_secure_cloud_auth_account_component":                  resourceSysdigSecureCloudauthAccountComponent(),
+			"sysdig_secure_cloud_auth_account_feature":                    resourceSysdigSecureCloudauthAccountFeature(),
 
 			"sysdig_monitor_silence_rule":                                  resourceSysdigMonitorSilenceRule(),
 			"sysdig_monitor_alert_downtime":                                resourceSysdigMonitorAlertDowntime(),
@@ -219,11 +222,11 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_posture_policies":                              dataSourceSysdigSecurePosturePolicies(),
 			"sysdig_secure_custom_role_permissions":                       dataSourceSysdigSecureCustomRolePermissions(),
 
-			"sysdig_current_user":      dataSourceSysdigCurrentUser(),
-			"sysdig_user":              dataSourceSysdigUser(),
-			"sysdig_secure_connection": dataSourceSysdigSecureConnection(),
-			"sysdig_custom_role":       dataSourceSysdigCustomRole(),
-
+			"sysdig_current_user":                                          dataSourceSysdigCurrentUser(),
+			"sysdig_user":                                                  dataSourceSysdigUser(),
+			"sysdig_secure_connection":                                     dataSourceSysdigSecureConnection(),
+			"sysdig_custom_role":                                           dataSourceSysdigCustomRole(),
+			"sysdig_agent_access_key":                                      dataSourceSysdigAgentAccessKey(),
 			"sysdig_fargate_workload_agent":                                dataSourceSysdigFargateWorkloadAgent(),
 			"sysdig_monitor_notification_channel_pagerduty":                dataSourceSysdigMonitorNotificationChannelPagerduty(),
 			"sysdig_monitor_notification_channel_email":                    dataSourceSysdigMonitorNotificationChannelEmail(),

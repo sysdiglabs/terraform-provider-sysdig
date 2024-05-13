@@ -30,6 +30,10 @@
         "Value": "sysdig_logging"
       },
       {
+        "Name": "SYSDIG_PRIORITY",
+        "Value": "priority"
+      },
+      {
         "Name": "SYSDIG_SIDECAR",
         "Value": ""
       },
@@ -81,6 +85,10 @@
       {
         "Name": "SYSDIG_LOGGING",
         "Value": "sysdig_logging"
+      },
+      {
+        "Name": "SYSDIG_PRIORITY",
+        "Value": "priority"
       },
       {
         "Name": "SYSDIG_SIDECAR",

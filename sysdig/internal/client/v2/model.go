@@ -605,6 +605,14 @@ type CloudauthAccountSecure struct {
 	cloudauth.CloudAccount
 }
 
+type CloudauthAccountComponentSecure struct {
+	cloudauth.AccountComponent
+}
+
+type CloudauthAccountFeatureSecure struct {
+	cloudauth.AccountFeature
+}
+
 type ScanningPolicy struct {
 	ID             string         `json:"id,omitempty"`
 	Version        string         `json:"version,omitempty"`
@@ -809,7 +817,6 @@ type AlertV2ConfigDowntime struct {
 	GroupAggregation string                  `json:"groupAggregation"`
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
-	NoDataBehaviour  string                  `json:"noDataBehaviour"`
 }
 
 type AlertV2Downtime struct {
@@ -999,6 +1006,26 @@ type SilenceRule struct {
 
 	Version int `json:"version,omitempty"`
 	ID      int `json:"id,omitempty"`
+}
+
+type AgentAccessKey struct {
+	ID             int               `json:"id,omitempty"`
+	Reservation    int               `json:"agentReservation"`
+	Limit          int               `json:"agentLimit"`
+	TeamID         int               `json:"teamId,omitempty"`
+	AgentAccessKey string            `json:"accessKey,omitempty"`
+	Metadata       map[string]string `json:"metadata,omitempty"`
+	Enabled        bool              `json:"isEnabled"`
+	DateCreated    string            `json:"dateCreated,omitempty"`
+	DateDisabled   string            `json:"dateDisabled,omitempty"`
+}
+
+type AgentAccessKeyReadWrapper struct {
+	CustomerAccessKey []AgentAccessKey `json:"customerAccessKeys"`
+}
+
+type AgentAccessKeyWriteWrapper struct {
+	CustomerAccessKey AgentAccessKey `json:"customerAccessKey"`
 }
 
 type OrganizationSecure struct {
