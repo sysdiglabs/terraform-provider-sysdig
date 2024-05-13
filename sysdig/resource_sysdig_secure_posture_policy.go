@@ -352,9 +352,8 @@ func setControls(controls []v2.Control) []interface{} {
 	return controlsData
 }
 func resourceSysdigSecurePosturePolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
+	// TODO: implement deletion
 	return nil
-
 }
 
 // Helper function to retrieve string value from ResourceData and handle nil case
