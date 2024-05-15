@@ -3,7 +3,6 @@ package sysdig
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -51,7 +50,7 @@ func resourceSysdigSecureCustomPolicy() *schema.Resource {
 				ValidateDiagFunc: validateDiagFunc(validation.IntBetween(0, 7)),
 			},
 			"rules": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -100,11 +99,11 @@ func customPolicyFromResourceData(d *schema.ResourceData) v2.Policy {
 
 	policy.Rules = []*v2.PolicyRule{}
 
-	rules := d.Get("rules").([]interface{})
-	for index := range rules {
+	for _, ruleItr := range d.Get("rules").(*schema.Set).List() {
+		ruleInfo := ruleItr.(map[string]interface{})
 		rule := &v2.PolicyRule{
-			Name:    d.Get(fmt.Sprintf("rules.%d.name", index)).(string),
-			Enabled: d.Get(fmt.Sprintf("rules.%d.enabled", index)).(bool),
+			Name:    ruleInfo["name"].(string),
+			Enabled: ruleInfo["enabled"].(bool),
 		}
 		policy.Rules = append(policy.Rules, rule)
 	}
@@ -147,13 +146,14 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 }
 
 func getPolicyRulesFromResourceData(d *schema.ResourceData) []*v2.PolicyRule {
-	rules := d.Get("rules").([]interface{})
+	rules := d.Get("rules").(*schema.Set).List()
 	policyRules := make([]*v2.PolicyRule, len(rules))
 
-	for i, rule := range rules {
+	for i, ruleItr := range rules {
+		ruleInfo := ruleItr.(map[string]interface{})
 		policyRules[i] = &v2.PolicyRule{
-			Name:    rule.(map[string]interface{})["name"].(string),
-			Enabled: rule.(map[string]interface{})["enabled"].(bool),
+			Name:    ruleInfo["name"].(string),
+			Enabled: ruleInfo["enabled"].(bool),
 		}
 	}
 
