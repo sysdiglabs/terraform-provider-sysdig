@@ -57,7 +57,6 @@ resource "sysdig_secure_posture_policy" "example" {
 
 - `name` - (Required) The name of the Posture Policy, eg. `CIS Docker Benchmark`
 - `description` - (Required) The description of the Posture Poliy,  eg. `CIS Docker Benchmark`
-* `version` - (Optional) Policy version, eg. `1.0.0`
 * `link` -  (Optional) Policy link
 * `type` -  (Optional) Policy type:
   - AWS - `aws`

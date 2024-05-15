@@ -945,7 +945,7 @@ type PosturePolicy struct {
 }
 
 type RequirementsGroup struct {
-	Id                        string              `json:"id,omitempty"`
+	ID                        string              `json:"id,omitempty"`
 	Name                      string              `json:"name,omitempty"`
 	Requirements              []Requirement       `json:"requirements,omitempty"`
 	Description               string              `json:"description,omitempty"`
@@ -955,7 +955,7 @@ type RequirementsGroup struct {
 }
 
 type Requirement struct {
-	Id                  string    `json:"id,omitempty"`
+	ID                  string    `json:"id,omitempty"`
 	Name                string    `json:"name,omitempty"`
 	RequirementFolderId string    `json:"requirementFolderId,omitempty"`
 	Description         string    `json:"description,omitempty"`
@@ -970,40 +970,35 @@ type Control struct {
 }
 
 type CreatePosturePolicy struct {
-	Id                 string                    `json:"id,omitempty"`
-	Name               string                    `json:"name,omitempty"`
-	Description        string                    `json:"description,omitempty"`
-	Type               string                    `json:"type,omitempty"`
-	Link               string                    `json:"link,omitempty"`
-	Version            string                    `json:"version,omitempty"`
-	RequirementFolders []CreateRequirementsGroup `json:"groups,omitempty"`
-	MinKubeVersion     float64                   `json:"minKubeVersion,omitempty"`
-	MaxKubeVersion     float64                   `json:"maxKubeVersion,omitempty"`
-	IsActive           bool                      `json:"isActive,omitempty"`
-	Platform           string                    `json:"platform,omitempty"`
+	ID                string                    `json:"id,omitempty"`
+	Name              string                    `json:"name,omitempty"`
+	Description       string                    `json:"description,omitempty"`
+	Type              string                    `json:"type,omitempty"`
+	Link              string                    `json:"link,omitempty"`
+	Version           string                    `json:"version,omitempty"`
+	RequirementGroups []CreateRequirementsGroup `json:"groups,omitempty"`
+	MinKubeVersion    float64                   `json:"minKubeVersion,omitempty"`
+	MaxKubeVersion    float64                   `json:"maxKubeVersion,omitempty"`
+	IsActive          bool                      `json:"isActive,omitempty"`
+	Platform          string                    `json:"platform,omitempty"`
 }
 
 type CreateRequirementsGroup struct {
-	Id                        string                    `json:"id,omitempty"`
-	Name                      string                    `json:"name,omitempty"`
-	Requirements              []CreateRequirement       `json:"requirements,omitempty"`
-	Description               string                    `json:"description,omitempty"`
-	Authors                   string                    `json:"author,omitempty"`
-	Folders                   []CreateRequirementsGroup `json:"groups,omitempty"`
-	RequirementFolderParentID string                    `json:"requirementFolderParentId,omitempty"`
+	ID           string                    `json:"id,omitempty"`
+	Name         string                    `json:"name,omitempty"`
+	Requirements []CreateRequirement       `json:"requirements,omitempty"`
+	Description  string                    `json:"description,omitempty"`
+	Folders      []CreateRequirementsGroup `json:"groups,omitempty"`
 }
 
 type CreateRequirement struct {
-	Id                  string                     `json:"id,omitempty"`
-	Name                string                     `json:"name,omitempty"`
-	RequirementFolderId string                     `json:"requirementFolderId,omitempty"`
-	Description         string                     `json:"description,omitempty"`
-	Controls            []CreateRequirementControl `json:"controls,omitempty"`
-	Authors             string                     `json:"authors,omitempty"`
+	ID          string                     `json:"id,omitempty"`
+	Name        string                     `json:"name,omitempty"`
+	Description string                     `json:"description,omitempty"`
+	Controls    []CreateRequirementControl `json:"controls,omitempty"`
 }
 
 type CreateRequirementControl struct {
-	ID      string `json:"id,omitempty"`
 	Name    string `json:"name,omitempty"`
 	Enabled bool   `json:"enabled,omitempty"`
 }

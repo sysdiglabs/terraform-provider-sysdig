@@ -41,7 +41,7 @@ func (client *Client) CreateOrUpdatePosturePolicy(ctx context.Context, p *Create
 		return nil, "", err
 	}
 	defer response.Body.Close()
-	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
 		errStatus, err := client.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}

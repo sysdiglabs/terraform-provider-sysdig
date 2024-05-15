@@ -157,10 +157,12 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 			SchemaTypeKey: {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 			SchemaLinkKey: {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 			SchemaMinKubeVersionKey: {
 				Type:     schema.TypeFloat,
@@ -178,10 +180,7 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 			SchemaPlatformKey: {
 				Type:     schema.TypeString,
 				Optional: true,
-			},
-			SchemaVersionKey: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Default:  "",
 			},
 			SchemaGroupKey: {
 				Type:     schema.TypeList,
@@ -201,17 +200,17 @@ func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *sch
 
 	groups := extractGroupsRecursive(d.Get(SchemaGroupKey))
 	req := &v2.CreatePosturePolicy{
-		Id:                 getStringValue(d, SchemaIDKey),
-		Name:               getStringValue(d, SchemaNameKey),
-		Description:        getStringValue(d, SchemaDescriptionKey),
-		MinKubeVersion:     getFloatValue(d, SchemaMinKubeVersionKey),
-		MaxKubeVersion:     getFloatValue(d, SchemaMaxKubeVersionKey),
-		IsActive:           getBoolValue(d, SchemaIsActiveKey),
-		Platform:           getStringValue(d, SchemaPlatformKey),
-		Link:               getStringValue(d, SchemaLinkKey),
-		Version:            getStringValue(d, SchemaVersionKey),
-		RequirementFolders: groups,
+		ID:                getStringValue(d, SchemaIDKey),
+		Name:              getStringValue(d, SchemaNameKey),
+		Description:       getStringValue(d, SchemaDescriptionKey),
+		MinKubeVersion:    getFloatValue(d, SchemaMinKubeVersionKey),
+		MaxKubeVersion:    getFloatValue(d, SchemaMaxKubeVersionKey),
+		IsActive:          getBoolValue(d, SchemaIsActiveKey),
+		Platform:          getStringValue(d, SchemaPlatformKey),
+		Link:              getStringValue(d, SchemaLinkKey),
+		RequirementGroups: groups,
 	}
+	fmt.Println("request: ", req)
 	new, errStatus, err := client.CreateOrUpdatePosturePolicy(ctx, req)
 	if err != nil {
 		return diag.Errorf("Error creating new policy with groups. error status: %s err: %s", errStatus, err)
@@ -234,6 +233,7 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 	}
 
 	policy, err := client.GetPosturePolicy(ctx, id)
+	fmt.Println("get policy: ", policy)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -252,12 +252,9 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	err = d.Set(SchemaVersionKey, policy.Description)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	strconv.Itoa(policy.Type)
 
-	err = d.Set(SchemaTypeKey, policy.Type)
+	err = d.Set(SchemaTypeKey, strconv.Itoa(policy.Type))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -299,7 +296,7 @@ func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) error {
 	var groupsData []interface{}
 	for _, group := range groups {
 		groupData := map[string]interface{}{
-			"id":          group.Id,
+			"id":          group.ID,
 			"name":        group.Name,
 			"description": group.Description,
 		}
@@ -324,7 +321,7 @@ func setRequirements(requirements []v2.Requirement) []interface{} {
 	var requirementsData []interface{}
 	for _, req := range requirements {
 		reqData := map[string]interface{}{
-			"id":          req.Id,
+			"id":          req.ID,
 			"name":        req.Name,
 			"description": req.Description,
 		}
@@ -390,7 +387,7 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 		}
 	case map[string]interface{}:
 		group := v2.CreateRequirementsGroup{
-			Id:          d["id"].(string),
+			ID:          d["id"].(string),
 			Name:        d["name"].(string),
 			Description: d["description"].(string),
 		}
@@ -399,7 +396,7 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 			for _, reqData := range reqs {
 				reqMap := reqData.(map[string]interface{})
 				requirement := v2.CreateRequirement{
-					Id:          reqMap["id"].(string),
+					ID:          reqMap["id"].(string),
 					Name:        reqMap["name"].(string),
 					Description: reqMap["description"].(string),
 				}
