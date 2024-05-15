@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig_secure || tf_acc_policies_aws || tf_acc_onprem_secure
+//go:build tf_acc_sysdig_secure || tf_acc_policies_aws
 
 package sysdig_test
 

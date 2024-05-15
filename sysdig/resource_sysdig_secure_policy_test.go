@@ -10,11 +10,49 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/draios/terraform-provider-sysdig/buildinfo"
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
 func TestAccPolicy(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+
+	steps := []resource.TestStep{
+		{
+			Config: policyWithName(rText()),
+		},
+		{
+			ResourceName:      "sysdig_secure_policy.sample",
+			ImportState:       true,
+			ImportStateVerify: true,
+		},
+		{
+			Config: policyWithoutActions(rText()),
+		},
+		{
+			Config: policyWithoutNotificationChannels(rText()),
+		},
+		{
+			Config: policyWithMinimumConfiguration(rText()),
+		},
+		{
+			Config: policiesWithDifferentSeverities(rText()),
+		},
+		{
+			Config: policiesWithKillAction(rText()),
+		},
+	}
+
+	if !buildinfo.OnpremSecure {
+		steps = append(steps,
+			resource.TestStep{Config: policiesForAWSCloudtrail(rText())},
+			resource.TestStep{Config: policiesForGCPAuditLog(rText())},
+			resource.TestStep{Config: policiesForAzurePlatformlogs(rText())},
+			resource.TestStep{Config: policiesForFalcoCloudAWSCloudtrail(rText())},
+			resource.TestStep{Config: policiesForOkta(rText())},
+			resource.TestStep{Config: policiesForGithub(rText())},
+		)
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
@@ -23,49 +61,7 @@ func TestAccPolicy(t *testing.T) {
 				return sysdig.Provider(), nil
 			},
 		},
-		Steps: []resource.TestStep{
-			{
-				Config: policyWithName(rText()),
-			},
-			{
-				ResourceName:      "sysdig_secure_policy.sample",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: policyWithoutActions(rText()),
-			},
-			{
-				Config: policyWithoutNotificationChannels(rText()),
-			},
-			{
-				Config: policyWithMinimumConfiguration(rText()),
-			},
-			{
-				Config: policiesWithDifferentSeverities(rText()),
-			},
-			{
-				Config: policiesWithKillAction(rText()),
-			},
-			{
-				Config: policiesForAWSCloudtrail(rText()),
-			},
-			{
-				Config: policiesForGCPAuditLog(rText()),
-			},
-			{
-				Config: policiesForAzurePlatformlogs(rText()),
-			},
-			{
-				Config: policiesForFalcoCloudAWSCloudtrail(rText()),
-			},
-			{
-				Config: policiesForOkta(rText()),
-			},
-			{
-				Config: policiesForGithub(rText()),
-			},
-		},
+		Steps: steps,
 	})
 }
 

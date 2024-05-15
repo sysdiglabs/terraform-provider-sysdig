@@ -10,12 +10,54 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/draios/terraform-provider-sysdig/buildinfo"
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
 func TestAccCustomPolicy(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	policy1 := rText()
+
+	steps := []resource.TestStep{
+		{
+			Config: customPolicyWithName(policy1),
+		},
+		{
+			ResourceName:      "sysdig_secure_custom_policy.sample",
+			ImportState:       true,
+			ImportStateVerify: true,
+		},
+		{
+			Config: customPolicyWithRulesOrderChange(policy1),
+		},
+		{
+			Config: customPolicyWithoutActions(rText()),
+		},
+		{
+			Config: customPolicyWithoutNotificationChannels(rText()),
+		},
+		{
+			Config: customPolicyWithMinimumConfiguration(rText()),
+		},
+		{
+			Config: customPoliciesWithDifferentSeverities(rText()),
+		},
+		{
+			Config: customPoliciesWithKillAction(rText()),
+		},
+		{
+			Config: customPoliciesWithDisabledRules(rText()),
+		},
+	}
+
+	if !buildinfo.OnpremSecure {
+		steps = append(steps,
+			resource.TestStep{Config: customPoliciesForAWSCloudtrail(rText())},
+			resource.TestStep{Config: customPoliciesForGCPAuditLog(rText())},
+			resource.TestStep{Config: customPoliciesForAzurePlatformlogs(rText())},
+		)
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -23,46 +65,7 @@ func TestAccCustomPolicy(t *testing.T) {
 				return sysdig.Provider(), nil
 			},
 		},
-		Steps: []resource.TestStep{
-			{
-				Config: customPolicyWithName(policy1),
-			},
-			{
-				ResourceName:      "sysdig_secure_custom_policy.sample",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: customPolicyWithRulesOrderChange(policy1),
-			},
-			{
-				Config: customPolicyWithoutActions(rText()),
-			},
-			{
-				Config: customPolicyWithoutNotificationChannels(rText()),
-			},
-			{
-				Config: customPolicyWithMinimumConfiguration(rText()),
-			},
-			{
-				Config: customPoliciesWithDifferentSeverities(rText()),
-			},
-			{
-				Config: customPoliciesWithKillAction(rText()),
-			},
-			{
-				Config: customPoliciesForAWSCloudtrail(rText()),
-			},
-			{
-				Config: customPoliciesForGCPAuditLog(rText()),
-			},
-			{
-				Config: customPoliciesForAzurePlatformlogs(rText()),
-			},
-			{
-				Config: customPoliciesWithDisabledRules(rText()),
-			},
-		},
+		Steps: steps,
 	})
 }
 
