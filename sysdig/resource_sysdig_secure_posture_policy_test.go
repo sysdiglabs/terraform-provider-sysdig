@@ -24,25 +24,27 @@ func TestSecurePosturePolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: createPolicyResource(rText()),
+				Config: createPolicyResource(),
 			},
 			{
-				Config: updatePolicyResource(rText()),
+				Config: updatePolicyResource(),
 			},
 		},
 	})
 }
+
 func createPolicyResource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_posture_policy" "sample" {
-  name = "policy-%s"
+  name = "policy-test"
   description = "policy description"
 }`, name)
 }
+
 func updatePolicyResource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_posture_policy" "sample" {
-		name = "save-my-policy-%s"
+		name = "save-my-policy-test"
 		description = "updated policy description"
 }`, name)
 }
