@@ -33,7 +33,7 @@ func TestSecurePosturePolicy(t *testing.T) {
 	})
 }
 
-func createPolicyResource(name string) string {
+func createPolicyResource() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_posture_policy" "sample" {
   name = "policy-test"
@@ -41,7 +41,7 @@ resource "sysdig_secure_posture_policy" "sample" {
 }`, name)
 }
 
-func updatePolicyResource(name string) string {
+func updatePolicyResource() string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_posture_policy" "sample" {
 		name = "save-my-policy-test"
