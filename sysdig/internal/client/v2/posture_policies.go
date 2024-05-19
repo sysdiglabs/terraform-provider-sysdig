@@ -9,7 +9,7 @@ import (
 const (
 	PosturePolicyListPath   = "%s/api/cspm/v1/policy/policies/list"
 	PosturePolicyCreatePath = "%s/api/cspm/v1/policy"
-	PosturePolicyGetPath    = "%s/api/cspm/v1/policy/policies/view/%d"
+	PosturePolicyGetPath    = "%s/api/cspm/v1/policy/%d"
 )
 
 type PosturePolicyInterface interface {
