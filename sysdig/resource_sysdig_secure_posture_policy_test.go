@@ -14,7 +14,7 @@ import (
 )
 
 func TestSecurePosturePolicy(t *testing.T) {
-	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+	func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -38,7 +38,7 @@ func createPolicyResource() string {
 resource "sysdig_secure_posture_policy" "sample" {
   name = "policy-test"
   description = "policy description"
-}`, name)
+}`)
 }
 
 func updatePolicyResource() string {
@@ -46,5 +46,5 @@ func updatePolicyResource() string {
 resource "sysdig_secure_posture_policy" "sample" {
 		name = "save-my-policy-test"
 		description = "updated policy description"
-}`, name)
+}`)
 }
