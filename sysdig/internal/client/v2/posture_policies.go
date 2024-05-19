@@ -7,10 +7,11 @@ import (
 )
 
 const (
-    PosturePolicyListPath = "%s/api/cspm/v1/policy/policies/list"
-    PosturePolicyCreatePath = "%s/api/cspm/v1/policy"
-    PosturePolicyGetPath = "%s/api/cspm/v1/policy/policies/view/%d"
+	PosturePolicyListPath   = "%s/api/cspm/v1/policy/policies/list"
+	PosturePolicyCreatePath = "%s/api/cspm/v1/policy"
+	PosturePolicyGetPath    = "%s/api/cspm/v1/policy/policies/view/%d"
 )
+
 type PosturePolicyInterface interface {
 	Base
 	ListPosturePolicies(ctx context.Context) ([]PosturePolicy, error)
@@ -32,6 +33,7 @@ func (client *Client) ListPosturePolicies(ctx context.Context) ([]PosturePolicy,
 
 	return resp.Data, nil
 }
+
 func (client *Client) CreateOrUpdatePosturePolicy(ctx context.Context, p *CreatePosturePolicy) (*PosturePolicy, string, error) {
 	payload, err := Marshal(p)
 	if err != nil {
