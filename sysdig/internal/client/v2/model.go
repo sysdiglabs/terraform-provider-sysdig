@@ -964,7 +964,6 @@ type Requirement struct {
 }
 
 type Control struct {
-	ID      string `json:"id,omitempty"`
 	Name    string `json:"name,omitempty"`
 	Enabled bool   `json:"enabled,omitempty"`
 }
