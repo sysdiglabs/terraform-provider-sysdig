@@ -40,7 +40,7 @@ func createPolicyResource() string {
 func createPolicyWithRiskResource() string {
 	return `
 resource "sysdig_secure_posture_policy" "sample" {
-	name = "policy-test"
+	name = "policy-test-with-group"
 	description = "updated policy description"
 	is_active = true
 	type = "kubernetes"
