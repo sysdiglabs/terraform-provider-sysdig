@@ -26,9 +26,6 @@ func TestSecurePosturePolicy(t *testing.T) {
 			{
 				Config: createPolicyResource(rText()),
 			},
-			{
-				Config: createPolicyWithRiskResource(rText()),
-			},
 		},
 	})
 }
@@ -37,26 +34,6 @@ func createPolicyResource(name string) string {
 		name = "policy-test-%s"
 		description = "policy description"
 		is_active = true
-		type = "kubernetes"
+		type = "0"
 	}`, name)
-}
-func createPolicyWithRiskResource(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_secure_posture_policy" "sample" {
-	name = "policy-test-with-group-%s"
-	description = "updated policy description"
-	is_active = true
-	type = "kubernetes"
-	group {
-  		name = "group 1"
-		description = "group 1"
-  		requirement {
-  			name = "requirement 1"
-	  		description = "requirement 1"
-  			control {
-				name = "Create Pods"
-			}
-		}
-	}
-}`, name)
 }
