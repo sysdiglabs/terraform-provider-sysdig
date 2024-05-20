@@ -3,15 +3,18 @@
 package sysdig_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestSecurePosturePolicy(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -21,26 +24,26 @@ func TestSecurePosturePolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: createPolicyResource(),
+				Config: createPolicyResource(rText()),
 			},
 			{
-				Config: createPolicyWithRiskResource(),
+				Config: createPolicyWithRiskResource(rText()),
 			},
 		},
 	})
 }
-func createPolicyResource() string {
-	return `resource "sysdig_secure_posture_policy" "sample" {
-		name = "policy-test"
+func createPolicyResource(name string) string {
+	return fmt.Sprintf(`resource "sysdig_secure_posture_policy" "sample" {
+		name = "policy-test-%s"
 		description = "policy description"
 		is_active = true
 		type = "kubernetes"
-	}`
+	}`, name)
 }
-func createPolicyWithRiskResource() string {
-	return `
+func createPolicyWithRiskResource(name string) string {
+	return fmt.Sprintf(`
 resource "sysdig_secure_posture_policy" "sample" {
-	name = "policy-test-with-group"
+	name = "policy-test-with-group-%s"
 	description = "updated policy description"
 	is_active = true
 	type = "kubernetes"
@@ -55,5 +58,5 @@ resource "sysdig_secure_posture_policy" "sample" {
 			}
 		}
 	}
-}`
+}`, name)
 }
