@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -210,7 +209,6 @@ func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *sch
 		Link:              getStringValue(d, SchemaLinkKey),
 		RequirementGroups: groups,
 	}
-	fmt.Println("request: ", req)
 	new, errStatus, err := client.CreateOrUpdatePosturePolicy(ctx, req)
 	if err != nil {
 		return diag.Errorf("Error creating new policy with groups. error status: %s err: %s", errStatus, err)
@@ -233,7 +231,6 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 	}
 
 	policy, err := client.GetPosturePolicy(ctx, id)
-	fmt.Println("get policy: ", policy)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -313,7 +310,6 @@ func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) error {
 
 		groupsData = append(groupsData, groupData)
 	}
-	fmt.Println("groupsData: ", groupsData)
 	return d.Set(SchemaGroupKey, groupsData)
 }
 
