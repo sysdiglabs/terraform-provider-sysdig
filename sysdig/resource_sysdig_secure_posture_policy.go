@@ -288,6 +288,25 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 	return nil
 }
 
+func resourceSysdigSecurePosturePolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getPosturePolicyClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	id, err := strconv.ParseInt(d.Id(), 10, 64)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.DeletePosturePolicy(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
+}
+
 func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) error {
 	var groupsData []interface{}
 	for _, group := range groups {
@@ -342,10 +361,6 @@ func setControls(controls []v2.Control) []interface{} {
 		controlsData = append(controlsData, ctrlData)
 	}
 	return controlsData
-}
-func resourceSysdigSecurePosturePolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// TODO: implement deletion
-	return nil
 }
 
 // Helper function to retrieve string value from ResourceData and handle nil case

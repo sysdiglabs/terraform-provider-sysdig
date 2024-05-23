@@ -10,6 +10,7 @@ const (
 	PosturePolicyListPath   = "%s/api/cspm/v1/policy/policies/list"
 	PosturePolicyCreatePath = "%s/api/cspm/v1/policy"
 	PosturePolicyGetPath    = "%s/api/cspm/v1/policy/posture/policies/%d?include_controls=true"
+	PosturePolicyDeletePath = "%s/api/cspm/v1/policy/policies/%d"
 )
 
 type PosturePolicyInterface interface {
@@ -17,6 +18,7 @@ type PosturePolicyInterface interface {
 	ListPosturePolicies(ctx context.Context) ([]PosturePolicy, error)
 	CreateOrUpdatePosturePolicy(ctx context.Context, p *CreatePosturePolicy) (*FullPosturePolicy, string, error)
 	GetPosturePolicy(ctx context.Context, id int64) (*FullPosturePolicy, error)
+	DeletePosturePolicy(ctx context.Context, id int64) error
 }
 
 func (client *Client) ListPosturePolicies(ctx context.Context) ([]PosturePolicy, error) {
@@ -69,8 +71,26 @@ func (client *Client) GetPosturePolicy(ctx context.Context, id int64) (*FullPost
 	return &wrapper.Data, nil
 }
 
+func (client *Client) DeletePosturePolicy(ctx context.Context, id int64) error {
+	response, err := client.requester.Request(ctx, http.MethodDelete, client.deletePolicyUrl(id), nil)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
+		return client.ErrorFromResponse(response)
+	}
+
+	return nil
+}
+
 func (client *Client) getPolicyUrl(id int64) string {
 	return fmt.Sprintf(PosturePolicyGetPath, client.config.url, id)
+}
+
+func (client *Client) deletePolicyUrl(id int64) string {
+	return fmt.Sprintf(PosturePolicyDeletePath, client.config.url, id)
 }
 
 func (client *Client) getPosturePolicyURL(path string) string {
