@@ -201,6 +201,7 @@ func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *sch
 	req := &v2.CreatePosturePolicy{
 		ID:                getStringValue(d, SchemaIDKey),
 		Name:              getStringValue(d, SchemaNameKey),
+		Type:              getStringValue(d, SchemaTypeKey),
 		Description:       getStringValue(d, SchemaDescriptionKey),
 		MinKubeVersion:    getFloatValue(d, SchemaMinKubeVersionKey),
 		MaxKubeVersion:    getFloatValue(d, SchemaMaxKubeVersionKey),
