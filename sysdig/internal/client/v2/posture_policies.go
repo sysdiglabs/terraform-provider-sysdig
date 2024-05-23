@@ -9,14 +9,14 @@ import (
 const (
 	PosturePolicyListPath   = "%s/api/cspm/v1/policy/policies/list"
 	PosturePolicyCreatePath = "%s/api/cspm/v1/policy"
-	PosturePolicyGetPath    = "%s/api/cspm/v1/policy/policies/view/%d"
+	PosturePolicyGetPath    = "%s/api/cspm/v1/policy/posture/policies/%d?include_controls=true"
 )
 
 type PosturePolicyInterface interface {
 	Base
 	ListPosturePolicies(ctx context.Context) ([]PosturePolicy, error)
-	CreateOrUpdatePosturePolicy(ctx context.Context, p *CreatePosturePolicy) (*PosturePolicy, string, error)
-	GetPosturePolicy(ctx context.Context, id int64) (*PosturePolicy, error)
+	CreateOrUpdatePosturePolicy(ctx context.Context, p *CreatePosturePolicy) (*FullPosturePolicy, string, error)
+	GetPosturePolicy(ctx context.Context, id int64) (*FullPosturePolicy, error)
 }
 
 func (client *Client) ListPosturePolicies(ctx context.Context) ([]PosturePolicy, error) {
@@ -34,7 +34,7 @@ func (client *Client) ListPosturePolicies(ctx context.Context) ([]PosturePolicy,
 	return resp.Data, nil
 }
 
-func (client *Client) CreateOrUpdatePosturePolicy(ctx context.Context, p *CreatePosturePolicy) (*PosturePolicy, string, error) {
+func (client *Client) CreateOrUpdatePosturePolicy(ctx context.Context, p *CreatePosturePolicy) (*FullPosturePolicy, string, error) {
 	payload, err := Marshal(p)
 	if err != nil {
 		return nil, "", err
@@ -48,25 +48,24 @@ func (client *Client) CreateOrUpdatePosturePolicy(ctx context.Context, p *Create
 		errStatus, err := client.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
-	resp, err := Unmarshal[PosturePolicyResponse](response.Body)
+	resp, err := Unmarshal[FullPosturePolicyResponse](response.Body)
 	if err != nil {
 		return nil, "", err
 	}
 	return &resp.Data, "", nil
 }
 
-func (client *Client) GetPosturePolicy(ctx context.Context, id int64) (*PosturePolicy, error) {
+func (client *Client) GetPosturePolicy(ctx context.Context, id int64) (*FullPosturePolicy, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.getPolicyUrl(id), nil)
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
 
-	wrapper, err := Unmarshal[PosturePolicyResponse](response.Body)
+	wrapper, err := Unmarshal[FullPosturePolicyResponse](response.Body)
 	if err != nil {
 		return nil, err
 	}
-
 	return &wrapper.Data, nil
 }
 

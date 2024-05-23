@@ -926,24 +926,39 @@ type PosturePolicyZoneMeta struct {
 }
 
 type PosturePolicy struct {
-	ID                string                  `json:"id,omitempty"`
-	Name              string                  `json:"name,omitempty"`
-	Type              int                     `json:"type,omitempty"`
-	Kind              int                     `json:"kind,omitempty"`
-	Description       string                  `json:"description,omitempty"`
-	Version           string                  `json:"version,omitempty"`
-	Link              string                  `json:"link,omitempty"`
-	Authors           string                  `json:"authors,omitempty"`
-	PublishedData     string                  `json:"publishedDate,omitempty"`
-	RequirementsGroup []RequirementsGroup     `json:"requirementFolders,omitempty"`
-	MinKubeVersion    float64                 `json:"minKubeVersion,omitempty"`
-	MaxKubeVersion    float64                 `json:"maxKubeVersion,omitempty"`
-	IsCustom          bool                    `json:"isCustom,omitempty"`
-	IsActive          bool                    `json:"isActive,omitempty"`
-	Platform          string                  `json:"platform,omitempty"`
-	Zones             []PosturePolicyZoneMeta `json:"zones,omitempty"`
+	ID             string                  `json:"id,omitempty"`
+	Name           string                  `json:"name,omitempty"`
+	Type           int                     `json:"type,omitempty"`
+	Kind           int                     `json:"kind,omitempty"`
+	Description    string                  `json:"description,omitempty"`
+	Version        string                  `json:"version,omitempty"`
+	Link           string                  `json:"link,omitempty"`
+	Authors        string                  `json:"authors,omitempty"`
+	PublishedData  string                  `json:"publishedDate,omitempty"`
+	MinKubeVersion float64                 `json:"minKubeVersion,omitempty"`
+	MaxKubeVersion float64                 `json:"maxKubeVersion,omitempty"`
+	IsCustom       bool                    `json:"isCustom,omitempty"`
+	IsActive       bool                    `json:"isActive,omitempty"`
+	Platform       string                  `json:"platform,omitempty"`
+	Zones          []PosturePolicyZoneMeta `json:"zones,omitempty"`
 }
 
+type FullPosturePolicy struct {
+	ID                string              `json:"id,omitempty"`
+	Name              string              `json:"name,omitempty"`
+	Type              string              `json:"type,omitempty"`
+	Description       string              `json:"description,omitempty"`
+	Version           string              `json:"version,omitempty"`
+	Link              string              `json:"link,omitempty"`
+	Authors           string              `json:"authors,omitempty"`
+	PublishedData     string              `json:"publishedDate,omitempty"`
+	RequirementsGroup []RequirementsGroup `json:"requirementFolders,omitempty"`
+	MinKubeVersion    float64             `json:"minKubeVersion,omitempty"`
+	MaxKubeVersion    float64             `json:"maxKubeVersion,omitempty"`
+	IsCustom          bool                `json:"isCustom,omitempty"`
+	IsActive          bool                `json:"isActive,omitempty"`
+	Platform          string              `json:"platform,omitempty"`
+}
 type RequirementsGroup struct {
 	ID                        string              `json:"id,omitempty"`
 	Name                      string              `json:"name,omitempty"`
@@ -1005,6 +1020,9 @@ type PosturePolicyResponse struct {
 	Data PosturePolicy `json:"data"`
 }
 
+type FullPosturePolicyResponse struct {
+	Data FullPosturePolicy `json:"data"`
+}
 type PostureZonePolicyListResponse struct {
 	Data []PosturePolicy `json:"data"`
 }
