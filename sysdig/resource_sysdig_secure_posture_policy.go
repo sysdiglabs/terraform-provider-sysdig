@@ -201,6 +201,7 @@ func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *sch
 	req := &v2.CreatePosturePolicy{
 		ID:                getStringValue(d, SchemaIDKey),
 		Name:              getStringValue(d, SchemaNameKey),
+		Type:              getStringValue(d, SchemaTypeKey),
 		Description:       getStringValue(d, SchemaDescriptionKey),
 		MinKubeVersion:    getFloatValue(d, SchemaMinKubeVersionKey),
 		MaxKubeVersion:    getFloatValue(d, SchemaMaxKubeVersionKey),
@@ -249,9 +250,7 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	strconv.Itoa(policy.Type)
-
-	err = d.Set(SchemaTypeKey, strconv.Itoa(policy.Type))
+	err = d.Set(SchemaTypeKey, policy.Type)
 	if err != nil {
 		return diag.FromErr(err)
 	}
