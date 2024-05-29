@@ -34,6 +34,6 @@ func createPolicyResource(name string) string {
 		name = "policy-test-%s"
 		description = "policy description"
 		is_active = true
-		type = "Unknown"
+		type = "GCP"
 	}`, name)
 }
