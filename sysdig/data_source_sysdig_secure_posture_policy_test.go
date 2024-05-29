@@ -22,7 +22,10 @@ func TestAccPosturePolicyDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: posturePolicyDataSource(),
+				Config: `
+				data "sysdig_secure_posture_policy" "policy" {
+					id = 2
+				}`,
 				Check: func(state *terraform.State) error {
 					policyRef := "data.sysdig_secure_posture_policy.policy"
 					s, ok := state.RootModule().Resources[policyRef]
@@ -30,21 +33,14 @@ func TestAccPosturePolicyDataSource(t *testing.T) {
 						return fmt.Errorf("%s not found", policyRef)
 					}
 					if s.Primary.ID != "2" {
-						return fmt.Errorf("expected policy ID to be 2, got %s", s.Primary.ID)
+						return fmt.Errorf("expected policy ID to be 2")
 					}
 					if s.Primary.Attributes["name"] != "Sysdig Kubernetes" {
-						return fmt.Errorf("expected policy name to be `Sysdig Kubernetes`, got %s", s.Primary.Attributes["name"])
+						return fmt.Errorf("expected policy name to be `Sysdig Kubernetes`")
 					}
 					return nil
 				},
 			},
 		},
 	})
-}
-
-func posturePolicyDataSource() string {
-	return `
-data "sysdig_secure_posture_policy" "policy" {
-	id = 2
-}`
 }
