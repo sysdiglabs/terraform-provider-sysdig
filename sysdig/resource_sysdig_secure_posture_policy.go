@@ -283,7 +283,9 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 	if err := setGroups(d, policy.RequirementsGroup); err != nil {
 		return diag.FromErr(err)
 	}
-
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
