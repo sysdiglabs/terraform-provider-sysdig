@@ -43,8 +43,8 @@ func TestAccPosturePolicyDataSource(t *testing.T) {
 }
 
 func posturePolicyDataSource() string {
-	return fmt.Sprintf(`
+	return `
 data "sysdig_secure_posture_policy" "policy" {
 	id = 2
-}`)
+}`
 }
