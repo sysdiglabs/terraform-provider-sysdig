@@ -22,9 +22,7 @@ func TestAccPosturePolicyDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: `data sysdig_secure_posture_policy policy {
-					id = "2"
-				}`,
+				Config: posturePolicyDataSource(),
 				Check: func(state *terraform.State) error {
 					policyRef := "data.sysdig_secure_posture_policy.policy"
 					s, ok := state.RootModule().Resources[policyRef]
@@ -42,4 +40,11 @@ func TestAccPosturePolicyDataSource(t *testing.T) {
 			},
 		},
 	})
+}
+
+func posturePolicyDataSource() string {
+	return fmt.Sprintf(`
+data "sysdig_secure_posture_policy" "policy" {
+	id = 2
+}`)
 }
