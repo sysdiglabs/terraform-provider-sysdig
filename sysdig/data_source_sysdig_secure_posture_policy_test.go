@@ -37,6 +37,7 @@ func TestAccPosturePolicyDataSource(t *testing.T) {
 					if s.Primary.Attributes["name"] != "Sysdig Kubernetes" {
 						return fmt.Errorf("expected policy name to be `Sysdig Kubernetes`, got %s", s.Primary.Attributes["name"])
 					}
+					return nil
 
 				},
 			},
