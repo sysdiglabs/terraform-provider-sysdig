@@ -158,7 +158,10 @@ func downtimeAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (er
 	}
 
 	var trigger_after_pct float64
-	fmt.Sscanf(alert.Condition, "avg(timeAvg(uptime)) <= %f", &trigger_after_pct)
+	_, err = fmt.Sscanf(alert.Condition, "avg(timeAvg(uptime)) <= %f", &trigger_after_pct)
+	if err != nil {
+		return err
+	}
 	trigger_after_pct = (1 - trigger_after_pct) * 100
 
 	_ = data.Set("trigger_after_pct", int(trigger_after_pct))
