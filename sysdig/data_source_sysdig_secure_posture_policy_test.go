@@ -14,7 +14,7 @@ import (
 
 func TestAccPosturePolicyDataSource(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: preCheckAnyEnv(t, SysdigIBMSecureAPIKeyEnv, SysdigSecureApiTokenEnv),
+		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -38,7 +38,6 @@ func TestAccPosturePolicyDataSource(t *testing.T) {
 						return fmt.Errorf("expected policy name to be `Sysdig Kubernetes`, got %s", s.Primary.Attributes["name"])
 					}
 					return nil
-
 				},
 			},
 		},
