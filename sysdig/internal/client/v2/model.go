@@ -979,8 +979,8 @@ type Requirement struct {
 }
 
 type Control struct {
-	Name    string `json:"name,omitempty"`
-	Enabled bool   `json:"enabled,omitempty"`
+	Name   string `json:"name,omitempty"`
+	Status bool   `json:"status,omitempty"`
 }
 
 type CreatePosturePolicy struct {

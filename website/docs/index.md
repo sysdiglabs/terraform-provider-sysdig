@@ -261,6 +261,7 @@ When IBM Workload Protection resources are to be created, this authentication mu
 > - `sysdig_current_user`
 > - `sysdig_secure_notification_channel`
 > - `sysdig_secure_posture_policies`
+> - `sysdig_secure_posture_policy`
 
 ###  Others
 * `extra_headers` - (Optional) Defines extra HTTP headers that will be added to the client

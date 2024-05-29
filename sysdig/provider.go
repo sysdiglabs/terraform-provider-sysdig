@@ -244,6 +244,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_monitor_notification_channel_ibm_event_notification":   dataSourceSysdigMonitorNotificationChannelIBMEventNotification(),
 			"sysdig_monitor_notification_channel_ibm_function":             dataSourceSysdigMonitorNotificationChannelIBMFunction(),
 			"sysdig_monitor_custom_role_permissions":                       dataSourceSysdigMonitorCustomRolePermissions(),
+			"sysdig_secure_posture_policy":                                 dataSourceSysdigSecurePosturePolicy(),
 		},
 		ConfigureContextFunc: p.providerConfigure,
 	}

@@ -17,7 +17,7 @@ Creates a Sysdig Secure Posture Policy.
 ```terraform
 resource "sysdig_secure_posture_policy" "example" {
     name = "demo policy"
-    type = "kuberenetes"
+    type = "kubernetes"
     platform = "vanilla"
     max_kube_version = 2.0
     description = "demo create policy from terraform"
@@ -65,7 +65,7 @@ resource "sysdig_secure_posture_policy" "example" {
   - Kubernetes - `kubernetes`
   - Linux - `linux`
   - Docker - `docker`
-  - OCI = `oci`
+  - OCI - `oci`
 * `min_kube_version` -  (Optional) Policy minimum Kubernetes version, eg. `1.24`
 * `max_kube_version` -  (Optional) Policy maximum Kubernetes version, eg. `1.26`
 * `is_active` -  (Optional) Policy is active flag (active means policy is published, not active means policy is draft). by default is true.
