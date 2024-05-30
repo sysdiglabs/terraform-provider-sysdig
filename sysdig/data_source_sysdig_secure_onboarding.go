@@ -133,3 +133,93 @@ func dataSourceSysdigSecureTenantExternalIDRead(ctx context.Context, d *schema.R
 
 	return nil
 }
+
+func dataSourceSysdigSecureAgentlessScanningAssets() *schema.Resource {
+	timeout := 5 * time.Minute
+
+	return &schema.Resource{
+		ReadContext: dataSourceSysdigSecureAgentlessScanningAssetsRead,
+
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(timeout),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"aws": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"azure": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"backend": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"gcp": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+		},
+	}
+}
+
+// Retrieves the information of a resource form the file and loads it in Terraform
+func dataSourceSysdigSecureAgentlessScanningAssetsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getSecureOnboardingClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	assets, err := client.GetAgentlessScanningAssetsSecure(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	assetsAws, _ := assets["aws"].(map[string]interface{})
+	assetsAzure, _ := assets["azure"].(map[string]interface{})
+	assetsBackend, _ := assets["backend"].(map[string]interface{})
+	assetsGcp, _ := assets["gcp"].(map[string]interface{})
+
+	d.SetId("agentlessScanningAssets")
+	err = d.Set("aws", map[string]interface{}{
+		"account_id": assetsAws["accountId"],
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set("azure", map[string]interface{}{
+		"service_principal_id": assetsAzure["servicePrincipalId"],
+		"tenant_id":            assetsAzure["tenantId"],
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set("backend", map[string]interface{}{
+		"cloud_id": assetsBackend["cloudId"],
+		"type":     assetsBackend["type"],
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set("gcp", map[string]interface{}{
+		"worker_identity": assetsGcp["workerIdentity"],
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
+}
