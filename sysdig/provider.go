@@ -195,6 +195,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_trusted_cloud_identity":                        dataSourceSysdigSecureTrustedCloudIdentity(),
+			"sysdig_secure_tenant_external_id":                            dataSourceSysdigSecureTenantExternalID(),
 			"sysdig_secure_notification_channel":                          dataSourceSysdigSecureNotificationChannel(),
 			"sysdig_secure_notification_channel_pagerduty":                dataSourceSysdigSecureNotificationChannelPagerduty(),
 			"sysdig_secure_notification_channel_email":                    dataSourceSysdigSecureNotificationChannelEmail(),

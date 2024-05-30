@@ -6,10 +6,15 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/arn"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
+
+func getSecureOnboardingClient(c SysdigClients) (v2.OnboardingSecureInterface, error) {
+	return c.sysdigSecureClientV2()
+}
 
 func dataSourceSysdigSecureTrustedCloudIdentity() *schema.Resource {
 	timeout := 5 * time.Minute
@@ -53,7 +58,7 @@ func dataSourceSysdigSecureTrustedCloudIdentity() *schema.Resource {
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureCloudAccountClient(meta.(SysdigClients))
+	client, err := getSecureOnboardingClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -86,5 +91,45 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 
 		}
 	}
+	return nil
+}
+
+func dataSourceSysdigSecureTenantExternalID() *schema.Resource {
+	timeout := 5 * time.Minute
+
+	return &schema.Resource{
+		ReadContext: dataSourceSysdigSecureTenantExternalIDRead,
+
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(timeout),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"external_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+// Retrieves the information of a resource form the file and loads it in Terraform
+func dataSourceSysdigSecureTenantExternalIDRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getSecureOnboardingClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	externalId, err := client.GetTenantExternalIDSecure(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(externalId)
+	err = d.Set("external_id", externalId)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
 }
