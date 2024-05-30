@@ -156,7 +156,6 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 			SchemaTypeKey: {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "",
 			},
 			SchemaLinkKey: {
 				Type:     schema.TypeString,
@@ -284,7 +283,9 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 	if err := setGroups(d, policy.RequirementsGroup); err != nil {
 		return diag.FromErr(err)
 	}
-
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -356,7 +357,7 @@ func setControls(controls []v2.Control) []interface{} {
 	for _, ctrl := range controls {
 		ctrlData := map[string]interface{}{
 			"name":    ctrl.Name,
-			"enabled": ctrl.Enabled,
+			"enabled": ctrl.Status,
 		}
 		controlsData = append(controlsData, ctrlData)
 	}
