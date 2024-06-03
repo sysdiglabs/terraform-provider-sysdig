@@ -26,6 +26,7 @@ const (
 	SchemaIsCustomKey               = "is_custom"
 	SchemaIsActiveKey               = "is_active"
 	SchemaPlatformKey               = "platform"
+	SchemaVersionConstraintKey      = "version_constraint"
 	SchemaZonesKey                  = "zones"
 	SchemaZonesIDsKey               = "zone_ids"
 	SchemaAllZones                  = "all_zones"
