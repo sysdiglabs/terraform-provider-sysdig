@@ -14,6 +14,8 @@ Creates a group mapping in Sysdig.
 
 ## Example Usage
 
+### Regular users
+
 ```terraform
 resource "sysdig_group_mapping" "my_group" {
   group_name = "my-group"
@@ -30,6 +32,7 @@ resource "sysdig_group_mapping" "my_group" {
 ```
 This way, we define a group mapping named "my-group" for a user who will have a standard role in two teams.
 
+### Admin users
 If the group members should assume the Sysdig administrator role the mapping should be created this way
 
 ```terraform
@@ -52,7 +55,9 @@ The name doesn’t necessarily have to be “admin,” it’s just an example. T
 
 * `role` - (Required) The role that is assigned to the users. It can be a standard role or a custom team role ID.
 
-* `system_role` (Optional) The system role that is assigned to the users. Possible values: `ROLE_USER` or `ROLE_CUSTOMER`. Default to `ROLE_USER` if not specified.
+* `system_role` (Optional) The system role that is assigned to the users. The supported values are: 
+  * `ROLE_USER` for regular users (Default if not specified) 
+  * `ROLE_CUSTOMER` for admin users
 
 * `team_map` - (Required) Block to define team mapping.
 
