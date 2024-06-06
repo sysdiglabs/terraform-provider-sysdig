@@ -185,11 +185,11 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						SchemaMinKubeVersionKey: {
+						SchemaMinVersionKey: {
 							Type:     schema.TypeFloat,
 							Optional: true,
 						},
-						SchemaMaxKubeVersionKey: {
+						SchemaMaxVersionKey: {
 							Type:     schema.TypeFloat,
 							Optional: true,
 						},
@@ -230,6 +230,7 @@ func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *sch
 		Link:               getStringValue(d, SchemaLinkKey),
 		RequirementGroups:  groups,
 	}
+
 	new, errStatus, err := client.CreateOrUpdatePosturePolicy(ctx, req)
 
 	if err != nil {
@@ -405,10 +406,18 @@ func getVersionConstraintsValue(d *schema.ResourceData, key string) []v2.Version
 	}
 	for _, vc := range versionContraintsMap {
 		vcMap := vc.(map[string]interface{})
+		minVersion := 0.0
+		maxVersion := 0.0
+		if vcMap["min_version"] != nil {
+			minVersion = vcMap["min_version"].(float64)
+		}
+		if vcMap["max_version"] != nil {
+			maxVersion = vcMap["max_version"].(float64)
+		}
 		versionConstraint := v2.VersionConstraint{
-			MinKubeVersion: vcMap[SchemaMinVersionKey].(float64),
-			MaxKubeVersion: vcMap[SchemaMaxVersionKey].(float64),
-			Platform:       vcMap[SchemaPlatformKey].(string),
+			MinVersion: minVersion,
+			MaxVersion: maxVersion,
+			Platform:   vcMap["platform"].(string),
 		}
 		pvc = append(pvc, versionConstraint)
 	}
@@ -485,8 +494,8 @@ func setVersionConstraints(d *schema.ResourceData, key string, constraints []v2.
 	var constraintsList []map[string]interface{}
 	for _, vc := range constraints {
 		constraintsList = append(constraintsList, map[string]interface{}{
-			"min_version": vc.MinKubeVersion,
-			"max_version": vc.MaxKubeVersion,
+			"min_version": vc.MinVersion,
+			"max_version": vc.MaxVersion,
 			"platform":    vc.Platform,
 		})
 	}

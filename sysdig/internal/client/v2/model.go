@@ -962,9 +962,9 @@ type FullPosturePolicy struct {
 }
 
 type VersionConstraint struct {
-	Platform       string  `json:"platform"`
-	MinKubeVersion float64 `json:"minKubeVersion,omitempty"`
-	MaxKubeVersion float64 `json:"maxKubeVersion,omitempty"`
+	Platform   string  `json:"platform"`
+	MinVersion float64 `json:"minVersion,omitempty"`
+	MaxVersion float64 `json:"maxVersion,omitempty"`
 }
 
 type RequirementsGroup struct {
