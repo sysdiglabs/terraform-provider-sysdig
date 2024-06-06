@@ -302,8 +302,11 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	err = d.Set(SchemaVersionConstraintKey, setVersionConstraints(d, SchemaVersionConstraintKey, policy.VersionConstraints))
+	err = setVersionConstraints(d, SchemaVersionConstraintKey, policy.VersionConstraints)
 
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	// Set groups
 	if err := setGroups(d, policy.RequirementsGroup); err != nil {
 		return diag.FromErr(err)
@@ -491,16 +494,16 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 
 // Helper function to set version constraints in the Terraform schema
 func setVersionConstraints(d *schema.ResourceData, key string, constraints []v2.VersionConstraint) error {
-	var constraintsList []map[string]interface{}
+	var constraintsData []interface{}
 	for _, vc := range constraints {
-		constraintsList = append(constraintsList, map[string]interface{}{
+		constraint := map[string]interface{}{
 			"min_version": vc.MinVersion,
 			"max_version": vc.MaxVersion,
 			"platform":    vc.Platform,
-		})
+		}
+		constraintsData = append(constraintsData, constraint)
 	}
-
-	if err := d.Set(key, constraintsList); err != nil {
+	if err := d.Set(key, constraintsData); err != nil {
 		return err
 	}
 	return nil
