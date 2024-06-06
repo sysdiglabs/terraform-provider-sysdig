@@ -958,7 +958,7 @@ type FullPosturePolicy struct {
 	IsCustom           bool                `json:"isCustom,omitempty"`
 	IsActive           bool                `json:"isActive,omitempty"`
 	Platform           string              `json:"platform,omitempty"`
-	VersionConstraints []VersionConstraint `json:"versionConstraints,omitempty"`
+	VersionConstraints []VersionConstraint `json:"targets,omitempty"`
 }
 
 type VersionConstraint struct {
@@ -1003,7 +1003,7 @@ type CreatePosturePolicy struct {
 	MaxKubeVersion     float64                   `json:"maxKubeVersion,omitempty"`
 	IsActive           bool                      `json:"isActive,omitempty"`
 	Platform           string                    `json:"platform,omitempty"`
-	VersionConstraints []VersionConstraint       `json:"versionConstraints,omitempty"`
+	VersionConstraints []VersionConstraint       `json:"targets,omitempty"`
 }
 
 type CreateRequirementsGroup struct {

@@ -23,6 +23,8 @@ const (
 	SchemaCreatedDateKey            = "date_created"
 	SchemaMinKubeVersionKey         = "min_kube_version"
 	SchemaMaxKubeVersionKey         = "max_kube_version"
+	SchemaMinVersionKey             = "min_version"
+	SchemaMaxVersionKey             = "max_version"
 	SchemaIsCustomKey               = "is_custom"
 	SchemaIsActiveKey               = "is_active"
 	SchemaPlatformKey               = "platform"

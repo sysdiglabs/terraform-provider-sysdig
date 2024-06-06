@@ -406,9 +406,9 @@ func getVersionConstraintsValue(d *schema.ResourceData, key string) []v2.Version
 	for _, vc := range versionContraintsMap {
 		vcMap := vc.(map[string]interface{})
 		versionConstraint := v2.VersionConstraint{
-			MinKubeVersion: vcMap["min_kube_version"].(float64),
-			MaxKubeVersion: vcMap["max_kube_version"].(float64),
-			Platform:       vcMap["platform"].(string),
+			MinKubeVersion: vcMap[SchemaMinVersionKey].(float64),
+			MaxKubeVersion: vcMap[SchemaMaxVersionKey].(float64),
+			Platform:       vcMap[SchemaPlatformKey].(string),
 		}
 		pvc = append(pvc, versionConstraint)
 	}
@@ -485,9 +485,9 @@ func setVersionConstraints(d *schema.ResourceData, key string, constraints []v2.
 	var constraintsList []map[string]interface{}
 	for _, vc := range constraints {
 		constraintsList = append(constraintsList, map[string]interface{}{
-			"min_kube_version": vc.MinKubeVersion,
-			"max_kube_version": vc.MaxKubeVersion,
-			"platform":         vc.Platform,
+			"min_version": vc.MinKubeVersion,
+			"max_version": vc.MaxKubeVersion,
+			"platform":    vc.Platform,
 		})
 	}
 
