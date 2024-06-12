@@ -2,6 +2,8 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -91,6 +93,62 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 
 		}
 	}
+	return nil
+}
+
+func dataSourceSysdigSecureTrustedAzureApp() *schema.Resource {
+	timeout := 5 * time.Minute
+
+	return &schema.Resource{
+		ReadContext: dataSourceSysdigSecureTrustedAzureAppRead,
+
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(timeout),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"config_posture", "onboarding", "threat_detection"}, false),
+			},
+			"tenant_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"application_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"service_principal_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+// Retrieves the information of a resource form the file and loads it in Terraform
+func dataSourceSysdigSecureTrustedAzureAppRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getSecureOnboardingClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	app := d.Get("name").(string)
+	registration, err := client.GetTrustedAzureAppSecure(ctx, app)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId(app)
+	for k, v := range registration {
+		fmt.Printf("%s, %s\n", k, snakeCase(k))
+		err = d.Set(snakeCase(k), v)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return nil
 }
 
@@ -222,4 +280,13 @@ func dataSourceSysdigSecureAgentlessScanningAssetsRead(ctx context.Context, d *s
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+
+func snakeCase(str string) string {
+	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
+	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+	return strings.ToLower(snake)
 }
