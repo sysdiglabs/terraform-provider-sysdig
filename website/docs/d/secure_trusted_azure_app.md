@@ -33,5 +33,5 @@ In addition to all arguments above, the following attributes are exported:
 
 * `application_id` - The application's identifier
 
-* `service_principal_id` - The application's assocaited service principal identifier.
+* `service_principal_id` - The application's associated service principal identifier.
 
