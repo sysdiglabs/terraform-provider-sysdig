@@ -1088,6 +1088,24 @@ type SilenceRule struct {
 	ID      int `json:"id,omitempty"`
 }
 
+type InhibitionRule struct {
+	Name           string          `json:"name,omitempty"`
+	Description    string          `json:"description,omitempty"`
+	Enabled        bool            `json:"isEnabled"`
+	SourceMatchers []LabelMatchers `json:"sourceMatchers"`
+	TargetMatchers []LabelMatchers `json:"targetMatchers"`
+	Equal          []string        `json:"equal,omitempty"`
+
+	Version int `json:"version,omitempty"`
+	ID      int `json:"id,omitempty"`
+}
+
+type LabelMatchers struct {
+	LabelName string `json:"labelName"`
+	Operator  string `json:"operator"`
+	Value     string `json:"value"`
+}
+
 type AgentAccessKey struct {
 	ID             int               `json:"id,omitempty"`
 	Reservation    int               `json:"agentReservation,omitempty"`
