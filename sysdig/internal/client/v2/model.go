@@ -189,7 +189,8 @@ type Alert struct {
 	NotificationChannelIds []int               `json:"notificationChannelIds"`
 	Filter                 string              `json:"filter"`
 	Severity               int                 `json:"severity"`
-	Timespan               int                 `json:"timespan"`
+	Timespan               *int                `json:"timespan,omitempty"`
+	Duration               *int                `json:"duration,omitempty"`
 	CustomNotification     *CustomNotification `json:"customNotification"`
 	TeamID                 int                 `json:"teamId,omitempty"`
 	AutoCreated            bool                `json:"autoCreated"`

@@ -125,10 +125,11 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 
 func alertFromResourceData(d *schema.ResourceData) (alert *v2.Alert, err error) {
 	trigger_after_minutes := time.Duration(d.Get("trigger_after_minutes").(int)) * time.Minute
+	timespan := int(trigger_after_minutes.Microseconds())
 	alert = &v2.Alert{
 		Name:                   d.Get("name").(string),
 		Type:                   "MANUAL",
-		Timespan:               int(trigger_after_minutes.Microseconds()),
+		Timespan:               &timespan,
 		SegmentBy:              []string{},
 		NotificationChannelIds: []int{},
 		CustomNotification: &v2.CustomNotification{
@@ -202,13 +203,16 @@ func alertFromResourceData(d *schema.ResourceData) (alert *v2.Alert, err error) 
 }
 
 func alertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
-	trigger_after_minutes := time.Duration(alert.Timespan) * time.Microsecond
+	var trigger_after_minutes int
+	if alert.Timespan != nil {
+		trigger_after_minutes = int((time.Duration(*alert.Timespan) * time.Microsecond).Minutes())
+	}
 
 	_ = data.Set("version", alert.Version)
 	_ = data.Set("name", alert.Name)
 	_ = data.Set("description", alert.Description)
 	_ = data.Set("scope", alert.Filter)
-	_ = data.Set("trigger_after_minutes", int(trigger_after_minutes.Minutes()))
+	_ = data.Set("trigger_after_minutes", trigger_after_minutes)
 	_ = data.Set("group_name", alert.GroupName)
 	_ = data.Set("team", alert.TeamID)
 	_ = data.Set("enabled", alert.Enabled)
