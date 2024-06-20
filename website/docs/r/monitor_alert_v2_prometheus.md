@@ -20,7 +20,7 @@ resource "sysdig_monitor_alert_v2_prometheus" "sample" {
   description = "Elasticsearch JVM heap used over attention threshold"
   severity = "high"
   query = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
-  trigger_after_minutes = 10
+  duration_seconds = 600
   notification_channels {
     id = 1234
     renotify_every_minutes = 5
@@ -36,7 +36,8 @@ These arguments are common to all alerts in Sysdig Monitor.
 
 * `name` - (Required) The name of the Monitor alert. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
-* `trigger_after_minutes` - (Required) Threshold of time for the status to stabilize until the alert is fired.
+* `duration_seconds` - (Optional, cannot be used with `trigger_after_minutes`) A time interval that defines for how long a condition should be met before an alert occurrence is created.
+* `trigger_after_minutes` - (Optional, Deprecated, cannot be used with `duration_seconds`) A time interval that defines for how long a condition should be met before an alert occurrence is created. Deprecated: use `duration_seconds` instead.
 * `group` - (Optional) Lowercase string to group alerts in the UI.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.

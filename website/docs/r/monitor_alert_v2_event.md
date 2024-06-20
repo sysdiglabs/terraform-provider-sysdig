@@ -45,7 +45,7 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
     renotify_every_minutes = 60
   }
 
-  trigger_after_minutes = 1
+  range_seconds = 60
 
 }
 
@@ -59,7 +59,8 @@ These arguments are common to all alerts in Sysdig Monitor.
 
 * `name` - (Required) The name of the Monitor alert. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
-* `trigger_after_minutes` - (Required) Threshold of time for the status to stabilize until the alert is fired.
+* `range_seconds` - (Optional, required if `trigger_after_minutes` is not defined): Range of data points considered for the time aggregation.
+* `trigger_after_minutes` - (Optional, Deprecated) Range of data points considered for the time aggregation. Deprecated: use `range_seconds` instead.
 * `group` - (Optional) Lowercase string to group alerts in the UI.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.

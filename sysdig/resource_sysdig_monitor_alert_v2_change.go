@@ -312,7 +312,6 @@ func buildAlertV2ChangeStruct(d *schema.ResourceData) (*v2.AlertV2Change, error)
 
 	alert := &v2.AlertV2Change{
 		AlertV2Common:                            *alertV2Common,
-		DurationSec:                              0,
 		Config:                                   config,
 		UnreportedAlertNotificationsRetentionSec: unreportedAlertNotificationsRetentionSec,
 	}

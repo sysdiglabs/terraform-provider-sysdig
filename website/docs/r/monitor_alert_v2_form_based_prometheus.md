@@ -77,6 +77,7 @@ By defining this field, the user can add link to notifications.
 * `operator` - (Required) Operator for the condition to alert on. It can be `>`, `>=`, `<`, `<=`, `==` or `!=`.
 * `threshold` - (Required) Threshold used together with `op` to trigger the alert if crossed.
 * `warning_threshold` - (Optional) Warning threshold used together with `op` to trigger the alert if crossed. Must be a number that triggers the alert before reaching the main `threshold`.
+* `duration_seconds` - (Optional) A time interval that defines for how long a condition should be met before an alert occurrence is created.
 * `no_data_behaviour` - (Optional) behaviour in case of missing data. Can be `DO_NOTHING`, i.e. ignore, or `TRIGGER`, i.e. notify on main threshold. Default: `DO_NOTHING`.
 * `unreported_alert_notifications_retention_seconds` - (Optional) Period after which any alerts triggered for entities (such as containers or hosts) that are no longer reporting data will be automatically marked as 'deactivated'. By default there is no deactivation.
 
