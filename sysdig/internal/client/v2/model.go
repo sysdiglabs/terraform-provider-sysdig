@@ -706,6 +706,7 @@ type AlertV2Common struct {
 	CustomNotificationTemplate    *CustomNotificationTemplateV2 `json:"customNotificationTemplate,omitempty"`
 	CaptureConfig                 *CaptureConfigV2              `json:"captureConfig,omitempty"`
 	Links                         []AlertLinkV2                 `json:"links"`
+	Labels                        map[string]interface{}        `json:"labels,omitempty"`
 }
 
 type AlertV2ConfigPrometheus struct {
