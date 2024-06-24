@@ -38,6 +38,9 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 			Optional:     true,
 			Default:      string(v2.AlertV2SeverityLow),
 			ValidateFunc: validation.StringInSlice(AlertV2SeverityValues(), true),
+			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				return strings.EqualFold(old, new)
+			},
 		},
 		"group": {
 			Type:     schema.TypeString,
@@ -201,10 +204,14 @@ func AlertLinkV2TypeValues() []string {
 
 func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 	alert := &v2.AlertV2Common{
-		Name:     d.Get("name").(string),
-		Type:     "MANUAL",
-		Severity: d.Get("severity").(string),
-		Enabled:  d.Get("enabled").(bool),
+		Name:    d.Get("name").(string),
+		Type:    "MANUAL",
+		Enabled: d.Get("enabled").(bool),
+	}
+
+	alert.Severity = strings.ToLower(d.Get("severity").(string))
+	if alert.Severity == "info" {
+		alert.Severity = "none"
 	}
 
 	if description, ok := d.GetOk("description"); ok {
@@ -307,6 +314,9 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *v2.AlertV2Common) (
 	_ = d.Set("name", alert.Name)
 	_ = d.Set("description", alert.Description)
 	_ = d.Set("severity", alert.Severity)
+	if alert.Severity == "none" {
+		_ = d.Set("severity", "info")
+	}
 
 	// optional with defaults
 	_ = d.Set("group", alert.Group)
