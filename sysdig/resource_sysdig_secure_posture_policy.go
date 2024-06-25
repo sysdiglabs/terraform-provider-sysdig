@@ -280,10 +280,7 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 	}
 
 	// Set groups
-	if err := setGroups(d, policy.RequirementsGroup); err != nil {
-		return diag.FromErr(err)
-	}
-	if err != nil {
+	if _, err := setGroups(d, policy.RequirementsGroup); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil
@@ -308,7 +305,7 @@ func resourceSysdigSecurePosturePolicyDelete(ctx context.Context, d *schema.Reso
 	return nil
 }
 
-func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) error {
+func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) ([]interface{}, error) {
 	var groupsData []interface{}
 	for _, group := range groups {
 		groupData := map[string]interface{}{
@@ -323,13 +320,15 @@ func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) error {
 			groupData["requirement"] = requirementsData
 		}
 		if len(group.Folders) > 0 {
-			nestedGroupsData := setGroups(d, group.Folders)
+			nestedGroupsData, err := setGroups(d, group.Folders)
+			if err != nil {
+				return nil, err
+			}
 			groupData["group"] = nestedGroupsData
 		}
-
 		groupsData = append(groupsData, groupData)
 	}
-	return d.Set(SchemaGroupKey, groupsData)
+	return groupsData, nil
 }
 
 func setRequirements(requirements []v2.Requirement) []interface{} {
