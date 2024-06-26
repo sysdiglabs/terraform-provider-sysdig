@@ -75,10 +75,8 @@ func dataSourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Reso
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = d.Set(SchemaIDKey, policy.ID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+
+	d.SetId(policy.ID)
 
 	err = d.Set(SchemaNameKey, policy.Name)
 	if err != nil {
@@ -120,11 +118,14 @@ func dataSourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	// Set groups
-	if _, err := setGroups(d, policy.RequirementsGroup); err != nil {
+	groupsData, err := setGroups(d, policy.RequirementsGroup)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set(SchemaGroupKey, groupsData)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(policy.ID)
 	return nil
 }
