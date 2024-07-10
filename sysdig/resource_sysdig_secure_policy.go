@@ -217,7 +217,7 @@ func addActionsToPolicy(d *schema.ResourceData, policy *v2.Policy) {
 	}
 
 	killProcessAction, ok := d.GetOk("actions.0.kill_process")
-	if ok && killProcessAction.(bool) == true {
+	if ok && killProcessAction.(bool) {
 		policy.Actions = append(policy.Actions, v2.Action{Type: "POLICY_ACTION_KILL_PROCESS"})
 	}
 
