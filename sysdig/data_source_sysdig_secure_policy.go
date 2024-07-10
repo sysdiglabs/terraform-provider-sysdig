@@ -80,6 +80,11 @@ func createPolicyDataSourceSchema() map[string]*schema.Schema {
 						Optional: true,
 						Computed: true,
 					},
+					"kill_process": {
+						Type:     schema.TypeString,
+						Optional: true,
+						Computed: true,
+					},
 					"capture": {
 						Type:     schema.TypeList,
 						Optional: true,
@@ -137,11 +142,9 @@ func policyDataSourceToResourceData(policy v2.Policy, d *schema.ResourceData) {
 	_ = d.Set("runbook", policy.Runbook)
 
 	actions := []map[string]interface{}{{}}
+
 	for _, action := range policy.Actions {
-		if action.Type != "POLICY_ACTION_CAPTURE" {
-			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
-			actions[0]["container"] = strings.ToLower(action)
-		} else {
+		if action.Type == "POLICY_ACTION_CAPTURE" {
 			actions[0]["capture"] = []map[string]interface{}{{
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
@@ -150,6 +153,12 @@ func policyDataSourceToResourceData(policy v2.Policy, d *schema.ResourceData) {
 				"bucket_name":          action.BucketName,
 				"folder":               action.Folder,
 			}}
+
+		} else if action.Type == "POLICY_ACTION_KILL_PROCESS" {
+			actions[0]["kill_process"] = "true"
+		} else {
+			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
+			actions[0]["container"] = strings.ToLower(action)
 		}
 	}
 

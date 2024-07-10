@@ -48,6 +48,9 @@ func TestAccCustomPolicy(t *testing.T) {
 		{
 			Config: customPoliciesWithDisabledRules(rText()),
 		},
+		{
+			Config: customPoliciesWithKillProcessAction(rText()),
+		},
 	}
 
 	if !buildinfo.OnpremSecure {
@@ -222,8 +225,8 @@ resource "sysdig_secure_custom_policy" "sample_%d" {
 
 func customPoliciesWithKillAction(name string) (res string) {
 	return fmt.Sprintf(`
-resource "sysdig_secure_custom_policy" "sample" {
-  name = "TERRAFORM TEST 1 %s"
+resource "sysdig_secure_custom_policy" "sample10" {
+  name = "TERRAFORM TEST 10 %s"
   description = "TERRAFORM TEST %s"
   enabled = true
   severity = 4
@@ -237,6 +240,27 @@ resource "sysdig_secure_custom_policy" "sample" {
   actions {
     container = "kill"
   }
+}
+`, name, name)
+}
+
+func customPoliciesWithKillProcessAction(name string) (res string) {
+	return fmt.Sprintf(`
+resource "sysdig_secure_custom_policy" "sample10" {
+ name = "TERRAFORM TEST 1 %s"
+ description = "TERRAFORM TEST %s"
+ enabled = true
+ severity = 4
+ scope = "container.id != \"\""
+
+ rules {
+   name = "Terminal shell in container"
+   enabled = true
+ }
+
+ actions {
+   kill_process = "true"
+ }
 }
 `, name, name)
 }
