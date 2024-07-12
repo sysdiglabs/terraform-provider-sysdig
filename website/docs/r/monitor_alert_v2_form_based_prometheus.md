@@ -3,12 +3,12 @@ subcategory: "Sysdig Monitor"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_v2_form_based_prometheus"
 description: |-
-  Creates a Sysdig Monitor Form Based Prometheus Alert with AlertV2 API.
+  Creates a Sysdig Monitor Threshold Prometheus Alert with AlertV2 API.
 ---
 
 # Resource: sysdig_monitor_alert_v2_form_based_prometheus
 
-Creates a Sysdig Monitor Form Based Prometheus Alert. The notification is triggered on the user-defined PromQL expression with a threshold and operator defined outside of the expression, as described in [here](https://docs.sysdig.com/en/docs/sysdig-monitor/alerts/alert-types/metric-alerts/#translate-to-promql).
+Creates a Sysdig Monitor Prometheus Threshold Alert. The notification is triggered on the user-defined PromQL expression with a threshold and operator defined outside of the expression, as described in [here](https://docs.sysdig.com/en/docs/sysdig-monitor/alerts/alert-types/metric-alerts/#translate-to-promql).
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
@@ -71,7 +71,7 @@ By defining this field, the user can add link to notifications.
 * `href` - (Optional) When using `runbook` type, url of the external resource.
 * `id` - (Optional) When using `dashboard` type, dashboard id.
 
-### Form Based Prometheus alert arguments
+### Threshold Prometheus alert arguments
 
 * `query` - (Required) PromQL-based metric expression to alert on. Example: `sysdig_host_memory_available_bytes / sysdig_host_memory_total_bytes * 100` or `avg_over_time(sysdig_container_cpu_used_percent{}[59s])`.
 * `operator` - (Required) Operator for the condition to alert on. It can be `>`, `>=`, `<`, `<=`, `==` or `!=`.
@@ -95,7 +95,7 @@ In addition to all arguments above, the following attributes are exported, which
 
 ## Import
 
-Form Based Prometheus alerts can be imported using the alert ID, e.g.
+Threshold Prometheus alerts can be imported using the alert ID, e.g.
 
 ```
 $ terraform import sysdig_monitor_alert_v2_form_based_prometheus.example 12345

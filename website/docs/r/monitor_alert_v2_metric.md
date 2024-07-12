@@ -3,12 +3,12 @@ subcategory: "Sysdig Monitor"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_v2_metric"
 description: |-
-  Creates a Sysdig Monitor Metric Alert with AlertV2 API.
+  Creates a Sysdig Monitor Metric Threshold Alert with AlertV2 API.
 ---
 
 # Resource: sysdig_monitor_alert_v2_metric
 
-Creates a Sysdig Monitor Metric Alert. Monitor time-series metrics and alert if they violate user-defined thresholds.
+Creates a Sysdig Monitor Metric Threshold Alert. Monitor time-series metrics and alert if they violate user-defined thresholds.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
@@ -104,7 +104,7 @@ Enables the creation of a capture file of the syscalls during the event.
 * `filter` - (Optional) Additional filter to apply to the capture. For example: `proc.name contains nginx`.
 * `enabled` - (Optional) Wether to enable captures. Default: `true`.
 
-### Metric alert arguments
+### Metric Threshold alert arguments
 
 * `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure. Can be repeated.
 * `group_by` - (Optional) List of segments to trigger a separate alert on. Example: `["kube_cluster_name", "kube_pod_name"]`.
@@ -138,7 +138,7 @@ In addition to all arguments above, the following attributes are exported, which
 
 ## Import
 
-Metric alerts can be imported using the alert ID, e.g.
+Metric Threshold alerts can be imported using the alert ID, e.g.
 
 ```
 $ terraform import sysdig_monitor_alert_v2_metric.example 12345

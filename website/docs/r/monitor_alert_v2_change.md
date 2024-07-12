@@ -3,12 +3,12 @@ subcategory: "Sysdig Monitor"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_v2_change"
 description: |-
-  Creates a Sysdig Monitor Change Alert with AlertV2 API.
+  Creates a Sysdig Monitor Percentage of Change Alert with AlertV2 API.
 ---
 
 # Resource: sysdig_monitor_alert_v2_change
 
-Creates a Sysdig Monitor Change Alert. Change Alerts trigger when a metric value substantially deviates compared to historical values.
+Creates a Sysdig Monitor Percentage of Change Alert. Percentage of Change Alerts trigger when a metric value substantially deviates compared to historical values.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
@@ -92,7 +92,7 @@ By defining this field, the user can add link to notifications.
 * `href` - (Optional) When using `runbook` type, url of the external resource.
 * `id` - (Optional) When using `dashboard` type, dashboard id.
 
-### Change alert arguments
+### Percentage of Change alert arguments
 
 * `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure. Can be repeated.
 * `group_by` - (Optional) List of segments to trigger a separate alert on. Example: `["kube_cluster_name", "kube_pod_name"]`.
@@ -127,7 +127,7 @@ In addition to all arguments above, the following attributes are exported, which
 
 ## Import
 
-Change alerts can be imported using the alert ID, e.g.
+Percentage of Change alerts can be imported using the alert ID, e.g.
 
 ```
 $ terraform import sysdig_monitor_alert_v2_change.example 12345
