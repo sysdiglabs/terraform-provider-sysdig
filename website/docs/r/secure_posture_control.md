@@ -16,18 +16,39 @@ Creates a Sysdig Secure Posture Control.
 
 ```terraform
 resource "sysdig_secure_posture_control" "c"{
-        name = "EC2 - Instances should not have a public IP address"
-        description = "EC2 - Instances should not have a public IP address"
-        rego = "package sysdig\ndefault risky = false\nrisky {\n    input.NetworkInterfaces[_].Association.PublicIp\n    input.NetworkInterfaces[_].Association.PublicIp != \"\"\n}"
-        remediation_details= "Use a non-default VPC so that your instance is not assigned a public IP address by default.\n\nWhen you launch an EC2 instance into a default VPC, it is assigned a public IP address. When you launch an EC2 instance into a non-default VPC, the subnet configuration determines whether it receives a public IP address. The subnet has an attribute to determine if new EC2 instances in the subnet receive a public IP address from the public IPv4 address pool.\n\nYou cannot manually associate or disassociate an automatically-assigned public IP address from your EC2 instance. To control whether your EC2 instance receives a public IP address, do one of the following:\n\nModify the public IP addressing attribute of your subnet. For more information, see Modifying the public IPv4 addressing attribute for your subnet in the Amazon VPC User Guide.\nEnable or disable the public IP addressing feature during launch. This overrides the subnet's public IP addressing attribute. For more information, see Assign a public IPv4 address during instance launch in the Amazon EC2 User Guide for Linux Instances.\nFor more information, see Public IPv4 addresses and external DNS hostnames in the Amazon EC2 User Guide for Linux Instances.\n\nIf your EC2 instance is associated with an Elastic IP address, then your EC2 instance is reachable from the internet. You can disassociate an Elastic IP address from an instance or network interface at any time.\n\nTo disassociate an Elastic IP address\nOpen the Amazon EC2 console at https://console.aws.amazon.com/ec2/.\nIn the navigation pane, choose Elastic IPs.\nSelect the Elastic IP address to disassociate.\nFrom Actions, choose Disassociate Elastic IP address.\nChoose Disassociate."
+        name = "S3 - Enabled Versioning"
+        description = "S3 - Enabled Versioning"
         resource_kind = "AWS_S3_BUCKET"
-        severity= "High"
+        severity = "Low"
+        rego          = <<-EOF
+
+            package sysdig
+
+            import future.keywords.if
+            import future.keywords.in
+
+            default risky := false
+
+            risky if {
+              count(input.Versioning) == 0
+            }
+
+            risky if {
+              some version in input.Versioning
+              lower(version.Status) != "enabled"
+            }
+        EOF
+     
+     remediation_details = <<-EOF 
+      **Using AWS CLI**\n1. Run **put-bucket-versioning** command (OSX/Linux/UNIX) using the name of the Amazon S3 bucket that you want to reconfigure as the identifier parameter, to enable S3 object versioning for the selected bucket. If the request is successful, the **put-bucket-versioning** command should not return an output:\n```bash\nawsaws s3api put-bucket-versioning\n  --bucket cc-prod-web-data\n  --versioning-configuration Status=Enabled\n```\n2. Repeat step no. 1 to enable S3 object versioning for other Amazon S3 buckets available within your AWS cloud account.
+      
+    EOF
 }
 ```
 
 ## Argument Reference
 
-- `name` -- (Required) The name of the Posture Control. The name must be unique, e.g. `EC2 - Instances should not have a public IP address`
+- `name` - (Required) The name of the Posture Control. The name must be unique, e.g. `EC2 - Instances should not have a public IP address`
 - `description` - (Required) The description of the Posture Control, eg. `EC2 - Instances should not have a public IP address`
 - `rego` - (Required) The Posture control Rego. `package sysdig\ndefault risky = false\nrisky {\n    input.NetworkInterfaces[_].Association.PublicIp\n    input.      NetworkInterfaces[_].Association.PublicIp != \"\"\n}`
 - `remediation_details`- (Required) The Posture control Remediation details. `Use a non-default VPC so that your instance is not assigned a public IP address by default`
@@ -37,11 +58,11 @@ resource "sysdig_secure_posture_control" "c"{
 
 In addition to all arguments above, the following attributes are exported:
 
-- `author` - (Computed) The Control author.
+- `author` - (Computed) The custom control author.
 
 ## Import
 
-Posture policy can be imported using the ID, e.g.
+Posture custom control can be imported using the ID, e.g.
 
 ```
 $ terraform import sysdig_secure_posture_control.example c 12345
