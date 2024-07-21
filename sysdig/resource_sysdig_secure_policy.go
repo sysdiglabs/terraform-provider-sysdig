@@ -121,11 +121,7 @@ func commonPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 
 	actions := []map[string]interface{}{{}}
 	for _, action := range policy.Actions {
-		if action.Type != "POLICY_ACTION_CAPTURE" {
-			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
-			actions[0]["container"] = strings.ToLower(action)
-			// d.Set("actions.0.container", strings.ToLower(action))
-		} else {
+		if action.Type == "POLICY_ACTION_CAPTURE" {
 			actions[0]["capture"] = []map[string]interface{}{{
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
@@ -134,6 +130,12 @@ func commonPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 				"bucket_name":          action.BucketName,
 				"folder":               action.Folder,
 			}}
+
+		} else if action.Type == "POLICY_ACTION_KILL_PROCESS" {
+			actions[0]["kill_process"] = true
+		} else {
+			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
+			actions[0]["container"] = strings.ToLower(action)
 		}
 	}
 
@@ -212,6 +214,11 @@ func addActionsToPolicy(d *schema.ResourceData, policy *v2.Policy) {
 	preventMalwareAction, ok := d.GetOk("actions.0.prevent_malware")
 	if ok && preventMalwareAction.(bool) {
 		policy.Actions = append(policy.Actions, v2.Action{Type: "POLICY_ACTION_PREVENT_MALWARE"})
+	}
+
+	killProcessAction, ok := d.GetOk("actions.0.kill_process")
+	if ok && killProcessAction.(bool) {
+		policy.Actions = append(policy.Actions, v2.Action{Type: "POLICY_ACTION_KILL_PROCESS"})
 	}
 
 	containerAction := d.Get("actions.0.container").(string)
