@@ -174,6 +174,18 @@ type GroupMappingConfig struct {
 	DifferentTeamSameRoleStrategy string `json:"differentRolesSameTeamStrategy"`
 }
 
+type AllowedIpRange struct {
+	ID          int    `json:"id,omitempty"`
+	IpRange     string `json:"ipRange"`
+	Note        string `json:"note,omitempty"`
+	Enabled     bool   `json:"isEnabled"`
+	LastUpdated string `json:"lastUpdated,omitempty"`
+}
+
+type allowedIpRangeWrapper struct {
+	AllowedIpRange AllowedIpRange `json:"allowedIpRange"`
+}
+
 type alertWrapper struct {
 	Alert Alert `json:"alert"`
 }

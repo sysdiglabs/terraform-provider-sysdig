@@ -121,6 +121,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_custom_role":          resourceSysdigCustomRole(),
 			"sysdig_team_service_account": resourceSysdigTeamServiceAccount(),
 			"sysdig_agent_access_key":     resourceSysdigAgentAccessKey(),
+			"sysdig_allowed_ip_range":     resourceSysdigAllowedIpRange(),
 
 			"sysdig_secure_aws_ml_policy":                                 resourceSysdigSecureAWSMLPolicy(),
 			"sysdig_secure_custom_policy":                                 resourceSysdigSecureCustomPolicy(),
