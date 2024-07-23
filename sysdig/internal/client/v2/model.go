@@ -182,10 +182,6 @@ type AllowedIpRange struct {
 	LastUpdated string `json:"lastUpdated,omitempty"`
 }
 
-type allowedIpRangeWrapper struct {
-	AllowedIpRange AllowedIpRange `json:"allowedIpRange"`
-}
-
 type alertWrapper struct {
 	Alert Alert `json:"alert"`
 }
