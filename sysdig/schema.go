@@ -205,6 +205,14 @@ func ContainerActionSchema() *schema.Schema {
 	}
 }
 
+func ContainerKillProcessActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  false,
+	}
+}
+
 func ContainerActionComputedSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeString,
@@ -448,8 +456,9 @@ func createPolicySchema(original map[string]*schema.Schema) map[string]*schema.S
 			Optional: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"container": ContainerActionSchema(),
-					"capture":   CaptureActionSchema(),
+					"container":    ContainerActionSchema(),
+					"kill_process": ContainerKillProcessActionSchema(),
+					"capture":      CaptureActionSchema(),
 				},
 			},
 		},

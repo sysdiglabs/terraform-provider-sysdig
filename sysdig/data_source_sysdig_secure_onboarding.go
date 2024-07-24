@@ -2,6 +2,8 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -94,6 +96,62 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 	return nil
 }
 
+func dataSourceSysdigSecureTrustedAzureApp() *schema.Resource {
+	timeout := 5 * time.Minute
+
+	return &schema.Resource{
+		ReadContext: dataSourceSysdigSecureTrustedAzureAppRead,
+
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(timeout),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"config_posture", "onboarding", "threat_detection"}, false),
+			},
+			"tenant_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"application_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"service_principal_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+// Retrieves the information of a resource form the file and loads it in Terraform
+func dataSourceSysdigSecureTrustedAzureAppRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getSecureOnboardingClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	app := d.Get("name").(string)
+	registration, err := client.GetTrustedAzureAppSecure(ctx, app)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId(app)
+	for k, v := range registration {
+		fmt.Printf("%s, %s\n", k, snakeCase(k))
+		err = d.Set(snakeCase(k), v)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	return nil
+}
+
 func dataSourceSysdigSecureTenantExternalID() *schema.Resource {
 	timeout := 5 * time.Minute
 
@@ -132,4 +190,103 @@ func dataSourceSysdigSecureTenantExternalIDRead(ctx context.Context, d *schema.R
 	}
 
 	return nil
+}
+
+func dataSourceSysdigSecureAgentlessScanningAssets() *schema.Resource {
+	timeout := 5 * time.Minute
+
+	return &schema.Resource{
+		ReadContext: dataSourceSysdigSecureAgentlessScanningAssetsRead,
+
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(timeout),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"aws": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"azure": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"backend": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"gcp": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+		},
+	}
+}
+
+// Retrieves the information of a resource form the file and loads it in Terraform
+func dataSourceSysdigSecureAgentlessScanningAssetsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getSecureOnboardingClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	assets, err := client.GetAgentlessScanningAssetsSecure(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	assetsAws, _ := assets["aws"].(map[string]interface{})
+	assetsAzure, _ := assets["azure"].(map[string]interface{})
+	assetsBackend, _ := assets["backend"].(map[string]interface{})
+	assetsGcp, _ := assets["gcp"].(map[string]interface{})
+
+	d.SetId("agentlessScanningAssets")
+	err = d.Set("aws", map[string]interface{}{
+		"account_id": assetsAws["accountId"],
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set("azure", map[string]interface{}{
+		"service_principal_id": assetsAzure["servicePrincipalId"],
+		"tenant_id":            assetsAzure["tenantId"],
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set("backend", map[string]interface{}{
+		"cloud_id": assetsBackend["cloudId"],
+		"type":     assetsBackend["type"],
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set("gcp", map[string]interface{}{
+		"worker_identity": assetsGcp["workerIdentity"],
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
+}
+
+var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+
+func snakeCase(str string) string {
+	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
+	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+	return strings.ToLower(snake)
 }

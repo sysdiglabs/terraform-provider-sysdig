@@ -46,14 +46,14 @@ func TestAccSecureNotificationChannelTeamEmail(t *testing.T) {
 
 func secureNotificationChannelTeamEmailWithName(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_team" "sample" {
+resource "sysdig_secure_team" "sample1" {
 	name = "secure-sample-%s"
 	all_zones = "true"
 }
 resource "sysdig_secure_notification_channel_team_email" "sample_team_email1" {
 	name = "Example Channel %s - team email"
 	enabled = true
-	team_id = sysdig_secure_team.sample.id
+	team_id = sysdig_secure_team.sample1.id
 	notify_when_ok = true
 	notify_when_resolved = true
 }`, name, name)
@@ -61,14 +61,14 @@ resource "sysdig_secure_notification_channel_team_email" "sample_team_email1" {
 
 func secureNotificationChannelTeamEmailSharedWithCurrentTeam(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_team" "sample" {
+resource "sysdig_secure_team" "sample2" {
 	name = "secure-sample-%s"
 	all_zones = "true"
 }
 resource "sysdig_secure_notification_channel_team_email" "sample_team_email2" {
 	name = "Example Channel %s - team email"
 	enabled = true
-	team_id = sysdig_secure_team.sample.id
+	team_id = sysdig_secure_team.sample2.id
 	notify_when_ok = true
 	notify_when_resolved = true
 	share_with_current_team = true

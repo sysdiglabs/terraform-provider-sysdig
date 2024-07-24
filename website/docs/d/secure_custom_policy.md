@@ -58,6 +58,10 @@ The actions block is optional and supports:
     triggered. Can be *stop*, *pause* or *kill*. If this is not specified,
     no action will be applied at the container level.
 
+* `kill_process` - (Optional) Whether to kill the process that triggered the rule.
+  If this is not specified,
+  no action will be applied at the process level.
+
 * `capture` - (Optional) Captures with Sysdig the stream of system calls:
     * `seconds_before_event` - (Required) Captures the system calls during the
     amount of seconds before the policy was triggered.

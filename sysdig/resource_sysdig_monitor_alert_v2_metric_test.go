@@ -43,6 +43,9 @@ func TestAccAlertV2Metric(t *testing.T) {
 				Config: alertV2MetricWithSeverity(rText()),
 			},
 			{
+				Config: alertV2MetricWithSeverityInfo(rText()),
+			},
+			{
 				Config: alertV2MetricWithGroupBy(rText()),
 			},
 			{
@@ -197,6 +200,23 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	threshold = 50
 	trigger_after_minutes = 15
 	severity = "high"
+
+}
+`, name)
+}
+
+func alertV2MetricWithSeverityInfo(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_metric" "sample" {
+
+	name = "TERRAFORM TEST - METRICV2 %s"
+	metric = "sysdig_container_cpu_used_percent"
+	group_aggregation = "avg"
+	time_aggregation = "avg"
+	operator = ">="
+	threshold = 50
+	trigger_after_minutes = 15
+	severity = "info"
 
 }
 `, name)
