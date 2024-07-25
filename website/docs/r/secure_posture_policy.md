@@ -24,7 +24,7 @@ resource "sysdig_secure_posture_policy" "example" {
   description      = "demo create policy from terraform"
 
   // New targets field to specify version constraints
-  target =
+  target
     {
       platform   = "Vanilla"
       minVersion = 1.5
