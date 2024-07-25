@@ -180,7 +180,7 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			SchemaVersionConstraintKey: {
+			SchemaTargetKey: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
@@ -226,7 +226,7 @@ func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *sch
 		MaxKubeVersion:     getFloatValue(d, SchemaMaxKubeVersionKey),
 		IsActive:           getBoolValue(d, SchemaIsActiveKey),
 		Platform:           getStringValue(d, SchemaPlatformKey),
-		VersionConstraints: getVersionConstraintsValue(d, SchemaVersionConstraintKey),
+		VersionConstraints: getVersionConstraintsValue(d, SchemaTargetKey),
 		Link:               getStringValue(d, SchemaLinkKey),
 		RequirementGroups:  groups,
 	}
@@ -302,7 +302,7 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	err = setVersionConstraints(d, SchemaVersionConstraintKey, policy.VersionConstraints)
+	err = setVersionConstraints(d, SchemaTargetKey, policy.VersionConstraints)
 
 	if err != nil {
 		return diag.FromErr(err)

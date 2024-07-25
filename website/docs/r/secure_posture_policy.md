@@ -24,13 +24,12 @@ resource "sysdig_secure_posture_policy" "example" {
   description      = "demo create policy from terraform"
 
   // New targets field to specify version constraints
-  targets = [
+  target =
     {
       platform   = "Vanilla"
       minVersion = 1.5
       maxVersion = 2.0
     }
-  ]
 
   group {
     name        = "Security"
@@ -101,18 +100,18 @@ resource "sysdig_secure_posture_policy" "example" {
 
 * `maxKubeVersion`: (Optional) Policy maximum Kubernetes version, e.g., 1.26. This field will be deprecated in the future, and you should use the targets field instead to describe policy platform and version.
 
-* `targets`:(Optional) Specifies target platforms and version ranges. This field should replace Platform, MinKubeVersion, and MaxKubeVersion for more flexible and detailed policy descriptions.
+* `target`:(Optional) Specifies target platforms and version ranges. This field should replace Platform, MinKubeVersion, and MaxKubeVersion for more flexible and detailed policy descriptions.
 
   Note: The fields Platform, MinKubeVersion, and MaxKubeVersion will be deprecated in the future. We recommend using the targets field now to describe policy platform and version constraints
 
-* `groups` - (Optional) Group block defines list of groups attached to Policy
+* `group` - (Optional) Group block defines list of groups attached to Policy
 
-### Targetd block
+### Target block
  - `platform` (Optional): Name of the target platform (e.g., IKS, AWS).
  - `minVersion` (Optional): Minimum version of the platform.(e.g., 1.24)
  - `maxVersion` (Optional): Maximum version of the platform. (e.g., 1.26)
 
-### Groups block
+### Group block
 - `name` - (Required) The name of the Posture Policy Group.
 - `description` - (Required) The description of the Posture Policy Group.
 - `requirements` -  (Optional) Requirements block defines list of requirements attached to Group
