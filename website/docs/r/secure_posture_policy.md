@@ -106,12 +106,12 @@ resource "sysdig_secure_posture_policy" "example" {
 
 * `group` - (Optional) Group block defines list of groups attached to Policy
 
-### Target block
+### Targets block
  - `platform` (Optional): Name of the target platform (e.g., IKS, AWS).
  - `minVersion` (Optional): Minimum version of the platform.(e.g., 1.24)
  - `maxVersion` (Optional): Maximum version of the platform. (e.g., 1.26)
 
-### Group block
+### Groups block
 - `name` - (Required) The name of the Posture Policy Group.
 - `description` - (Required) The description of the Posture Policy Group.
 - `requirements` -  (Optional) Requirements block defines list of requirements attached to Group
