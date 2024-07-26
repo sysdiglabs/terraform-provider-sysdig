@@ -403,7 +403,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 		maturity = "high"
 	}
 }
-`, name, name, name)
+`, name)
 }
 
 func alertV2MetricWithWarningThreshold(name string) string {

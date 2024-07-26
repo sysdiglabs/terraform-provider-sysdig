@@ -25,7 +25,7 @@ func TestAccMonitorInhibitionRule(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: monitorInhibitionRuleBase(rText()),
+				Config: monitorInhibitionRuleBase(),
 			},
 			{
 				ResourceName:      "sysdig_monitor_inhibition_rule.sample",
@@ -68,8 +68,8 @@ func TestAccMonitorInhibitionRule(t *testing.T) {
 	})
 }
 
-func monitorInhibitionRuleBase(text string) string {
-	return fmt.Sprintf(`
+func monitorInhibitionRuleBase() string {
+	return `
 resource "sysdig_monitor_inhibition_rule" "sample" {
   source_matchers {
     label_name = "alertname"
@@ -94,7 +94,7 @@ resource "sysdig_monitor_inhibition_rule" "sample" {
     operator = "REGEXP_MATCHES"
     value = ".*l1val.*"
   }
-}`, text)
+}`
 }
 
 func monitorInhibitionRuleWithName(text string) string {
@@ -133,7 +133,7 @@ resource "sysdig_monitor_inhibition_rule" "sample" {
 	description = "Example Inhibition Rule descr %s"
   source_matchers {
     label_name = "alertname"
-    operator = EQUALS
+    operator = "EQUALS"
     value = "networkAlert"
   }
 
