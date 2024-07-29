@@ -216,9 +216,6 @@ func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.
 
 	cloudauthAccount, errStatus, err := client.GetCloudauthAccountSecure(ctx, data.Id())
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
-		}
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
 
@@ -238,9 +235,6 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 
 	existingCloudAccount, errStatus, err := client.GetCloudauthAccountSecure(ctx, data.Id())
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
-		}
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
 
@@ -254,9 +248,6 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 
 	_, errStatus, err = client.UpdateCloudauthAccountSecure(ctx, data.Id(), newCloudAccount)
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
-		}
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 
