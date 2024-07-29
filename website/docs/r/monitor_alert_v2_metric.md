@@ -8,7 +8,9 @@ description: |-
 
 # Resource: sysdig_monitor_alert_v2_metric
 
-Creates a Sysdig Monitor Metric Threshold Alert. Monitor time-series metrics and alert if they violate user-defined thresholds.
+-> **Note:**: Metric Alerts have been renamed to Threshold Alerts. The Terraform resource remains `sysdig_monitor_alert_v2_metric` for backwards compatibility.
+
+Monitor your infrastructure by comparing any metric against user-defined thresholds.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
@@ -55,12 +57,12 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 
 These arguments are common to all alerts in Sysdig Monitor.
 
-* `name` - (Required) The name of the Monitor alert. It must be unique.
+* `name` - (Required) The name of the alert rule. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
-* `range_seconds` - (Optional, required if `trigger_after_minutes` is not defined): Range of data points considered for the time aggregation.
-* `trigger_after_minutes` - (Optional, Deprecated) Range of data points considered for the time aggregation. Deprecated: use `range_seconds` instead.
+* `range_seconds` - (Optional, Required if `trigger_after_minutes` is not defined): The rolling time aggregation period in which the relevant metric data is evaluated.
+* `trigger_after_minutes` - (Optional, Deprecated) The rolling time aggregation period in which the relevant metric data is evaluated. Deprecated: use `range_seconds` instead.
 * `duration_seconds` - (Optional) A time interval that defines for how long a condition should be met before an alert occurrence is created.
-* `group` - (Optional) Lowercase string to group alerts in the UI.
+* `group` - (Optional) Used to group alert rules in the UI. This value must be a lowercase string.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.
 * `notification_channels` - (Optional) List of notification channel configurations.

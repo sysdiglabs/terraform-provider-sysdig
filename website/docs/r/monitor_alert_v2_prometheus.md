@@ -8,7 +8,7 @@ description: |-
 
 # Resource: sysdig_monitor_alert_v2_prometheus
 
-Creates a Sysdig Monitor Prometheus Alert. The notification is triggered on the user-defined PromQL expression.
+Monitor your infrastructure with PromQL queries, maintaining full compatibility with OSS Prometheus.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
@@ -34,11 +34,11 @@ resource "sysdig_monitor_alert_v2_prometheus" "sample" {
 
 These arguments are common to all alerts in Sysdig Monitor.
 
-* `name` - (Required) The name of the Monitor alert. It must be unique.
+* `name` - (Required) The name of the alert rule. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
-* `duration_seconds` - (Optional, cannot be used with `trigger_after_minutes`) A time interval that defines for how long a condition should be met before an alert occurrence is created.
-* `trigger_after_minutes` - (Optional, Deprecated, cannot be used with `duration_seconds`) A time interval that defines for how long a condition should be met before an alert occurrence is created. Deprecated: use `duration_seconds` instead.
-* `group` - (Optional) Lowercase string to group alerts in the UI.
+* `duration_seconds` - (Optional, cannot be used with `trigger_after_minutes`) Specifies the amount of time, in seconds, that an alert condition must remain continuously true before the alert rule is triggered.
+* `trigger_after_minutes` - (Optional, Deprecated, cannot be used with `duration_seconds`) Specifies the amount of time, in minutes, that an alert condition must remain continuously true before the alert rule is triggered. Deprecated: use `duration_seconds` instead.
+* `group` - (Optional) Used to group alert rules in the UI. This value must be a lowercase string.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.
 * `notification_channels` - (Optional) List of notification channel configurations.
