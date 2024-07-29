@@ -36,7 +36,7 @@ func resourceSysdigMonitorAlertV2FormBasedPrometheus() *schema.Resource {
 			"operator": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{">", ">=", "<", "<=", "=", "!="}, false),
+				ValidateFunc: validation.StringInSlice([]string{">", ">=", "<", "<=", "==", "!="}, false),
 			},
 			"threshold": {
 				Type:     schema.TypeFloat,
