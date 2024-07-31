@@ -6,23 +6,24 @@ description: |-
   Creates allowed IP range in Sysdig which can be used to restrict access to the Sysdig platform.
 ---
 
-# Resource: sysdig_allowed_ip_range
+# Resource: sysdig_ip_filter
 
-Creates allowed IP range in Sysdig which can be used to restrict access to the Sysdig platform.
+Configures IP address/range which can be used to restrict access to the Sysdig platform.
+The feature is active when at least one IP address/range exists and is enabled.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
 ```terraform
-resource "sysdig_allowed_ip_range" "example" {
+resource "sysdig_ip_filter" "example" {
   ip_range = "192.168.100.0/24"
   note     = "Office IP range"
   enabled  = true
 }
 
 ```
-This example creates an allowed IP range for 192.168.100.0/24, with a note indicating it's for an office IP range, and it's enabled.
+This example creates a filter for IP range 192.168.100.0/24, with a note indicating it's for an office IP range, and it's enabled.
 
 
 ## Argument Reference
@@ -38,8 +39,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-Sysdig allowed IP ranges can be imported using the ID, e.g.
+Sysdig IP filter can be imported using the ID, e.g.
 
 ```
-$ terraform import sysdig_allowed_ip_range.example 12345
+$ terraform import sysdig_ip_filter.example 12345
 ```

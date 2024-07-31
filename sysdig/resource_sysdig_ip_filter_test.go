@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestAccSysdigAllowedIpRange_fullLifecycle(t *testing.T) {
+func TestAccSysdigIpFilter_fullLifecycle(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -24,18 +24,18 @@ func TestAccSysdigAllowedIpRange_fullLifecycle(t *testing.T) {
 				// Create resource
 				Config: configBasic("192.168.1.0/24", "Initial note", true),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sysdig_allowed_ip_range.test", "ip_range", "192.168.1.0/24"),
-					resource.TestCheckResourceAttr("sysdig_allowed_ip_range.test", "note", "Initial note"),
-					resource.TestCheckResourceAttr("sysdig_allowed_ip_range.test", "enabled", "true"),
+					resource.TestCheckResourceAttr("sysdig_ip_filter.test", "ip_range", "192.168.1.0/24"),
+					resource.TestCheckResourceAttr("sysdig_ip_filter.test", "note", "Initial note"),
+					resource.TestCheckResourceAttr("sysdig_ip_filter.test", "enabled", "true"),
 				),
 			},
 			{
 				// Update resource
 				Config: configBasic("192.168.2.0/24", "Updated note", false),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sysdig_allowed_ip_range.test", "ip_range", "192.168.2.0/24"),
-					resource.TestCheckResourceAttr("sysdig_allowed_ip_range.test", "note", "Updated note"),
-					resource.TestCheckResourceAttr("sysdig_allowed_ip_range.test", "enabled", "false"),
+					resource.TestCheckResourceAttr("sysdig_ip_filter.test", "ip_range", "192.168.2.0/24"),
+					resource.TestCheckResourceAttr("sysdig_ip_filter.test", "note", "Updated note"),
+					resource.TestCheckResourceAttr("sysdig_ip_filter.test", "enabled", "false"),
 				),
 			},
 		},
@@ -44,7 +44,7 @@ func TestAccSysdigAllowedIpRange_fullLifecycle(t *testing.T) {
 
 func configBasic(ipRange, note string, enabled bool) string {
 	return fmt.Sprintf(`
-resource "sysdig_allowed_ip_range" "test" {
+resource "sysdig_ip_filter" "test" {
   ip_range = "%s"
   note     = "%s"
   enabled  = %t

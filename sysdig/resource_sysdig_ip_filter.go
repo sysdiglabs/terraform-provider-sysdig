@@ -8,12 +8,12 @@ import (
 	"strconv"
 )
 
-func resourceSysdigAllowedIpRange() *schema.Resource {
+func resourceSysdigIpFilter() *schema.Resource {
 	return &schema.Resource{
-		ReadContext:   resourceSysdigAllowedIpRangeRead,
-		CreateContext: resourceSysdigAllowedIpRangeCreate,
-		UpdateContext: resourceSysdigAllowedIpRangeUpdate,
-		DeleteContext: resourceSysdigAllowedIpRangeDelete,
+		ReadContext:   resourceSysdigIpFilterRead,
+		CreateContext: resourceSysdigIpFilterCreate,
+		UpdateContext: resourceSysdigIpFilterUpdate,
+		DeleteContext: resourceSysdigIpFilterDelete,
 		Schema: map[string]*schema.Schema{
 			"ip_range": {
 				Type:     schema.TypeString,
@@ -31,7 +31,7 @@ func resourceSysdigAllowedIpRange() *schema.Resource {
 	}
 }
 
-func resourceSysdigAllowedIpRangeRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIpFilterRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -42,16 +42,16 @@ func resourceSysdigAllowedIpRangeRead(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	allowedIpRange, err := client.GetAllowedIpRangeById(ctx, id)
+	ipFilter, err := client.GetIPFilterById(ctx, id)
 	if err != nil {
-		if err == v2.AllowedIpRangeNotFound {
+		if err == v2.IpFilterNotFound {
 			d.SetId("")
 			return nil
 		}
 		return diag.FromErr(err)
 	}
 
-	err = ipRangeToResourceData(allowedIpRange, d)
+	err = ipFilterToResourceData(ipFilter, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -59,37 +59,36 @@ func resourceSysdigAllowedIpRangeRead(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceSysdigAllowedIpRangeCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIpFilterCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	allowedIpRange, err := ipRangeFromResourceData(d)
+	ipFilter, err := ipFilterFromResourceData(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	createdAllowedIpRange, err := client.CreateAllowedIpRange(ctx, allowedIpRange)
+	createdIPFilter, err := client.CreateIPFilter(ctx, ipFilter)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(strconv.Itoa(createdAllowedIpRange.ID))
+	d.SetId(strconv.Itoa(createdIPFilter.ID))
 
-	resourceSysdigAllowedIpRangeRead(ctx, d, m)
+	resourceSysdigIpFilterRead(ctx, d, m)
 
 	return nil
-
 }
 
-func resourceSysdigAllowedIpRangeUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIpFilterUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	allowedIpRange, err := ipRangeFromResourceData(d)
+	ipFilter, err := ipFilterFromResourceData(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -100,18 +99,18 @@ func resourceSysdigAllowedIpRangeUpdate(ctx context.Context, d *schema.ResourceD
 
 	}
 
-	allowedIpRange.ID = id
-	_, err = client.UpdateAllowedIpRange(ctx, allowedIpRange, id)
+	ipFilter.ID = id
+	_, err = client.UpdateIPFilter(ctx, ipFilter, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	resourceSysdigAllowedIpRangeRead(ctx, d, m)
+	resourceSysdigIpFilterRead(ctx, d, m)
 
 	return nil
 }
 
-func resourceSysdigAllowedIpRangeDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIpFilterDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -122,7 +121,7 @@ func resourceSysdigAllowedIpRangeDelete(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteAllowedIpRange(ctx, id)
+	err = client.DeleteIPFilter(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -130,16 +129,16 @@ func resourceSysdigAllowedIpRangeDelete(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func ipRangeToResourceData(allowedIpRange *v2.AllowedIpRange, d *schema.ResourceData) error {
-	err := d.Set("ip_range", allowedIpRange.IpRange)
+func ipFilterToResourceData(ipFilter *v2.IPFilter, d *schema.ResourceData) error {
+	err := d.Set("ip_range", ipFilter.IPRange)
 	if err != nil {
 		return err
 	}
-	err = d.Set("note", allowedIpRange.Note)
+	err = d.Set("note", ipFilter.Note)
 	if err != nil {
 		return err
 	}
-	err = d.Set("enabled", allowedIpRange.Enabled)
+	err = d.Set("enabled", ipFilter.Enabled)
 	if err != nil {
 		return err
 	}
@@ -147,9 +146,9 @@ func ipRangeToResourceData(allowedIpRange *v2.AllowedIpRange, d *schema.Resource
 	return nil
 }
 
-func ipRangeFromResourceData(d *schema.ResourceData) (*v2.AllowedIpRange, error) {
-	return &v2.AllowedIpRange{
-		IpRange: d.Get("ip_range").(string),
+func ipFilterFromResourceData(d *schema.ResourceData) (*v2.IPFilter, error) {
+	return &v2.IPFilter{
+		IPRange: d.Get("ip_range").(string),
 		Note:    d.Get("note").(string),
 		Enabled: d.Get("enabled").(bool),
 	}, nil

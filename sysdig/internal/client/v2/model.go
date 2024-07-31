@@ -174,9 +174,9 @@ type GroupMappingConfig struct {
 	DifferentTeamSameRoleStrategy string `json:"differentRolesSameTeamStrategy"`
 }
 
-type AllowedIpRange struct {
+type IPFilter struct {
 	ID          int    `json:"id,omitempty"`
-	IpRange     string `json:"ipRange"`
+	IPRange     string `json:"ipRange"`
 	Note        string `json:"note,omitempty"`
 	Enabled     bool   `json:"isEnabled"`
 	LastUpdated string `json:"lastUpdated,omitempty"`
