@@ -98,7 +98,7 @@ func (client *Client) DeleteIPFilter(ctx context.Context, id int) error {
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusNotFound {
 		return client.ErrorFromResponse(response)
 	}
 
