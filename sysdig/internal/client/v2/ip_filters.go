@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-var IpFilterNotFound = errors.New("IP filter not found")
+var IPFilterNotFound = errors.New("IP filter not found")
 
 const (
 	IPFiltersPath = "%s/platform/v1/ip-filters"

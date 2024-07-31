@@ -8,12 +8,12 @@ import (
 	"strconv"
 )
 
-func resourceSysdigIpFilter() *schema.Resource {
+func resourceSysdigIPFilter() *schema.Resource {
 	return &schema.Resource{
-		ReadContext:   resourceSysdigIpFilterRead,
-		CreateContext: resourceSysdigIpFilterCreate,
-		UpdateContext: resourceSysdigIpFilterUpdate,
-		DeleteContext: resourceSysdigIpFilterDelete,
+		ReadContext:   resourceSysdigIPFilterRead,
+		CreateContext: resourceSysdigIPFilterCreate,
+		UpdateContext: resourceSysdigIPFilterUpdate,
+		DeleteContext: resourceSysdigIPFilterDelete,
 		Schema: map[string]*schema.Schema{
 			"ip_range": {
 				Type:     schema.TypeString,
@@ -31,7 +31,7 @@ func resourceSysdigIpFilter() *schema.Resource {
 	}
 }
 
-func resourceSysdigIpFilterRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIPFilterRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -44,7 +44,7 @@ func resourceSysdigIpFilterRead(ctx context.Context, d *schema.ResourceData, m i
 
 	ipFilter, err := client.GetIPFilterById(ctx, id)
 	if err != nil {
-		if err == v2.IpFilterNotFound {
+		if err == v2.IPFilterNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -59,7 +59,7 @@ func resourceSysdigIpFilterRead(ctx context.Context, d *schema.ResourceData, m i
 	return nil
 }
 
-func resourceSysdigIpFilterCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIPFilterCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -77,12 +77,12 @@ func resourceSysdigIpFilterCreate(ctx context.Context, d *schema.ResourceData, m
 
 	d.SetId(strconv.Itoa(createdIPFilter.ID))
 
-	resourceSysdigIpFilterRead(ctx, d, m)
+	resourceSysdigIPFilterRead(ctx, d, m)
 
 	return nil
 }
 
-func resourceSysdigIpFilterUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIPFilterUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -105,12 +105,12 @@ func resourceSysdigIpFilterUpdate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	resourceSysdigIpFilterRead(ctx, d, m)
+	resourceSysdigIPFilterRead(ctx, d, m)
 
 	return nil
 }
 
-func resourceSysdigIpFilterDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIPFilterDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
