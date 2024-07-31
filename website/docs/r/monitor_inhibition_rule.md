@@ -50,11 +50,11 @@ resource "sysdig_monitor_inhibition_rule" "sample" {
 
 * `enabled` - (Optional) Whether to enable the Inhibition Rule. Default: `true`.
 
-* `equal` - (Optional) List of labels that must have an equal value in the source and target alert for the inhibition to take effect.
+* `equal` - (Optional) List of label names that must have identical values in both the source and target alert occurrences for the inhibition rule to apply.
 
 ### `source_matchers`
 
-List of source matchers for which one or more alerts have to exist for the inhibition to take effect.
+Source Matchers define the label combinations that an alert occurrence must match for the inhibition rule to apply. When an alert occurrence satisfies this criteria, it activates the inhibition rule, which can then suppress notifications for target alerts.
 
 It is a list of objects with the following fields:
 
@@ -66,7 +66,7 @@ It is a list of objects with the following fields:
 
 ### `target_matchers`
 
-List of target matchers that have to be fulfilled by the target alerts to be muted.
+Target Matchers define the label combinations that an alert occurrence must match for the inhibition rule to suppress the alert notification. When a target alert occurrence meets these criteria, its notifications will be inhibited if the source matchers' conditions are also met.
 
 It is a list of objects with the following fields:
 
