@@ -195,6 +195,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_agentless_scanning_assets":                     dataSourceSysdigSecureAgentlessScanningAssets(),
+			"sysdig_secure_cloud_ingestion_assets":                        dataSourceSysdigSecureCloudIngestionAssets(),
 			"sysdig_secure_trusted_azure_app":                             dataSourceSysdigSecureTrustedAzureApp(),
 			"sysdig_secure_trusted_cloud_identity":                        dataSourceSysdigSecureTrustedCloudIdentity(),
 			"sysdig_secure_tenant_external_id":                            dataSourceSysdigSecureTenantExternalID(),

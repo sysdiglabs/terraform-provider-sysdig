@@ -282,6 +282,68 @@ func dataSourceSysdigSecureAgentlessScanningAssetsRead(ctx context.Context, d *s
 	return nil
 }
 
+func dataSourceSysdigSecureCloudIngestionAssets() *schema.Resource {
+	timeout := 5 * time.Minute
+
+	return &schema.Resource{
+		ReadContext: dataSourceSysdigSecureCloudIngestionAssetsRead,
+
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(timeout),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"aws": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"gcp": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+		},
+	}
+}
+
+// Retrieves the information of a resource form the file and loads it in Terraform
+func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getSecureOnboardingClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	assets, err := client.GetCloudIngestionAssetsSecure(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	assetsAws, _ := assets["aws"].(map[string]interface{})
+	assetsGcp, _ := assets["gcp"].(map[string]interface{})
+
+	d.SetId("cloudIngestionAssets")
+	err = d.Set("aws", map[string]interface{}{
+		"eventBusARN": assetsAws["eventBusARN"],
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set("gcp", map[string]interface{}{
+		"routingKey": assetsGcp["routingKey"],
+		"metadata":   assetsGcp["metadata"],
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
+}
+
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
 var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
 
