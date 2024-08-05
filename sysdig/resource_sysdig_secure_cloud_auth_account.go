@@ -33,6 +33,10 @@ var (
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			SchemaVersion: {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			SchemaCloudConnectorMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -216,9 +220,6 @@ func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.
 
 	cloudauthAccount, errStatus, err := client.GetCloudauthAccountSecure(ctx, data.Id())
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
-		}
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
 
@@ -238,9 +239,6 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 
 	existingCloudAccount, errStatus, err := client.GetCloudauthAccountSecure(ctx, data.Id())
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
-		}
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
 
@@ -254,9 +252,6 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 
 	_, errStatus, err = client.UpdateCloudauthAccountSecure(ctx, data.Id(), newCloudAccount)
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
-		}
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 
@@ -382,6 +377,8 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 					component.Type = cloudauth.Component(cloudauth.Component_value[value.(string)])
 				case SchemaInstance:
 					component.Instance = value.(string)
+				case SchemaVersion:
+					component.Version = value.(string)
 				case SchemaCloudConnectorMetadata:
 					component.Metadata = &cloudauth.AccountComponent_CloudConnectorMetadata{CloudConnectorMetadata: &cloudauth.CloudConnectorMetadata{}}
 					err = protojson.Unmarshal([]byte(value.(string)), component.GetCloudConnectorMetadata())
@@ -493,6 +490,7 @@ func componentsToResourceData(components []*cloudauth.AccountComponent) []map[st
 		resourceData := map[string]interface{}{}
 		resourceData[SchemaType] = component.GetType().String()
 		resourceData[SchemaInstance] = component.GetInstance()
+		resourceData[SchemaVersion] = component.GetVersion()
 
 		switch component.GetType() {
 		case cloudauth.Component_COMPONENT_CLOUD_CONNECTOR:
