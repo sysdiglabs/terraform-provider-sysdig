@@ -48,6 +48,7 @@ const (
 	SchemaMonitorCloudMetrics       = "monitor_cloud_metrics"
 	SchemaType                      = "type"
 	SchemaInstance                  = "instance"
+	SchemaVersion                   = "version"
 	SchemaCloudConnectorMetadata    = "cloud_connector_metadata"
 	SchemaTrustedRoleMetadata       = "trusted_role_metadata"
 	SchemaEventBridgeMetadata       = "event_bridge_metadata"
