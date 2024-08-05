@@ -57,34 +57,3 @@ func createControlResource(name string) string {
     EOF
 	}`, name)
 }
-func updateControlResource(name string) string {
-	return fmt.Sprintf(`resource "sysdig_secure_posture_control" "test" {
-        name = "S3 - Enabled Versioning-test-%s"
-        description = "S3 - Enabled Versioning"
-        resource_kind = "AWS_S3_BUCKET"
-        severity = "Low"
-        rego          = <<-EOF
-
-            package sysdig
-
-            import future.keywords.if
-            import future.keywords.in
-
-            default risky := false
-
-            risky if {
-              count(input.Versioning) == 0
-            }
-
-            risky if {
-              some version in input.Versioning
-              lower(version.Status) != "enabled"
-            }
-        EOF
-     
-     remediation_details = <<-EOF 
-      **Using Example***
-      
-    EOF
-	}`, name)
-}
