@@ -156,6 +156,7 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 			SchemaTypeKey: {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "Unknown",
 			},
 			SchemaLinkKey: {
 				Type:     schema.TypeString,
@@ -178,7 +179,26 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 			SchemaPlatformKey: {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "",
+			},
+			SchemaTargetKey: {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						SchemaMinVersionKey: {
+							Type:     schema.TypeFloat,
+							Optional: true,
+						},
+						SchemaMaxVersionKey: {
+							Type:     schema.TypeFloat,
+							Optional: true,
+						},
+						SchemaPlatformKey: {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
 			},
 			SchemaGroupKey: {
 				Type:     schema.TypeList,
@@ -198,18 +218,21 @@ func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *sch
 
 	groups := extractGroupsRecursive(d.Get(SchemaGroupKey))
 	req := &v2.CreatePosturePolicy{
-		ID:                getStringValue(d, SchemaIDKey),
-		Name:              getStringValue(d, SchemaNameKey),
-		Type:              getStringValue(d, SchemaTypeKey),
-		Description:       getStringValue(d, SchemaDescriptionKey),
-		MinKubeVersion:    getFloatValue(d, SchemaMinKubeVersionKey),
-		MaxKubeVersion:    getFloatValue(d, SchemaMaxKubeVersionKey),
-		IsActive:          getBoolValue(d, SchemaIsActiveKey),
-		Platform:          getStringValue(d, SchemaPlatformKey),
-		Link:              getStringValue(d, SchemaLinkKey),
-		RequirementGroups: groups,
+		ID:                 getStringValue(d, SchemaIDKey),
+		Name:               getStringValue(d, SchemaNameKey),
+		Type:               getStringValue(d, SchemaTypeKey),
+		Description:        getStringValue(d, SchemaDescriptionKey),
+		MinKubeVersion:     getFloatValue(d, SchemaMinKubeVersionKey),
+		MaxKubeVersion:     getFloatValue(d, SchemaMaxKubeVersionKey),
+		IsActive:           getBoolValue(d, SchemaIsActiveKey),
+		Platform:           getStringValue(d, SchemaPlatformKey),
+		VersionConstraints: getVersionConstraintsValue(d, SchemaTargetKey),
+		Link:               getStringValue(d, SchemaLinkKey),
+		RequirementGroups:  groups,
 	}
+
 	new, errStatus, err := client.CreateOrUpdatePosturePolicy(ctx, req)
+
 	if err != nil {
 		return diag.Errorf("Error creating new policy with groups. error status: %s err: %s", errStatus, err)
 	}
@@ -279,6 +302,11 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
+	err = setVersionConstraints(d, SchemaTargetKey, policy.VersionConstraints)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	// Set groups
 	groupsData, err := setGroups(d, policy.RequirementsGroup)
 	if err != nil {
@@ -378,6 +406,33 @@ func getStringValue(d *schema.ResourceData, key string) string {
 	return ""
 }
 
+// Helper function to retrieve version constraints value from ResourceData and handle nil case
+func getVersionConstraintsValue(d *schema.ResourceData, key string) []v2.VersionConstraint {
+	pvc := []v2.VersionConstraint{}
+	versionContraintsMap, ok := d.Get(key).([]interface{})
+	if !ok {
+		return nil
+	}
+	for _, vc := range versionContraintsMap {
+		vcMap := vc.(map[string]interface{})
+		minVersion := 0.0
+		maxVersion := 0.0
+		if vcMap["min_version"] != nil {
+			minVersion = vcMap["min_version"].(float64)
+		}
+		if vcMap["max_version"] != nil {
+			maxVersion = vcMap["max_version"].(float64)
+		}
+		versionConstraint := v2.VersionConstraint{
+			MinVersion: minVersion,
+			MaxVersion: maxVersion,
+			Platform:   vcMap["platform"].(string),
+		}
+		pvc = append(pvc, versionConstraint)
+	}
+	return pvc
+}
+
 // Helper function to retrieve float64 value from ResourceData and handle nil case
 func getFloatValue(d *schema.ResourceData, key string) float64 {
 	if value, ok := d.GetOk(key); ok {
@@ -441,4 +496,21 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 	}
 
 	return groups
+}
+
+// Helper function to set version constraints in the Terraform schema
+func setVersionConstraints(d *schema.ResourceData, key string, constraints []v2.VersionConstraint) error {
+	var constraintsData []interface{}
+	for _, vc := range constraints {
+		constraint := map[string]interface{}{
+			"min_version": vc.MinVersion,
+			"max_version": vc.MaxVersion,
+			"platform":    vc.Platform,
+		}
+		constraintsData = append(constraintsData, constraint)
+	}
+	if err := d.Set(key, constraintsData); err != nil {
+		return err
+	}
+	return nil
 }

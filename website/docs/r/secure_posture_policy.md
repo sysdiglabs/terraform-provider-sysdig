@@ -16,41 +16,59 @@ Creates a Sysdig Secure Posture Policy.
 
 ```terraform
 resource "sysdig_secure_posture_policy" "example" {
-    name = "demo policy"
-    type = "kubernetes"
-    platform = "vanilla"
-    max_kube_version = 2.0
-    description = "demo create policy from terraform"
-      group {
-        name = "Security"
-        description = "Security description"
-        requirement{
-          name = "Security Enforce access control"
-          description = "Enforce description"
-          control {
-              name = "Create Pods"
-              enabled = false
-          }
-          control {
-              name = "Kubelet - Disabled AlwaysAllowed Authorization"
-          }
-        }
+  name             = "demo policy"
+  type             = "kubernetes"
+  platform         = "Vanilla" // Currently supported, but will be deprecated in the future
+  min_kube_version = 1.5       // Currently supported, but will be deprecated in the future
+  max_kube_version = 2.0       // Currently supported, but will be deprecated in the future
+  description      = "demo create policy from terraform"
+
+  // New targets field to specify version constraints
+  target
+    {
+      platform   = "Vanilla"
+      minVersion = 1.5
+      maxVersion = 2.0
+    }
+
+  group {
+    name        = "Security"
+    description = "Security description"
+
+    requirement {
+      name        = "Security Enforce access control"
+      description = "Enforce description"
+
+      control {
+        name    = "Create Pods"
+        enabled = false
       }
-      group {
-          name = "Data protection"
-          description = "Data protection description"
-          requirement{
-            name = "Enforce access control"
-            description = "Enforce description"
-            control {
-                name = "Create Pods"
-            }
-            control {
-                name = "Kubelet - Disabled AlwaysAllowed Authorization"
-            }
-          }     
+
+      control {
+        name = "Kubelet - Disabled AlwaysAllowed Authorization"
       }
+    }
+  }
+
+  group {
+    name        = "Data protection"
+    description = "Data protection description"
+
+    requirement {
+      name        = "Enforce access control"
+      description = "Enforce description"
+
+      control {
+        name = "Create Pods"
+      }
+
+      control {
+        name = "Kubelet - Disabled AlwaysAllowed Authorization"
+      }
+    }
+  }
 }
+
 ```
 
 ## Argument Reference
@@ -66,19 +84,32 @@ resource "sysdig_secure_posture_policy" "example" {
   - Linux - `linux`
   - Docker - `docker`
   - OCI - `oci`
-* `min_kube_version` -  (Optional) Policy minimum Kubernetes version, eg. `1.24`
-* `max_kube_version` -  (Optional) Policy maximum Kubernetes version, eg. `1.26`
-* `is_active` -  (Optional) Policy is active flag (active means policy is published, not active means policy is draft). by default is true.
-* `platform` - (Optional) Policy platform: 
-    - IKS -     `iks`,
-    - GKE -     `gke`,
-    - Vanilla -  `vanilla`,
-    - AKS -     `aks`,
-    - RKE2 -     `rke2`,
-    - OCP4  -     `ocp4`,
-    - MKE  -      `mke`,
-    - EKS  -     `eks`,
-* `groups` - (Optional) Group block defines list of groups attached to Policy
+ * `platform`: (Optional) Platform for which the policy applies. This field will be deprecated in the future, and you should use the targets field instead to describe policy platform and version. Supported platforms include:
+
+    IKS - iks
+    GKE - gke
+    Vanilla - vanilla
+    AKS - aks
+    RKE2 - rke2
+    OCP4 - ocp4
+    MKE - mke
+    EKS - eks
+    OCI - oci
+
+* `minKubeVersion`: (Optional) Policy minimum Kubernetes version, e.g., 1.24. This field will be deprecated in the future, and you should use the targets field instead to describe policy platform and version.
+
+* `maxKubeVersion`: (Optional) Policy maximum Kubernetes version, e.g., 1.26. This field will be deprecated in the future, and you should use the targets field instead to describe policy platform and version.
+
+* `target`:(Optional) Specifies target platforms and version ranges. This field should replace Platform, MinKubeVersion, and MaxKubeVersion for more flexible and detailed policy descriptions.
+
+  Note: The fields Platform, MinKubeVersion, and MaxKubeVersion will be deprecated in the future. We recommend using the targets field now to describe policy platform and version constraints
+
+* `group` - (Optional) Group block defines list of groups attached to Policy
+
+### Targets block
+ - `platform` (Optional): Name of the target platform (e.g., IKS, AWS).
+ - `minVersion` (Optional): Minimum version of the platform.(e.g., 1.24)
+ - `maxVersion` (Optional): Maximum version of the platform. (e.g., 1.26)
 
 ### Groups block
 - `name` - (Required) The name of the Posture Policy Group.
