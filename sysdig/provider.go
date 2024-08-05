@@ -193,6 +193,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_posture_zone":                                   resourceSysdigSecurePostureZone(),
 			"sysdig_secure_organization":                                   resourceSysdigSecureOrganization(),
 			"sysdig_secure_posture_policy":                                 resourceSysdigSecurePosturePolicy(),
+			"sysdig_secure_posture_control":                                resourceSysdigSecurePostureControl(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_agentless_scanning_assets":                     dataSourceSysdigSecureAgentlessScanningAssets(),
