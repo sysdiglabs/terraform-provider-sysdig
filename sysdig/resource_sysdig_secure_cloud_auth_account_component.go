@@ -175,6 +175,7 @@ func cloudauthAccountComponentFromResourceData(data *schema.ResourceData) *v2.Cl
 		AccountComponent: cloudauth.AccountComponent{
 			Type:     cloudauth.Component(cloudauth.Component_value[data.Get(SchemaType).(string)]),
 			Instance: data.Get(SchemaInstance).(string),
+			Version:  data.Get(SchemaVersion).(string),
 		},
 	}
 	// XXX: naive but simple approach to read resource data, and check for the metadata schema type passed (only one of the types will be passed)
@@ -239,6 +240,11 @@ func cloudauthAccountComponentToResourceData(data *schema.ResourceData, cloudAcc
 	}
 
 	err = data.Set(SchemaInstance, cloudAccountComponent.GetInstance())
+	if err != nil {
+		return err
+	}
+
+	err = data.Set(SchemaVersion, cloudAccountComponent.GetVersion())
 	if err != nil {
 		return err
 	}

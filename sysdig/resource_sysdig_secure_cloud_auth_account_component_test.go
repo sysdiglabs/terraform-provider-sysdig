@@ -71,6 +71,7 @@ resource "sysdig_secure_cloud_auth_account_component" "azure_service_principal" 
   account_id		         = sysdig_secure_cloud_auth_account.azure_sample.id
   type                       = "COMPONENT_SERVICE_PRINCIPAL"
   instance                   = "secure-posture"
+	version										 = "v1.0.0"
   service_principal_metadata = jsonencode({
 	  azure = {
 		  active_directory_service_principal = {

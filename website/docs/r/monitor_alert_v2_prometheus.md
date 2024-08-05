@@ -25,6 +25,10 @@ resource "sysdig_monitor_alert_v2_prometheus" "sample" {
     id = 1234
     renotify_every_minutes = 5
   }
+  labels = {
+    application = "app1"
+    maturity = "high"
+  }
 }
 ```
 
@@ -44,6 +48,7 @@ These arguments are common to all alerts in Sysdig Monitor.
 * `notification_channels` - (Optional) List of notification channel configurations.
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
 * `link` - (Optional) List of links to add to notifications.
+* `labels` - (Optional) map of labels to be attached to this alert.
 
 ### `notification_channels`
 
