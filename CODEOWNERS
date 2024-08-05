@@ -10,6 +10,8 @@
 *monitor*providers* @jwsarna1
 *monitor*groupmapping* @shadow649
 *notification_channel* @michelevergnano @dkutsanov @antonio-cuomo @dbonf
+*inhibition_rule* @michelevergnano @dkutsanov @antonio-cuomo @dbonf
+*silence_rule* @michelevergnano @dkutsanov @antonio-cuomo @dbonf
 
 # policies/rules
 *secure*policy* @kmvachhani @rosenbloomb-sysdig @ombellare @miguelgordo @ivanlysiuk-sysdig @daniel-almeida @jbainbridgesysdig @IvanNik @hila1608 @yaminSapir @chen-shmilovich-sysdig @zohar-arad
