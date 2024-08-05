@@ -177,6 +177,10 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 				},
 			},
 		},
+		"labels": {
+			Type:     schema.TypeMap,
+			Optional: true,
+		},
 	}
 
 	for k, v := range original {
@@ -307,6 +311,8 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 		}
 	}
 
+	alert.Labels = d.Get("labels").(map[string]interface{})
+
 	return alert
 }
 
@@ -394,6 +400,8 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *v2.AlertV2Common) (
 		}
 		_ = d.Set("link", links)
 	}
+
+	_ = d.Set("labels", alert.Labels)
 
 	return nil
 }
