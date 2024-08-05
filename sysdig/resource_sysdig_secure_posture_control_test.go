@@ -52,8 +52,6 @@ func createControlResource(name string) string {
             }
         EOF
      
-     remediation_details = <<-EOF 
-      test remediation details 
-    EOF
+     remediation_details = "Enable versioning on the S3 bucket"
 	}`, name)
 }
