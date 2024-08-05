@@ -53,7 +53,7 @@ func createControlResource(name string) string {
         EOF
      
      remediation_details = <<-EOF 
-      **Using AWS CLI**\n1. 
+      test remediation details 
     EOF
 	}`, name)
 }
