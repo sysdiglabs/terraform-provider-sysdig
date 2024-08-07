@@ -18,7 +18,7 @@ type PostureControl struct {
 	ID                 string `json:"id"`
 	Name               string `json:"name"`
 	Description        string `json:"description"`
-	ResourceKind       string `json:"resourceKind"`
+	ResourceKind       string `json:"resourceKindDisplayName"`
 	Severity           string `json:"severity"`
 	Rego               string `json:"rego"`
 	RemediationDetails string `json:"remediationDetails"`
