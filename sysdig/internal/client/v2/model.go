@@ -706,6 +706,7 @@ type AlertV2Common struct {
 	CustomNotificationTemplate    *CustomNotificationTemplateV2 `json:"customNotificationTemplate,omitempty"`
 	CaptureConfig                 *CaptureConfigV2              `json:"captureConfig,omitempty"`
 	Links                         []AlertLinkV2                 `json:"links"`
+	Labels                        map[string]interface{}        `json:"labels,omitempty"`
 }
 
 type AlertV2ConfigPrometheus struct {
@@ -1086,6 +1087,24 @@ type SilenceRule struct {
 
 	Version int `json:"version,omitempty"`
 	ID      int `json:"id,omitempty"`
+}
+
+type InhibitionRule struct {
+	Name           string          `json:"name,omitempty"`
+	Description    string          `json:"description,omitempty"`
+	Enabled        bool            `json:"isEnabled"`
+	SourceMatchers []LabelMatchers `json:"sourceMatchers"`
+	TargetMatchers []LabelMatchers `json:"targetMatchers"`
+	Equal          []string        `json:"equal,omitempty"`
+
+	Version int `json:"version,omitempty"`
+	ID      int `json:"id,omitempty"`
+}
+
+type LabelMatchers struct {
+	LabelName string `json:"labelName"`
+	Operator  string `json:"operator"`
+	Value     string `json:"value"`
 }
 
 type AgentAccessKey struct {
