@@ -26,7 +26,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `aws.eventBusARN` - AWS event bus from which Sysdig Cloud Ingestion operates
 
-* `gcp.routingKey` - GCP ingestion routing key
+* `gcp_routing_key` - GCP ingestion routing key
 
-* `gcp.metadata` - GCP ingestion metadata
+* `gcp_metadata` - GCP ingestion metadata
 
