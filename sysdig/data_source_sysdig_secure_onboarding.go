@@ -300,12 +300,13 @@ func dataSourceSysdigSecureCloudIngestionAssets() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"gcp": {
+			"gcp_routing_key": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"gcp_metadata": {
 				Type:     schema.TypeMap,
 				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
 			},
 		},
 	}
@@ -333,10 +334,13 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = d.Set("gcp", map[string]interface{}{
-		"routingKey": assetsGcp["routingKey"],
-		"metadata":   assetsGcp["metadata"],
-	})
+
+	err = d.Set("gcp_routing_key", assetsGcp["routingKey"])
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("gcp_metadata", assetsGcp["metadata"])
 	if err != nil {
 		return diag.FromErr(err)
 	}
