@@ -75,27 +75,27 @@ func TestAccTrustedAzureAppDataSource(t *testing.T) {
 				Config: `data "sysdig_secure_trusted_azure_app" "config_posture" {	name = "config_posture" }`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_azure_app.config_posture", "name", "config_posture"),
-					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.config_posture", "application_id"), // uncomment to assert a non empty value
-					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.config_posture", "tenant_id"), // uncomment to assert a non empty value
-					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.config_posture", "service_principal_id"), // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.config_posture", "application_id"),       // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.config_posture", "tenant_id"),            // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.config_posture", "service_principal_id"), // uncomment to assert a non empty value
 				),
 			},
 			{
 				Config: `data "sysdig_secure_trusted_azure_app" "onboarding" {	name = "onboarding" }`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_azure_app.onboarding", "name", "onboarding"),
-					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.onboarding", "application_id"), // uncomment to assert a non empty value
-					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.onboarding", "tenant_id"), // uncomment to assert a non empty value
-					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.onboarding", "service_principal_id"), // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.onboarding", "application_id"),       // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.onboarding", "tenant_id"),            // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.onboarding", "service_principal_id"), // uncomment to assert a non empty value
 				),
 			},
 			{
 				Config: `data "sysdig_secure_trusted_azure_app" "threat_detection" { name = "threat_detection" }`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_azure_app.threat_detection", "name", "threat_detection"),
-					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.threat_detection", "application_id"), // uncomment to assert a non empty value
-					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.threat_detection", "tenant_id"), // uncomment to assert a non empty value
-					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.threat_detection", "service_principal_id"), // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.threat_detection", "application_id"),       // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.threat_detection", "tenant_id"),            // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.threat_detection", "service_principal_id"), // uncomment to assert a non empty value
 				),
 			},
 		},
@@ -142,6 +142,35 @@ func TestAccAgentlessScanningAssetsDataSource(t *testing.T) {
 					resource.TestCheckResourceAttr("data.sysdig_secure_agentless_scanning_assets.assets", "azure.%", "2"),
 					resource.TestCheckResourceAttr("data.sysdig_secure_agentless_scanning_assets.assets", "backend.%", "2"),
 					resource.TestCheckResourceAttr("data.sysdig_secure_agentless_scanning_assets.assets", "gcp.%", "1"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCloudIngestionAssetsDataSource(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `data "sysdig_secure_cloud_ingestion_assets" "assets" {}`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.%", "1"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_routing_key"),
+
+					// metadata fields are opaque to api backend; cloudingestion controls what fields are passed
+					// asserts ingestionType and ingestionURL in metadata since it is required
+					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_metadata.ingestionType", "gcp"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_metadata.ingestionURL"),
 				),
 			},
 		},

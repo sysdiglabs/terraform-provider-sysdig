@@ -11,6 +11,7 @@ const (
 	onboardingTrustedAzureAppPath         = "%s/api/secure/onboarding/v2/trustedAzureApp?app=%s"
 	onboardingTenantExternaIDPath         = "%s/api/secure/onboarding/v2/externalID"
 	onboardingAgentlessScanningAssetsPath = "%s/api/secure/onboarding/v2/agentlessScanningAssets"
+	onboardingCloudIngestionAssetsPath    = "%s/api/secure/onboarding/v2/cloudIngestionAssets"
 )
 
 type OnboardingSecureInterface interface {
@@ -19,6 +20,7 @@ type OnboardingSecureInterface interface {
 	GetTrustedAzureAppSecure(ctx context.Context, app string) (map[string]string, error)
 	GetTenantExternalIDSecure(ctx context.Context) (string, error)
 	GetAgentlessScanningAssetsSecure(ctx context.Context) (map[string]any, error)
+	GetCloudIngestionAssetsSecure(ctx context.Context) (map[string]any, error)
 }
 
 func (client *Client) GetTrustedCloudIdentitySecure(ctx context.Context, provider string) (string, error) {
@@ -65,6 +67,20 @@ func (client *Client) GetTenantExternalIDSecure(ctx context.Context) (string, er
 
 func (client *Client) GetAgentlessScanningAssetsSecure(ctx context.Context) (map[string]interface{}, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingAgentlessScanningAssetsPath, client.config.url), nil)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return nil, client.ErrorFromResponse(response)
+	}
+
+	return Unmarshal[map[string]interface{}](response.Body)
+}
+
+func (client *Client) GetCloudIngestionAssetsSecure(ctx context.Context) (map[string]interface{}, error) {
+	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingCloudIngestionAssetsPath, client.config.url), nil)
 	if err != nil {
 		return nil, err
 	}
