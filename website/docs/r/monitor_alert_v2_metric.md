@@ -8,7 +8,7 @@ description: |-
 
 # Resource: sysdig_monitor_alert_v2_metric
 
--> **Note:**: Metric Alerts have been renamed to Threshold Alerts. The Terraform resource remains `sysdig_monitor_alert_v2_metric` for backwards compatibility.
+-> **Note:** Metric Alerts have been renamed to Threshold Alerts. The Terraform resource remains `sysdig_monitor_alert_v2_metric` for backwards compatibility.
 
 Monitor your infrastructure by comparing any metric against user-defined thresholds.
 

@@ -174,7 +174,7 @@ func buildAlertV2PrometheusStruct(d *schema.ResourceData) *v2.AlertV2Prometheus 
 	if d.HasChange("trigger_after_minutes") {
 		// GetOk returns true even if the value is stored only in the state and not in the user config:
 		// to avoid applying a trigger_after_minutes old value from the state even if the user removed it from the config
-		// we use HasChange that is true only if the use has changed (or created) it - and so it must be in the config
+		// we use HasChange that is true only if the user has changed (or created) it - and so it must be in the config
 		if attr, ok := d.GetOk("trigger_after_minutes"); ok && attr != nil {
 			config.Duration = minutesToSeconds(d.Get("trigger_after_minutes").(int))
 		}

@@ -8,7 +8,7 @@ description: |-
 
 # Resource: sysdig_monitor_alert_v2_form_based_prometheus
 
--> **Note:** Note: Form Based Prometheus Alerts are now part of Threshold Alerts. The Terraform resource remains `sysdig_monitor_alert_v2_form_based_prometheus` for backwards compatibility.
+-> **Note:** Form Based Prometheus Alerts are now part of Threshold Alerts. The Terraform resource remains `sysdig_monitor_alert_v2_form_based_prometheus` for backwards compatibility.
 
 Threshold Alerts configured with PromQL allow you to monitor your infrastructure by comparing any PromQL expression against user-defined thresholds.
 
