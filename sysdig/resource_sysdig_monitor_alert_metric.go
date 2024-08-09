@@ -15,10 +15,11 @@ func resourceSysdigMonitorAlertMetric() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigAlertMetricCreate,
-		UpdateContext: resourceSysdigAlertMetricUpdate,
-		ReadContext:   resourceSysdigAlertMetricRead,
-		DeleteContext: resourceSysdigAlertMetricDelete,
+		DeprecationMessage: "\"sysdig_monitor_alert_metric\" has been deprecated and will be removed in future releases, use \"sysdig_monitor_alert_v2_metric\" instead",
+		CreateContext:      resourceSysdigAlertMetricCreate,
+		UpdateContext:      resourceSysdigAlertMetricUpdate,
+		ReadContext:        resourceSysdigAlertMetricRead,
+		DeleteContext:      resourceSysdigAlertMetricDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

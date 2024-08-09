@@ -17,10 +17,11 @@ func resourceSysdigMonitorAlertDowntime() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigAlertDowntimeCreate,
-		UpdateContext: resourceSysdigAlertDowntimeUpdate,
-		ReadContext:   resourceSysdigAlertDowntimeRead,
-		DeleteContext: resourceSysdigAlertDowntimeDelete,
+		DeprecationMessage: "\"sysdig_monitor_alert_downtime\" has been deprecated and will be removed in future releases, use \"sysdig_monitor_alert_v2_downtime\" instead",
+		CreateContext:      resourceSysdigAlertDowntimeCreate,
+		UpdateContext:      resourceSysdigAlertDowntimeUpdate,
+		ReadContext:        resourceSysdigAlertDowntimeRead,
+		DeleteContext:      resourceSysdigAlertDowntimeDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

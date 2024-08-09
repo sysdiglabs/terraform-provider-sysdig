@@ -17,10 +17,11 @@ func resourceSysdigMonitorAlertEvent() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigAlertEventCreate,
-		UpdateContext: resourceSysdigAlertEventUpdate,
-		ReadContext:   resourceSysdigAlertEventRead,
-		DeleteContext: resourceSysdigAlertEventDelete,
+		DeprecationMessage: "\"sysdig_monitor_alert_event\" has been deprecated and will be removed in future releases, use \"sysdig_monitor_alert_v2_event\" instead",
+		CreateContext:      resourceSysdigAlertEventCreate,
+		UpdateContext:      resourceSysdigAlertEventUpdate,
+		ReadContext:        resourceSysdigAlertEventRead,
+		DeleteContext:      resourceSysdigAlertEventDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
