@@ -3,12 +3,14 @@ subcategory: "Sysdig Monitor"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_v2_metric"
 description: |-
-  Creates a Sysdig Monitor Metric Alert with AlertV2 API.
+  Creates a Sysdig Monitor Metric Threshold Alert with AlertV2 API.
 ---
 
 # Resource: sysdig_monitor_alert_v2_metric
 
-Creates a Sysdig Monitor Metric Alert. Monitor time-series metrics and alert if they violate user-defined thresholds.
+-> **Note:** Metric Alerts have been renamed to Threshold Alerts. The Terraform resource remains `sysdig_monitor_alert_v2_metric` for backwards compatibility.
+
+Monitor your infrastructure by comparing any metric against user-defined thresholds.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
@@ -43,7 +45,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
     renotify_every_minutes = 60
   }
 
-  trigger_after_minutes = 1
+  range_seconds = 60
 
 }
 
@@ -55,10 +57,12 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 
 These arguments are common to all alerts in Sysdig Monitor.
 
-* `name` - (Required) The name of the Monitor alert. It must be unique.
+* `name` - (Required) The name of the alert rule. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
-* `trigger_after_minutes` - (Required) Threshold of time for the status to stabilize until the alert is fired.
-* `group` - (Optional) Lowercase string to group alerts in the UI.
+* `range_seconds` - (Optional, Required if `trigger_after_minutes` is not defined): The rolling time aggregation period in which the relevant metric data is evaluated.
+* `trigger_after_minutes` - (Optional, Deprecated) The rolling time aggregation period in which the relevant metric data is evaluated. Deprecated: use `range_seconds` instead.
+* `duration_seconds` - (Optional) A time interval that defines for how long a condition should be met before an alert occurrence is created.
+* `group` - (Optional) Used to group alert rules in the UI. This value must be a lowercase string.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.
 * `notification_channels` - (Optional) List of notification channel configurations.
@@ -103,7 +107,7 @@ Enables the creation of a capture file of the syscalls during the event.
 * `filter` - (Optional) Additional filter to apply to the capture. For example: `proc.name contains nginx`.
 * `enabled` - (Optional) Wether to enable captures. Default: `true`.
 
-### Metric alert arguments
+### Metric Threshold alert arguments
 
 * `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure. Can be repeated.
 * `group_by` - (Optional) List of segments to trigger a separate alert on. Example: `["kube_cluster_name", "kube_pod_name"]`.
@@ -137,7 +141,7 @@ In addition to all arguments above, the following attributes are exported, which
 
 ## Import
 
-Metric alerts can be imported using the alert ID, e.g.
+Metric Threshold alerts can be imported using the alert ID, e.g.
 
 ```
 $ terraform import sysdig_monitor_alert_v2_metric.example 12345

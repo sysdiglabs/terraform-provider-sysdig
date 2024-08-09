@@ -234,6 +234,8 @@ func buildAlertV2GroupOutlierStruct(d *schema.ResourceData) (*v2.AlertV2GroupOut
 
 	config.NoDataBehaviour = d.Get("no_data_behaviour").(string)
 
+	config.ObservationWindow = minutesToSeconds(d.Get("observation_window_minutes").(int))
+
 	var unreportedAlertNotificationsRetentionSec *int
 	if unreportedAlertNotificationsRetentionSecInterface, ok := d.GetOk("unreported_alert_notifications_retention_seconds"); ok {
 		u := unreportedAlertNotificationsRetentionSecInterface.(int)
@@ -242,7 +244,6 @@ func buildAlertV2GroupOutlierStruct(d *schema.ResourceData) (*v2.AlertV2GroupOut
 
 	alert := &v2.AlertV2GroupOutlier{
 		AlertV2Common:                            *alertV2Common,
-		DurationSec:                              minutesToSeconds(d.Get("observation_window_minutes").(int)),
 		Config:                                   config,
 		UnreportedAlertNotificationsRetentionSec: unreportedAlertNotificationsRetentionSec,
 	}
@@ -260,7 +261,7 @@ func updateAlertV2GroupOutlierState(d *schema.ResourceData, alert *v2.AlertV2Gro
 		return err
 	}
 
-	_ = d.Set("observation_window_minutes", secondsToMinutes(alert.DurationSec))
+	_ = d.Set("observation_window_minutes", secondsToMinutes(alert.Config.ObservationWindow))
 
 	_ = d.Set("algorithm", alert.Config.Algorithm)
 

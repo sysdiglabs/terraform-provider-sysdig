@@ -189,7 +189,8 @@ type Alert struct {
 	NotificationChannelIds []int               `json:"notificationChannelIds"`
 	Filter                 string              `json:"filter"`
 	Severity               int                 `json:"severity"`
-	Timespan               int                 `json:"timespan"`
+	Timespan               *int                `json:"timespan,omitempty"`
+	Duration               *int                `json:"duration,omitempty"`
 	CustomNotification     *CustomNotification `json:"customNotification"`
 	TeamID                 int                 `json:"teamId,omitempty"`
 	AutoCreated            bool                `json:"autoCreated"`
@@ -712,12 +713,13 @@ type AlertV2Common struct {
 type AlertV2ConfigPrometheus struct {
 	Query            string `json:"query"`
 	KeepFiringForSec *int   `json:"keepFiringForSec,omitempty"`
+
+	Duration int `json:"duration"`
 }
 
 type AlertV2Prometheus struct {
 	AlertV2Common
-	DurationSec int                     `json:"durationSec"`
-	Config      AlertV2ConfigPrometheus `json:"config"`
+	Config AlertV2ConfigPrometheus `json:"config"`
 }
 
 type alertV2PrometheusWrapper struct {
@@ -755,12 +757,13 @@ type AlertV2ConfigEvent struct {
 
 	Filter string   `json:"filter"`
 	Tags   []string `json:"tags"`
+
+	Range int `json:"range"`
 }
 
 type AlertV2Event struct {
 	AlertV2Common
-	DurationSec int                `json:"durationSec"`
-	Config      AlertV2ConfigEvent `json:"config"`
+	Config AlertV2ConfigEvent `json:"config"`
 }
 
 type alertV2EventWrapper struct {
@@ -796,11 +799,13 @@ type AlertV2ConfigMetric struct {
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
 	NoDataBehaviour  string                  `json:"noDataBehaviour"`
+
+	Range    int `json:"range"`
+	Duration int `json:"duration"`
 }
 
 type AlertV2Metric struct {
 	AlertV2Common
-	DurationSec                              int                 `json:"durationSec"`
 	Config                                   AlertV2ConfigMetric `json:"config"`
 	UnreportedAlertNotificationsRetentionSec *int                `json:"unreportedAlertNotificationsRetentionSec"`
 }
@@ -818,11 +823,12 @@ type AlertV2ConfigDowntime struct {
 	GroupAggregation string                  `json:"groupAggregation"`
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
+
+	Range int `json:"range"`
 }
 
 type AlertV2Downtime struct {
 	AlertV2Common
-	DurationSec                              int                   `json:"durationSec"`
 	Config                                   AlertV2ConfigDowntime `json:"config"`
 	UnreportedAlertNotificationsRetentionSec *int                  `json:"unreportedAlertNotificationsRetentionSec"`
 }
@@ -856,11 +862,12 @@ type AlertV2ConfigFormBasedPrometheus struct {
 	WarningConditionOperator string   `json:"warningConditionOperator,omitempty"`
 	WarningThreshold         *float64 `json:"warningThreshold,omitempty"`
 	NoDataBehaviour          string   `json:"noDataBehaviour"`
+
+	Duration int `json:"duration"`
 }
 
 type AlertV2FormBasedPrometheus struct {
 	AlertV2Common
-	DurationSec                              int                              `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
 	Config                                   AlertV2ConfigFormBasedPrometheus `json:"config"`
 	UnreportedAlertNotificationsRetentionSec *int                             `json:"unreportedAlertNotificationsRetentionSec"`
 }
@@ -881,11 +888,12 @@ type AlertV2ConfigGroupOutlier struct {
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
 	NoDataBehaviour  string                  `json:"noDataBehaviour"`
+
+	ObservationWindow int `json:"observationWindow"`
 }
 
 type AlertV2GroupOutlier struct {
 	AlertV2Common
-	DurationSec                              int                       `json:"durationSec"` // Observation window should be greater than or equal to 10 minutes
 	Config                                   AlertV2ConfigGroupOutlier `json:"config"`
 	UnreportedAlertNotificationsRetentionSec *int                      `json:"unreportedAlertNotificationsRetentionSec"`
 }
@@ -896,7 +904,6 @@ type alertV2GroupOutlierWrapper struct {
 
 type AlertV2Change struct {
 	AlertV2Common
-	DurationSec                              int                 `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
 	Config                                   AlertV2ConfigChange `json:"config"`
 	UnreportedAlertNotificationsRetentionSec *int                `json:"unreportedAlertNotificationsRetentionSec"`
 }
