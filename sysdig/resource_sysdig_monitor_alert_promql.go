@@ -131,6 +131,9 @@ func promqlAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, er
 	if err != nil {
 		return
 	}
+	duration := int((time.Duration(*alert.Timespan) * time.Microsecond).Seconds())
+	alert.Duration = &duration
+	alert.Timespan = nil
 
 	alert.Type = "PROMETHEUS"
 
@@ -143,6 +146,11 @@ func promqlAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err 
 	err = alertToResourceData(alert, data)
 	if err != nil {
 		return
+	}
+
+	if alert.Duration != nil {
+		trigger_after_minutes := int((time.Duration(*alert.Duration) * time.Second).Minutes())
+		_ = data.Set("trigger_after_minutes", trigger_after_minutes)
 	}
 
 	_ = data.Set("promql", alert.Condition)

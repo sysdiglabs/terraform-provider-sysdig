@@ -28,6 +28,9 @@ func TestAccAlertV2Event(t *testing.T) {
 				Config: alertV2Event(rText()),
 			},
 			{
+				Config: alertV2EventWithTriggerAfterMinutes(rText()),
+			},
+			{
 				Config: alertV2EventWithSources(rText()),
 			},
 			{
@@ -46,6 +49,28 @@ func TestAccAlertV2Event(t *testing.T) {
 }
 
 func alertV2Event(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_event" "sample" {
+
+	name = "TERRAFORM TEST - EVENTV2 %s"
+	filter = "xxx"
+	operator = ">="
+	threshold = 50
+
+	scope {
+		label = "kube_cluster_name"
+		operator = "in"
+		values = ["thom-cluster1", "demo-env-prom"]
+	}
+
+	range_seconds = 600
+
+}
+
+`, name)
+}
+
+func alertV2EventWithTriggerAfterMinutes(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_alert_v2_event" "sample" {
 
@@ -83,7 +108,7 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
 		values = ["thom-cluster1", "demo-env-prom"]
 	}
 
-	trigger_after_minutes = 15
+	range_seconds = 600
 
 }
 
@@ -106,7 +131,7 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
 		values = ["thom-cluster1", "demo-env-prom"]
 	}
 
-	trigger_after_minutes = 15
+	range_seconds = 600
 
 }
 
@@ -129,7 +154,7 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
 		values = ["thom-cluster1", "demo-env-prom"]
 	}
 
-	trigger_after_minutes = 15
+	range_seconds = 600
 
 }
 

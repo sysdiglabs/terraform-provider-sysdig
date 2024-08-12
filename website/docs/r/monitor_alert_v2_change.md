@@ -3,12 +3,14 @@ subcategory: "Sysdig Monitor"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_v2_change"
 description: |-
-  Creates a Sysdig Monitor Change Alert with AlertV2 API.
+  Creates a Sysdig Monitor Percentage of Change Alert with AlertV2 API.
 ---
 
 # Resource: sysdig_monitor_alert_v2_change
 
-Creates a Sysdig Monitor Change Alert. Change Alerts trigger when a metric value substantially deviates compared to historical values.
+-> **Note:** Change Alerts have been renamed to Percentage of Change Alerts. The Terraform resource remains `sysdig_monitor_alert_v2_change` for backwards compatibility.
+
+Compare the percentage of change of a metric over two specific timeframes, such as comparing the last 5 minutes to the previous hour.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
@@ -56,14 +58,15 @@ resource "sysdig_monitor_alert_v2_change" "sample" {
 
 These arguments are common to all alerts in Sysdig Monitor.
 
-* `name` - (Required) The name of the Monitor alert. It must be unique.
+* `name` - (Required) The name of the alert rule. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
-* `group` - (Optional) Lowercase string to group alerts in the UI.
+* `group` - (Optional) Used to group alert rules in the UI. This value must be a lowercase string.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.
 * `notification_channels` - (Optional) List of notification channel configurations.
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
 * `link` - (Optional) List of links to add to notifications.
+* `labels` - (Optional) map of labels to be attached to this alert.
 
 ### `notification_channels`
 
@@ -92,7 +95,7 @@ By defining this field, the user can add link to notifications.
 * `href` - (Optional) When using `runbook` type, url of the external resource.
 * `id` - (Optional) When using `dashboard` type, dashboard id.
 
-### Change alert arguments
+### Percentage of Change alert arguments
 
 * `scope` - (Optional) Part of the infrastructure where the alert is valid. Defaults to the entire infrastructure. Can be repeated.
 * `group_by` - (Optional) List of segments to trigger a separate alert on. Example: `["kube_cluster_name", "kube_pod_name"]`.
@@ -127,7 +130,7 @@ In addition to all arguments above, the following attributes are exported, which
 
 ## Import
 
-Change alerts can be imported using the alert ID, e.g.
+Percentage of Change alerts can be imported using the alert ID, e.g.
 
 ```
 $ terraform import sysdig_monitor_alert_v2_change.example 12345

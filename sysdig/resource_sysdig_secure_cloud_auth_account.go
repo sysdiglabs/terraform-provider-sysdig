@@ -33,6 +33,10 @@ var (
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			SchemaVersion: {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			SchemaCloudConnectorMetadata: {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -373,6 +377,8 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 					component.Type = cloudauth.Component(cloudauth.Component_value[value.(string)])
 				case SchemaInstance:
 					component.Instance = value.(string)
+				case SchemaVersion:
+					component.Version = value.(string)
 				case SchemaCloudConnectorMetadata:
 					component.Metadata = &cloudauth.AccountComponent_CloudConnectorMetadata{CloudConnectorMetadata: &cloudauth.CloudConnectorMetadata{}}
 					err = protojson.Unmarshal([]byte(value.(string)), component.GetCloudConnectorMetadata())
@@ -484,6 +490,7 @@ func componentsToResourceData(components []*cloudauth.AccountComponent) []map[st
 		resourceData := map[string]interface{}{}
 		resourceData[SchemaType] = component.GetType().String()
 		resourceData[SchemaInstance] = component.GetInstance()
+		resourceData[SchemaVersion] = component.GetVersion()
 
 		switch component.GetType() {
 		case cloudauth.Component_COMPONENT_CLOUD_CONNECTOR:

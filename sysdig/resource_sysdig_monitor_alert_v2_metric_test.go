@@ -28,6 +28,12 @@ func TestAccAlertV2Metric(t *testing.T) {
 				Config: alertV2Metric(rText()),
 			},
 			{
+				Config: alertV2MetricWithTriggerAfterMinutes(rText()),
+			},
+			{
+				Config: alertV2MetricWithDuration(rText()),
+			},
+			{
 				Config: alertV2MetricWithScope(rText()),
 			},
 			{
@@ -67,6 +73,9 @@ func TestAccAlertV2Metric(t *testing.T) {
 				Config: alertV2MetricWithUnreportedAlertNotificationsRetentionSec(rText()),
 			},
 			{
+				Config: alertV2MetricWithLabels(rText()),
+			},
+			{
 				Config: alertV2MetricWithWarningThreshold(rText()),
 			},
 			{
@@ -88,7 +97,40 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
+	range_seconds = 600
+
+}
+`, name)
+}
+
+func alertV2MetricWithTriggerAfterMinutes(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_metric" "sample" {
+
+	name = "TERRAFORM TEST - METRICV2 %s"
+	metric = "sysdig_container_cpu_used_percent"
+	group_aggregation = "avg"
+	time_aggregation = "avg"
+	operator = ">="
+	threshold = 50
 	trigger_after_minutes = 15
+
+}
+`, name)
+}
+
+func alertV2MetricWithDuration(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_metric" "sample" {
+
+	name = "TERRAFORM TEST - METRICV2 %s"
+	metric = "sysdig_container_cpu_used_percent"
+	group_aggregation = "avg"
+	time_aggregation = "avg"
+	operator = ">="
+	threshold = 50
+	range_seconds = 600
+	duration_seconds = 900
 
 }
 `, name)
@@ -104,7 +146,7 @@ func alertV2MetricWithScope(name string) string {
 		time_aggregation = "avg"
 		operator = ">="
 		threshold = 50
-		trigger_after_minutes = 15
+		range_seconds = 600
 		scope {
 			label = "kube_cluster_name"
 			operator = "in"
@@ -130,7 +172,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 600
 	no_data_behaviour = "TRIGGER"
 
 }
@@ -157,7 +199,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 600
 	enabled = false
 	notification_channels {
 		id = sysdig_monitor_notification_channel_email.nc_email1.id
@@ -181,7 +223,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 600
 	description = "description"
 
 }
@@ -198,7 +240,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 600
 	severity = "high"
 
 }
@@ -232,7 +274,7 @@ func alertV2MetricWithGroupBy(name string) string {
 		time_aggregation = "avg"
 		operator = ">="
 		threshold = 50
-		trigger_after_minutes = 15
+		range_seconds = 600
 		group_by = ["kube_cluster_name", "cloud_provider_tag_Owner",]
 
 	}
@@ -249,7 +291,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 600
 	group = "customgroup"
 
 }
@@ -266,7 +308,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 600
 	custom_notification {
 		subject = "test"
 		prepend = "pre"
@@ -287,7 +329,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 600
 	capture {
 		filename = "test.scap"
 	}
@@ -337,7 +379,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 600
 	link {
 		type = "runbook"
 		href = "http://example.com"
@@ -360,7 +402,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 600
 	enabled = false
 
 }
@@ -377,8 +419,28 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 600
 	unreported_alert_notifications_retention_seconds = 60 * 60 * 24 * 30
+}
+`, name)
+}
+
+func alertV2MetricWithLabels(name string) string {
+	return fmt.Sprintf(`
+
+resource "sysdig_monitor_alert_v2_metric" "sample" {
+
+	name = "TERRAFORM TEST - METRICV2 %s"
+	metric = "sysdig_container_cpu_used_percent"
+	group_aggregation = "avg"
+	time_aggregation = "avg"
+	operator = ">="
+	threshold = 50
+	trigger_after_minutes = 15
+	labels = {
+		application = "app1"
+		maturity = "high"
+	}
 }
 `, name)
 }
@@ -403,7 +465,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 600
 	enabled = false
 	warning_threshold = 10
 	notification_channels {

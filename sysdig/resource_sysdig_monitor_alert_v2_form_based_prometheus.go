@@ -33,6 +33,11 @@ func resourceSysdigMonitorAlertV2FormBasedPrometheus() *schema.Resource {
 		},
 
 		Schema: createScopedSegmentedAlertV2Schema(createAlertV2Schema(map[string]*schema.Schema{
+			"duration_seconds": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(0),
+			},
 			"operator": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -198,6 +203,10 @@ func buildAlertV2FormBasedPrometheusStruct(d *schema.ResourceData) (*v2.AlertV2F
 
 	config.NoDataBehaviour = d.Get("no_data_behaviour").(string)
 
+	if attr, ok := d.GetOk("duration_seconds"); ok && attr != nil {
+		config.Duration = d.Get("duration_seconds").(int)
+	}
+
 	var unreportedAlertNotificationsRetentionSec *int
 	if unreportedAlertNotificationsRetentionSecInterface, ok := d.GetOk("unreported_alert_notifications_retention_seconds"); ok {
 		u := unreportedAlertNotificationsRetentionSecInterface.(int)
@@ -206,7 +215,6 @@ func buildAlertV2FormBasedPrometheusStruct(d *schema.ResourceData) (*v2.AlertV2F
 
 	alert := &v2.AlertV2FormBasedPrometheus{
 		AlertV2Common:                            *alertV2Common,
-		DurationSec:                              0,
 		Config:                                   config,
 		UnreportedAlertNotificationsRetentionSec: unreportedAlertNotificationsRetentionSec,
 	}
@@ -223,6 +231,8 @@ func updateAlertV2FormBasedPrometheusState(d *schema.ResourceData, alert *v2.Ale
 	if err != nil {
 		return err
 	}
+
+	_ = d.Set("duration_seconds", alert.Config.Duration)
 
 	_ = d.Set("operator", alert.Config.ConditionOperator)
 

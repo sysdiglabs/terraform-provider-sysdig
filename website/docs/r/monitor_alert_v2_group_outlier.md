@@ -58,14 +58,15 @@ resource "sysdig_monitor_alert_v2_group_outlier" "sample" {
 
 These arguments are common to all alerts in Sysdig Monitor.
 
-* `name` - (Required) The name of the Monitor alert. It must be unique.
+* `name` - (Required) The name of the alert rule. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
-* `group` - (Optional) Lowercase string to group alerts in the UI.
+* `group` - (Optional) Used to group alert rules in the UI. This value must be a lowercase string.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.
 * `notification_channels` - (Optional) List of notification channel configurations.
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
 * `link` - (Optional) List of links to add to notifications.
+* `labels` - (Optional) map of labels to be attached to this alert.
 
 ### `notification_channels`
 
