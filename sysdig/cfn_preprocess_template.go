@@ -58,7 +58,7 @@ func updateKeys(inputMap gabs.Container) error {
 
 			err = inputMap.Delete(key)
 			if err != nil {
-				return fmt.Errorf("failed to delete old key %s" + key)
+				return fmt.Errorf("failed to delete old key %s", key)
 			}
 
 			// recurse to update child's keys
