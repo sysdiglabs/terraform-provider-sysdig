@@ -3,12 +3,14 @@ subcategory: "Sysdig Monitor"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_v2_form_based_prometheus"
 description: |-
-  Creates a Sysdig Monitor Form Based Prometheus Alert with AlertV2 API.
+  Creates a Sysdig Monitor Threshold Prometheus Alert with AlertV2 API.
 ---
 
 # Resource: sysdig_monitor_alert_v2_form_based_prometheus
 
-Creates a Sysdig Monitor Form Based Prometheus Alert. The notification is triggered on the user-defined PromQL expression with a threshold and operator defined outside of the expression, as described in [here](https://docs.sysdig.com/en/docs/sysdig-monitor/alerts/alert-types/metric-alerts/#translate-to-promql).
+-> **Note:** Form Based Prometheus Alerts are now part of Threshold Alerts. The Terraform resource remains `sysdig_monitor_alert_v2_form_based_prometheus` for backwards compatibility.
+
+Threshold Alerts configured with PromQL allow you to monitor your infrastructure by comparing any PromQL expression against user-defined thresholds.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
@@ -35,14 +37,15 @@ resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 
 These arguments are common to all alerts in Sysdig Monitor.
 
-* `name` - (Required) The name of the Monitor alert. It must be unique.
+* `name` - (Required) The name of the alert rule. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
-* `group` - (Optional) Lowercase string to group alerts in the UI.
+* `group` - (Optional) Used to group alert rules in the UI. This value must be a lowercase string.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.
 * `notification_channels` - (Optional) List of notification channel configurations.
 * `custom_notification` - (Optional) Allows to define a custom notification title, prepend and append text.
 * `link` - (Optional) List of links to add to notifications.
+* `labels` - (Optional) map of labels to be attached to this alert.
 
 ### `notification_channels`
 
@@ -71,12 +74,13 @@ By defining this field, the user can add link to notifications.
 * `href` - (Optional) When using `runbook` type, url of the external resource.
 * `id` - (Optional) When using `dashboard` type, dashboard id.
 
-### Form Based Prometheus alert arguments
+### Threshold Prometheus alert arguments
 
 * `query` - (Required) PromQL-based metric expression to alert on. Example: `sysdig_host_memory_available_bytes / sysdig_host_memory_total_bytes * 100` or `avg_over_time(sysdig_container_cpu_used_percent{}[59s])`.
-* `operator` - (Required) Operator for the condition to alert on. It can be `>`, `>=`, `<`, `<=`, `=` or `!=`.
+* `operator` - (Required) Operator for the condition to alert on. It can be `>`, `>=`, `<`, `<=`, `==` or `!=`.
 * `threshold` - (Required) Threshold used together with `op` to trigger the alert if crossed.
 * `warning_threshold` - (Optional) Warning threshold used together with `op` to trigger the alert if crossed. Must be a number that triggers the alert before reaching the main `threshold`.
+* `duration_seconds` - (Optional) Specifies the amount of time, in seconds, that an alert condition must remain continuously true before the alert rule is triggered.
 * `no_data_behaviour` - (Optional) behaviour in case of missing data. Can be `DO_NOTHING`, i.e. ignore, or `TRIGGER`, i.e. notify on main threshold. Default: `DO_NOTHING`.
 * `unreported_alert_notifications_retention_seconds` - (Optional) Period after which any alerts triggered for entities (such as containers or hosts) that are no longer reporting data will be automatically marked as 'deactivated'. By default there is no deactivation.
 
@@ -94,7 +98,7 @@ In addition to all arguments above, the following attributes are exported, which
 
 ## Import
 
-Form Based Prometheus alerts can be imported using the alert ID, e.g.
+Threshold Prometheus alerts can be imported using the alert ID, e.g.
 
 ```
 $ terraform import sysdig_monitor_alert_v2_form_based_prometheus.example 12345

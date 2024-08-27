@@ -51,11 +51,13 @@ type MonitorCommon interface {
 	AlertV2Interface
 	DashboardInterface
 	SilenceRuleInterface
+	InhibitionRuleInterface
 }
 
 type SecureCommon interface {
 	PosturePolicyInterface
 	PostureZoneInterface
+	PostureControlInterface
 }
 
 type Requester interface {
@@ -75,7 +77,7 @@ func (client *Client) ErrorFromResponse(response *http.Response) error {
 		return errors.New(response.Status)
 	}
 
-	search, err := jmespath.Search("[message, error, errors[].[reason, message]][][] | join(', ', @)", data)
+	search, err := jmespath.Search("[message, error, details[], errors[].[reason, message]][][] | join(', ', @)", data)
 	if err != nil {
 		return errors.New(response.Status)
 	}

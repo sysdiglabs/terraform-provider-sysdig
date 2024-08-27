@@ -136,5 +136,5 @@ In addition to all arguments above, the following attributes are exported:
 Posture policy can be imported using the ID, e.g.
 
 ```
-$ terraform import sysdig_secure_posture_policy.example p
+$ terraform import sysdig_secure_posture_policy.example p 12345
 ```

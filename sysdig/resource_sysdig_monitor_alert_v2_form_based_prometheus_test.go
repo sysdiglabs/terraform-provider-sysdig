@@ -28,6 +28,12 @@ func TestAccAlertV2FormBasedPrometheusTest(t *testing.T) {
 				Config: alertV2FormBasedPrometheusTest(rText()),
 			},
 			{
+				Config: alertV2FormBasedPrometheusWithEqualOperatorTest(rText()),
+			},
+			{
+				Config: alertV2FormBasedPrometheusTestWithDuration(rText()),
+			},
+			{
 				Config: alertV2FormBasedPrometheusTestWithNoData(rText()),
 			},
 			{
@@ -73,6 +79,29 @@ resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
 	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
 	operator = ">="
 	threshold = 50
+}
+`, name)
+}
+
+func alertV2FormBasedPrometheusWithEqualOperatorTest(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
+	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
+	operator = "=="
+	threshold = 50
+}
+	`, name)
+}
+
+func alertV2FormBasedPrometheusTestWithDuration(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_form_based_prometheus" "sample" {
+	name = "TERRAFORM TEST - FORM BASED PROMETHEUS %s"
+	query = "avg_over_time(sysdig_container_cpu_used_percent{container_name=\"test\"}[59s])"
+	operator = ">="
+	threshold = 50
+	duration_seconds = 600
 }
 `, name)
 }

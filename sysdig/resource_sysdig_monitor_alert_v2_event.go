@@ -34,8 +34,18 @@ func resourceSysdigMonitorAlertV2Event() *schema.Resource {
 
 		Schema: createScopedSegmentedAlertV2Schema(createAlertV2Schema(map[string]*schema.Schema{
 			"trigger_after_minutes": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true, // computed if range_seconds is defined
+				Deprecated:   "Use range_seconds instead",
+				ValidateFunc: validation.IntAtLeast(1),
+			},
+			"range_seconds": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true, // computed if trigger_after_minutes is defined
+				ExactlyOneOf: []string{"trigger_after_minutes"},
+				ValidateFunc: validation.IntAtLeast(60),
 			},
 			"operator": {
 				Type:         schema.TypeString,
@@ -203,9 +213,21 @@ func buildAlertV2EventStruct(d *schema.ResourceData) (*v2.AlertV2Event, error) {
 	}
 	config.Tags = tags
 
+	if attr, ok := d.GetOk("range_seconds"); ok && attr != nil {
+		config.Range = d.Get("range_seconds").(int)
+	}
+
+	if d.HasChange("trigger_after_minutes") {
+		// GetOk returns true even if the value is stored only in the state and not in the user config:
+		// to avoid applying a trigger_after_minutes old value from the state even if the user removed it from the config
+		// we use HasChange that is true only if the user has changed (or created) it - and so it must be in the config
+		if attr, ok := d.GetOk("trigger_after_minutes"); ok && attr != nil {
+			config.Range = minutesToSeconds(d.Get("trigger_after_minutes").(int))
+		}
+	}
+
 	alert := &v2.AlertV2Event{
 		AlertV2Common: *alertV2Common,
-		DurationSec:   minutesToSeconds(d.Get("trigger_after_minutes").(int)),
 		Config:        config,
 	}
 	return alert, nil
@@ -222,7 +244,8 @@ func updateAlertV2EventState(d *schema.ResourceData, alert *v2.AlertV2Event) err
 		return err
 	}
 
-	_ = d.Set("trigger_after_minutes", secondsToMinutes(alert.DurationSec))
+	_ = d.Set("trigger_after_minutes", secondsToMinutes(alert.Config.Range))
+	_ = d.Set("range_seconds", alert.Config.Range)
 
 	_ = d.Set("operator", alert.Config.ConditionOperator)
 

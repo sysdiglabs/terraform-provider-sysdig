@@ -159,6 +159,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_cloud_auth_account_feature":                    resourceSysdigSecureCloudauthAccountFeature(),
 
 			"sysdig_monitor_silence_rule":                                  resourceSysdigMonitorSilenceRule(),
+			"sysdig_monitor_inhibition_rule":                               resourceSysdigMonitorInhibitionRule(),
 			"sysdig_monitor_alert_downtime":                                resourceSysdigMonitorAlertDowntime(),
 			"sysdig_monitor_alert_metric":                                  resourceSysdigMonitorAlertMetric(),
 			"sysdig_monitor_alert_event":                                   resourceSysdigMonitorAlertEvent(),
@@ -192,9 +193,11 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_posture_zone":                                   resourceSysdigSecurePostureZone(),
 			"sysdig_secure_organization":                                   resourceSysdigSecureOrganization(),
 			"sysdig_secure_posture_policy":                                 resourceSysdigSecurePosturePolicy(),
+			"sysdig_secure_posture_control":                                resourceSysdigSecurePostureControl(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_agentless_scanning_assets":                     dataSourceSysdigSecureAgentlessScanningAssets(),
+			"sysdig_secure_cloud_ingestion_assets":                        dataSourceSysdigSecureCloudIngestionAssets(),
 			"sysdig_secure_trusted_azure_app":                             dataSourceSysdigSecureTrustedAzureApp(),
 			"sysdig_secure_trusted_cloud_identity":                        dataSourceSysdigSecureTrustedCloudIdentity(),
 			"sysdig_secure_tenant_external_id":                            dataSourceSysdigSecureTenantExternalID(),
