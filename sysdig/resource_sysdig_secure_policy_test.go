@@ -48,10 +48,14 @@ func TestAccPolicy(t *testing.T) {
 			resource.TestStep{Config: policiesForAWSCloudtrail(rText())},
 			resource.TestStep{Config: policiesForGCPAuditLog(rText())},
 			resource.TestStep{Config: policiesForAzurePlatformlogs(rText())},
-			resource.TestStep{Config: policiesForFalcoCloudAWSCloudtrail(rText())},
-			resource.TestStep{Config: policiesForOkta(rText())},
-			resource.TestStep{Config: policiesForGithub(rText())},
 		)
+		if !buildinfo.IBMSecure {
+			steps = append(steps,
+				resource.TestStep{Config: policiesForFalcoCloudAWSCloudtrail(rText())},
+				resource.TestStep{Config: policiesForOkta(rText())},
+				resource.TestStep{Config: policiesForGithub(rText())},
+			)
+		}
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
