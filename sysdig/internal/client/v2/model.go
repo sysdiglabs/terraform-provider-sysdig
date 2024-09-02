@@ -964,21 +964,29 @@ type PosturePolicy struct {
 }
 
 type FullPosturePolicy struct {
-	ID                string              `json:"id,omitempty"`
-	Name              string              `json:"name,omitempty"`
-	Type              string              `json:"type,omitempty"`
-	Description       string              `json:"description,omitempty"`
-	Version           string              `json:"version,omitempty"`
-	Link              string              `json:"link,omitempty"`
-	Authors           string              `json:"authors,omitempty"`
-	PublishedData     string              `json:"publishedDate,omitempty"`
-	RequirementsGroup []RequirementsGroup `json:"requirementFolders,omitempty"`
-	MinKubeVersion    float64             `json:"minKubeVersion,omitempty"`
-	MaxKubeVersion    float64             `json:"maxKubeVersion,omitempty"`
-	IsCustom          bool                `json:"isCustom,omitempty"`
-	IsActive          bool                `json:"isActive,omitempty"`
-	Platform          string              `json:"platform,omitempty"`
+	ID                 string              `json:"id,omitempty"`
+	Name               string              `json:"name,omitempty"`
+	Type               string              `json:"type,omitempty"`
+	Description        string              `json:"description,omitempty"`
+	Version            string              `json:"version,omitempty"`
+	Link               string              `json:"link,omitempty"`
+	Authors            string              `json:"authors,omitempty"`
+	PublishedData      string              `json:"publishedDate,omitempty"`
+	RequirementsGroup  []RequirementsGroup `json:"requirementFolders,omitempty"`
+	MinKubeVersion     float64             `json:"minKubeVersion,omitempty"`
+	MaxKubeVersion     float64             `json:"maxKubeVersion,omitempty"`
+	IsCustom           bool                `json:"isCustom,omitempty"`
+	IsActive           bool                `json:"isActive,omitempty"`
+	Platform           string              `json:"platform,omitempty"`
+	VersionConstraints []VersionConstraint `json:"targets,omitempty"`
 }
+
+type VersionConstraint struct {
+	Platform   string  `json:"platform"`
+	MinVersion float64 `json:"minVersion,omitempty"`
+	MaxVersion float64 `json:"maxVersion,omitempty"`
+}
+
 type RequirementsGroup struct {
 	ID                        string              `json:"id,omitempty"`
 	Name                      string              `json:"name,omitempty"`
@@ -1004,17 +1012,18 @@ type Control struct {
 }
 
 type CreatePosturePolicy struct {
-	ID                string                    `json:"id,omitempty"`
-	Name              string                    `json:"name,omitempty"`
-	Description       string                    `json:"description,omitempty"`
-	Type              string                    `json:"type,omitempty"`
-	Link              string                    `json:"link,omitempty"`
-	Version           string                    `json:"version,omitempty"`
-	RequirementGroups []CreateRequirementsGroup `json:"groups,omitempty"`
-	MinKubeVersion    float64                   `json:"minKubeVersion,omitempty"`
-	MaxKubeVersion    float64                   `json:"maxKubeVersion,omitempty"`
-	IsActive          bool                      `json:"isActive,omitempty"`
-	Platform          string                    `json:"platform,omitempty"`
+	ID                 string                    `json:"id,omitempty"`
+	Name               string                    `json:"name,omitempty"`
+	Description        string                    `json:"description,omitempty"`
+	Type               string                    `json:"type,omitempty"`
+	Link               string                    `json:"link,omitempty"`
+	Version            string                    `json:"version,omitempty"`
+	RequirementGroups  []CreateRequirementsGroup `json:"groups,omitempty"`
+	MinKubeVersion     float64                   `json:"minKubeVersion,omitempty"`
+	MaxKubeVersion     float64                   `json:"maxKubeVersion,omitempty"`
+	IsActive           bool                      `json:"isActive,omitempty"`
+	Platform           string                    `json:"platform,omitempty"`
+	VersionConstraints []VersionConstraint       `json:"targets,omitempty"`
 }
 
 type CreateRequirementsGroup struct {
