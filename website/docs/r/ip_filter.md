@@ -9,7 +9,7 @@ description: |-
 # Resource: sysdig_ip_filter
 
 Configures IP address/range which can be used to restrict access to the Sysdig platform.
-The feature is active when at least one IP address/range exists and is enabled.
+The feature is activated by setting `ip_filtering_enabled` to `true` in the `sysdig_ip_filters_settings` resource. At least one IP range must be defined in the `sysdig_ip_filter` before enabling the feature.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 

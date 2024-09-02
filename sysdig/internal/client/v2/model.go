@@ -182,6 +182,10 @@ type IPFilter struct {
 	LastUpdated string `json:"lastUpdated,omitempty"`
 }
 
+type IPFiltersSettings struct {
+	IPFilteringEnabled bool `json:"isFilteringEnabled"`
+}
+
 type alertWrapper struct {
 	Alert Alert `json:"alert"`
 }
