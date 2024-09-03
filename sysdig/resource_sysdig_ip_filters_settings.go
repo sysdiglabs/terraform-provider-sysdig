@@ -42,9 +42,6 @@ func resourceSysdigIPFiltersSettingsRead(ctx context.Context, d *schema.Resource
 }
 
 func resourceSysdigIPFiltersSettingsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	if d.Id() != "" {
-		return diag.Errorf("IP filter settings resource already exists, cannot create another one")
-	}
 
 	d.SetId("ip_filters_settings_id") // It's singleton resource so we use a fixed ID
 

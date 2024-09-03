@@ -1,10 +1,19 @@
+---
+subcategory: "Sysdig Platform"
+layout: "sysdig"
+page_title: "Sysdig: sysdig_ip_filters_settings"
+description: |-
+  Creates a IP filters settings in Sysdig.
+---
+
 # Resource: sysdig_ip_filters_settings
 
 Configures settings for IP filters (`sysdig_ip_filter` resource) which can be used to restrict access to the Sysdig platform.
 Currently, there is only one setting available: `ip_filtering_enabled` which enables or disables the IP filtering feature. To enable the feature, at least one IP range must be defined in the `sysdig_ip_filter` resource.
 
 > **Warning**
-> This resource is global and is allowed to have only one instance per customer
+> This resource is global and is allowed to have only one instance per customer.
+> Please verify the IP ranges before enabling the feature, ensuring you include the IP range you are using. Failure to include your current IP range will block your access to Sysdig until you connect from an approved IP range.
 
 The `sysdig_ip_filters_settings` behaves differently from normal resources, in that Terraform does not destroy this resource.
 On resource destruction, Terraform performs no actions in Sysdig.

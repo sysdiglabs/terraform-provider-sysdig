@@ -22,13 +22,6 @@ func TestAccSysdigIpFiltersSettings_fullLifecycle(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create resource
-				Config: configBasic(true),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sysdig_ip_filters_settings.test", "ip_filtering_enabled", "true"),
-				),
-			},
-			{
-				// Update resource
 				Config: configBasic(false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sysdig_ip_filters_settings.test", "ip_filtering_enabled", "false"),
