@@ -22,7 +22,7 @@ func TestAccSysdigIpFilter_fullLifecycle(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create resource
-				Config: configBasic("192.168.1.0/24", "Initial note", true),
+				Config: createIPFilter("192.168.1.0/24", "Initial note", true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sysdig_ip_filter.test", "ip_range", "192.168.1.0/24"),
 					resource.TestCheckResourceAttr("sysdig_ip_filter.test", "note", "Initial note"),
@@ -31,7 +31,7 @@ func TestAccSysdigIpFilter_fullLifecycle(t *testing.T) {
 			},
 			{
 				// Update resource
-				Config: configBasic("192.168.2.0/24", "Updated note", false),
+				Config: createIPFilter("192.168.2.0/24", "Updated note", false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sysdig_ip_filter.test", "ip_range", "192.168.2.0/24"),
 					resource.TestCheckResourceAttr("sysdig_ip_filter.test", "note", "Updated note"),
@@ -42,7 +42,7 @@ func TestAccSysdigIpFilter_fullLifecycle(t *testing.T) {
 	})
 }
 
-func configBasic(ipRange, note string, enabled bool) string {
+func createIPFilter(ipRange, note string, enabled bool) string {
 	return fmt.Sprintf(`
 resource "sysdig_ip_filter" "test" {
   ip_range = "%s"
