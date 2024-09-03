@@ -13,7 +13,8 @@ Currently, there is only one setting available: `ip_filtering_enabled` which ena
 
 > **Warning**
 > This resource is global and is allowed to have only one instance per customer.
-> Please verify the IP ranges before enabling the feature, ensuring you include the IP range you are using. Failure to include your current IP range will block your access to Sysdig until you connect from an approved IP range.
+> Please verify that all IP ranges are created before enabling the feature. Failure to include your IP range will block your access to Sysdig until you connect from an approved IP range.
+
 
 The `sysdig_ip_filters_settings` behaves differently from normal resources, in that Terraform does not destroy this resource.
 On resource destruction, Terraform performs no actions in Sysdig.
@@ -33,6 +34,10 @@ This example enables the IP filtering feature.
 ## Argument Reference
 
 * `ip_filtering_enabled` - (Required) Specifies whether the IP filtering feature is enabled.
+
+## Attributes Reference
+
+No additional attributes are exported.
 
 ## Import
 
