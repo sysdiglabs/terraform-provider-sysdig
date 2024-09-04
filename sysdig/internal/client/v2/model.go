@@ -915,8 +915,8 @@ type alertV2ChangeWrapper struct {
 type CloudAccountCredentialsMonitor struct {
 	AccountId   string `json:"accountId"`
 	RoleName    string `json:"roleName"`
-	SecretKey   string `json:"secretKey"`
-	AccessKeyId string `json:"accessKeyId"`
+	SecretKey   string `json:"key"`
+	AccessKeyId string `json:"id"`
 }
 
 type CloudAccountMonitor struct {
