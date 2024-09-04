@@ -15,18 +15,26 @@ Creates a Sysdig Monitor Cloud Account for monitoring cloud resources.
 ## Example Usage
 
 ```terraform
+// GCP example
 resource "sysdig_monitor_cloud_account" "sample" {
   cloud_provider = "GCP"
   integration_type = "API"
   account_id = "gcp_project_id"
 }
+
+// AWS example
+resource "sysdig_monitor_cloud_account" "sample" {
+  cloud_provider = "AWS"
+  integration_type = "Metrics Streams"
+  account_id = "123412341234"
+}
 ```
 
 ## Argument Reference
 
-* `cloud_provider` - (Required) Cloud platform that will be monitored. Only `GCP` is currently supported.
-* `integration_type` - (Required) Type of cloud integration. Only `API` is currently supported.
-* `account_id` - (Required) The GCP project id for the project that will be monitored.
+* `cloud_provider` - (Required) Cloud platform that will be monitored. Only `GCP` and `AWS` are currently supported.
+* `integration_type` - (Required) Type of cloud integration. Only `API` and `Metrics Streams` are currently supported (`Metrics Streams` only for `AWS`).
+* `account_id` - (Required) The GCP project id for the project that will be monitored and Account ID itself for AWS.
 * `additional_options` - (Optional) The private key generated when creating a new GCP service account key. Must be in JSON format and base64 encoded.
 
 ## Attributes Reference
