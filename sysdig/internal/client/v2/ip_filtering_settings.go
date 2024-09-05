@@ -10,13 +10,13 @@ const (
 	IPFiltersSettingsPath = "%s/platform/v1/ip-filters-settings"
 )
 
-type IPFiltersSettingsInterface interface {
+type IPFilteringSettingsInterface interface {
 	Base
-	GetIPFiltersSettings(ctx context.Context) (*IPFiltersSettings, error)
-	UpdateIPFiltersSettings(ctx context.Context, ipFiltersSettings *IPFiltersSettings) (*IPFiltersSettings, error)
+	GetIPFilteringSettings(ctx context.Context) (*IPFiltersSettings, error)
+	UpdateIPFilteringSettings(ctx context.Context, ipFiltersSettings *IPFiltersSettings) (*IPFiltersSettings, error)
 }
 
-func (client *Client) GetIPFiltersSettings(ctx context.Context) (*IPFiltersSettings, error) {
+func (client *Client) GetIPFilteringSettings(ctx context.Context) (*IPFiltersSettings, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, client.GetIPFiltersSettingsURL(), nil)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (client *Client) GetIPFiltersSettings(ctx context.Context) (*IPFiltersSetti
 	return &ipFiltersSettings, nil
 }
 
-func (client *Client) UpdateIPFiltersSettings(ctx context.Context, ipFiltersSettings *IPFiltersSettings) (*IPFiltersSettings, error) {
+func (client *Client) UpdateIPFilteringSettings(ctx context.Context, ipFiltersSettings *IPFiltersSettings) (*IPFiltersSettings, error) {
 	payload, err := Marshal(ipFiltersSettings)
 	if err != nil {
 		return nil, err

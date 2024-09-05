@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestAccSysdigIpFiltersSettings_fullLifecycle(t *testing.T) {
+func TestAccSysdigIpFilteringSettings_fullLifecycle(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -22,18 +22,18 @@ func TestAccSysdigIpFiltersSettings_fullLifecycle(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create resource
-				Config: createIPFiltersSettings(false),
+				Config: createIPFilteringSettings(false),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sysdig_ip_filters_settings.test", "ip_filtering_enabled", "false"),
+					resource.TestCheckResourceAttr("sysdig_ip_filtering_settings.test", "ip_filtering_enabled", "false"),
 				),
 			},
 		},
 	})
 }
 
-func createIPFiltersSettings(ipFilteringEnabled bool) string {
+func createIPFilteringSettings(ipFilteringEnabled bool) string {
 	return fmt.Sprintf(`
-resource "sysdig_ip_filters_settings" "test" {
+resource "sysdig_ip_filtering_settings" "test" {
   ip_filtering_enabled = %t
 }
 `, ipFilteringEnabled)
