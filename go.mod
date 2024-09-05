@@ -1,6 +1,6 @@
 module github.com/draios/terraform-provider-sysdig
 
-go 1.19
+go 1.22
 
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0
