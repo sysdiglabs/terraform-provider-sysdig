@@ -53,3 +53,6 @@ oanc
 # Local test folder
 local-terraform-test/
 dist/
+
+**/provider_code_spec.json
+
