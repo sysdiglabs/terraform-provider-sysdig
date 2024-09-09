@@ -1,0 +1,4267 @@
+openapi: 3.0.3
+info:
+  version: 1.10.0
+  title: Sysdig Platform Public API
+  description: This is a description of the Sysdig Platform Public API.
+  contact:
+    name: Sysdig
+    url: https://sysdig.com
+    email: info@sysdig.com
+security:
+  - bearerAuth: []
+tags:
+  - name: Teams
+    description: The use of teams provides a strategic way to organize groups, streamline workflows, or protect data, as needed by an organization. Administrators who design and implement teams should have in-depth knowledge of organizational infrastructure and goals.
+    externalDocs:
+      description: Find out more
+      url: https://docs.sysdig.com/en/docs/administration/administration-settings/user-and-team-administration/manage-teams-and-roles/
+  - name: Users
+    description: User for the Sysdig platform.
+  - name: User Deactivation
+    description: User deactivation configuration.
+  - name: Access Keys
+    description: Manage Access Keys.
+  - name: SSO Settings
+    description: Single Sign-On (SSO) settings are used to configure the SSO access to the Sysdig platform.
+    externalDocs:
+      description: Find out more
+      url: https://docs.sysdig.com/en/docs/administration/administration-settings/access-and-secrets/authentication-and-authorization-saas/
+  - name: Group Mappings
+    description: Group mappings are used to map groups from an external identity provider to teams and roles in the Sysdig platform.
+    externalDocs:
+      description: Find out more
+      url: https://docs.sysdig.com/en/docs/administration/administration-settings/access-and-secrets/group-mappings/
+  - name: Service Accounts Notification Settings
+    description: Service accounts notification settings are used to configure the notification settings for service accounts.
+  - name: IP Filtering
+    description: |
+      IP filtering is used to control access to the Sysdig platform based on specified IP ranges.\
+      NOTE: The feature can be activated via the `/platform/v1/ip-filters-settings` endpoint (or through the UI) only if at least one IP address or range is configured.
+  - name: Permissions
+    description: Permissions define the actions that you can perform in the Sysdig platform.
+  - name: Capture Storage
+    description: Capture storage configuration.
+    externalDocs:
+      description: Find out more
+      url: https://docs.sysdig.com/en/docs/administration/administration-settings/outbound-integrations/s3-capture-storage/
+  - name: Roles
+    description: |
+      A custom role is an admin-defined role that allows Sysdig administrators to bundle a set of permissions and assign it to one or more users or teams.
+    externalDocs:
+      description: Find out more
+      url: https://docs.sysdig.com/en/custom-role/
+paths:
+  /platform/v1/teams:
+    get:
+      summary: List Teams
+      description: |
+        Retrieve a paginated list of teams.\
+        \
+        **Required permissions:** _customer-teams.read_
+      operationId: getTeamsV1
+      tags:
+        - Teams
+      parameters:
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/OrderBy'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: The teams page.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTeamsPaginatedResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create Team
+      description: |
+        Create a new team.\
+        \
+        **Required permissions:** _teams.create_
+      operationId: createTeamV1
+      tags:
+        - Teams
+      requestBody:
+        description: The payload required to create a new team.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTeamRequestV1'
+      responses:
+        '201':
+          description: Team created.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/teams/{teamId}:
+    get:
+      summary: Get Team
+      description: |
+        Return a team by ID.\
+        \
+        **Required permissions:** _customer-teams.read_
+      operationId: getTeamByIdV1
+      tags:
+        - Teams
+      parameters:
+        - $ref: '#/components/parameters/TeamIdPath'
+      responses:
+        '200':
+          description: Team found.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update Team
+      description: |
+        Update a team by its ID.\
+        \
+        **Required permissions:** _teams.edit_
+      operationId: updateTeamByIdV1
+      tags:
+        - Teams
+      parameters:
+        - $ref: '#/components/parameters/TeamIdPath'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTeamRequestV1'
+      responses:
+        '200':
+          description: Team updated.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete Team
+      description: |
+        Delete a team by its ID.\
+        \
+        **Required permissions:** _teams.edit_
+      operationId: deleteTeamByIdV1
+      tags:
+        - Teams
+      parameters:
+        - $ref: '#/components/parameters/TeamIdPath'
+      responses:
+        '204':
+          description: Team deleted.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/teams/{teamId}/users:
+    get:
+      summary: List Memberships
+      description: |
+        Retrieve a paginated list of memberships in a given team ID.\
+        \
+        **Required permissions:** _memberships.read_
+      operationId: getTeamUsersV1
+      tags:
+        - Teams
+      parameters:
+        - $ref: '#/components/parameters/TeamIdPath'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: The memberships page.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTeamUsersPaginatedResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/teams/{teamId}/users/{userId}:
+    get:
+      summary: Get Membership
+      description: |
+        Return a membership by its ID.\
+        \
+        **Required permissions:** _memberships.read_
+      operationId: getTeamUserByIdV1
+      tags:
+        - Teams
+      parameters:
+        - $ref: '#/components/parameters/TeamIdPath'
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        '200':
+          description: Membership found.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamUserResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Save Membership
+      description: |
+        Add or update a membership.
+
+        | Permission             | Description                                                                                             |
+        | -----------------------| --------------------------------------------------------------------------------------------------------|
+        | memberships.edit       | Required to create a new membership.                                                                    |
+        | memberships-roles.edit | Required to change roles of an existing membership or to create a new membership with a specific role.  |
+      operationId: saveTeamUserV1
+      tags:
+        - Teams
+      parameters:
+        - $ref: '#/components/parameters/TeamIdPath'
+        - $ref: '#/components/parameters/UserIdPath'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveTeamUserRequestV1'
+      responses:
+        '200':
+          description: Membership updated.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamUserResponseV1'
+        '201':
+          description: Membership created.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamUserResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete Membership
+      description: |
+        Delete a membership defined by its ID.\
+        \
+        **Required permissions:** _memberships.edit_
+      operationId: deleteTeamUserByIdV1
+      tags:
+        - Teams
+      parameters:
+        - $ref: '#/components/parameters/TeamIdPath'
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        '204':
+          description: Membership deleted.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/users:
+    get:
+      summary: List Users
+      description: |
+        Retrieve a paginated list of users.\
+        \
+        **Required permissions:** _users.read_
+      operationId: getUsersV1
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/OrderBy'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: The users page.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUsersPaginatedResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create User
+      description: |
+        Create a new user.\
+        \
+        **Required permissions:** _users.create_
+      operationId: createUserV1
+      tags:
+        - Users
+      parameters:
+        - name: activationFlow
+          in: query
+          description: |
+            The activation flow is used to send an invitation email to the user that is being created.\
+            \
+            **NOTE: it is required to set at least one product in the payload in order to send the appropriate email.**
+          required: false
+          schema:
+            type: boolean
+            default: false
+            example: true
+      requestBody:
+        description: The payload required to create a new user.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequestV1'
+        required: true
+      responses:
+        '201':
+          description: User created.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/users/{userId}:
+    get:
+      summary: Get User
+      description: |
+        Display a user by ID.\
+        \
+        **Required permissions:** _users.read_
+      operationId: getUserByIdV1
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        '200':
+          description: User found.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update User
+      description: |
+        Update a user by its ID. \
+        \
+        **Required permissions:** _users.edit_
+      operationId: updateUserV1
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequestV1'
+        required: true
+      responses:
+        '200':
+          description: User updated.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete User
+      description: |
+        Delete a user by its ID.\
+        \
+        **Required permissions:** _users.edit_
+      operationId: deleteUserByIdV1
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        '204':
+          description: User deleted.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/configuration/user-deactivation:
+    get:
+      summary: Get User Deactivation Configuration
+      description: |
+        Retrieve the user deactivation configuration.\
+        \
+        **Required permissions:** _customer-user-deactivation-configuration.read_
+      operationId: getUserDeactivationConfigurationV1
+      tags:
+        - User Deactivation
+      responses:
+        '200':
+          description: Display the User Deactivation Configuration.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDeactivationConfigurationResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update or Create User Deactivation Configuration
+      description: |
+        Update or Create User deactivation configuration.\
+        \
+        **Required permissions:** _customer-user-deactivation-configuration.edit_
+      operationId: updateUserDeactivationConfigurationByIdV1
+      tags:
+        - User Deactivation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDeactivationConfigurationRequestV1'
+      responses:
+        '200':
+          description: User Configuration updated.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDeactivationConfigurationResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/configuration/capture-storage:
+    get:
+      summary: Get Capture Storage Configuration
+      description: |
+        Retrieve the capture storage configuration.\
+        \
+        **Required permissions:** _sysdig-storage.read_
+      operationId: getCaptureStorageConfigurationV1
+      tags:
+        - Capture Storage
+      responses:
+        '200':
+          description: Display the Capture Storage Configuration.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaptureStorageConfigurationResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update or Create Capture Storage Configuration
+      description: |
+        Update or Create Capture Storage configuration.\
+        \
+        **Required permissions:** _sysdig-storage.edit_
+      operationId: updateCaptureStorageConfigurationV1
+      tags:
+        - Capture Storage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveCaptureStorageConfigurationRequestV1'
+      responses:
+        '200':
+          description: Capture Storage updated.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaptureStorageConfigurationResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/access-keys:
+    get:
+      summary: List Access Keys
+      description: |
+        Retrieve a paginated list of access keys.\
+        \
+        **Required permissions:** _customer-access-keys.read_
+      operationId: getAccessKeysV1
+      tags:
+        - Access Keys
+      parameters:
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/OrderBy'
+        - $ref: '#/components/parameters/MultiFilter'
+      responses:
+        '200':
+          description: The access keys page.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAccessKeysPaginatedResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create Access Key
+      description: |
+        Create a new access key.\
+        \
+        **Required permissions:** _customer-access-keys.edit_
+      operationId: createAccessKeyV1
+      tags:
+        - Access Keys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccessKeyRequestV1'
+      responses:
+        '201':
+          description: Access key created.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/access-keys/{accessKeyId}:
+    get:
+      summary: Get Access Key
+      description: |
+        Return an access key by id.\
+        \
+        **Required permissions:** _customer-access-keys.read_
+      operationId: getAccessKeyByIdV1
+      tags:
+        - Access Keys
+      parameters:
+        - $ref: '#/components/parameters/AccessKeyIdPath'
+      responses:
+        '200':
+          description: Access key found.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update Access Key
+      description: |
+        Update an access key by id.\
+        \
+        **Required permissions:** _customer-access-keys.edit_
+      operationId: updateAccessKeyByIdV1
+      tags:
+        - Access Keys
+      parameters:
+        - $ref: '#/components/parameters/AccessKeyIdPath'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAccessKeyRequestV1'
+      responses:
+        '200':
+          description: Access key updated.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete Access Key
+      description: |
+        Delete an access key by id.\
+        \
+        **Required permissions:** customer-access-keys.edit_
+      operationId: deleteAccessKeyByIdV1
+      tags:
+        - Access Keys
+      parameters:
+        - $ref: '#/components/parameters/AccessKeyIdPath'
+      responses:
+        '204':
+          description: Access key deleted.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/group-mappings:
+    get:
+      summary: List Group Mappings
+      description: |
+        Retrieve a paginated list of group mappings.\
+        \
+        **Required permissions:** _group-mappings.read_
+      operationId: getGroupMappingsV1
+      tags:
+        - Group Mappings
+      parameters:
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/OrderBy'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: Group mappings paginated response.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupMappingsPaginatedResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create Group Mapping
+      description: |
+        Create a new group mapping.\
+        \
+        **Required permissions:** _group-mappings.edit_
+      operationId: createGroupMappingV1
+      tags:
+        - Group Mappings
+      requestBody:
+        description: The payload required to create group mapping.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupMappingRequestV1'
+      responses:
+        '201':
+          description: Group Mapping created.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupMappingResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/group-mappings/{groupMappingId}:
+    get:
+      summary: Get Group Mapping
+      description: |
+        Return a group mapping by its ID.\
+        \
+        **Required permissions:** _group-mappings.read_
+      operationId: getGroupMappingByIdV1
+      tags:
+        - Group Mappings
+      parameters:
+        - $ref: '#/components/parameters/GroupMappingIdPath'
+      responses:
+        '200':
+          description: Group Mapping found.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupMappingResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update Group Mapping
+      description: |
+        Update a group mapping by its ID.\
+        \
+        **Required permissions:** _group-mappings.edit_
+      operationId: updateGroupMappingByIdV1
+      tags:
+        - Group Mappings
+      parameters:
+        - $ref: '#/components/parameters/GroupMappingIdPath'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroupMappingRequestV1'
+      responses:
+        '200':
+          description: Group Mapping updated.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupMappingResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete Group Mapping
+      description: |
+        Delete a group mapping by its ID.\
+        \
+        **Required permissions:** _group-mappings.edit_
+      operationId: deleteGroupMappingByIdV1
+      tags:
+        - Group Mappings
+      parameters:
+        - $ref: '#/components/parameters/GroupMappingIdPath'
+      responses:
+        '204':
+          description: Group mapping deleted.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/group-mappings-settings:
+    get:
+      summary: Get Group Mappings Settings
+      description: |
+        Retrieves your group mapping settings.\
+        \
+        **Required permissions:** _group-mappings.read_
+      operationId: getGroupMappingSettingsV1
+      tags:
+        - Group Mappings
+      responses:
+        '200':
+          description: Group mappings page.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupMappingSettingsV1'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Save Group Mapping settings
+      description: |
+        Saves your group mapping settings.\
+        \
+        **Required permissions:** _group-mappings.edit_
+      operationId: saveGroupMappingSettingsV1
+      tags:
+        - Group Mappings
+      requestBody:
+        description: The payload required to save group mapping settings.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupMappingSettingsV1'
+      responses:
+        '200':
+          description: Group Mapping settings saved.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupMappingSettingsV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/sso-settings:
+    get:
+      summary: List SSO Settings
+      description: |
+        Retrieve a paginated list of SSO settings.\
+        \
+        **Required permissions:** _sso-settings.read_
+      operationId: getSsoSettingsV1
+      tags:
+        - SSO Settings
+      parameters:
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: List all SSO settings response.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllSsoSettingsResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create SSO Settings
+      description: |
+        Create a new SSO settings.\
+        \
+        **Required permissions:** _sso-setting.edit_
+      operationId: createSsoSettingsV1
+      tags:
+        - SSO Settings
+      requestBody:
+        description: The payload required to create SSO settings.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSsoSettingsRequestV1'
+      responses:
+        '201':
+          description: SSO settings created.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SsoSettingsResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/sso-settings/{ssoSettingsId}:
+    get:
+      summary: Get SSO Settings
+      description: |
+        Return SSO settings by ID.\
+        \
+        **Required permissions:** _sso-settings.read_
+      operationId: getSsoSettingsByIdV1
+      tags:
+        - SSO Settings
+      parameters:
+        - $ref: '#/components/parameters/SsoSettingsIdPath'
+      responses:
+        '200':
+          description: SSO settings found.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SsoSettingsResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update SSO Settings
+      description: |
+        Update SSO settings by its ID.\
+        \
+        **Required permissions:** _sso-settings.edit_
+      operationId: updateSsoSettingsByIdV1
+      tags:
+        - SSO Settings
+      parameters:
+        - $ref: '#/components/parameters/SsoSettingsIdPath'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSsoSettingsRequestV1'
+      responses:
+        '200':
+          description: SSO setting updated.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SsoSettingsResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete SSO Settings
+      description: |
+        Delete SSO settings by its ID.\
+        \
+        **Required permissions:** _sso-settings.edit_
+      operationId: deleteSsoSettingsByIdV1
+      tags:
+        - SSO Settings
+      parameters:
+        - $ref: '#/components/parameters/SsoSettingsIdPath'
+      responses:
+        '204':
+          description: SSO settings deleted.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/teams/{teamId}/service-accounts/notification-settings:
+    post:
+      summary: Create Service Accounts Notification Settings
+      description: |
+        Create a new Notification Settings for Service Accounts which belong to a specific team.\
+        \
+        **Required permissions:** _service-accounts-notification-settings.edit_
+      operationId: createServiceAccountsNotificationSettingsV1
+      tags:
+        - Service Accounts Notification Settings
+      parameters:
+        - $ref: '#/components/parameters/TeamIdPath'
+      requestBody:
+        description: The payload required to create Service Accounts Notification Settings.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateServiceAccountsNotificationSettingsRequestV1'
+      responses:
+        '201':
+          description: Service Accounts Notification Settings created.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccountsNotificationSettingsResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: Get Service Accounts Notification Settings
+      description: |
+        Return Service Accounts Notification Settings for a given team.\
+        \
+        **Required permissions:** _service-accounts-notification-settings.read_
+      operationId: getServiceAccountsNotificationSettingsV1
+      tags:
+        - Service Accounts Notification Settings
+      parameters:
+        - $ref: '#/components/parameters/TeamIdPath'
+      responses:
+        '200':
+          description: Service Accounts Notification Settings found.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccountsNotificationSettingsResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update Service Accounts Notification Settings
+      description: |
+        Update Service Accounts Notification Settings for a given team.\
+        \
+        **Required permissions:** _service-accounts-notification-settings.edit_
+      operationId: updateServiceAccountsNotificationSettingsV1
+      tags:
+        - Service Accounts Notification Settings
+      parameters:
+        - $ref: '#/components/parameters/TeamIdPath'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateServiceAccountsNotificationSettingsRequestV1'
+      responses:
+        '200':
+          description: Service Accounts Notification Settings updated.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccountsNotificationSettingsResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete Service Accounts Notification Settings
+      description: |
+        Delete Service Accounts Notification Settings for a given team.\
+        \
+        **Required permissions:** _service-accounts-notification-settings.edit_
+      operationId: deleteServiceAccountsNotificationSettingsV1
+      tags:
+        - Service Accounts Notification Settings
+      parameters:
+        - $ref: '#/components/parameters/TeamIdPath'
+      responses:
+        '204':
+          description: Service Accounts Notification Settings deleted.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/service-accounts/notification-settings:
+    post:
+      summary: Create Global Service Accounts Notification Settings
+      description: |
+        Create a new Notification Settings for Global Service Accounts.\
+        \
+        **Required permissions:** _global-service-accounts-notification-settings.edit_
+      operationId: createGlobalServiceAccountsNotificationSettingsV1
+      tags:
+        - Service Accounts Notification Settings
+      requestBody:
+        description: The payload required to create Service Accounts Notification Settings.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateServiceAccountsNotificationSettingsRequestV1'
+      responses:
+        '201':
+          description: Service Accounts Notification Settings created.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccountsNotificationSettingsResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: Get Global Service Accounts Notification Settings
+      description: |
+        Return Notification Settings for Global Service Accounts.\
+        \
+        **Required permissions:** _global-service-accounts-notification-settings.read_
+      operationId: getGlobalServiceAccountsNotificationSettingsV1
+      tags:
+        - Service Accounts Notification Settings
+      responses:
+        '200':
+          description: Service Accounts Notification Settings found.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccountsNotificationSettingsResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update Global Service Accounts Notification Settings
+      description: |
+        Update Notification Settings for Global Service Accounts.\
+        \
+        **Required permissions:** _global-service-accounts-notification-settings.edit_
+      operationId: updateGlobalServiceAccountsNotificationSettingsV1
+      tags:
+        - Service Accounts Notification Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateServiceAccountsNotificationSettingsRequestV1'
+      responses:
+        '200':
+          description: Service Accounts Notification Settings updated.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccountsNotificationSettingsResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete Global Service Accounts Notification Settings
+      description: |
+        Delete Notification Settings for Global Service Accounts.\
+        \
+        **Required permissions:** _global-service-accounts-notification-settings.edit_
+      operationId: deleteGlobalServiceAccountsNotificationSettingsV1
+      tags:
+        - Service Accounts Notification Settings
+      responses:
+        '204':
+          description: Service Accounts Notification Settings deleted.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/ip-filters:
+    get:
+      summary: List IP Filters
+      description: |
+        Retrieve a paginated list of IP filters.\
+        \
+        **Required permissions:** _ip-filters.read_
+      operationId: getIpFiltersV1
+      tags:
+        - IP Filtering
+      parameters:
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: List all IP filters response.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpFiltersPaginatedResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create IP Filter
+      description: |
+        Create a new IP filter.\
+        \
+        **Required permissions:** _ip-filters.edit_
+      operationId: createIpFilterV1
+      tags:
+        - IP Filtering
+      requestBody:
+        description: The payload required to create IP filter.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIpFilterV1'
+      responses:
+        '201':
+          description: IP filter created.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpFilterResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/ip-filters/{ipFilterId}:
+    get:
+      summary: Get IP Filter by ID
+      description: |
+        Get IP Filter by ID.\
+        \
+        **Required permissions:** _ip-filters.read_
+      operationId: getIpFilterByIdV1
+      tags:
+        - IP Filtering
+      parameters:
+        - $ref: '#/components/parameters/IpFilterIdPath'
+      responses:
+        '200':
+          description: IP filter found.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpFilterResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update IP Filter
+      description: |
+        Update IP filter by its ID. \
+        \
+        **Required permissions:** _ip-filters.edit_
+      operationId: updateIpFilterV1
+      tags:
+        - IP Filtering
+      parameters:
+        - $ref: '#/components/parameters/IpFilterIdPath'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIpFilterV1'
+        required: true
+      responses:
+        '200':
+          description: IP filter updated.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpFilterResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete IP Filter
+      description: |
+        Delete IP filter by its ID.\
+        \
+        **Required permissions:** _ip-filters.edit_
+      operationId: deleteIpFilterByIdV1
+      tags:
+        - IP Filtering
+      parameters:
+        - $ref: '#/components/parameters/IpFilterIdPath'
+      responses:
+        '204':
+          description: IP filter deleted.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/ip-filters-settings:
+    get:
+      summary: Get IP Filters Settings
+      description: |
+        Retrieves your IP filters settings.\
+        \
+        **Required permissions:** _ip-filters.read_
+      operationId: getIpFiltersSettingsV1
+      tags:
+        - IP Filtering
+      responses:
+        '200':
+          description: IP filters settings.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpFiltersSettingsV1'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Save IP Filters settings
+      description: |
+        Saves your IP filters settings.\
+        \
+        **Required permissions:** _ip-filters.edit_
+      operationId: saveIpFiltersSettingsV1
+      tags:
+        - IP Filtering
+      requestBody:
+        description: The payload required to save IP filters settings.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IpFiltersSettingsV1'
+      responses:
+        '200':
+          description: IP filters settings saved.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpFiltersSettingsV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/permissions:
+    get:
+      summary: Get Customer Permissions
+      description: |
+        Retrieve a list of permissions that are used in custom roles.\
+        \
+        **Required permissions:** _permissions.read_
+      operationId: getPermissionsV1
+      tags:
+        - Permissions
+      parameters:
+        - $ref: '#/components/parameters/PermissionsFilter'
+      responses:
+        '200':
+          description: Display Permissions.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPermissionsResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/roles:
+    get:
+      summary: List Roles
+      description: |
+        Retrieve a paginated list of roles.\
+        \
+        **Required permissions:** _roles.read_
+      operationId: getRolesV1
+      tags:
+        - Roles
+      parameters:
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/OrderBy'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: The roles page.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetRolesPaginatedResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create Role
+      description: |
+        Create a new role.\
+        \
+        **Required permissions:** _roles.edit_
+      operationId: createRoleV1
+      tags:
+        - Roles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleRequestV1'
+      responses:
+        '201':
+          description: Role created.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /platform/v1/roles/{roleId}:
+    get:
+      summary: Get Role
+      description: |
+        Return a role by its ID.\
+        \
+        **Required permissions:** _roles.read_
+      operationId: getRoleByIdV1
+      tags:
+        - Roles
+      parameters:
+        - $ref: '#/components/parameters/RoleIdPath'
+      responses:
+        '200':
+          description: Role found.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update Role
+      description: |
+        Update a role by its ID.\
+        \
+        **Required permissions:** _roles.edit_
+      operationId: updateRoleByIdV1
+      tags:
+        - Roles
+      parameters:
+        - $ref: '#/components/parameters/RoleIdPath'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleRequestV1'
+      responses:
+        '200':
+          description: Role updated.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponseV1'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete Role
+      description: |
+        Delete a role by its ID.\
+        \
+        **Required permissions:** _roles.edit_
+      operationId: deleteRoleByIdV1
+      tags:
+        - Roles
+      parameters:
+        - $ref: '#/components/parameters/RoleIdPath'
+      responses:
+        '204':
+          description: Role deleted.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of allowed requests per minute.
+              schema:
+                type: integer
+                format: int32
+                minimum: 1
+                maximum: 4096
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    Offset:
+      name: offset
+      in: query
+      description: The offset number of items to start with
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 2147483647
+        default: 0
+        example: 30
+    Limit:
+      name: limit
+      in: query
+      description: The number of items to return
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 200
+        default: 25
+        example: 25
+    OrderBy:
+      name: orderby
+      in: query
+      description: The order by field separated by a colon for the direction
+      required: false
+      schema:
+        type: string
+        maxLength: 256
+        default: ''
+        example: name:asc
+    Filter:
+      name: filter
+      in: query
+      description: The filter by field separated by a colon for the filter value
+      required: false
+      schema:
+        type: string
+        maxLength: 8192
+        default: ''
+        example: name:filter
+    TeamIdPath:
+      name: teamId
+      in: path
+      description: The team ID.
+      required: true
+      schema:
+        $ref: '#/components/schemas/UnlimitedLong'
+    UserIdPath:
+      name: userId
+      in: path
+      description: The user ID.
+      required: true
+      schema:
+        $ref: '#/components/schemas/UnlimitedLong'
+    MultiFilter:
+      name: filter
+      in: query
+      description: |
+        Filters to apply in the form of `key:value`.\
+        Multiple filters can be applied by repeating the `filter` parameter:\
+        `&filter=key1:value1&filter=key2:value2`
+      required: false
+      style: form
+      schema:
+        type: array
+        maxItems: 4
+        default: []
+        items:
+          type: string
+          maxLength: 512
+          default: ''
+          example: first_name:john
+    AccessKeyIdPath:
+      name: accessKeyId
+      in: path
+      description: The access key id.
+      required: true
+      schema:
+        $ref: '#/components/schemas/UnlimitedLong'
+    GroupMappingIdPath:
+      name: groupMappingId
+      in: path
+      description: The group mapping ID.
+      required: true
+      schema:
+        $ref: '#/components/schemas/UnlimitedLong'
+    SsoSettingsIdPath:
+      name: ssoSettingsId
+      in: path
+      description: SSO settings ID.
+      required: true
+      schema:
+        $ref: '#/components/schemas/UnlimitedLong'
+    IpFilterIdPath:
+      name: ipFilterId
+      in: path
+      description: IP Filter ID.
+      required: true
+      schema:
+        $ref: '#/components/schemas/UnlimitedLong'
+    PermissionsFilter:
+      name: filter
+      description: |
+        Filter by products when getting permissions for custom roles.\
+        Avaliable products are: SDS, SDC.\
+        You can specify a single product or a list of products separated by commas.\
+        Product names are case-sensitive.\
+        If not specified, all permissions are returned.
+      in: query
+      required: false
+      schema:
+        type: string
+        maxLength: 8192
+        default: ''
+        example: products:SDS
+    RoleIdPath:
+      name: roleId
+      in: path
+      description: The role id.
+      required: true
+      schema:
+        $ref: '#/components/schemas/UnlimitedLong'
+  schemas:
+    OffsetPaginatedResponse:
+      type: object
+      title: Offset Paginated Response
+      properties:
+        page:
+          description: Page information.
+          type: object
+          properties:
+            previous:
+              type: string
+              maxLength: 8192
+              nullable: true
+              example: '10'
+            next:
+              type: string
+              maxLength: 8192
+              nullable: true
+              example: '30'
+            total:
+              type: integer
+              format: int64
+              minimum: 0
+              example: 1
+        data:
+          description: Paginated data.
+          type: array
+          maxItems: 200
+          items: {}
+    UnlimitedLong:
+      description: ' '
+      type: integer
+      format: int64
+      minimum: 0
+      example: 1
+    TeamRoleV1:
+      title: Team Role
+      description: The standard team role provided by Sysdig.
+      type: string
+      example: ROLE_TEAM_READ
+      enum:
+        - ROLE_TEAM_NONE
+        - ROLE_TEAM_READ
+        - ROLE_TEAM_SERVICE_MANAGER
+        - ROLE_TEAM_STANDARD
+        - ROLE_TEAM_EDIT
+        - ROLE_TEAM_MANAGER
+    Product:
+      title: Sysdig Product
+      description: The Sysdig product
+      type: string
+      example: secure
+      enum:
+        - monitor
+        - secure
+    EntryPointModuleV1:
+      title: Entry Point Module
+      type: string
+      description: The Module is the area in Sysdig Monitor.
+      example: Alerts
+      enum:
+        - Alerts
+        - Dashboards
+        - Events
+        - Explore
+        - Overview
+        - Settings
+        - DashboardTemplates
+    EntryPointV1:
+      title: Entry Point
+      type: object
+      description: |
+        The page you see after logging into Sysdig UI. It is defined by a Module and a Selection.
+        **The Entry Point is not supported in Sysdig Secure.**
+      properties:
+        module:
+          $ref: '#/components/schemas/EntryPointModuleV1'
+        selection:
+          type: string
+          description: |
+            The selection is the specific page within the Module, usually defined by the resource ID.
+            It is supported only supported by **Dashboards** and **DashboardTemplates** Modules.
+          example: '2231245'
+          maxLength: 128
+          nullable: true
+    UiSettingsV1:
+      title: UiSettings
+      type: object
+      description: UI related settings.
+      properties:
+        entryPoint:
+          $ref: '#/components/schemas/EntryPointV1'
+        theme:
+          type: string
+          description: The color assigned to the team.
+          example: '#112233'
+          maxLength: 7
+    ScopeTypeV1:
+      title: Scope Type
+      type: string
+      example: PROMETHEUS_REMOTE_WRITE
+      enum:
+        - AGENT
+        - AWS_CLOUD_WATCH
+        - HOST_CONTAINER
+        - IBM_PLATFORM_METRICS
+        - PROMETHEUS_REMOTE_WRITE
+    ScopeV1:
+      title: Scope
+      type: object
+      required:
+        - type
+        - expression
+      properties:
+        type:
+          $ref: '#/components/schemas/ScopeTypeV1'
+        expression:
+          type: string
+          maxLength: 65356
+          example: kubernetes.cluster.name in ("test-env")
+    AdditionalTeamPermissionsV1:
+      title: Additional Team Permissions
+      type: object
+      description: Additional permissions available to the users of the team.
+      properties:
+        hasSysdigCaptures:
+          description: Enable the Sysdig captures feature for this team.
+          type: boolean
+          default: false
+          example: false
+        hasInfrastructureEvents:
+          type: boolean
+          default: false
+          example: false
+        hasAwsData:
+          type: boolean
+          default: false
+          example: false
+        hasRapidResponse:
+          type: boolean
+          default: false
+          example: false
+        hasAgentCli:
+          type: boolean
+          default: false
+          example: false
+        hasBeaconMetrics:
+          type: boolean
+          default: false
+          example: false
+    TeamResponseV1:
+      type: object
+      title: Team Response V1
+      properties:
+        id:
+          $ref: '#/components/schemas/UnlimitedLong'
+        name:
+          description: The name of the team. It must be unique.
+          type: string
+          example: Scanning operations
+          maxLength: 256
+        description:
+          description: A description of the team explaining what is it used for.
+          type: string
+          maxLength: 2048
+          example: This team has access to scanning results
+          nullable: true
+        isImmutableTeam:
+          description: Specifies if the team is immutable. This is true if the team was created by the system with full access. It cannot be modified.
+          type: boolean
+          example: false
+        isDefaultTeam:
+          description: Specifies if the team is the default team. The default team is used to automatically assign new users to a team.
+          type: boolean
+          example: false
+        standardTeamRole:
+          allOf:
+            - $ref: '#/components/schemas/TeamRoleV1'
+          description: |
+            The standard team role assigned by default to users added to this team. Mutually exclusive with 'customTeamRoleId'.
+          nullable: true
+        customTeamRoleId:
+          allOf:
+            - $ref: '#/components/schemas/UnlimitedLong'
+          description: |
+            The custom team role assigned by default to users added to this team. Mutually exclusive with 'standardTeamRoleId'.
+          nullable: true
+        product:
+          allOf:
+            - $ref: '#/components/schemas/Product'
+          description: The product to which the team is assigned to.
+        uiSettings:
+          $ref: '#/components/schemas/UiSettingsV1'
+        isAllZones:
+          description: |
+            'True' if the users belonging to this team have access to all zones. Mutually exclusive with 'zoneIds'.
+          type: boolean
+          example: false
+        zoneIds:
+          description: |
+            The list of zones that users assigned to this team will have access to. Mutually exclusive with 'allZones'.
+          type: array
+          items:
+            $ref: '#/components/schemas/UnlimitedLong'
+          maxItems: 8192
+        scopes:
+          description: The scopes available to the users of this team.
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeV1'
+          maxItems: 512
+        additionalTeamPermissions:
+          $ref: '#/components/schemas/AdditionalTeamPermissionsV1'
+        dateCreated:
+          description: The date (in ISO 8601 format) when this team was created.
+          type: string
+          format: date-time
+          example: '2017-07-21T17:32:28Z'
+          maxLength: 64
+        lastUpdated:
+          description: The date (in ISO 8601 format) when this team was last updated.
+          type: string
+          format: date-time
+          example: '2017-07-21T17:32:28Z'
+          maxLength: 64
+        version:
+          $ref: '#/components/schemas/UnlimitedLong'
+    GetTeamsPaginatedResponseV1:
+      title: Get Paginated Teams Response V1
+      allOf:
+        - $ref: '#/components/schemas/OffsetPaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/TeamResponseV1'
+              maxItems: 200
+    Error:
+      title: Error
+      type: object
+      properties:
+        type:
+          description: The error code.
+          type: string
+          maxLength: 512
+          example: resource_not_found
+        message:
+          description: A human readable error message.
+          type: string
+          maxLength: 8192
+          example: Error message
+        details:
+          description: A list of details related to the error.
+          type: array
+          maxItems: 512
+          items: {}
+    CreateTeamRequestV1:
+      title: Create Team Request
+      type: object
+      required:
+        - name
+        - product
+      properties:
+        name:
+          description: The name of the team. It must be unique.
+          type: string
+          minLength: 1
+          maxLength: 256
+          example: Team name
+        description:
+          description: A longer description of the team explaining what is it used for.
+          type: string
+          maxLength: 2048
+          example: Longer team description
+        isDefaultTeam:
+          description: Specifies if the team is the default team. The default team is used to automatically assign new users to a team.
+          type: boolean
+          example: false
+        standardTeamRole:
+          allOf:
+            - $ref: '#/components/schemas/TeamRoleV1'
+          description: |
+            The standard team role assigned by default to users added to this team. **Mutually exclusive with customTeamRoleId**.\
+            \
+            *ROLE_TEAM_SERVICE_MANAGER is only supported in Secure.*
+        customTeamRoleId:
+          allOf:
+            - $ref: '#/components/schemas/UnlimitedLong'
+          description: |
+            The custom team role assigned by default to users added to this team. **Mutually exclusive with standardTeamRoleId**.
+        product:
+          allOf:
+            - $ref: '#/components/schemas/Product'
+          description: The product to which the team is assigned to. Teams can only be part of a single product at a time.
+        uiSettings:
+          $ref: '#/components/schemas/UiSettingsV1'
+        isAllZones:
+          description: |
+            **True** if the users that are members of this team have access to all zones. **Mutually exclusive with zoneIds**.\
+            \
+            _Only supported in Secure features._
+          type: boolean
+          example: false
+        zoneIds:
+          description: |
+            The list of zones that users assigned to this team will have access to. **Mutually exclusive with allZones**.\
+            \
+            _Only supported in Secure features._
+          type: array
+          items:
+            $ref: '#/components/schemas/UnlimitedLong'
+          maxItems: 8192
+        scopes:
+          description: |
+            Scopes is a list of different scope types and filter values that will be applied to resources
+            when accessed through the team.
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeV1'
+          maxItems: 512
+        additionalTeamPermissions:
+          $ref: '#/components/schemas/AdditionalTeamPermissionsV1'
+    UpdateTeamRequestV1:
+      type: object
+      title: Update Team Request V1
+      required:
+        - version
+        - name
+        - isDefaultTeam
+        - uiSettings
+        - scopes
+        - additionalTeamPermissions
+      properties:
+        version:
+          $ref: '#/components/schemas/UnlimitedLong'
+        name:
+          description: The name of the team.
+          type: string
+          example: User Team
+          maxLength: 256
+        description:
+          description: A description of the team explaining what is it used for.
+          type: string
+          example: User Team description
+          maxLength: 2048
+        isDefaultTeam:
+          description: Specifies if this is the default team. The default team is used to automatically assign new users to a team.
+          type: boolean
+          example: false
+        standardTeamRole:
+          allOf:
+            - $ref: '#/components/schemas/TeamRoleV1'
+          description: |
+            The standard team role assigned by default to users added to this team.
+        customTeamRoleId:
+          allOf:
+            - $ref: '#/components/schemas/UnlimitedLong'
+          description: |
+            The custom team role assigned by default to users added to this team.
+        uiSettings:
+          $ref: '#/components/schemas/UiSettingsV1'
+        isAllZones:
+          description: |
+            **True** if the users that are members of this team have access to all zones. **Mutually exclusive with zoneIds**.\
+            \
+            _Only supported in Secure features._
+          type: boolean
+          example: false
+        zoneIds:
+          description: |
+            The list of zones that users assigned to this team will have access to. **Mutually exclusive with allZones**.\
+            \
+            _Only supported in Secure features._
+          type: array
+          items:
+            $ref: '#/components/schemas/UnlimitedLong'
+          maxItems: 8192
+        scopes:
+          description: |
+            Scopes is a list of different scope types and filter values that will be applied to resources
+            when accessed through the team.
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeV1'
+          maxItems: 512
+          minItems: 1
+        additionalTeamPermissions:
+          $ref: '#/components/schemas/AdditionalTeamPermissionsV1'
+    TeamUserResponseV1:
+      type: object
+      title: Team User Response V1
+      properties:
+        teamId:
+          $ref: '#/components/schemas/UnlimitedLong'
+        userId:
+          $ref: '#/components/schemas/UnlimitedLong'
+        standardTeamRole:
+          allOf:
+            - $ref: '#/components/schemas/TeamRoleV1'
+          nullable: true
+        customTeamRoleId:
+          allOf:
+            - $ref: '#/components/schemas/UnlimitedLong'
+          nullable: true
+    GetTeamUsersPaginatedResponseV1:
+      title: Get Paginated Team Users Response V1
+      allOf:
+        - $ref: '#/components/schemas/OffsetPaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/TeamUserResponseV1'
+              maxItems: 200
+    SaveTeamUserRequestV1:
+      type: object
+      title: Create or Update Membership Request V1
+      properties:
+        standardTeamRole:
+          description: |
+            The standard team role assigned for the user in this team. **Mutually exclusive with customTeamRoleId**.\
+            \
+            *ROLE_TEAM_SERVICE_MANAGER is only supported in Secure.*
+          allOf:
+            - $ref: '#/components/schemas/TeamRoleV1'
+        customTeamRoleId:
+          description: |
+            The custom team role ID assigned for the user in this team. **Mutually exclusive with standardTeamRole**.
+          allOf:
+            - $ref: '#/components/schemas/UnlimitedLong'
+    UserResponseV1:
+      type: object
+      title: User Response V1
+      properties:
+        id:
+          $ref: '#/components/schemas/UnlimitedLong'
+        email:
+          description: |
+            The email address of the user.
+          type: string
+          example: john.doe@nomail.cc
+          maxLength: 512
+        firstName:
+          description: |
+            The name of the user.
+          type: string
+          example: john
+          maxLength: 256
+          nullable: true
+        lastName:
+          description: |
+            The last name of the user.
+          type: string
+          example: doe
+          maxLength: 256
+          nullable: true
+        isAdmin:
+          description: |
+            **True** if the user has Administration permissions.
+          type: boolean
+          example: false
+        activationStatus:
+          description: |
+            The current activation status of the user.
+          type: string
+          example: confirmed
+          maxLength: 256
+        dateCreated:
+          description: |
+            The date and time when the user was created.
+          type: string
+          format: date-time
+          example: '2017-07-21T17:32:28Z'
+          maxLength: 64
+        lastUpdated:
+          description: |
+            The date and time when the user was last updated.
+          type: string
+          format: date-time
+          example: '2017-07-21T17:32:28Z'
+          maxLength: 64
+          nullable: true
+        version:
+          allOf:
+            - $ref: '#/components/schemas/UnlimitedLong'
+          description: |
+            The current version of the resource.
+    GetUsersPaginatedResponseV1:
+      title: Get Paginated Users Response V1
+      allOf:
+        - $ref: '#/components/schemas/OffsetPaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserResponseV1'
+              maxItems: 200
+    CreateUserRequestV1:
+      type: object
+      title: Create User Request V1
+      description: Request to create the User
+      required:
+        - email
+      properties:
+        email:
+          description: |
+            The email address of the user. If the activation flow is set, this address will
+            be used to send the activation email.
+          type: string
+          format: email
+          example: john.doe@nomail.cc
+          maxLength: 512
+        firstName:
+          description: |
+            The name of the user.
+          type: string
+          example: John
+          maxLength: 256
+        lastName:
+          description: |
+            The surname of the user.
+          type: string
+          example: Doe
+          maxLength: 256
+        isAdmin:
+          description: |
+            **True** if the user has Administration permissions.
+          type: boolean
+          default: false
+          example: false
+        products:
+          description: The user will be added to the default teams specified by this field.
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+          maxItems: 2
+          example:
+            - secure
+            - monitor
+    UpdateUserRequestV1:
+      type: object
+      title: Update User Request V1
+      required:
+        - version
+      properties:
+        firstName:
+          description: |
+            The name of the user.
+          type: string
+          example: john
+          maxLength: 256
+        lastName:
+          description: |
+            The surname of the user.
+          type: string
+          example: doe
+          maxLength: 256
+        isAdmin:
+          description: |
+            **True** if the user has Administration permissions.
+          type: boolean
+          example: false
+        version:
+          allOf:
+            - $ref: '#/components/schemas/UnlimitedLong'
+          description: |
+            The current version of the resource.
+    DaysInYearInt:
+      description: Number of days in a year
+      type: integer
+      format: int32
+      minimum: 1
+      maximum: 365
+      example: 90
+    UserDeactivationConfigurationResponseV1:
+      type: object
+      title: User Deactivation Configuration Response V1
+      properties:
+        customerId:
+          allOf:
+            - $ref: '#/components/schemas/UnlimitedLong'
+          description: |
+            The customer Id.
+        isEnabled:
+          description: Specifies if user deactivation is enabled for this customer.
+          type: boolean
+          example: false
+        numberDaysBeforeDeactivation:
+          allOf:
+            - $ref: '#/components/schemas/DaysInYearInt'
+          description: |
+            Number of days before inactive users are deactivated.
+    UpdateUserDeactivationConfigurationRequestV1:
+      type: object
+      title: Update User Deactivation Configuration Request V1
+      required:
+        - isEnabled
+        - numberDaysBeforeDeactivation
+      properties:
+        isEnabled:
+          description: Specifies if user deactivation is enabled for this customer.
+          type: boolean
+          example: false
+        numberDaysBeforeDeactivation:
+          allOf:
+            - $ref: '#/components/schemas/DaysInYearInt'
+          description: |
+            Number of days before inactive users are deactivated.
+    BucketConfigurationV1:
+      type: object
+      title: Bucket Configuration V1
+      required:
+        - name
+      properties:
+        name:
+          description: The name of the bucket.
+          type: string
+          maxLength: 255
+          example: my-bucket
+        folder:
+          description: The folder in the bucket where the captures are stored. Name of the folder without any prefix slashes ("test-folder" and not "/test-folder").
+          type: string
+          maxLength: 255
+          example: my-folder
+        description:
+          description: The description of the bucket.
+          type: string
+          maxLength: 255
+          example: My bucket description
+        providerKeyId:
+          description: Id of the configured cloud provider account. Could be fetched with /api/providers endpoint.
+          type: string
+          maxLength: 255
+          example: my-provider-key-id
+        endpoint:
+          description: The endpoint of the bucket. ***Required for S3 compatible storage.***
+          type: string
+          maxLength: 255
+          example: https://my-bucket.s3.amazonaws.com
+        region:
+          description: The region of the bucket.
+          maxLength: 255
+          type: string
+          example: us-east-1
+        pathStyleAccess:
+          description: Specifies if the bucket uses path-style access.
+          type: boolean
+          default: false
+          example: false
+    CaptureStorageConfigurationResponseV1:
+      type: object
+      title: Capture Storage Configuration Response V1
+      properties:
+        isEnabled:
+          description: Specifies if capture storage is enabled.
+          type: boolean
+          example: false
+        isEncryptionWithProvidedKeyEnabled:
+          description: Specifies if server-side encryption with provided encryption key (SSE-C) is enabled.
+          type: boolean
+          example: false
+        buckets:
+          type: array
+          maxItems: 1
+          description: |
+            The list of buckets where the captures are stored. Currently only one bucket is supported.
+          items:
+            $ref: '#/components/schemas/BucketConfigurationV1'
+    SaveCaptureStorageConfigurationRequestV1:
+      type: object
+      title: Update Capture Storage Configuration Request V1
+      required:
+        - isEnabled
+      properties:
+        isEnabled:
+          description: Specifies if capture storage is enabled.
+          type: boolean
+          example: false
+        isEncryptionWithProvidedKeyEnabled:
+          description: Specifies if server-side encryption with provided encryption key (SSE-C) is enabled.
+          type: boolean
+          default: false
+          example: false
+        encryptionKey:
+          description: AES-256 encryption key to be used for server-side encryption (base64 encoded).
+          maxLength: 255
+          type: string
+          example: 23kA/KCxPktKXLijIIt91uB+sJ652w/ES9hZ3+eWadM=
+        buckets:
+          type: array
+          maxItems: 1
+          description: |
+            The list of buckets where the captures are stored. Currently only one bucket is supported.
+          items:
+            $ref: '#/components/schemas/BucketConfigurationV1'
+    AccessKeyResponseV1:
+      title: Access Key Response V1
+      description: Access key response
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UnlimitedLong'
+        isEnabled:
+          description: Indicates if the access key is enabled
+          type: boolean
+          example: true
+        accessKey:
+          description: Displays the access key value
+          type: string
+          maxLength: 256
+          example: f97af7c5-dac3-49b1-b5e0-710871d34a15
+        dateCreated:
+          description: |
+            Date and time when access key was created
+          type: string
+          format: date-time
+          nullable: true
+          example: '2022-01-31T22:15:28Z'
+          maxLength: 64
+        dateDisabled:
+          description: |
+            Date and time when access key was disabled
+          type: string
+          format: date-time
+          nullable: true
+          example: '2022-01-31T22:15:28Z'
+          maxLength: 64
+        agentLimit:
+          description: Maximum number of agents that can be connected with the access key
+          type: integer
+          nullable: true
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          example: 100
+        agentReservation:
+          description: Number of agents that are guaranteed to be available for the access key
+          type: integer
+          nullable: true
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          example: 5
+        teamId:
+          description: ID of team that owns the access key
+          type: integer
+          nullable: true
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          example: 13
+        metadata:
+          description: Access key metadata (maximum of 20 key-value pairs where key can be up to 25 characters long and value can be up to 50 characters long)
+          maxItems: 20
+          type: object
+          additionalProperties:
+            type: string
+            maxLength: 76
+            example: metaKey1:metaValue1
+    GetAccessKeysPaginatedResponseV1:
+      title: Get Paginated Access Keys Response V1
+      allOf:
+        - $ref: '#/components/schemas/OffsetPaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/AccessKeyResponseV1'
+              maxItems: 200
+    CreateAccessKeyRequestV1:
+      title: Create Access Key Request
+      description: Create access key request
+      type: object
+      properties:
+        agentLimit:
+          description: Maximum number of agents that can be connected with the access key
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          example: 100
+        agentReservation:
+          description: Number of agents that are guaranteed to be available for the access key
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          example: 5
+        teamId:
+          description: ID of team that owns the access key
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          example: 13
+        metadata:
+          description: Access key metadata (maximum of 20 key-value pairs where key can be up to 25 characters long and value can be up to 50 characters long)
+          maxItems: 20
+          type: object
+          additionalProperties:
+            type: string
+            maxLength: 76
+            example: metaKey1:metaValue1
+    UpdateAccessKeyRequestV1:
+      title: Update Access Key Request
+      description: Update access key request
+      type: object
+      required:
+        - isEnabled
+      properties:
+        agentLimit:
+          description: Maximum number of agents that can be connected with the access key
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          example: 100
+        agentReservation:
+          description: Number of agents that are guaranteed to be available for the access key
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          example: 5
+        teamId:
+          description: ID of team that owns the access key
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          example: 13
+        isEnabled:
+          description: Flag that indicates if the access key should be disabled or enabled
+          type: boolean
+          example: true
+        metadata:
+          description: Access key metadata (maximum of 20 key-value pairs where key can be up to 25 characters long and value can be up to 50 characters long)
+          maxItems: 20
+          type: object
+          additionalProperties:
+            type: string
+            maxLength: 76
+            example: metaKey1:metaValue1
+    TeamMapV1:
+      type: object
+      title: Team Map
+      description: Determines the teams to which a group is mapped.
+      properties:
+        isForAllTeams:
+          description: |
+            If true, the group is mapped to all teams.
+          type: boolean
+          example: false
+        teamIds:
+          description: |
+            The list of teams to which group is mapped. It is empty when 'isForAllTeams' is true, otherwise it should have at least 1 element.
+          type: array
+          example:
+            - 154
+            - 187
+          items:
+            $ref: '#/components/schemas/UnlimitedLong'
+          maxItems: 8192
+    GroupMappingResponseV1:
+      type: object
+      title: Group Mapping Response V1
+      properties:
+        id:
+          $ref: '#/components/schemas/UnlimitedLong'
+        groupName:
+          description: The group name matching the external provider name.
+          type: string
+          example: Admins_Mapped_Group
+          maxLength: 256
+        standardTeamRole:
+          description: |
+            The standard team role assigned for the user in this team. **Mutually exclusive with customTeamRoleId**.
+          allOf:
+            - $ref: '#/components/schemas/TeamRoleV1'
+          nullable: true
+        customTeamRoleId:
+          description: |
+            The custom team role ID assigned for the user in this team. **Mutually exclusive with standardTeamRole**.
+          allOf:
+            - $ref: '#/components/schemas/UnlimitedLong'
+          nullable: true
+        isAdmin:
+          description: Flag that indicates if the group is an admin group.
+          type: boolean
+          example: false
+        teamMap:
+          $ref: '#/components/schemas/TeamMapV1'
+        weight:
+          description: The weight of the group mapping that is used to determine the priority - a lower number has higher priority.
+          type: integer
+          format: int16
+          minimum: 1
+          maximum: 32767
+          example: 2
+        dateCreated:
+          description: The date in which this group mapping was created in ISO 8601 format.
+          type: string
+          format: date-time
+          example: '2017-07-21T17:32:28Z'
+          maxLength: 64
+        lastUpdated:
+          description: The date in which this group mapping was last updated in ISO 8601 format.
+          type: string
+          format: date-time
+          example: '2017-07-21T17:32:28Z'
+          maxLength: 64
+    GroupMappingsPaginatedResponseV1:
+      title: Get Group Mappings Paginated Response V1
+      allOf:
+        - $ref: '#/components/schemas/OffsetPaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/GroupMappingResponseV1'
+              maxItems: 8192
+    CreateGroupMappingRequestV1:
+      type: object
+      title: Create Group Mapping Request V1
+      properties:
+        groupName:
+          description: The group name matching the external provider name.
+          type: string
+          example: Admins_Mapped_Group
+          maxLength: 256
+        standardTeamRole:
+          description: |
+            The standard team role assigned for the user in this team. **Mutually exclusive with customTeamRoleId**.
+          allOf:
+            - $ref: '#/components/schemas/TeamRoleV1'
+          nullable: true
+        customTeamRoleId:
+          description: |
+            The custom team role ID assigned for the user in this team. **Mutually exclusive with standardTeamRole**.
+          allOf:
+            - $ref: '#/components/schemas/UnlimitedLong'
+          nullable: true
+        isAdmin:
+          description: Flag that indicates if the group is an admin group.
+          type: boolean
+          example: false
+        teamMap:
+          $ref: '#/components/schemas/TeamMapV1'
+        weight:
+          description: The weight of the group mapping is used to determine the priority - a lower number has higher priority.
+          type: integer
+          format: int16
+          minimum: 1
+          maximum: 32767
+          default: 32767
+          example: 2
+      required:
+        - groupName
+        - teamMap
+    UpdateGroupMappingRequestV1:
+      type: object
+      title: Update Group Mapping Request V1
+      properties:
+        groupName:
+          description: The group name matching the external provider name.
+          type: string
+          example: Admins_Mapped_Group
+          maxLength: 256
+        standardTeamRole:
+          description: |
+            The standard team role assigned for the user in this team. **Mutually exclusive with customTeamRoleId**.
+          allOf:
+            - $ref: '#/components/schemas/TeamRoleV1'
+          nullable: true
+        customTeamRoleId:
+          description: |
+            The custom team role ID assigned for the user in this team. **Mutually exclusive with standardTeamRole**.
+          allOf:
+            - $ref: '#/components/schemas/UnlimitedLong'
+          nullable: true
+        isAdmin:
+          description: Flag that indicates if the group is an admin group.
+          type: boolean
+          example: false
+        teamMap:
+          $ref: '#/components/schemas/TeamMapV1'
+        weight:
+          description: The weight of the group mapping that is used to determine the priority - a lower number has higher priority.
+          type: integer
+          format: int16
+          minimum: 1
+          maximum: 32767
+          default: 32767
+          example: 2
+      required:
+        - groupName
+        - teamMap
+        - isAdmin
+        - weight
+    GroupMappingSettingsV1:
+      type: object
+      title: Group Mapping Settings Request V1
+      description: |
+        The request to save group mapping settings.
+        Currently settings for conflict resolution strategies are supported.
+      properties:
+        noMappingStrategy:
+          description: |
+            Strategy for handling no mappings.
+          type: string
+          example: UNAUTHORIZED
+          enum:
+            - UNAUTHORIZED
+            - DEFAULT_TEAM_DEFAULT_ROLE
+            - NO_MAPPINGS_ERROR_REDIRECT
+        differentRolesSameTeamStrategy:
+          description: |
+            Strategy for handling different roles on the same team.
+          type: string
+          example: UNAUTHORIZED
+          enum:
+            - UNAUTHORIZED
+            - FIRST_MATCH
+            - WEIGHTED
+        noMappingsErrorRedirectUrl:
+          description: |
+            Redirect URL when NO_MAPPINGS_ERROR_REDIRECT is selected.
+          type: string
+          example: https://www.example.com
+          maxLength: 2048
+          nullable: true
+      required:
+        - noMappingStrategy
+        - differentRolesSameTeamStrategy
+    SsoSettingsBaseSchemaV1:
+      type: object
+      title: SSO Settings Base Schema V1
+      properties:
+        product:
+          allOf:
+            - $ref: '#/components/schemas/Product'
+          description: The product to which SSO settings is applied to. SSO settings are configured per specific product.
+        isActive:
+          type: boolean
+          description: Flag to indicate if the SSO settings is active.
+          example: true
+        createUserOnLogin:
+          type: boolean
+          description: Flag to indicate if the user will be created automatically if not found in the system.
+          example: true
+        isPasswordLoginEnabled:
+          type: boolean
+          description: Flag to indicate if the user will be able to login with password.
+          example: true
+        isSingleLogoutEnabled:
+          type: boolean
+          description: Flag to indicate if the single logout support is enabled.
+          example: true
+        isGroupMappingEnabled:
+          type: boolean
+          description: Flag to indicate if group mapping support is enabled.
+          example: true
+        groupMappingAttributeName:
+          type: string
+          description: The group mapping attribute name.
+          example: groups
+          maxLength: 64
+          nullable: true
+    SsoSettingsResponseBaseV1:
+      title: SSO Settings Write Base Response V1
+      type: object
+      description: Response SSO Settings Base Schema
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SsoTypeV1'
+      discriminator:
+        propertyName: type
+        mapping:
+          SAML: '#/components/schemas/SamlResponseV1'
+          OPENID: '#/components/schemas/OpenIdConfigResponseV1'
+    SamlBaseV1:
+      type: object
+      title: SAML SSO Settings Base Schema V1
+      properties:
+        metadataUrl:
+          type: string
+          description: The metadata URL of the SAML provider. **Mutually exclusive with metadata*
+          example: https://accounts.example.com/metadata
+          maxLength: 2048
+        metadataXml:
+          type: string
+          description: The metadata XML of the SAML provider. **Mutually exclusive with metadataUrl*
+          maxLength: 65356
+          example: |
+            <EntityDescriptor entityID= "https://accounts.example.com">
+        emailParameter:
+          type: string
+          description: The email parameter of the SAML provider.
+          example: email
+          maxLength: 2048
+        isSignatureValidationEnabled:
+          type: boolean
+          description: Flag that indicates if the signature validation is enabled.
+          example: true
+        isSignedAssertionEnabled:
+          type: boolean
+          description: Flag that indicates if the signed assertion is enabled.
+          example: true
+        isDestinationVerificationEnabled:
+          type: boolean
+          description: Flag that indicates if the destination verification is enabled.
+          example: true
+        isEncryptionSupportEnabled:
+          type: boolean
+          description: Flag that indicates if the encryption support is enabled.
+          example: true
+    SamlResponseV1:
+      type: object
+      title: SAML Settings Response V1
+      allOf:
+        - $ref: '#/components/schemas/SsoSettingsResponseBaseV1'
+        - $ref: '#/components/schemas/SamlBaseV1'
+    OpenIdMetadataV1:
+      type: object
+      title: The metadata of the OpenID Connect provider
+      properties:
+        issuer:
+          type: string
+          description: The base issuer URL of the OpenID Connect provider.
+          example: https://accounts.example.com
+          maxLength: 2048
+        authorizationEndpoint:
+          type: string
+          description: The authorization endpoint of the OpenID Connect provider.
+          example: https://accounts.example.com/oauth2/authorize
+          maxLength: 2048
+        tokenEndpoint:
+          type: string
+          description: The token endpoint of the OpenID Connect provider.
+          example: https://accounts.example.com/oauth2/token
+          maxLength: 2048
+        jwksUri:
+          type: string
+          description: The JSON Web Key Set URI of the OpenID Connect provider.
+          example: https://accounts.example.com/oauth2/jwks
+          maxLength: 2048
+        endSessionEndpoint:
+          type: string
+          description: Single sign-out endpoint of the OpenID Connect provider.
+          example: https://accounts.example.com/oauth2/logout
+          maxLength: 2048
+        tokenAuthMethod:
+          type: string
+          enum:
+            - CLIENT_SECRET_BASIC
+            - CLIENT_SECRET_POST
+          description: The token authentication method of the OpenID Connect provider.
+          example: CLIENT_SECRET_BASIC
+      required:
+        - issuerBaseUrl
+        - authorizationEndpoint
+        - tokenEndpoint
+        - jsonWebKeySetEndpoint
+        - tokenAuthMethod
+    OpenIdBaseV1:
+      type: object
+      title: OpenID Settings Base Schema
+      properties:
+        issuerUrl:
+          type: string
+          description: The issuer URL of the OpenID Connect provider.
+          example: https://accounts.example.com
+          maxLength: 2048
+        clientId:
+          type: string
+          description: The client ID of the OpenID Connect provider.
+          example: client-id
+          maxLength: 2048
+        isMetadataDiscoveryEnabled:
+          type: boolean
+          description: Flag to indicate if the metadata discovery is enabled.
+          example: true
+        metadata:
+          allOf:
+            - $ref: '#/components/schemas/OpenIdMetadataV1'
+          description: The metadata of the OpenID Connect provider.
+        groupAttributeName:
+          type: string
+          description: The group attribute name of the OpenID Connect provider.
+          example: groups
+          maxLength: 64
+        isAdditionalScopesCheckEnabled:
+          type: boolean
+          description: Flag to indicate if the additional scopes verification on login.
+          example: true
+        additionalScopes:
+          type: array
+          description: List of additional scopes to be verified on login.
+          items:
+            type: string
+            description: The scope to be verified on login.
+            maxLength: 64
+            example: scope 1
+          example:
+            - scope 1
+            - scope 2
+          maxItems: 64
+    OpenIdConfigResponseV1:
+      type: object
+      title: OpenID Connect SSO Settings Response V1
+      allOf:
+        - $ref: '#/components/schemas/SsoSettingsResponseBaseV1'
+        - $ref: '#/components/schemas/OpenIdBaseV1'
+    SsoTypeV1:
+      title: SSO Type
+      description: Supported SSO types
+      type: string
+      example: SAML
+      enum:
+        - SAML
+        - OPENID
+    SsoSettingsResponseV1:
+      type: object
+      title: SSO Settings Write Response V1
+      allOf:
+        - $ref: '#/components/schemas/SsoSettingsBaseSchemaV1'
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/UnlimitedLong'
+            config:
+              $ref: '#/components/schemas/SsoSettingsResponseBaseV1'
+            dateCreated:
+              description: The date (in ISO 8601 format) when this SSO config was created.
+              type: string
+              format: date-time
+              example: '2017-07-21T17:32:28Z'
+              maxLength: 64
+            lastUpdated:
+              description: The date (in ISO 8601 format) when this SSO config was last updated.
+              type: string
+              format: date-time
+              example: '2017-07-21T17:32:28Z'
+              maxLength: 64
+            version:
+              $ref: '#/components/schemas/UnlimitedLong'
+    AllSsoSettingsResponseV1:
+      title: Get All SSO Settings Response V1
+      type: object
+      properties:
+        data:
+          description: The list of SSO settings.
+          type: array
+          items:
+            $ref: '#/components/schemas/SsoSettingsResponseV1'
+          maxItems: 250
+    SsoSettingsCreateRequestBaseV1:
+      title: SSO Settings Create Request Base V1
+      type: object
+      description: Create Request SSO Settings Base Schema
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SsoTypeV1'
+      discriminator:
+        propertyName: type
+        mapping:
+          SAML: '#/components/schemas/SamlCreateRequestV1'
+          OPENID: '#/components/schemas/OpenIdCreateRequestV1'
+    SamlCreateRequestV1:
+      type: object
+      title: SAML Settings Create Request V1
+      allOf:
+        - $ref: '#/components/schemas/SsoSettingsCreateRequestBaseV1'
+        - $ref: '#/components/schemas/SamlBaseV1'
+      required:
+        - emailParameter
+    OpenIdRequestBaseV1:
+      type: object
+      title: OpenID Settings Base Write Request V1
+      allOf:
+        - $ref: '#/components/schemas/OpenIdBaseV1'
+        - type: object
+          properties:
+            clientSecret:
+              type: string
+              description: The client secret of the OpenID Connect provider.
+              example: client-secret
+              maxLength: 2048
+    OpenIdCreateRequestV1:
+      type: object
+      title: OpenID Connect SSO Settings Create Request V1
+      allOf:
+        - $ref: '#/components/schemas/SsoSettingsCreateRequestBaseV1'
+        - $ref: '#/components/schemas/OpenIdRequestBaseV1'
+      required:
+        - issuerUrl
+        - clientId
+        - clientSecret
+    CreateSsoSettingsRequestV1:
+      type: object
+      title: Create SSO settings Request V1
+      allOf:
+        - $ref: '#/components/schemas/SsoSettingsBaseSchemaV1'
+        - type: object
+          properties:
+            config:
+              $ref: '#/components/schemas/SsoSettingsCreateRequestBaseV1'
+      required:
+        - product
+        - config
+    SsoSettingsUpdateRequestBaseV1:
+      title: SSO Settings Update Request Base V1
+      type: object
+      description: Update Request SSO Settings Base Schema
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SsoTypeV1'
+      discriminator:
+        propertyName: type
+        mapping:
+          SAML: '#/components/schemas/SamlUpdateRequestV1'
+          OPENID: '#/components/schemas/OpenIdUpdateRequestV1'
+    SamlUpdateRequestV1:
+      type: object
+      title: SAML Settings Update Request V1
+      allOf:
+        - $ref: '#/components/schemas/SsoSettingsUpdateRequestBaseV1'
+        - $ref: '#/components/schemas/SamlBaseV1'
+      required:
+        - emailParameter
+        - isSignatureValidationEnabled
+        - isSignedAssertionEnabled
+        - isDestinationVerificationEnabled
+        - isEncryptionSupportEnabled
+    OpenIdUpdateRequestV1:
+      type: object
+      title: OpenID Connect SSO Settings Update Request V1
+      allOf:
+        - $ref: '#/components/schemas/SsoSettingsUpdateRequestBaseV1'
+        - $ref: '#/components/schemas/OpenIdRequestBaseV1'
+      required:
+        - issuerUrl
+        - clientId
+        - clientSecret
+        - isAdditionalScopesCheckEnabled
+        - isMetadataDiscoveryEnabled
+    UpdateSsoSettingsRequestV1:
+      type: object
+      title: Update SSO settings Request V1
+      allOf:
+        - $ref: '#/components/schemas/SsoSettingsBaseSchemaV1'
+        - type: object
+          properties:
+            version:
+              $ref: '#/components/schemas/UnlimitedLong'
+            config:
+              $ref: '#/components/schemas/SsoSettingsUpdateRequestBaseV1'
+      required:
+        - version
+        - product
+        - config
+        - isActive
+        - createUserOnLogin
+        - isPasswordLoginEnabled
+        - isSingleLogoutEnabled
+        - isGroupMappingEnabled
+    ServiceAccountsNotificationSettinsBase:
+      type: object
+      description: The base schema for the service accounts notification settings.
+      properties:
+        isEnabled:
+          description: Whether the notification settings are enabled or not.
+          type: boolean
+          example: true
+        notificationChannelIds:
+          description: |
+            The list of notification channel IDs to which the notifications are to be sent.\
+            \
+            Supported types are **EMAIL** and **SLACK**.
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/UnlimitedLong'
+          maxItems: 10
+        daysBeforeExpiry:
+          description: The number of days before the expiry of the service account when the notifications are to be sent.
+          type: array
+          minimum: 1
+          maximum: 60
+          maxItems: 5
+          default:
+            - 30
+            - 7
+            - 1
+          items:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 60
+            example: 3
+    ServiceAccountsNotificationSettingsResponseV1:
+      type: object
+      title: Service Accounts Notification Settings Response V1
+      allOf:
+        - $ref: '#/components/schemas/ServiceAccountsNotificationSettinsBase'
+    UpdateServiceAccountsNotificationSettingsRequestV1:
+      type: object
+      title: Update Service Accounts Notification Settings Request V1
+      required:
+        - isEnabled
+        - notificationChannelIds
+        - daysBeforeExpiry
+      allOf:
+        - $ref: '#/components/schemas/ServiceAccountsNotificationSettinsBase'
+    CreateServiceAccountsNotificationSettingsRequestV1:
+      type: object
+      title: Create Service Accounts Notification Settings Request V1
+      required:
+        - isEnabled
+        - notificationChannelIds
+      allOf:
+        - $ref: '#/components/schemas/ServiceAccountsNotificationSettinsBase'
+    IpFilterResponseV1:
+      type: object
+      title: IP Filter Response V1
+      properties:
+        id:
+          $ref: '#/components/schemas/UnlimitedLong'
+        ipRange:
+          type: string
+          description: IP range in CIDR notation
+          maxLength: 43
+          example: 192.168.0.0/24
+        note:
+          type: string
+          maxLength: 128
+          example: London Office
+          nullable: true
+        isEnabled:
+          type: boolean
+          example: true
+        isAllowed:
+          description: Whether the IP range is allowed or not.
+          type: boolean
+          example: true
+        lastUpdated:
+          description: The date when IP filter was last updated.
+          type: string
+          format: date-time
+          example: '2017-07-21T17:32:28Z'
+          maxLength: 64
+    IpFiltersPaginatedResponseV1:
+      title: Get Paginated IP Filters Response V1
+      allOf:
+        - $ref: '#/components/schemas/OffsetPaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/IpFilterResponseV1'
+              maxItems: 200
+    CreateIpFilterV1:
+      type: object
+      title: Create IP Filter Request V1
+      description: Request to create IP filter.
+      required:
+        - ipRange
+        - isEnabled
+      properties:
+        ipRange:
+          description: IP range in CIDR notation
+          type: string
+          maxLength: 43
+          example: 192.168.0.0/24
+        note:
+          type: string
+          maxLength: 128
+          example: London Office
+        isEnabled:
+          type: boolean
+          example: true
+    UpdateIpFilterV1:
+      type: object
+      title: Update IP Filter Request V1
+      description: Request to update IP filter.
+      required:
+        - ipRange
+        - isEnabled
+        - note
+      properties:
+        ipRange:
+          description: IP range in CIDR notation
+          type: string
+          maxLength: 43
+          example: 192.168.0.0/24
+        note:
+          type: string
+          maxLength: 128
+          example: London Office
+        isEnabled:
+          type: boolean
+          example: true
+    IpFiltersSettingsV1:
+      type: object
+      title: Ip Filters Settings V1
+      description: |
+        Used to configure IP filters settings.
+      properties:
+        isFilteringEnabled:
+          type: boolean
+          description: Specifies if IP filtering is enabled.
+          example: false
+    PermissionV1:
+      type: object
+      description: Permission to perform an action on the Sysdig platform.
+      properties:
+        id:
+          description: |
+            Permission Authority.
+          type: string
+          example: cspm-results.read
+          maxLength: 256
+        description:
+          description: |
+            Permission description.
+          type: string
+          example: Access CSPM results
+          maxLength: 512
+        products:
+          description: |
+            Specifies the Sysdig product the permission applies to (Secure = SDS; Monitor = SDC).
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            description: |
+              Sysdig Monitor Product - SDC\
+              Sysdig Secure Product - SDS
+            example: SDS
+            maxLength: 3
+          maxItems: 2
+        dependencies:
+          description: |
+            List of permissions that this permission depends on.
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            maxLength: 256
+            example: cspm-results.read
+          maxItems: 100
+    GetPermissionsResponseV1:
+      title: Permissions Response V1
+      description: Permissions response
+      type: object
+      properties:
+        permissions:
+          type: array
+          uniqueItems: true
+          description: |
+            Set of permissions
+          items:
+            $ref: '#/components/schemas/PermissionV1'
+          maxItems: 1000
+        total:
+          description: Total number of permissions
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          example: 135
+    RoleResponseV1:
+      title: Create Role Response
+      description: Create role response
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UnlimitedLong'
+        description:
+          description: Describes the role
+          type: string
+          maxLength: 255
+          example: Enables access to Dashboards section
+        monitorPermissions:
+          description: |
+            Set of Monitor permissions assigned to the role. 
+            Check GET /platform/v1/permissions to obtain the list of available values.
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            maxLength: 255
+            example: alerts.read
+          maxItems: 100
+        securePermissions:
+          description: |
+            Set of Secure permissions assigned to the role. 
+            Check GET /platform/v1/permissions to obtain the list of available values.
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            maxLength: 255
+            example: scanning.read
+          maxItems: 100
+        name:
+          description: The display name of the role
+          type: string
+          maxLength: 255
+          example: Dashboard Viewer
+    GetRolesPaginatedResponseV1:
+      title: Get Paginated Roles Response V1
+      allOf:
+        - $ref: '#/components/schemas/OffsetPaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RoleResponseV1'
+              maxItems: 200
+    RoleRequestV1:
+      title: Role Request
+      description: Create or update role request
+      type: object
+      required:
+        - name
+      properties:
+        description:
+          description: Describes the role
+          type: string
+          maxLength: 255
+          example: Enables access to Dashboards section
+        monitorPermissions:
+          description: |
+            Set of Monitor permissions assigned to the role. 
+            Check GET /platform/v1/permissions to obtain the list of available values.
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            maxLength: 255
+            example: alerts.read
+          maxItems: 100
+        securePermissions:
+          description: |
+            Set of Secure permissions assigned to the role. 
+            Check GET /platform/v1/permissions to obtain the list of available values.
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            maxLength: 255
+            example: scanning.read
+          maxItems: 100
+        name:
+          description: The display name of the role
+          type: string
+          maxLength: 255
+          example: Dashboard Viewer
+  responses:
+    BadRequest:
+      description: Operation failed due to invalid payload.
+      headers:
+        X-RateLimit-Limit:
+          description: Maximum number of allowed requests per minute.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 4096
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            type: bad_request
+            message: Bad request
+            details: []
+    Unauthorized:
+      description: Access denied.
+      headers:
+        X-RateLimit-Limit:
+          description: Maximum number of allowed requests per minute.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 4096
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            type: unauthorized
+            message: Unauthorized
+            details: []
+    TooManyRequests:
+      description: Too many requests.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 14400
+          description: Retry after X seconds.
+          required: false
+        X-RateLimit-Limit:
+          description: Maximum number of allowed requests per minute.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 4096
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            type: too_many_requests
+            message: Too many requests
+            details: []
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            type: internal_server_error
+            message: Internal server error
+            details: []
+    Conflict:
+      description: Conflict.
+      headers:
+        X-RateLimit-Limit:
+          description: Maximum number of allowed requests per minute.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 4096
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            type: conflict
+            message: Conflict
+            details: []
+    UnsupportedMediaType:
+      description: Server cannot accept content of type specified in Content-Type header.
+      headers:
+        X-RateLimit-Limit:
+          description: Maximum number of allowed requests per minute.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 4096
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            type: unsupported_media_type
+            message: Unsupported media type
+            details: []
+    UnprocessableEntity:
+      description: Server was unable to process the request.
+      headers:
+        X-RateLimit-Limit:
+          description: Maximum number of allowed requests per minute.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 4096
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            type: unprocessable_content
+            message: Unprocessable content
+            details: []
+    NotFound:
+      description: Not found.
+      headers:
+        X-RateLimit-Limit:
+          description: Maximum number of allowed requests per minute.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 4096
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            type: resource_not_found
+            message: Resource not found
+            details: []
+    Forbidden:
+      description: Not enough privileges to complete the action.
+      headers:
+        X-RateLimit-Limit:
+          description: Maximum number of allowed requests per minute.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 4096
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            type: forbidden
+            message: Forbidden
+            details: []

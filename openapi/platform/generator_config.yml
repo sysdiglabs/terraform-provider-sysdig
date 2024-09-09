@@ -1,0 +1,64 @@
+provider:
+  name: sysdig
+
+data_sources:
+  sysdig_access_keys:
+    read:
+      path: /platform/v1/access-keys/{accessKeyId}
+      method: GET
+resources:
+  sysdig_user:
+    read:
+      path: /platform/v1/users/{userId}
+      method: GET
+    create:
+      path: /platform/v1/users
+      method: POST
+    update:
+      path: /platform/v1/users/{userId}
+      method: PUT
+    delete:
+      path: /platform/v1/users/{userId}
+      method: DELETE
+  sysdig_group_mapping:
+    read:
+      path: /platform/v1/group-mappings/{groupMappingId}
+      method: GET
+    create:
+      path: /platform/v1/group-mappings
+      method: POST
+    update:
+      path: /platform/v1/group-mappings/{groupMappingId}
+      method: PUT
+    delete:
+      path: /platform/v1/group-mappings/{groupMappingId}
+      method: DELETE
+  sysdig_ip_filter:
+    create:
+      path: /platform/v1/ip-filters
+      method: POST
+    read:
+      path: /platform/v1/ip-filters/{ipFilterId}
+      method: GET
+    update:
+      path: /platform/v1/ip-filters/{ipFilterId}
+      method: PUT
+    delete:
+      path: /platform/v1/ip-filters/{ipFilterId}
+      method: DELETE
+  sysdig_ip_filtering_settings:
+    read:
+      path: /platform/v1/ip-filters-settings
+      method: GET
+    create:
+      path: /platform/v1/ip-filters-settings
+      method: PUT
+    update:
+      path: /platform/v1/ip-filters-settings
+      method: PUT
+    delete:
+      path: /platform/v1/ip-filters-settings
+      method: DELETE
+
+
+
