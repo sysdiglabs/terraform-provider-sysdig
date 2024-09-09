@@ -20,7 +20,6 @@ resource "sysdig_monitor_cloud_account" "sample" {
   cloud_provider = "GCP"
   integration_type = "API"
   account_id = "gcp_project_id"
-  secret_key = "sdasdasagfdkgmjsdkgmsdlkgndgsngklsdngksdlngsdsg"
 }
 
 // AWS example with role delegation
