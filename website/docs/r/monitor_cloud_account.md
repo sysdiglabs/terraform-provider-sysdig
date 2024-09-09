@@ -23,12 +23,21 @@ resource "sysdig_monitor_cloud_account" "sample" {
   secret_key = "sdasdasagfdkgmjsdkgmsdlkgndgsngklsdngksdlngsdsg"
 }
 
-// AWS example
+// AWS example with role delegation
 resource "sysdig_monitor_cloud_account" "sample" {
   cloud_provider = "AWS"
   integration_type = "Metrics Streams"
   account_id = "123412341234"
   role_name = "SysdigTestRole"
+}
+
+// AWS example with secret key
+resource "sysdig_monitor_cloud_account" "sample" {
+  cloud_provider = "AWS"
+  integration_type = "Metrics Streams"
+  account_id = "123412341234"
+  secret_key = "Xxx5XX2xXx/Xxxx+xxXxXXxXxXxxXXxxxXXxXxXx"
+  access_key_id = "XXXXX33XXXX3XX3XXX7X"
 }
 ```
 
@@ -38,7 +47,7 @@ resource "sysdig_monitor_cloud_account" "sample" {
 * `integration_type` - (Required) Type of cloud integration. Only `API` and `Metrics Streams` are currently supported (`Metrics Streams` only for `AWS`).
 * `account_id` - (Required) The GCP project id for the project that will be monitored and Account ID itself for AWS.
 * `role_name` - (Optional) The role name tha will take the permissions over some resources in AWS
-* `secret_key` - (Required) The hash of the secret key for a GCP connection
+* `secret_key` - (Optional) The the secret key for a AWS connection
 * `access_key_id` - (Optional) The ID for the access key that has the permissions into the Cloud Account
 * `additional_options` - (Optional) The private key generated when creating a new GCP service account key. Must be in JSON format and base64 encoded.
 
