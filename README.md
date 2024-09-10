@@ -35,7 +35,7 @@ $ cd terraform-provider-sysdig
 $ make build
 ```
 
-If you're a rookie, check [Official Terraform Provider development guides](https://developer.hashicorp.com/terraform/plugin/frameworkO)
+If you're a rookie, check [Official Terraform Provider development guides](https://developer.hashicorp.com/terraform/plugin/framework)
 
 ### Creating new resource / data sources
 
