@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 API=""
+TAG=""
+ASSET_NAME=""
+OAS_FILE_NAME="oas.yaml"  # Default output file name for downloaded OpenAPI spec
 
 # Parse input arguments
 for arg in "$@"; do
@@ -9,29 +12,47 @@ for arg in "$@"; do
             API="${arg#*=}"
             shift
             ;;
+        --tag=*)
+            TAG="${arg#*=}"
+            shift
+            ;;
+        --assetName=*)
+            ASSET_NAME="${arg#*=}"
+            shift
+            ;;
         *)
             ;;
     esac
 done
 
-# Check if the required parameter (api) is provided
+# Check if the required --api parameter is provided
 if [ -z "$API" ]; then
-    echo "Error: No api parameter provided. Usage: ./generate-from-oas.sh --api=<api_name>"
+    echo "Error: The --api parameter is required. Usage: ./script.sh --api=<directory_name> [--tag=<tag>] [--assetName=<asset_name>]"
     exit 1
 fi
 
 # Define the base directory for OpenAPI files
 BASE_OPENAPI_DIR="../openapi"
 
-# Use the provided parameter to construct the OpenAPI directory path
-API="$API"
+# Use the provided --api parameter to construct the open api directory path
 OPENAPI_DIR="${BASE_OPENAPI_DIR}/${API}"
 
-# Define paths based on the constructed OpenAPI directory
-OPENAPI_SPEC="${OPENAPI_DIR}/oas.yaml"
+# Define paths based on the constructed open api directory
+OPENAPI_SPEC="${OPENAPI_DIR}/${OAS_FILE_NAME}"
 GENERATOR_CONFIG_FILE="${OPENAPI_DIR}/generator_config.yml"
 GENERATED_SCHEMA_FILE="${OPENAPI_DIR}/generated-schema/provider_code_spec.json"
-OUTPUT_DIR="../sysdig/generated/${API}"
+
+# If both tag and asset name are provided, download the OpenAPI spec file
+if [ -n "$TAG" ] && [ -n "$ASSET_NAME" ]; then
+    echo "Downloading OpenAPI spec file from GitHub release asset..."
+    go run ../openapi/download-gh-asset.go -tag="$TAG" -assetName="$ASSET_NAME" -outputFile="${OPENAPI_SPEC}"
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to download OpenAPI specification file from GitHub. Exiting."
+        exit 1
+    fi
+    echo "OpenAPI spec file downloaded successfully to ${OPENAPI_SPEC}."
+fi
+
 
 # Check if the OpenAPI spec file exists
 if [ ! -f "${OPENAPI_SPEC}" ]; then
@@ -57,6 +78,7 @@ if ! command -v tfplugingen-framework &> /dev/null; then
 fi
 
 # Create directories if they do not exist
+OUTPUT_DIR="../sysdig/generated/${API}"
 mkdir -p "$(dirname "${GENERATED_SCHEMA_FILE}")"
 mkdir -p "${OUTPUT_DIR}"
 
@@ -95,3 +117,5 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 echo "'go mod tidy' completed successfully."
+
+echo "Code generation completed successfully."
