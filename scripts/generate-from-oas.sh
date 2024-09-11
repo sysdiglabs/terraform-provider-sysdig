@@ -3,7 +3,8 @@
 API=""
 TAG=""
 ASSET_NAME=""
-OAS_FILE_NAME="oas.yaml"  # Default output file name for downloaded OpenAPI spec
+OAS_FILE_NAME="oas.yaml"
+BASE_OPENAPI_DIR="../openapi"
 
 # Parse input arguments
 for arg in "$@"; do
@@ -27,12 +28,9 @@ done
 
 # Check if the required --api parameter is provided
 if [ -z "$API" ]; then
-    echo "Error: The --api parameter is required. Usage: ./script.sh --api=<directory_name> [--tag=<tag>] [--assetName=<asset_name>]"
+    echo "Error: The --api parameter is required. Usage: ./generate-from-oas.sh --api=<directory_name> [--tag=<tag>] [--assetName=<asset_name>]"
     exit 1
 fi
-
-# Define the base directory for OpenAPI files
-BASE_OPENAPI_DIR="../openapi"
 
 # Use the provided --api parameter to construct the open api directory path
 OPENAPI_DIR="${BASE_OPENAPI_DIR}/${API}"
