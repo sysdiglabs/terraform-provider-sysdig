@@ -37,12 +37,28 @@ func resourceSysdigMonitorCloudAccount() *schema.Resource {
 				Required: true,
 			},
 			"account_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:      schema.TypeString,
+				Required:  true,
+				Sensitive: true,
 			},
-			"additional_options": {
+			"role_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"secret_key": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			"access_key_id": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			"additional_options": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 		},
 	}
@@ -140,7 +156,10 @@ func monitorCloudAccountFromResourceData(data *schema.ResourceData) v2.CloudAcco
 		IntegrationType:   data.Get("integration_type").(string),
 		AdditionalOptions: data.Get("additional_options").(string),
 		Credentials: v2.CloudAccountCredentialsMonitor{
-			AccountId: data.Get("account_id").(string),
+			AccountId:   data.Get("account_id").(string),
+			RoleName:    data.Get("role_name").(string),
+			SecretKey:   data.Get("secret_key").(string),
+			AccessKeyId: data.Get("access_key_id").(string),
 		},
 	}
 }
@@ -162,6 +181,21 @@ func monitorCloudAccountToResourceData(data *schema.ResourceData, cloudAccount *
 	}
 
 	err = data.Set("account_id", cloudAccount.Credentials.AccountId)
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("role_name", cloudAccount.Credentials.RoleName)
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("secret_key", cloudAccount.Credentials.SecretKey)
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("access_key_id", cloudAccount.Credentials.AccessKeyId)
 	if err != nil {
 		return err
 	}
