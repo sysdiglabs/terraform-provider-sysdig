@@ -15,10 +15,11 @@ func resourceSysdigMonitorAlertPromql() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigAlertPromqlCreate,
-		UpdateContext: resourceSysdigAlertPromqlUpdate,
-		ReadContext:   resourceSysdigAlertPromqlRead,
-		DeleteContext: resourceSysdigAlertPromqlDelete,
+		DeprecationMessage: "\"sysdig_monitor_alert_promql\" has been deprecated and will be removed in future releases, use \"sysdig_monitor_alert_v2_prometheus\" instead",
+		CreateContext:      resourceSysdigAlertPromqlCreate,
+		UpdateContext:      resourceSysdigAlertPromqlUpdate,
+		ReadContext:        resourceSysdigAlertPromqlRead,
+		DeleteContext:      resourceSysdigAlertPromqlDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
