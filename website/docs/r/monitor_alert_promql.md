@@ -3,12 +3,12 @@ subcategory: "Sysdig Monitor"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_promql"
 description: |-
-  Creates a Sysdig Monitor PromQL Alert.
+  Creates a Sysdig Monitor Prometheus Alert.
 ---
 
 # Resource: sysdig_monitor_alert_promql
 
-Creates a Sysdig Monitor PromQL Alert. Monitor prometheus metrics and alert if they violate user-defined PromQL-based metric expression.
+Creates a Sysdig Monitor Prometheus Alert. Monitor prometheus metrics and alert if they violate user-defined PromQL-based metric expression.
 
 ~> **Deprecation Notice:** `sysdig_monitor_alert_promql` has been deprecated and will be removed in future releases, use `sysdig_monitor_alert_v2_prometheus` instead.
 
@@ -52,7 +52,7 @@ By defining this field, the user can modify the title and the body of the messag
 * `prepend` - (Optional) Text to add before the alert template.
 * `append` - (Optional) Text to add after the alert template.
 
-### PromQL alert arguments
+### Prometheus alert arguments
 
 * `promql` - (Required) PromQL-based metric expression to alert on. Example: `histogram_quantile(0.99, rate(etcd_http_successful_duration_seconds_bucket[5m]) > 0.15` or `predict_linear(sysdig_fs_free_bytes{fstype!~"tmpfs"}[1h], 24*3600) < 10000000000`.
 
@@ -71,7 +71,7 @@ In addition to all arguments above, the following attributes are exported, which
 
 ## Import
 
-PromQL alerts can be imported using the alert ID, e.g.
+Prometheus alerts can be imported using the alert ID, e.g.
 
 ```
 $ terraform import sysdig_monitor_alert_promql.example 12345

@@ -3,12 +3,12 @@ subcategory: "Sysdig Monitor"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_monitor_alert_metric"
 description: |-
-  Creates a Sysdig Monitor Metric Alert.
+  Creates a Sysdig Monitor Metric Threshold Alert.
 ---
 
 # Resource: sysdig_monitor_alert_metric
 
-Creates a Sysdig Monitor Metric Alert. Monitor time-series metrics and alert if they violate user-defined thresholds.
+Creates a Sysdig Monitor Metric Threshold Alert. Monitor time-series metrics and alert if they violate user-defined thresholds.
 
 ~> **Deprecation Notice:** `sysdig_monitor_alert_metric` has been deprecated and will be removed in future releases, use `sysdig_monitor_alert_v2_metric` instead.
 
@@ -92,7 +92,7 @@ In addition to all arguments above, the following attributes are exported, which
 
 ## Import
 
-Metric alerts can be imported using the alert ID, e.g.
+Metric Threshold alerts can be imported using the alert ID, e.g.
 
 ```
 $ terraform import sysdig_monitor_alert_metric.example 12345

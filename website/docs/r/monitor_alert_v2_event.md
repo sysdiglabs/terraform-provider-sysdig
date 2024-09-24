@@ -8,9 +8,7 @@ description: |-
 
 # Resource: sysdig_monitor_alert_v2_event
 
-Creates a Sysdig Monitor Event Alert. Monitor occurrences of specific events, and alert if the total
-number of occurrences violates a threshold. Useful for alerting on container, orchestration, and
-service events like restarts and deployments.
+Monitor your infrastructure by tracking specific events, and alert if the total number of occurrences exceeds a user-defined threshold.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
@@ -45,7 +43,7 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
     renotify_every_minutes = 60
   }
 
-  trigger_after_minutes = 1
+  range_seconds = 60
 
 }
 
@@ -57,10 +55,11 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
 
 These arguments are common to all alerts in Sysdig Monitor.
 
-* `name` - (Required) The name of the Monitor alert. It must be unique.
+* `name` - (Required) The name of the alert rule. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
-* `trigger_after_minutes` - (Required) Threshold of time for the status to stabilize until the alert is fired.
-* `group` - (Optional) Lowercase string to group alerts in the UI.
+* `range_seconds` - (Optional, required if `trigger_after_minutes` is not defined): The time period in seconds over which to count events and trigger an alert if the total exceeds the threshold.
+* `trigger_after_minutes` - (Optional, Deprecated) The time period in minutes over which to count events and trigger an alert if the total exceeds the threshold. Deprecated: use `range_seconds` instead.
+* `group` - (Optional) Used to group alert rules in the UI. This value must be a lowercase string.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.
 * `notification_channels` - (Optional) List of notification channel configurations.

@@ -174,6 +174,18 @@ type GroupMappingConfig struct {
 	DifferentTeamSameRoleStrategy string `json:"differentRolesSameTeamStrategy"`
 }
 
+type IPFilter struct {
+	ID          int    `json:"id,omitempty"`
+	IPRange     string `json:"ipRange"`
+	Note        string `json:"note,omitempty"`
+	Enabled     bool   `json:"isEnabled"`
+	LastUpdated string `json:"lastUpdated,omitempty"`
+}
+
+type IPFiltersSettings struct {
+	IPFilteringEnabled bool `json:"isFilteringEnabled"`
+}
+
 type alertWrapper struct {
 	Alert Alert `json:"alert"`
 }
@@ -189,7 +201,8 @@ type Alert struct {
 	NotificationChannelIds []int               `json:"notificationChannelIds"`
 	Filter                 string              `json:"filter"`
 	Severity               int                 `json:"severity"`
-	Timespan               int                 `json:"timespan"`
+	Timespan               *int                `json:"timespan,omitempty"`
+	Duration               *int                `json:"duration,omitempty"`
 	CustomNotification     *CustomNotification `json:"customNotification"`
 	TeamID                 int                 `json:"teamId,omitempty"`
 	AutoCreated            bool                `json:"autoCreated"`
@@ -712,12 +725,13 @@ type AlertV2Common struct {
 type AlertV2ConfigPrometheus struct {
 	Query            string `json:"query"`
 	KeepFiringForSec *int   `json:"keepFiringForSec,omitempty"`
+
+	Duration int `json:"duration"`
 }
 
 type AlertV2Prometheus struct {
 	AlertV2Common
-	DurationSec int                     `json:"durationSec"`
-	Config      AlertV2ConfigPrometheus `json:"config"`
+	Config AlertV2ConfigPrometheus `json:"config"`
 }
 
 type alertV2PrometheusWrapper struct {
@@ -755,12 +769,13 @@ type AlertV2ConfigEvent struct {
 
 	Filter string   `json:"filter"`
 	Tags   []string `json:"tags"`
+
+	Range int `json:"range"`
 }
 
 type AlertV2Event struct {
 	AlertV2Common
-	DurationSec int                `json:"durationSec"`
-	Config      AlertV2ConfigEvent `json:"config"`
+	Config AlertV2ConfigEvent `json:"config"`
 }
 
 type alertV2EventWrapper struct {
@@ -796,11 +811,13 @@ type AlertV2ConfigMetric struct {
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
 	NoDataBehaviour  string                  `json:"noDataBehaviour"`
+
+	Range    int `json:"range"`
+	Duration int `json:"duration"`
 }
 
 type AlertV2Metric struct {
 	AlertV2Common
-	DurationSec                              int                 `json:"durationSec"`
 	Config                                   AlertV2ConfigMetric `json:"config"`
 	UnreportedAlertNotificationsRetentionSec *int                `json:"unreportedAlertNotificationsRetentionSec"`
 }
@@ -818,11 +835,12 @@ type AlertV2ConfigDowntime struct {
 	GroupAggregation string                  `json:"groupAggregation"`
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
+
+	Range int `json:"range"`
 }
 
 type AlertV2Downtime struct {
 	AlertV2Common
-	DurationSec                              int                   `json:"durationSec"`
 	Config                                   AlertV2ConfigDowntime `json:"config"`
 	UnreportedAlertNotificationsRetentionSec *int                  `json:"unreportedAlertNotificationsRetentionSec"`
 }
@@ -856,11 +874,12 @@ type AlertV2ConfigFormBasedPrometheus struct {
 	WarningConditionOperator string   `json:"warningConditionOperator,omitempty"`
 	WarningThreshold         *float64 `json:"warningThreshold,omitempty"`
 	NoDataBehaviour          string   `json:"noDataBehaviour"`
+
+	Duration int `json:"duration"`
 }
 
 type AlertV2FormBasedPrometheus struct {
 	AlertV2Common
-	DurationSec                              int                              `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
 	Config                                   AlertV2ConfigFormBasedPrometheus `json:"config"`
 	UnreportedAlertNotificationsRetentionSec *int                             `json:"unreportedAlertNotificationsRetentionSec"`
 }
@@ -881,11 +900,12 @@ type AlertV2ConfigGroupOutlier struct {
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
 	NoDataBehaviour  string                  `json:"noDataBehaviour"`
+
+	ObservationWindow int `json:"observationWindow"`
 }
 
 type AlertV2GroupOutlier struct {
 	AlertV2Common
-	DurationSec                              int                       `json:"durationSec"` // Observation window should be greater than or equal to 10 minutes
 	Config                                   AlertV2ConfigGroupOutlier `json:"config"`
 	UnreportedAlertNotificationsRetentionSec *int                      `json:"unreportedAlertNotificationsRetentionSec"`
 }
@@ -896,7 +916,6 @@ type alertV2GroupOutlierWrapper struct {
 
 type AlertV2Change struct {
 	AlertV2Common
-	DurationSec                              int                 `json:"durationSec"` // not really used but the api wants it set to 0 in POST/PUT
 	Config                                   AlertV2ConfigChange `json:"config"`
 	UnreportedAlertNotificationsRetentionSec *int                `json:"unreportedAlertNotificationsRetentionSec"`
 }
@@ -906,7 +925,10 @@ type alertV2ChangeWrapper struct {
 }
 
 type CloudAccountCredentialsMonitor struct {
-	AccountId string `json:"accountId"`
+	AccountId   string `json:"accountId"`
+	RoleName    string `json:"roleName"`
+	SecretKey   string `json:"key"`
+	AccessKeyId string `json:"id"`
 }
 
 type CloudAccountMonitor struct {
@@ -945,21 +967,29 @@ type PosturePolicy struct {
 }
 
 type FullPosturePolicy struct {
-	ID                string              `json:"id,omitempty"`
-	Name              string              `json:"name,omitempty"`
-	Type              string              `json:"type,omitempty"`
-	Description       string              `json:"description,omitempty"`
-	Version           string              `json:"version,omitempty"`
-	Link              string              `json:"link,omitempty"`
-	Authors           string              `json:"authors,omitempty"`
-	PublishedData     string              `json:"publishedDate,omitempty"`
-	RequirementsGroup []RequirementsGroup `json:"requirementFolders,omitempty"`
-	MinKubeVersion    float64             `json:"minKubeVersion,omitempty"`
-	MaxKubeVersion    float64             `json:"maxKubeVersion,omitempty"`
-	IsCustom          bool                `json:"isCustom,omitempty"`
-	IsActive          bool                `json:"isActive,omitempty"`
-	Platform          string              `json:"platform,omitempty"`
+	ID                 string              `json:"id,omitempty"`
+	Name               string              `json:"name,omitempty"`
+	Type               string              `json:"type,omitempty"`
+	Description        string              `json:"description,omitempty"`
+	Version            string              `json:"version,omitempty"`
+	Link               string              `json:"link,omitempty"`
+	Authors            string              `json:"authors,omitempty"`
+	PublishedData      string              `json:"publishedDate,omitempty"`
+	RequirementsGroup  []RequirementsGroup `json:"requirementFolders,omitempty"`
+	MinKubeVersion     float64             `json:"minKubeVersion,omitempty"`
+	MaxKubeVersion     float64             `json:"maxKubeVersion,omitempty"`
+	IsCustom           bool                `json:"isCustom,omitempty"`
+	IsActive           bool                `json:"isActive,omitempty"`
+	Platform           string              `json:"platform,omitempty"`
+	VersionConstraints []VersionConstraint `json:"targets,omitempty"`
 }
+
+type VersionConstraint struct {
+	Platform   string  `json:"platform"`
+	MinVersion float64 `json:"minVersion,omitempty"`
+	MaxVersion float64 `json:"maxVersion,omitempty"`
+}
+
 type RequirementsGroup struct {
 	ID                        string              `json:"id,omitempty"`
 	Name                      string              `json:"name,omitempty"`
@@ -985,17 +1015,18 @@ type Control struct {
 }
 
 type CreatePosturePolicy struct {
-	ID                string                    `json:"id,omitempty"`
-	Name              string                    `json:"name,omitempty"`
-	Description       string                    `json:"description,omitempty"`
-	Type              string                    `json:"type,omitempty"`
-	Link              string                    `json:"link,omitempty"`
-	Version           string                    `json:"version,omitempty"`
-	RequirementGroups []CreateRequirementsGroup `json:"groups,omitempty"`
-	MinKubeVersion    float64                   `json:"minKubeVersion,omitempty"`
-	MaxKubeVersion    float64                   `json:"maxKubeVersion,omitempty"`
-	IsActive          bool                      `json:"isActive,omitempty"`
-	Platform          string                    `json:"platform,omitempty"`
+	ID                 string                    `json:"id,omitempty"`
+	Name               string                    `json:"name,omitempty"`
+	Description        string                    `json:"description,omitempty"`
+	Type               string                    `json:"type,omitempty"`
+	Link               string                    `json:"link,omitempty"`
+	Version            string                    `json:"version,omitempty"`
+	RequirementGroups  []CreateRequirementsGroup `json:"groups,omitempty"`
+	MinKubeVersion     float64                   `json:"minKubeVersion,omitempty"`
+	MaxKubeVersion     float64                   `json:"maxKubeVersion,omitempty"`
+	IsActive           bool                      `json:"isActive,omitempty"`
+	Platform           string                    `json:"platform,omitempty"`
+	VersionConstraints []VersionConstraint       `json:"targets,omitempty"`
 }
 
 type CreateRequirementsGroup struct {

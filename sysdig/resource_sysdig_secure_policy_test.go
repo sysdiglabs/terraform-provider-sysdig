@@ -4,6 +4,8 @@ package sysdig_test
 
 import (
 	"fmt"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -48,10 +50,14 @@ func TestAccPolicy(t *testing.T) {
 			resource.TestStep{Config: policiesForAWSCloudtrail(rText())},
 			resource.TestStep{Config: policiesForGCPAuditLog(rText())},
 			resource.TestStep{Config: policiesForAzurePlatformlogs(rText())},
-			resource.TestStep{Config: policiesForFalcoCloudAWSCloudtrail(rText())},
-			resource.TestStep{Config: policiesForOkta(rText())},
-			resource.TestStep{Config: policiesForGithub(rText())},
 		)
+		if !strings.HasSuffix(os.Getenv("SYSDIG_SECURE_URL"), "ibm.com") {
+			steps = append(steps,
+				resource.TestStep{Config: policiesForFalcoCloudAWSCloudtrail(rText())},
+				resource.TestStep{Config: policiesForOkta(rText())},
+				resource.TestStep{Config: policiesForGithub(rText())},
+			)
+		}
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
