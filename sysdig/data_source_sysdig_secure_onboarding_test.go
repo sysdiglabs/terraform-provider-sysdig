@@ -99,12 +99,12 @@ func TestAccTrustedAzureAppDataSource(t *testing.T) {
 				),
 			},
 			{
-				Config: `data "sysdig_secure_trusted_azure_app" "agentless" { name = "agentless" }`,
+				Config: `data "sysdig_secure_trusted_azure_app" "vm_agentless" { name = "vm_agentless" }`,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_azure_app.agentless", "name", "agentless"),
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.agentless", "application_id"),       // uncomment to assert a non empty value
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.agentless", "tenant_id"),            // uncomment to assert a non empty value
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.agentless", "service_principal_id"), // uncomment to assert a non empty value
+					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_azure_app.vm_agentless", "name", "vm_agentless"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.vm_agentless", "application_id"),       // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.vm_agentless", "tenant_id"),            // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.vm_agentless", "service_principal_id"), // uncomment to assert a non empty value
 				),
 			},
 		},
