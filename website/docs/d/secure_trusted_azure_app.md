@@ -22,7 +22,7 @@ data "sysdig_secure_trusted_azure_app" "onboarding" {
 
 ## Argument Reference
 
-* `name` - (Required) Sysdig's Azure App name urrently supported applications are `config_posture`, `onboarding`, `threat_detection` and `vm_agentless`
+* `name` - (Required) Sysdig's Azure App name urrently supported applications are `config_posture`, `onboarding`, `threat_detection` and `vm_workload_scanning`.
 
 
 ## Attributes Reference
