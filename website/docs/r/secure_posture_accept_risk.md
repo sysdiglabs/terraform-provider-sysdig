@@ -1,0 +1,74 @@
+---
+subcategory: "Sysdig Secure"
+layout: "sysdig"
+page_title: "Sysdig: sysdig_secure_posture_accept_risk"
+description: |-
+  Accepts Sysdig Secure Posture Risk.
+---
+
+# Resource: sysdig_secure_posture_accept_risk
+
+Creates a Sysdig Secure Posture Accept Risk.
+
+-> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
+
+## Example Usage
+
+```terraform
+resource "sysdig_secure_accept_posture_risk" "accept_risk_zone" {
+    description  = "Accept risk for zone"
+    control_name = "ServiceAccounts with cluster access"
+    reason       = "Risk Transferred"
+    expires_in   = "30 Days"
+    zone_name = "Entire Infrastructure"
+}
+
+resource "sysdig_secure_accept_posture_risk" "accept_risk_resource" {
+    description  = "Accept risk for resource"
+    control_name = "ServiceAccounts with cluster access"
+    reason       = "Risk Transferred"
+    expires_in   = "30 Days"
+    filter       = "name in ('system:controller:daemon-set-s') and kind in ('ClusterRole')"
+}
+
+## Attributes Reference
+
+- `id` - (Computed) The unique identifier for the risk acceptance.
+- `control_name` - (Required) The name of the posture control being accepted.
+- `zone_name` - (Optional) The zone associated with the risk acceptance.
+- `description` - (Required) A description of the risk acceptance.
+- `filter` - (Optional) A filter for identifying the resources affected by the acceptance.
+- `reason` - (Required) The reason for accepting the risk. Possible values are:
+  - `Risk Owned`
+  - `Risk Transferred`
+  - `Risk Avoided`
+  - `Risk Mitigated`
+  - `Risk Not Relevant`
+  - `Custom`
+- `expires_in` - (Required) The duration for which the risk acceptance is valid. Possible values are:
+  - `7 Days`
+  - `30 Days`
+  - `60 Days`
+  - `90 Days`
+  - `Custom`
+  - `Never`
+- `expires_at` - (Computed) The timestamp indicating when the acceptance expires, in UTC time format (milliseconds since epoch).
+- `is_expired` - (Computed) Indicates whether the acceptance is expired.
+- `acceptance_date` - (Computed) The date when the risk was accepted.
+- `username` - (Computed) The username of the user who accepted the risk.
+- `type` - (Computed) The type of risk acceptance.
+- `is_system` - (Computed) Indicates whether the acceptance is sysdig-accepts.
+- `accept_period` - (Computed) The period for which the risk is accepted.
+
+
+In addition to all arguments above, the following attributes are exported:
+
+- `author` - (Computed) The custom control author.
+
+## Import
+
+Posture custom control can be imported using the ID, e.g.
+
+```
+$ terraform import sysdig_secure_posture_accept_risk.example c 12345
+```
