@@ -15,7 +15,7 @@ Creates a Sysdig Secure Posture Accept Risk.
 ## Example Usage
 
 ```terraform
-resource "sysdig_secure_accept_posture_risk" "accept_risk_zone" {
+resource "sysdig_secure_posture_accept_risk" "accept_risk_zone" {
     description  = "Accept risk for zone"
     control_name = "ServiceAccounts with cluster access"
     reason       = "Risk Transferred"
@@ -23,7 +23,7 @@ resource "sysdig_secure_accept_posture_risk" "accept_risk_zone" {
     zone_name = "Entire Infrastructure"
 }
 
-resource "sysdig_secure_accept_posture_risk" "accept_risk_resource" {
+resource "sysdig_secure_posture_accept_risk" "accept_risk_resource" {
     description  = "Accept risk for resource"
     control_name = "ServiceAccounts with cluster access"
     reason       = "Risk Transferred"
