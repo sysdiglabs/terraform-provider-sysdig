@@ -23,6 +23,8 @@ type SysdigCommon interface {
 	CustomRoleInterface
 	CustomRolePermissionInterface
 	TeamServiceAccountInterface
+	IPFiltersInterface
+	IPFilteringSettingsInterface
 }
 
 type SysdigMonitor interface {

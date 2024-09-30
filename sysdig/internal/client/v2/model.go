@@ -174,6 +174,18 @@ type GroupMappingConfig struct {
 	DifferentTeamSameRoleStrategy string `json:"differentRolesSameTeamStrategy"`
 }
 
+type IPFilter struct {
+	ID          int    `json:"id,omitempty"`
+	IPRange     string `json:"ipRange"`
+	Note        string `json:"note,omitempty"`
+	Enabled     bool   `json:"isEnabled"`
+	LastUpdated string `json:"lastUpdated,omitempty"`
+}
+
+type IPFiltersSettings struct {
+	IPFilteringEnabled bool `json:"isFilteringEnabled"`
+}
+
 type alertWrapper struct {
 	Alert Alert `json:"alert"`
 }
@@ -913,7 +925,10 @@ type alertV2ChangeWrapper struct {
 }
 
 type CloudAccountCredentialsMonitor struct {
-	AccountId string `json:"accountId"`
+	AccountId   string `json:"accountId"`
+	RoleName    string `json:"roleName"`
+	SecretKey   string `json:"key"`
+	AccessKeyId string `json:"id"`
 }
 
 type CloudAccountMonitor struct {
