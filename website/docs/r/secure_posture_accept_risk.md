@@ -30,7 +30,7 @@ resource "sysdig_secure_posture_accept_risk" "accept_risk_resource" {
     expires_in   = "30 Days"
     filter       = "name in ('system:controller:daemon-set-s') and kind in ('ClusterRole')"
 }
-'''
+```
 
 ## Attributes Reference
 
