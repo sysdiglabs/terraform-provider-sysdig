@@ -32,7 +32,7 @@ resource "sysdig_secure_posture_accept_risk" "accept_risk_resource" {
 }
 ```
 
-## Attributes Reference
+## Argument Reference
 
 - `id` - (Computed) The unique identifier for the risk acceptance.
 - `control_name` - (Required) The name of the posture control being accepted.
@@ -61,6 +61,8 @@ resource "sysdig_secure_posture_accept_risk" "accept_risk_resource" {
 - `is_system` - (Computed) Indicates whether the acceptance is sysdig-accepts.
 - `accept_period` - (Computed) The period for which the risk is accepted.
 
+
+## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
