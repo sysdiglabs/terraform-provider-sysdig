@@ -23,13 +23,24 @@ func TestAcceptSecurePostureRisk(t *testing.T) {
 				Config: acceptPostureRiskResource(),
 			},
 			{
-				ResourceName: "sysdig_secure_posture_accept_risk.accept_resource",
+				Config: acceptPostureRiskZone(),
 			},
 		},
 	})
 }
 
 func acceptPostureRiskResource() string {
+	return `
+resource "sysdig_secure_posture_accept_risk" "accept_resource" {
+    description = "test accept posture risk resource"
+    control_name = "ServiceAccounts with cluster access"
+    reason = "Risk Transferred"
+    expires_in = "30 Days"
+    filter = "name in ('system:controller:daemon-set-s') and kind in ('ClusterRole')"
+}`
+}
+
+func acceptPostureRiskZone() string {
 	return `
 resource "sysdig_secure_posture_accept_risk" "accept_resource" {
     description = "test accept posture risk resource"
