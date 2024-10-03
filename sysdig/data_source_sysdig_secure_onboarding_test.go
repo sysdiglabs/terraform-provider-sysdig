@@ -27,11 +27,16 @@ func TestAccTrustedCloudIdentityDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
+				Config:      `data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {	cloud_provider = "invalid" }`,
+				ExpectError: regexp.MustCompile(`.*expected cloud_provider to be one of.*`),
+			},
+			{
 				Config: `data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {	cloud_provider = "aws" }`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_cloud_identity.trusted_identity", "cloud_provider", "aws"),
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_cloud_identity.trusted_identity", "aws_account_id"),
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_cloud_identity.trusted_identity", "aws_role_name"),
+					// not asserting the gov exported fields because not every backend environment is gov supported and thus will have empty values
 				),
 			},
 			{
@@ -96,6 +101,15 @@ func TestAccTrustedAzureAppDataSource(t *testing.T) {
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.threat_detection", "application_id"),       // uncomment to assert a non empty value
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.threat_detection", "tenant_id"),            // uncomment to assert a non empty value
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.threat_detection", "service_principal_id"), // uncomment to assert a non empty value
+				),
+			},
+			{
+				Config: `data "sysdig_secure_trusted_azure_app" "vm_workload_scanning" { name = "vm_workload_scanning" }`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_azure_app.vm_workload_scanning", "name", "vm_workload_scanning"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.vm_workload_scanning", "application_id"),       // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.vm_workload_scanning", "tenant_id"),            // uncomment to assert a non empty value
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_azure_app.vm_workload_scanning", "service_principal_id"), // uncomment to assert a non empty value
 				),
 			},
 		},
@@ -164,9 +178,10 @@ func TestAccCloudIngestionAssetsDataSource(t *testing.T) {
 			{
 				Config: `data "sysdig_secure_cloud_ingestion_assets" "assets" {}`,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.%", "1"),
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_routing_key"),
+					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.%", "2"),
+					// not asserting the gov exported fields because not every backend environment is gov supported and thus will have empty values
 
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_routing_key"),
 					// metadata fields are opaque to api backend; cloudingestion controls what fields are passed
 					// asserts ingestionType and ingestionURL in metadata since it is required
 					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_metadata.ingestionType", "gcp"),

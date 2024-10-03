@@ -939,8 +939,64 @@ type CloudAccountMonitor struct {
 	AdditionalOptions string                         `json:"additionalOptions"`
 }
 
+type CloudAccountMonitorForCost struct {
+	Feature       string                         `json:"feature"`
+	Platform      string                         `json:"platform"`
+	Configuration CloudCostConfiguration         `json:"config"`
+	Credentials   CloudAccountCredentialsMonitor `json:"credentials"`
+}
+
+type CloudCostConfiguration struct {
+	AthenaBucketName     string `json:"athenaBucketName"`
+	AthenaDatabaseName   string `json:"athenaDatabaseName"`
+	AthenaRegion         string `json:"athenaRegion"`
+	AthenaWorkgroup      string `json:"athenaWorkgroup"`
+	AthenaTableName      string `json:"athenaTableName"`
+	SpotPricesBucketName string `json:"spotPricesBucketName"`
+}
+
+type CloudAccountCreatedForCost struct {
+	Id              string `json:"id"`
+	CustomerId      int    `json:"customerId"`
+	ProviderId      string `json:"providerId"`
+	Provider        string `json:"provider"`
+	SkipFetch       bool   `json:"skipFetch"`
+	IntegrationType string `json:"integrationType"`
+	CredentialsType string `json:"credentialsType"`
+	RoleArn         string `json:"roleArn"`
+	ExternalId      string `json:"externalId"`
+}
+
 type cloudAccountWrapperMonitor struct {
 	CloudAccount CloudAccountMonitor `json:"provider"`
+}
+
+type CloudConfigForCost struct {
+	AthenaProjectId      string `json:"athenaProjectId"`
+	AthenaBucketName     string `json:"athenaBucketName"`
+	AthenaRegion         string `json:"athenaRegion"`
+	AthenaDatabaseName   string `json:"athenaDatabaseName"`
+	AthenaTableName      string `json:"athenaTableName"`
+	AthenaWorkgroup      string `json:"athenaWorkgroup"`
+	SpotPricesBucketName string `json:"spotPricesBucketName"`
+	IntegrationType      string `json:"integrationType"`
+}
+
+type CloudAccountCostProvider struct {
+	CustomerId      int                `json:"customerId"`
+	ProviderId      string             `json:"providerId"`
+	Provider        string             `json:"provider"`
+	CredentialsId   string             `json:"credentialsId"`
+	Feature         string             `json:"feature"`
+	Config          CloudConfigForCost `json:"config"`
+	Enabled         bool               `json:"enabled"`
+	CredentialsType string             `json:"credentialsType"`
+	RoleArn         string             `json:"roleArn"`
+	ExternalId      string             `json:"externalId"`
+}
+
+type CloudAccountCostProviderWrapper struct {
+	CloudAccountCostProvider CloudAccountCostProvider `json:"item"`
 }
 
 type PosturePolicyZoneMeta struct {
