@@ -3,6 +3,7 @@ package sysdig
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -185,7 +186,7 @@ func monitorCloudAccountToResourceData(data *schema.ResourceData, cloudAccount *
 		return err
 	}
 
-	err = data.Set("role_name", cloudAccount.Credentials.RoleName)
+	err = data.Set("role_name", strings.Split(cloudAccount.Credentials.RoleName, ":role/")[1])
 	if err != nil {
 		return err
 	}
