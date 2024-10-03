@@ -110,7 +110,7 @@ func dataSourceSysdigSecureTrustedAzureApp() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"config_posture", "onboarding", "threat_detection"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"config_posture", "onboarding", "threat_detection", "vm_workload_scanning"}, false),
 			},
 			"tenant_id": {
 				Type:     schema.TypeString,
