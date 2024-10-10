@@ -215,6 +215,7 @@ func TestAccGCPSecureCloudAuthAccountAgentlesScanningWithInventory(t *testing.T)
 			provider_id   = "gcp-agentless-test-%s"
 			provider_type = "PROVIDER_GCP"
 			enabled       = true
+			regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
 
 		    feature {
               secure_config_posture {
@@ -619,6 +620,7 @@ func TestAccAWSSecureCloudAccountConfigPostureAndAgentlessScanning(t *testing.T)
 					enabled       = true
 					provider_id   = "%s"
 					provider_type = "PROVIDER_AWS"
+					regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
 
 					feature {
 
