@@ -76,4 +76,5 @@ const (
 	SchemaCloudProviderAlias            = "provider_alias"
 	SchemaAccountId                     = "account_id"
 	SchemaFeatureFlags                  = "flags"
+	SchemaRegulatoryFramework           = "regulatory_framework"
 )

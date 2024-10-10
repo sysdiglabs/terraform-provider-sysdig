@@ -62,6 +62,7 @@ resource "sysdig_secure_cloud_auth_account" "azure_sample" {
   enabled            = true
   provider_tenant_id = "%s"
   provider_alias     = "some-alias"
+  regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
   lifecycle {
 	ignore_changes = [
 	  component,
@@ -140,6 +141,7 @@ resource "sysdig_secure_cloud_auth_account" "azure_sample" {
   enabled            = true
   provider_tenant_id = "%s"
   provider_alias     = "some-alias"
+  regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
   lifecycle {
 	ignore_changes = [
 	  component,

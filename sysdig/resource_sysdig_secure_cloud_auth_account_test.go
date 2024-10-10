@@ -54,6 +54,7 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
   provider_id   = "sample-%s"
   provider_type = "PROVIDER_GCP"
   enabled       = true
+  regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
 }`, accountID)
 }
 
@@ -90,6 +91,7 @@ resource "sysdig_secure_cloud_auth_account" "gcp_config_posture" {
   provider_id   = "gcp-cspm-test-%s"
   provider_type = "PROVIDER_GCP"
   enabled       = true
+  regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
   feature {
     secure_config_posture {
       enabled    = true
@@ -215,6 +217,7 @@ func TestAccGCPSecureCloudAuthAccountAgentlesScanningWithInventory(t *testing.T)
 			provider_id   = "gcp-agentless-test-%s"
 			provider_type = "PROVIDER_GCP"
 			enabled       = true
+			regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
 
 		    feature {
               secure_config_posture {
@@ -293,6 +296,7 @@ func TestAccGCPSecureCloudAuthAccountThreatDetection(t *testing.T) {
 			provider_id   = "gcp-cdr-test-%s"
 			provider_type = "PROVIDER_GCP"
 			enabled       = true
+			regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
 		    feature {
 			  secure_threat_detection {
 			    enabled    = true
@@ -422,6 +426,7 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 	  enabled       = true
 	  provider_tenant_id = "%s"
 	  provider_alias = "some-alias"
+      regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
 	}`, accountId, randomTenantId)
 }
 
@@ -463,6 +468,7 @@ func secureAzureCloudAuthAccountWithConfigPosture(accountID string) string {
 			enabled       = true
 			provider_tenant_id = "%s"
 			provider_alias = "some-alias"
+			regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
 			feature {
 				secure_config_posture {
 					enabled    = true
@@ -525,6 +531,7 @@ func secureAzureCloudAuthAccountWithThreatDetection(accountID string) string {
 			provider_type = "PROVIDER_AZURE"
 			enabled       = true
 			provider_tenant_id = "%s"
+			regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
 			feature {
 				secure_threat_detection {
 					enabled    = true
@@ -570,6 +577,7 @@ func TestAccAWSSecureCloudAccountThreatDetection(t *testing.T) {
 					enabled       = true
 					provider_id   = "%s"
 					provider_type = "PROVIDER_AWS"
+					regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
 
 					feature {
 
@@ -619,6 +627,7 @@ func TestAccAWSSecureCloudAccountConfigPostureAndAgentlessScanning(t *testing.T)
 					enabled       = true
 					provider_id   = "%s"
 					provider_type = "PROVIDER_AWS"
+					regulatory_framework = "REGULATORY_FRAMEWORK_UNSPECIFIED"
 
 					feature {
 
