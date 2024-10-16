@@ -348,6 +348,72 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 	return nil
 }
 
+func dataSourceSysdigSecureTrustedCloudRegulationAssets() *schema.Resource {
+	timeout := 5 * time.Minute
+
+	return &schema.Resource{
+		ReadContext: dataSourceSysdigSecureTrustedCloudRegulationAssetsRead,
+
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(timeout),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"cloud_provider": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"aws"}, false),
+			},
+			"gov_identity": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"aws_gov_account_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"aws_gov_role_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+// Retrieves the information of a resource form the file and loads it in Terraform
+func dataSourceSysdigSecureTrustedCloudRegulationAssetsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getSecureOnboardingClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	trustedRegulation, err := client.GetTrustedCloudRegulationAssetsSecure(ctx, d.Get("cloud_provider").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	provider := d.Get("cloud_provider")
+	d.SetId(fmt.Sprintf("%s_trusted_regulation_assets", provider.(string)))
+
+	switch provider {
+	case "aws":
+		// set the gov regulation based identity
+		err = d.Set("gov_identity", trustedRegulation["trustedIdentityGov"])
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		// If identity is an ARN, attempt to extract certain fields
+		parsedArn, err := arn.Parse(trustedRegulation["trustedIdentityGov"])
+		if err == nil {
+			_ = d.Set("aws_gov_account_id", parsedArn.AccountID)
+			if parsedArn.Service == "iam" && strings.HasPrefix(parsedArn.Resource, "role/") {
+				_ = d.Set("aws_gov_role_name", strings.TrimPrefix(parsedArn.Resource, "role/"))
+			}
+		}
+	}
+	return nil
+}
+
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
 var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
 
