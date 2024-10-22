@@ -207,9 +207,7 @@ func TestAccTrustedCloudRegulationAssetsDataSource(t *testing.T) {
 				Config: `data "sysdig_secure_trusted_cloud_regulation_assets" "trusted_identity_gov" {	cloud_provider = "aws" }`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_cloud_regulation_assets.trusted_identity_gov", "cloud_provider", "aws"),
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_cloud_regulation_assets.trusted_identity_gov", "gov_identity"),
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_cloud_regulation_assets.trusted_identity_gov", "aws_gov_account_id"),
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_cloud_regulation_assets.trusted_identity_gov", "aws_gov_role_name"),
+					// not asserting the exported fields because not every backend environment is gov supported and will have non-empty values returned
 				),
 			},
 		},
