@@ -46,5 +46,3 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - (Computed) The ID of the cloud account.
 
 * `organization_id` - (Computed) The ID of the organization, if the cloud account is part of any organization.
-
-* `regulatory_framework` - (Computed) The type of the regulatory framework for the account.
