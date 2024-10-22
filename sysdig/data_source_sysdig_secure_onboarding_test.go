@@ -185,3 +185,31 @@ func TestAccCloudIngestionAssetsDataSource(t *testing.T) {
 		},
 	})
 }
+
+func TestAccTrustedCloudRegulationAssetsDataSource(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config:      `data "sysdig_secure_trusted_cloud_regulation_assets" "trusted_identity_gov" {	cloud_provider = "invalid" }`,
+				ExpectError: regexp.MustCompile(`.*expected cloud_provider to be one of.*`),
+			},
+			{
+				Config: `data "sysdig_secure_trusted_cloud_regulation_assets" "trusted_identity_gov" {	cloud_provider = "aws" }`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_cloud_regulation_assets.trusted_identity_gov", "cloud_provider", "aws"),
+					// not asserting the exported fields because not every backend environment is gov supported and will have non-empty values returned
+				),
+			},
+		},
+	})
+}
