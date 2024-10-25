@@ -27,11 +27,16 @@ func TestAccTrustedCloudIdentityDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
+				Config:      `data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {	cloud_provider = "invalid" }`,
+				ExpectError: regexp.MustCompile(`.*expected cloud_provider to be one of.*`),
+			},
+			{
 				Config: `data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {	cloud_provider = "aws" }`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_cloud_identity.trusted_identity", "cloud_provider", "aws"),
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_cloud_identity.trusted_identity", "aws_account_id"),
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_cloud_identity.trusted_identity", "aws_role_name"),
+					// not asserting the gov exported fields because not every backend environment is gov supported and will have non-empty values returned
 				),
 			},
 			{
@@ -180,34 +185,6 @@ func TestAccCloudIngestionAssetsDataSource(t *testing.T) {
 					// asserts ingestionType and ingestionURL in metadata since it is required
 					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_metadata.ingestionType", "gcp"),
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_metadata.ingestionURL"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccTrustedCloudRegulationAssetsDataSource(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
-		ProviderFactories: map[string]func() (*schema.Provider, error){
-			"sysdig": func() (*schema.Provider, error) {
-				return sysdig.Provider(), nil
-			},
-		},
-		Steps: []resource.TestStep{
-			{
-				Config:      `data "sysdig_secure_trusted_cloud_regulation_assets" "trusted_identity_gov" {	cloud_provider = "invalid" }`,
-				ExpectError: regexp.MustCompile(`.*expected cloud_provider to be one of.*`),
-			},
-			{
-				Config: `data "sysdig_secure_trusted_cloud_regulation_assets" "trusted_identity_gov" {	cloud_provider = "aws" }`,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_cloud_regulation_assets.trusted_identity_gov", "cloud_provider", "aws"),
-					// not asserting the exported fields because not every backend environment is gov supported and will have non-empty values returned
 				),
 			},
 		},

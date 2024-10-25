@@ -54,6 +54,18 @@ func dataSourceSysdigSecureTrustedCloudIdentity() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"gov_identity": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"aws_gov_account_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"aws_gov_role_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -65,18 +77,55 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 		return diag.FromErr(err)
 	}
 
+	// get trusted identity for commercial backend
 	identity, err := client.GetTrustedCloudIdentitySecure(ctx, d.Get("cloud_provider").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
+	// get trusted identity for regulatory backend, such as govcloud
+	// XXX: only supported for aws currently. update when supported for other providers
+	var trustedRegulation map[string]string
+	if d.Get("cloud_provider").(string) == "aws" {
+		trustedRegulation, err = client.GetTrustedCloudRegulationAssetsSecure(ctx, d.Get("cloud_provider").(string))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	d.SetId(identity)
-	_ = d.Set("identity", identity)
 
 	provider := d.Get("cloud_provider")
 	switch provider {
-	case "aws", "gcp":
-		// If identity is an ARN, attempt to extract certain fields
+	case "aws":
+		// set the commercial identity
+		_ = d.Set("identity", identity)
+		// if identity is an ARN, attempt to extract certain fields
+		parsedArn, err := arn.Parse(identity)
+		if err == nil {
+			_ = d.Set("aws_account_id", parsedArn.AccountID)
+			if parsedArn.Service == "iam" && strings.HasPrefix(parsedArn.Resource, "role/") {
+				_ = d.Set("aws_role_name", strings.TrimPrefix(parsedArn.Resource, "role/"))
+			}
+		}
+
+		// set the gov regulation based identity (only supported for aws currently)
+		err = d.Set("gov_identity", trustedRegulation["trustedIdentityGov"])
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		// if identity is an ARN, attempt to extract certain fields
+		parsedArn, err = arn.Parse(trustedRegulation["trustedIdentityGov"])
+		if err == nil {
+			_ = d.Set("aws_gov_account_id", parsedArn.AccountID)
+			if parsedArn.Service == "iam" && strings.HasPrefix(parsedArn.Resource, "role/") {
+				_ = d.Set("aws_gov_role_name", strings.TrimPrefix(parsedArn.Resource, "role/"))
+			}
+		}
+	case "gcp":
+		// set the commercial identity
+		_ = d.Set("identity", identity)
+		// if identity is an ARN, attempt to extract certain fields
 		parsedArn, err := arn.Parse(identity)
 		if err == nil {
 			_ = d.Set("aws_account_id", parsedArn.AccountID)
@@ -85,7 +134,9 @@ func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *sche
 			}
 		}
 	case "azure":
-		// If identity is an Azure tenantID/clientID, separate into each part
+		// set the commercial identity
+		_ = d.Set("identity", identity)
+		// if identity is an Azure tenantID/clientID, separate into each part
 		tenantID, spID, err := parseAzureCreds(identity)
 		if err == nil {
 			_ = d.Set("azure_tenant_id", tenantID)
@@ -345,72 +396,6 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 		return diag.FromErr(err)
 	}
 
-	return nil
-}
-
-func dataSourceSysdigSecureTrustedCloudRegulationAssets() *schema.Resource {
-	timeout := 5 * time.Minute
-
-	return &schema.Resource{
-		ReadContext: dataSourceSysdigSecureTrustedCloudRegulationAssetsRead,
-
-		Timeouts: &schema.ResourceTimeout{
-			Read: schema.DefaultTimeout(timeout),
-		},
-
-		Schema: map[string]*schema.Schema{
-			"cloud_provider": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"aws"}, false),
-			},
-			"gov_identity": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"aws_gov_account_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"aws_gov_role_name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-		},
-	}
-}
-
-// Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigSecureTrustedCloudRegulationAssetsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureOnboardingClient(meta.(SysdigClients))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	trustedRegulation, err := client.GetTrustedCloudRegulationAssetsSecure(ctx, d.Get("cloud_provider").(string))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	provider := d.Get("cloud_provider")
-	d.SetId(fmt.Sprintf("%s_trusted_regulation_assets", provider.(string)))
-
-	switch provider {
-	case "aws":
-		// set the gov regulation based identity
-		err = d.Set("gov_identity", trustedRegulation["trustedIdentityGov"])
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		// If identity is an ARN, attempt to extract certain fields
-		parsedArn, err := arn.Parse(trustedRegulation["trustedIdentityGov"])
-		if err == nil {
-			_ = d.Set("aws_gov_account_id", parsedArn.AccountID)
-			if parsedArn.Service == "iam" && strings.HasPrefix(parsedArn.Resource, "role/") {
-				_ = d.Set("aws_gov_role_name", strings.TrimPrefix(parsedArn.Resource, "role/"))
-			}
-		}
-	}
 	return nil
 }
 

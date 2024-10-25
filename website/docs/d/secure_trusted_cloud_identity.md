@@ -39,3 +39,8 @@ In addition to all arguments above, the following attributes are exported:
 
 * `azure_service_principal_id` - If `identity` contains credentials for an Azure Service Principal, this attribute contains the service principal's ID. `cloud_provider` must be equal to `azure`.
 
+* `gov_identity` - Sysdig's identity for regulatory workloads (User/Role/etc) that should be used to create a trust relationship allowing Sysdig access to your regulated cloud account. Currently supported on `aws`.
+
+* `aws_gov_account_id` - If `gov_identity` is an AWS GOV IAM Role ARN, this attribute contains the AWS GOV Account ID to which the ARN belongs, otherwise it contains the empty string. Currently supported on `aws`.
+
+* `aws_gov_role_name` - If `gov_identity` is a AWS GOV IAM Role ARN, this attribute contains the name of the GOV role, otherwise it contains the empty string. Currently supported on `aws`.
