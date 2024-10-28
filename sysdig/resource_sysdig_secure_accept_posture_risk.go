@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -121,6 +122,10 @@ func resourceSysdigSecureAcceptPostureControlCreate(ctx context.Context, d *sche
 		req.ExpiresAt = d.Get(SchemaExpiresAtKey).(int64)
 	}
 
+	if req.ZoneName == "" && req.Filter == "" || req.ZoneName != "" && req.Filter != "" {
+		return diag.Errorf("Error creating accept risk. Either a zone name must be provided to accept all resources for control in a specific zone, or a filter must be provided to accept a specific resource.")
+	}
+
 	acceptance, errStatus, err := client.SaveAcceptPostureRisk(ctx, req)
 	if err != nil {
 		return diag.Errorf("Error creating accept risk. error status: %s err: %s", errStatus, err)
@@ -142,25 +147,27 @@ func resourceSysdigSecureAcceptPostureControlUpdate(ctx context.Context, d *sche
 		Acceptance:   v2.UpdateAcceptPostureRiskFields{},
 	}
 	expiresIn := d.Get(SchemaExpiresInKey).(string)
+	var millis int64
 	if expiresIn == "7 Days" {
 		req.Acceptance.AcceptPeriod = "7"
-		req.Acceptance.ExpiresAt = strconv.FormatInt(time.Now().AddDate(0, 0, 7).Unix(), 10)
+		millis = time.Now().AddDate(0, 0, 7).UTC().UnixMilli()
 	} else if expiresIn == "30 Days" {
 		req.Acceptance.AcceptPeriod = "30"
-		req.Acceptance.ExpiresAt = strconv.FormatInt(time.Now().AddDate(0, 0, 30).Unix(), 10)
+		millis = time.Now().AddDate(0, 0, 30).UTC().UnixMilli()
 	} else if expiresIn == "60 Days" {
 		req.Acceptance.AcceptPeriod = "60"
-		req.Acceptance.ExpiresAt = strconv.FormatInt(time.Now().AddDate(0, 0, 60).Unix(), 10)
+		millis = time.Now().AddDate(0, 0, 60).UTC().UnixMilli()
 	} else if expiresIn == "90 Days" {
 		req.Acceptance.AcceptPeriod = "90"
-		req.Acceptance.ExpiresAt = strconv.FormatInt(time.Now().AddDate(0, 0, 90).Unix(), 10)
+		millis = time.Now().AddDate(0, 0, 90).UTC().UnixMilli()
 	} else if expiresIn == "Never" {
 		req.Acceptance.AcceptPeriod = "Never"
-		req.Acceptance.ExpiresAt = "0"
+		millis = 0
 	} else {
 		req.Acceptance.AcceptPeriod = "Custom"
 		req.Acceptance.ExpiresAt = d.Get(SchemaExpiresAtKey).(string)
 	}
+	req.Acceptance.ExpiresAt = fmt.Sprintf("%d", millis)
 	req.Acceptance.Description = d.Get(SchemaDescriptionKey).(string)
 	req.Acceptance.Reason = d.Get(SchemaReasonKey).(string)
 
