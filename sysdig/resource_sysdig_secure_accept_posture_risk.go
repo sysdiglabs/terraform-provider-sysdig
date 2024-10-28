@@ -122,10 +122,6 @@ func resourceSysdigSecureAcceptPostureControlCreate(ctx context.Context, d *sche
 		req.ExpiresAt = d.Get(SchemaExpiresAtKey).(int64)
 	}
 
-	if req.ZoneName == "" && req.Filter == "" || req.ZoneName != "" && req.Filter != "" {
-		return diag.Errorf("Error creating accept risk. Either a zone name must be provided to accept all resources for control in a specific zone, or a filter must be provided to accept a specific resource.")
-	}
-
 	acceptance, errStatus, err := client.SaveAcceptPostureRisk(ctx, req)
 	if err != nil {
 		return diag.Errorf("Error creating accept risk. error status: %s err: %s", errStatus, err)
