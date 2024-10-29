@@ -2,7 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -60,8 +59,8 @@ func resourceSysdigSecureAcceptPostureRisk() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"7 Days", "30 Days", "60 Days", "90 Days", "Custom", "Never"}, false),
 			},
 			SchemaExpiresAtKey: {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			SchemaIsExpiredKey: {
 				Type:     schema.TypeBool,
@@ -106,22 +105,23 @@ func resourceSysdigSecureAcceptPostureControlCreate(ctx context.Context, d *sche
 		Filter:       d.Get(SchemaFilterKey).(string),
 		Reason:       d.Get(SchemaReasonKey).(string),
 	}
-
+	var expiresAt int64
 	expiresIn := d.Get(SchemaExpiresInKey).(string)
 	if expiresIn == "7 Days" {
-		req.ExpiresAt = time.Now().AddDate(0, 0, 7).UTC().UnixMilli()
+		expiresAt = time.Now().AddDate(0, 0, 7).UTC().UnixMilli()
 	} else if expiresIn == "30 Days" {
-		req.ExpiresAt = time.Now().AddDate(0, 0, 30).UTC().UnixMilli()
+		expiresAt = time.Now().AddDate(0, 0, 30).UTC().UnixMilli()
 	} else if expiresIn == "60 Days" {
-		req.ExpiresAt = time.Now().AddDate(0, 0, 60).UTC().UnixMilli()
+		expiresAt = time.Now().AddDate(0, 0, 60).UTC().UnixMilli()
 	} else if expiresIn == "90 Days" {
-		req.ExpiresAt = time.Now().AddDate(0, 0, 90).UTC().UnixMilli()
+		expiresAt = time.Now().AddDate(0, 0, 90).UTC().UnixMilli()
 	} else if expiresIn == "Never" {
-		req.ExpiresAt = 0
+		expiresAt = 0
 	} else {
-		req.ExpiresAt = d.Get(SchemaExpiresAtKey).(int64)
+		t := d.Get(SchemaExpiresAtKey).(string)
+		expiresAt, _ = strconv.ParseInt(t, 10, 64)
 	}
-
+	req.ExpiresAt = strconv.FormatInt(expiresAt, 10)
 	acceptance, errStatus, err := client.SaveAcceptPostureRisk(ctx, req)
 	if err != nil {
 		return diag.Errorf("Error creating accept risk. error status: %s err: %s", errStatus, err)
@@ -161,9 +161,13 @@ func resourceSysdigSecureAcceptPostureControlUpdate(ctx context.Context, d *sche
 		millis = 0
 	} else {
 		req.Acceptance.AcceptPeriod = "Custom"
-		req.Acceptance.ExpiresAt = d.Get(SchemaExpiresAtKey).(string)
+		t := d.Get(SchemaExpiresAtKey).(string)
+		millis, err = strconv.ParseInt(t, 10, 64)
+		if err != nil {
+			millis = time.Now().AddDate(0, 0, 30).UTC().UnixMilli()
+		}
 	}
-	req.Acceptance.ExpiresAt = fmt.Sprintf("%d", millis)
+	req.Acceptance.ExpiresAt = strconv.FormatInt(millis, 10)
 	req.Acceptance.Description = d.Get(SchemaDescriptionKey).(string)
 	req.Acceptance.Reason = d.Get(SchemaReasonKey).(string)
 
@@ -224,11 +228,8 @@ func resourceSysdigSecureAcceptPostureControlRead(ctx context.Context, d *schema
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	expiresAt, err := strconv.ParseInt(acceptance.Data.ExpiresAt, 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	err = d.Set(SchemaExpiresAtKey, expiresAt)
+
+	err = d.Set(SchemaExpiresAtKey, acceptance.Data.ExpiresAt)
 	if err != nil {
 		return diag.FromErr(err)
 	}

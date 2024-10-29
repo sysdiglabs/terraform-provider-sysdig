@@ -31,7 +31,7 @@ type AccepetPostureRiskRequest struct {
 	Description  string `json:"description"`
 	Filter       string `json:"filter"`
 	Reason       string `json:"reason"`
-	ExpiresAt    int64  `json:"expiresAt"`
+	ExpiresAt    string `json:"expiresAt"`
 }
 
 type UpdateAccepetPostureRiskRequest struct {

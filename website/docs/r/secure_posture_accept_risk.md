@@ -30,6 +30,16 @@ resource "sysdig_secure_posture_accept_risk" "accept_risk_resource" {
     expires_in   = "30 Days"
     filter       = "name in ('system:controller:daemon-set-s') and kind in ('ClusterRole')"
 }
+
+
+resource "sysdig_secure_posture_accept_risk" "scheduler_set_to_loopback_bind_address" {
+    description = "This is custom risk acceptance for scheduler_set_to_loopback_bind_address"
+    control_name = "Scheduler - Set to Loopback bind-address"
+    reason = "Custom"
+    expires_in = "Custom"
+    expires_at = "1730293523000"
+    zone_name = "Entire Infrastructure"
+}
 ```
 
 ## Argument Reference
@@ -53,7 +63,7 @@ resource "sysdig_secure_posture_accept_risk" "accept_risk_resource" {
   - `90 Days`
   - `Custom`
   - `Never`
-- `expires_at` - (Computed) The timestamp indicating when the acceptance expires, in UTC time format (milliseconds since epoch).
+- `expires_at` - (Optional) This timestamp indicates when the acceptance expires, formatted in UTC time (milliseconds since epoch). If you choose expires_in=Custom, you must provide expires_at, which specifies the expiration date in milliseconds.
 - `is_expired` - (Computed) Indicates whether the acceptance is expired.
 - `acceptance_date` - (Computed) The date when the risk was accepted.
 - `username` - (Computed) The username of the user who accepted the risk.
