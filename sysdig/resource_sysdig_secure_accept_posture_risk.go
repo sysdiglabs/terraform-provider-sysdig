@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -121,6 +122,9 @@ func resourceSysdigSecureAcceptPostureControlCreate(ctx context.Context, d *sche
 		t := d.Get(SchemaExpiresAtKey).(string)
 		expiresAt, _ = strconv.ParseInt(t, 10, 64)
 	}
+	if expiresAt <= time.Now().UTC().UnixMilli() {
+		return diag.Errorf("Error creating accept risk. error status: %s err: %s", "ExpiresAt must be in the future", fmt.Errorf("ExpiresAt must be in the future"))
+	}
 	req.ExpiresAt = strconv.FormatInt(expiresAt, 10)
 	acceptance, errStatus, err := client.SaveAcceptPostureRisk(ctx, req)
 	if err != nil {
@@ -163,6 +167,9 @@ func resourceSysdigSecureAcceptPostureControlUpdate(ctx context.Context, d *sche
 		req.Acceptance.AcceptPeriod = "Custom"
 		t := d.Get(SchemaExpiresAtKey).(string)
 		millis, err = strconv.ParseInt(t, 10, 64)
+		if millis <= time.Now().UTC().UnixMilli() {
+			return diag.Errorf("Error updating accept risk. ID: %s, error status: %s err: %s", req.AcceptanceID, "ExpiresAt must be in the future", err)
+		}
 		if err != nil {
 			millis = time.Now().AddDate(0, 0, 30).UTC().UnixMilli()
 		}
