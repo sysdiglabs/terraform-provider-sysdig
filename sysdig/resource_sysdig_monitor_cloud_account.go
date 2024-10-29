@@ -61,6 +61,30 @@ func resourceSysdigMonitorCloudAccount() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 			},
+			"athena_bucket_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"athena_database_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"athena_region": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"athena_workgroup": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"athena_table_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"spot_prices_bucket_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -75,14 +99,25 @@ func resourceSysdigMonitorCloudAccountCreate(ctx context.Context, data *schema.R
 		return diag.FromErr(err)
 	}
 
-	cloudAccount := monitorCloudAccountFromResourceData(data)
+	if data.Get("integration_type").(string) == "Cost" {
+		cloudAccount := monitorCloudAccountForCostFromResourceData(data)
+		cloudAccountCreated, err := client.CreateCloudAccountMonitorForCost(ctx, &cloudAccount)
 
-	cloudAccountCreated, err := client.CreateCloudAccountMonitor(ctx, &cloudAccount)
-	if err != nil {
-		return diag.FromErr(err)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		data.SetId(cloudAccountCreated.Id)
+	} else {
+		cloudAccount := monitorCloudAccountFromResourceData(data)
+		cloudAccountCreated, err := client.CreateCloudAccountMonitor(ctx, &cloudAccount)
+
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		data.SetId(strconv.Itoa(cloudAccountCreated.Id))
 	}
-
-	data.SetId(strconv.Itoa(cloudAccountCreated.Id))
 
 	return nil
 }
@@ -161,6 +196,25 @@ func monitorCloudAccountFromResourceData(data *schema.ResourceData) v2.CloudAcco
 			RoleName:    data.Get("role_name").(string),
 			SecretKey:   data.Get("secret_key").(string),
 			AccessKeyId: data.Get("access_key_id").(string),
+		},
+	}
+}
+
+func monitorCloudAccountForCostFromResourceData(data *schema.ResourceData) v2.CloudAccountMonitorForCost {
+	return v2.CloudAccountMonitorForCost{
+		Feature:  "Cloud cost",
+		Platform: data.Get("cloud_provider").(string),
+		Configuration: v2.CloudCostConfiguration{
+			AthenaBucketName:     data.Get("athena_bucket_name").(string),
+			AthenaDatabaseName:   data.Get("athena_database_name").(string),
+			AthenaRegion:         data.Get("athena_region").(string),
+			AthenaWorkgroup:      data.Get("athena_workgroup").(string),
+			AthenaTableName:      data.Get("athena_table_name").(string),
+			SpotPricesBucketName: data.Get("spot_prices_bucket_name").(string),
+		},
+		Credentials: v2.CloudAccountCredentialsMonitor{
+			AccountId: data.Get("account_id").(string),
+			RoleName:  data.Get("role_name").(string),
 		},
 	}
 }

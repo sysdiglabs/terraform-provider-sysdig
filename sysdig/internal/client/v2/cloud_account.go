@@ -12,6 +12,7 @@ const (
 	cloudAccountPath                = "%s/api/cloud/v2/accounts/%s"
 	cloudAccountWithExternalIDPath  = "%s/api/cloud/v2/accounts/%s?includeExternalID=true"
 	providersPath                   = "%v/api/v2/providers"
+	costCloudAccountPath            = "%s/api/cloudaccount"
 )
 
 type CloudAccountSecureInterface interface {
@@ -25,6 +26,7 @@ type CloudAccountSecureInterface interface {
 type CloudAccountMonitorInterface interface {
 	Base
 	CreateCloudAccountMonitor(ctx context.Context, provider *CloudAccountMonitor) (*CloudAccountMonitor, error)
+	CreateCloudAccountMonitorForCost(ctx context.Context, provider *CloudAccountMonitorForCost) (*CloudAccountCreatedForCost, error)
 	UpdateCloudAccountMonitor(ctx context.Context, id int, provider *CloudAccountMonitor) (*CloudAccountMonitor, error)
 	GetCloudAccountMonitor(ctx context.Context, id int) (*CloudAccountMonitor, error)
 	DeleteCloudAccountMonitor(ctx context.Context, id int) error
@@ -135,6 +137,30 @@ func (client *Client) CreateCloudAccountMonitor(ctx context.Context, provider *C
 	return &wrapper.CloudAccount, nil
 }
 
+func (client *Client) CreateCloudAccountMonitorForCost(ctx context.Context, provider *CloudAccountMonitorForCost) (*CloudAccountCreatedForCost, error) {
+	payload, err := Marshal(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := client.requester.Request(ctx, http.MethodPost, client.getCostProvidersURL(), payload)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return nil, client.ErrorFromResponse(response)
+	}
+
+	wrapper, err := Unmarshal[CloudAccountCreatedForCost](response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return &wrapper, nil
+}
+
 func (client *Client) UpdateCloudAccountMonitor(ctx context.Context, id int, provider *CloudAccountMonitor) (*CloudAccountMonitor, error) {
 	payload, err := Marshal(provider)
 	if err != nil {
@@ -198,4 +224,8 @@ func (client *Client) getProviderURL(id int) string {
 
 func (client *Client) getProvidersURL() string {
 	return fmt.Sprintf(providersPath, client.config.url)
+}
+
+func (client *Client) getCostProvidersURL() string {
+	return fmt.Sprintf(costCloudAccountPath, client.config.url)
 }
