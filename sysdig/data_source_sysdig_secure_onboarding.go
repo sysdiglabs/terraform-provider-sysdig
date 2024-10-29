@@ -380,7 +380,8 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 
 	d.SetId("cloudIngestionAssets")
 	err = d.Set("aws", map[string]interface{}{
-		"eventBusARN": assetsAws["eventBusARN"],
+		"eventBusARN":    assetsAws["eventBusARN"],
+		"eventBusARNGov": assetsAws["eventBusARNGov"],
 	})
 	if err != nil {
 		return diag.FromErr(err)
