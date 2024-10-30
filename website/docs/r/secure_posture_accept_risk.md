@@ -17,7 +17,7 @@ Creates a Sysdig Secure Posture Accept Risk.
 ```terraform
 resource "sysdig_secure_posture_accept_risk" "accept_risk_global" {
     description  = "Accept risk for zone"
-    control_name = "ServiceAccounts with cluster access"
+    control_name = "Network - Enabled Endpoint Private Access in Existing Clusters (EKS)"
     reason       = "Risk Transferred"
     expires_in   = "30 Days"
     zone_name = "Entire Infrastructure"
@@ -25,10 +25,10 @@ resource "sysdig_secure_posture_accept_risk" "accept_risk_global" {
 
 resource "sysdig_secure_posture_accept_risk" "accept_risk_resource" {
     description  = "Accept risk for resource"
-    control_name = "ServiceAccounts with cluster access"
+    control_name = "Fargate - Untrusted Workloads"
     reason       = "Risk Transferred"
     expires_in   = "30 Days"
-    filter       = "name in ('system:controller:daemon-set-s') and kind in ('ClusterRole')"
+    filter       = "name in (\"aws-int-01-cicd-aws-eks-workloads-shield\") and providerType in (\"AWS\") and kind in (\"AWS_EKS_CLUSTER\") and location in (\"us-east-1\")"
 }
 
 
