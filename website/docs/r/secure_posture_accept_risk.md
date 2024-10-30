@@ -49,32 +49,32 @@ resource "sysdig_secure_posture_accept_risk" "scheduler_set_to_loopback_bind_add
 - `zone_name` - (Optional) The zone associated with the risk acceptance.
 - `description` - (Required) A description of the risk acceptance.
 - `filter` - (Optional) A filter for identifying the resources affected by the acceptance.
-    List of supported fields:
-
+  
+   ### List of supported fields:
    - name
-      Type: string
-      Example: name in ("cf-templates-1s951ca3qbh1-us-west-2")
-      Description: The name of the resource to accept risk for
+      - Type: string
+      - Example: name in ("cf-templates-1s951ca3qbh1-us-west-2")
+      - Description: The name of the resource to accept risk for
   
   - namespace
-      Type: string
-      Example: namespace in ("my-namespace")
-      Description: The namespace to accept risk for
+      - Type: string
+      - Example: namespace in ("my-namespace")
+      - Description: The namespace to accept risk for
   
    - kind
-      Type: string
-      Example: kind in ("AWS_S3_BUCKET")
-      Description: The resource kind to accept risk for
+      - Type: string
+      - Example: kind in ("AWS_S3_BUCKET")
+      - Description: The resource kind to accept risk for
 
     - location
-      Type: string
-      Example: location in ("ap-southeast-2")
-      Description: The cloud location/region to accept risk for
+      - Type: string
+      - Example: location in ("ap-southeast-2")
+      - Description: The cloud location/region to accept risk for
 
     - providerType
-      Type: string
-      Example: providerType in ("AWS")
-      Description: The cloud provider to accept risk for (AWS/GCP/Azure)
+      - Type: string
+      - Example: providerType in ("AWS")
+      - Description: The cloud provider to accept risk for (AWS/GCP/Azure)
 
 - `reason` - (Required) The reason for accepting the risk. Possible values are:
   - `Risk Owned`
