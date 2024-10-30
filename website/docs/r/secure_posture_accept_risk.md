@@ -50,7 +50,7 @@ resource "sysdig_secure_posture_accept_risk" "scheduler_set_to_loopback_bind_add
 - `description` - (Required) A description of the risk acceptance.
 - `filter` - (Optional) A filter for identifying the resources affected by the acceptance.
   
-   ### List of supported fields:
+   ##### List of supported fields:
    - name
       - Type: string
       - Example: name in ("cf-templates-1s951ca3qbh1-us-west-2")
