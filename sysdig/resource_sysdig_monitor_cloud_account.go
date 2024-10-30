@@ -61,29 +61,12 @@ func resourceSysdigMonitorCloudAccount() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 			},
-			"athena_bucket_name": {
-				Type:     schema.TypeString,
+			"config": {
+				Type:     schema.TypeMap,
 				Optional: true,
-			},
-			"athena_database_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"athena_region": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"athena_workgroup": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"athena_table_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"spot_prices_bucket_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	}
@@ -152,14 +135,26 @@ func resourceSysdigMonitorCloudAccountRead(ctx context.Context, data *schema.Res
 		return diag.FromErr(err)
 	}
 
-	cloudAccount, err := client.GetCloudAccountMonitor(ctx, id)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	if data.Get("integration_type") != nil && data.Get("integration_type").(string) != "Cost" {
+		cloudAccount, err := client.GetCloudAccountMonitor(ctx, id)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-	err = monitorCloudAccountToResourceData(data, cloudAccount)
-	if err != nil {
-		return diag.FromErr(err)
+		err = monitorCloudAccountToResourceData(data, cloudAccount)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	} else {
+		cloudAccount, err := client.GetCloudAccountMonitorForCost(ctx, id)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		err = monitorCloudAccountForCostToResourceData(data, cloudAccount)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return nil
@@ -171,16 +166,30 @@ func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.R
 		return diag.FromErr(err)
 	}
 
-	cloudAccount := monitorCloudAccountFromResourceData(data)
+	if data.Get("integration_type") != nil && data.Get("integration_type").(string) != "Cost" {
+		cloudAccount := monitorCloudAccountFromResourceData(data)
 
-	id, err := strconv.Atoi(data.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
+		id, err := strconv.Atoi(data.Id())
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-	_, err = client.UpdateCloudAccountMonitor(ctx, id, &cloudAccount)
-	if err != nil {
-		return diag.FromErr(err)
+		_, err = client.UpdateCloudAccountMonitor(ctx, id, &cloudAccount)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	} else {
+		cloudAccount := monitorCloudAccountForCostFromResourceDataPutMethod(data)
+
+		id, err := strconv.Atoi(data.Id())
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		_, err = client.UpdateCloudAccountMonitorForCost(ctx, id, &cloudAccount)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return nil
@@ -205,16 +214,32 @@ func monitorCloudAccountForCostFromResourceData(data *schema.ResourceData) v2.Cl
 		Feature:  "Cloud cost",
 		Platform: data.Get("cloud_provider").(string),
 		Configuration: v2.CloudCostConfiguration{
-			AthenaBucketName:     data.Get("athena_bucket_name").(string),
-			AthenaDatabaseName:   data.Get("athena_database_name").(string),
-			AthenaRegion:         data.Get("athena_region").(string),
-			AthenaWorkgroup:      data.Get("athena_workgroup").(string),
-			AthenaTableName:      data.Get("athena_table_name").(string),
-			SpotPricesBucketName: data.Get("spot_prices_bucket_name").(string),
+			AthenaBucketName:     data.Get("config").(map[string]interface{})["athena_bucket_name"].(string),
+			AthenaDatabaseName:   data.Get("config").(map[string]interface{})["athena_database_name"].(string),
+			AthenaRegion:         data.Get("config").(map[string]interface{})["athena_region"].(string),
+			AthenaWorkgroup:      data.Get("config").(map[string]interface{})["athena_workgroup"].(string),
+			AthenaTableName:      data.Get("config").(map[string]interface{})["athena_table_name"].(string),
+			SpotPricesBucketName: data.Get("config").(map[string]interface{})["spot_prices_bucket_name"].(string),
 		},
 		Credentials: v2.CloudAccountCredentialsMonitor{
 			AccountId: data.Get("account_id").(string),
 			RoleName:  data.Get("role_name").(string),
+		},
+	}
+}
+
+func monitorCloudAccountForCostFromResourceDataPutMethod(data *schema.ResourceData) v2.CloudAccountCostProvider {
+	return v2.CloudAccountCostProvider{
+		Provider: data.Get("cloud_provider").(string),
+		RoleArn:  "arn:aws:iam::" + data.Get("account_id").(string) + ":role/" + data.Get("role_name").(string),
+		Config: v2.CloudConfigForCost{
+			AthenaBucketName:     data.Get("config").(map[string]interface{})["athena_bucket_name"].(string),
+			AthenaDatabaseName:   data.Get("config").(map[string]interface{})["athena_database_name"].(string),
+			AthenaRegion:         data.Get("config").(map[string]interface{})["athena_region"].(string),
+			AthenaWorkgroup:      data.Get("config").(map[string]interface{})["athena_workgroup"].(string),
+			AthenaTableName:      data.Get("config").(map[string]interface{})["athena_table_name"].(string),
+			SpotPricesBucketName: data.Get("config").(map[string]interface{})["spot_prices_bucket_name"].(string),
+			IntegrationType:      data.Get("integration_type").(string),
 		},
 	}
 }
@@ -251,6 +276,42 @@ func monitorCloudAccountToResourceData(data *schema.ResourceData, cloudAccount *
 	}
 
 	err = data.Set("access_key_id", cloudAccount.Credentials.AccessKeyId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func monitorCloudAccountForCostToResourceData(data *schema.ResourceData, cloudAccount *v2.CloudAccountCostProvider) error {
+	err := data.Set("cloud_provider", cloudAccount.Provider)
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("config", map[string]interface{}{
+		"athena_bucket_name":      cloudAccount.Config.AthenaBucketName,
+		"athena_database_name":    cloudAccount.Config.AthenaDatabaseName,
+		"athena_region":           cloudAccount.Config.AthenaRegion,
+		"athena_workgroup":        cloudAccount.Config.AthenaWorkgroup,
+		"athena_table_name":       cloudAccount.Config.AthenaTableName,
+		"spot_prices_bucket_name": cloudAccount.Config.SpotPricesBucketName,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("integration_type", cloudAccount.Config.IntegrationType)
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("account_id", cloudAccount.ProviderId)
+	if err != nil {
+		return err
+	}
+
+	err = data.Set("role_name", strings.Split(cloudAccount.RoleArn, ":role/")[1])
 	if err != nil {
 		return err
 	}
