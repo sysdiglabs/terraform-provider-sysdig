@@ -135,23 +135,23 @@ func resourceSysdigMonitorCloudAccountRead(ctx context.Context, data *schema.Res
 		return diag.FromErr(err)
 	}
 
-	if data.Get("integration_type") != nil && data.Get("integration_type").(string) != "Cost" {
-		cloudAccount, err := client.GetCloudAccountMonitor(ctx, id)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		err = monitorCloudAccountToResourceData(data, cloudAccount)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-	} else {
+	if data.Get("integration_type").(string) == "Cost" {
 		cloudAccount, err := client.GetCloudAccountMonitorForCost(ctx, id)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
 		err = monitorCloudAccountForCostToResourceData(data, cloudAccount)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	} else {
+		cloudAccount, err := client.GetCloudAccountMonitor(ctx, id)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		err = monitorCloudAccountToResourceData(data, cloudAccount)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -166,19 +166,7 @@ func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.R
 		return diag.FromErr(err)
 	}
 
-	if data.Get("integration_type") != nil && data.Get("integration_type").(string) != "Cost" {
-		cloudAccount := monitorCloudAccountFromResourceData(data)
-
-		id, err := strconv.Atoi(data.Id())
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		_, err = client.UpdateCloudAccountMonitor(ctx, id, &cloudAccount)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-	} else {
+	if data.Get("integration_type").(string) == "Cost" {
 		cloudAccount := monitorCloudAccountForCostFromResourceDataPutMethod(data)
 
 		id, err := strconv.Atoi(data.Id())
@@ -187,6 +175,18 @@ func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.R
 		}
 
 		_, err = client.UpdateCloudAccountMonitorForCost(ctx, id, &cloudAccount)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	} else {
+		cloudAccount := monitorCloudAccountFromResourceData(data)
+
+		id, err := strconv.Atoi(data.Id())
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		_, err = client.UpdateCloudAccountMonitor(ctx, id, &cloudAccount)
 		if err != nil {
 			return diag.FromErr(err)
 		}
