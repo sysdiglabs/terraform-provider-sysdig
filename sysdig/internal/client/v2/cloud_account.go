@@ -195,7 +195,7 @@ func (client *Client) UpdateCloudAccountMonitorForCost(ctx context.Context, id i
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.getProviderURL(id), payload)
+	response, err := client.requester.Request(ctx, http.MethodPut, client.getUpdateCostProviderURL(), payload)
 	if err != nil {
 		return nil, err
 	}
