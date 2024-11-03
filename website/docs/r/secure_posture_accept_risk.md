@@ -37,7 +37,7 @@ resource "sysdig_secure_posture_accept_risk" "scheduler_set_to_loopback_bind_add
     control_name = "Scheduler - Set to Loopback bind-address"
     reason = "Custom"
     expires_in = "Custom"
-    expires_at = "1730293523000"
+    end_time = "1730293523000"
     zone_name = "Entire Infrastructure"
 }
 ```
@@ -90,7 +90,9 @@ resource "sysdig_secure_posture_accept_risk" "scheduler_set_to_loopback_bind_add
   - `90 Days`
   - `Custom`
   - `Never`
-- `expires_at` - (Optional) This timestamp indicates when the acceptance expires, formatted in UTC time (milliseconds since epoch). If you choose expires_in=Custom, you must provide expires_at, which specifies the expiration date in milliseconds.
+- `expires_at` - (Computed) This timestamp indicates when the acceptance expires, formatted in UTC time (milliseconds since epoch).
+- `end_time` - (Optional)  This timestamp indicates the custom time, when the acceptance expires, formatted in UTC time (milliseconds since epoch).
+ If you choose expires_in=Custom, you should provide future end_time, which specifies the expiration date in milliseconds.
 - `is_expired` - (Computed) Indicates whether the acceptance is expired.
 - `acceptance_date` - (Computed) The date when the risk was accepted.
 - `username` - (Computed) The username of the user who accepted the risk.
@@ -107,7 +109,7 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-Posture custom control can be imported using the ID, e.g.
+Posture accept risk can be imported using the ID, e.g.
 
 ```
 $ terraform import sysdig_secure_posture_accept_risk.example c 12345

@@ -61,7 +61,7 @@ func resourceSysdigSecureAcceptPostureRisk() *schema.Resource {
 			},
 			SchemaExpiresAtKey: {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			SchemaIsExpiredKey: {
 				Type:     schema.TypeBool,
@@ -87,6 +87,11 @@ func resourceSysdigSecureAcceptPostureRisk() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			SchemaEndTimeKey: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
 		},
 	}
 }
@@ -106,26 +111,26 @@ func resourceSysdigSecureAcceptPostureControlCreate(ctx context.Context, d *sche
 		Filter:       d.Get(SchemaFilterKey).(string),
 		Reason:       d.Get(SchemaReasonKey).(string),
 	}
-	var expiresAt int64
+	var endTime int64
 	expiresIn := d.Get(SchemaExpiresInKey).(string)
 	if expiresIn == "7 Days" {
-		expiresAt = time.Now().AddDate(0, 0, 7).UTC().UnixMilli()
+		endTime = time.Now().AddDate(0, 0, 7).UTC().UnixMilli()
 	} else if expiresIn == "30 Days" {
-		expiresAt = time.Now().AddDate(0, 0, 30).UTC().UnixMilli()
+		endTime = time.Now().AddDate(0, 0, 30).UTC().UnixMilli()
 	} else if expiresIn == "60 Days" {
-		expiresAt = time.Now().AddDate(0, 0, 60).UTC().UnixMilli()
+		endTime = time.Now().AddDate(0, 0, 60).UTC().UnixMilli()
 	} else if expiresIn == "90 Days" {
-		expiresAt = time.Now().AddDate(0, 0, 90).UTC().UnixMilli()
+		endTime = time.Now().AddDate(0, 0, 90).UTC().UnixMilli()
 	} else if expiresIn == "Never" {
-		expiresAt = 0
+		endTime = 0
 	} else {
-		t := d.Get(SchemaExpiresAtKey).(string)
-		expiresAt, _ = strconv.ParseInt(t, 10, 64)
+		t := d.Get(SchemaEndTimeKey).(string)
+		endTime, _ = strconv.ParseInt(t, 10, 64)
 	}
-	if expiresAt <= time.Now().UTC().UnixMilli() {
+	if endTime <= time.Now().UTC().UnixMilli() {
 		return diag.Errorf("Error creating accept risk. error status: %s err: %s", "ExpiresAt must be in the future", fmt.Errorf("ExpiresAt must be in the future"))
 	}
-	req.ExpiresAt = strconv.FormatInt(expiresAt, 10)
+	req.ExpiresAt = strconv.FormatInt(endTime, 10)
 	acceptance, errStatus, err := client.SaveAcceptPostureRisk(ctx, req)
 	if err != nil {
 		return diag.Errorf("Error creating accept risk. error status: %s err: %s", errStatus, err)
@@ -165,7 +170,7 @@ func resourceSysdigSecureAcceptPostureControlUpdate(ctx context.Context, d *sche
 		millis = 0
 	} else {
 		req.Acceptance.AcceptPeriod = "Custom"
-		t := d.Get(SchemaExpiresAtKey).(string)
+		t := d.Get(SchemaEndTimeKey).(string)
 		millis, err = strconv.ParseInt(t, 10, 64)
 		if millis <= time.Now().UTC().UnixMilli() {
 			return diag.Errorf("Error updating accept risk. ID: %s, error status: %s err: %s", req.AcceptanceID, "ExpiresAt must be in the future", err)

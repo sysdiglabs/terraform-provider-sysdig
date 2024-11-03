@@ -28,6 +28,7 @@ const (
 	SchemaIsSystemKey                   = "is_system"
 	SchemaUsernameKey                   = "username"
 	SchemaAcceptPeriodKey               = "accept_period"
+	SchemaEndTimeKey                    = "end_time"
 	SchemaReasonKey                     = "reason"
 	SchemaVersionKey                    = "version"
 	SchemaLinkKey                       = "link"
