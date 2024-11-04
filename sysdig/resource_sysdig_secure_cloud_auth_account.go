@@ -184,7 +184,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			SchemaRegulatoryFramework: {
+			SchemaProviderPartition: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -423,15 +423,15 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
 	return &v2.CloudauthAccountSecure{
 		CloudAccount: cloudauth.CloudAccount{
-			Enabled:             data.Get(SchemaEnabled).(bool),
-			OrganizationId:      data.Get(SchemaOrganizationIDKey).(string),
-			ProviderId:          data.Get(SchemaCloudProviderId).(string),
-			Provider:            cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
-			Components:          constructAccountComponents(data),
-			Feature:             constructAccountFeatures(data),
-			ProviderTenantId:    data.Get(SchemaCloudProviderTenantId).(string),
-			ProviderAlias:       data.Get(SchemaCloudProviderAlias).(string),
-			RegulatoryFramework: cloudauth.RegulatoryFramework(cloudauth.RegulatoryFramework_value[data.Get(SchemaRegulatoryFramework).(string)]),
+			Enabled:           data.Get(SchemaEnabled).(bool),
+			OrganizationId:    data.Get(SchemaOrganizationIDKey).(string),
+			ProviderId:        data.Get(SchemaCloudProviderId).(string),
+			Provider:          cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
+			Components:        constructAccountComponents(data),
+			Feature:           constructAccountFeatures(data),
+			ProviderTenantId:  data.Get(SchemaCloudProviderTenantId).(string),
+			ProviderAlias:     data.Get(SchemaCloudProviderAlias).(string),
+			ProviderPartition: cloudauth.ProviderPartition(cloudauth.ProviderPartition_value[data.Get(SchemaProviderPartition).(string)]),
 		},
 	}
 }
@@ -592,8 +592,8 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 	}
 
 	// TODO: add an acc test with no values, with fedramp values and with ""
-	if !(cloudAccount.RegulatoryFramework.String() == "REGULATORY_FRAMEWORK_UNSPECIFIED") {
-		err = data.Set(SchemaRegulatoryFramework, cloudAccount.RegulatoryFramework.String())
+	if !(cloudAccount.ProviderPartition.String() == "PROVIDER_PARTITION_UNSPECIFIED") {
+		err = data.Set(SchemaProviderPartition, cloudAccount.ProviderPartition.String())
 		if err != nil {
 			return err
 		}

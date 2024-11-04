@@ -34,7 +34,7 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 
 * `component` - (Optional) The component configuration to enable on this cloud account. There can be multiple component blocks for a feature, one for each component to be enabled.
 
-* `regulatory_framework` - (Optional - AWS installs only) The type of Regulatory Framework for cloud account. Currently supported options are `REGULATORY_FRAMEWORK_UNSPECIFIED` and `REGULATORY_FRAMEWORK_US_FEDRAMP`.
+* `provider_partition` - (Optional - AWS installs only) The type of Partition of the Provider for cloud account. Currently supported options are `PROVIDER_PARTITION_UNSPECIFIED` and `PROVIDER_PARTITION_AWS_GOVCLOUD`.
 
 
 -> **Note:** Please refer to Sysdig Secure API Documentation for the Cloud Accounts API for providing `feature` & `component`.
