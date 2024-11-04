@@ -595,6 +595,13 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 	if err != nil {
 		return err
 	}
+	// TODO: add an acc test with no values, with fedramp values and with ""
+	if !(cloudAccount.RegulatoryFramework.String() == "REGULATORY_FRAMEWORK_UNSPECIFIED") {
+		err = data.Set(SchemaRegulatoryFramework, cloudAccount.RegulatoryFramework.String())
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
