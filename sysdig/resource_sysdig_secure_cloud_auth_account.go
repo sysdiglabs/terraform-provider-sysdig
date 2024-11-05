@@ -591,8 +591,7 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		}
 	}
 
-	// TODO: add an acc test with no values, with fedramp values and with ""
-	if !(cloudAccount.ProviderPartition.String() == cloudauth.ProviderPartition_name[0]) {
+	if !(cloudAccount.ProviderPartition.String() == cloudauth.ProviderPartition_PROVIDER_PARTITION_UNSPECIFIED.String()) {
 		err = data.Set(SchemaProviderPartition, cloudAccount.ProviderPartition.String())
 		if err != nil {
 			return err
