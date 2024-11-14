@@ -119,7 +119,7 @@ func TestAccRuleFalco(t *testing.T) {
 func ruleFalcoTerminalShell(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "terminal_shell" {
-  name = "TERRAFORM TEST %s - Terminal Shell Base Rule"
+  name = "TERRAFORM TEST %s - Terminal Shell"
   description = "TERRAFORM TEST %s"
   tags = ["container", "shell", "mitre_execution"]
 
