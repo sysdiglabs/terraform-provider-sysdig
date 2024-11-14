@@ -119,7 +119,7 @@ func TestAccRuleFalco(t *testing.T) {
 func ruleFalcoTerminalShell(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "terminal_shell" {
-  name = "TERRAFORM TEST %s - Terminal Shell"
+  name = "TERRAFORM TEST %s - Terminal Shell Base Rule"
   description = "TERRAFORM TEST %s"
   tags = ["container", "shell", "mitre_execution"]
 
@@ -133,7 +133,7 @@ resource "sysdig_secure_rule_falco" "terminal_shell" {
 func ruleFalcoTerminalShellWithMissingOuput(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "terminal_shell" {
-  name = "TERRAFORM TEST %s - Terminal Shell"
+  name = "TERRAFORM TEST %s - Terminal Shell Missing Output"
   description = "TERRAFORM TEST %s"
   tags = ["container", "shell", "mitre_execution"]
 
@@ -146,7 +146,7 @@ resource "sysdig_secure_rule_falco" "terminal_shell" {
 func ruleFalcoTerminalShellWithMissingSource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "terminal_shell" {
-  name = "TERRAFORM TEST %s - Terminal Shell"
+  name = "TERRAFORM TEST %s - Terminal Shell Missing Source"
   description = "TERRAFORM TEST %s"
   tags = ["container", "shell", "mitre_execution"]
 
@@ -160,7 +160,7 @@ resource "sysdig_secure_rule_falco" "terminal_shell" {
 func ruleFalcoUpdatedTerminalShell(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "terminal_shell" {
-  name = "TERRAFORM TEST %s - Terminal Shell"
+  name = "TERRAFORM TEST %s - Terminal Shell Updated"
   description = "TERRAFORM TEST %s"
   tags = ["shell", "mitre_execution"]
 
@@ -278,7 +278,7 @@ resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role_exceptions" {
 func ruleFalcoTerminalShellWithMinimumEngineVersion(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "terminal_shell" {
-  name = "TERRAFORM TEST %s - Terminal Shell"
+  name = "TERRAFORM TEST %s - Terminal Shell Min Engine Version"
   minimum_engine_version = 13
   description = "TERRAFORM TEST %s"
   tags = ["container", "shell", "mitre_execution"]
