@@ -312,8 +312,6 @@ resource "sysdig_secure_rule_falco" "awscloudtrail_append" {
   append = true
   exceptions {
 	name = "user_name"
-	fields = ["ct.user"]
-	comps = ["="]
 	values = jsonencode([ ["user_a"] ])
    }
 }`
