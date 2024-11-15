@@ -92,7 +92,7 @@ resource "sysdig_secure_macro" "sample2" {
 `
 }
 
-func macroWithMacroPart1(name1, name2 string) string {
+func macroWithMacroPart1(name1 string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_macro" "sample3" {
   name = "terraform_test_%s"
