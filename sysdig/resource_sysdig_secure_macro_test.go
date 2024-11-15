@@ -43,10 +43,19 @@ func TestAccMacro(t *testing.T) {
 				Config: macroAppendToDefault(),
 			},
 			{
-				Config: macroWithMacro(rText(), rText()),
+				Config: macroWithMacroPart1(rText()),
 			},
 			{
-				Config: macroWithMacroAndList(rText(), rText(), rText()),
+				Config: macroWithMacroPart2(rText()),
+			},
+			{
+				Config: listWithName(rText()),
+			},
+			{
+				Config: macroWithMacroAndListPart1(rText()),
+			},
+			{
+				Config: macroWithMacroAndListPart2(rText()),
 			},
 			{
 				Config: macroWithMinimumEngineVersion(rText()),
@@ -83,34 +92,43 @@ resource "sysdig_secure_macro" "sample2" {
 `
 }
 
-func macroWithMacro(name1, name2 string) string {
+func macroWithMacroPart1(name1, name2 string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_macro" "sample3" {
   name = "terraform_test_%s"
   condition = "always_true"
 }
+`, name1)
+}
 
+func macroWithMacroPart2(name2 string) string {
+	return fmt.Sprintf(`
 resource "sysdig_secure_macro" "sample4" {
   name = "terraform_test_%s"
   condition = "never_true and ${sysdig_secure_macro.sample3.name}"
 }
-`, name1, name2)
+`, name2)
 }
 
-func macroWithMacroAndList(name1, name2, name3 string) string {
+func macroWithMacroAndListPart1(name1 string) string {
 	return fmt.Sprintf(`
-%s
 
 resource "sysdig_secure_macro" "sample5" {
   name = "terraform_test_%s"
   condition = "fd.name in (${sysdig_secure_list.sample.name})"
 }
 
+`, name1)
+}
+
+func macroWithMacroAndListPart2(name1 string) string {
+	return fmt.Sprintf(`
+
 resource "sysdig_secure_macro" "sample6" {
   name = "terraform_test_%s"
   condition = "never_true and ${sysdig_secure_macro.sample5.name}"
 }
-`, listWithName(name3), name1, name2)
+`, name1)
 }
 
 func macroWithMinimumEngineVersion(name string) string {
