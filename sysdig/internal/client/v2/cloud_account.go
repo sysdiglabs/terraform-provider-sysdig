@@ -30,7 +30,7 @@ type CloudAccountMonitorInterface interface {
 	CreateCloudAccountMonitor(ctx context.Context, provider *CloudAccountMonitor) (*CloudAccountMonitor, error)
 	CreateCloudAccountMonitorForCost(ctx context.Context, provider *CloudAccountMonitorForCost) (*CloudAccountCreatedForCost, error)
 	UpdateCloudAccountMonitor(ctx context.Context, id int, provider *CloudAccountMonitor) (*CloudAccountMonitor, error)
-	UpdateCloudAccountMonitorForCost(ctx context.Context, id int, provider *CloudAccountCostProvider) (*CloudAccountCostProvider, error)
+	UpdateCloudAccountMonitorForCost(ctx context.Context, provider *CloudAccountCostProvider) (*CloudAccountCostProvider, error)
 	GetCloudAccountMonitor(ctx context.Context, id int) (*CloudAccountMonitor, error)
 	GetCloudAccountMonitorForCost(ctx context.Context, id int) (*CloudAccountCostProvider, error)
 	DeleteCloudAccountMonitor(ctx context.Context, id int) error
@@ -189,7 +189,7 @@ func (client *Client) UpdateCloudAccountMonitor(ctx context.Context, id int, pro
 	return &wrapper.CloudAccount, nil
 }
 
-func (client *Client) UpdateCloudAccountMonitorForCost(ctx context.Context, id int, provider *CloudAccountCostProvider) (*CloudAccountCostProvider, error) {
+func (client *Client) UpdateCloudAccountMonitorForCost(ctx context.Context, provider *CloudAccountCostProvider) (*CloudAccountCostProvider, error) {
 	payload, err := Marshal(provider)
 	if err != nil {
 		return nil, err

@@ -166,15 +166,22 @@ func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.R
 		return diag.FromErr(err)
 	}
 
-	if data.Get("integration_type").(string) == "Cost" {
-		cloudAccount := monitorCloudAccountForCostFromResourceDataPutMethod(data)
+	id, err := strconv.Atoi(data.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-		id, err := strconv.Atoi(data.Id())
+	if data.Get("integration_type").(string) == "Cost" {
+		putObjectAccount := monitorCloudAccountForCostFromResourceDataPutMethod(data)
+
+		cloudAccount, err := client.GetCloudAccountMonitorForCost(ctx, id)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
-		_, err = client.UpdateCloudAccountMonitorForCost(ctx, id, &cloudAccount)
+		mixFieldsForUpdateRequest(&putObjectAccount, cloudAccount)
+
+		_, err = client.UpdateCloudAccountMonitorForCost(ctx, &putObjectAccount)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -317,4 +324,16 @@ func monitorCloudAccountForCostToResourceData(data *schema.ResourceData, cloudAc
 	}
 
 	return nil
+}
+
+func mixFieldsForUpdateRequest(putObject *v2.CloudAccountCostProvider, currentStatusObject *v2.CloudAccountCostProvider) {
+	putObject.Provider = currentStatusObject.Provider
+	putObject.RoleArn = currentStatusObject.RoleArn
+	putObject.Config.IntegrationType = currentStatusObject.Config.IntegrationType
+	putObject.Config.AthenaBucketName = currentStatusObject.Config.AthenaBucketName
+	putObject.Config.AthenaDatabaseName = currentStatusObject.Config.AthenaDatabaseName
+	putObject.Config.AthenaRegion = currentStatusObject.Config.AthenaRegion
+	putObject.Config.AthenaWorkgroup = currentStatusObject.Config.AthenaWorkgroup
+	putObject.Config.AthenaTableName = currentStatusObject.Config.AthenaTableName
+	putObject.Config.SpotPricesBucketName = currentStatusObject.Config.SpotPricesBucketName
 }
