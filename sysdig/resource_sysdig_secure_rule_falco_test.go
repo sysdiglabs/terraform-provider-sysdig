@@ -243,7 +243,7 @@ func TestRuleFalcoCloudAWSCloudtrail(t *testing.T) {
 func TestRuleFalcoCloudAWSCloudtrailAppend(t *testing.T) {
 	steps := []resource.TestStep{
 		{
-			Config: ruleFalcoCloudAWSCloudtrailWithAppend(),
+			Config: RuleFalcoCloudAWSCloudtrailWithAppend(randomString()),
 		},
 	}
 	runTest(steps, t)
@@ -449,18 +449,18 @@ resource "sysdig_secure_rule_falco" "falco_rule_with_exceptions" {
 }
 
 func existingFalcoRuleWithExceptions(name string) string {
-	return `
+	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "attach_to_cluster_admin_role_exceptions" {
     name = "Terminal shell in container" # Sysdig-provided
     append    = true
 
     exceptions {
-        name = "proc_name"
+        name = "proc_name_%s"
         fields = ["proc.name"]
         comps = ["in"]
         values = jsonencode([["sh"]])
    }
-}`
+}`, name)
 }
 
 func ruleFalcoTerminalShellWithMinimumEngineVersion(name string) string {
@@ -492,19 +492,19 @@ resource "sysdig_secure_rule_falco" "awscloudtrail" {
 }`, name, name)
 }
 
-func ruleFalcoCloudAWSCloudtrailWithAppend() string {
-	return `
+func RuleFalcoCloudAWSCloudtrailWithAppend(name string) string {
+	return fmt.Sprintf(`
 resource "sysdig_secure_rule_falco" "awscloudtrail_append" {
   name = "Amplify Create App"
   source = "awscloudtrail"
   append = true
   exceptions {
-	name = "user_name"
+	name = "user_name_%s"
 	fields = ["ct.user"]
 	comps = ["="]
 	values = jsonencode([ ["user_a"] ])
    }
-}`
+}`, name)
 }
 
 func ruleOkta(name string) string {
