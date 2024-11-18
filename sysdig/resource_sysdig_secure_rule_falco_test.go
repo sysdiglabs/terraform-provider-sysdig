@@ -15,12 +15,279 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccRuleFalco(t *testing.T) {
-	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+//func TestAccRuleFalco(t *testing.T) {
+//	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+//
+//	ruleRandomImmutableText := rText()
+//
+//	randomText := rText()
+//	resource.Test(t, resource.TestCase{
+//		PreCheck: func() {
+//			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+//				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+//			}
+//		},
+//		ProviderFactories: map[string]func() (*schema.Provider, error){
+//			"sysdig": func() (*schema.Provider, error) {
+//				return sysdig.Provider(), nil
+//			},
+//		},
+//		Steps: []resource.TestStep{
+//			//{
+//	Config: ruleFalcoTerminalShell(ruleRandomImmutableText),
+//},
+//{
+//	Config: ruleFalcoUpdatedTerminalShell(ruleRandomImmutableText),
+//},
+//{
+//	Config: ruleFalcoTerminalShellWithMinimumEngineVersion(rText()),
+//},
+//{
+//	ResourceName:      "sysdig_secure_rule_falco.terminal_shell",
+//	ImportState:       true,
+//	ImportStateVerify: true,
+//},
+//{
+//	Config: ruleFalcoTerminalShellWithAppend(),
+//},
+//{
+//	ResourceName:      "sysdig_secure_rule_falco.terminal_shell_append",
+//	ImportState:       true,
+//	ImportStateVerify: true,
+//},
+//{
+//	Config: ruleFalcoGcpAuditlog(rText()),
+//},
+//{
+//	Config: ruleFalcoAzureAuditlog(rText()),
+//},
+//{
+//	Config: ruleFalcoKubeAudit(rText()),
+//},
+//{
+//	ResourceName:      "sysdig_secure_rule_falco.kube_audit",
+//	ImportState:       true,
+//	ImportStateVerify: true,
+//},
+// Incorrect configurations
+//{
+//	Config:      ruleFalcoTerminalShellWithMissingOuput(rText()),
+//	ExpectError: regexp.MustCompile("output must be set when append = false"),
+//},
+//{
+//	Config:      ruleFalcoTerminalShellWithMissingSource(rText()),
+//	ExpectError: regexp.MustCompile("source must be set when append = false"),
+//},
+//{
+//	Config: ruleFalcoWithExceptions(randomText),
+//},
+//{
+//	ResourceName:      "sysdig_secure_rule_falco.falco_rule_with_exceptions",
+//	ImportState:       true,
+//	ImportStateVerify: true,
+//},
+//{
+//	Config: existingFalcoRuleWithExceptions(randomText),
+//},
+//{
+//	ResourceName:      "sysdig_secure_rule_falco.attach_to_cluster_admin_role_exceptions",
+//	ImportState:       true,
+//	ImportStateVerify: true,
+//},
+//{
+//	Config: ruleFalcoCloudAWSCloudtrail(randomText),
+//},
+//{
+//	Config: ruleFalcoCloudAWSCloudtrailWithAppend(),
+//},
+//{
+//	Config: ruleOkta(randomText),
+//},
+//{
+//	Config: ruleOktaWithAppend(),
+//},
+//{
+//	Config: ruleGithub(randomText),
+//},
+//{
+//	Config: ruleGithubWithAppend(),
+//},
+//		},
+//	})
+//}
 
-	ruleRandomImmutableText := rText()
+func TestAccRuleFalcoTerminalShell(t *testing.T) {
+	ruleRandomImmutableText := randomString()
+	steps := []resource.TestStep{
+		{
+			Config: ruleFalcoTerminalShell(ruleRandomImmutableText),
+		},
+		{
+			Config: ruleFalcoUpdatedTerminalShell(ruleRandomImmutableText),
+		},
+		{
+			ResourceName:      "sysdig_secure_rule_falco.terminal_shell",
+			ImportState:       true,
+			ImportStateVerify: true,
+		},
+	}
+	runTest(steps, t)
+}
 
-	randomText := rText()
+func TestAccRuleFalcoTerminalShellWithMinimumEngineVersion(t *testing.T) {
+	steps := []resource.TestStep{
+		{Config: ruleFalcoTerminalShellWithMinimumEngineVersion(randomString())},
+	}
+	runTest(steps, t)
+}
+
+func TestRuleFalcoTerminalShellWithAppend(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: ruleFalcoTerminalShellWithAppend(),
+		},
+		{
+			ResourceName:      "sysdig_secure_rule_falco.terminal_shell_append",
+			ImportState:       true,
+			ImportStateVerify: true,
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestRuleFalcoGcpAuditlog(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: ruleFalcoGcpAuditlog(randomString()),
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestRuleFalcoAzureAuditlog(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: ruleFalcoAzureAuditlog(randomString()),
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestRuleFalcoKubeAudit(t *testing.T) {
+
+	steps := []resource.TestStep{
+		{
+			Config: ruleFalcoKubeAudit(randomString()),
+		},
+		{
+			ResourceName:      "sysdig_secure_rule_falco.kube_audit",
+			ImportState:       true,
+			ImportStateVerify: true,
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestIncorrectErrors(t *testing.T) {
+	steps := []resource.TestStep{
+		// Incorrect configurations
+		{
+			Config:      ruleFalcoTerminalShellWithMissingOuput(randomString()),
+			ExpectError: regexp.MustCompile("output must be set when append = false"),
+		},
+		{
+			Config:      ruleFalcoTerminalShellWithMissingSource(randomString()),
+			ExpectError: regexp.MustCompile("source must be set when append = false"),
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestRuleFalcoWithExceptions(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: ruleFalcoWithExceptions(randomString()),
+		},
+		{
+			ResourceName:      "sysdig_secure_rule_falco.falco_rule_with_exceptions",
+			ImportState:       true,
+			ImportStateVerify: true,
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestExistingFalcoRuleWithExceptions(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: existingFalcoRuleWithExceptions(randomString()),
+		},
+		{
+			ResourceName:      "sysdig_secure_rule_falco.attach_to_cluster_admin_role_exceptions",
+			ImportState:       true,
+			ImportStateVerify: true,
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestRuleFalcoCloudAWSCloudtrail(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: ruleFalcoCloudAWSCloudtrail(randomString()),
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestRuleFalcoCloudAWSCloudtrailAppend(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: ruleFalcoCloudAWSCloudtrailWithAppend(),
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestRuleOkta(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: ruleOkta(randomString()),
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestRuleOktaAppends(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: ruleOktaWithAppend(),
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestRuleGithub(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: ruleGithub(randomString()),
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestRuleGithubAppends(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: ruleGithubWithAppend(),
+		},
+	}
+	runTest(steps, t)
+}
+
+func randomString() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+
+func runTest(steps []resource.TestStep, t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -32,88 +299,9 @@ func TestAccRuleFalco(t *testing.T) {
 				return sysdig.Provider(), nil
 			},
 		},
-		Steps: []resource.TestStep{
-			{
-				Config: ruleFalcoTerminalShell(ruleRandomImmutableText),
-			},
-			{
-				Config: ruleFalcoUpdatedTerminalShell(ruleRandomImmutableText),
-			},
-			{
-				Config: ruleFalcoTerminalShellWithMinimumEngineVersion(rText()),
-			},
-			{
-				ResourceName:      "sysdig_secure_rule_falco.terminal_shell",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: ruleFalcoTerminalShellWithAppend(),
-			},
-			{
-				ResourceName:      "sysdig_secure_rule_falco.terminal_shell_append",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: ruleFalcoGcpAuditlog(rText()),
-			},
-			{
-				Config: ruleFalcoAzureAuditlog(rText()),
-			},
-			{
-				Config: ruleFalcoKubeAudit(rText()),
-			},
-			{
-				ResourceName:      "sysdig_secure_rule_falco.kube_audit",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			// Incorrect configurations
-			{
-				Config:      ruleFalcoTerminalShellWithMissingOuput(rText()),
-				ExpectError: regexp.MustCompile("output must be set when append = false"),
-			},
-			{
-				Config:      ruleFalcoTerminalShellWithMissingSource(rText()),
-				ExpectError: regexp.MustCompile("source must be set when append = false"),
-			},
-			{
-				Config: ruleFalcoWithExceptions(randomText),
-			},
-			{
-				ResourceName:      "sysdig_secure_rule_falco.falco_rule_with_exceptions",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: existingFalcoRuleWithExceptions(randomText),
-			},
-			{
-				ResourceName:      "sysdig_secure_rule_falco.attach_to_cluster_admin_role_exceptions",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: ruleFalcoCloudAWSCloudtrail(randomText),
-			},
-			{
-				Config: ruleFalcoCloudAWSCloudtrailWithAppend(),
-			},
-			{
-				Config: ruleOkta(randomText),
-			},
-			{
-				Config: ruleOktaWithAppend(),
-			},
-			{
-				Config: ruleGithub(randomText),
-			},
-			{
-				Config: ruleGithubWithAppend(),
-			},
-		},
+		Steps: steps,
 	})
+
 }
 
 func ruleFalcoTerminalShell(name string) string {
