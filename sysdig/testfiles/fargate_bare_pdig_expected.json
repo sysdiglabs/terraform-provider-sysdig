@@ -48,6 +48,10 @@
             {
                 "Name": "THE_ANSWER_IS",
                 "Value": "42"
+            },
+            {
+                "Name": "SYSDIG_EXTRA_CONF",
+                "Value": "agent_extra_config"
             }
         ],
         "LinuxParameters": {
@@ -117,6 +121,10 @@
             {
                 "Name": "__INSTRUMENTATION_WRAPPER",
                 "Value": "/opt/draios/bin/pdig,-C,-t,-1"
+            },
+            {
+                "Name": "SYSDIG_EXTRA_CONF",
+                "Value": "agent_extra_config"
             }
         ],
         "LinuxParameters": {
@@ -199,6 +207,10 @@
             {
                 "Name": "THE_ANSWER_IS",
                 "Value": "42"
+            },
+            {
+                "Name": "SYSDIG_EXTRA_CONF",
+                "Value": "agent_extra_config"
             }
         ]
     }

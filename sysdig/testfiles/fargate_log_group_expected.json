@@ -43,6 +43,10 @@
             {
                 "Name": "SYSDIG_ORCHESTRATOR",
                 "Value": "orchestrator_host"
+            },
+            {
+                "Name": "SYSDIG_EXTRA_CONF",
+                "Value": "agent_extra_config"
             }
         ],
         "LinuxParameters": {
@@ -109,6 +113,10 @@
             {
                 "Name": "SYSDIG_ORCHESTRATOR",
                 "Value": "orchestrator_host"
+            },
+            {
+                "Name": "SYSDIG_EXTRA_CONF",
+                "Value": "agent_extra_config"
             }
         ]
     }

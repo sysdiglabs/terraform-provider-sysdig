@@ -50,6 +50,7 @@ func getKiltRecipe(t *testing.T) string {
 		CollectorPort:    "collector_port",
 		SysdigLogging:    "sysdig_logging",
 		Priority:         "priority",
+		AgentExtraConfig: "agent_extra_config",
 	}
 
 	jsonRecipeConfig, err := json.Marshal(&recipeConfig)
@@ -176,7 +177,7 @@ func TestNewPatchOptions(t *testing.T) {
 	actualPatchOptions := newPatchOptions(data)
 
 	if !reflect.DeepEqual(expectedPatchOptions, actualPatchOptions) {
-		t.Errorf("patcConfigurations are not equal. Expected: %v, Actual: %v", expectedPatchOptions, actualPatchOptions)
+		t.Errorf("Patch options are not equal. Expected: %v, Actual: %v", expectedPatchOptions, actualPatchOptions)
 	}
 
 	err = data.Set("priority", "security")
@@ -225,6 +226,35 @@ func TestECStransformation(t *testing.T) {
 	expectedOutput, err := os.ReadFile("testfiles/ECSInstrumented.json")
 	if err != nil {
 		t.Fatalf("Cannot find testfiles/ECSinput.json")
+	}
+
+	sortAndCompare(t, expectedOutput, []byte(*patchedOutput))
+}
+
+func TestAgentExtraConfig(t *testing.T) {
+	inputfile, err := os.ReadFile("testfiles/fargate_extra_config.json")
+	if err != nil {
+		t.Fatalf("Cannot find testfiles/fargate_extra_config.json")
+	}
+
+	kiltConfig := &cfnpatcher.Configuration{
+		Kilt:               agentinoKiltDefinition,
+		OptIn:              false,
+		UseRepositoryHints: true,
+		RecipeConfig:       getKiltRecipe(t),
+		SidecarConfig:      getSidecarConfig(),
+	}
+
+	patchOpts := &patchOptions{}
+
+	patchedOutput, err := patchFargateTaskDefinition(context.Background(), string(inputfile), kiltConfig, patchOpts)
+	if err != nil {
+		t.Fatalf("Cannot execute PatchFargateTaskDefinition : %v", err.Error())
+	}
+
+	expectedOutput, err := os.ReadFile("testfiles/fargate_extra_config_expected.json")
+	if err != nil {
+		t.Fatalf("Cannot find testfiles/fargate_extra_config_expected.json")
 	}
 
 	sortAndCompare(t, expectedOutput, []byte(*patchedOutput))

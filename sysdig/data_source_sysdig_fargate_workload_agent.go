@@ -28,6 +28,7 @@ const agentinoKiltDefinition = `build {
         "SYSDIG_LOGGING": ${config.sysdig_logging}
         "SYSDIG_SIDECAR": ${config.sidecar}
         "SYSDIG_PRIORITY": ${config.priority}
+        "SYSDIG_EXTRA_CONF": ${config.agent_extra_config}
     }
     capabilities: ["SYS_PTRACE"]
     mount: [
@@ -161,6 +162,11 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 				Type:        schema.TypeInt,
 				Description: "The minimum amount (in MiB) of memory reserved for the instrumentation container",
 				Default:     0,
+				Optional:    true,
+			},
+			"agent_extra_config": {
+				Type:        schema.TypeString,
+				Description: "Workload Agent extra configuration in YAML format",
 				Optional:    true,
 			},
 
@@ -369,6 +375,7 @@ type KiltRecipeConfig struct {
 	SysdigLogging    string `json:"sysdig_logging"`
 	Sidecar          string `json:"sidecar"`
 	Priority         string `json:"priority"`
+	AgentExtraConfig string `json:"agent_extra_config"`
 }
 
 type patchOptions struct {
@@ -452,6 +459,7 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 		SysdigLogging:    d.Get("sysdig_logging").(string),
 		Sidecar:          d.Get("sidecar").(string),
 		Priority:         priority,
+		AgentExtraConfig: d.Get("agent_extra_config").(string),
 	}
 
 	jsonConf, err := json.Marshal(&recipeConfig)

@@ -6,10 +6,7 @@
             "/opt/draios/bin/instrument"
         ],
         "Command": [
-            "/bin/test",
-            "test",
-            "--test-arg",
-            "test-arg-value"
+            "/bin/test"
         ],
         "Environment": [
             {
@@ -46,7 +43,7 @@
             },
             {
                 "Name": "SYSDIG_EXTRA_CONF",
-                "Value": "agent_extra_config"
+                "Value": "protobuf_print: true"
             }
         ],
         "LinuxParameters": {
@@ -57,10 +54,6 @@
             }
         },
         "VolumesFrom": [
-            {
-                "ReadOnly": true,
-                "SourceContainer": "test_container"
-            },
             {
                 "ReadOnly": true,
                 "SourceContainer": "SysdigInstrumentation"
@@ -111,7 +104,7 @@
             },
             {
                 "Name": "SYSDIG_EXTRA_CONF",
-                "Value": "agent_extra_config"
+                "Value": "protobuf_print: true"
             }
         ]
     }

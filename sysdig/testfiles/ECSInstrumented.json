@@ -50,6 +50,10 @@
       {
         "Name": "SYSDIG_COLLECTOR_PORT",
         "Value": "collector_port"
+      },
+      {
+        "Name": "SYSDIG_EXTRA_CONF",
+        "Value": "agent_extra_config"
       }
     ],
     "Image": "quay.io/rehman0288/busyboxplus:latest",
@@ -125,6 +129,10 @@
       {
         "Name": "SYSDIG_COLLECTOR_PORT",
         "Value": "collector_port"
+      },
+      {
+        "Name": "SYSDIG_EXTRA_CONF",
+        "Value": "agent_extra_config"
       }
     ]
   }
