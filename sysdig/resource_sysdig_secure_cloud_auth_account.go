@@ -156,7 +156,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			SchemaCloudProviderType: {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{cloudauth.Provider_PROVIDER_AWS.String(), cloudauth.Provider_PROVIDER_GCP.String(), cloudauth.Provider_PROVIDER_AZURE.String()}, false),
+				ValidateFunc: validation.StringInSlice([]string{cloudauth.Provider_PROVIDER_AWS.String(), cloudauth.Provider_PROVIDER_GCP.String(), cloudauth.Provider_PROVIDER_AZURE.String(), cloudauth.Provider_PROVIDER_ORACLECLOUD.String()}, false),
 			},
 			SchemaEnabled: {
 				Type:     schema.TypeBool,
