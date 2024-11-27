@@ -680,8 +680,6 @@ func TestAccAWSSecureCloudAccountConfigPostureAndAgentlessScanning(t *testing.T)
 * Oracle tests
 *************/
 func TestAccOracleSecureCloudAccountRoot(t *testing.T) {
-	rText := func() string { return acctest.RandStringFromCharSet(60, acctest.CharSetAlphaNum) }
-	compartmentID := rText()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
