@@ -680,6 +680,8 @@ func TestAccAWSSecureCloudAccountConfigPostureAndAgentlessScanning(t *testing.T)
 * Oracle tests
 *************/
 func TestAccOracleSecureCloudAccountRoot(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(60, acctest.CharSetAlphaNum) }
+	tenantOCID := rText()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -693,7 +695,7 @@ func TestAccOracleSecureCloudAccountRoot(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureOracleCloudAuthAccountMinimumConfiguration(""),
+				Config: secureOracleCloudAuthAccountMinimumConfiguration(tenantOCID, false),
 			},
 			{
 				ResourceName:      "sysdig_secure_cloud_auth_account.sample",
@@ -706,7 +708,7 @@ func TestAccOracleSecureCloudAccountRoot(t *testing.T) {
 
 func TestAccOracleSecureCloudAccountCompartment(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(60, acctest.CharSetAlphaNum) }
-	compartmentID := rText()
+	tenantOCID := rText()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -720,7 +722,7 @@ func TestAccOracleSecureCloudAccountCompartment(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureOracleCloudAuthAccountMinimumConfiguration(compartmentID),
+				Config: secureOracleCloudAuthAccountMinimumConfiguration(tenantOCID, true),
 			},
 			{
 				ResourceName:      "sysdig_secure_cloud_auth_account.sample",
@@ -731,11 +733,11 @@ func TestAccOracleSecureCloudAccountCompartment(t *testing.T) {
 	})
 }
 
-func secureOracleCloudAuthAccountMinimumConfiguration(compartmentID string) string {
+func secureOracleCloudAuthAccountMinimumConfiguration(tenantID string, compartmentOnboard bool) string {
 	rID := func() string { return acctest.RandStringFromCharSet(60, acctest.CharSetAlphaNum) }
-	randomTenantId := rID()
-	if compartmentID == "" {
-		compartmentID = randomTenantId
+	compartmentID := rID()
+	if !compartmentOnboard {
+		compartmentID = tenantID
 	}
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "sample" {
@@ -743,5 +745,5 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 	  provider_type = "PROVIDER_ORACLECLOUD"
 	  enabled       = true
 	  provider_tenant_id = "%s"
-	}`, fmt.Sprintf("ocid1.tenancy.oc1..%s", compartmentID), fmt.Sprintf("ocid1.tenancy.oc1..%s", randomTenantId))
+	}`, fmt.Sprintf("ocid1.tenancy.oc1..%s", compartmentID), fmt.Sprintf("ocid1.tenancy.oc1..%s", tenantID))
 }
