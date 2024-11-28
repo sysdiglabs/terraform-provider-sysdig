@@ -680,8 +680,7 @@ func TestAccAWSSecureCloudAccountConfigPostureAndAgentlessScanning(t *testing.T)
 * Oracle tests
 *************/
 func TestAccOracleSecureCloudAccountRoot(t *testing.T) {
-	rText := func() string { return acctest.RandStringFromCharSet(60, acctest.CharSetAlphaNum) }
-	tenantOCID := rText()
+	tenantOCID := "hm211p7gfmnosgirgvndsm2n90xnl4a8n3t9po093st9dbtm0jn4xl7dk78j"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -707,8 +706,7 @@ func TestAccOracleSecureCloudAccountRoot(t *testing.T) {
 }
 
 func TestAccOracleSecureCloudAccountCompartment(t *testing.T) {
-	rText := func() string { return acctest.RandStringFromCharSet(60, acctest.CharSetAlphaNum) }
-	tenantOCID := rText()
+	tenantOCID := "hm211p7gfmnosgirgvndsm2n90xnl4a8n3t9po093st9dbtm0jn4xl7dk78j"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
