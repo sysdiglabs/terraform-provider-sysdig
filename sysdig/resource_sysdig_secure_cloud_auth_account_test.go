@@ -680,7 +680,8 @@ func TestAccAWSSecureCloudAccountConfigPostureAndAgentlessScanning(t *testing.T)
 * Oracle tests
 *************/
 func TestAccOracleSecureCloudAccountRoot(t *testing.T) {
-	tenantOCID := "hm211p7gfmnosgirgvndsm2n90xnl4a8n3t9po093st9dbtm0jn4xl7dk78j"
+	rID := func() string { return acctest.RandStringFromCharSet(60, acctest.CharSetAlphaNum) }
+	tenantID := rID()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -694,7 +695,7 @@ func TestAccOracleSecureCloudAccountRoot(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureOracleCloudAuthAccountMinimumConfiguration(tenantOCID, false),
+				Config: secureOracleCloudAuthAccountMinimumConfiguration(tenantID, false),
 			},
 			{
 				ResourceName:      "sysdig_secure_cloud_auth_account.sample",
@@ -706,7 +707,8 @@ func TestAccOracleSecureCloudAccountRoot(t *testing.T) {
 }
 
 func TestAccOracleSecureCloudAccountCompartment(t *testing.T) {
-	tenantOCID := "hm211p7gfmnosgirgvndsm2n90xnl4a8n3t9po093st9dbtm0jn4xl7dk78j"
+	rID := func() string { return acctest.RandStringFromCharSet(60, acctest.CharSetAlphaNum) }
+	tenantID := rID()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
