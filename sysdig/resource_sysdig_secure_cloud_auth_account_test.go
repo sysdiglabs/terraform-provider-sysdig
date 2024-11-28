@@ -722,7 +722,7 @@ func TestAccOracleSecureCloudAccountCompartment(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureOracleCloudAuthAccountMinimumConfiguration(tenantOCID, true),
+				Config: secureOracleCloudAuthAccountMinimumConfiguration(tenantID, true),
 			},
 			{
 				ResourceName:      "sysdig_secure_cloud_auth_account.sample",
