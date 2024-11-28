@@ -591,6 +591,13 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		}
 	}
 
+	if cloudAccount.Provider == cloudauth.Provider_PROVIDER_ORACLECLOUD {
+		err = data.Set(SchemaCloudProviderTenantId, cloudAccount.ProviderTenantId)
+		if err != nil {
+			return err
+		}
+	}
+
 	if !(cloudAccount.ProviderPartition.String() == cloudauth.ProviderPartition_PROVIDER_PARTITION_UNSPECIFIED.String()) {
 		err = data.Set(SchemaProviderPartition, cloudAccount.ProviderPartition.String())
 		if err != nil {
