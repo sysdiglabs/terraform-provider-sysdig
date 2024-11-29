@@ -25,7 +25,14 @@
             inherit terraform-provider-sysdig;
             default = terraform-provider-sysdig;
           };
-          devShells.default = with pkgs; mkShell { packages = [ go_1_23 ]; };
+          devShells.default =
+            with pkgs;
+            mkShell {
+              packages = [
+                go_1_23
+                govulncheck
+              ];
+            };
 
           formatter = pkgs.nixfmt-rfc-style;
         }

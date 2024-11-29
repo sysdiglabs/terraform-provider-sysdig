@@ -13,13 +13,15 @@ TERRAFORM_PROVIDER_DEV_VERSION=1.0.0
 TERRAFORM_PLATFORM=$(shell terraform version -json | jq -r .platform)
 TERRAFORM_SYSDIG_PLUGIN_DIR=$(TERRAFORM_PLUGIN_ROOT_DIR)/$(TERRAFORM_PROVIDER_REFERENCE_NAME)/$(TERRAFORM_PROVIDER_NAME)/$(TERRAFORM_PROVIDER_DEV_VERSION)/$(TERRAFORM_PLATFORM)
 
-install-tools:
-	go install golang.org/x/tools/cmd/stringer@latest
-
 default: build
 
 build: fmtcheck
 	go install
+
+check: check-vuln
+
+check-vuln:
+	govulncheck .
 
 install: fmtcheck
 	go build -o terraform-provider-sysdig
@@ -68,9 +70,6 @@ lint:
 
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
-
-vendor-status:
-	@govendor status
 
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
