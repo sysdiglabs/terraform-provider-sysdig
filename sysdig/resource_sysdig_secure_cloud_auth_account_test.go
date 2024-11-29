@@ -745,5 +745,20 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 	  provider_type = "PROVIDER_ORACLECLOUD"
 	  enabled       = true
 	  provider_tenant_id = "%s"
+
+# TODO: add component back when https://github.com/draios/secure-backend/pull/38958 is merged
+#	  component {
+#		type     = "COMPONENT_SERVICE_PRINCIPAL"
+#		instance = "secure-onboarding"
+#		version  = "v0.1.0"
+#		service_principal_metadata = jsonencode({
+#		  oci = {
+#			api_key = {
+#			  user_id = "user-id"
+#			}
+#		  }
+#		})
+#	  }
 	}`, fmt.Sprintf("ocid1.tenancy.oc1..%s", compartmentID), fmt.Sprintf("ocid1.tenancy.oc1..%s", tenantID))
+
 }
