@@ -1,7 +1,8 @@
 *.dll
 *.exe
 .DS_Store
-.envrc
+.secrets
+.direnv/
 .env
 example.tf
 terraform.tfplan
