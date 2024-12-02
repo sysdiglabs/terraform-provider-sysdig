@@ -33,3 +33,5 @@ In addition to all arguments above, the following attributes are exported:
 
 * `group_ocid` - The application's associated usergroup OCI identifier.
 
+* `user_ocid` - The application's associated user OCI identifier.
+

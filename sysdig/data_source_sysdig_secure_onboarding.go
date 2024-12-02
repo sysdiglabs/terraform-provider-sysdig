@@ -424,6 +424,10 @@ func dataSourceSysdigSecureTrustedOracleApp() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"user_ocid": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }

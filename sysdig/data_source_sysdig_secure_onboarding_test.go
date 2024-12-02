@@ -215,6 +215,7 @@ func TestAccTrustedOracleAppDataSource(t *testing.T) {
 					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_oracle_app.config_posture", "name", "config_posture"),
 					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.config_posture", "tenancy_ocid"), // uncomment to assert a non empty value
 					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.config_posture", "group_ocid"),   // uncomment to assert a non empty value
+					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.config_posture", "user_ocid"),   // uncomment to assert a non empty value
 				),
 			},
 			{
@@ -223,6 +224,7 @@ func TestAccTrustedOracleAppDataSource(t *testing.T) {
 					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_oracle_app.onboarding", "name", "onboarding"),
 					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.onboarding", "tenancy_ocid"), // uncomment to assert a non empty value
 					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.onboarding", "group_ocid"),   // uncomment to assert a non empty value
+					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.onboarding", "user_ocid"),   // uncomment to assert a non empty value
 				),
 			},
 		},
