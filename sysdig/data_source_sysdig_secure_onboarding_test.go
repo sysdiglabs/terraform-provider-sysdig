@@ -213,18 +213,20 @@ func TestAccTrustedOracleAppDataSource(t *testing.T) {
 				Config: `data "sysdig_secure_trusted_oracle_app" "config_posture" {	name = "config_posture" }`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_oracle_app.config_posture", "name", "config_posture"),
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.config_posture", "tenancy_ocid"), // uncomment to assert a non empty value
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.config_posture", "group_ocid"),   // uncomment to assert a non empty value
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.config_posture", "user_ocid"),    // uncomment to assert a non empty value
+					// not asserting the oci exported fields because not every backend environment is oci supported yet and thus will have empty values
+					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.config_posture", "tenancy_ocid"), // uncomment to assert a non empty value
+					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.config_posture", "group_ocid"),   // uncomment to assert a non empty value
+					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.config_posture", "user_ocid"),    // uncomment to assert a non empty value
 				),
 			},
 			{
 				Config: `data "sysdig_secure_trusted_oracle_app" "onboarding" {	name = "onboarding" }`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_oracle_app.onboarding", "name", "onboarding"),
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.onboarding", "tenancy_ocid"), // uncomment to assert a non empty value
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.onboarding", "group_ocid"),   // uncomment to assert a non empty value
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.onboarding", "user_ocid"),    // uncomment to assert a non empty value
+					// not asserting the oci exported fields because not every backend environment is oci supported yet and thus will have empty values
+					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.onboarding", "tenancy_ocid"), // uncomment to assert a non empty value
+					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.onboarding", "group_ocid"),   // uncomment to assert a non empty value
+					// resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_oracle_app.onboarding", "user_ocid"),    // uncomment to assert a non empty value
 				),
 			},
 		},
