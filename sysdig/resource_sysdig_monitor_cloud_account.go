@@ -217,17 +217,34 @@ func monitorCloudAccountFromResourceData(data *schema.ResourceData) v2.CloudAcco
 }
 
 func monitorCloudAccountForCostFromResourceData(data *schema.ResourceData) v2.CloudAccountMonitorForCost {
+
+	configuration := v2.CloudCostConfiguration{}
+
+	if config, ok := data.Get("config").(map[string]interface{}); ok {
+		if val, exists := config["athena_bucket_name"]; exists {
+			configuration.AthenaBucketName = val.(string)
+		}
+		if val, exists := config["athena_database_name"]; exists {
+			configuration.AthenaDatabaseName = val.(string)
+		}
+		if val, exists := config["athena_region"]; exists {
+			configuration.AthenaRegion = val.(string)
+		}
+		if val, exists := config["athena_workgroup"]; exists {
+			configuration.AthenaWorkgroup = val.(string)
+		}
+		if val, exists := config["athena_table_name"]; exists {
+			configuration.AthenaTableName = val.(string)
+		}
+		if val, exists := config["spot_prices_bucket_name"]; exists {
+			configuration.SpotPricesBucketName = val.(string)
+		}
+	}
+
 	return v2.CloudAccountMonitorForCost{
-		Feature:  "Cloud cost",
-		Platform: data.Get("cloud_provider").(string),
-		Configuration: v2.CloudCostConfiguration{
-			AthenaBucketName:     data.Get("config").(map[string]interface{})["athena_bucket_name"].(string),
-			AthenaDatabaseName:   data.Get("config").(map[string]interface{})["athena_database_name"].(string),
-			AthenaRegion:         data.Get("config").(map[string]interface{})["athena_region"].(string),
-			AthenaWorkgroup:      data.Get("config").(map[string]interface{})["athena_workgroup"].(string),
-			AthenaTableName:      data.Get("config").(map[string]interface{})["athena_table_name"].(string),
-			SpotPricesBucketName: data.Get("config").(map[string]interface{})["spot_prices_bucket_name"].(string),
-		},
+		Feature:       "Cloud cost",
+		Platform:      data.Get("cloud_provider").(string),
+		Configuration: configuration,
 		Credentials: v2.CloudAccountCredentialsMonitor{
 			AccountId: data.Get("account_id").(string),
 			RoleName:  data.Get("role_name").(string),
