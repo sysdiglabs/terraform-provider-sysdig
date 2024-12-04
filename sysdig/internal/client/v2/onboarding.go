@@ -13,6 +13,7 @@ const (
 	onboardingAgentlessScanningAssetsPath = "%s/api/secure/onboarding/v2/agentlessScanningAssets"
 	onboardingCloudIngestionAssetsPath    = "%s/api/secure/onboarding/v2/cloudIngestionAssets"
 	onboardingTrustedRegulationAssetsPath = "%s/api/secure/onboarding/v2/trustedRegulationAssets?provider=%s"
+	onboardingTrustedOracleAppPath        = "%s/api/secure/onboarding/v2/trustedOracleApp?app=%s"
 )
 
 type OnboardingSecureInterface interface {
@@ -23,6 +24,7 @@ type OnboardingSecureInterface interface {
 	GetAgentlessScanningAssetsSecure(ctx context.Context) (map[string]any, error)
 	GetCloudIngestionAssetsSecure(ctx context.Context) (map[string]any, error)
 	GetTrustedCloudRegulationAssetsSecure(ctx context.Context, provider string) (map[string]string, error)
+	GetTrustedOracleAppSecure(ctx context.Context, app string) (map[string]string, error)
 }
 
 func (client *Client) GetTrustedCloudIdentitySecure(ctx context.Context, provider string) (string, error) {
@@ -97,6 +99,20 @@ func (client *Client) GetCloudIngestionAssetsSecure(ctx context.Context) (map[st
 
 func (client *Client) GetTrustedCloudRegulationAssetsSecure(ctx context.Context, provider string) (map[string]string, error) {
 	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingTrustedRegulationAssetsPath, client.config.url, provider), nil)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return nil, client.ErrorFromResponse(response)
+	}
+
+	return Unmarshal[map[string]string](response.Body)
+}
+
+func (client *Client) GetTrustedOracleAppSecure(ctx context.Context, app string) (map[string]string, error) {
+	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingTrustedOracleAppPath, client.config.url, app), nil)
 	if err != nil {
 		return nil, err
 	}
