@@ -675,3 +675,89 @@ func TestAccAWSSecureCloudAccountConfigPostureAndAgentlessScanning(t *testing.T)
 		},
 	})
 }
+
+/*************
+* Oracle tests
+*************/
+func TestAccOracleSecureCloudAccountRoot(t *testing.T) {
+	rID := func() string { return acctest.RandStringFromCharSet(60, acctest.CharSetAlphaNum) }
+	tenantID := rID()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: secureOracleCloudAuthAccountMinimumConfiguration(tenantID, false),
+			},
+			{
+				ResourceName:      "sysdig_secure_cloud_auth_account.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccOracleSecureCloudAccountCompartment(t *testing.T) {
+	rID := func() string { return acctest.RandStringFromCharSet(60, acctest.CharSetAlphaNum) }
+	tenantID := rID()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: secureOracleCloudAuthAccountMinimumConfiguration(tenantID, true),
+			},
+			{
+				ResourceName:      "sysdig_secure_cloud_auth_account.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func secureOracleCloudAuthAccountMinimumConfiguration(tenantID string, compartmentOnboard bool) string {
+	rID := func() string { return acctest.RandStringFromCharSet(60, acctest.CharSetAlphaNum) }
+	compartmentID := rID()
+	if !compartmentOnboard {
+		compartmentID = tenantID
+	}
+	return fmt.Sprintf(`
+resource "sysdig_secure_cloud_auth_account" "sample" {
+	  provider_id   = "%s"
+	  provider_type = "PROVIDER_ORACLECLOUD"
+	  enabled       = true
+	  provider_tenant_id = "%s"
+
+	  component {
+		type     = "COMPONENT_SERVICE_PRINCIPAL"
+		instance = "secure-onboarding"
+		version  = "v0.1.0"
+		service_principal_metadata = jsonencode({
+		  oci = {
+			api_key = {
+			  user_id = "user-id"
+			}
+		  }
+		})
+	  }
+	}`, fmt.Sprintf("ocid1.tenancy.oc1..%s", compartmentID), fmt.Sprintf("ocid1.tenancy.oc1..%s", tenantID))
+
+}
