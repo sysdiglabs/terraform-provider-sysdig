@@ -203,6 +203,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_cloud_ingestion_assets":                        dataSourceSysdigSecureCloudIngestionAssets(),
 			"sysdig_secure_trusted_azure_app":                             dataSourceSysdigSecureTrustedAzureApp(),
 			"sysdig_secure_trusted_cloud_identity":                        dataSourceSysdigSecureTrustedCloudIdentity(),
+			"sysdig_secure_trusted_oracle_app":                            dataSourceSysdigSecureTrustedOracleApp(),
 			"sysdig_secure_tenant_external_id":                            dataSourceSysdigSecureTenantExternalID(),
 			"sysdig_secure_notification_channel":                          dataSourceSysdigSecureNotificationChannel(),
 			"sysdig_secure_notification_channel_pagerduty":                dataSourceSysdigSecureNotificationChannelPagerduty(),
