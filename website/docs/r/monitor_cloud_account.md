@@ -38,6 +38,22 @@ resource "sysdig_monitor_cloud_account" "sample" {
   secret_key = "Xxx5XX2xXx/Xxxx+xxXxXXxXxXxxXXxxxXXxXxXx"
   access_key_id = "XXXXX33XXXX3XX3XXX7X"
 }
+
+// AWS example with role delegation for Cost feature
+resource "sysdig_monitor_cloud_account" "assume_role_cloud_account" {
+  cloud_provider = "AWS"
+  integration_type = "Cost"
+  account_id = "123412341234"
+  role_name = "SysdigTestRole"
+  config = {
+      athena_bucket_name = "AthenaBucketNameTest"
+      athena_database_name = "AthenaDatabaseNameTest"
+      athena_region = "AthenaRegion"
+      athena_workgroup = "AthenaWorkgroupName"
+      athena_table_name = "AthenaTableName"
+      spot_prices_bucket_name = "SpotPricesBucketName"
+  }
+}
 ```
 
 ## Argument Reference
@@ -49,6 +65,7 @@ resource "sysdig_monitor_cloud_account" "sample" {
 * `secret_key` - (Optional) The the secret key for a AWS connection. It must be provided along `access_key_id` when this auth mode is used.
 * `access_key_id` - (Optional) The ID for the access key that has the permissions into the Cloud Account. It must be provided along `secret_key` when this auth mode is used.
 * `additional_options` - (Optional) The private key generated when creating a new GCP service account key. Must be in JSON format and base64 encoded.
+* `config` - (Optional) Configuration parameters for Athena connection into the Sysdig Cloud Account.
 
 ## Attributes Reference
 
