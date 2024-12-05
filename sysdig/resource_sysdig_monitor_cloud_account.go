@@ -344,13 +344,39 @@ func monitorCloudAccountForCostToResourceData(data *schema.ResourceData, cloudAc
 }
 
 func mixFieldsForUpdateRequest(putObject *v2.CloudAccountCostProvider, currentStatusObject *v2.CloudAccountCostProvider) {
-	putObject.Provider = currentStatusObject.Provider
-	putObject.RoleArn = currentStatusObject.RoleArn
-	putObject.Config.IntegrationType = currentStatusObject.Config.IntegrationType
-	putObject.Config.AthenaBucketName = currentStatusObject.Config.AthenaBucketName
-	putObject.Config.AthenaDatabaseName = currentStatusObject.Config.AthenaDatabaseName
-	putObject.Config.AthenaRegion = currentStatusObject.Config.AthenaRegion
-	putObject.Config.AthenaWorkgroup = currentStatusObject.Config.AthenaWorkgroup
-	putObject.Config.AthenaTableName = currentStatusObject.Config.AthenaTableName
-	putObject.Config.SpotPricesBucketName = currentStatusObject.Config.SpotPricesBucketName
+
+	if putObject.Provider == "" {
+		putObject.Provider = currentStatusObject.Provider
+	}
+	if putObject.RoleArn == "" {
+		putObject.RoleArn = currentStatusObject.RoleArn
+	}
+
+	if putObject.Config.IntegrationType == "" {
+		putObject.Config.IntegrationType = currentStatusObject.Config.IntegrationType
+	}
+
+	if putObject.Config.AthenaBucketName == "" {
+		putObject.Config.AthenaBucketName = currentStatusObject.Config.AthenaBucketName
+	}
+
+	if putObject.Config.AthenaDatabaseName == "" {
+		putObject.Config.AthenaDatabaseName = currentStatusObject.Config.AthenaDatabaseName
+	}
+
+	if putObject.Config.AthenaRegion == "" {
+		putObject.Config.AthenaRegion = currentStatusObject.Config.AthenaRegion
+	}
+
+	if putObject.Config.AthenaWorkgroup == "" {
+		putObject.Config.AthenaWorkgroup = currentStatusObject.Config.AthenaWorkgroup
+	}
+
+	if putObject.Config.AthenaTableName == "" {
+		putObject.Config.AthenaTableName = currentStatusObject.Config.AthenaTableName
+	}
+
+	if putObject.Config.SpotPricesBucketName == "" {
+		putObject.Config.SpotPricesBucketName = currentStatusObject.Config.SpotPricesBucketName
+	}
 }
