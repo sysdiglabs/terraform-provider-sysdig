@@ -179,7 +179,7 @@ func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.R
 			return diag.FromErr(err)
 		}
 
-		mixFieldsForUpdateRequest(&putObjectAccount, cloudAccount)
+		completeEmptyFieldsForUpdateRequest(&putObjectAccount, cloudAccount)
 
 		_, err = client.UpdateCloudAccountMonitorForCost(ctx, &putObjectAccount)
 		if err != nil {
@@ -343,40 +343,12 @@ func monitorCloudAccountForCostToResourceData(data *schema.ResourceData, cloudAc
 	return nil
 }
 
-func mixFieldsForUpdateRequest(putObject *v2.CloudAccountCostProvider, currentStatusObject *v2.CloudAccountCostProvider) {
-
-	if putObject.Provider == "" {
-		putObject.Provider = currentStatusObject.Provider
-	}
-	if putObject.RoleArn == "" {
-		putObject.RoleArn = currentStatusObject.RoleArn
-	}
-
-	if putObject.Config.IntegrationType == "" {
-		putObject.Config.IntegrationType = currentStatusObject.Config.IntegrationType
-	}
-
-	if putObject.Config.AthenaBucketName == "" {
-		putObject.Config.AthenaBucketName = currentStatusObject.Config.AthenaBucketName
-	}
-
-	if putObject.Config.AthenaDatabaseName == "" {
-		putObject.Config.AthenaDatabaseName = currentStatusObject.Config.AthenaDatabaseName
-	}
-
-	if putObject.Config.AthenaRegion == "" {
-		putObject.Config.AthenaRegion = currentStatusObject.Config.AthenaRegion
-	}
-
-	if putObject.Config.AthenaWorkgroup == "" {
-		putObject.Config.AthenaWorkgroup = currentStatusObject.Config.AthenaWorkgroup
-	}
-
-	if putObject.Config.AthenaTableName == "" {
-		putObject.Config.AthenaTableName = currentStatusObject.Config.AthenaTableName
-	}
-
-	if putObject.Config.SpotPricesBucketName == "" {
-		putObject.Config.SpotPricesBucketName = currentStatusObject.Config.SpotPricesBucketName
-	}
+func completeEmptyFieldsForUpdateRequest(putObject *v2.CloudAccountCostProvider, currentStatusObject *v2.CloudAccountCostProvider) {
+	putObject.ExternalId = currentStatusObject.ExternalId
+	putObject.CredentialsType = currentStatusObject.CredentialsType
+	putObject.CustomerId = currentStatusObject.CustomerId
+	putObject.ProviderId = currentStatusObject.ProviderId
+	putObject.CredentialsId = currentStatusObject.CredentialsId
+	putObject.Feature = currentStatusObject.Feature
+	putObject.Enabled = currentStatusObject.Enabled
 }
