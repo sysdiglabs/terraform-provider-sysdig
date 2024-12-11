@@ -400,6 +400,62 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 	return nil
 }
 
+func dataSourceSysdigSecureTrustedOracleApp() *schema.Resource {
+	timeout := 5 * time.Minute
+
+	return &schema.Resource{
+		ReadContext: dataSourceSysdigSecureTrustedOracleAppRead,
+
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(timeout),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"config_posture", "onboarding"}, false),
+			},
+			"tenancy_ocid": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"group_ocid": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"user_ocid": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+// Retrieves the information of a resource from the file and loads it in Terraform
+func dataSourceSysdigSecureTrustedOracleAppRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getSecureOnboardingClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	app := d.Get("name").(string)
+	trustedIdentityGroup, err := client.GetTrustedOracleAppSecure(ctx, app)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId(app)
+	for k, v := range trustedIdentityGroup {
+		fmt.Printf("%s, %s\n", k, snakeCase(k))
+		err = d.Set(snakeCase(k), v)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	return nil
+}
+
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
 var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
 
