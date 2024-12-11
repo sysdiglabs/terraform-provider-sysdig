@@ -10,7 +10,11 @@
       flake-utils,
     }:
     let
-      overlays.default = final: prev: { };
+      overlays.default = final: prev: {
+        terraform-providers = prev.terraform-providers // {
+          sysdig = prev.callPackage ./package.nix { };
+        };
+      };
       flake = flake-utils.lib.eachDefaultSystem (
         system:
         let
@@ -21,9 +25,12 @@
           };
         in
         {
-          packages = with pkgs; {
-            inherit terraform-provider-sysdig;
-            default = terraform-provider-sysdig;
+          packages = with pkgs.terraform-providers; {
+            inherit sysdig;
+            default = sysdig;
+          };
+          apps.terraform = flake-utils.lib.mkApp {
+            drv = pkgs.terraform.withPlugins (tf: [ tf.sysdig ]);
           };
           devShells.default =
             with pkgs;

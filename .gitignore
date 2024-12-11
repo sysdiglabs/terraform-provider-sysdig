@@ -54,3 +54,6 @@ oanc
 # Local test folder
 local-terraform-test/
 dist/
+
+# Nix result
+result
