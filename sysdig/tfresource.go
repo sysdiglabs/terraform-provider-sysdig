@@ -143,38 +143,97 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 		return errors.New("The policy must have at least one rule attached to it")
 	}
 
-	rules := []map[string]interface{}{}
+	var rules []map[string]interface{}
 	for _, rule := range policy.Rules {
-		// Only a single block of exceptions and prohibited binaries is allowed
-		exceptions := []map[string]interface{}{{
-			"items":       rule.Details.(*v2.DriftRuleDetails).Exceptions.Items,
-			"match_items": rule.Details.(*v2.DriftRuleDetails).Exceptions.MatchItems,
-		}}
-
-		prohibitedBinaries := []map[string]interface{}{{
-			"items":       rule.Details.(*v2.DriftRuleDetails).ProhibitedBinaries.Items,
-			"match_items": rule.Details.(*v2.DriftRuleDetails).ProhibitedBinaries.MatchItems,
-		}}
-
-		mode := rule.Details.(*v2.DriftRuleDetails).Mode
-		enabled := true
-		if mode == "disabled" {
-			enabled = false
+		driftDetails, ok := rule.Details.(*v2.DriftRuleDetails)
+		if !ok {
+			return errors.New("unexpected rule details type, expected DriftRuleDetails")
 		}
 
-		rules = append(rules, map[string]interface{}{
-			"id":                  rule.Id,
-			"name":                rule.Name,
-			"description":         rule.Description,
-			"version":             rule.Version,
-			"tags":                rule.Tags,
-			"enabled":             enabled,
-			"exceptions":          exceptions,
-			"prohibited_binaries": prohibitedBinaries,
-		})
+		// Directly use fields assuming backend returns zero values (not nil)
+		exceptionsItems := driftDetails.Exceptions.Items
+		exceptionsMatchItems := driftDetails.Exceptions.MatchItems
+
+		var exceptionsBlock []map[string]interface{}
+		if len(exceptionsItems) > 0 || exceptionsMatchItems {
+			exceptionsBlock = []map[string]interface{}{
+				{
+					"items":       exceptionsItems,
+					"match_items": exceptionsMatchItems,
+				},
+			}
+		}
+
+		prohibitedItems := driftDetails.ProhibitedBinaries.Items
+		prohibitedMatchItems := driftDetails.ProhibitedBinaries.MatchItems
+
+		var prohibitedBinariesBlock []map[string]interface{}
+		if len(prohibitedItems) > 0 || prohibitedMatchItems {
+			prohibitedBinariesBlock = []map[string]interface{}{
+				{
+					"items":       prohibitedItems,
+					"match_items": prohibitedMatchItems,
+				},
+			}
+		}
+
+		processBasedExceptionsItems := driftDetails.ProcessBasedExceptions.Items
+		processBasedExceptionMatchItems := driftDetails.ProcessBasedExceptions.MatchItems
+
+		var processBasedExceptionsBlock []map[string]interface{}
+		if len(processBasedExceptionsItems) > 0 || processBasedExceptionMatchItems {
+			processBasedExceptionsBlock = []map[string]interface{}{
+				{
+					"items":       processBasedExceptionsItems,
+					"match_items": processBasedExceptionMatchItems,
+				},
+			}
+		}
+
+		processBasedProhibitedBinariesItems := driftDetails.ProcessBasedDenylist.Items
+		processBasedProhibitedBinariesMatchItems := driftDetails.ProcessBasedDenylist.MatchItems
+
+		var processBasedProhibitedBinariesBlock []map[string]interface{}
+		if len(processBasedProhibitedBinariesItems) > 0 || processBasedProhibitedBinariesMatchItems {
+			processBasedProhibitedBinariesBlock = []map[string]interface{}{
+				{
+					"items":       processBasedProhibitedBinariesItems,
+					"match_items": processBasedProhibitedBinariesMatchItems,
+				},
+			}
+		}
+
+		mode := driftDetails.Mode
+		enabled := (mode != "disabled")
+
+		ruleMap := map[string]interface{}{
+			"id":          rule.Id,
+			"name":        rule.Name,
+			"description": rule.Description,
+			"version":     rule.Version,
+			"tags":        rule.Tags,
+			"enabled":     enabled,
+		}
+
+		if exceptionsBlock != nil {
+			ruleMap["exceptions"] = exceptionsBlock
+		}
+		if prohibitedBinariesBlock != nil {
+			ruleMap["prohibited_binaries"] = prohibitedBinariesBlock
+		}
+		if processBasedExceptionsBlock != nil {
+			ruleMap["process_based_exceptions"] = processBasedExceptionsBlock
+		}
+		if processBasedProhibitedBinariesBlock != nil {
+			ruleMap["process_based_prohibited_binaries"] = processBasedProhibitedBinariesBlock
+		}
+
+		rules = append(rules, ruleMap)
 	}
 
-	_ = d.Set("rule", rules)
+	if err := d.Set("rule", rules); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -418,6 +477,10 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 		if _, ok := d.GetOk("rule.0.exceptions"); ok { // TODO: Do not hardcode the indexes
 			exceptions.Items = schemaSetToList(d.Get("rule.0.exceptions.0.items"))
 			exceptions.MatchItems = d.Get("rule.0.exceptions.0.match_items").(bool)
+		} else {
+			// initialize Items and MatchItems so we comply with structure and not generate drift
+			exceptions.Items = []string{}
+			exceptions.MatchItems = false
 		}
 
 		// TODO: Extract into a function
@@ -425,6 +488,32 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 		if _, ok := d.GetOk("rule.0.prohibited_binaries"); ok { // TODO: Do not hardcode the indexes
 			prohibitedBinaries.Items = schemaSetToList(d.Get("rule.0.prohibited_binaries.0.items"))
 			prohibitedBinaries.MatchItems = d.Get("rule.0.prohibited_binaries.0.match_items").(bool)
+		} else {
+			// initialize Items and MatchItems so we comply with structure and not generate drift
+			prohibitedBinaries.Items = []string{}
+			prohibitedBinaries.MatchItems = false
+		}
+
+		// TODO: Extract into a function
+		processBasedExceptions := &v2.RuntimePolicyRuleList{}
+		if _, ok := d.GetOk("rule.0.process_based_exceptions"); ok { // TODO: Do not hardcode the indexes
+			processBasedExceptions.Items = schemaSetToList(d.Get("rule.0.process_based_exceptions.0.items"))
+			processBasedExceptions.MatchItems = d.Get("rule.0.process_based_exceptions.0.match_items").(bool)
+		} else {
+			// initialize Items and MatchItems so we comply with structure and not generate drift
+			processBasedExceptions.Items = []string{}
+			processBasedExceptions.MatchItems = false
+		}
+
+		// TODO: Extract into a function
+		processBasedProhibitedBinaries := &v2.RuntimePolicyRuleList{}
+		if _, ok := d.GetOk("rule.0.process_based_prohibited_binaries"); ok { // TODO: Do not hardcode the indexes
+			processBasedProhibitedBinaries.Items = schemaSetToList(d.Get("rule.0.process_based_prohibited_binaries.0.items"))
+			processBasedProhibitedBinaries.MatchItems = d.Get("rule.0.process_based_prohibited_binaries.0.match_items").(bool)
+		} else {
+			// initialize Items and MatchItems so we comply with structure and not generate drift
+			processBasedProhibitedBinaries.Items = []string{}
+			processBasedProhibitedBinaries.MatchItems = false
 		}
 
 		tags := schemaSetToList(d.Get("rule.0.tags"))
@@ -445,10 +534,12 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 			Description: d.Get("rule.0.description").(string),
 			Tags:        tags,
 			Details: v2.DriftRuleDetails{
-				RuleType:           v2.ElementType("DRIFT"), // TODO: Use const
-				Mode:               mode,
-				Exceptions:         exceptions,
-				ProhibitedBinaries: prohibitedBinaries,
+				RuleType:               v2.ElementType("DRIFT"), // TODO: Use const
+				Mode:                   mode,
+				Exceptions:             exceptions,
+				ProhibitedBinaries:     prohibitedBinaries,
+				ProcessBasedExceptions: processBasedExceptions,
+				ProcessBasedDenylist:   processBasedProhibitedBinaries,
 			},
 		}
 
