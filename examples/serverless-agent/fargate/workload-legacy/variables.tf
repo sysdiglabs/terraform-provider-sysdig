@@ -46,11 +46,11 @@ variable "agent_workload_image" {
   default     = "quay.io/sysdig/workload-agent:latest"
 }
 
-variable "collector_host" {
-  description = "Collector Host"
+variable "orchestrator_host" {
+  description = "Orchestrator Host"
 }
 
-variable "collector_port" {
-  description = "Collector Port"
-  default     = 6443
+variable "orchestrator_port" {
+  description = "Orchestrator Port"
+  default     = 6667
 }
