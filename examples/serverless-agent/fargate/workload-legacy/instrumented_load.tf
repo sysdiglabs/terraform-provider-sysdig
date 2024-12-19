@@ -31,8 +31,8 @@ data "sysdig_fargate_workload_agent" "containers_instrumented" {
   workload_agent_image = var.agent_workload_image
 
   sysdig_access_key = var.access_key
-  collector_host    = var.collector_host
-  collector_port    = var.collector_port
+  orchestrator_host = var.orchestrator_host
+  orchestrator_port = var.orchestrator_port
 
   log_configuration {
     group         = aws_cloudwatch_log_group.instrumented_logs.name
