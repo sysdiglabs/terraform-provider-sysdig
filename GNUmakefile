@@ -66,7 +66,7 @@ fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
 
 lint:
-	golangci-lint run --timeout 1h ./...
+	golangci-lint run --timeout 1h --build-tags unit,tf_acc_sysdig_monitor,tf_acc_sysdig_secure,tf_acc_ibm_monitor,tf_acc_ibm_secure ./...
 
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
