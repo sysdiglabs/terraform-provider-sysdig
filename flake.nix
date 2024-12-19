@@ -43,6 +43,8 @@
               packages = [
                 go_1_23
                 govulncheck
+                golangci-lint
+                golangci-lint-langserver
               ];
             };
 
@@ -58,6 +60,7 @@
             mkShell {
               packages = [
                 (terraform.withPlugins (tf: [ tf.sysdig ]))
+                bashInteractive
               ];
             };
 
