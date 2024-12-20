@@ -55,6 +55,7 @@
             mkShell {
               packages = [
                 go_1_23
+                errcheck
                 govulncheck
                 golangci-lint
                 golangci-lint-langserver

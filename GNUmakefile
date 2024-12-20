@@ -18,7 +18,7 @@ default: build
 build: fmtcheck
 	go install
 
-check: check-vuln
+check: fmtcheck errcheck check-vuln doccheck lint
 
 check-vuln:
 	govulncheck .
