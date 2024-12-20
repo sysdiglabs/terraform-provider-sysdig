@@ -71,6 +71,30 @@ lint:
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
+# Leverages on nix compiling and configuring the provider using the package.nix and the devshell
+init-provider-to-test:
+	echo 'terraform { ' > main.tf
+	echo 'required_providers { sysdig = { ' >> main.tf
+	echo 'source = "sysdiglabs/sysdig" ' >> main.tf
+	echo 'version = "1.0.0-local" ' >> main.tf
+	echo '} }' >> main.tf
+	echo '}' >> main.tf
+	terraform init
+
+.PHONY: terraform-providers-schema
+terraform-providers-schema:
+	rm -rf terraform-providers-schema
+	mkdir -p terraform-providers-schema
+
+doccheck: terraform-providers-schema init-provider-to-test
+	terraform providers schema -json > terraform-providers-schema/schema.json
+	tfproviderdocs check \
+          -allowed-resource-subcategories-file website/allowed-subcategories.txt \
+          -enable-contents-check \
+          -provider-source registry.terraform.io/sysdiglabs/sysdig \
+          -providers-schema-json terraform-providers-schema/schema.json \
+          -require-resource-subcategory
+
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
 		echo "ERROR: Set TEST to a specific package. For example,"; \

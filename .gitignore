@@ -57,3 +57,6 @@ dist/
 
 # Nix result
 result
+
+main.tf
+terraform-providers-schema/

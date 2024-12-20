@@ -2,12 +2,14 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    tfproviderdocs-init.url = "github:nixos/nixpkgs/pull/366576/head"; # tfproviderdocs is not yet a package in nixpkgs, so this workaronuds it
   };
   outputs =
     {
       self,
       nixpkgs,
       flake-utils,
+      tfproviderdocs-init,
     }:
     let
       overlays.default = final: prev: {
@@ -15,13 +17,24 @@
           sysdig = prev.callPackage ./package.nix { };
         };
       };
+      overlays.tfproviderdocs =
+        final: prev:
+        let
+          pkgs = import tfproviderdocs-init { inherit (prev) system; };
+        in
+        {
+          inherit (pkgs) tfproviderdocs;
+        };
       flake = flake-utils.lib.eachDefaultSystem (
         system:
         let
           pkgs = import nixpkgs {
             inherit system;
             config.allowUnfree = true;
-            overlays = [ self.overlays.default ];
+            overlays = [
+              self.overlays.default
+              self.overlays.tfproviderdocs
+            ];
           };
         in
         {
@@ -45,6 +58,8 @@
                 govulncheck
                 golangci-lint
                 golangci-lint-langserver
+                (terraform.withPlugins (tf: [ tf.sysdig ]))
+                tfproviderdocs
               ];
             };
 

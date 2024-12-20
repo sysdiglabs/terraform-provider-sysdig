@@ -37,7 +37,8 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "tfproviderdocs-init": "tfproviderdocs-init"
       }
     },
     "systems": {
@@ -52,6 +53,22 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "tfproviderdocs-init": {
+      "locked": {
+        "lastModified": 1734621777,
+        "narHash": "sha256-SaR9l3niFXbSVDlOOsak/WDGnui+DHir6SK+Lhb5Hdw=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "84c6cfd483ed210d0bb07145a2a2102bc35f3e11",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "pull/366576/head",
+        "repo": "nixpkgs",
         "type": "github"
       }
     }
