@@ -2,11 +2,12 @@
 
 This example deploys a cluster with a workload and the Serverless Workload Agent as a sidecar to secure the workload.
 
-The Workload Agent will directly connect to the Sysdig Collector.
+The Workload Agent will use an Orchestrator Agent as a proxy to the Sysdig Collector.
 
 ## Prerequisites
 
 The following prerequisites are required to deploy this cluster:
+- Orchestrator Agent deployed
 - VPC
 - 2 subnets
 
