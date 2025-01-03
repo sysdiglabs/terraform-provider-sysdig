@@ -84,6 +84,7 @@ init-provider-to-test:
 .PHONY: terraform-providers-schema
 terraform-providers-schema:
 	rm -rf terraform-providers-schema
+	rm .terraform.lock.hcl
 	mkdir -p terraform-providers-schema
 
 doccheck: terraform-providers-schema init-provider-to-test
