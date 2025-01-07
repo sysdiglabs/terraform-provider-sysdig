@@ -176,6 +176,10 @@ func TestAccCloudIngestionAssetsDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
+				Config:      `data "sysdig_secure_cloud_ingestion_assets" "assets" {	cloud_provider = "invalid" }`,
+				ExpectError: regexp.MustCompile(`.*expected cloud_provider to be one of.*`),
+			},
+			{
 				Config: `data "sysdig_secure_cloud_ingestion_assets" "assets" {}`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.%", "2"),
@@ -186,6 +190,15 @@ func TestAccCloudIngestionAssetsDataSource(t *testing.T) {
 					// asserts ingestionType and ingestionURL in metadata since it is required
 					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_metadata.ingestionType", "gcp"),
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_metadata.ingestionURL"),
+				),
+			},
+			{
+				Config: `data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {	cloud_provider = "aws" }`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_cloud_identity.trusted_identity", "cloud_provider", "aws"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_cloud_identity.trusted_identity", "aws_account_id"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_cloud_identity.trusted_identity", "aws_role_name"),
+					// not asserting the gov exported fields because not every backend environment is gov supported and thus will have empty values
 				),
 			},
 		},

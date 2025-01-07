@@ -8,10 +8,11 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/arn"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 )
 
 func getSecureOnboardingClient(c SysdigClients) (v2.OnboardingSecureInterface, error) {
@@ -344,6 +345,15 @@ func dataSourceSysdigSecureCloudIngestionAssets() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"cloud_provider": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"aws", "gcp", "azure"}, false),
+			},
+			"cloud_provider_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"aws": {
 				Type:     schema.TypeMap,
 				Computed: true,
@@ -359,6 +369,14 @@ func dataSourceSysdigSecureCloudIngestionAssets() *schema.Resource {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
+			"sns_routing_key": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"sns_metadata": {
+				Type:     schema.TypeMap,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -370,7 +388,7 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 		return diag.FromErr(err)
 	}
 
-	assets, err := client.GetCloudIngestionAssetsSecure(ctx)
+	assets, err := client.GetCloudIngestionAssetsSecure(ctx, d.Get("cloud_provider").(string), d.Get("cloud_provider_id").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -380,8 +398,10 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 
 	d.SetId("cloudIngestionAssets")
 	err = d.Set("aws", map[string]interface{}{
-		"eventBusARN":    assetsAws["eventBusARN"],
-		"eventBusARNGov": assetsAws["eventBusARNGov"],
+		"eventBusARN":     assetsAws["eventBusARN"],
+		"eventBusARNGov":  assetsAws["eventBusARNGov"],
+		"sns_routing_key": assetsAws["snsRoutingKey"],
+		"sns_metadata":    assetsAws["snsMetadata"],
 	})
 	if err != nil {
 		return diag.FromErr(err)

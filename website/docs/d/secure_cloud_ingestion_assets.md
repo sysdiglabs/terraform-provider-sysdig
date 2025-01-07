@@ -32,3 +32,6 @@ In addition to all arguments above, the following attributes are exported:
 
 * `gcp_metadata` - GCP ingestion metadata
 
+* `sns_routing_key` - CloudTrail SNS ingestion routing key
+
+* `sns_metadata` - CloudTrail SNS ingestion metadata
