@@ -176,28 +176,32 @@ func TestAccCloudIngestionAssetsDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config:      `data "sysdig_secure_cloud_ingestion_assets" "assets" {	cloud_provider = "invalid" }`,
+				Config: `data "sysdig_secure_cloud_ingestion_assets" "assets" { 
+			cloud_provider = "invalid" 
+			cloud_provider_id = "123"
+			}`,
 				ExpectError: regexp.MustCompile(`.*expected cloud_provider to be one of.*`),
 			},
 			{
 				Config: `data "sysdig_secure_cloud_ingestion_assets" "assets" {}`,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.%", "2"),
-					// not asserting the gov exported fields because not every backend environment is gov supported and thus will have empty values
+					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.%", "4"),
+					// not asserting the gov exported fields because not every backend environme nt is gov supported and thus will have empty values
 
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_routing_key"),
-					// metadata fields are opaque to api backend; cloudingestion controls what fields are passed
+					// metadata fields are opaque to api backend; cloudingestion controls what f ields are passed
 					// asserts ingestionType and ingestionURL in metadata since it is required
 					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_metadata.ingestionType", "gcp"),
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_metadata.ingestionURL"),
 				),
 			},
 			{
-				Config: `data "sysdig_secure_trusted_cloud_identity" "trusted_identity" {	cloud_provider = "aws" }`,
+				Config: `data "sysdig_secure_cloud_ingestion_assets" "assets" {
+						cloud_provider = "aws" 
+						cloud_provider_id = "012345678901"
+				}`,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.sysdig_secure_trusted_cloud_identity.trusted_identity", "cloud_provider", "aws"),
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_cloud_identity.trusted_identity", "aws_account_id"),
-					resource.TestCheckResourceAttrSet("data.sysdig_secure_trusted_cloud_identity.trusted_identity", "aws_role_name"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "sns_routing_key"),
 					// not asserting the gov exported fields because not every backend environment is gov supported and thus will have empty values
 				),
 			},
