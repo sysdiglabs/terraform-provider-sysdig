@@ -347,12 +347,12 @@ func dataSourceSysdigSecureCloudIngestionAssets() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"cloud_provider": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"aws", "gcp", "azure"}, false),
 			},
 			"cloud_provider_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"aws": {
 				Type:     schema.TypeMap,
@@ -387,7 +387,7 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
+	
 	assets, err := client.GetCloudIngestionAssetsSecure(ctx, d.Get("cloud_provider").(string), d.Get("cloud_provider_id").(string))
 	if err != nil {
 		return diag.FromErr(err)
