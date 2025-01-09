@@ -14,6 +14,7 @@ import (
 )
 
 func TestAccList(t *testing.T) {
+	t.Skip("Skipping this test temporarily due to https://sysdig.atlassian.net/browse/SSPROD-51182")
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	fixedRandomText := rText()
 
