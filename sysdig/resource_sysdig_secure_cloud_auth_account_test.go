@@ -756,9 +756,9 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 			  user_id = "user-id"
 #			  region = "region"
 			}
-			policy = {
-			 policy_id = "policy-id"
-			}
+#			policy = {
+#			 policy_id = "policy-id"
+#			}
 		  }
 		})
 	  }
