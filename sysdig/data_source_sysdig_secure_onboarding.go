@@ -369,14 +369,6 @@ func dataSourceSysdigSecureCloudIngestionAssets() *schema.Resource {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
-			"sns_routing_key": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"sns_metadata": {
-				Type:     schema.TypeMap,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -396,12 +388,17 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 	assetsAws, _ := assets["aws"].(map[string]interface{})
 	assetsGcp, _ := assets["gcp"].(map[string]interface{})
 
+	var ingestionURL string
+	if assetsAws["snsMetadata"] != nil {
+		ingestionURL = assetsAws["snsMetadata"].(map[string]interface{})["ingestionURL"].(string)
+	}
+
 	d.SetId("cloudIngestionAssets")
 	err = d.Set("aws", map[string]interface{}{
 		"eventBusARN":     assetsAws["eventBusARN"],
 		"eventBusARNGov":  assetsAws["eventBusARNGov"],
 		"sns_routing_key": assetsAws["snsRoutingKey"],
-		"sns_metadata":    assetsAws["snsMetadata"],
+		"sns_routing_url": ingestionURL,
 	})
 	if err != nil {
 		return diag.FromErr(err)
