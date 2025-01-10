@@ -18,6 +18,7 @@ func TestAccTrustedCloudIdentityDataSource(t *testing.T) {
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
 				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
 			}
 		},
 		ProviderFactories: map[string]func() (*schema.Provider, error){
