@@ -18,7 +18,6 @@ func TestAccTrustedCloudIdentityDataSource(t *testing.T) {
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
 				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
 			}
 		},
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -187,10 +186,10 @@ func TestAccCloudIngestionAssetsDataSource(t *testing.T) {
 				Config: `data "sysdig_secure_cloud_ingestion_assets" "assets" {}`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.%", "4"),
-					// not asserting the gov exported fields because not every backend environme nt is gov supported and thus will have empty values
+					// not asserting the gov exported fields because not every backend environment is gov supported and thus will have empty values
 
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_routing_key"),
-					// metadata fields are opaque to api backend; cloudingestion controls what f ields are passed
+					// metadata fields are opaque to api backend; cloudingestion controls what fields are passed
 					// asserts ingestionType and ingestionURL in metadata since it is required
 					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_metadata.ingestionType", "gcp"),
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_metadata.ingestionURL"),
