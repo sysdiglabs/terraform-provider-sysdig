@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	organizationsPath = "%s/api/cloudauth/v1/organizations"
-	organizationPath  = "%s/api/cloudauth/v1/organizations/%s"
+	organizationsPath = "%s/api/cloudauth/v1/organizations?async=true"
+	organizationPath  = "%s/api/cloudauth/v1/organizations/%s?async=true"
 )
 
 type OrganizationSecureInterface interface {
