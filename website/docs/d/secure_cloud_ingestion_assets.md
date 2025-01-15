@@ -30,7 +30,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `aws.sns_routing_key` - AWS CloudTrail SNS ingestion routing key
 
-* `aws.sns_metadata` - AWS CloudTrail SNS ingestion metadata
+* `aws.sns_routing_url` - AWS CloudTrail SNS ingestion URL
 
 * `gcp_routing_key` - GCP ingestion routing key
 
