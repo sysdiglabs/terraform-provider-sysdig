@@ -8,10 +8,11 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/arn"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 )
 
 func getSecureOnboardingClient(c SysdigClients) (v2.OnboardingSecureInterface, error) {
@@ -344,6 +345,15 @@ func dataSourceSysdigSecureCloudIngestionAssets() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"cloud_provider": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"aws", "gcp", "azure"}, false),
+			},
+			"cloud_provider_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"aws": {
 				Type:     schema.TypeMap,
 				Computed: true,
@@ -370,7 +380,7 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 		return diag.FromErr(err)
 	}
 
-	assets, err := client.GetCloudIngestionAssetsSecure(ctx)
+	assets, err := client.GetCloudIngestionAssetsSecure(ctx, d.Get("cloud_provider").(string), d.Get("cloud_provider_id").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -378,10 +388,17 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 	assetsAws, _ := assets["aws"].(map[string]interface{})
 	assetsGcp, _ := assets["gcp"].(map[string]interface{})
 
+	var ingestionURL string
+	if assetsAws["snsMetadata"] != nil {
+		ingestionURL = assetsAws["snsMetadata"].(map[string]interface{})["ingestionURL"].(string)
+	}
+
 	d.SetId("cloudIngestionAssets")
 	err = d.Set("aws", map[string]interface{}{
-		"eventBusARN":    assetsAws["eventBusARN"],
-		"eventBusARNGov": assetsAws["eventBusARNGov"],
+		"eventBusARN":     assetsAws["eventBusARN"],
+		"eventBusARNGov":  assetsAws["eventBusARNGov"],
+		"sns_routing_key": assetsAws["snsRoutingKey"],
+		"sns_routing_url": ingestionURL,
 	})
 	if err != nil {
 		return diag.FromErr(err)
@@ -456,8 +473,10 @@ func dataSourceSysdigSecureTrustedOracleAppRead(ctx context.Context, d *schema.R
 	return nil
 }
 
-var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
-var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+var (
+	matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+	matchAllCap   = regexp.MustCompile("([a-z0-9])([A-Z])")
+)
 
 func snakeCase(str string) string {
 	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")

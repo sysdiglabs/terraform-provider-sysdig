@@ -28,7 +28,10 @@ In addition to all arguments above, the following attributes are exported:
 
 * `aws.eventBusARNGov` - AWS Gov event bus (if supported) from which Sysdig Cloud Ingestion operates
 
+* `aws.sns_routing_key` - AWS CloudTrail SNS ingestion routing key
+
+* `aws.sns_routing_url` - AWS CloudTrail SNS ingestion URL
+
 * `gcp_routing_key` - GCP ingestion routing key
 
 * `gcp_metadata` - GCP ingestion metadata
-
