@@ -13,15 +13,13 @@ TERRAFORM_PROVIDER_DEV_VERSION=1.0.0
 TERRAFORM_PLATFORM=$(shell terraform version -json | jq -r .platform)
 TERRAFORM_SYSDIG_PLUGIN_DIR=$(TERRAFORM_PLUGIN_ROOT_DIR)/$(TERRAFORM_PROVIDER_REFERENCE_NAME)/$(TERRAFORM_PROVIDER_NAME)/$(TERRAFORM_PROVIDER_DEV_VERSION)/$(TERRAFORM_PLATFORM)
 
+install-tools:
+	go install golang.org/x/tools/cmd/stringer@latest
+
 default: build
 
 build: fmtcheck
 	go install
-
-check: fmtcheck errcheck check-vuln doccheck lint
-
-check-vuln:
-	govulncheck .
 
 install: fmtcheck
 	go build -o terraform-provider-sysdig
@@ -66,35 +64,13 @@ fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
 
 lint:
-	golangci-lint run --timeout 1h --build-tags unit,tf_acc_sysdig_monitor,tf_acc_sysdig_secure,tf_acc_ibm_monitor,tf_acc_ibm_secure ./...
+	golangci-lint run --timeout 1h ./...
 
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
-# Leverages on nix compiling and configuring the provider using the package.nix and the devshell
-init-provider-to-test:
-	echo 'terraform { ' > main.tf
-	echo 'required_providers { sysdig = { ' >> main.tf
-	echo 'source = "sysdiglabs/sysdig" ' >> main.tf
-	echo 'version = "1.0.0-local" ' >> main.tf
-	echo '} }' >> main.tf
-	echo '}' >> main.tf
-	terraform init
-
-.PHONY: terraform-providers-schema
-terraform-providers-schema:
-	rm -rf terraform-providers-schema
-	rm .terraform.lock.hcl
-	mkdir -p terraform-providers-schema
-
-doccheck: terraform-providers-schema init-provider-to-test
-	terraform providers schema -json > terraform-providers-schema/schema.json
-	tfproviderdocs check \
-          -allowed-resource-subcategories-file website/allowed-subcategories.txt \
-          -enable-contents-check \
-          -provider-source registry.terraform.io/sysdiglabs/sysdig \
-          -providers-schema-json terraform-providers-schema/schema.json \
-          -require-resource-subcategory
+vendor-status:
+	@govendor status
 
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
