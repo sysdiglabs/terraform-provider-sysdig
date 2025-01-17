@@ -755,6 +755,8 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 			api_key = {
 			  user_id = "user-id"
 #			  region = "region"
+#			  fingerprint = "fingerprint"
+#			  private_key = "private_key"
 			}
 			policy = {
 			 policy_id = "policy-id"
