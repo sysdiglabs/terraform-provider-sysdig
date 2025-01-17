@@ -754,10 +754,11 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 		  oci = {
 			api_key = {
 			  user_id = "user-id"
+#			  region = "region"
 			}
-#			policy = {
-#			 policy_id = "policy-id"
-#			}
+			policy = {
+			 policy_id = "policy-id"
+			}
 		  }
 		})
 	  }
