@@ -1,3 +1,7 @@
+# These owners will be the default owners for everything in
+# the repo, unless a later match takes precedence
+* @filiptubic @mbarbieri @draraksysdig @tembleking @airadier
+
 # Fargate workload agent
 *fargate* @marojor @francesco-racciatti @pgcrooks-sysdig @gnosek
 
@@ -17,10 +21,10 @@
 *secure*policy* @kmvachhani @rosenbloomb-sysdig @ombellare @miguelgordo @ivanlysiuk-sysdig @daniel-almeida @jbainbridgesysdig @IvanNik @hila1608 @yaminSapir @chen-shmilovich-sysdig @zohar-arad
 
 # internal components
-/sysdig/internal/client/v2/client.go @filiptubic @mbarbieri @draraksysdig
-/sysdig/internal/client/v2/config.go @filiptubic @mbarbieri @draraksysdig
-/sysdig/internal/client/v2/ibm.go @filiptubic @mbarbieri @draraksysdig
-/sysdig/internal/client/v2/agentaccesskey.go @igoreulalio @filiptubic @mbarbieri @draraksysdig
-/main.go @filiptubic @mbarbieri @draraksysdig
-/.goreleaser.yml @filiptubic @mbarbieri @draraksysdig
-/.github/ @filiptubic @mbarbieri @draraksysdig
+/sysdig/internal/client/v2/client.go @filiptubic @mbarbieri @draraksysdig @tembleking @airadier
+/sysdig/internal/client/v2/config.go @filiptubic @mbarbieri @draraksysdig @tembleking @airadier
+/sysdig/internal/client/v2/ibm.go @filiptubic @mbarbieri @draraksysdig @tembleking @airadier
+/sysdig/internal/client/v2/agentaccesskey.go @igoreulalio @filiptubic @mbarbieri @draraksysdig @tembleking @airadier
+/main.go @filiptubic @mbarbieri @draraksysdig @tembleking @airadier
+/.goreleaser.yml @filiptubic @mbarbieri @draraksysdig @tembleking @airadier
+/.github/ @filiptubic @mbarbieri @draraksysdig @tembleking @airadier
