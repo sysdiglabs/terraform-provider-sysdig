@@ -31,8 +31,8 @@ resource "sysdig_secure_organization" "sample" {
 * `organizational_unit_ids` - (Optional) List of organizational unit identifiers from which to onboard. If empty, the entire organization is onboarded. 
 * `included_organizational_groups` - (Optional) List of organizational groups to include during onboarding.
 * `excluded_organizational_groups` - (Optional) List of organizational groups to exclude during onboarding.
-* `included_cloud_accounts` - (Optional) List of cloud accounts to exclude during onboarding.
-* `excluded_cloud_accounts` - (Optional) List of cloud accounts to include during onboarding.
+* `included_cloud_accounts` - (Optional) List of cloud accounts to include during onboarding.
+* `excluded_cloud_accounts` - (Optional) List of cloud accounts to exclude during onboarding.
 
 ## Attributes Reference
 
