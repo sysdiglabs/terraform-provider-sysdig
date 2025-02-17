@@ -47,7 +47,7 @@ func monitorNotificationChannelSlack(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_slack" "nc_slack" {
 	name = "%s"
-	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	url = "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	channel = "#sysdig"
 	show_section_runbook_links = false
 	show_section_event_details = false
