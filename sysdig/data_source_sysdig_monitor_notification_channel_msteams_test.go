@@ -40,7 +40,7 @@ func monitorNotificationChannelMSTeams(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_msteams" "nc_msteams" {
 	name = "%s"
-	url = "https://hooks.msteams.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	url = "https://sysdig.webhook.office.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 }
 
 data "sysdig_monitor_notification_channel_msteams" "nc_msteams" {

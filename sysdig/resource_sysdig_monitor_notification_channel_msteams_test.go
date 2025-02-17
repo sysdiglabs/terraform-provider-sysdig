@@ -49,7 +49,7 @@ func monitorNotificationChannelMSTeamsWithName(name string) string {
 resource "sysdig_monitor_notification_channel_msteams" "sample-msteams1" {
 	name = "Example Channel %s - MS Teams"
 	enabled = true
-	url = "https://hooks.msteams.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	url = "https://sysdig.webhook.office.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	notify_when_ok = true
 	notify_when_resolved = true
 }`, name)
@@ -61,7 +61,7 @@ resource "sysdig_monitor_notification_channel_msteams" "sample-msteams2" {
 	name = "Example Channel %s - MS Teams"
 	share_with_current_team = true
 	enabled = true
-	url = "https://hooks.msteams.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	url = "https://sysdig.webhook.office.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	notify_when_ok = true
 	notify_when_resolved = true
 }`, name)
