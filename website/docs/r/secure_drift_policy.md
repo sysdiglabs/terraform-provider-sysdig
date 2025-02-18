@@ -118,6 +118,10 @@ The rule block is required and supports:
     * `items` - (Required) Specify comma separated list of exceptions, e.g. `/usr/bin/rm, /usr/bin/curl`.
 * `prohibited_binaries` - (Optional) A prohibited binary can be a known harmful binary or one that facilitates discovery of your environment.
     * `items` - (Required) Specify comma separated list of prohibited binaries, e.g. `/usr/bin/rm, /usr/bin/curl`.
+* `process_based_exceptions` - (Optional) List of processes that will be able to execute a drifted file 
+    * `items` - (Required) Specify comma separated list of processes, e.g. `/usr/bin/rm, /usr/bin/curl`.      
+* `process_based_prohibited_binaries` - (Optional) List of processes that will be prohibited to execute a drifted file
+    * `items` - (Required) Specify comma separated list of processes, e.g. `/usr/bin/rm, /usr/bin/curl`.
 
 
 
