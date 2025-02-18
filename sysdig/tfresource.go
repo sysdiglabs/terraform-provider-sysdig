@@ -22,6 +22,8 @@ const (
 	defaultMalwareTag = "malware"
 	defaultDriftTag   = "drift"
 	defaultMLTag      = "machine_learning"
+
+	driftElementType = "DRIFT"
 )
 
 type Target interface {
@@ -473,48 +475,13 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 		// TODO: Iterate over a list of rules instead of hard-coding the index values
 		// TODO: Should we assume that only a single Malware rule can be attached to a policy?
 
-		exceptions := &v2.RuntimePolicyRuleList{}
-		if _, ok := d.GetOk("rule.0.exceptions"); ok { // TODO: Do not hardcode the indexes
-			exceptions.Items = schemaSetToList(d.Get("rule.0.exceptions.0.items"))
-			exceptions.MatchItems = d.Get("rule.0.exceptions.0.match_items").(bool)
-		} else {
-			// initialize Items and MatchItems so we comply with structure and not generate drift
-			exceptions.Items = []string{}
-			exceptions.MatchItems = false
-		}
+		exceptions := extractIntoRuntimePolicyRuleList("rule.0.exceptions", d)
 
-		// TODO: Extract into a function
-		prohibitedBinaries := &v2.RuntimePolicyRuleList{}
-		if _, ok := d.GetOk("rule.0.prohibited_binaries"); ok { // TODO: Do not hardcode the indexes
-			prohibitedBinaries.Items = schemaSetToList(d.Get("rule.0.prohibited_binaries.0.items"))
-			prohibitedBinaries.MatchItems = d.Get("rule.0.prohibited_binaries.0.match_items").(bool)
-		} else {
-			// initialize Items and MatchItems so we comply with structure and not generate drift
-			prohibitedBinaries.Items = []string{}
-			prohibitedBinaries.MatchItems = false
-		}
+		prohibitedBinaries := extractIntoRuntimePolicyRuleList("rule.0.prohibited_binaries", d)
 
-		// TODO: Extract into a function
-		processBasedExceptions := &v2.RuntimePolicyRuleList{}
-		if _, ok := d.GetOk("rule.0.process_based_exceptions"); ok { // TODO: Do not hardcode the indexes
-			processBasedExceptions.Items = schemaSetToList(d.Get("rule.0.process_based_exceptions.0.items"))
-			processBasedExceptions.MatchItems = d.Get("rule.0.process_based_exceptions.0.match_items").(bool)
-		} else {
-			// initialize Items and MatchItems so we comply with structure and not generate drift
-			processBasedExceptions.Items = []string{}
-			processBasedExceptions.MatchItems = false
-		}
+		processBasedExceptions := extractIntoRuntimePolicyRuleList("rule.0.process_based_exceptions", d)
 
-		// TODO: Extract into a function
-		processBasedProhibitedBinaries := &v2.RuntimePolicyRuleList{}
-		if _, ok := d.GetOk("rule.0.process_based_prohibited_binaries"); ok { // TODO: Do not hardcode the indexes
-			processBasedProhibitedBinaries.Items = schemaSetToList(d.Get("rule.0.process_based_prohibited_binaries.0.items"))
-			processBasedProhibitedBinaries.MatchItems = d.Get("rule.0.process_based_prohibited_binaries.0.match_items").(bool)
-		} else {
-			// initialize Items and MatchItems so we comply with structure and not generate drift
-			processBasedProhibitedBinaries.Items = []string{}
-			processBasedProhibitedBinaries.MatchItems = false
-		}
+		processBasedProhibitedBinaries := extractIntoRuntimePolicyRuleList("rule.0.process_based_prohibited_binaries", d)
 
 		tags := schemaSetToList(d.Get("rule.0.tags"))
 		// Set default tags as field tags must not be null
@@ -534,12 +501,12 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 			Description: d.Get("rule.0.description").(string),
 			Tags:        tags,
 			Details: v2.DriftRuleDetails{
-				RuleType:               v2.ElementType("DRIFT"), // TODO: Use const
+				RuleType:               v2.ElementType(driftElementType), // TODO: Use const
 				Mode:                   mode,
-				Exceptions:             exceptions,
-				ProhibitedBinaries:     prohibitedBinaries,
-				ProcessBasedExceptions: processBasedExceptions,
-				ProcessBasedDenylist:   processBasedProhibitedBinaries,
+				Exceptions:             &exceptions,
+				ProhibitedBinaries:     &prohibitedBinaries,
+				ProcessBasedExceptions: &processBasedExceptions,
+				ProcessBasedDenylist:   &processBasedProhibitedBinaries,
 			},
 		}
 
@@ -557,6 +524,22 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 		policy.Rules = append(policy.Rules, rule)
 	}
 	return nil
+}
+
+func extractIntoRuntimePolicyRuleList(key string, d *schema.ResourceData) v2.RuntimePolicyRuleList {
+	if _, ok := d.GetOk(key); ok {
+		items := schemaSetToList(d.Get(key + ".0.items"))
+		matchItems := d.Get(key + ".0.match_items").(bool)
+
+		return v2.RuntimePolicyRuleList{
+			Items:      items,
+			MatchItems: matchItems,
+		}
+	}
+	return v2.RuntimePolicyRuleList{
+		Items:      []string{},
+		MatchItems: false,
+	}
 }
 
 func setPolicyRulesML(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
