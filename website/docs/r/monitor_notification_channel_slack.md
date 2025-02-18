@@ -18,7 +18,7 @@ Creates a Sysdig Monitor Notification Channel of type Slack.
 resource "sysdig_monitor_notification_channel_slack" "sample-slack" {
 	name                    = "Example Channel - Slack"
 	enabled                 = true
-	url                     = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	url                     = "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	channel                 = "#sysdig"
 	notify_when_ok          = false
 	notify_when_resolved    = false

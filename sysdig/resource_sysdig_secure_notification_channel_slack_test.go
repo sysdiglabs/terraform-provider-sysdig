@@ -57,7 +57,7 @@ func secureNotificationChannelSlackWithName(name string) string {
 resource "sysdig_secure_notification_channel_slack" "sample-slack" {
 	name = "Example Channel %s - Slack"
 	enabled = true
-	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	url = "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	channel = "#sysdig"
 	notify_when_ok = true
 	notify_when_resolved = true
@@ -70,7 +70,7 @@ resource "sysdig_secure_notification_channel_slack" "sample-slack" {
 	name = "Example Channel %s - Slack"
 	share_with_current_team = true
 	enabled = true
-	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	url = "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	channel = "#sysdig"
 	notify_when_ok = true
 	notify_when_resolved = true
@@ -82,7 +82,7 @@ func secureNotificationChannelSlackWithNameAndTemplateVersion(name, version stri
 resource "sysdig_secure_notification_channel_slack" "sample-slack" {
 	name = "Example Channel %s - Slack"
 	enabled = true
-	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	url = "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	channel = "#sysdig"
 	notify_when_ok = true
 	notify_when_resolved = true

@@ -57,7 +57,7 @@ func secureNotificationChannelMSTeamsWithName(name string) string {
 resource "sysdig_secure_notification_channel_msteams" "sample-msteams" {
 	name = "Example Channel %s - MS Teams"
 	enabled = true
-	url = "https://hooks.msteams.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	url = "https://sysdig.webhook.office.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	notify_when_ok = true
 	notify_when_resolved = true
 }`, name)
@@ -69,7 +69,7 @@ resource "sysdig_secure_notification_channel_msteams" "sample-msteams" {
 	name = "Example Channel %s - MS Teams"
 	share_with_current_team = true
 	enabled = true
-	url = "https://hooks.msteams.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	url = "https://sysdig.webhook.office.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	notify_when_ok = true
 	notify_when_resolved = true
 }`, name)
@@ -80,7 +80,7 @@ func secureNotificationChannelMSTeamsWithNameAndTemplateVersion(name, version st
 resource "sysdig_secure_notification_channel_msteams" "sample-msteams" {
 	name = "Example Channel %s - MS Teams"
 	enabled = true
-	url = "https://hooks.msteams.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	url = "https://sysdig.webhook.office.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	notify_when_ok = true
 	notify_when_resolved = true
 	template_version = "%s"

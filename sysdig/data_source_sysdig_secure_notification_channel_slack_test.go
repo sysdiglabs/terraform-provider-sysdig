@@ -42,7 +42,7 @@ func secureNotificationChannelSlack(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_notification_channel_slack" "nc_slack" {
 	name = "%s"
-	url = "https://hooks.slack.cwom/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	url = "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	channel = "#sysdig"
 	template_version = "v2"
 }
