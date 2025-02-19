@@ -591,7 +591,7 @@ func ruleGuardDuty(name string) string {
 	  tags = ["guardduty"]
 	
 	  condition = "guardduty.resourceType=\"Container\""
-	  output = "GuardDuty Event received (account ID=%guardduty.accountId)"
+	  output = "GuardDuty Event received (account ID=%%guardduty.accountId)"
 	  priority = "debug"
 	  source = "guardduty"
 	}`, name, name)
