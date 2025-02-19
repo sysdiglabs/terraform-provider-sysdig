@@ -122,6 +122,7 @@ The rule block is required and supports:
     * `items` - (Required) Specify comma separated list of processes, e.g. `/usr/bin/rm, /usr/bin/curl`.      
 * `process_based_prohibited_binaries` - (Optional) List of processes that will be prohibited to execute a drifted file
     * `items` - (Required) Specify comma separated list of processes, e.g. `/usr/bin/rm, /usr/bin/curl`.
+* `mounted_volume_drift_enabled` - (Optional) Treat all binaries from mounted volumes as drifted. Default value is false/disabled.
 
 
 

@@ -39,9 +39,9 @@ func TestAccDriftPolicy(t *testing.T) {
 			{
 				Config: driftPolicyWithoutExceptions(rText()),
 			},
-      {
-        Config: driftPolicyWithMountedVolumeDriftEnabled(rText()),
-      }
+			{
+				Config: driftPolicyWithMountedVolumeDriftEnabled(rText()),
+			},
 		},
 	})
 }
