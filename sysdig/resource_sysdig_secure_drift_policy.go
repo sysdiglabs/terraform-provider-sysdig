@@ -66,6 +66,7 @@ func resourceSysdigSecureDriftPolicy() *schema.Resource {
 						"prohibited_binaries":               ExceptionsSchema(),
 						"process_based_exceptions":          ExceptionsSchema(),
 						"process_based_prohibited_binaries": ExceptionsSchema(),
+						"mounted_volume_drift_enabled":      BoolSchema(),
 					},
 				},
 			},
