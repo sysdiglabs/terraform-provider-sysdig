@@ -583,7 +583,7 @@ resource "sysdig_secure_rule_falco" "github_append" {
 }`
 }
 
-func ruleGuardDuty() string {
+func ruleGuardDuty(name string) string {
 	return fmt.Sprintf(`
 	resource "sysdig_secure_rule_falco" "guardduty" {
 	  name = "TERRAFORM TEST %[1]s - GuardDuty"
