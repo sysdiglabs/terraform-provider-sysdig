@@ -39,6 +39,9 @@ func TestAccDriftPolicy(t *testing.T) {
 			{
 				Config: driftPolicyWithoutExceptions(rText()),
 			},
+			{
+				Config: driftPolicyWithMountedVolumeDriftEnabled(rText()),
+			},
 		},
 	})
 }
@@ -211,4 +214,32 @@ resource "sysdig_secure_drift_policy" "sample" {
 }
 
 `, secureNotificationChannelEmailWithName(name), name)
+}
+
+func driftPolicyWithMountedVolumeDriftEnabled(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_drift_policy" "sample" {
+
+  name        = "Test Drift Policy %s"
+  description = "Test Drift Policy Description"
+  enabled     = true
+  severity    = 4
+
+  rule {
+    description = "Test Drift Rule Description"
+    mounted_volume_drift_enabled = true
+    enabled = true
+
+    exceptions {
+      items = ["/usr/bin/sh"]
+    }
+    prohibited_binaries {
+      items = ["/usr/bin/curl"]
+    }
+	  process_based_exceptions {
+      items = ["/usr/bin/curl"]
+    }
+	} 
+}
+  `, name)
 }
