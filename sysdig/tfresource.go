@@ -209,12 +209,13 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 		enabled := (mode != "disabled")
 
 		ruleMap := map[string]interface{}{
-			"id":          rule.Id,
-			"name":        rule.Name,
-			"description": rule.Description,
-			"version":     rule.Version,
-			"tags":        rule.Tags,
-			"enabled":     enabled,
+			"id":                           rule.Id,
+			"name":                         rule.Name,
+			"description":                  rule.Description,
+			"version":                      rule.Version,
+			"tags":                         rule.Tags,
+			"enabled":                      enabled,
+			"mounted_volume_drift_enabled": driftDetails.MountedVolumeDriftEnabled,
 		}
 
 		if exceptionsBlock != nil {
@@ -495,18 +496,21 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 			mode = "disabled"
 		}
 
+		mountedVolumeDriftEnabled := d.Get("rule.0.mounted_volume_drift_enabled").(bool)
+
 		rule := &v2.RuntimePolicyRule{
 			// TODO: Do not hardcode the indexes
 			Name:        d.Get("rule.0.name").(string),
 			Description: d.Get("rule.0.description").(string),
 			Tags:        tags,
 			Details: v2.DriftRuleDetails{
-				RuleType:               v2.ElementType(driftElementType), // TODO: Use const
-				Mode:                   mode,
-				Exceptions:             &exceptions,
-				ProhibitedBinaries:     &prohibitedBinaries,
-				ProcessBasedExceptions: &processBasedExceptions,
-				ProcessBasedDenylist:   &processBasedProhibitedBinaries,
+				RuleType:                  v2.ElementType(driftElementType), // TODO: Use const
+				Mode:                      mode,
+				Exceptions:                &exceptions,
+				ProhibitedBinaries:        &prohibitedBinaries,
+				ProcessBasedExceptions:    &processBasedExceptions,
+				ProcessBasedDenylist:      &processBasedProhibitedBinaries,
+				MountedVolumeDriftEnabled: mountedVolumeDriftEnabled,
 			},
 		}
 
