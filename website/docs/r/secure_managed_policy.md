@@ -51,7 +51,7 @@ resource "sysdig_secure_managed_policy" "sysdig_runtime_threat_detection" {
 * `name` - (Required) The name of the Secure managed policy. It must match the name of an existing managed policy.
 
 * `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`,
-  `aws_cloudtrail`, `gcp_auditlog`, `azure_platformlogs`, `awscloudtrail`, `okta`, `github`. By default it is `falco`.
+  `aws_cloudtrail`, `gcp_auditlog`, `azure_platformlogs`, `awscloudtrail`, `okta`, `github`, `guardduty`. By default it is `falco`.
 
 * `enabled` - (Optional) Will secure process with this policy?. By default this is true.
 

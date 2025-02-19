@@ -285,6 +285,24 @@ func TestRuleGithubAppends(t *testing.T) {
 	runTest(steps, t)
 }
 
+func TestRuleGuardDuty(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: ruleGuardDuty(randomString()),
+		},
+	}
+	runTest(steps, t)
+}
+
+func TestRuleGuardDutyAppends(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: ruleGuardDutyWithAppend(),
+		},
+	}
+	runTest(steps, t)
+}
+
 func randomString() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 func runTest(steps []resource.TestStep, t *testing.T) {
@@ -563,4 +581,33 @@ resource "sysdig_secure_rule_falco" "github_append" {
 	values = jsonencode([ ["user_c"] ])
    }
 }`
+}
+
+func ruleGuardDuty() string {
+	return fmt.Sprintf(`
+	resource "sysdig_secure_rule_falco" "guardduty" {
+	  name = "TERRAFORM TEST %[1]s - GuardDuty"
+	  description = "TERRAFORM TEST %[1]s"
+	  tags = ["guardduty"]
+	
+	  condition = "guardduty.resourceType=\"Container\""
+	  output = "GuardDuty Event received (account ID=%guardduty.accountId)"
+	  priority = "debug"
+	  source = "guardduty"
+	}`, name, name)
+}
+
+func ruleGuardDutyWithAppend() string {
+	return `
+	resource "sysdig_secure_rule_falco" "guardduty_append" {
+	  name = "GuardDuty High Severity Finding on Container"
+	  source = "guardduty"
+	  append = true
+	  exceptions {
+		name = "resource_type_tf"
+		fields = ["guardduty.resourceType"]
+		comps = ["="]
+		values = jsonencode([ ["Amazon S2"] ])
+	   }
+	}`
 }
