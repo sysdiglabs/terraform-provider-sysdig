@@ -426,11 +426,14 @@ type RuntimePolicyRuleList struct {
 }
 
 type DriftRuleDetails struct {
-	RuleType           ElementType            `json:"ruleType"`
-	Exceptions         *RuntimePolicyRuleList `json:"exceptionList"`
-	ProhibitedBinaries *RuntimePolicyRuleList `json:"prohibitedBinaries"`
-	Mode               string                 `json:"mode"`
-	Details            `json:"-"`
+	RuleType                  ElementType            `json:"ruleType"`
+	Exceptions                *RuntimePolicyRuleList `json:"exceptionList"`
+	ProcessBasedExceptions    *RuntimePolicyRuleList `json:"allowlistProcess"`
+	ProcessBasedDenylist      *RuntimePolicyRuleList `json:"denylistProcess"`
+	ProhibitedBinaries        *RuntimePolicyRuleList `json:"prohibitedBinaries"`
+	Mode                      string                 `json:"mode"`
+	MountedVolumeDriftEnabled bool                   `json:"mountedVolumeDriftEnabled"`
+	Details                   `json:"-"`
 }
 
 func (p DriftRuleDetails) GetRuleType() ElementType {

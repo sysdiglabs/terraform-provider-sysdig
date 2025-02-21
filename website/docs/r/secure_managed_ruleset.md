@@ -59,7 +59,7 @@ resource "sysdig_secure_managed_ruleset" "sysdig_runtime_threat_detection_manage
 
 * `enabled` - (Optional) Will secure process with this rule?. By default this is true.
 
-* `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`, `aws_cloudtrail`, `awscloudtrail`, `okta`, `github`. By default it is `falco`.
+* `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`, `aws_cloudtrail`, `awscloudtrail`, `okta`, `github`, `guardduty`. By default it is `falco`.
 
 * `runbook` - (Optional) Customer provided url that provides a runbook for a given policy. 
 - - -
@@ -70,7 +70,7 @@ The `inherited_from` block is required and identifies the managed policy that th
 
 * `name` - (Required) The name of the Secure managed policy. It must match the name of an existing managed policy.
 
-* `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`, `aws_cloudtrail`, `awscloudtrail`, `okta`, `github`. By default it is `falco`.
+* `type` - (Optional) Specifies the type of the runtime policy. Must be one of: `falco`, `list_matching`, `k8s_audit`, `aws_cloudtrail`, `awscloudtrail`, `okta`, `github`, `guardduty`. By default it is `falco`.
 
 - - -
 

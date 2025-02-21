@@ -36,6 +36,12 @@ func TestAccDriftPolicy(t *testing.T) {
 			{
 				Config: driftPolicyWithoutNotificationChannel(rText()),
 			},
+			{
+				Config: driftPolicyWithoutExceptions(rText()),
+			},
+			{
+				Config: driftPolicyWithMountedVolumeDriftEnabled(rText()),
+			},
 		},
 	})
 }
@@ -61,6 +67,9 @@ resource "sysdig_secure_drift_policy" "sample" {
     prohibited_binaries {
       items = ["/usr/bin/curl"]
     }
+	process_based_exceptions {
+      items = ["/usr/bin/curl"]
+	} 
   }
 
   actions {
@@ -94,6 +103,9 @@ resource "sysdig_secure_drift_policy" "sample" {
     prohibited_binaries {
       items = ["/usr/bin/curl"]
     }
+	process_based_exceptions {
+      items = ["/usr/bin/curl"]
+	} 
   }
 
   actions {
@@ -133,6 +145,9 @@ resource "sysdig_secure_drift_policy" "sample" {
     prohibited_binaries {
       items = ["/usr/bin/curl"]
     }
+	process_based_exceptions {
+      items = ["/usr/bin/curl"]
+	} 
   }
 
   actions {}
@@ -162,6 +177,9 @@ resource "sysdig_secure_drift_policy" "sample" {
     prohibited_binaries {
       items = ["/usr/bin/curl"]
     }
+	process_based_exceptions {
+      items = ["/usr/bin/curl"]
+	} 
   }
 
   actions {
@@ -170,4 +188,58 @@ resource "sysdig_secure_drift_policy" "sample" {
 }
 
 `, name)
+}
+
+func driftPolicyWithoutExceptions(name string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "sysdig_secure_drift_policy" "sample" {
+  name        = "Test Drift Policy %s"
+  description = "Test Drift Policy Description"
+  enabled     = true
+  severity    = 4
+
+  rule {
+    description = "Test Drift Rule Description"
+
+    enabled = true
+  }
+
+  actions {
+    prevent_drift = true
+  }
+
+  notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
+}
+
+`, secureNotificationChannelEmailWithName(name), name)
+}
+
+func driftPolicyWithMountedVolumeDriftEnabled(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_drift_policy" "sample" {
+
+  name        = "Test Drift Policy %s"
+  description = "Test Drift Policy Description"
+  enabled     = true
+  severity    = 4
+
+  rule {
+    description = "Test Drift Rule Description"
+    mounted_volume_drift_enabled = true
+    enabled = true
+
+    exceptions {
+      items = ["/usr/bin/sh"]
+    }
+    prohibited_binaries {
+      items = ["/usr/bin/curl"]
+    }
+	  process_based_exceptions {
+      items = ["/usr/bin/curl"]
+    }
+	} 
+}
+  `, name)
 }

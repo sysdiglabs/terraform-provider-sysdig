@@ -56,6 +56,7 @@ func TestAccPolicy(t *testing.T) {
 				resource.TestStep{Config: policiesForFalcoCloudAWSCloudtrail(rText())},
 				resource.TestStep{Config: policiesForOkta(rText())},
 				resource.TestStep{Config: policiesForGithub(rText())},
+				resource.TestStep{Config: policiesForGuardDuty(rText())},
 			)
 		}
 	}
@@ -250,6 +251,17 @@ resource "sysdig_secure_policy" "sample9" {
   name = "TERRAFORM TEST 4 %s"
   description = "TERRAFORM TEST %s"
   type = "github"
+  actions {}
+}
+`, name, name)
+}
+
+func policiesForGuardDuty(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_policy" "sample10" {
+  name = "TERRAFORM TEST 4 %s"
+  description = "TERRAFORM TEST %s"
+  type = "guardduty"
   actions {}
 }
 `, name, name)
