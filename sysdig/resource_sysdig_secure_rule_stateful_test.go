@@ -3,13 +3,11 @@
 package sysdig_test
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -21,14 +19,14 @@ func TestRuleStatefulAppends(t *testing.T) {
 	}
 	steps := []resource.TestStep{
 		{
-			Config: ruleStatefulAppend(rName()),
+			Config: ruleStatefulAppend(),
 		},
 	}
 	runStatefulTest(steps, t)
 }
 
-func ruleStatefulAppend(name string) string {
-	return fmt.Sprintf(`
+func ruleStatefulAppend() string {
+	return `
 	resource "sysdig_secure_rule_stateful" "stateful_rule_append" {
 	  name = "API Gateway Enumeration Detected"
 	  source = "awscloudtrail_stateful"
@@ -36,12 +34,10 @@ func ruleStatefulAppend(name string) string {
 	  append = true
 	  exceptions {
       values = jsonencode([["abc", ["docker.io/library/busybox"]]])
-      name = "tf_append_%s"
+      name = "user_accountid"
     }
-	}`, name)
+	}`
 }
-
-func rName() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 func runStatefulTest(steps []resource.TestStep, t *testing.T) {
 	resource.Test(t, resource.TestCase{
