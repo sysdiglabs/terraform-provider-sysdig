@@ -159,7 +159,24 @@ func resourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceData,
 	if rule.Details.Append != nil {
 		_ = d.Set("append", *rule.Details.Append)
 	}
-	if err := updateResourceDataExceptions(d, rule.Details.Exceptions); err != nil {
+
+	exceptions := make([]any, 0, len(rule.Details.Exceptions))
+	for _, exception := range rule.Details.Exceptions {
+		if exception == nil {
+			return diag.Errorf("exception is nil")
+		}
+		valuesData, err := json.Marshal(exception.Values)
+		if err != nil {
+			return diag.Errorf("error marshalling exception values '%+v': %s", exception.Values, err)
+		}
+
+		exceptions = append(exceptions, map[string]any{
+			"name":   exception.Name,
+			"values": string(valuesData),
+		})
+	}
+
+	if err := d.Set("exceptions", exceptions); err != nil {
 		return diag.FromErr(err)
 	}
 
