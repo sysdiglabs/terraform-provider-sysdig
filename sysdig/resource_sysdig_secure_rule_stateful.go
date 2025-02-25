@@ -68,19 +68,9 @@ func resourceSysdigSecureStatefulRule() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"comps": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
 						"values": {
 							Type:     schema.TypeString,
 							Required: true,
-						},
-						"fields": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
@@ -124,8 +114,6 @@ func resourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	// for stateful rules, we'll need to get the rule group
 
 	nameObj, ok := d.GetOk("name")
 	if !ok {
