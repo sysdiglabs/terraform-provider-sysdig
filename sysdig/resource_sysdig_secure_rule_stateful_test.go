@@ -1,7 +1,9 @@
 package sysdig_test
 
 import (
+	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
@@ -11,6 +13,10 @@ import (
 )
 
 func TestRuleStatefulAppends(t *testing.T) {
+	if strings.HasSuffix(os.Getenv("SYSDIG_SECURE_URL"), "ibm.com") {
+		t.Skip("Skipping stateful tests for IBM Cloud")
+		return
+	}
 	steps := []resource.TestStep{
 		{
 			Config: ruleStatefulAppend(rName()),
@@ -20,7 +26,7 @@ func TestRuleStatefulAppends(t *testing.T) {
 }
 
 func ruleStatefulAppend(name string) string {
-	return `
+	return fmt.Sprintf(`
 	resource "sysdig_secure_rule_stateful" "stateful_rule_append" {
 	  name = "API Gateway Enumeration Detected"
 	  source = "awscloudtrail_stateful"
@@ -30,7 +36,7 @@ func ruleStatefulAppend(name string) string {
       values = jsonencode([["abc", ["docker.io/library/busybox"]]])
       name = "tf_append_%s"
     }
-	}`
+	}`, name)
 }
 
 func rName() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
