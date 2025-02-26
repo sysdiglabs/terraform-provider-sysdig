@@ -11,7 +11,7 @@ const (
 	onboardingTrustedAzureAppPath         = "%s/api/secure/onboarding/v2/trustedAzureApp?app=%s"
 	onboardingTenantExternaIDPath         = "%s/api/secure/onboarding/v2/externalID"
 	onboardingAgentlessScanningAssetsPath = "%s/api/secure/onboarding/v2/agentlessScanningAssets"
-	onboardingCloudIngestionAssetsPath    = "%s/api/secure/onboarding/v2/cloudIngestionAssets?provider=%s&providerID=%s"
+	onboardingCloudIngestionAssetsPath    = "%s/api/secure/onboarding/v2/cloudIngestionAssets?provider=%s&providerID=%s&componentType=%s"
 	onboardingTrustedRegulationAssetsPath = "%s/api/secure/onboarding/v2/trustedRegulationAssets?provider=%s"
 	onboardingTrustedOracleAppPath        = "%s/api/secure/onboarding/v2/trustedOracleApp?app=%s"
 )
@@ -22,7 +22,7 @@ type OnboardingSecureInterface interface {
 	GetTrustedAzureAppSecure(ctx context.Context, app string) (map[string]string, error)
 	GetTenantExternalIDSecure(ctx context.Context) (string, error)
 	GetAgentlessScanningAssetsSecure(ctx context.Context) (map[string]any, error)
-	GetCloudIngestionAssetsSecure(ctx context.Context, provider, providerID string) (map[string]any, error)
+	GetCloudIngestionAssetsSecure(ctx context.Context, provider, providerID, componentType string) (map[string]any, error)
 	GetTrustedCloudRegulationAssetsSecure(ctx context.Context, provider string) (map[string]string, error)
 	GetTrustedOracleAppSecure(ctx context.Context, app string) (map[string]string, error)
 }
@@ -83,8 +83,8 @@ func (client *Client) GetAgentlessScanningAssetsSecure(ctx context.Context) (map
 	return Unmarshal[map[string]interface{}](response.Body)
 }
 
-func (client *Client) GetCloudIngestionAssetsSecure(ctx context.Context, provider, providerID string) (map[string]interface{}, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingCloudIngestionAssetsPath, client.config.url, provider, providerID), nil)
+func (client *Client) GetCloudIngestionAssetsSecure(ctx context.Context, provider, providerID, componentType string) (map[string]interface{}, error) {
+	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingCloudIngestionAssetsPath, client.config.url, provider, providerID, componentType), nil)
 	if err != nil {
 		return nil, err
 	}

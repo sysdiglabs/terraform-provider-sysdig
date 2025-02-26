@@ -205,6 +205,18 @@ func TestAccCloudIngestionAssetsDataSource(t *testing.T) {
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.sns_routing_url"),
 				),
 			},
+			{
+				Config: `data "sysdig_secure_cloud_ingestion_assets" "assets" {
+						cloud_provider = "aws" 
+						cloud_provider_id = "012345678901"
+						component_type = "COMPONENT_WEBHOOK_DATASOURCE"
+				}`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.api_dest_routing_key"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.api_dest_routing_url"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.api_dest_token"),
+				),
+			},
 		},
 	})
 }
