@@ -375,45 +375,84 @@ func dataSourceSysdigSecureCloudIngestionAssets() *schema.Resource {
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var assets map[string]any
+	var err error
+
 	client, err := getSecureOnboardingClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	assets, err := client.GetCloudIngestionAssetsSecure(ctx, d.Get("cloud_provider").(string), d.Get("cloud_provider_id").(string))
-	if err != nil {
-		return diag.FromErr(err)
+	cloudProvider, ok := d.GetOk("cloud_provider")
+	if !ok {
+		// GCP case
+		assets, err = client.GetCloudIngestionAssetsSecure(ctx, "", "", "")
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		assetsGcp, _ := assets["gcp"].(map[string]interface{})
+		err = d.Set("gcp_routing_key", assetsGcp["routingKey"])
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		err = d.Set("gcp_metadata", assetsGcp["metadata"])
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		return nil
 	}
 
-	assetsAws, _ := assets["aws"].(map[string]interface{})
-	assetsGcp, _ := assets["gcp"].(map[string]interface{})
+	componentType, ok := d.GetOk("component_type")
+	if !ok {
+		// AWS SNS case
+		assets, err = client.GetCloudIngestionAssetsSecure(ctx, cloudProvider.(string), d.Get("cloud_provider_id").(string), "")
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		assetsAws, _ := assets["aws"].(map[string]interface{})
 
-	var ingestionURL string
-	if assetsAws["snsMetadata"] != nil {
-		ingestionURL = assetsAws["snsMetadata"].(map[string]interface{})["ingestionURL"].(string)
+		var ingestionURL string
+		if assetsAws["snsMetadata"] != nil {
+			ingestionURL = assetsAws["snsMetadata"].(map[string]interface{})["ingestionURL"].(string)
+		}
+
+		d.SetId("cloudIngestionAssets")
+		err = d.Set("aws", map[string]interface{}{
+			"eventBusARN":     assetsAws["eventBusARN"],
+			"eventBusARNGov":  assetsAws["eventBusARNGov"],
+			"sns_routing_key": assetsAws["snsRoutingKey"],
+			"sns_routing_url": ingestionURL,
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	} else {
+		// AWS Api Destination case
+		assets, err = client.GetCloudIngestionAssetsSecure(ctx, d.Get("cloud_provider").(string), d.Get("cloud_provider_id").(string), componentType.(string))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		assetsAws, _ := assets["aws"].(map[string]interface{})
+
+		var ingestionURL string
+		if assetsAws["apiDestMetadata"] != nil {
+			ingestionURL = assetsAws["apiDestMetadata"].(map[string]interface{})["ingestionURL"].(string)
+		}
+
+		d.SetId("cloudIngestionAssets")
+		err = d.Set("aws", map[string]interface{}{
+			"eventBusARN":          assetsAws["eventBusARN"],
+			"eventBusARNGov":       assetsAws["eventBusARNGov"],
+			"api_dest_routing_key": assetsAws["apiDestRoutingKey"],
+			"api_dest_routing_url": ingestionURL,
+			"api_dest_token":       assetsAws["apiDestToken"],
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
-
-	d.SetId("cloudIngestionAssets")
-	err = d.Set("aws", map[string]interface{}{
-		"eventBusARN":     assetsAws["eventBusARN"],
-		"eventBusARNGov":  assetsAws["eventBusARNGov"],
-		"sns_routing_key": assetsAws["snsRoutingKey"],
-		"sns_routing_url": ingestionURL,
-	})
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	err = d.Set("gcp_routing_key", assetsGcp["routingKey"])
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	err = d.Set("gcp_metadata", assetsGcp["metadata"])
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	return nil
 }
 
