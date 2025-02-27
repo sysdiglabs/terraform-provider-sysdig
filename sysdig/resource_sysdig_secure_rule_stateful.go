@@ -48,6 +48,10 @@ func resourceSysdigSecureStatefulRule() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"version": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 			"source": {
 				Type:             schema.TypeString,
 				Required:         true,
