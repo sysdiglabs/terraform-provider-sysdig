@@ -189,7 +189,6 @@ func (client *Client) UpdateStatefulRule(ctx context.Context, rule Rule) (Rule, 
 }
 
 func (client *Client) DeleteStatefulRule(ctx context.Context, ruleID int) error {
-	fmt.Println("deleting stateful rule")
 	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeleteStatefulRuleURL(ruleID), nil)
 	if err != nil {
 		return err

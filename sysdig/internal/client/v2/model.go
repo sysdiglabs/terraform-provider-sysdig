@@ -527,8 +527,8 @@ const (
 	RuleTypeProcess             = "PROCESS"
 	RuleTypeSyscall             = "SYSCALL"
 	RuleTypeStatefulSequence    = "STATEFUL_SEQUENCE"
-	StatefulUniqPercentRuleType = "STATEFUL_UNIQ_PERCENT"
-	StatefulCountRuleType       = "STATEFUL_COUNT"
+	RuleTypeStatefulUniqPercent = "STATEFUL_UNIQ_PERCENT"
+	RuleTypeStatefulCount       = "STATEFUL_COUNT"
 )
 
 type Details struct {

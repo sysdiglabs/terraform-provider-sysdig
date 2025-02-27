@@ -17,8 +17,14 @@ import (
 
 var validateStatefulRuleSource = validation.StringInSlice([]string{"awscloudtrail_stateful"}, false)
 
+var validateStatefulRuleType = validation.StringInSlice([]string{
+	v2.RuleTypeStatefulSequence,
+	v2.RuleTypeStatefulCount,
+	v2.RuleTypeStatefulUniqPercent,
+}, false)
+
 func resourceSysdigSecureStatefulRule() *schema.Resource {
-	timeout := 5 * time.Minute
+	timeout := 1 * time.Minute
 
 	return &schema.Resource{
 		CreateContext: resourceSysdigRuleStatefulCreate,
@@ -36,7 +42,12 @@ func resourceSysdigSecureStatefulRule() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 
-		Schema: createRuleSchema(map[string]*schema.Schema{
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
 			"source": {
 				Type:             schema.TypeString,
 				Optional:         false,
@@ -44,14 +55,10 @@ func resourceSysdigSecureStatefulRule() *schema.Resource {
 				ValidateDiagFunc: validateDiagFunc(validateStatefulRuleSource),
 			},
 			"ruletype": {
-				Type:     schema.TypeString,
-				Optional: false,
-				Required: true,
-				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
-					v2.RuleTypeStatefulSequence,
-					v2.StatefulCountRuleType,
-					v2.StatefulUniqPercentRuleType,
-				}, false)),
+				Type:             schema.TypeString,
+				Optional:         false,
+				Required:         true,
+				ValidateDiagFunc: validateDiagFunc(validateStatefulRuleType),
 			},
 			"append": {
 				Type:     schema.TypeBool,
@@ -75,7 +82,7 @@ func resourceSysdigSecureStatefulRule() *schema.Resource {
 					},
 				},
 			},
-		}),
+		},
 	}
 }
 
@@ -95,8 +102,6 @@ func resourceSysdigRuleStatefulCreate(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
-
 	d.SetId(strconv.Itoa(rule.ID))
 	_ = d.Set("version", rule.Version)
 
@@ -144,12 +149,6 @@ func resourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceData,
 		if r.ID == id {
 			rule = r
 			break
-		}
-	}
-
-	if rule.Details.Append != nil && !(*(rule.Details.Append)) {
-		if rule.Details.Condition == nil {
-			return diag.Errorf("no condition data for a Stateful rule")
 		}
 	}
 
@@ -202,7 +201,6 @@ func resourceSysdigRuleStatefulUpdate(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	return nil
 }
@@ -223,7 +221,6 @@ func resourceSysdigRuleStatefulDelete(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
 	return nil
 }
