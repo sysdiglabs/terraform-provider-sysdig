@@ -50,13 +50,11 @@ func resourceSysdigSecureStatefulRule() *schema.Resource {
 			},
 			"source": {
 				Type:             schema.TypeString,
-				Optional:         false,
 				Required:         true,
 				ValidateDiagFunc: validateDiagFunc(validateStatefulRuleSource),
 			},
 			"ruletype": {
 				Type:             schema.TypeString,
-				Optional:         false,
 				Required:         true,
 				ValidateDiagFunc: validateDiagFunc(validateStatefulRuleType),
 			},
@@ -67,7 +65,6 @@ func resourceSysdigSecureStatefulRule() *schema.Resource {
 			},
 			"exceptions": {
 				Type:     schema.TypeList,
-				Optional: false,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -195,7 +192,12 @@ func resourceSysdigRuleStatefulUpdate(ctx context.Context, d *schema.ResourceDat
 	}
 
 	rule.Version = d.Get("version").(int)
-	rule.ID, _ = strconv.Atoi(d.Id())
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	rule.ID = id
 
 	_, err = client.UpdateStatefulRule(ctx, rule)
 	if err != nil {
