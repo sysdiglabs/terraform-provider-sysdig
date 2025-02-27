@@ -191,7 +191,11 @@ func resourceSysdigRuleStatefulUpdate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	rule.Version = d.Get("version").(int)
+	version, ok := d.Get("version").(int)
+	if !ok {
+		return diag.FromErr(errors.New("version is required"))
+	}
+	rule.Version = version
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
