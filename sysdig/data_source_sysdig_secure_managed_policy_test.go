@@ -37,11 +37,7 @@ func TestAccManagedPolicyDataSource(t *testing.T) {
 				return sysdig.Provider(), nil
 			},
 		},
-		Steps: []resource.TestStep{
-			{
-				Config: managedPolicyDataSource(),
-			},
-		},
+		Steps: steps,
 	})
 }
 
