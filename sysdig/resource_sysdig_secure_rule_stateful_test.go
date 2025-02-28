@@ -33,7 +33,7 @@ func ruleStatefulAppend() string {
 	  ruletype = "STATEFUL_SEQUENCE"
 	  append = true
 	  exceptions {
-      values = jsonencode([["12345", ["docker.io/library/busybox"]]])
+      values = jsonencode([["user_abc", ["12345"]]])
       name = "user_accountid"
     }
 	}`
