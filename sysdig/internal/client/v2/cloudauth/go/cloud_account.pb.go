@@ -1166,7 +1166,7 @@ type CloudOrganization struct {
 	ExcludedOrganizationalGroups []string               `protobuf:"bytes,16,rep,name=excluded_organizational_groups,json=excludedOrganizationalGroups,proto3" json:"excluded_organizational_groups,omitempty"` // optional sub OUs to not target for the organization
 	IncludedCloudAccounts        []string               `protobuf:"bytes,17,rep,name=included_cloud_accounts,json=includedCloudAccounts,proto3" json:"included_cloud_accounts,omitempty"`                      // optional cloud accounts to target for the organization
 	ExcludedCloudAccounts        []string               `protobuf:"bytes,18,rep,name=excluded_cloud_accounts,json=excludedCloudAccounts,proto3" json:"excluded_cloud_accounts,omitempty"`                      // optional cloud accounts to not target for the organization
-	OrganizationRootId           string                 `protobuf:"bytes,19,opt,name=organization_root_id,json=organizationRootId,proto3" json:"organization_root_id,omitempty"`                               // organization's root id
+	OrganizationRootId           string                 `protobuf:"bytes,19,opt,name=organization_root_id,json=organizationRootId,proto3" json:"organization_root_id,omitempty"`                               // organization's root id if available, else organization/tenant id
 }
 
 func (x *CloudOrganization) Reset() {
