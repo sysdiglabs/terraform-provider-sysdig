@@ -428,7 +428,7 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 			return diag.FromErr(err)
 		}
 	} else {
-		// AWS Api Destination case
+		// AWS EventBridge case
 		assets, err = client.GetCloudIngestionAssetsSecure(ctx, d.Get("cloud_provider").(string), d.Get("cloud_provider_id").(string), componentType.(string))
 		if err != nil {
 			return diag.FromErr(err)
@@ -437,17 +437,19 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 		assetsAws, _ := assets["aws"].(map[string]interface{})
 
 		var ingestionURL string
-		if assetsAws["apiDestMetadata"] != nil {
-			ingestionURL = assetsAws["apiDestMetadata"].(map[string]interface{})["ingestionURL"].(string)
+		var apiKey string
+		if assetsAws["ebMetadata"] != nil {
+			ingestionURL = assetsAws["ebMetadata"].(map[string]interface{})["ingestionURL"].(string)
+			apiKey = assetsAws["ebMetadata"].(map[string]interface{})["apiKey"].(string)
 		}
 
 		d.SetId("cloudIngestionAssets")
 		err = d.Set("aws", map[string]interface{}{
-			"eventBusARN":          assetsAws["eventBusARN"],
-			"eventBusARNGov":       assetsAws["eventBusARNGov"],
-			"api_dest_routing_key": assetsAws["apiDestRoutingKey"],
-			"api_dest_routing_url": ingestionURL,
-			"api_dest_token":       assetsAws["apiDestToken"],
+			"eventBusARN":    assetsAws["eventBusARN"],
+			"eventBusARNGov": assetsAws["eventBusARNGov"],
+			"eb_routing_key": assetsAws["ebRoutingKey"],
+			"eb_routing_url": ingestionURL,
+			"eb_api_key":     apiKey,
 		})
 		if err != nil {
 			return diag.FromErr(err)
