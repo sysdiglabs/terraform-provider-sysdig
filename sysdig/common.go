@@ -89,6 +89,7 @@ const (
 	SchemaExcludedOrganizationalGroups  = "excluded_organizational_groups"
 	SchemaIncludedCloudAccounts         = "included_cloud_accounts"
 	SchemaExcludedCloudAccounts         = "excluded_cloud_accounts"
+	SchemaOrganizationRootID            = "organization_root_id"
 	SchemaCloudProviderTenantId         = "provider_tenant_id"
 	SchemaCloudProviderAlias            = "provider_alias"
 	SchemaAccountId                     = "account_id"

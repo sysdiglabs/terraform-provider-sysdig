@@ -121,6 +121,7 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 }
 resource "sysdig_secure_organization" "sample-org" {
   management_account_id		= sysdig_secure_cloud_auth_account.sample.id
+  organization_root_id 		= "test-id"
 }
 `, accountID, test_service_account_key_encoded, test_service_account_key_encoded)
 }
