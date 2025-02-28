@@ -56,5 +56,6 @@ data "sysdig_secure_managed_policy" "stateful_example" {
 	name = "Sysdig AWS Behavioral Analytics Threat Detection"
 	enabled = false
 	type = "awscloudtrail_stateful"
+}
 `
 }
