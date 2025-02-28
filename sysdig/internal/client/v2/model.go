@@ -520,12 +520,15 @@ type Rule struct {
 }
 
 const (
-	RuleTypeContainer  = "CONTAINER"
-	RuleTypeFalco      = "FALCO"
-	RuleTypeFilesystem = "FILESYSTEM"
-	RuleTypeNetwork    = "NETWORK"
-	RuleTypeProcess    = "PROCESS"
-	RuleTypeSyscall    = "SYSCALL"
+	RuleTypeContainer           = "CONTAINER"
+	RuleTypeFalco               = "FALCO"
+	RuleTypeFilesystem          = "FILESYSTEM"
+	RuleTypeNetwork             = "NETWORK"
+	RuleTypeProcess             = "PROCESS"
+	RuleTypeSyscall             = "SYSCALL"
+	RuleTypeStatefulSequence    = "STATEFUL_SEQUENCE"
+	RuleTypeStatefulUniqPercent = "STATEFUL_UNIQ_PERCENT"
+	RuleTypeStatefulCount       = "STATEFUL_COUNT"
 )
 
 type Details struct {
