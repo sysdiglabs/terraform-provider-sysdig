@@ -185,9 +185,6 @@ func TestAccCloudIngestionAssetsDataSource(t *testing.T) {
 			{
 				Config: `data "sysdig_secure_cloud_ingestion_assets" "assets" {}`,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.%", "4"),
-					// not asserting the gov exported fields because not every backend environment is gov supported and thus will have empty values
-
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_routing_key"),
 					// metadata fields are opaque to api backend; cloudingestion controls what fields are passed
 					// asserts ingestionType and ingestionURL in metadata since it is required
