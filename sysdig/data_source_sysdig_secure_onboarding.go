@@ -354,6 +354,10 @@ func dataSourceSysdigSecureCloudIngestionAssets() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"component_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"aws": {
 				Type:     schema.TypeMap,
 				Computed: true,
