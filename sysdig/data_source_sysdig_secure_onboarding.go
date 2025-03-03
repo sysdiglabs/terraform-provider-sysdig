@@ -390,6 +390,8 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 		if err != nil {
 			return diag.FromErr(err)
 		}
+
+		d.SetId("cloudIngestionAssets")
 		assetsGcp, _ := assets["gcp"].(map[string]interface{})
 		err = d.Set("gcp_routing_key", assetsGcp["routingKey"])
 		if err != nil {
