@@ -1220,3 +1220,35 @@ type AgentAccessKeyWriteWrapper struct {
 type OrganizationSecure struct {
 	cloudauth.CloudOrganization
 }
+
+type ZoneWrapper struct {
+	Zone Zone `json:"zone"`
+}
+
+type ZonesWrapper struct {
+	Zones []Zone `json:"zones"`
+}
+
+type ZoneRequest struct {
+	ID          int         `json:"id,omitempty"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Scopes      []ZoneScope `json:"zoneScope"`
+}
+
+type Zone struct {
+	ID             int         `json:"id"`
+	Name           string      `json:"name"`
+	Description    string      `json:"description"`
+	Author         string      `json:"author"`
+	LastModifiedBy string      `json:"lastModifiedBy"`
+	LastUpdated    string      `json:"lastUpdated"`
+	IsSystem       bool        `json:"isSystem"`
+	Scopes         []ZoneScope `json:"scopes"`
+}
+
+type ZoneScope struct {
+	ID         int    `json:"id"`
+	TargetType string `json:"targetType"`
+	Rules      string `json:"rules"`
+}
