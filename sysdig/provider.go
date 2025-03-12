@@ -148,6 +148,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_rule_process":                                  resourceSysdigSecureRuleProcess(),
 			"sysdig_secure_rule_syscall":                                  resourceSysdigSecureRuleSyscall(),
 			"sysdig_secure_rule_falco":                                    resourceSysdigSecureRuleFalco(),
+			"sysdig_secure_rule_stateful":                                 resourceSysdigSecureStatefulRule(),
 			"sysdig_secure_team":                                          resourceSysdigSecureTeam(),
 			"sysdig_secure_list":                                          resourceSysdigSecureList(),
 			"sysdig_secure_macro":                                         resourceSysdigSecureMacro(),

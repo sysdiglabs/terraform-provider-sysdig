@@ -33,6 +33,7 @@ var validatePolicyType = validation.StringInSlice([]string{
 	"aws_machine_learning",
 	"machine_learning",
 	"guardduty",
+	"awscloudtrail_stateful",
 }, false)
 
 func resourceSysdigSecurePolicy() *schema.Resource {
