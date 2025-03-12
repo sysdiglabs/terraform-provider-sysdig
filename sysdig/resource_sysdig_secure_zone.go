@@ -17,6 +17,9 @@ func resourceSysdigZone() *schema.Resource {
 		ReadContext:   resourceSysdigZoneRead,
 		UpdateContext: resourceSysdigZoneUpdate,
 		DeleteContext: resourceSysdigZoneDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Schema: map[string]*schema.Schema{
 			SchemaNameKey: {
