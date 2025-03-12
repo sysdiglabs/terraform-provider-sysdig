@@ -26,21 +26,27 @@ func TestAccSysdigZone_basic(t *testing.T) {
 			{
 				Config: zoneConfig(zoneName, zoneDescription),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sysdig_zone.test", "name", zoneName),
-					resource.TestCheckResourceAttr("sysdig_zone.test", "description", zoneDescription),
-					resource.TestCheckResourceAttr("sysdig_zone.test", "scopes.0.target_type", "aws"),
-					resource.TestCheckResourceAttr("sysdig_zone.test", "scopes.0.rules", "organization in (\"o1\", \"o2\") and account in (\"a1\", \"a2\")"),
+					resource.TestCheckResourceAttr("sysdig_secure_zone.test", "name", zoneName),
+					resource.TestCheckResourceAttr("sysdig_secure_zone.test", "description", zoneDescription),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						"sysdig_secure_zone.test",
+						"scopes.*.scope.*",
+						map[string]string{
+							"target_type": "aws",
+							"rules":       "organization in (\"o1\", \"o2\") and account in (\"a1\", \"a2\")",
+						},
+					),
 				),
 			},
 			{
-				ResourceName:      "sysdig_zone.test",
+				ResourceName:      "sysdig_secure_zone.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				Config: zoneConfig(zoneName, "Updated Description"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sysdig_zone.test", "description", "Updated Description"),
+					resource.TestCheckResourceAttr("sysdig_secure_zone.test", "description", "Updated Description"),
 				),
 			},
 		},
