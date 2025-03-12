@@ -28,8 +28,8 @@ func TestAccSysdigZone_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sysdig_zone.test", "name", zoneName),
 					resource.TestCheckResourceAttr("sysdig_zone.test", "description", zoneDescription),
-					resource.TestCheckResourceAttr("sysdig_zone.test", "scopes.0.target_type", "host"),
-					resource.TestCheckResourceAttr("sysdig_zone.test", "scopes.0.rules", "host.name = 'example-host'"),
+					resource.TestCheckResourceAttr("sysdig_zone.test", "scopes.0.target_type", "aws"),
+					resource.TestCheckResourceAttr("sysdig_zone.test", "scopes.0.rules", "organization in (\"o1\", \"o2\") and account in (\"a1\", \"a2\")"),
 				),
 			},
 			{
@@ -52,12 +52,12 @@ func testAccSysdigZoneConfig(name, description string) string {
 resource "sysdig_zone" "test" {
   name        = "%s"
   description = "%s"
-  scopes = [
-    {
-      target_type = "host"
-      rules       = "host.name = 'example-host'"
+  scopes {
+    scope {
+      target_type = "aws"
+      rules       = "organization in (\"o1\", \"o2\") and account in (\"a1\", \"a2\")"
     }
-  ]
+  }
 }
 `, name, description)
 }
@@ -67,12 +67,12 @@ func testAccSysdigZoneConfigUpdatedDescription(name, description string) string 
 resource "sysdig_zone" "test" {
   name        = "%s"
   description = "%s"
-  scopes = [
-    {
-      target_type = "host"
-      rules       = "host.name = 'example-host'"
+  scopes {
+    scope {
+      target_type = "aws"
+      rules       = "organization in (\"o1\", \"o2\") and account in (\"a1\", \"a2\")"
     }
-  ]
+  }
 }
 `, name, description)
 }

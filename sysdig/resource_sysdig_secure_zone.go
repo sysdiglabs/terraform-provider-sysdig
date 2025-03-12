@@ -18,42 +18,52 @@ func resourceSysdigZone() *schema.Resource {
 		DeleteContext: resourceSysdigZoneDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			SchemaNameKey: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			SchemaDescriptionKey: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"is_system": {
+			SchemaIsSystemKey: {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"author": {
+			SchemaAuthorKey: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"last_modified_by": {
+			SchemaLastModifiedBy: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"last_updated": {
+			SchemaLastUpdated: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"scopes": {
-				Type:     schema.TypeList,
-				Required: true,
+			SchemaScopesKey: {
+				Optional: true,
+				Type:     schema.TypeSet,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"target_type": {
-							Type:     schema.TypeString,
+						SchemaScopeKey: {
+							Type:     schema.TypeSet,
+							MinItems: 1,
 							Required: true,
-						},
-						"rules": {
-							Type:     schema.TypeString,
-							Required: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									SchemaTargetTypeKey: {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									SchemaRulesKey: {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -86,6 +96,7 @@ func resourceSysdigZoneRead(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	id, _ := strconv.Atoi(d.Id())
+
 	zone, err := client.GetZoneById(ctx, id)
 	if err != nil {
 		d.SetId("")
@@ -94,7 +105,7 @@ func resourceSysdigZoneRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	_ = d.Set("name", zone.Name)
 	_ = d.Set("description", zone.Description)
-	_ = d.Set("scopes", flattenZoneScopes(zone.Scopes))
+	_ = d.Set("scopes", fromZoneScopesResponse(zone.Scopes))
 	_ = d.Set("is_system", zone.IsSystem)
 	_ = d.Set("author", zone.Author)
 	_ = d.Set("last_modified_by", zone.LastModifiedBy)
@@ -136,35 +147,64 @@ func resourceSysdigZoneDelete(ctx context.Context, d *schema.ResourceData, m int
 }
 
 func zoneRequestFromResourceData(d *schema.ResourceData) *v2.ZoneRequest {
-	return &v2.ZoneRequest{
-		ID:          d.Get("id").(int),
+	zoneRequest := &v2.ZoneRequest{
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
-		Scopes:      expandZoneScopes(d.Get("scopes").([]interface{})),
+		Scopes:      toZoneScopesRequest(d.Get("scopes").(*schema.Set)),
 	}
+
+	if d.Id() != "" {
+		id, err := strconv.Atoi(d.Id())
+		if err == nil {
+			zoneRequest.ID = id
+		}
+	}
+
+	return zoneRequest
 }
 
-func expandZoneScopes(scopes []interface{}) []v2.ZoneScope {
+func toZoneScopesRequest(scopes *schema.Set) []v2.ZoneScope {
 	var zoneScopes []v2.ZoneScope
-	for _, scope := range scopes {
-		scopeMap := scope.(map[string]interface{})
-		zoneScopes = append(zoneScopes, v2.ZoneScope{
-			TargetType: scopeMap["target_type"].(string),
-			Rules:      scopeMap["rules"].(string),
-		})
+	for _, scopeData := range scopes.List() {
+		scopeMap := scopeData.(map[string]interface{})
+		scopeSet := scopeMap[SchemaScopeKey].(*schema.Set)
+		for _, attr := range scopeSet.List() {
+			s := attr.(map[string]interface{})
+			zoneScopes = append(zoneScopes, v2.ZoneScope{
+				TargetType: s[SchemaTargetTypeKey].(string),
+				Rules:      s[SchemaRulesKey].(string),
+			})
+		}
 	}
 	return zoneScopes
 }
 
-func flattenZoneScopes(scopes []v2.ZoneScope) []interface{} {
+func fromZoneScopesResponse(scopes []v2.ZoneScope) []interface{} {
 	var flattenedScopes []interface{}
 	for _, scope := range scopes {
 		flattenedScopes = append(flattenedScopes, map[string]interface{}{
-			"target_type": scope.TargetType,
-			"rules":       scope.Rules,
+			SchemaTargetTypeKey: scope.TargetType,
+			SchemaRulesKey:      scope.Rules,
 		})
 	}
-	return flattenedScopes
+	response := []interface{}{
+		map[string]interface{}{
+			SchemaScopeKey: schema.NewSet(schema.HashResource(&schema.Resource{
+				Schema: map[string]*schema.Schema{
+					SchemaTargetTypeKey: {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					SchemaRulesKey: {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+				},
+			}), flattenedScopes),
+		},
+	}
+
+	return response
 }
 
 func getZoneClient(clients SysdigClients) (v2.ZoneInterface, error) {

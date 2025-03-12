@@ -42,12 +42,12 @@ func (client *Client) GetZoneById(ctx context.Context, id int) (*Zone, error) {
 	}
 	defer response.Body.Close()
 
-	wrapper, err := Unmarshal[ZoneWrapper](response.Body)
+	zone, err := Unmarshal[Zone](response.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	return &wrapper.Zone, nil
+	return &zone, nil
 }
 
 func (client *Client) CreateZone(ctx context.Context, zone *ZoneRequest) (*Zone, error) {
@@ -66,12 +66,12 @@ func (client *Client) CreateZone(ctx context.Context, zone *ZoneRequest) (*Zone,
 		return nil, client.ErrorFromResponse(response)
 	}
 
-	wrapper, err := Unmarshal[ZoneWrapper](response.Body)
+	createdZone, err := Unmarshal[Zone](response.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	return &wrapper.Zone, nil
+	return &createdZone, nil
 }
 
 func (client *Client) UpdateZone(ctx context.Context, zone *ZoneRequest) (*Zone, error) {
@@ -90,12 +90,12 @@ func (client *Client) UpdateZone(ctx context.Context, zone *ZoneRequest) (*Zone,
 		return nil, client.ErrorFromResponse(response)
 	}
 
-	wrapper, err := Unmarshal[ZoneWrapper](response.Body)
+	updatedZone, err := Unmarshal[Zone](response.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	return &wrapper.Zone, nil
+	return &updatedZone, nil
 }
 
 func (client *Client) DeleteZone(ctx context.Context, id int) error {
