@@ -11,12 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceSysdigZone() *schema.Resource {
+func resourceSysdigSecureZone() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceSysdigZoneCreate,
-		ReadContext:   resourceSysdigZoneRead,
-		UpdateContext: resourceSysdigZoneUpdate,
-		DeleteContext: resourceSysdigZoneDelete,
+		CreateContext: resourceSysdigSecureZoneCreate,
+		ReadContext:   resourceSysdigSecureZoneRead,
+		UpdateContext: resourceSysdigSecureZoneUpdate,
+		DeleteContext: resourceSysdigSecureZoneDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -76,7 +76,7 @@ func resourceSysdigZone() *schema.Resource {
 	}
 }
 
-func resourceSysdigZoneCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigSecureZoneCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, err := getZoneClient(m.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -90,10 +90,10 @@ func resourceSysdigZoneCreate(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	d.SetId(fmt.Sprintf("%d", createdZone.ID))
-	return resourceSysdigZoneRead(ctx, d, m)
+	return resourceSysdigSecureZoneRead(ctx, d, m)
 }
 
-func resourceSysdigZoneRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, err := getZoneClient(m.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -118,7 +118,7 @@ func resourceSysdigZoneRead(ctx context.Context, d *schema.ResourceData, m inter
 	return nil
 }
 
-func resourceSysdigZoneUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigSecureZoneUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, err := getZoneClient(m.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -131,10 +131,10 @@ func resourceSysdigZoneUpdate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(fmt.Errorf("error updating Sysdig Zone: %s", err))
 	}
 
-	return resourceSysdigZoneRead(ctx, d, m)
+	return resourceSysdigSecureZoneRead(ctx, d, m)
 }
 
-func resourceSysdigZoneDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigSecureZoneDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client, err := getZoneClient(m.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
