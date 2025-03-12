@@ -24,7 +24,7 @@ func TestAccSysdigZone_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSysdigZoneConfig(zoneName, zoneDescription),
+				Config: zoneConfig(zoneName, zoneDescription),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sysdig_zone.test", "name", zoneName),
 					resource.TestCheckResourceAttr("sysdig_zone.test", "description", zoneDescription),
@@ -38,7 +38,7 @@ func TestAccSysdigZone_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccSysdigZoneConfigUpdatedDescription(zoneName, "Updated Description"),
+				Config: zoneConfig(zoneName, "Updated Description"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sysdig_zone.test", "description", "Updated Description"),
 				),
@@ -47,24 +47,9 @@ func TestAccSysdigZone_basic(t *testing.T) {
 	})
 }
 
-func testAccSysdigZoneConfig(name, description string) string {
+func zoneConfig(name, description string) string {
 	return fmt.Sprintf(`
-resource "sysdig_zone" "test" {
-  name        = "%s"
-  description = "%s"
-  scopes {
-    scope {
-      target_type = "aws"
-      rules       = "organization in (\"o1\", \"o2\") and account in (\"a1\", \"a2\")"
-    }
-  }
-}
-`, name, description)
-}
-
-func testAccSysdigZoneConfigUpdatedDescription(name, description string) string {
-	return fmt.Sprintf(`
-resource "sysdig_zone" "test" {
+resource "sysdig_secure_zone" "test" {
   name        = "%s"
   description = "%s"
   scopes {
