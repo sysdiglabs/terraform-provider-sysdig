@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -109,7 +110,7 @@ func resourceSysdigZoneRead(ctx context.Context, d *schema.ResourceData, m inter
 	_ = d.Set("is_system", zone.IsSystem)
 	_ = d.Set("author", zone.Author)
 	_ = d.Set("last_modified_by", zone.LastModifiedBy)
-	_ = d.Set("last_updated", zone.LastUpdated)
+	_ = d.Set("last_updated", time.UnixMilli(zone.LastUpdated).Format(time.RFC3339))
 
 	return nil
 }
