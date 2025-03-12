@@ -34,7 +34,7 @@ resource "sysdig_secure_managed_ruleset" "sysdig_runtime_threat_detection_manage
     scope = "container.id != \"\""
 
     // Disabling rules
-    disabled_rules = ["Dump memory for credentials"]
+    disabled_rules = ["Hexadecimal string detected"]
 
     actions {
         container = "stop"
