@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	ZonesPath = "%s/platform/v1/zones"
-	ZonePath  = "%s/platform/v1/zones/%d"
+	PlatformZonesPath = "%s/platform/v1/zones"
+	PlatformZonePath  = "%s/platform/v1/zones/%d"
 )
 
 type ZoneInterface interface {
@@ -113,9 +113,9 @@ func (client *Client) DeleteZone(ctx context.Context, id int) error {
 }
 
 func (client *Client) getZonesURL() string {
-	return fmt.Sprintf(ZonesPath, client.config.url)
+	return fmt.Sprintf(PlatformZonesPath, client.config.url)
 }
 
 func (client *Client) getZoneURL(id int) string {
-	return fmt.Sprintf(ZonePath, client.config.url, id)
+	return fmt.Sprintf(PlatformZonePath, client.config.url, id)
 }
