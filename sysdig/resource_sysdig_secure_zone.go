@@ -47,7 +47,7 @@ func resourceSysdigSecureZone() *schema.Resource {
 				Computed: true,
 			},
 			SchemaScopesKey: {
-				Optional: true,
+				Required: true,
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Elem: &schema.Resource{
@@ -58,6 +58,10 @@ func resourceSysdigSecureZone() *schema.Resource {
 							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									SchemaIDKey: {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
 									SchemaTargetTypeKey: {
 										Type:     schema.TypeString,
 										Required: true,
@@ -175,6 +179,7 @@ func toZoneScopesRequest(scopes *schema.Set) []v2.ZoneScope {
 		for _, attr := range scopeSet.List() {
 			s := attr.(map[string]interface{})
 			zoneScopes = append(zoneScopes, v2.ZoneScope{
+				ID:         s[SchemaIDKey].(int),
 				TargetType: s[SchemaTargetTypeKey].(string),
 				Rules:      s[SchemaRulesKey].(string),
 			})
@@ -187,6 +192,7 @@ func fromZoneScopesResponse(scopes []v2.ZoneScope) []interface{} {
 	var flattenedScopes []interface{}
 	for _, scope := range scopes {
 		flattenedScopes = append(flattenedScopes, map[string]interface{}{
+			SchemaIDKey:         scope.ID,
 			SchemaTargetTypeKey: scope.TargetType,
 			SchemaRulesKey:      scope.Rules,
 		})
@@ -195,6 +201,10 @@ func fromZoneScopesResponse(scopes []v2.ZoneScope) []interface{} {
 		map[string]interface{}{
 			SchemaScopeKey: schema.NewSet(schema.HashResource(&schema.Resource{
 				Schema: map[string]*schema.Schema{
+					SchemaIDKey: {
+						Type:     schema.TypeInt,
+						Computed: true,
+					},
 					SchemaTargetTypeKey: {
 						Type:     schema.TypeString,
 						Required: true,
