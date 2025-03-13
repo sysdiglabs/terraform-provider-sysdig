@@ -66,7 +66,7 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 	}
 	enabled = true
 	scope = "container.id != \"\""
-	disabled_rules = ["Dump memory for credentials"]
+	disabled_rules = ["Hexadecimal string detected"]
 	runbook = "https://sysdig.com"
 
 	actions {
@@ -95,7 +95,7 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 	}
 	enabled = true
 	scope = "container.id != \"\""
-	disabled_rules = ["Dump memory for credentials"]
+	disabled_rules = ["Hexadecimal string detected"]
 	runbook = "https://sysdig.com"
 
 	actions {}
@@ -116,7 +116,7 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 	}
 	enabled = true
 	scope = "container.id != \"\""
-	disabled_rules = ["Dump memory for credentials"]
+	disabled_rules = ["Hexadecimal string detected"]
 	runbook = "https://sysdig.com"
 
 	actions {
@@ -154,7 +154,7 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 	}
 	enabled = true
 	scope = "container.id != \"\""
-	disabled_rules = ["Dump memory for credentials"]
+	disabled_rules = ["Hexadecimal string detected"]
 	runbook = "https://sysdig.com"
 
 	actions {
