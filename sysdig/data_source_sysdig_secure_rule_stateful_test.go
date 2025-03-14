@@ -46,6 +46,12 @@ func ruleStatefulDataSource() string {
 
 data "sysdig_secure_rule_stateful" "data_stateful_rule_append" {
   name = "API Gateway Enumeration Detected"
+  source = "awscloudtrail_stateful"
+  ruletype = "STATEFUL_SEQUENCE"
+  exceptions {
+    values = jsonencode([["user_abc", ["12345"]]])
+	name = "user_accountid"
+	  }
   depends_on = [ sysdig_secure_rule_stateful.stateful_rule_append ]
 }
 `, ruleStatefulAppend())
