@@ -104,11 +104,14 @@ func resourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m
 
 	_ = d.Set("name", zone.Name)
 	_ = d.Set("description", zone.Description)
-	_ = d.Set("scopes", fromZoneScopesResponse(zone.Scopes))
 	_ = d.Set("is_system", zone.IsSystem)
 	_ = d.Set("author", zone.Author)
 	_ = d.Set("last_modified_by", zone.LastModifiedBy)
 	_ = d.Set("last_updated", time.UnixMilli(zone.LastUpdated).Format(time.RFC3339))
+
+	if err := d.Set(SchemaScopeKey, fromZoneScopesResponse(zone.Scopes)); err != nil {
+		return diag.FromErr(fmt.Errorf("error setting scope: %s", err))
+	}
 
 	return nil
 }
