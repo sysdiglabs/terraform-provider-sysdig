@@ -28,28 +28,31 @@ func dataSourceSysdigSecureRuleStateful() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"id": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 			"version": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"source": {
 				Type:             schema.TypeString,
-				Required:         true,
+				Computed:         true,
 				ValidateDiagFunc: validateDiagFunc(validateStatefulRuleSource),
 			},
 			"ruletype": {
 				Type:             schema.TypeString,
-				Required:         true,
+				Computed:         true,
 				ValidateDiagFunc: validateDiagFunc(validateStatefulRuleType),
 			},
 			"append": {
 				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
+				Computed: true,
 			},
 			"exceptions": {
 				Type:     schema.TypeList,
-				Required: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
