@@ -30,7 +30,7 @@ func TestAccSysdigZone_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("sysdig_secure_zone.test", "description", zoneDescription),
 					resource.TestCheckTypeSetElemNestedAttrs(
 						"sysdig_secure_zone.test",
-						"scopes.*.scope.*",
+						"scope.*",
 						map[string]string{
 							"target_type": "aws",
 							"rules":       "organization in (\"o1\", \"o2\") and account in (\"a1\", \"a2\")",
@@ -58,11 +58,9 @@ func zoneConfig(name, description string) string {
 resource "sysdig_secure_zone" "test" {
   name        = "%s"
   description = "%s"
-  scopes {
-    scope {
-      target_type = "aws"
-      rules       = "organization in (\"o1\", \"o2\") and account in (\"a1\", \"a2\")"
-    }
+  scope {
+    target_type = "aws"
+    rules       = "organization in (\"o1\", \"o2\") and account in (\"a1\", \"a2\")"
   }
 }
 `, name, description)

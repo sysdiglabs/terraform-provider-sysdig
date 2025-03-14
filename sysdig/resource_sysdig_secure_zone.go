@@ -46,32 +46,23 @@ func resourceSysdigSecureZone() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			SchemaScopesKey: {
-				Required: true,
+			SchemaScopeKey: {
 				Type:     schema.TypeSet,
-				MaxItems: 1,
+				MinItems: 1,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						SchemaScopeKey: {
-							Type:     schema.TypeSet,
-							MinItems: 1,
+						SchemaIDKey: {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						SchemaTargetTypeKey: {
+							Type:     schema.TypeString,
 							Required: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									SchemaIDKey: {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									SchemaTargetTypeKey: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									SchemaRulesKey: {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-								},
-							},
+						},
+						SchemaRulesKey: {
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},
@@ -158,7 +149,7 @@ func zoneRequestFromResourceData(d *schema.ResourceData) *v2.ZoneRequest {
 	zoneRequest := &v2.ZoneRequest{
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
-		Scopes:      toZoneScopesRequest(d.Get("scopes").(*schema.Set)),
+		Scopes:      toZoneScopesRequest(d.Get(SchemaScopeKey).(*schema.Set)),
 	}
 
 	if d.Id() != "" {
@@ -173,17 +164,13 @@ func zoneRequestFromResourceData(d *schema.ResourceData) *v2.ZoneRequest {
 
 func toZoneScopesRequest(scopes *schema.Set) []v2.ZoneScope {
 	var zoneScopes []v2.ZoneScope
-	for _, scopeData := range scopes.List() {
-		scopeMap := scopeData.(map[string]interface{})
-		scopeSet := scopeMap[SchemaScopeKey].(*schema.Set)
-		for _, attr := range scopeSet.List() {
-			s := attr.(map[string]interface{})
-			zoneScopes = append(zoneScopes, v2.ZoneScope{
-				ID:         s[SchemaIDKey].(int),
-				TargetType: s[SchemaTargetTypeKey].(string),
-				Rules:      s[SchemaRulesKey].(string),
-			})
-		}
+	for _, attr := range scopes.List() {
+		s := attr.(map[string]interface{})
+		zoneScopes = append(zoneScopes, v2.ZoneScope{
+			ID:         s[SchemaIDKey].(int),
+			TargetType: s[SchemaTargetTypeKey].(string),
+			Rules:      s[SchemaRulesKey].(string),
+		})
 	}
 	return zoneScopes
 }
@@ -197,28 +184,7 @@ func fromZoneScopesResponse(scopes []v2.ZoneScope) []interface{} {
 			SchemaRulesKey:      scope.Rules,
 		})
 	}
-	response := []interface{}{
-		map[string]interface{}{
-			SchemaScopeKey: schema.NewSet(schema.HashResource(&schema.Resource{
-				Schema: map[string]*schema.Schema{
-					SchemaIDKey: {
-						Type:     schema.TypeInt,
-						Computed: true,
-					},
-					SchemaTargetTypeKey: {
-						Type:     schema.TypeString,
-						Required: true,
-					},
-					SchemaRulesKey: {
-						Type:     schema.TypeString,
-						Optional: true,
-					},
-				},
-			}), flattenedScopes),
-		},
-	}
-
-	return response
+	return flattenedScopes
 }
 
 func getZoneClient(clients SysdigClients) (v2.ZoneInterface, error) {

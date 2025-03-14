@@ -19,16 +19,14 @@ resource "sysdig_secure_zone" "example" {
   name        = "example-zone"
   description = "An example Sysdig zone"
 
-  scopes {
-    scope {
-      target_type = "aws"
-      rules       = "organization in (\"o1\", \"o2\") and account in (\"a1\", \"a2\")"
-    }
+  scope {
+    target_type = "aws"
+    rules       = "organization in (\"o1\", \"o2\") and account in (\"a1\", \"a2\")"
+  }
 
-    scope {
-      target_type = "azure"
-      rules       = "organization contains \"o1\""
-    }
+  scope {
+    target_type = "azure"
+    rules       = "organization contains \"o1\""
   }
 }
 ```
