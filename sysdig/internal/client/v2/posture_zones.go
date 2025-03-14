@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	ZonesPath = "%s/api/cspm/v1/policy/zones"
-	ZonePath  = "%s/api/cspm/v1/policy/zones/%d"
+	PostureZonesPath = "%s/api/cspm/v1/policy/zones"
+	PostureZonePath  = "%s/api/cspm/v1/policy/zones/%d"
 )
 
 type PostureZoneInterface interface {
@@ -28,7 +28,7 @@ func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZ
 		return nil, "", err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.createZoneURL(), payload)
+	response, err := client.requester.Request(ctx, http.MethodPost, client.createPostureZoneURL(), payload)
 	if err != nil {
 		return nil, "", err
 	}
@@ -48,7 +48,7 @@ func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZ
 }
 
 func (client *Client) GetPostureZone(ctx context.Context, id int) (*PostureZone, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.getZoneURL(id), nil)
+	response, err := client.requester.Request(ctx, http.MethodGet, client.getPostureZoneURL(id), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (client *Client) GetPostureZone(ctx context.Context, id int) (*PostureZone,
 }
 
 func (client *Client) DeletePostureZone(ctx context.Context, id int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.getZoneURL(id), nil)
+	response, err := client.requester.Request(ctx, http.MethodDelete, client.getPostureZoneURL(id), nil)
 	if err != nil {
 		return err
 	}
@@ -76,10 +76,10 @@ func (client *Client) DeletePostureZone(ctx context.Context, id int) error {
 	return nil
 }
 
-func (client *Client) createZoneURL() string {
-	return fmt.Sprintf(ZonesPath, client.config.url)
+func (client *Client) createPostureZoneURL() string {
+	return fmt.Sprintf(PostureZonesPath, client.config.url)
 }
 
-func (client *Client) getZoneURL(id int) string {
-	return fmt.Sprintf(ZonePath, client.config.url, id)
+func (client *Client) getPostureZoneURL(id int) string {
+	return fmt.Sprintf(PostureZonePath, client.config.url, id)
 }

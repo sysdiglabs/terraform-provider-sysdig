@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/cache@v2
+    - uses: actions/cache@v4
       continue-on-error: true
       id: cache-terraform-plugin-dir
       timeout-minutes: 2
@@ -34,12 +34,12 @@ jobs:
       run: |
         echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
     - if: steps.cache-terraform-plugin-dir.outputs.cache-hit != 'true' || steps.cache-terraform-plugin-dir.outcome == 'failure'
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: ${{ env.GOCACHE }}
         key: ${{ runner.os }}-GOCACHE-${{ hashFiles('go.sum') }}-${{ hashFiles('sysdig/**') }}
     - if: steps.cache-terraform-plugin-dir.outputs.cache-hit != 'true' || steps.cache-terraform-plugin-dir.outcome == 'failure'
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-pkg-mod-${{ hashFiles('go.sum') }}
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/cache@v2
+    - uses: actions/cache@v4
       continue-on-error: true
       id: cache-terraform-providers-schema
       timeout-minutes: 2
@@ -61,7 +61,7 @@ jobs:
         path: terraform-providers-schema
         key: ${{ runner.os }}-terraform-providers-schema-${{ hashFiles('go.sum') }}-${{ hashFiles('sysdig/**') }}
     - if: steps.cache-terraform-providers-schema.outputs.cache-hit != 'true' || steps.cache-terraform-providers-schema.outcome == 'failure'
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       timeout-minutes: 2
       with:
         path: terraform-plugin-dir
@@ -97,14 +97,14 @@ jobs:
         go-version: ${{ env.GO_VERSION }}
         check-latest: true
         cache: true
-    - uses: actions/cache@v2
+    - uses: actions/cache@v4
       continue-on-error: true
       timeout-minutes: 2
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-pkg-mod-${{ hashFiles('go.sum') }}
     - run: cd /tmp && go install github.com/bflad/tfproviderdocs@latest
-    - uses: actions/cache@v2
+    - uses: actions/cache@v4
       timeout-minutes: 2
       with:
         path: terraform-providers-schema

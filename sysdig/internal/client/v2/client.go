@@ -60,6 +60,7 @@ type SecureCommon interface {
 	PostureControlInterface
 	PostureAcceptRiskInterface
 	PostureVulnerabilityAcceptRiskInterface
+	ZoneInterface
 }
 
 type Requester interface {
