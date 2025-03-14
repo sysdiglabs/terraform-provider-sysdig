@@ -39,6 +39,8 @@ resource "sysdig_secure_zone" "example" {
 
 ### Scopes block
 
+- `id` - (Computed) The ID of the scope.
+
 - `target_type` - (Required) The target type for the scope. Supported types:
 
     - AWS - `aws`
@@ -162,6 +164,8 @@ resource "sysdig_secure_zone" "example" {
 
 In addition to all arguments above, the following attributes are exported:
 
+- `id` - (Computed) The ID of the Zone.
+- `is_system` - (Computed) Whether the Zone is a system zone.
 - `author` - (Computed) The zone author.
 - `last_modified_by` - (Computed) By whom is last modification made.
 - `last_updated` - (Computed) Timestamp of last modification of zone.
