@@ -37,14 +37,12 @@ func dataSourceSysdigSecureRuleStateful() *schema.Resource {
 				Computed: true,
 			},
 			"source": {
-				Type:             schema.TypeString,
-				Computed:         true,
-				ValidateDiagFunc: validateDiagFunc(validateStatefulRuleSource),
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"ruletype": {
-				Type:             schema.TypeString,
-				Computed:         true,
-				ValidateDiagFunc: validateDiagFunc(validateStatefulRuleType),
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"append": {
 				Type:     schema.TypeBool,
