@@ -4,10 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"strconv"
 	"time"
 
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -37,8 +35,9 @@ func dataSourceSysdigSecureRuleStateful() *schema.Resource {
 				Computed: true,
 			},
 			"source": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validateDiagFunc(validateStatefulRuleSource),
 			},
 			"ruletype": {
 				Type:     schema.TypeString,
@@ -74,11 +73,6 @@ func dataSourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	nameObj, ok := d.GetOk("name")
 	if !ok {
 		return diag.FromErr(errors.New("name is required"))
@@ -98,17 +92,16 @@ func dataSourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	if len(rules) == 0 {
-		d.SetId("")
+	ruleIndexObj, ok := d.GetOk("index")
+	ruleIndex := 0
+	if ok {
+		ruleIndex = ruleIndexObj.(int)
 	}
 
-	var rule v2.Rule
+	rule := rules[ruleIndex]
 
-	for _, r := range rules {
-		if r.ID == id {
-			rule = r
-			break
-		}
+	if len(rules) == 0 {
+		d.SetId("")
 	}
 
 	exceptions := make([]any, 0, len(rule.Details.Exceptions))

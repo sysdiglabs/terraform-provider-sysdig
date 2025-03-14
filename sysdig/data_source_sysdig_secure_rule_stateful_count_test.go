@@ -14,7 +14,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccRuleStatefulDataSource(t *testing.T) {
+func TestAccRuleStatefulCountDataSource(t *testing.T) {
 
 	if strings.HasSuffix(os.Getenv("SYSDIG_SECURE_URL"), "ibm.com") {
 		t.Skip("Skipping stateful tests for IBM Cloud")
@@ -34,13 +34,16 @@ func TestAccRuleStatefulDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: ruleStatefulDataSource(),
+				Config: ruleStatefulCountDataSource(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.sysdig_secure_rule_stateful_count.data_stateful_rule_append", "rule_count", "1"),
+				),
 			},
 		},
 	})
 }
 
-func ruleStatefulDataSource() string {
+func ruleStatefulCountDataSource() string {
 	return fmt.Sprintf(`
 %s
 
