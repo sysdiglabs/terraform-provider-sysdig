@@ -34,6 +34,9 @@ func TestAccRuleStatefulDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
+				Config: ruleStatefulAppend(),
+			},
+			{
 				Config: ruleStatefulDataSource(),
 			},
 		},
@@ -41,12 +44,11 @@ func TestAccRuleStatefulDataSource(t *testing.T) {
 }
 
 func ruleStatefulDataSource() string {
-	return fmt.Sprintf(`
-%s
+	return fmt.Sprint(`
 
 data "sysdig_secure_rule_stateful" "data_stateful_rule_append" {
   name = "API Gateway Enumeration Detected"
   depends_on = [ sysdig_secure_rule_stateful.stateful_rule_append ]
 }
-`, ruleStatefulAppend())
+`)
 }
