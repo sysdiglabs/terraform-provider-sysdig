@@ -47,7 +47,7 @@ func ruleStatefulCountDataSource() string {
 	return fmt.Sprintf(`
 %s
 
-data "sysdig_secure_rule_stateful" "data_stateful_rule_append" {
+data "sysdig_secure_rule_stateful_count" "data_stateful_rule_append" {
   name = "API Gateway Enumeration Detected"
   source = "awscloudtrail_stateful"
   depends_on = [ sysdig_secure_rule_stateful.stateful_rule_append ]
