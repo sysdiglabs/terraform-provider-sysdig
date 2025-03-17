@@ -36,7 +36,7 @@ func TestAccRuleStatefulCountDataSource(t *testing.T) {
 			{
 				Config: ruleStatefulCountDataSource(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.sysdig_secure_rule_stateful_count.data_stateful_rule_append", "rule_count", "1"),
+					resource.TestCheckResourceAttr("data.sysdig_secure_rule_stateful_count.data_stateful_rule_append", "rule_count", "2"),
 				),
 			},
 		},
