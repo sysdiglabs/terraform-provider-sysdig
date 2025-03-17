@@ -96,7 +96,10 @@ func dataSourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceDat
 	ruleIndexObj, ok := d.GetOk("index")
 	ruleIndex := 0
 	if ok {
-		ruleIndex, _ = ruleIndexObj.(int)
+		ruleIndex, ok = ruleIndexObj.(int)
+		if !ok {
+			return diag.FromErr(errors.New("index must be an integer"))
+		}
 	}
 
 	rule := rules[ruleIndex]
