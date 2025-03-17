@@ -50,7 +50,7 @@ func dataSourceSysdigRuleStatefulCountRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	d.SetId(fmt.Sprintf("count_%s", ruleName))
+	d.SetId(fmt.Sprintf("count__%s__%s", ruleName, ruleType))
 	_ = d.Set("name", ruleName)
 	_ = d.Set("rule_count", len(rules))
 
