@@ -96,7 +96,7 @@ func dataSourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceDat
 	ruleIndexObj, ok := d.GetOk("index")
 	ruleIndex := 0
 	if ok {
-		ruleIndex, ok = ruleIndexObj.(int)
+		ruleIndex, _ = ruleIndexObj.(int)
 	}
 
 	rule := rules[ruleIndex]
