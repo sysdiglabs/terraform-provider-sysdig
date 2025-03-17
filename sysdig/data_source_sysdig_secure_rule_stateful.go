@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -102,6 +103,15 @@ func dataSourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceDat
 
 	if len(rules) == 0 {
 		d.SetId("")
+	} else {
+		d.SetId(strconv.Itoa(rule.ID))
+	}
+
+	_ = d.Set("name", rule.Name)
+	_ = d.Set("source", source)
+
+	if rule.Details.Append != nil {
+		_ = d.Set("append", *rule.Details.Append)
 	}
 
 	exceptions := make([]any, 0, len(rule.Details.Exceptions))
