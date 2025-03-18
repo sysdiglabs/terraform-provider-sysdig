@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 )
 
 const (
@@ -13,15 +14,18 @@ const (
 
 type ZoneInterface interface {
 	Base
-	GetZones(ctx context.Context) ([]Zone, error)
+	GetZones(ctx context.Context, name string) ([]Zone, error)
 	GetZoneById(ctx context.Context, id int) (*Zone, error)
 	CreateZone(ctx context.Context, zone *ZoneRequest) (*Zone, error)
 	UpdateZone(ctx context.Context, zone *ZoneRequest) (*Zone, error)
 	DeleteZone(ctx context.Context, id int) error
 }
 
-func (client *Client) GetZones(ctx context.Context) ([]Zone, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.getZonesURL(), nil)
+func (client *Client) GetZones(ctx context.Context, name string) ([]Zone, error) {
+	zonesURL := client.getZonesURL()
+	zonesURL = fmt.Sprintf("%s?filter=name:%s", zonesURL, url.QueryEscape(name))
+
+	response, err := client.requester.Request(ctx, http.MethodGet, zonesURL, nil)
 	if err != nil {
 		return nil, err
 	}
