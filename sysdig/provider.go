@@ -235,6 +235,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_rule_syscall":                                  dataSourceSysdigSecureRuleSyscall(),
 			"sysdig_secure_posture_policies":                              dataSourceSysdigSecurePosturePolicies(),
 			"sysdig_secure_custom_role_permissions":                       dataSourceSysdigSecureCustomRolePermissions(),
+			"sysdig_secure_zone":                                          dataSourceSysdigSecureZone(),
 
 			"sysdig_current_user":                                          dataSourceSysdigCurrentUser(),
 			"sysdig_user":                                                  dataSourceSysdigUser(),
