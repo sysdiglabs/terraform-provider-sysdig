@@ -1,3 +1,11 @@
+---
+subcategory: "Sysdig Secure"
+layout: "sysdig"
+page_title: "Sysdig: sysdig_secure_zone"
+description: |-
+  Retrieves Zone by ID.
+---
+
 # sysdig\_secure\_zone Data Source
 
 The `sysdig_secure_zone` data source allows you to retrieve information about a specific Sysdig Secure Zone.
