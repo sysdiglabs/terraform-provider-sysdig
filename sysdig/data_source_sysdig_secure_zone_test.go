@@ -30,7 +30,7 @@ func TestAccDataSourceSysdigSecureZone(t *testing.T) {
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_zone.test", "last_modified_by"),
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_zone.test", "last_updated"),
 					resource.TestCheckTypeSetElemNestedAttrs(
-						"test-secure-zone",
+						"data.sysdig_secure_zone.test",
 						"scope.*",
 						map[string]string{
 							"target_type": "aws",
