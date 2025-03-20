@@ -44,4 +44,3 @@ Supported fields for exceptions:
 * `name` - The name of the existing exception definition.
 * `values` - Contains tuples of values. Each item in the tuple should align 1-1 with the corresponding field
   and comparison operator. 
-
