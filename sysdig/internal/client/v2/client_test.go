@@ -57,7 +57,6 @@ func TestUnmarshal(t *testing.T) {
 }
 
 func TestClient_ErrorFromResponse_non_json(t *testing.T) {
-
 	givenPayload := "non json body"
 	expected := "401 Unauthorized"
 	c := Client{}
@@ -111,7 +110,6 @@ func TestClient_ErrorFromResponse_standard_error_format(t *testing.T) {
 }
 
 func TestClient_ErrorFromResponse_standard_error_format_2(t *testing.T) {
-
 	givenPayload := `
 	{
 		"timestamp" : 1715255725613,
