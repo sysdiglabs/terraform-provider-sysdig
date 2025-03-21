@@ -15,7 +15,7 @@ Creates a Sysdig Monitor Notification Channel of type IBM Event Notification (on
 ## Example Usage
 
 ```terraform
-# IBM event notification registering in the same account 
+# IBM event notification registering in the same account
 resource "sysdig_monitor_notification_channel_ibm_event_notification" "sample" {
 	name                    = "Example Channel - IBM Event Notification"
 	enabled                 = true
@@ -27,7 +27,7 @@ resource "sysdig_monitor_notification_channel_ibm_event_notification" "sample" {
 ```
 
 ```terraform
-# IBM event notification registering in different account 
+# IBM event notification registering in different account
 resource "sysdig_monitor_notification_channel_ibm_event_notification" "sample" {
 	name                    = "Example Channel - IBM Event Notification"
 	enabled                 = true
@@ -42,7 +42,7 @@ resource "sysdig_monitor_notification_channel_ibm_event_notification" "sample" {
 
 * `name` - (Required) The name of the Notification Channel. Must be unique.
 
-* `instance_id` - (Required) id of the Event Notifications Instance. Id value can be either an instance id or CRN. If the event notification instance is within the same account, use the actual instance id. If it is in a different account, then use the Event Notifications Instance's [CRN](https://cloud.ibm.com/docs/account?topic=account-crn).   
+* `instance_id` - (Required) id of the Event Notifications Instance. Id value can be either an instance id or CRN. If the event notification instance is within the same account, use the actual instance id. If it is in a different account, then use the Event Notifications Instance's [CRN](https://cloud.ibm.com/docs/account?topic=account-crn).
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
@@ -56,7 +56,7 @@ resource "sysdig_monitor_notification_channel_ibm_event_notification" "sample" {
     if the notification channel is working. Default is false.
 
 * `share_with_current_team` - (Optional) If set to `true` it will share notification channel only with current team (in which user is logged in).
-  Otherwise, it will share it with all teams, which is the default behaviour.
+  Otherwise, it will share it with all teams, which is the default behaviour. Although this is an optional setting, beware that if you have lower permissions than admin you may see a `error: 403 Forbidden` if this is not set to `true`.
 
 ## Attributes Reference
 

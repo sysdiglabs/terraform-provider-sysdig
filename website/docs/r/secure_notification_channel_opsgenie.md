@@ -44,7 +44,7 @@ resource "sysdig_secure_notification_channel_opsgenie" "sample-opsgenie" {
     if the notification channel is working. Default is false.
 
 * `share_with_current_team` - (Optional) If set to `true` it will share notification channel only with current team (in which user is logged in).
-  Otherwise, it will share it with all teams, which is the default behaviour.
+  Otherwise, it will share it with all teams, which is the default behaviour. Although this is an optional setting, beware that if you have lower permissions than admin you may see a `error: 403 Forbidden` if this is not set to `true`.
 
 ## Attributes Reference
 
