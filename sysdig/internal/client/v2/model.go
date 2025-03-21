@@ -1225,7 +1225,7 @@ type OrganizationSecure struct {
 }
 
 type ZonesWrapper struct {
-	Zones []Zone `json:"zones"`
+	Zones []Zone `json:"data"`
 }
 
 type ZoneRequest struct {
