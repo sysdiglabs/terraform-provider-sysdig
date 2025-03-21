@@ -199,6 +199,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_posture_control":                                resourceSysdigSecurePostureControl(),
 			"sysdig_secure_posture_accept_risk":                            resourceSysdigSecureAcceptPostureRisk(),
 			"sysdig_secure_vulnerability_accept_risk":                      resourceSysdigSecureVulnerabilityAcceptRisk(),
+			"sysdig_secure_zone":                                           resourceSysdigSecureZone(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_secure_agentless_scanning_assets":                     dataSourceSysdigSecureAgentlessScanningAssets(),
@@ -236,6 +237,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_custom_role_permissions":                       dataSourceSysdigSecureCustomRolePermissions(),
 			"sysdig_secure_rule_stateful":                                 dataSourceSysdigSecureRuleStateful(),
 			"sysdig_secure_rule_stateful_count":                           dataSourceSysdigSecureRuleStatefulCount(),
+			"sysdig_secure_zone":                                          dataSourceSysdigSecureZone(),
 
 			"sysdig_current_user":                                          dataSourceSysdigCurrentUser(),
 			"sysdig_user":                                                  dataSourceSysdigUser(),
