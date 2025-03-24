@@ -185,10 +185,8 @@ func TestAccCloudIngestionAssetsDataSource(t *testing.T) {
 			{
 				Config: `data "sysdig_secure_cloud_ingestion_assets" "assets" {}`,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.%", "4"),
-					// not asserting the gov exported fields because not every backend environment is gov supported and thus will have empty values
-
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_routing_key"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.eventBusARN"),
 					// metadata fields are opaque to api backend; cloudingestion controls what fields are passed
 					// asserts ingestionType and ingestionURL in metadata since it is required
 					resource.TestCheckResourceAttr("data.sysdig_secure_cloud_ingestion_assets.assets", "gcp_metadata.ingestionType", "gcp"),
@@ -203,6 +201,18 @@ func TestAccCloudIngestionAssetsDataSource(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.sns_routing_key"),
 					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.sns_routing_url"),
+				),
+			},
+			{
+				Config: `data "sysdig_secure_cloud_ingestion_assets" "assets" {
+						cloud_provider = "aws" 
+						cloud_provider_id = "012345678901"
+						component_type = "COMPONENT_WEBHOOK_DATASOURCE"
+				}`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.eb_routing_key"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.eb_routing_url"),
+					resource.TestCheckResourceAttrSet("data.sysdig_secure_cloud_ingestion_assets.assets", "aws.eb_api_key"),
 				),
 			},
 		},
