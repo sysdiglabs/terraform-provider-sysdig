@@ -1154,6 +1154,11 @@ type PostureZoneRequest struct {
 	Scopes      []PostureZoneScope `json:"scopes"`
 }
 
+type ZonePoliciesRequest struct {
+	ZoneID    int   `json:"zoneId"`
+	PolicyIDs []int `json:"policyIds"`
+}
+
 type PostureZoneResponse struct {
 	Data PostureZone `json:"data"`
 }
