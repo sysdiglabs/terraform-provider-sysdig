@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	PostureZonesPath = "%s/api/cspm/v1/policy/zones"
-	PostureZonePath  = "%s/api/cspm/v1/policy/zones/%d"
+	PostureZonesPath        = "%s/api/cspm/v1/policy/zones"
+	PostureZonePath         = "%s/api/cspm/v1/policy/zones/%d"
+	PostureZonePoliciesPath = "%s/api/cspm/v1/policy/zone-policies"
 )
 
 type PostureZoneInterface interface {
@@ -16,6 +17,7 @@ type PostureZoneInterface interface {
 	CreateOrUpdatePostureZone(ctx context.Context, z *PostureZoneRequest) (*PostureZone, string, error)
 	GetPostureZone(ctx context.Context, id int) (*PostureZone, error)
 	DeletePostureZone(ctx context.Context, id int) error
+	BindZoneToPolicies(ctx context.Context, r *ZonePoliciesRequest) error
 }
 
 func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZoneRequest) (*PostureZone, string, error) {
@@ -76,10 +78,35 @@ func (client *Client) DeletePostureZone(ctx context.Context, id int) error {
 	return nil
 }
 
+func (client *Client) BindZoneToPolicies(ctx context.Context, r *ZonePoliciesRequest) error {
+
+	payload, err := Marshal(r)
+	if err != nil {
+		return err
+	}
+
+	response, err := client.requester.Request(ctx, http.MethodPost, client.getZonePoliciesURL(), payload)
+	if err != nil {
+		return err
+	}
+
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return client.ErrorFromResponse(response)
+	}
+
+	return nil
+}
+
 func (client *Client) createPostureZoneURL() string {
 	return fmt.Sprintf(PostureZonesPath, client.config.url)
 }
 
 func (client *Client) getPostureZoneURL(id int) string {
 	return fmt.Sprintf(PostureZonePath, client.config.url, id)
+}
+
+func (client *Client) getZonePoliciesURL() string {
+	return fmt.Sprintf(PostureZonePoliciesPath, client.config.url)
 }
