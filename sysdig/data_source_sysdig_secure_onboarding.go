@@ -380,88 +380,85 @@ func dataSourceSysdigSecureCloudIngestionAssets() *schema.Resource {
 
 // Retrieves the information of a resource form the file and loads it in Terraform
 func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var assets map[string]any
-	var err error
-
 	client, err := getSecureOnboardingClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	cloudProvider, ok := d.GetOk("cloud_provider")
-	if !ok {
-		// GCP case
-		assets, err = client.GetCloudIngestionAssetsSecure(ctx, "", "", "")
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		d.SetId("cloudIngestionAssets")
-		assetsGcp, _ := assets["gcp"].(map[string]interface{})
-		err = d.Set("gcp_routing_key", assetsGcp["routingKey"])
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		err = d.Set("gcp_metadata", assetsGcp["metadata"])
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		return nil
+	cloudProvider := ""
+	if v, ok := d.GetOk("cloud_provider"); ok {
+		cloudProvider = v.(string)
 	}
 
-	componentType, ok := d.GetOk("component_type")
-	if !ok {
-		// AWS SNS case
-		assets, err = client.GetCloudIngestionAssetsSecure(ctx, cloudProvider.(string), d.Get("cloud_provider_id").(string), "")
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		assetsAws, _ := assets["aws"].(map[string]interface{})
+	cloudProviderID := ""
+	if v, ok := d.GetOk("cloud_provider_id"); ok {
+		cloudProviderID = v.(string)
+	}
 
-		var ingestionURL string
-		if assetsAws["snsMetadata"] != nil {
-			ingestionURL = assetsAws["snsMetadata"].(map[string]interface{})["ingestionURL"].(string)
-		}
+	componentType := ""
+	if v, ok := d.GetOk("component_type"); ok {
+		componentType = v.(string)
+	}
 
-		d.SetId("cloudIngestionAssets")
-		err = d.Set("aws", map[string]interface{}{
-			"eventBusARN":     assetsAws["eventBusARN"],
-			"eventBusARNGov":  assetsAws["eventBusARNGov"],
-			"sns_routing_key": assetsAws["snsRoutingKey"],
-			"sns_routing_url": ingestionURL,
-		})
-		if err != nil {
-			return diag.FromErr(err)
-		}
-	} else {
-		// AWS EventBridge case
-		assets, err = client.GetCloudIngestionAssetsSecure(ctx, d.Get("cloud_provider").(string), d.Get("cloud_provider_id").(string), componentType.(string))
-		if err != nil {
-			return diag.FromErr(err)
+	assets, err := client.GetCloudIngestionAssetsSecure(ctx, cloudProvider, cloudProviderID, componentType)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("cloudIngestionAssets")
+
+	// Set GCP data if available
+	if gcpAssets, ok := assets["gcp"].(map[string]interface{}); ok {
+		if routingKey, exists := gcpAssets["routingKey"]; exists {
+			if err := d.Set("gcp_routing_key", routingKey); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 
-		assetsAws, _ := assets["aws"].(map[string]interface{})
+		if metadata, exists := gcpAssets["metadata"]; exists {
+			if err := d.Set("gcp_metadata", metadata); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
 
-		var ingestionURL string
-		var apiKey string
-		if assetsAws["ebMetadata"] != nil {
-			ingestionURL = assetsAws["ebMetadata"].(map[string]interface{})["ingestionURL"].(string)
-			apiKey = assetsAws["ebMetadata"].(map[string]interface{})["apiKey"].(string)
+	// Set AWS data if available
+	if awsAssets, ok := assets["aws"].(map[string]interface{}); ok {
+		awsData := map[string]interface{}{
+			"eventBusARN":    awsAssets["eventBusARN"],
+			"eventBusARNGov": awsAssets["eventBusARNGov"],
 		}
 
-		d.SetId("cloudIngestionAssets")
-		err = d.Set("aws", map[string]interface{}{
-			"eventBusARN":    assetsAws["eventBusARN"],
-			"eventBusARNGov": assetsAws["eventBusARNGov"],
-			"eb_routing_key": assetsAws["ebRoutingKey"],
-			"eb_routing_url": ingestionURL,
-			"eb_api_key":     apiKey,
-		})
-		if err != nil {
+		// Add SNS specific fields if available
+		if awsAssets["snsRoutingKey"] != nil {
+			awsData["sns_routing_key"] = awsAssets["snsRoutingKey"]
+		}
+
+		if snsMetadata, ok := awsAssets["snsMetadata"].(map[string]interface{}); ok && snsMetadata != nil {
+			if ingestionURL, exists := snsMetadata["ingestionURL"]; exists {
+				awsData["sns_routing_url"] = ingestionURL
+			}
+		}
+
+		// Add EventBridge specific fields if available
+		if awsAssets["ebRoutingKey"] != nil {
+			awsData["eb_routing_key"] = awsAssets["ebRoutingKey"]
+		}
+
+		if ebMetadata, ok := awsAssets["ebMetadata"].(map[string]interface{}); ok && ebMetadata != nil {
+			if ingestionURL, exists := ebMetadata["ingestionURL"]; exists {
+				awsData["eb_routing_url"] = ingestionURL
+			}
+			if apiKey, exists := ebMetadata["apiKey"]; exists {
+				awsData["eb_api_key"] = apiKey
+			}
+		}
+
+		if err := d.Set("aws", awsData); err != nil {
 			return diag.FromErr(err)
 		}
 	}
+
 	return nil
 }
 
