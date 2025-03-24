@@ -119,6 +119,9 @@ func resourceCreatePostureZone(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	zoneClient, err := getZoneClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	postureZoneClient, err := getPostureZoneClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -171,6 +174,9 @@ func resourceUpdatePostureZone(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	zoneClient, err := getZoneClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	postureZoneClient, err := getPostureZoneClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -293,6 +299,9 @@ func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resource
 
 func resourceSysdigSecurePostureZoneDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	postureClient, err := getPostureZoneClient(meta.(SysdigClients))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	zoneClient, err := getZoneClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
