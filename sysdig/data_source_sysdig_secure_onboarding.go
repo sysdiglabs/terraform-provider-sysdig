@@ -355,9 +355,8 @@ func dataSourceSysdigSecureCloudIngestionAssets() *schema.Resource {
 				Optional: true,
 			},
 			"component_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"COMPONENT_WEBHOOK_DATASOURCE"}, false),
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"aws": {
 				Type:     schema.TypeMap,
