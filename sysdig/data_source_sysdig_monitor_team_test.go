@@ -23,7 +23,7 @@ func TestAccDataSourceSysdigMonitorTeam(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: monitorTeamWithName(name),
+				Config: monitorTeamResourceAndDatasource(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test", "name", name),
 				),
@@ -32,7 +32,7 @@ func TestAccDataSourceSysdigMonitorTeam(t *testing.T) {
 	})
 }
 
-func monitorTeamWithName(name string) string {
+func monitorTeamResourceAndDatasource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team" "sample" {
   name        = "TF test-%s"

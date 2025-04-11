@@ -22,7 +22,7 @@ func TestAccDataSourceSysdigSecureTeam(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureTeamWithName(name),
+				Config: secureTeamAndDatasource(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "name", name),
 				),
@@ -31,7 +31,7 @@ func TestAccDataSourceSysdigSecureTeam(t *testing.T) {
 	})
 }
 
-func secureTeamWithName(name string) string {
+func secureTeamAndDatasource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_team" "sample" {
   name        = "TF test-%s"
