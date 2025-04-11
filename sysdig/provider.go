@@ -238,6 +238,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_rule_stateful":                                 dataSourceSysdigSecureRuleStateful(),
 			"sysdig_secure_rule_stateful_count":                           dataSourceSysdigSecureRuleStatefulCount(),
 			"sysdig_secure_zone":                                          dataSourceSysdigSecureZone(),
+			"sysdig_secure_team":                                          dataSourceSysdigSecureTeam(),
 
 			"sysdig_current_user":                                          dataSourceSysdigCurrentUser(),
 			"sysdig_user":                                                  dataSourceSysdigUser(),
@@ -260,6 +261,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_monitor_notification_channel_ibm_event_notification":   dataSourceSysdigMonitorNotificationChannelIBMEventNotification(),
 			"sysdig_monitor_notification_channel_ibm_function":             dataSourceSysdigMonitorNotificationChannelIBMFunction(),
 			"sysdig_monitor_custom_role_permissions":                       dataSourceSysdigMonitorCustomRolePermissions(),
+			"sysdig_monitor_team":                                          dataSourceSysdigMonitorTeam(),
 			"sysdig_secure_posture_policy":                                 dataSourceSysdigSecurePosturePolicy(),
 		},
 		ConfigureContextFunc: p.providerConfigure,
