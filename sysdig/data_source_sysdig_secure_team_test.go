@@ -14,7 +14,7 @@ import (
 func TestAccDataSourceSysdigSecureTeam(t *testing.T) {
 	name := fmt.Sprintf("test-secure-team-%s", randomText(5))
 	resource.Test(t, resource.TestCase{
-		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
+		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -34,8 +34,10 @@ func TestAccDataSourceSysdigSecureTeam(t *testing.T) {
 func secureTeamAndDatasource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_team" "sample" {
-  name        = "TF test-%s"
-  description = "A test secure team"
+  name        = "%s"
+  description        = "A test secure team"
+  scope_by           = "container"
+  filter             = "container.image.repo = \"sysdig/agent\""
 }
 
 data "sysdig_secure_team" "test" {
