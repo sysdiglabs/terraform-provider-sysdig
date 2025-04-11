@@ -4,12 +4,13 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceSysdigSecureTeam() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceSysdigSecureTeamRead,
+		ReadContext: dataSourceSysdigSecureTeamRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -78,21 +79,21 @@ func dataSourceSysdigSecureTeam() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecureTeamRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	clients := meta.(SysdigClients)
 	client, err := getSecureTeamClient(clients)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Get("id").(string))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	team, err := client.GetTeamById(context.Background(), id)
+	team, err := client.GetTeamById(ctx, id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(team.ID))

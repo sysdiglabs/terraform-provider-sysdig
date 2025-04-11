@@ -4,12 +4,13 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceSysdigMonitorTeam() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceSysdigMonitorTeamRead,
+		ReadContext: dataSourceSysdigMonitorTeamRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -70,6 +71,7 @@ func dataSourceSysdigMonitorTeam() *schema.Resource {
 			"entrypoint": {
 				Type:     schema.TypeList,
 				Computed: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
@@ -91,21 +93,21 @@ func dataSourceSysdigMonitorTeam() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigMonitorTeamRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	clients := meta.(SysdigClients)
 	client, err := getMonitorTeamClient(clients)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id, err := strconv.Atoi(d.Get("id").(string))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	team, err := client.GetTeamById(context.Background(), id)
+	team, err := client.GetTeamById(ctx, id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(strconv.Itoa(team.ID))
