@@ -37,8 +37,14 @@ func monitorTeamResourceAndDatasource(name string) string {
 resource "sysdig_monitor_team" "sample" {
   name        = "%s"
   description        = "A monitor secure team"
-  scope_by           = "container"
-  filter             = "container.image.repo = \"sysdig/agent\""
+  scope_by           			= "host"
+  filter             			= "container.image.repo = \"sysdig/agent\""
+  can_use_sysdig_capture 		= true
+  can_see_infrastructure_events = true
+  
+  entrypoint {
+	type = "Dashboards"
+  }
 }
 
 data "sysdig_monitor_team" "test" {

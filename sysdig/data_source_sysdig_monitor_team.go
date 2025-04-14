@@ -71,7 +71,6 @@ func dataSourceSysdigMonitorTeam() *schema.Resource {
 			"entrypoint": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
