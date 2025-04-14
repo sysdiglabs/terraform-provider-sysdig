@@ -191,5 +191,19 @@ func fromZoneScopesResponse(scopes []v2.ZoneScope) []interface{} {
 }
 
 func getZoneClient(clients SysdigClients) (v2.ZoneInterface, error) {
-	return clients.sysdigSecureClientV2()
+	var client v2.ZoneInterface
+	var err error
+	switch clients.GetClientType() {
+	case IBMSecure:
+		client, err = clients.ibmSecureClient()
+		if err != nil {
+			return nil, err
+		}
+	default:
+		client, err = clients.sysdigSecureClientV2()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }

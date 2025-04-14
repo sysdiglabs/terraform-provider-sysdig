@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig_secure || tf_acc_onprem_secure
+//go:build tf_acc_sysdig_secure || tf_acc_onprem_secure || tf_acc_ibm_secure
 
 package sysdig_test
 
@@ -16,7 +16,7 @@ func TestAccSysdigZone_basic(t *testing.T) {
 	zoneDescription := "Test Zone Description"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
+		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
