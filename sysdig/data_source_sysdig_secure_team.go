@@ -44,6 +44,14 @@ func dataSourceSysdigSecureTeam() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"enable_ibm_platform_metrics": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"ibm_platform_metrics": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"user_roles": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -108,6 +116,13 @@ func dataSourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData,
 	_ = d.Set("version", team.Version)
 	_ = d.Set("zone_ids", team.ZoneIDs)
 	_ = d.Set("all_zones", team.AllZones)
+
+	var ibmPlatformMetrics *string
+	if team.NamespaceFilters != nil {
+		ibmPlatformMetrics = team.NamespaceFilters.IBMPlatformMetrics
+	}
+	_ = d.Set("enable_ibm_platform_metrics", team.CanUseBeaconMetrics)
+	_ = d.Set("ibm_platform_metrics", ibmPlatformMetrics)
 
 	return nil
 }

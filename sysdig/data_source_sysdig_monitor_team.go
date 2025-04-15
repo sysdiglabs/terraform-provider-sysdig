@@ -52,6 +52,14 @@ func dataSourceSysdigMonitorTeam() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"enable_ibm_platform_metrics": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"ibm_platform_metrics": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"user_roles": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -122,6 +130,13 @@ func dataSourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData
 	_ = d.Set("user_roles", userMonitorRolesToSet(team.UserRoles))
 	_ = d.Set("entrypoint", entrypointToSet(team.EntryPoint))
 	_ = d.Set("version", team.Version)
+
+	var ibmPlatformMetrics *string
+	if team.NamespaceFilters != nil {
+		ibmPlatformMetrics = team.NamespaceFilters.IBMPlatformMetrics
+	}
+	_ = d.Set("enable_ibm_platform_metrics", team.CanUseBeaconMetrics)
+	_ = d.Set("ibm_platform_metrics", ibmPlatformMetrics)
 
 	return nil
 }
