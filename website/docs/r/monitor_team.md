@@ -21,7 +21,7 @@ resource "sysdig_monitor_team" "devops" {
   entrypoint {
 	type = "Explore"
   }
-  
+
   user_roles {
     email = data.sysdig_current_user.me.email
     role = "ROLE_TEAM_MANAGER"
@@ -36,8 +36,11 @@ resource "sysdig_monitor_team" "devops" {
     email = "john.smith@example.com"
     role = data.sysdig_custom_role.custom_role.id
   }
+
+  filter = "kubernetes.namespace.name in (\"kube-system\") and kubernetes.deployment.name in (\"coredns\")"
+  prometheus_remote_write_metrics_filter = "kube_cluster_name in (\"test-cluster\", \"test-k8s-data\") and kube_deployment_name  = \"coredns\" and my_metric starts with \"prefix\" and not my_metric contains \"prefix-test\""
 }
- 
+
 data "sysdig_current_user" "me" {
 }
 
@@ -50,21 +53,22 @@ data "sysdig_custom_role" "custom_role" {
 
 * `name` - (Required) The name of the Monitor Team. It must be unique and must not exist in Secure.
 
-* `entrypoint` - (Required) Main entry point for the current team in the product. 
+* `entrypoint` - (Required) Main entry point for the current team in the product.
                  See the Entrypoint argument reference section for more information.
 
 * `description` - (Optional) A description of the team.
 
 * `theme` - (Optional) Colour of the team. Default: "#73A1F7".
 
-* `scope_by` - (Optional) Scope for the team. Default: "container".
+* `scope_by` - (Optional) Scope for the team, either "container" or "host". Default: "container". If set to host, Team members can see all Host-level and Container-level information. If set to Container, Team members can see only Container-level information.
 
-* `filter` - (Optional) If the team can only see some resources, 
-             write down a filter of such resources.
-             
-* `use_sysdig_capture` - (Optional) Defines if the team is able to create Sysdig Capture files. 
+* `filter` - (Optional) Use this option to select which Agent Metrics data users of this team can view. Not setting it will allow users to see all Agent Metrics data.
+
+* `prometheus_remote_write_metrics_filter` - (Optional) Use this option to select which Prometheus Remote Write data users of this team can view. Not setting it will allow users to see all Prometheus Remote Write data.
+
+* `use_sysdig_capture` - (Optional) Defines if the team is able to create Sysdig Capture files.
                          Default: true.
-                         
+
 * `can_see_infrastructure_events` - (Optional) TODO. Default: false.
 
 * `can_use_aws_data` - (Optional) TODO. Default: false.
@@ -99,9 +103,9 @@ In addition to all arguments above, the following attributes are exported:
 
 ### IBM Cloud Monitoring arguments
 
-* `enable_ibm_platform_metrics` - (Optional) Enable platform metrics on IBM Cloud Monitoring.
+* `enable_ibm_platform_metrics` - (Optional) Enable Platform Metrics on IBM Cloud Monitoring.
 
-* `ibm_platform_metrics` - (Optional) Define platform metrics on IBM Cloud Monitoring.
+* `ibm_platform_metrics` - (Optional) Use this option to select which Platform Metrics data users of this team can view. Not setting it will allow users to see all Platform Metrics data.
 
 ## Import
 

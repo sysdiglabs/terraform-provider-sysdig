@@ -35,7 +35,8 @@ type Team struct {
 }
 
 type NamespaceFilters struct {
-	IBMPlatformMetrics *string `json:"ibmPlatformMetrics"`
+	IBMPlatformMetrics    *string `json:"ibmPlatformMetrics,omitempty"`
+	PrometheusRemoteWrite *string `json:"prometheusRemoteWrite,omitempty"`
 }
 
 type UserRoles struct {

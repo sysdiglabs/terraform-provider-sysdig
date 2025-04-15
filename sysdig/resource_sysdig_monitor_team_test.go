@@ -54,10 +54,11 @@ resource "sysdig_monitor_team" "sample" {
   description        			= "%s"
   scope_by           			= "host"
   filter             			= "container.image.repo = \"sysdig/agent\""
+  prometheus_remote_write_metrics_filter = "kube_cluster_name in (\"test-cluster\", \"test-k8s-data\") and kube_deployment_name  = \"coredns\" and my_metric starts with \"prefix\" and not my_metric contains \"prefix-test\""
   can_use_sysdig_capture 		= true
   can_see_infrastructure_events = true
   can_use_aws_data 				= true
-  
+
   entrypoint {
 	type = "Dashboards"
   }

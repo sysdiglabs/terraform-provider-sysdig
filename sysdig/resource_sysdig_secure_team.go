@@ -200,7 +200,12 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	resourceSysdigTeamReadIBM(d, &t)
+	var ibmPlatformMetrics *string
+	if t.NamespaceFilters != nil {
+		ibmPlatformMetrics = t.NamespaceFilters.IBMPlatformMetrics
+	}
+	_ = d.Set("enable_ibm_platform_metrics", t.CanUseBeaconMetrics)
+	_ = d.Set("ibm_platform_metrics", ibmPlatformMetrics)
 
 	return nil
 }
@@ -288,7 +293,16 @@ func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v
 		t.ZoneIDs[i] = z.(int)
 	}
 
-	teamFromResourceDataIBM(d, &t)
+	canUseBeaconMetrics := d.Get("enable_ibm_platform_metrics").(bool)
+	t.CanUseBeaconMetrics = &canUseBeaconMetrics
+
+	if v, ok := d.GetOk("ibm_platform_metrics"); ok {
+		metrics := v.(string)
+		if t.NamespaceFilters == nil {
+			t.NamespaceFilters = &v2.NamespaceFilters{}
+		}
+		t.NamespaceFilters.IBMPlatformMetrics = &metrics
+	}
 
 	return t
 }
