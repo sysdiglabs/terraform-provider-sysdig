@@ -33,3 +33,6 @@ data "sysdig_secure_team" "example" {
 - `user_roles` - The roles assigned to users in the team.
 - `zone_ids` - The IDs of the zones associated with the team.
 - `all_zones` - Whether the team has access to all zones.
+- `version` - The version of the secure team.
+- `theme` - The theme of the secure team.
+

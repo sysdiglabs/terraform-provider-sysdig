@@ -29,3 +29,5 @@ data "sysdig_monitor_teams" "example" {}
   - `can_use_aws_data` - Whether the team can use AWS data.
   - `default_team` - Whether the team is the default team.
   - `user_roles` - The roles assigned to users in the team.
+  - `version` - The version of the monitor team.
+  - `theme` - The theme of the monitor team.
