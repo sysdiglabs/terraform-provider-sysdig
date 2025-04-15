@@ -109,5 +109,7 @@ func dataSourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData,
 	_ = d.Set("zone_ids", team.ZoneIDs)
 	_ = d.Set("all_zones", team.AllZones)
 
+	resourceSysdigTeamReadIBM(d, &team)
+
 	return nil
 }

@@ -123,5 +123,7 @@ func dataSourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData
 	_ = d.Set("entrypoint", entrypointToSet(team.EntryPoint))
 	_ = d.Set("version", team.Version)
 
+	resourceSysdigTeamReadIBM(d, &team)
+
 	return nil
 }
