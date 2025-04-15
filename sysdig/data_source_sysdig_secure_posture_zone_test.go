@@ -24,11 +24,11 @@ func TestAccDataSourceSysdigSecurePostureZones(t *testing.T) {
 			{
 				Config: testAccDataSourceSysdigSecurePostureZonesWithMultipleResourcesConfig(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDataSourceSysdigSecurePostureZonesExists("data.sysdig_secure_posture_zones.test_posture_zone"),
-					resource.TestCheckResourceAttr("data.sysdig_secure_posture_zones.test_posture_zone", "name", "test-zone-1"),
-					resource.TestCheckResourceAttr("data.sysdig_secure_posture_zones.test_posture_zone", "description", "Test description 1"),
+					testAccCheckDataSourceSysdigSecurePostureZonesExists("data.sysdig_secure_posture_zone.test_posture_zone"),
+					resource.TestCheckResourceAttr("data.sysdig_secure_posture_zone.test_posture_zone", "name", "test-zone-1"),
+					resource.TestCheckResourceAttr("data.sysdig_secure_posture_zone.test_posture_zone", "description", "Test description 1"),
 					resource.TestCheckTypeSetElemNestedAttrs(
-						"data.sysdig_secure_posture_zones.test_posture_zone",
+						"data.sysdig_secure_posture_zone.test_posture_zone",
 						"scopes.*",
 						map[string]string{
 							"target_type": "aws",
