@@ -48,22 +48,20 @@ data "sysdig_custom_role" "custom_role" {
 
 * `description` - (Optional) A description of the team.
 
-* `theme` - (Optional) Colour of the team. Default: "#73A1F7".
+* `theme` - (Optional) Colour of the team. Default: `#73A1F7`.
 
-* `scope_by` - (Optional) Scope for the team, either "container" or "host". Default: "container". If set to "host", team members can see all host-level and container-level information. If set to "container", Team members can see only Container-level information.
+* `scope_by` - (Optional) Scope for the team, either `container` or `host`. Default: `container`. If set to `host`, team members can see all host-level and container-level information. If set to `container`, team members can see only Container-level information.
 
 * `filter` - (Optional) If the team can only see some resources,
              write down a filter of such resources.
 
-* `use_sysdig_capture` - (Optional) Defines if the team is able to create Sysdig Capture files. Default: true.
+* `use_sysdig_capture` - (Optional) Defines if the team is able to create Sysdig Capture files. Default: `true`.
 
-* `can_use_agent_cli` - (Optional) Enable this option to give this team access to Using the Agent Console. Default: true.
+* `can_use_agent_cli` - (Optional) Enable this option to give this team access to Using the Agent Console. Default: `true`.
 
-* `can_use_rapid_response` - (Optional) Enable this option to give this Secure team access to Rapid Response. Default: false.
+* `can_use_rapid_response` - (Optional) Enable this option to give this Secure team access to Rapid Response. Default: `false`.
 
-* `default_team` - (Optional) Defines if the team is the default one. Warning: only one can be the default,
-                   if you define multiple default teams, Terraform will be updating the API in every execution,
-                   even if the state hasn't changed.
+* `default_team` - (Optional) Defines if the team is the default one. Warning: only one can be the default, if you define multiple default teams, Terraform will be updating the API in every execution, even if the state hasn't changed.
 
 * `user_roles` - (Optional) Multiple user roles can be specified.
                  Administrators of the account will be automatically added
@@ -79,13 +77,16 @@ data "sysdig_custom_role" "custom_role" {
 * `email` - (Required) The email of the user in the group.
 
 * `role` - (Optional) The role for the user in this group.
-           Valid roles are: ROLE_TEAM_STANDARD, ROLE_TEAM_EDIT, ROLE_TEAM_READ, ROLE_TEAM_MANAGER or CustomRole ID.<br/>
-           Default: ROLE_TEAM_STANDARD.<br/>
+           Valid roles are: `ROLE_TEAM_STANDARD`, `ROLE_TEAM_EDIT`, `ROLE_TEAM_READ`, `ROLE_TEAM_MANAGER` or CustomRole ID.<br/>
+           Default: `ROLE_TEAM_STANDARD`.<br/>
            Note: CustomRole ID can be referenced from `sysdig_custom_role` resource or `sysdig_custom_role` data source
 
 ## Attributes Reference
 
-No additional attributes are exported.
+In addition to all arguments above, the following attributes are exported:
+
+* `id` - ID of the created team.
+* `version` - Current version of the resource.
 
 ## Import
 
