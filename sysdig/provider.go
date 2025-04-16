@@ -240,6 +240,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_zone":                                          dataSourceSysdigSecureZone(),
 			"sysdig_secure_team":                                          dataSourceSysdigSecureTeam(),
 			"sysdig_secure_teams":                                         dataSourceSysdigSecureTeams(),
+			"sysdig_secure_posture_zone":                                  dataSourceSysdigSecurePostureZone(),
 
 			"sysdig_current_user":                                          dataSourceSysdigCurrentUser(),
 			"sysdig_user":                                                  dataSourceSysdigUser(),
