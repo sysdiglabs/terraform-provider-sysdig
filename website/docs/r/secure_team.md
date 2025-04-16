@@ -50,7 +50,7 @@ data "sysdig_custom_role" "custom_role" {
 
 * `theme` - (Optional) Colour of the team. Default: "#73A1F7".
 
-* `scope_by` - (Optional) Scope for the team. Default: "container".
+* `scope_by` - (Optional) Scope for the team, either "container" or "host". Default: "container". If set to "host", team members can see all host-level and container-level information. If set to "container", Team members can see only Container-level information.
 
 * `filter` - (Optional) If the team can only see some resources,
              write down a filter of such resources.

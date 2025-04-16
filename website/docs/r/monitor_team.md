@@ -59,9 +59,9 @@ data "sysdig_custom_role" "custom_role" {
 
 * `description` - (Optional) A description of the team.
 
-* `theme` - (Optional) Colour of the team. Default: "#73A1F7".
+* `theme` - (Optional) Colour of the team. Default: "#05C391".
 
-* `scope_by` - (Optional) Scope for the team, either "container" or "host". Default: "container". If set to host, Team members can see all Host-level and Container-level information. If set to Container, Team members can see only Container-level information.
+* `scope_by` - (Optional) Scope for the team, either "container" or "host". Default: "host". If set to host, team members can see all host-level and container-level information. If set to Container, Team members can see only Container-level information.
 
 * `filter` - (Optional) Use this option to select which Agent Metrics data users of this team can view. Not setting it will allow users to see all Agent Metrics data.
 

@@ -46,9 +46,10 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 				Optional: true,
 			},
 			"scope_by": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "host",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "host",
+				ValidateFunc: validation.StringInSlice([]string{"host", "container"}, false),
 			},
 			"filter": {
 				Type:     schema.TypeString,

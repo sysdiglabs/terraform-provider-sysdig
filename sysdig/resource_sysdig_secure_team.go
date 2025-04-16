@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceSysdigSecureTeam() *schema.Resource {
@@ -61,9 +62,10 @@ func resourceSysdigSecureTeam() *schema.Resource {
 				Optional: true,
 			},
 			"scope_by": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "container",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "container",
+				ValidateFunc: validation.StringInSlice([]string{"host", "container"}, false),
 			},
 			"filter": {
 				Type:     schema.TypeString,
