@@ -25,9 +25,9 @@ func TestAccDataSourceSysdigMonitorTeamIBM(t *testing.T) {
 			{
 				Config: monitorTeamWithPlatformMetricsAndDatasourceIBM(name),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test_dt", "name", name),
-					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test_dt", "enable_ibm_platform_metrics", "true"),
-					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test_dt", "ibm_platform_metrics", "foo in (\"0\") and bar in (\"3\")"),
+					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test", "name", name),
+					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test", "enable_ibm_platform_metrics", "true"),
+					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test", "ibm_platform_metrics", "foo in (\"0\") and bar in (\"3\")"),
 				),
 			},
 		},
@@ -36,7 +36,7 @@ func TestAccDataSourceSysdigMonitorTeamIBM(t *testing.T) {
 
 func monitorTeamWithPlatformMetricsAndDatasourceIBM(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_monitor_team" "test" {
+resource "sysdig_monitor_team" "sample" {
   name = "%s"
   enable_ibm_platform_metrics = true
   ibm_platform_metrics = "foo in (\"0\") and bar in (\"3\")"
@@ -46,7 +46,7 @@ resource "sysdig_monitor_team" "test" {
   }
 }
 
-data "sysdig_monitor_team" "test_dt" {
+data "sysdig_monitor_team" "test" {
   id = sysdig_monitor_team.sample.id
 }
 `, name)
