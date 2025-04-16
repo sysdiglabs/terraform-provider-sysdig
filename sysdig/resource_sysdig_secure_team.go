@@ -70,12 +70,14 @@ func resourceSysdigSecureTeam() *schema.Resource {
 				Optional: true,
 			},
 			"enable_ibm_platform_metrics": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:       schema.TypeBool,
+				Optional:   true,
+				Deprecated: "This option should be not used anymore and will be removed in the future",
 			},
 			"ibm_platform_metrics": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "This option should be not used anymore and will be removed in the future",
 			},
 			"use_sysdig_capture": {
 				Type:     schema.TypeBool,
