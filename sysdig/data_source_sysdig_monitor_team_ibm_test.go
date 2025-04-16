@@ -12,7 +12,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccDataSourceSysdigMonitorTeam(t *testing.T) {
+func TestAccDataSourceSysdigMonitorTeamIBM(t *testing.T) {
 	name := fmt.Sprintf("test-monitor-team-%s", randomText(5))
 	resource.Test(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigIBMMonitorAPIKeyEnv),
@@ -23,7 +23,7 @@ func TestAccDataSourceSysdigMonitorTeam(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: monitorTeamResourceAndDatasource(name),
+				Config: monitorTeamWithPlatformMetricsAndDatasourceIBM(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test_dt", "name", name),
 					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test_dt", "enable_ibm_platform_metrics", "true"),
@@ -34,7 +34,7 @@ func TestAccDataSourceSysdigMonitorTeam(t *testing.T) {
 	})
 }
 
-func monitorTeamWithPlatformMetricsIBM(name string) string {
+func monitorTeamWithPlatformMetricsAndDatasourceIBM(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team" "test" {
   name = "%s"
