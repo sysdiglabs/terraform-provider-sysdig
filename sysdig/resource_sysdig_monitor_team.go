@@ -46,11 +46,16 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 				Optional: true,
 			},
 			"scope_by": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "host",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "host",
+				ValidateFunc: validation.StringInSlice([]string{"host", "container"}, false),
 			},
 			"filter": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"prometheus_remote_write_metrics_filter": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -77,6 +82,11 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"can_use_agent_cli": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 			"user_roles": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -102,7 +112,7 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 						"type": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"Explore", "Dashboards", "Events", "Alerts", "Settings"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"Explore", "Dashboards", "Events", "Alerts", "Settings", "DashboardTemplates", "Advisor"}, false),
 						},
 
 						"selection": {
@@ -187,12 +197,21 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 	_ = d.Set("filter", t.Filter)
 	_ = d.Set("can_use_sysdig_capture", t.CanUseSysdigCapture)
 	_ = d.Set("can_see_infrastructure_events", t.CanUseCustomEvents)
+	_ = d.Set("can_use_agent_cli", t.CanUseAgentCli)
 	_ = d.Set("can_use_aws_data", t.CanUseAwsMetrics)
 	_ = d.Set("default_team", t.DefaultTeam)
 	_ = d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
 	_ = d.Set("entrypoint", entrypointToSet(t.EntryPoint))
 
-	resourceSysdigTeamReadIBM(d, &t)
+	var ibmPlatformMetrics *string
+	var prometheusRemoteWrite *string
+	if t.NamespaceFilters != nil {
+		ibmPlatformMetrics = t.NamespaceFilters.IBMPlatformMetrics
+		prometheusRemoteWrite = t.NamespaceFilters.PrometheusRemoteWrite
+	}
+	_ = d.Set("enable_ibm_platform_metrics", t.CanUseBeaconMetrics)
+	_ = d.Set("ibm_platform_metrics", ibmPlatformMetrics)
+	_ = d.Set("prometheus_remote_write_metrics_filter", prometheusRemoteWrite)
 
 	return nil
 }
@@ -217,8 +236,12 @@ func entrypointToSet(entrypoint *v2.EntryPoint) (res []map[string]interface{}) {
 		return
 	}
 
+	module := entrypoint.Module
+	if module == "Overview" {
+		module = "Advisor"
+	}
 	entrypointMap := map[string]interface{}{
-		"type":      entrypoint.Module,
+		"type":      module,
 		"selection": entrypoint.Selection,
 	}
 	return append(res, entrypointMap)
@@ -264,8 +287,8 @@ func resourceSysdigMonitorTeamDelete(ctx context.Context, d *schema.ResourceData
 func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team {
 	canUseSysdigCapture := d.Get("can_use_sysdig_capture").(bool)
 	canUseCustomEvents := d.Get("can_see_infrastructure_events").(bool)
+	canUseAgentCli := d.Get("can_use_agent_cli").(bool)
 	canUseAwsMetrics := d.Get("can_use_aws_data").(bool)
-	canUseBeaconMetrics := false
 	t := v2.Team{
 		Theme:               d.Get("theme").(string),
 		Name:                d.Get("name").(string),
@@ -275,7 +298,7 @@ func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team
 		CanUseSysdigCapture: &canUseSysdigCapture,
 		CanUseCustomEvents:  &canUseCustomEvents,
 		CanUseAwsMetrics:    &canUseAwsMetrics,
-		CanUseBeaconMetrics: &canUseBeaconMetrics,
+		CanUseAgentCli:      &canUseAgentCli,
 		DefaultTeam:         d.Get("default_team").(bool),
 	}
 
@@ -291,11 +314,31 @@ func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team
 
 	t.EntryPoint = &v2.EntryPoint{}
 	t.EntryPoint.Module = d.Get("entrypoint.0.type").(string)
+	if t.EntryPoint.Module == "Advisor" {
+		t.EntryPoint.Module = "Overview"
+	}
 	if val, ok := d.GetOk("entrypoint.0.selection"); ok {
 		t.EntryPoint.Selection = val.(string)
 	}
 
-	teamFromResourceDataIBM(d, &t)
+	canUseBeaconMetrics := d.Get("enable_ibm_platform_metrics").(bool)
+	t.CanUseBeaconMetrics = &canUseBeaconMetrics
+
+	if v, ok := d.GetOk("ibm_platform_metrics"); ok {
+		metrics := v.(string)
+		if t.NamespaceFilters == nil {
+			t.NamespaceFilters = &v2.NamespaceFilters{}
+		}
+		t.NamespaceFilters.IBMPlatformMetrics = &metrics
+	}
+
+	if v, ok := d.GetOk("prometheus_remote_write_metrics_filter"); ok {
+		metrics := v.(string)
+		if t.NamespaceFilters == nil {
+			t.NamespaceFilters = &v2.NamespaceFilters{}
+		}
+		t.NamespaceFilters.PrometheusRemoteWrite = &metrics
+	}
 
 	return t
 }

@@ -29,10 +29,11 @@ data "sysdig_secure_team" "example" {
 - `filter` - The filter applied to the team.
 - `scope_by` - The scope of the team.
 - `use_sysdig_capture` - Whether the team can use Sysdig capture.
+- `can_use_agent_cli` - Whether the team can use the agent CLI.
+- `can_use_rapid_response` - Whether the team can use rapid response.
 - `default_team` - Whether the team is the default team.
 - `user_roles` - The roles assigned to users in the team.
 - `zone_ids` - The IDs of the zones associated with the team.
 - `all_zones` - Whether the team has access to all zones.
 - `version` - The version of the secure team.
 - `theme` - The theme of the secure team.
-

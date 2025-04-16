@@ -26,6 +26,8 @@ type Team struct {
 	CanUseCustomEvents  *bool             `json:"canUseCustomEvents,omitempty"`
 	CanUseAwsMetrics    *bool             `json:"canUseAwsMetrics,omitempty"`
 	CanUseBeaconMetrics *bool             `json:"canUseBeaconMetrics,omitempty"`
+	CanUseRapidResponse *bool             `json:"canUseRapidResponse,omitempty"`
+	CanUseAgentCli      *bool             `json:"canUseAgentCli,omitempty"`
 	UserCount           int               `json:"userCount,omitempty"`
 	Filter              string            `json:"filter,omitempty"`
 	NamespaceFilters    *NamespaceFilters `json:"namespaceFilters,omitempty"`
@@ -35,7 +37,8 @@ type Team struct {
 }
 
 type NamespaceFilters struct {
-	IBMPlatformMetrics *string `json:"ibmPlatformMetrics"`
+	IBMPlatformMetrics    *string `json:"ibmPlatformMetrics,omitempty"`
+	PrometheusRemoteWrite *string `json:"prometheusRemoteWrite,omitempty"`
 }
 
 type UserRoles struct {
