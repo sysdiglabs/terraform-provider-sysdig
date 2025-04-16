@@ -49,7 +49,7 @@ resource "sysdig_secure_team" "sample" {
   filter                 = "container.image.repo = \"sysdig/agent\""
   all_zones              = true
   can_use_agent_cli      = false
-	can_use_rapid_response = true
+  can_use_rapid_response = true
 }
 
 data "sysdig_secure_team" "test" {
