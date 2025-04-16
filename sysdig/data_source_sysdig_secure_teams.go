@@ -24,61 +24,6 @@ func dataSourceSysdigSecureTeams() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"theme": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"scope_by": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"filter": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"use_sysdig_capture": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"default_team": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"user_roles": {
-							Type:     schema.TypeSet,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"email": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"role": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"zone_ids": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeInt,
-							},
-						},
-						"all_zones": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"version": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
 					},
 				},
 			},
