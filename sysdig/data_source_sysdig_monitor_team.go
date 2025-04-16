@@ -36,6 +36,10 @@ func dataSourceSysdigMonitorTeam() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"prometheus_remote_write_metrics_filter": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"can_use_sysdig_capture": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -45,6 +49,10 @@ func dataSourceSysdigMonitorTeam() *schema.Resource {
 				Computed: true,
 			},
 			"can_use_aws_data": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"can_use_agent_cli": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
@@ -126,17 +134,21 @@ func dataSourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData
 	_ = d.Set("can_use_sysdig_capture", team.CanUseSysdigCapture)
 	_ = d.Set("can_see_infrastructure_events", team.CanUseCustomEvents)
 	_ = d.Set("can_use_aws_data", team.CanUseAwsMetrics)
+	_ = d.Set("can_use_agent_cli", team.CanUseAgentCli)
 	_ = d.Set("default_team", team.DefaultTeam)
 	_ = d.Set("user_roles", userMonitorRolesToSet(team.UserRoles))
 	_ = d.Set("entrypoint", entrypointToSet(team.EntryPoint))
 	_ = d.Set("version", team.Version)
 
 	var ibmPlatformMetrics *string
+	var prometheusRemoteWrite *string
 	if team.NamespaceFilters != nil {
 		ibmPlatformMetrics = team.NamespaceFilters.IBMPlatformMetrics
+		prometheusRemoteWrite = team.NamespaceFilters.PrometheusRemoteWrite
 	}
 	_ = d.Set("enable_ibm_platform_metrics", team.CanUseBeaconMetrics)
 	_ = d.Set("ibm_platform_metrics", ibmPlatformMetrics)
+	_ = d.Set("prometheus_remote_write_metrics_filter", prometheusRemoteWrite)
 
 	return nil
 }

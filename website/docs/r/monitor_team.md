@@ -19,9 +19,10 @@ resource "sysdig_monitor_team" "devops" {
   name = "Monitoring DevOps team"
 
   entrypoint {
-	type = "Explore"
+    type = "DashboardTemplates"
+    selection = "view.net.http"
   }
-  
+
   user_roles {
     email = data.sysdig_current_user.me.email
     role = "ROLE_TEAM_MANAGER"
@@ -36,8 +37,11 @@ resource "sysdig_monitor_team" "devops" {
     email = "john.smith@example.com"
     role = data.sysdig_custom_role.custom_role.id
   }
+
+  filter = "kubernetes.namespace.name in (\"kube-system\") and kubernetes.deployment.name in (\"coredns\")"
+  prometheus_remote_write_metrics_filter = "kube_cluster_name in (\"test-cluster\", \"test-k8s-data\") and kube_deployment_name  = \"coredns\" and my_metric starts with \"prefix\" and not my_metric contains \"prefix-test\""
 }
- 
+
 data "sysdig_current_user" "me" {
 }
 
@@ -50,24 +54,28 @@ data "sysdig_custom_role" "custom_role" {
 
 * `name` - (Required) The name of the Monitor Team. It must be unique and must not exist in Secure.
 
-* `entrypoint` - (Required) Main entry point for the current team in the product. 
+* `entrypoint` - (Required) Main entry point for the current team in the product.
                  See the Entrypoint argument reference section for more information.
 
 * `description` - (Optional) A description of the team.
 
-* `theme` - (Optional) Colour of the team. Default: "#73A1F7".
+* `theme` - (Optional) Colour of the team. Default: `#05C391`.
 
-* `scope_by` - (Optional) Scope for the team. Default: "container".
+* `scope_by` - (Optional) Scope for the team, either `container` or `host`. Default: `host`. If set to `host`, team members can see all host-level and container-level information. If set to `container`, team members can see only Container-level information.
 
-* `filter` - (Optional) If the team can only see some resources, 
-             write down a filter of such resources.
-             
-* `use_sysdig_capture` - (Optional) Defines if the team is able to create Sysdig Capture files. 
-                         Default: true.
-                         
-* `can_see_infrastructure_events` - (Optional) TODO. Default: false.
+* `filter` - (Optional) Use this option to select which Agent Metrics data users of this team can view. Not setting it will allow users to see all Agent Metrics data.
 
-* `can_use_aws_data` - (Optional) TODO. Default: false.
+* `prometheus_remote_write_metrics_filter` - (Optional) Use this option to select which Prometheus Remote Write data users of this team can view. Not setting it will allow users to see all Prometheus Remote Write data.
+
+* `can_use_sysdig_capture` - (Optional) Defines if the team is able to create Sysdig Capture files.  Default: `true`.
+
+* `can_see_infrastructure_events` - (Optional) Enable this option to allow this team to view all Infrastructure and Custom Events from every user and agent. Otherwise, this team will only see infrastructure events sent specifically to this team. Default: `false`.
+
+* `can_use_aws_data` - (Optional) Enable this option to give this team access to AWS metrics and tags. All AWS data is made available, regardless of the team’s Scope. Default: `false`.
+
+* `can_use_agent_cli` - (Optional) Enable this option to give this team access to Using the Agent Console. Default: `true`.
+
+* `default_team` - (Optional) Defines if the team is the default one. Warning: only one can be the default, if you define multiple default teams, Terraform will be updating the API in every execution, even if the state hasn't changed.
 
 * `user_roles` - (Optional) Multiple user roles can be specified.
                  Administrators of the account will be automatically added
@@ -77,31 +85,32 @@ data "sysdig_custom_role" "custom_role" {
 ### Entrypoint Argument Reference
 
 * `type` - (Required) Main entrypoint for the team.
-                      Valid options are: Explore, Dashboards, Events, Alerts, Settings.
+                      Valid options are: `Explore`, `Dashboards`, `Events`, `Alerts`, `Settings`, `DashboardTemplates`, `Advisor`.
 
 * `selection` - (Optional) Sets up the defined Dashboard name as entrypoint.
-                Warning: This field must only be added if the `type` is "Dashboards".
+                Warning: This field must only be added if the `type` is `Dashboards`, and the value is the numeric id of the selected dashboard, or `DashboardTemplates`, and the value is the id (dotted name) of the selected dashboard template.
 
 ### User Role Argument Reference
 
 * `email` - (Required) The email of the user in the group.
 
 * `role` - (Optional) The role for the user in this group.
-           Valid roles are: ROLE_TEAM_STANDARD, ROLE_TEAM_EDIT, ROLE_TEAM_READ, ROLE_TEAM_MANAGER or CustomRole ID.<br/>
-           Default: ROLE_TEAM_STANDARD.<br/>
+           Valid roles are: `ROLE_TEAM_STANDARD`, `ROLE_TEAM_EDIT`, `ROLE_TEAM_READ`, `ROLE_TEAM_MANAGER` or CustomRole ID.<br/>
+           Default: `ROLE_TEAM_STANDARD`.<br/>
            Note: CustomRole ID can be referenced from `sysdig_custom_role` resource or `sysdig_custom_role` data source
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `default_team` - (Optional) Mark team as default team. Users with no designated team will be added to this team by default.
+* `id` - ID of the created team.
+* `version` - Current version of the resource.
 
 ### IBM Cloud Monitoring arguments
 
-* `enable_ibm_platform_metrics` - (Optional) Enable platform metrics on IBM Cloud Monitoring.
+* `enable_ibm_platform_metrics` - (Optional) Enable Platform Metrics on IBM Cloud Monitoring.
 
-* `ibm_platform_metrics` - (Optional) Define platform metrics on IBM Cloud Monitoring.
+* `ibm_platform_metrics` - (Optional) Use this option to select which Platform Metrics data users of this team can view. Not setting it will allow users to see all Platform Metrics data.
 
 ## Import
 

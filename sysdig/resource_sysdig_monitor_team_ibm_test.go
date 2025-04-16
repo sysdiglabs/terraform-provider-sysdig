@@ -42,6 +42,9 @@ func TestAccMonitorIBMTeam(t *testing.T) {
 				Config: monitorTeamWithPlatformMetricsIBM(rText()),
 			},
 			{
+				Config: monitorTeamWithPlatformMetricsAndPrwMetricsIBM(rText()),
+			},
+			{
 				ResourceName:      "sysdig_monitor_team.sample",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -53,15 +56,16 @@ func TestAccMonitorIBMTeam(t *testing.T) {
 func monitorTeamWithFullConfigIBM(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team" "sample" {
-  name                   		= "sample-%s"
-  description        			= "%s"
-  scope_by           			= "host"
-  filter             			= "container.image.repo = \"sysdig/agent\""
-  can_use_sysdig_capture 		= true
-  can_see_infrastructure_events = true
-  
+  name                                   = "sample-%s"
+  description                            = "%s"
+  scope_by                               = "host"
+  filter                                 = "container.image.repo = \"sysdig/agent\""
+  prometheus_remote_write_metrics_filter = "kube_cluster_name in (\"test-cluster\", \"test-k8s-data\") and kube_deployment_name  = \"coredns\" and my_metric starts with \"prefix\" and not my_metric contains \"prefix-test\""
+  can_use_sysdig_capture                 = true
+  can_see_infrastructure_events          = true
+
   entrypoint {
-	type = "Dashboards"
+    type = "Dashboards"
   }
 }`, name, name)
 }
@@ -69,12 +73,25 @@ resource "sysdig_monitor_team" "sample" {
 func monitorTeamWithPlatformMetricsIBM(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team" "sample" {
-  name = "sample-%s"
+  name                        = "sample-%s"
   enable_ibm_platform_metrics = true
-  ibm_platform_metrics = "foo in (\"0\") and bar in (\"3\")"
+  ibm_platform_metrics        = "foo in (\"0\") and bar in (\"3\")"
 
   entrypoint {
-	type = "Dashboards"
+    type = "Dashboards"
+  }
+}`, name)
+}
+
+func monitorTeamWithPlatformMetricsAndPrwMetricsIBM(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_team" "sample" {
+  name                                   = "sample-%s"
+  enable_ibm_platform_metrics            = true
+  prometheus_remote_write_metrics_filter = "kube_cluster_name in (\"test-cluster\", \"test-k8s-data\") and kube_deployment_name  = \"coredns\" and my_metric starts with \"prefix\" and not my_metric contains \"prefix-test\""
+
+  entrypoint {
+    type = "Dashboards"
   }
 }`, name)
 }

@@ -28,9 +28,11 @@ data "sysdig_monitor_team" "example" {
 - `description` - The description of the monitor team.
 - `entrypoint` - The entrypoint configuration for the team.
 - `filter` - The filter applied to the team.
+- `prometheus_remote_write_metrics_filter` - The Prometheus remote write metrics filter for the team.
 - `scope_by` - The scope of the team.
 - `can_use_sysdig_capture` - Whether the team can use Sysdig capture.
 - `can_see_infrastructure_events` - Whether the team can see infrastructure events.
+- `can_use_agent_cli` - Whether the team can use the agent CLI.
 - `can_use_aws_data` - Whether the team can use AWS data.
 - `default_team` - Whether the team is the default team.
 - `user_roles` - The roles assigned to users in the team.

@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceSysdigSecureTeam() *schema.Resource {
@@ -61,26 +62,39 @@ func resourceSysdigSecureTeam() *schema.Resource {
 				Optional: true,
 			},
 			"scope_by": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "container",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "container",
+				ValidateFunc: validation.StringInSlice([]string{"host", "container"}, false),
 			},
 			"filter": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"enable_ibm_platform_metrics": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:       schema.TypeBool,
+				Optional:   true,
+				Deprecated: "This option should be not used anymore and will be removed in the future",
 			},
 			"ibm_platform_metrics": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "This option should be not used anymore and will be removed in the future",
 			},
 			"use_sysdig_capture": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
+			},
+			"can_use_agent_cli": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"can_use_rapid_response": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"user_roles": {
 				Type:     schema.TypeSet,
@@ -187,6 +201,8 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 	_ = d.Set("scope_by", t.Show)
 	_ = d.Set("filter", t.Filter)
 	_ = d.Set("use_sysdig_capture", t.CanUseSysdigCapture)
+	_ = d.Set("can_use_agent_cli", t.CanUseAgentCli)
+	_ = d.Set("can_use_rapid_response", t.CanUseRapidResponse)
 	_ = d.Set("default_team", t.DefaultTeam)
 	_ = d.Set("user_roles", userSecureRolesToSet(t.UserRoles))
 
@@ -200,7 +216,12 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	resourceSysdigTeamReadIBM(d, &t)
+	var ibmPlatformMetrics *string
+	if t.NamespaceFilters != nil {
+		ibmPlatformMetrics = t.NamespaceFilters.IBMPlatformMetrics
+	}
+	_ = d.Set("enable_ibm_platform_metrics", t.CanUseBeaconMetrics)
+	_ = d.Set("ibm_platform_metrics", ibmPlatformMetrics)
 
 	return nil
 }
@@ -258,6 +279,8 @@ func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData,
 
 func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team {
 	canUseSysdigCapture := d.Get("use_sysdig_capture").(bool)
+	canUseAgentCli := d.Get("can_use_agent_cli").(bool)
+	canUseRapidResponse := d.Get("can_use_rapid_response").(bool)
 	canUseAwsMetrics := new(bool)
 	allZones := d.Get(SchemaAllZones).(bool)
 	t := v2.Team{
@@ -268,6 +291,8 @@ func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v
 		Filter:              d.Get("filter").(string),
 		CanUseSysdigCapture: &canUseSysdigCapture,
 		CanUseAwsMetrics:    canUseAwsMetrics,
+		CanUseAgentCli:      &canUseAgentCli,
+		CanUseRapidResponse: &canUseRapidResponse,
 		DefaultTeam:         d.Get("default_team").(bool),
 		AllZones:            allZones,
 	}
@@ -288,7 +313,16 @@ func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v
 		t.ZoneIDs[i] = z.(int)
 	}
 
-	teamFromResourceDataIBM(d, &t)
+	canUseBeaconMetrics := d.Get("enable_ibm_platform_metrics").(bool)
+	t.CanUseBeaconMetrics = &canUseBeaconMetrics
+
+	if v, ok := d.GetOk("ibm_platform_metrics"); ok {
+		metrics := v.(string)
+		if t.NamespaceFilters == nil {
+			t.NamespaceFilters = &v2.NamespaceFilters{}
+		}
+		t.NamespaceFilters.IBMPlatformMetrics = &metrics
+	}
 
 	return t
 }
