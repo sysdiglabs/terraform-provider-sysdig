@@ -17,7 +17,7 @@ Creates a Sysdig Secure Team.
 ```terraform
 resource "sysdig_secure_team" "devops" {
   name = "DevOps team"
-  
+
   user_roles {
     email = data.sysdig_current_user.me.email
     role = "ROLE_TEAM_MANAGER"
@@ -33,7 +33,7 @@ resource "sysdig_secure_team" "devops" {
     role = data.sysdig_custom_role.custom_role.id
   }
 }
- 
+
 data "sysdig_current_user" "me" {
 }
 
@@ -52,12 +52,15 @@ data "sysdig_custom_role" "custom_role" {
 
 * `scope_by` - (Optional) Scope for the team. Default: "container".
 
-* `filter` - (Optional) If the team can only see some resources, 
+* `filter` - (Optional) If the team can only see some resources,
              write down a filter of such resources.
-             
-* `use_sysdig_capture` - (Optional) Defines if the team is able to create Sysdig Capture files. 
-                         Default: true.
-                         
+
+* `use_sysdig_capture` - (Optional) Defines if the team is able to create Sysdig Capture files. Default: true.
+
+* `can_use_agent_cli` - (Optional) Enable this option to give this team access to Using the Agent Console. Default: true.
+
+* `can_use_rapid_response` - (Optional) Enable this option to give this Secure team access to Rapid Response. Default: false.
+
 * `default_team` - (Optional) Defines if the team is the default one. Warning: only one can be the default,
                    if you define multiple default teams, Terraform will be updating the API in every execution,
                    even if the state hasn't changed.
@@ -70,7 +73,7 @@ data "sysdig_custom_role" "custom_role" {
 * `zone_ids` - (Optional) List of zone IDs attached to the team. If `all_zones` is specified this argument needs to be omitted.
 
 * `all_zones` - (Optional) Attach all zones to the team. If this argument is enabled then `zone_ids` needs to be omitted.
-                         
+
 ### User Role Argument Reference
 
 * `email` - (Required) The email of the user in the group.

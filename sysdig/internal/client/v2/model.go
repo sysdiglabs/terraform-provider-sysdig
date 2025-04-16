@@ -26,6 +26,8 @@ type Team struct {
 	CanUseCustomEvents  *bool             `json:"canUseCustomEvents,omitempty"`
 	CanUseAwsMetrics    *bool             `json:"canUseAwsMetrics,omitempty"`
 	CanUseBeaconMetrics *bool             `json:"canUseBeaconMetrics,omitempty"`
+	CanUseRapidResponse *bool             `json:"canUseRapidResponse,omitempty"`
+	CanUseAgentCli      *bool             `json:"canUseAgentCli,omitempty"`
 	UserCount           int               `json:"userCount,omitempty"`
 	Filter              string            `json:"filter,omitempty"`
 	NamespaceFilters    *NamespaceFilters `json:"namespaceFilters,omitempty"`

@@ -82,6 +82,16 @@ func resourceSysdigSecureTeam() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"can_use_agent_cli": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"can_use_rapid_response": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"user_roles": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -187,6 +197,8 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 	_ = d.Set("scope_by", t.Show)
 	_ = d.Set("filter", t.Filter)
 	_ = d.Set("use_sysdig_capture", t.CanUseSysdigCapture)
+	_ = d.Set("can_use_agent_cli", t.CanUseAgentCli)
+	_ = d.Set("can_use_rapid_response", t.CanUseRapidResponse)
 	_ = d.Set("default_team", t.DefaultTeam)
 	_ = d.Set("user_roles", userSecureRolesToSet(t.UserRoles))
 
@@ -263,6 +275,8 @@ func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData,
 
 func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team {
 	canUseSysdigCapture := d.Get("use_sysdig_capture").(bool)
+	canUseAgentCli := d.Get("can_use_agent_cli").(bool)
+	canUseRapidResponse := d.Get("can_use_rapid_response").(bool)
 	canUseAwsMetrics := new(bool)
 	allZones := d.Get(SchemaAllZones).(bool)
 	t := v2.Team{
@@ -273,6 +287,8 @@ func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v
 		Filter:              d.Get("filter").(string),
 		CanUseSysdigCapture: &canUseSysdigCapture,
 		CanUseAwsMetrics:    canUseAwsMetrics,
+		CanUseAgentCli:      &canUseAgentCli,
+		CanUseRapidResponse: &canUseRapidResponse,
 		DefaultTeam:         d.Get("default_team").(bool),
 		AllZones:            allZones,
 	}

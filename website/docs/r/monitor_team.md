@@ -19,7 +19,8 @@ resource "sysdig_monitor_team" "devops" {
   name = "Monitoring DevOps team"
 
   entrypoint {
-	type = "Explore"
+	  type = "DashboardTemplates"
+    selection = "view.net.http"
   }
 
   user_roles {
@@ -66,12 +67,13 @@ data "sysdig_custom_role" "custom_role" {
 
 * `prometheus_remote_write_metrics_filter` - (Optional) Use this option to select which Prometheus Remote Write data users of this team can view. Not setting it will allow users to see all Prometheus Remote Write data.
 
-* `use_sysdig_capture` - (Optional) Defines if the team is able to create Sysdig Capture files.
-                         Default: true.
+* `use_sysdig_capture` - (Optional) Defines if the team is able to create Sysdig Capture files.  Default: true.
 
-* `can_see_infrastructure_events` - (Optional) TODO. Default: false.
+* `can_see_infrastructure_events` - (Optional) Enable this option to allow this team to view all Infrastructure and Custom Events from every user and agent. Otherwise, this team will only see infrastructure events sent specifically to this team. Default: false.
 
-* `can_use_aws_data` - (Optional) TODO. Default: false.
+* `can_use_aws_data` - (Optional) Enable this option to give this team access to AWS metrics and tags. All AWS data is made available, regardless of the team’s Scope. Default: false.
+
+* `can_use_agent_cli` - (Optional) Enable this option to give this team access to Using the Agent Console. Default: true.
 
 * `user_roles` - (Optional) Multiple user roles can be specified.
                  Administrators of the account will be automatically added
@@ -81,10 +83,10 @@ data "sysdig_custom_role" "custom_role" {
 ### Entrypoint Argument Reference
 
 * `type` - (Required) Main entrypoint for the team.
-                      Valid options are: Explore, Dashboards, Events, Alerts, Settings.
+                      Valid options are: `Explore`, `Dashboards`, `Events`, `Alerts`, `Settings`, `DashboardTemplates`, `Overview`.
 
 * `selection` - (Optional) Sets up the defined Dashboard name as entrypoint.
-                Warning: This field must only be added if the `type` is "Dashboards".
+                Warning: This field must only be added if the `type` is `Dashboards`, and the value is the numeric id of the selected dashboard, or `DashboardTemplates`, and the value is the id (dotted name) of the selected dashboard template.
 
 ### User Role Argument Reference
 

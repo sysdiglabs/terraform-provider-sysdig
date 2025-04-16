@@ -28,6 +28,9 @@ func TestAccSecureTeam(t *testing.T) {
 				Config: secureTeamWithName(randomText(10)),
 			},
 			{
+				Config: secureTeamWithAgentCliAndRapidResponse(randomText(10)),
+			},
+			{
 				Config: secureTeamMinimumConfiguration(randomText(10)),
 			},
 			{
@@ -74,19 +77,31 @@ resource "sysdig_secure_team" "sample" {
 `, name, name)
 }
 
+func secureTeamWithAgentCliAndRapidResponse(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_team" "sample" {
+  name                   = "sample-%s"
+  description            = "%s"
+  scope_by               = "container"
+  can_use_agent_cli      = false
+	can_use_rapid_response = true
+}
+`, name, name)
+}
+
 func secureTeamMinimumConfiguration(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_team" "sample" {
-  name      = "sample-%s"
+  name = "sample-%s"
 }`, name)
 }
 
 func secureTeamWithPlatformMetricsIBM(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_team" "sample" {
-  name = "sample-%s"
+  name                        = "sample-%s"
   enable_ibm_platform_metrics = true
-  ibm_platform_metrics = "foo in (\"0\") and bar in (\"3\")"
+  ibm_platform_metrics        = "foo in (\"0\") and bar in (\"3\")"
 }`, name)
 }
 

@@ -81,6 +81,11 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"can_use_agent_cli": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 			"user_roles": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -106,7 +111,7 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 						"type": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"Explore", "Dashboards", "Events", "Alerts", "Settings"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"Explore", "Dashboards", "Events", "Alerts", "Settings", "DashboardTemplates", "Overview"}, false),
 						},
 
 						"selection": {
@@ -191,6 +196,7 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 	_ = d.Set("filter", t.Filter)
 	_ = d.Set("can_use_sysdig_capture", t.CanUseSysdigCapture)
 	_ = d.Set("can_see_infrastructure_events", t.CanUseCustomEvents)
+	_ = d.Set("can_use_agent_cli", t.CanUseAgentCli)
 	_ = d.Set("can_use_aws_data", t.CanUseAwsMetrics)
 	_ = d.Set("default_team", t.DefaultTeam)
 	_ = d.Set("user_roles", userMonitorRolesToSet(t.UserRoles))
@@ -276,6 +282,7 @@ func resourceSysdigMonitorTeamDelete(ctx context.Context, d *schema.ResourceData
 func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team {
 	canUseSysdigCapture := d.Get("can_use_sysdig_capture").(bool)
 	canUseCustomEvents := d.Get("can_see_infrastructure_events").(bool)
+	canUseAgentCli := d.Get("can_use_agent_cli").(bool)
 	canUseAwsMetrics := d.Get("can_use_aws_data").(bool)
 	t := v2.Team{
 		Theme:               d.Get("theme").(string),
@@ -286,6 +293,7 @@ func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team
 		CanUseSysdigCapture: &canUseSysdigCapture,
 		CanUseCustomEvents:  &canUseCustomEvents,
 		CanUseAwsMetrics:    &canUseAwsMetrics,
+		CanUseAgentCli:      &canUseAgentCli,
 		DefaultTeam:         d.Get("default_team").(bool),
 	}
 
