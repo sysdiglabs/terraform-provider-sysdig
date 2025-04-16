@@ -111,7 +111,7 @@ func resourceSysdigMonitorTeam() *schema.Resource {
 						"type": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"Explore", "Dashboards", "Events", "Alerts", "Settings", "DashboardTemplates", "Overview"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"Explore", "Dashboards", "Events", "Alerts", "Settings", "DashboardTemplates", "Advisor"}, false),
 						},
 
 						"selection": {
@@ -235,8 +235,12 @@ func entrypointToSet(entrypoint *v2.EntryPoint) (res []map[string]interface{}) {
 		return
 	}
 
+	module := entrypoint.Module
+	if module == "Overview" {
+		module = "Advisor"
+	}
 	entrypointMap := map[string]interface{}{
-		"type":      entrypoint.Module,
+		"type":      module,
 		"selection": entrypoint.Selection,
 	}
 	return append(res, entrypointMap)
@@ -309,6 +313,9 @@ func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team
 
 	t.EntryPoint = &v2.EntryPoint{}
 	t.EntryPoint.Module = d.Get("entrypoint.0.type").(string)
+	if t.EntryPoint.Module == "Advisor" {
+		t.EntryPoint.Module = "Overview"
+	}
 	if val, ok := d.GetOk("entrypoint.0.selection"); ok {
 		t.EntryPoint.Selection = val.(string)
 	}

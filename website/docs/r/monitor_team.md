@@ -83,7 +83,7 @@ data "sysdig_custom_role" "custom_role" {
 ### Entrypoint Argument Reference
 
 * `type` - (Required) Main entrypoint for the team.
-                      Valid options are: `Explore`, `Dashboards`, `Events`, `Alerts`, `Settings`, `DashboardTemplates`, `Overview`.
+                      Valid options are: `Explore`, `Dashboards`, `Events`, `Alerts`, `Settings`, `DashboardTemplates`, `Advisor`.
 
 * `selection` - (Optional) Sets up the defined Dashboard name as entrypoint.
                 Warning: This field must only be added if the `type` is `Dashboards`, and the value is the numeric id of the selected dashboard, or `DashboardTemplates`, and the value is the id (dotted name) of the selected dashboard template.
