@@ -29,9 +29,7 @@ func TestAccDataSourceSysdigSecureTeam(t *testing.T) {
 					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "scope_by", "container"),
 					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "filter", "container.image.repo = \"sysdig/agent\""),
 					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "version", "0"),
-					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "can_use_sysdig_capture", "true"),
-					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "can_see_infrastructure_events", "true"),
-					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "can_use_aws_data", "false"),
+					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "use_sysdig_capture", "true"),
 					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "all_zones", "true"),
 				),
 			},
@@ -45,10 +43,8 @@ resource "sysdig_secure_team" "sample" {
   name               = "%s"
   description        = "A test secure team"
   scope_by           = "container"
-  can_use_sysdig_capture = true
-  can_see_infrastructure_events = true
+  use_sysdig_capture = true
   filter             = "container.image.repo = \"sysdig/agent\""
-  can_use_aws_data   = false
   all_zones          = true
 }
 
