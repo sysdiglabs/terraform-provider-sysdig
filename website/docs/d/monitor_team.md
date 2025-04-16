@@ -36,3 +36,5 @@ data "sysdig_monitor_team" "example" {
 - `user_roles` - The roles assigned to users in the team.
 - `version` - The version of the monitor team.
 - `theme` - The theme of the monitor team.
+- `enable_ibm_platform_metrics` - Whether the team can use IBM platform metrics.
+- `ibm_platform_metrics` - The IBM platform metrics configuration for the team.
