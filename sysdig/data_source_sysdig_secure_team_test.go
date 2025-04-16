@@ -31,6 +31,8 @@ func TestAccDataSourceSysdigSecureTeam(t *testing.T) {
 					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "version", "0"),
 					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "use_sysdig_capture", "true"),
 					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "all_zones", "true"),
+					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "can_use_agent_cli", "false"),
+					resource.TestCheckResourceAttr("data.sysdig_secure_team.test", "can_use_rapid_response", "true"),
 				),
 			},
 		},
@@ -40,12 +42,14 @@ func TestAccDataSourceSysdigSecureTeam(t *testing.T) {
 func secureTeamAndDatasource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_team" "sample" {
-  name               = "%s"
-  description        = "A test secure team"
-  scope_by           = "container"
-  use_sysdig_capture = true
-  filter             = "container.image.repo = \"sysdig/agent\""
-  all_zones          = true
+  name                   = "%s"
+  description            = "A test secure team"
+  scope_by               = "container"
+  use_sysdig_capture     = true
+  filter                 = "container.image.repo = \"sysdig/agent\""
+  all_zones              = true
+  can_use_agent_cli      = false
+	can_use_rapid_response = true
 }
 
 data "sysdig_secure_team" "test" {

@@ -40,6 +40,14 @@ func dataSourceSysdigSecureTeam() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"can_use_agent_cli": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"can_use_rapid_response": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"default_team": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -103,6 +111,8 @@ func dataSourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData,
 	_ = d.Set("scope_by", team.Show)
 	_ = d.Set("filter", team.Filter)
 	_ = d.Set("use_sysdig_capture", team.CanUseSysdigCapture)
+	_ = d.Set("can_use_agent_cli", team.CanUseAgentCli)
+	_ = d.Set("can_use_rapid_response", team.CanUseRapidResponse)
 	_ = d.Set("default_team", team.DefaultTeam)
 	_ = d.Set("user_roles", userSecureRolesToSet(team.UserRoles))
 	_ = d.Set("version", team.Version)

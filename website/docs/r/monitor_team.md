@@ -67,7 +67,7 @@ data "sysdig_custom_role" "custom_role" {
 
 * `prometheus_remote_write_metrics_filter` - (Optional) Use this option to select which Prometheus Remote Write data users of this team can view. Not setting it will allow users to see all Prometheus Remote Write data.
 
-* `use_sysdig_capture` - (Optional) Defines if the team is able to create Sysdig Capture files.  Default: true.
+* `can_use_sysdig_capture` - (Optional) Defines if the team is able to create Sysdig Capture files.  Default: true.
 
 * `can_see_infrastructure_events` - (Optional) Enable this option to allow this team to view all Infrastructure and Custom Events from every user and agent. Otherwise, this team will only see infrastructure events sent specifically to this team. Default: false.
 

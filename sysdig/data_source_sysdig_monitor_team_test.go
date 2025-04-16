@@ -32,6 +32,8 @@ func TestAccDataSourceSysdigMonitorTeam(t *testing.T) {
 					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test", "can_use_sysdig_capture", "true"),
 					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test", "can_see_infrastructure_events", "true"),
 					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test", "can_use_aws_data", "true"),
+					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test", "can_use_agent_cli", "false"),
+					resource.TestCheckResourceAttr("data.sysdig_monitor_team.test", "prometheus_remote_write_metrics_filter", "kube_cluster_name in (\"test-cluster\")"),
 				),
 			},
 		},
@@ -48,9 +50,10 @@ resource "sysdig_monitor_team" "sample" {
   can_use_sysdig_capture 		= true
   can_see_infrastructure_events = true
   can_use_aws_data = true
-  
+  can_use_agent_cli = false
+  prometheus_remote_write_metrics_filter = "kube_cluster_name in (\"test-cluster\")"
   entrypoint {
-	type = "Dashboards"
+    type = "Dashboards"
   }
 }
 
