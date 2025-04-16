@@ -19,6 +19,11 @@ type TeamInterface interface {
 	CreateTeam(ctx context.Context, tRequest Team) (t Team, err error)
 	UpdateTeam(ctx context.Context, tRequest Team) (t Team, err error)
 	DeleteTeam(ctx context.Context, id int) error
+	ListTeams(ctx context.Context) ([]Team, error)
+}
+
+type teamsWrapper struct {
+	Teams []Team `json:"teams"`
 }
 
 func (client *Client) GetUserIDByEmail(ctx context.Context, userRoles []UserRoles) ([]UserRoles, error) {
@@ -152,6 +157,25 @@ func (client *Client) DeleteTeam(ctx context.Context, id int) error {
 	}
 
 	return nil
+}
+
+func (client *Client) ListTeams(ctx context.Context) ([]Team, error) {
+	response, err := client.requester.Request(ctx, http.MethodGet, client.GetTeamsURL(), nil)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return nil, client.ErrorFromResponse(response)
+	}
+
+	wrapper, err := Unmarshal[teamsWrapper](response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return wrapper.Teams, nil
 }
 
 func (client *Client) GetUsersLightURL() string {
