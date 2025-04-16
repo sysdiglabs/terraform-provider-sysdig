@@ -19,7 +19,7 @@ resource "sysdig_monitor_team" "devops" {
   name = "Monitoring DevOps team"
 
   entrypoint {
-	  type = "DashboardTemplates"
+    type = "DashboardTemplates"
     selection = "view.net.http"
   }
 

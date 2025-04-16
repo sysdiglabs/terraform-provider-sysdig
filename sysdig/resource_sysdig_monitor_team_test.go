@@ -58,10 +58,10 @@ resource "sysdig_monitor_team" "sample" {
   can_use_sysdig_capture                 = true
   can_see_infrastructure_events          = true
   can_use_aws_data                       = true
-	can_use_agent_cli                      = true
+  can_use_agent_cli                      = true
 
   entrypoint {
-	type = "Dashboards"
+    type = "Dashboards"
   }
 }`, name, name)
 }
