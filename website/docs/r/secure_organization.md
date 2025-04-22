@@ -34,6 +34,7 @@ resource "sysdig_secure_organization" "sample" {
 * `included_cloud_accounts` - (Optional) List of cloud accounts to include during onboarding.
 * `excluded_cloud_accounts` - (Optional) List of cloud accounts to exclude during onboarding.
 * `organization_root_id` - (Optional) Organization's root id if available, else organization/tenant id.
+* `automatic_onboarding` - (Optional) Whether or not accounts in organization are to be detected automatically.
 
 ## Attributes Reference
 
