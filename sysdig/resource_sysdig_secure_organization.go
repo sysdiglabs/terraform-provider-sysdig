@@ -81,7 +81,7 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 			SchemaAutomaticOnboarding: {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Default:  false,
 			},
 		},
 	}
