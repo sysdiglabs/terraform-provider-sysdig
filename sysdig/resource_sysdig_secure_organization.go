@@ -78,6 +78,11 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 				Optional: true,
 				Default:  "",
 			},
+			SchemaAutomaticOnboarding: {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -166,6 +171,7 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.Organizat
 	secureOrganization := &v2.OrganizationSecure{CloudOrganization: cloudauth.CloudOrganization{}}
 	secureOrganization.CloudOrganization.ManagementAccountId = data.Get(SchemaManagementAccountId).(string)
 	secureOrganization.CloudOrganization.OrganizationRootId = data.Get(SchemaOrganizationRootID).(string)
+	secureOrganization.CloudOrganization.AutomaticOnboarding = data.Get(SchemaAutomaticOnboarding).(bool)
 	organizationalUnitIdsData := data.Get(SchemaOrganizationalUnitIds).([]interface{})
 	for _, organizationalUnitIdData := range organizationalUnitIdsData {
 		secureOrganization.CloudOrganization.OrganizationalUnitIds = append(
@@ -240,6 +246,11 @@ func secureOrganizationToResourceData(data *schema.ResourceData, org *v2.Organiz
 	}
 
 	err = data.Set(SchemaOrganizationRootID, org.OrganizationRootId)
+	if err != nil {
+		return err
+	}
+
+	err = data.Set(SchemaAutomaticOnboarding, org.AutomaticOnboarding)
 	if err != nil {
 		return err
 	}
