@@ -33,8 +33,9 @@ func resourceSysdigSecureNotificationChannelSlack() *schema.Resource {
 
 		Schema: createSecureNotificationChannelSchema(map[string]*schema.Schema{
 			"url": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:      schema.TypeString,
+				Required:  true,
+				Sensitive: true,
 			},
 			"channel": {
 				Type:     schema.TypeString,
