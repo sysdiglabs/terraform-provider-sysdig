@@ -1,12 +1,12 @@
 ---
 subcategory: "Sysdig Monitor"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_monitor_notification_channel_email"
+page_title: "Sysdig: sysdig_monitor_notification_channel_ibm_function"
 description: |-
   Retrieves information about a Monitor notification channel of type IBM Function
 ---
 
-# Data Source: sysdig_monitor_notification_channel_email
+# Data Source: sysdig_monitor_notification_channel_ibm_function
 
 Retrieves information about a Monitor notification channel of type IBM Function.
 
@@ -15,7 +15,7 @@ Retrieves information about a Monitor notification channel of type IBM Function.
 ## Example Usage
 
 ```terraform
-data "sysdig_monitor_notification_channel_email" "nc_email" {
+data "sysdig_monitor_notification_channel_ibm_function" "nc_ibm_function" {
 	name = "some notification channel name"
 }
 ```
