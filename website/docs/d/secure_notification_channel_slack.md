@@ -32,6 +32,8 @@ In addition to all arguments above, the following attributes are exported:
 * `name` - The Notification Channel Name.
 * `url` - URL of the Slack.
 * `channel` - Channel name from this Slack.* `template_version` - The notification template version to use to create notifications.
+* `is_private_channel` - Whether the Slack channel is private or not.
+* `private_channel_url` - The channel URL,
 * `enabled` - Whether the Notification Channel is active or not.
 * `notify_when_ok` - Whether the Notification Channel sends a notification when the condition is no longer triggered.
 * `notify_when_resolved` - Whether the Notification Channel sends a notification if it's manually acknowledged by a

@@ -29,6 +29,14 @@ func dataSourceSysdigSecureNotificationChannelSlack() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"is_private_channel": {
+				Type:     schema.TypeBool,
+				Required: false,
+			},
+			"private_channel_url": {
+				Type:     schema.TypeString,
+				Required: false,
+			},
 			"template_version": {
 				Type:     schema.TypeString,
 				Computed: true,

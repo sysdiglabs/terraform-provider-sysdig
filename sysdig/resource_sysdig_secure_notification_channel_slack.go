@@ -41,6 +41,14 @@ func resourceSysdigSecureNotificationChannelSlack() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"is_private_channel": {
+				Type:     schema.TypeBool,
+				Required: false,
+			},
+			"private_channel_url": {
+				Type:     schema.TypeString,
+				Required: false,
+			},
 			"template_version": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -163,6 +171,8 @@ func secureNotificationChannelSlackFromResourceData(d *schema.ResourceData, team
 	nc.Type = NOTIFICATION_CHANNEL_TYPE_SLACK
 	nc.Options.Url = d.Get("url").(string)
 	nc.Options.Channel = d.Get("channel").(string)
+	nc.Options.IsPrivateChannel = d.Get("is_private_channel").(bool)
+	nc.Options.PrivateChannelUrl = d.Get("private_channel_url").(string)
 
 	setNotificationChannelSlackTemplateConfig(&nc, d)
 
@@ -208,6 +218,8 @@ func secureNotificationChannelSlackToResourceData(nc *v2.NotificationChannel, d 
 
 	_ = d.Set("url", nc.Options.Url)
 	_ = d.Set("channel", nc.Options.Channel)
+	_ = d.Set("is_private_channel", nc.Options.IsPrivateChannel)
+	_ = d.Set("private_channel_url", nc.Options.PrivateChannelUrl)
 
 	err = getTemplateVersionFromNotificationChannelSlack(nc, d)
 

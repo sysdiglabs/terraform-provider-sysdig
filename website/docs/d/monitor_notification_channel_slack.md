@@ -32,6 +32,8 @@ In addition to all arguments above, the following attributes are exported:
 * `name` - The Notification Channel Name.
 * `url` - URL of the Slack.
 * `channel` - Channel name from this Slack.
+* `is_private_channel` - Whether the Slack channel is private or not.
+* `private_channel_url` - The channel URL,
 * `show_section_runbook_links` - Whether to include the runbook links section in the Slack messages.
 * `show_section_event_details` - Whether to include the event details section in the Slack messages.
 * `show_section_user_defined_content` - Whether to include the user defined section in the Slack messages.

@@ -20,6 +20,7 @@ resource "sysdig_secure_notification_channel_slack" "sample-slack" {
 	enabled                 = true
 	url                     = "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	channel                 = "#sysdig"
+	is_private_channel      = false
 	notify_when_ok          = false
 	notify_when_resolved    = false
 	template_version        = "v2"
@@ -33,6 +34,10 @@ resource "sysdig_secure_notification_channel_slack" "sample-slack" {
 * `url` - (Required) URL of the Slack.
 
 * `channel` - (Required) Channel name from this Slack.
+
+* `is_private_channel` - (Optional) Whether the Slack channel is private or not.
+
+* `private_channel_url` - (Optional) The channel URL, if channel is private.
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 

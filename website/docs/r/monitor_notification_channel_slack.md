@@ -20,6 +20,7 @@ resource "sysdig_monitor_notification_channel_slack" "sample-slack" {
 	enabled                 = true
 	url                     = "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	channel                 = "#sysdig"
+	is_private_channel      = false
 	notify_when_ok          = false
 	notify_when_resolved    = false
 }
@@ -46,6 +47,11 @@ resource "sysdig_monitor_notification_channel_slack" "sample-slack" {
 * `show_section_capturing_information` - (Optional) Whether to include the capturing information section in the Slack messages. Default: true.
 
 * `channel` - (Required) Channel name from this Slack.
+
+* `is_private_channel` - (Optional) Whether the Slack channel is private or not.
+
+* `private_channel_url` - (Optional) The channel URL, if channel is private.
+
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
