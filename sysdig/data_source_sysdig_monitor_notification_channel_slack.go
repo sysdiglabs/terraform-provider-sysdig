@@ -21,8 +21,9 @@ func dataSourceSysdigMonitorNotificationChannelSlack() *schema.Resource {
 
 		Schema: createMonitorNotificationChannelSchema(map[string]*schema.Schema{
 			"url": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"channel": {
 				Type:     schema.TypeString,
