@@ -121,6 +121,8 @@ type NotificationChannelOptions struct {
 	RoutingKey               string                                     `json:"routingKey,omitempty"`               // Type: VictorOps
 	Url                      string                                     `json:"url,omitempty"`                      // Type: OpsGenie, Webhook, Slack, google chat, prometheus alert manager, custom webhook, ms teams
 	Channel                  string                                     `json:"channel,omitempty"`                  // Type: Slack
+	PrivateChannel           bool                                       `json:"privateChannel,omitempty"`           // Type: Slack
+	PrivateChannelUrl        string                                     `json:"privateChannelUrl,omitempty"`        // Type: Slack
 	Account                  string                                     `json:"account,omitempty"`                  // Type: PagerDuty
 	ServiceKey               string                                     `json:"serviceKey,omitempty"`               // Type: PagerDuty
 	ServiceName              string                                     `json:"serviceName,omitempty"`              // Type: PagerDuty
