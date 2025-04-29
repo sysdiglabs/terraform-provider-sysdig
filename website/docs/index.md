@@ -234,7 +234,6 @@ When IBM Workload Protection resources are to be created, this authentication mu
 > - `sysdig_secure_notification_channel_team_email`
 > - `sysdig_monitor_notification_channel_google_chat`
 > - `sysdig_monitor_notification_channel_custom_webhook`
-> - `sysdig_monitor_notification_channel_ibm_function`
 > - `sysdig_monitor_notification_channel_ibm_event_notification`
 > - `sysdig_monitor_silence_rule`
 > - `sysdig_monitor_inhibition_rule`
