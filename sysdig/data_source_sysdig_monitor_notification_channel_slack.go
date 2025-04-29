@@ -29,13 +29,13 @@ func dataSourceSysdigMonitorNotificationChannelSlack() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"is_private_channel": {
+			"private_channel": {
 				Type:     schema.TypeBool,
-				Required: false,
+				Computed: true,
 			},
 			"private_channel_url": {
 				Type:     schema.TypeString,
-				Required: false,
+				Computed: true,
 			},
 			"show_section_runbook_links": {
 				Type:     schema.TypeBool,

@@ -48,6 +48,14 @@ func TestAccSecureNotificationChannelSlack(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: secureNotificationChannelSlackSharedWithPrivateChannel(rText()),
+			},
+			{
+				ResourceName:      "sysdig_secure_notification_channel_slack.sample-slack-private",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -88,4 +96,16 @@ resource "sysdig_secure_notification_channel_slack" "sample-slack" {
 	notify_when_resolved = true
 	template_version = "%s"
 }`, name, version)
+}
+
+func secureNotificationChannelSlackSharedWithPrivateChannel(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_notification_channel_slack" "sample-slack-private" {
+	name = "Example Channel %s - Slack"
+	enabled = true
+	url = "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+	channel = "#sysdig"
+	private_channel = true
+	private_channel_url = "https://app.slack.com/client/XXXXXXXX/XXXXXXXX"
+}`, name)
 }
