@@ -31,7 +31,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The Notification Channel ID.
 * `url` - URL of the Slack webhook.
 * `channel` - Name of the Slack channel.
-* `private_channel` - Whether the Slack Channel has been marked as private or not.
+* `is_private_channel` - Whether the Slack Channel has been marked as private or not.
 * `private_channel_url` - The channel URL, i.e. the link that is referencing the channel (not to be confused with the webhook url), if the channel is private.
 * `template_version` - The notification template version to use to create notifications.
 * `enabled` - Whether the Notification Channel is active or not.

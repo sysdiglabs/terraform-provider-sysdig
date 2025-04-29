@@ -40,7 +40,7 @@ func resourceSysdigMonitorNotificationChannelSlack() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"private_channel": {
+			"is_private_channel": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
@@ -204,7 +204,7 @@ func monitorNotificationChannelSlackFromResourceData(d *schema.ResourceData, tea
 	nc.Type = NOTIFICATION_CHANNEL_TYPE_SLACK
 	nc.Options.Url = d.Get("url").(string)
 	nc.Options.Channel = d.Get("channel").(string)
-	nc.Options.PrivateChannel = d.Get("private_channel").(bool)
+	nc.Options.PrivateChannel = d.Get("is_private_channel").(bool)
 	nc.Options.PrivateChannelUrl = d.Get("private_channel_url").(string)
 	nc.Options.TemplateConfiguration = []v2.NotificationChannelTemplateConfiguration{
 		{
@@ -257,7 +257,7 @@ func monitorNotificationChannelSlackToResourceData(nc *v2.NotificationChannel, d
 
 	_ = d.Set("url", nc.Options.Url)
 	_ = d.Set("channel", nc.Options.Channel)
-	_ = d.Set("private_channel", nc.Options.PrivateChannel)
+	_ = d.Set("is_private_channel", nc.Options.PrivateChannel)
 	_ = d.Set("private_channel_url", nc.Options.PrivateChannelUrl)
 
 	runbookLinks := true

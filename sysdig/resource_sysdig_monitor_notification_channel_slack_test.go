@@ -106,7 +106,7 @@ resource "sysdig_monitor_notification_channel_slack" "sample-slack-private" {
 	enabled = true
 	url = "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 	channel = "#sysdig"
-	private_channel = true
+	is_private_channel = true
 	private_channel_url = "https://app.slack.com/client/XXXXXXXX/XXXXXXXX"
 }`, name)
 }
