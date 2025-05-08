@@ -31,6 +31,9 @@ func (client *Client) GetZones(ctx context.Context, name string) ([]Zone, error)
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode != http.StatusOK {
+		return nil, client.ErrorFromResponse(response)
+	}
 	wrapper, err := Unmarshal[ZonesWrapper](response.Body)
 	if err != nil {
 		return nil, err
@@ -46,6 +49,9 @@ func (client *Client) GetZoneById(ctx context.Context, id int) (*Zone, error) {
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode != http.StatusOK {
+		return nil, client.ErrorFromResponse(response)
+	}
 	zone, err := Unmarshal[Zone](response.Body)
 	if err != nil {
 		return nil, err

@@ -28,6 +28,10 @@ func (client *Client) ListPosturePolicies(ctx context.Context) ([]PosturePolicy,
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode != http.StatusOK {
+		return nil, client.ErrorFromResponse(response)
+	}
+
 	resp, err := Unmarshal[PostureZonePolicyListResponse](response.Body)
 	if err != nil {
 		return nil, err
