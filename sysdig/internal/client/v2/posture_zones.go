@@ -54,6 +54,9 @@ func (client *Client) GetPostureZone(ctx context.Context, id int) (*PostureZone,
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode != http.StatusOK {
+		return nil, client.ErrorFromResponse(response)
+	}
 	wrapper, err := Unmarshal[PostureZoneResponse](response.Body)
 	if err != nil {
 		return nil, err

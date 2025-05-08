@@ -48,6 +48,9 @@ func (c *Client) GetPostureControl(ctx context.Context, id int64) (*PostureContr
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode != http.StatusOK {
+		return nil, c.ErrorFromResponse(response)
+	}
 	wrapper, err := Unmarshal[SaveControlResponse](response.Body)
 	if err != nil {
 		return nil, err
