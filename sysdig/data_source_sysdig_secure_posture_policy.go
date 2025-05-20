@@ -1,7 +1,11 @@
 package sysdig
 
 import (
+	"cmp"
 	"context"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"slices"
 	"strconv"
 	"time"
 
@@ -75,7 +79,15 @@ func dataSourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Reso
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
+	tflog.Info(ctx, "Policy Details in data")
+	for rg_i, rg := range policy.RequirementsGroup {
+		for r_i, r := range rg.Requirements {
+			slices.SortFunc(r.Controls, func(a, b v2.Control) int {
+				return cmp.Compare(a.Name, b.Name)
+			})
+			policy.RequirementsGroup[rg_i].Requirements[r_i].Controls = r.Controls
+		}
+	}
 	d.SetId(policy.ID)
 
 	err = d.Set(SchemaNameKey, policy.Name)
@@ -118,7 +130,7 @@ func dataSourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	groupsData, err := setGroups(d, policy.RequirementsGroup)
+	groupsData, err := setGroups(ctx, d, policy.RequirementsGroup)
 	if err != nil {
 		return diag.FromErr(err)
 	}

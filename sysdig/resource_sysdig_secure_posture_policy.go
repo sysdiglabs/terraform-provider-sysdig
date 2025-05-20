@@ -1,7 +1,11 @@
 package sysdig
 
 import (
+	"cmp"
 	"context"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"slices"
 	"strconv"
 	"time"
 
@@ -44,7 +48,7 @@ func createGroupSchema(i int) *schema.Resource {
 								Required: true,
 							},
 							"control": {
-								Type:     schema.TypeList,
+								Type:     schema.TypeSet,
 								Optional: true,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
@@ -140,6 +144,13 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
 		},
+		//CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+		//	tflog.Info(ctx, "============= CustomizeDiff ============")
+		//	for k, v := range diff.GetRawPlan().AsValueMap() {
+		//		tflog.Info(ctx, fmt.Sprintf("%s, %v", k, v.AsValueMap()))
+		//	}
+		//	return nil
+		//},
 		Schema: map[string]*schema.Schema{
 			SchemaIDKey: {
 				Type:     schema.TypeString,
@@ -243,6 +254,7 @@ func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *sch
 }
 
 func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	tflog.Info(ctx, "============= resourceSysdigSecurePosturePolicyRead ============")
 	client, err := getPosturePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -257,6 +269,17 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	// Sort controls
+	for rg_i, rg := range policy.RequirementsGroup {
+		for r_i, r := range rg.Requirements {
+			slices.SortFunc(r.Controls, func(a, b v2.Control) int {
+				return cmp.Compare(a.Name, b.Name)
+			})
+			policy.RequirementsGroup[rg_i].Requirements[r_i].Controls = r.Controls
+		}
+	}
+
 	err = d.Set(SchemaIDKey, policy.ID)
 	if err != nil {
 		return diag.FromErr(err)
@@ -308,7 +331,7 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 	// Set groups
-	groupsData, err := setGroups(d, policy.RequirementsGroup)
+	groupsData, err := setGroups(ctx, d, policy.RequirementsGroup)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -317,7 +340,7 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
+	tflog.Info(ctx, "============= resourceSysdigSecurePosturePolicyRead ENDED ============")
 	return nil
 }
 
@@ -340,7 +363,7 @@ func resourceSysdigSecurePosturePolicyDelete(ctx context.Context, d *schema.Reso
 	return nil
 }
 
-func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) ([]interface{}, error) {
+func setGroups(ctx context.Context, d *schema.ResourceData, groups []v2.RequirementsGroup) ([]interface{}, error) {
 	var groupsData []interface{}
 	for _, group := range groups {
 		groupData := map[string]interface{}{
@@ -351,11 +374,11 @@ func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) ([]interfa
 
 		// Recursively set nested groups and requirements
 		if len(group.Requirements) > 0 {
-			requirementsData := setRequirements(group.Requirements)
+			requirementsData := setRequirements(ctx, group.Requirements)
 			groupData["requirement"] = requirementsData
 		}
 		if len(group.Folders) > 0 {
-			nestedGroupsData, err := setGroups(d, group.Folders)
+			nestedGroupsData, err := setGroups(ctx, d, group.Folders)
 			if err != nil {
 				return nil, err
 			}
@@ -366,7 +389,7 @@ func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) ([]interfa
 	return groupsData, nil
 }
 
-func setRequirements(requirements []v2.Requirement) []interface{} {
+func setRequirements(ctx context.Context, requirements []v2.Requirement) []interface{} {
 	var requirementsData []interface{}
 	for _, req := range requirements {
 		reqData := map[string]interface{}{
@@ -377,7 +400,16 @@ func setRequirements(requirements []v2.Requirement) []interface{} {
 
 		// Set controls for each requirement
 		if len(req.Controls) > 0 {
-			controlsData := setControls(req.Controls)
+			controlsData := setControls(ctx, req.Controls)
+
+			slices.SortFunc(controlsData, func(a, b interface{}) int {
+				aMap := a.(map[string]interface{})
+				bMap := b.(map[string]interface{})
+
+				aName := aMap["name"].(string)
+				bName := bMap["name"].(string)
+				return cmp.Compare(aName, bName)
+			})
 			reqData["control"] = controlsData
 		}
 
@@ -386,7 +418,7 @@ func setRequirements(requirements []v2.Requirement) []interface{} {
 	return requirementsData
 }
 
-func setControls(controls []v2.Control) []interface{} {
+func setControls(ctx context.Context, controls []v2.Control) []interface{} {
 	var controlsData []interface{}
 	for _, ctrl := range controls {
 		ctrlData := map[string]interface{}{
@@ -395,6 +427,17 @@ func setControls(controls []v2.Control) []interface{} {
 		}
 		controlsData = append(controlsData, ctrlData)
 	}
+
+	tflog.Info(ctx, fmt.Sprintf("Controls BEFORE SORT: %v", controlsData))
+	slices.SortFunc(controlsData, func(a, b interface{}) int {
+		aMap := a.(map[string]interface{})
+		bMap := b.(map[string]interface{})
+
+		aName := aMap["name"].(string)
+		bName := bMap["name"].(string)
+		return cmp.Compare(aName, bName)
+	})
+	tflog.Info(ctx, fmt.Sprintf("Controls AFTER SORT: %v", controlsData))
 	return controlsData
 }
 
@@ -474,6 +517,14 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 				}
 
 				if controlsData, ok := reqMap["control"].([]interface{}); ok {
+					slices.SortFunc(controlsData, func(a, b interface{}) int {
+						aMap := a.(map[string]interface{})
+						bMap := b.(map[string]interface{})
+
+						aName := aMap["name"].(string)
+						bName := bMap["name"].(string)
+						return cmp.Compare(aName, bName)
+					})
 					for _, controlData := range controlsData {
 						controlMap := controlData.(map[string]interface{})
 						control := v2.CreateRequirementControl{

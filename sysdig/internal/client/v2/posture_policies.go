@@ -3,6 +3,7 @@ package v2
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"net/http"
 )
 
@@ -22,6 +23,7 @@ type PosturePolicyInterface interface {
 }
 
 func (client *Client) ListPosturePolicies(ctx context.Context) ([]PosturePolicy, error) {
+	tflog.Info(ctx, "============= API:ListPosturePolicies ============")
 	response, err := client.requester.Request(ctx, http.MethodGet, client.getPosturePolicyURL(PosturePolicyListPath), nil)
 	if err != nil {
 		return nil, err
@@ -41,11 +43,13 @@ func (client *Client) ListPosturePolicies(ctx context.Context) ([]PosturePolicy,
 }
 
 func (client *Client) CreateOrUpdatePosturePolicy(ctx context.Context, p *CreatePosturePolicy) (*FullPosturePolicy, string, error) {
+	tflog.Info(ctx, "============= API:CreateOrUpdatePosturePolicy ============")
 	payload, err := Marshal(p)
 	if err != nil {
 		return nil, "", err
 	}
 	response, err := client.requester.Request(ctx, http.MethodPost, client.getPosturePolicyURL(PosturePolicyCreatePath), payload)
+	tflog.Info(ctx, fmt.Sprintf("======== Create Payload: %v", p))
 	if err != nil {
 		return nil, "", err
 	}
@@ -58,10 +62,12 @@ func (client *Client) CreateOrUpdatePosturePolicy(ctx context.Context, p *Create
 	if err != nil {
 		return nil, "", err
 	}
+	tflog.Info(ctx, fmt.Sprintf("======== Create Payload Response: %v", resp.Data.RequirementsGroup))
 	return &resp.Data, "", nil
 }
 
 func (client *Client) GetPosturePolicy(ctx context.Context, id int64) (*FullPosturePolicy, error) {
+	tflog.Info(ctx, "============= API:GetPosturePolicy ============")
 	response, err := client.requester.Request(ctx, http.MethodGet, client.getPolicyUrl(id), nil)
 	if err != nil {
 		return nil, err
@@ -76,6 +82,7 @@ func (client *Client) GetPosturePolicy(ctx context.Context, id int64) (*FullPost
 }
 
 func (client *Client) DeletePosturePolicy(ctx context.Context, id int64) error {
+	tflog.Info(ctx, "============= API:DeletePosturePolicy ============")
 	response, err := client.requester.Request(ctx, http.MethodDelete, client.deletePolicyUrl(id), nil)
 	if err != nil {
 		return err
