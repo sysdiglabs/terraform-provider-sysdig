@@ -5,6 +5,7 @@ package sysdig_test
 import (
 	"fmt"
 	"github.com/draios/terraform-provider-sysdig/sysdig"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"testing"
 
@@ -60,7 +61,7 @@ func testAccDataSourceSysdigSecurePostureZonesWithMultipleResourcesConfig(zoneID
 	data "sysdig_secure_posture_zone" "test_posture_zone" {
 		id = sysdig_secure_posture_zone.test_posture_zone.id
 	}
-	`)
+	`, zoneID)
 }
 
 func testAccCheckDataSourceSysdigSecurePostureZonesExists(resourceName string) resource.TestCheckFunc {
