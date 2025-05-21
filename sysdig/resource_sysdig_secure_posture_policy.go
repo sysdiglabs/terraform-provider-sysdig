@@ -27,7 +27,7 @@ func createGroupSchema(i int) *schema.Resource {
 					Required: true,
 				},
 				"requirement": {
-					Type:     schema.TypeList,
+					Type:     schema.TypeSet,
 					Optional: true,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -44,7 +44,7 @@ func createGroupSchema(i int) *schema.Resource {
 								Required: true,
 							},
 							"control": {
-								Type:     schema.TypeList,
+								Type:     schema.TypeSet,
 								Optional: true,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
@@ -86,7 +86,7 @@ func createGroupSchema(i int) *schema.Resource {
 				Elem:     createGroupSchema(i + 1),
 			},
 			"requirement": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -103,7 +103,7 @@ func createGroupSchema(i int) *schema.Resource {
 							Required: true,
 						},
 						"control": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -464,8 +464,8 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 			Description: d["description"].(string),
 		}
 
-		if reqs, ok := d["requirement"].([]interface{}); ok {
-			for _, reqData := range reqs {
+		if reqs, ok := d["requirement"].(*schema.Set); ok {
+			for _, reqData := range reqs.List() {
 				reqMap := reqData.(map[string]interface{})
 				requirement := v2.CreateRequirement{
 					ID:          reqMap["id"].(string),
@@ -473,8 +473,8 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 					Description: reqMap["description"].(string),
 				}
 
-				if controlsData, ok := reqMap["control"].([]interface{}); ok {
-					for _, controlData := range controlsData {
+				if controlsData, ok := reqMap["control"].(*schema.Set); ok {
+					for _, controlData := range controlsData.List() {
 						controlMap := controlData.(map[string]interface{})
 						control := v2.CreateRequirementControl{
 							Name:    controlMap["name"].(string),
