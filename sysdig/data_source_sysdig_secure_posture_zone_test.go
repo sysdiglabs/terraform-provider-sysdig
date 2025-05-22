@@ -5,6 +5,7 @@ package sysdig_test
 import (
 	"fmt"
 	"github.com/draios/terraform-provider-sysdig/sysdig"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"testing"
 
@@ -13,6 +14,8 @@ import (
 )
 
 func TestAccDataSourceSysdigSecurePostureZones(t *testing.T) {
+	rID := func() string { return acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum) }
+	randomZoneId := fmt.Sprintf("test-zone-%s", rID())
 	resource.Test(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -22,10 +25,10 @@ func TestAccDataSourceSysdigSecurePostureZones(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceSysdigSecurePostureZonesWithMultipleResourcesConfig(),
+				Config: testAccDataSourceSysdigSecurePostureZonesWithMultipleResourcesConfig(randomZoneId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataSourceSysdigSecurePostureZonesExists("data.sysdig_secure_posture_zone.test_posture_zone"),
-					resource.TestCheckResourceAttr("data.sysdig_secure_posture_zone.test_posture_zone", "name", "test-zone-1"),
+					resource.TestCheckResourceAttr("data.sysdig_secure_posture_zone.test_posture_zone", "name", randomZoneId),
 					resource.TestCheckResourceAttr("data.sysdig_secure_posture_zone.test_posture_zone", "description", "Test description 1"),
 					resource.TestCheckTypeSetElemNestedAttrs(
 						"data.sysdig_secure_posture_zone.test_posture_zone",
@@ -41,10 +44,10 @@ func TestAccDataSourceSysdigSecurePostureZones(t *testing.T) {
 	})
 }
 
-func testAccDataSourceSysdigSecurePostureZonesWithMultipleResourcesConfig() string {
-	return `
+func testAccDataSourceSysdigSecurePostureZonesWithMultipleResourcesConfig(zoneID string) string {
+	return fmt.Sprintf(`
 	resource "sysdig_secure_posture_zone" "test_posture_zone" {
-		name        = "test-zone-1"
+		name        = "%s"
 		description = "Test description 1"
 
 		scopes {
@@ -58,7 +61,7 @@ func testAccDataSourceSysdigSecurePostureZonesWithMultipleResourcesConfig() stri
 	data "sysdig_secure_posture_zone" "test_posture_zone" {
 		id = sysdig_secure_posture_zone.test_posture_zone.id
 	}
-	`
+	`, zoneID)
 }
 
 func testAccCheckDataSourceSysdigSecurePostureZonesExists(resourceName string) resource.TestCheckFunc {
