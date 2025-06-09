@@ -127,7 +127,7 @@ func resourceSysdigSecureAcceptPostureControlCreate(ctx context.Context, d *sche
 		t := d.Get(SchemaEndTimeKey).(string)
 		endTime, _ = strconv.ParseInt(t, 10, 64)
 	}
-	if endTime <= time.Now().UTC().UnixMilli() {
+	if endTime > 0 && endTime <= time.Now().UTC().UnixMilli() {
 		return diag.Errorf("Error creating accept risk. error status: %s err: %s", "ExpiresAt must be in the future", fmt.Errorf("ExpiresAt must be in the future"))
 	}
 	req.ExpiresAt = strconv.FormatInt(endTime, 10)
