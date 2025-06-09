@@ -20,6 +20,9 @@ func TestAcceptSecurePostureRisk(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
+				Config: acceptPostureRiskWithoutExpirationDate(),
+			},
+			{
 				Config: acceptPostureRiskResource(),
 			},
 			{
@@ -47,6 +50,17 @@ resource "sysdig_secure_posture_accept_risk" "accept_resource" {
     control_name = "ServiceAccounts with cluster access"
     reason = "Risk Transferred"
     expires_in = "30 Days"
+    filter = "name in ('system:controller:daemon-set-s') and kind in ('ClusterRole')"
+}`
+}
+
+func acceptPostureRiskWithoutExpirationDate() string {
+	return `
+resource "sysdig_secure_posture_accept_risk" "accept_resource" {
+    description = "test accept posture risk resource"
+    control_name = "ServiceAccounts with cluster access"
+    reason = "Risk Transferred"
+    expires_in = "Never"
     filter = "name in ('system:controller:daemon-set-s') and kind in ('ClusterRole')"
 }`
 }
