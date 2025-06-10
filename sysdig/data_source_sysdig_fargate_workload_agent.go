@@ -20,8 +20,6 @@ const agentinoKiltDefinition = `build {
     entry_point: ["/opt/draios/bin/instrument"]
     command: ${?original.entry_point} ${?original.command}
     environment_variables: {
-        "SYSDIG_ORCHESTRATOR": ${config.orchestrator_host}
-        "SYSDIG_ORCHESTRATOR_PORT": ${config.orchestrator_port}
         "SYSDIG_COLLECTOR": ${config.collector_host}
         "SYSDIG_COLLECTOR_PORT": ${config.collector_port}
         "SYSDIG_ACCESS_KEY": ${config.sysdig_access_key}
@@ -63,16 +61,6 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 			"image_auth_secret": {
 				Type:        schema.TypeString,
 				Description: "registry authentication secret",
-				Optional:    true,
-			},
-			"orchestrator_host": {
-				Type:        schema.TypeString,
-				Description: "the orchestrator host to connect to",
-				Optional:    true,
-			},
-			"orchestrator_port": {
-				Type:        schema.TypeString,
-				Description: "the orchestrator port to connect to",
 				Optional:    true,
 			},
 			"collector_host": {
@@ -360,15 +348,13 @@ func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string
 }
 
 type KiltRecipeConfig struct {
-	SysdigAccessKey  string `json:"sysdig_access_key"`
-	AgentImage       string `json:"agent_image"`
-	OrchestratorHost string `json:"orchestrator_host"`
-	OrchestratorPort string `json:"orchestrator_port"`
-	CollectorHost    string `json:"collector_host"`
-	CollectorPort    string `json:"collector_port"`
-	SysdigLogging    string `json:"sysdig_logging"`
-	Sidecar          string `json:"sidecar"`
-	Priority         string `json:"priority"`
+	SysdigAccessKey string `json:"sysdig_access_key"`
+	AgentImage      string `json:"agent_image"`
+	CollectorHost   string `json:"collector_host"`
+	CollectorPort   string `json:"collector_port"`
+	SysdigLogging   string `json:"sysdig_logging"`
+	Sidecar         string `json:"sidecar"`
+	Priority        string `json:"priority"`
 }
 
 type patchOptions struct {
@@ -443,15 +429,13 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 	}
 
 	recipeConfig := KiltRecipeConfig{
-		SysdigAccessKey:  d.Get("sysdig_access_key").(string),
-		AgentImage:       d.Get("workload_agent_image").(string),
-		OrchestratorHost: d.Get("orchestrator_host").(string),
-		OrchestratorPort: d.Get("orchestrator_port").(string),
-		CollectorHost:    d.Get("collector_host").(string),
-		CollectorPort:    d.Get("collector_port").(string),
-		SysdigLogging:    d.Get("sysdig_logging").(string),
-		Sidecar:          d.Get("sidecar").(string),
-		Priority:         priority,
+		SysdigAccessKey: d.Get("sysdig_access_key").(string),
+		AgentImage:      d.Get("workload_agent_image").(string),
+		CollectorHost:   d.Get("collector_host").(string),
+		CollectorPort:   d.Get("collector_port").(string),
+		SysdigLogging:   d.Get("sysdig_logging").(string),
+		Sidecar:         d.Get("sidecar").(string),
+		Priority:        priority,
 	}
 
 	jsonConf, err := json.Marshal(&recipeConfig)

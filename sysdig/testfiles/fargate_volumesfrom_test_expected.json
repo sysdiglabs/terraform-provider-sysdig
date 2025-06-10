@@ -13,10 +13,6 @@
         ],
         "Environment": [
             {
-                "Name": "SYSDIG_ORCHESTRATOR_PORT",
-                "Value": "orchestrator_port"
-            },
-            {
                 "Name": "SYSDIG_COLLECTOR",
                 "Value": "collector_host"
             },
@@ -39,10 +35,6 @@
             {
                 "Name": "SYSDIG_SIDECAR",
                 "Value": ""
-            },
-            {
-                "Name": "SYSDIG_ORCHESTRATOR",
-                "Value": "orchestrator_host"
             }
         ],
         "LinuxParameters": {
@@ -74,10 +66,6 @@
         },
         "Environment": [
             {
-                "Name": "SYSDIG_ORCHESTRATOR_PORT",
-                "Value": "orchestrator_port"
-            },
-            {
                 "Name": "SYSDIG_COLLECTOR",
                 "Value": "collector_host"
             },
@@ -100,10 +88,6 @@
             {
                 "Name": "SYSDIG_SIDECAR",
                 "Value": ""
-            },
-            {
-                "Name": "SYSDIG_ORCHESTRATOR",
-                "Value": "orchestrator_host"
             }
         ]
     }

@@ -36,14 +36,6 @@
         "Value": "temp"
       },
       {
-        "Name": "SYSDIG_ORCHESTRATOR",
-        "Value": "orchestrator_host"
-      },
-      {
-        "Name": "SYSDIG_ORCHESTRATOR_PORT",
-        "Value": "orchestrator_port"
-      },
-      {
         "Name": "SYSDIG_COLLECTOR",
         "Value": "collector_host"
       },
@@ -109,14 +101,6 @@
       {
         "Name": "pmet",
         "Value": "temp"
-      },
-      {
-        "Name": "SYSDIG_ORCHESTRATOR",
-        "Value": "orchestrator_host"
-      },
-      {
-        "Name": "SYSDIG_ORCHESTRATOR_PORT",
-        "Value": "orchestrator_port"
       },
       {
         "Name": "SYSDIG_COLLECTOR",
