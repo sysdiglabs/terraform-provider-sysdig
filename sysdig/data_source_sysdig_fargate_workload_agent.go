@@ -69,11 +69,13 @@ func dataSourceSysdigFargateWorkloadAgent() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "the orchestrator host to connect to",
 				Optional:    true,
+				Deprecated:  "The orchestrator agent is deprecated and no longer supported as of workload-agent version 6.0.0. Please use the collector_host parameter instead.",
 			},
 			"orchestrator_port": {
 				Type:        schema.TypeString,
 				Description: "the orchestrator port to connect to",
 				Optional:    true,
+				Deprecated:  "The orchestrator agent is deprecated and no longer supported as of workload-agent version 6.0.0. Please use the collector_port parameter instead.",
 			},
 			"collector_host": {
 				Type:        schema.TypeString,
