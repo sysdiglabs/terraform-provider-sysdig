@@ -61,6 +61,15 @@ func TestAccAlertV2Metric(t *testing.T) {
 				Config: alertV2MetricWithCustomNotifications(rText()),
 			},
 			{
+				Config: alertV2MetricWithCustomNotifications2(rText()),
+			},
+			{
+				Config: alertV2MetricWithCustomNotifications3(rText()),
+			},
+			{
+				Config: alertV2MetricWithCustomNotifications4(rText()),
+			},
+			{
 				Config: alertV2MetricWithCapture(rText()),
 			},
 			{
@@ -315,6 +324,78 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 		append = "post"
 	}
 
+}
+`, name)
+}
+
+func alertV2MetricWithCustomNotifications2(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_metric" "sample" {
+
+	name = "TERRAFORM TEST - METRICV2 %s"
+	metric = "sysdig_container_cpu_used_percent"
+	group_aggregation = "avg"
+	time_aggregation = "avg"
+	operator = ">="
+	threshold = 50
+	range_seconds = 600
+	custom_notification {
+		subject = "test"
+		prepend = "pre"
+		append = "post"
+		additional_field {
+			name = "test_field"
+			value = "test_value"
+		}
+		additional_field {
+			name = "test_field2"
+			value = "test_value2"
+		}
+	}
+}
+`, name)
+}
+
+func alertV2MetricWithCustomNotifications3(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_metric" "sample" {
+
+	name = "TERRAFORM TEST - METRICV2 %s"
+	metric = "sysdig_container_cpu_used_percent"
+	group_aggregation = "avg"
+	time_aggregation = "avg"
+	operator = ">="
+	threshold = 50
+	range_seconds = 600
+	custom_notification {
+		subject = "test"
+		prepend = "pre"
+		append = "post"
+		additional_field {
+			name = "test_field2"
+			value = "test_value2"
+		}
+	}
+}
+`, name)
+}
+
+func alertV2MetricWithCustomNotifications4(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_metric" "sample" {
+
+	name = "TERRAFORM TEST - METRICV2 %s"
+	metric = "sysdig_container_cpu_used_percent"
+	group_aggregation = "avg"
+	time_aggregation = "avg"
+	operator = ">="
+	threshold = 50
+	range_seconds = 600
+	custom_notification {
+		subject = "test"
+		prepend = "pre"
+		append = "post"
+	}
 }
 `, name)
 }

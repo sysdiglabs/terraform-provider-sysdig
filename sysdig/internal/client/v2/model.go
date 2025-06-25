@@ -697,9 +697,15 @@ type NotificationChannelOptionsV2 struct {
 }
 
 type CustomNotificationTemplateV2 struct {
-	Subject     string `json:"subject"`
-	PrependText string `json:"prependText"`
-	AppendText  string `json:"appendText"`
+	Subject                      string                              `json:"subject"`
+	PrependText                  string                              `json:"prependText"`
+	AppendText                   string                              `json:"appendText"`
+	AdditionalNotificationFields []CustomNotificationAdditionalField `json:"additionalNotificationFields,omitempty"`
+}
+
+type CustomNotificationAdditionalField struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 type CaptureConfigV2 struct {

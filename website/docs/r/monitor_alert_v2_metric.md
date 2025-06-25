@@ -47,6 +47,20 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 
   range_seconds = 60
 
+  custom_notification {
+    subject = "{{__alert_name__}} for pod {{kube_pod_name}}"
+    prepend = "Attention!!"
+    append = "Please investigate the issue. Escalate to the on-call team if needed."
+    additional_field {
+      name = "pod"
+      value = "{{kube_pod_name}}"
+    }
+    additional_field {
+      name = "cluster"
+      value = "{{kube_cluster_name}}"
+    }
+  }
+
 }
 
 ```
@@ -88,6 +102,11 @@ By defining this field, the user can modify the title and the body of the messag
 * `subject` - (Optional) Sets the title of the alert.
 * `prepend` - (Optional) Text to add before the alert template.
 * `append` - (Optional) Text to add after the alert template.
+* `additional_field` - (Optional) Set of additional fields to add to the notification.
+
+#### `additional_field`
+* `name` - (Required) field name.
+* `value` - (Required) field value.
 
 ### `link`
 
