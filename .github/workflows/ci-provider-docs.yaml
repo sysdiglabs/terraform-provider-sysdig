@@ -7,7 +7,7 @@ on:
 
 env:
   TERRAFORM_VERSION: "0.14.8"
-  GO_VERSION: "^1.17"
+  GO_VERSION: "^1.17"  # any 1.x version, see go.mod file for minimum
 
 jobs:
   go_build:
