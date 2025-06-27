@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/sysdiglabs/agent-kilt/runtimes/cloudformation/cfnpatcher"
+	"github.com/sysdiglabs/agent-kilt/pkg/cfnpatcher"
 )
 
 const agentinoKiltDefinition = `build {
