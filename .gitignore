@@ -53,3 +53,4 @@ oanc
 # Local test folder
 local-terraform-test/
 dist/
+.secrets

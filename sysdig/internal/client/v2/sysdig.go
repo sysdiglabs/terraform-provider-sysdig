@@ -41,8 +41,8 @@ type SysdigSecure interface {
 	RuleInterface
 	ListInterface
 	MacroInterface
-	ScanningPolicyInterface
-	ScanningPolicyAssignmentInterface
+	DeprecatedScanningPolicyInterface
+	DeprecatedScanningPolicyAssignmentInterface
 	VulnerabilityExceptionListInterface
 	VulnerabilityExceptionInterface
 	CloudAccountSecureInterface

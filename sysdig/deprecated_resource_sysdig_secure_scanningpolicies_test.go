@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestAccScanningPolicyAssignment(t *testing.T) {
+func TestAccDeprecatedScanningPolicy(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -29,39 +29,36 @@ func TestAccScanningPolicyAssignment(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: scanningPolicyAssignmentWithWhitelistIDs(rText()),
+				Config: deprecatedScanningPolicyWithName(rText()),
+			},
+			{
+				ResourceName:      "sysdig_secure_scanning_policy.sample",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func scanningPolicyAssignmentWithWhitelistIDs(name string) string {
+func deprecatedScanningPolicyWithName(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_scanning_policy_assignment" "sample" {
-  items {
-    name = "example %s"
-    image {
-      type = "tag"
-      value = "latest"
+resource "sysdig_secure_scanning_policy" "sample" {
+  name = "TERRAFORM TEST 1 %s"
+  comment = "TERRAFORM TEST %s"
+
+  rules {
+    gate = "dockerfile"
+    trigger = "effective_user"
+    action = "WARN"
+    params {
+        name = "users"
+        value = "docker"
     }
-    registry = "icr.io"
-    repository = "example"
-
-    policy_ids = ["default"]
-  }
-
-  items {
-    name = ""
-    image {
-      type = "tag"
-      value = "*"
+    params {
+        name = "type"
+        value = "blacklist"
     }
-    registry = "*"
-    repository = "*"
-
-    policy_ids = ["default"]
-	  whitelist_ids = []
   }
 }
-`, name)
+`, name, name)
 }
