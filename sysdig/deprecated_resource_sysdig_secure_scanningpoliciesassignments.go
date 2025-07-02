@@ -12,15 +12,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceSysdigSecureScanningPolicyAssignment() *schema.Resource {
+func deprecatedResourceSysdigSecureScanningPolicyAssignment() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
 		DeprecationMessage: "The legacy scanning engine has been deprecated. This resource will be removed in future releases.",
-		CreateContext:      resourceSysdigScanningPolicyAssignmentCreate,
-		ReadContext:        resourceSysdigScanningPolicyAssignmentRead,
-		UpdateContext:      resourceSysdigScanningPolicyAssignmentUpdate,
-		DeleteContext:      resourceSysdigScanningPolicyAssignmentDelete,
+		CreateContext:      deprecatedResourceSysdigScanningPolicyAssignmentCreate,
+		ReadContext:        deprecatedResourceSysdigScanningPolicyAssignmentRead,
+		UpdateContext:      deprecatedResourceSysdigScanningPolicyAssignmentUpdate,
+		DeleteContext:      deprecatedResourceSysdigScanningPolicyAssignmentDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -96,83 +96,83 @@ func resourceSysdigSecureScanningPolicyAssignment() *schema.Resource {
 	}
 }
 
-func getSecureScanningPolicyAssignmentClient(c SysdigClients) (v2.ScanningPolicyAssignmentInterface, error) {
+func getDeprecatedSecureScanningPolicyAssignmentClient(c SysdigClients) (v2.DeprecatedScanningPolicyAssignmentInterface, error) {
 	return c.sysdigSecureClientV2()
 }
 
-func resourceSysdigScanningPolicyAssignmentCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
+func deprecatedResourceSysdigScanningPolicyAssignmentCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getDeprecatedSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	scanningPolicyAssignmentList := scanningPolicyAssignmentListFromResourceData(d)
+	scanningPolicyAssignmentList := deprecatedScanningPolicyAssignmentListFromResourceData(d)
 
-	validation := validateScanningPolicyAssignment(scanningPolicyAssignmentList)
+	validation := deprecatedValidateScanningPolicyAssignment(scanningPolicyAssignmentList)
 	if validation != nil {
 		return validation
 	}
 
-	scanningPolicyAssignmentList, err = client.CreateScanningPolicyAssignmentList(ctx, scanningPolicyAssignmentList)
+	scanningPolicyAssignmentList, err = client.CreateDeprecatedScanningPolicyAssignmentList(ctx, scanningPolicyAssignmentList)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	scanningPolicyAssignmentListToResourceData(&scanningPolicyAssignmentList, d)
+	deprecatedScanningPolicyAssignmentListToResourceData(&scanningPolicyAssignmentList, d)
 
 	return nil
 }
 
-func resourceSysdigScanningPolicyAssignmentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
+func deprecatedResourceSysdigScanningPolicyAssignmentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getDeprecatedSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	scanningPolicyAssignmentList, err := client.GetScanningPolicyAssignmentList(ctx)
+	scanningPolicyAssignmentList, err := client.GetDeprecatedScanningPolicyAssignmentList(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	scanningPolicyAssignmentListToResourceData(&scanningPolicyAssignmentList, d)
+	deprecatedScanningPolicyAssignmentListToResourceData(&scanningPolicyAssignmentList, d)
 
 	return nil
 }
 
-func resourceSysdigScanningPolicyAssignmentUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
+func deprecatedResourceSysdigScanningPolicyAssignmentUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getDeprecatedSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	scanningPolicyAssignmentList := scanningPolicyAssignmentListFromResourceData(d)
+	scanningPolicyAssignmentList := deprecatedScanningPolicyAssignmentListFromResourceData(d)
 
-	validation := validateScanningPolicyAssignment(scanningPolicyAssignmentList)
+	validation := deprecatedValidateScanningPolicyAssignment(scanningPolicyAssignmentList)
 	if validation != nil {
 		return validation
 	}
 
-	scanningPolicyAssignmentList, err = client.CreateScanningPolicyAssignmentList(ctx, scanningPolicyAssignmentList) // As policy assignments is a list, update is the same than create
+	scanningPolicyAssignmentList, err = client.CreateDeprecatedScanningPolicyAssignmentList(ctx, scanningPolicyAssignmentList) // As policy assignments is a list, update is the same than create
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	scanningPolicyAssignmentListToResourceData(&scanningPolicyAssignmentList, d)
+	deprecatedScanningPolicyAssignmentListToResourceData(&scanningPolicyAssignmentList, d)
 
 	return nil
 }
 
 // As Policy Assignments cannot be empty (default assignment cannot be deleted), pushing the default one
-func resourceSysdigScanningPolicyAssignmentDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := getSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
+func deprecatedResourceSysdigScanningPolicyAssignmentDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := getDeprecatedSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	defaultImage := v2.ScanningPolicyAssignmentImage{
+	defaultImage := v2.DeprecatedScanningPolicyAssignmentImage{
 		Type:  "tag",
 		Value: "*",
 	}
-	defaultItem := v2.ScanningPolicyAssignment{
+	defaultItem := v2.DeprecatedScanningPolicyAssignment{
 		Name:         "default",
 		Registry:     "*",
 		Repository:   "*",
@@ -181,12 +181,12 @@ func resourceSysdigScanningPolicyAssignmentDelete(ctx context.Context, d *schema
 		WhitelistIDs: []string{},
 	}
 
-	scanningPolicyAssignmentList := v2.ScanningPolicyAssignmentList{
+	scanningPolicyAssignmentList := v2.DeprecatedScanningPolicyAssignmentList{
 		PolicyBundleId: "default", // this is forced because there is no other possible value
-		Items:          []v2.ScanningPolicyAssignment{defaultItem},
+		Items:          []v2.DeprecatedScanningPolicyAssignment{defaultItem},
 	}
 
-	err = client.DeleteScanningPolicyAssignmentList(ctx, scanningPolicyAssignmentList)
+	err = client.DeleteDeprecatedScanningPolicyAssignmentList(ctx, scanningPolicyAssignmentList)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -194,13 +194,13 @@ func resourceSysdigScanningPolicyAssignmentDelete(ctx context.Context, d *schema
 	return nil
 }
 
-func scanningPolicyAssignmentListToResourceData(scanningPolicyAssignmentList *v2.ScanningPolicyAssignmentList, d *schema.ResourceData) {
+func deprecatedScanningPolicyAssignmentListToResourceData(scanningPolicyAssignmentList *v2.DeprecatedScanningPolicyAssignmentList, d *schema.ResourceData) {
 	d.SetId(scanningPolicyAssignmentList.PolicyBundleId)
 	_ = d.Set("policy_bundle_id", scanningPolicyAssignmentList.PolicyBundleId)
 	var items []map[string]interface{}
 
 	for _, item := range scanningPolicyAssignmentList.Items {
-		itemInfo := scanningPolicyAssignmentToResourceData(item)
+		itemInfo := deprecatedScanningPolicyAssignmentToResourceData(item)
 
 		items = append(items, itemInfo)
 	}
@@ -208,7 +208,7 @@ func scanningPolicyAssignmentListToResourceData(scanningPolicyAssignmentList *v2
 	_ = d.Set("items", items)
 }
 
-func scanningPolicyAssignmentToResourceData(scanningPolicyAssignment v2.ScanningPolicyAssignment) map[string]interface{} {
+func deprecatedScanningPolicyAssignmentToResourceData(scanningPolicyAssignment v2.DeprecatedScanningPolicyAssignment) map[string]interface{} {
 	item := map[string]interface{}{
 		"id":            scanningPolicyAssignment.ID,
 		"name":          scanningPolicyAssignment.Name,
@@ -228,20 +228,20 @@ func scanningPolicyAssignmentToResourceData(scanningPolicyAssignment v2.Scanning
 	return item
 }
 
-func scanningPolicyAssignmentListFromResourceData(d *schema.ResourceData) v2.ScanningPolicyAssignmentList {
-	scanningPolicyAssignmentList := v2.ScanningPolicyAssignmentList{
+func deprecatedScanningPolicyAssignmentListFromResourceData(d *schema.ResourceData) v2.DeprecatedScanningPolicyAssignmentList {
+	scanningPolicyAssignmentList := v2.DeprecatedScanningPolicyAssignmentList{
 		PolicyBundleId: "default", // this is forced because there is no other possible value
 	}
 
-	scanningPolicyAssignmentList.Items = scanningPolicyAssignmentFromResourceData(d)
+	scanningPolicyAssignmentList.Items = deprecatedScanningPolicyAssignmentFromResourceData(d)
 
 	return scanningPolicyAssignmentList
 }
 
-func scanningPolicyAssignmentFromResourceData(d *schema.ResourceData) (scanningPolicyAssignmentItems []v2.ScanningPolicyAssignment) {
+func deprecatedScanningPolicyAssignmentFromResourceData(d *schema.ResourceData) (scanningPolicyAssignmentItems []v2.DeprecatedScanningPolicyAssignment) {
 	for _, item := range d.Get("items").([]interface{}) {
 		assignmentInfo := item.(map[string]interface{})
-		assignment := v2.ScanningPolicyAssignment{
+		assignment := v2.DeprecatedScanningPolicyAssignment{
 			Name:       assignmentInfo["name"].(string),
 			Registry:   assignmentInfo["registry"].(string),
 			Repository: assignmentInfo["repository"].(string),
@@ -263,7 +263,7 @@ func scanningPolicyAssignmentFromResourceData(d *schema.ResourceData) (scanningP
 			return
 		}
 		for _, image := range imageSet {
-			assignment.Image = v2.ScanningPolicyAssignmentImage{
+			assignment.Image = v2.DeprecatedScanningPolicyAssignmentImage{
 				Type:  image.(map[string]interface{})["type"].(string),
 				Value: image.(map[string]interface{})["value"].(string),
 			}
@@ -276,7 +276,7 @@ func scanningPolicyAssignmentFromResourceData(d *schema.ResourceData) (scanningP
 
 // Validate during creation as ValidateFunc is not supported in TypeList/TypeSet https://github.com/hashicorp/terraform-plugin-sdk/issues/156
 // This function validates the last Item from the assignment list applies to all (*/*:*) and the list of policies is not empty in any assignment
-func validateScanningPolicyAssignment(scanningPolicyAssignmentList v2.ScanningPolicyAssignmentList) diag.Diagnostics {
+func deprecatedValidateScanningPolicyAssignment(scanningPolicyAssignmentList v2.DeprecatedScanningPolicyAssignmentList) diag.Diagnostics {
 	for _, item := range scanningPolicyAssignmentList.Items {
 		if len(item.PolicyIDs) == 0 {
 			return diag.FromErr(errors.New("'policy_ids' list can not be empty"))

@@ -41,10 +41,10 @@ type SysdigSecure interface {
 	RuleInterface
 	ListInterface
 	MacroInterface
-	ScanningPolicyInterface
-	ScanningPolicyAssignmentInterface
-	VulnerabilityExceptionListInterface
-	VulnerabilityExceptionInterface
+	DeprecatedScanningPolicyInterface
+	DeprecatedScanningPolicyAssignmentInterface
+	DeprecatedVulnerabilityExceptionListInterface
+	DeprecatedVulnerabilityExceptionInterface
 	CloudAccountSecureInterface
 	CloudauthAccountSecureInterface
 	OrganizationSecureInterface

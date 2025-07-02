@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestAccScanningPolicy(t *testing.T) {
+func TestAccDeprecatedScanningPolicy(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -29,7 +29,7 @@ func TestAccScanningPolicy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: scanningPolicyWithName(rText()),
+				Config: deprecatedScanningPolicyWithName(rText()),
 			},
 			{
 				ResourceName:      "sysdig_secure_scanning_policy.sample",
@@ -40,7 +40,7 @@ func TestAccScanningPolicy(t *testing.T) {
 	})
 }
 
-func scanningPolicyWithName(name string) string {
+func deprecatedScanningPolicyWithName(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_scanning_policy" "sample" {
   name = "TERRAFORM TEST 1 %s"
