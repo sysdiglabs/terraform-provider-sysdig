@@ -8,33 +8,37 @@ import (
 )
 
 const (
-	GetNotificationChannels = "%s/api/notificationChannels"
-	GetNotificationChannel  = "%s/api/notificationChannels/%d"
+	getNotificationChannels = "%s/api/notificationChannels"
+	getNotificationChannel  = "%s/api/notificationChannels/%d"
 )
 
-var NotificationChannelNotFound = errors.New("notification channel not found")
+var ErrNotificationChannelNotFound = errors.New("notification channel not found")
 
 type NotificationChannelInterface interface {
 	Base
-	GetNotificationChannelById(ctx context.Context, id int) (NotificationChannel, error)
+	GetNotificationChannelByID(ctx context.Context, id int) (NotificationChannel, error)
 	GetNotificationChannelByName(ctx context.Context, name string) (NotificationChannel, error)
 	CreateNotificationChannel(ctx context.Context, channel NotificationChannel) (NotificationChannel, error)
 	UpdateNotificationChannel(ctx context.Context, channel NotificationChannel) (NotificationChannel, error)
 	DeleteNotificationChannel(ctx context.Context, id int) error
 }
 
-func (client *Client) GetNotificationChannelById(ctx context.Context, id int) (NotificationChannel, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetNotificationChannelUrl(id), nil)
+func (c *Client) GetNotificationChannelByID(ctx context.Context, id int) (nc NotificationChannel, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getNotificationChannelURL(id), nil)
 	if err != nil {
 		return NotificationChannel{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode == http.StatusNotFound {
-		return NotificationChannel{}, NotificationChannelNotFound
+		return NotificationChannel{}, ErrNotificationChannelNotFound
 	}
 	if response.StatusCode != http.StatusOK {
-		return NotificationChannel{}, client.ErrorFromResponse(response)
+		return NotificationChannel{}, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[notificationChannelWrapper](response.Body)
@@ -43,21 +47,25 @@ func (client *Client) GetNotificationChannelById(ctx context.Context, id int) (N
 	}
 
 	if wrapper.NotificationChannel.ID == 0 {
-		return NotificationChannel{}, fmt.Errorf("NotificationChannel with ID: %d does not exists", id)
+		return NotificationChannel{}, fmt.Errorf("notificationChannel with ID: %d does not exists", id)
 	}
 
 	return wrapper.NotificationChannel, nil
 }
 
-func (client *Client) GetNotificationChannelByName(ctx context.Context, name string) (NotificationChannel, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetNotificationChannelsUrl(), nil)
+func (c *Client) GetNotificationChannelByName(ctx context.Context, name string) (nc NotificationChannel, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getNotificationChannelsURL(), nil)
 	if err != nil {
 		return NotificationChannel{}, nil
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return NotificationChannel{}, client.ErrorFromResponse(response)
+		return NotificationChannel{}, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[notificationChannelListWrapper](response.Body)
@@ -74,7 +82,7 @@ func (client *Client) GetNotificationChannelByName(ctx context.Context, name str
 	return NotificationChannel{}, fmt.Errorf("notification channel with name: %s does not exist", name)
 }
 
-func (client *Client) CreateNotificationChannel(ctx context.Context, channel NotificationChannel) (NotificationChannel, error) {
+func (c *Client) CreateNotificationChannel(ctx context.Context, channel NotificationChannel) (nc NotificationChannel, err error) {
 	payload, err := Marshal(notificationChannelWrapper{
 		NotificationChannel: channel,
 	})
@@ -82,14 +90,18 @@ func (client *Client) CreateNotificationChannel(ctx context.Context, channel Not
 		return NotificationChannel{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.GetNotificationChannelsUrl(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.getNotificationChannelsURL(), payload)
 	if err != nil {
 		return NotificationChannel{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		return NotificationChannel{}, client.ErrorFromResponse(response)
+		return NotificationChannel{}, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[notificationChannelWrapper](response.Body)
@@ -100,7 +112,7 @@ func (client *Client) CreateNotificationChannel(ctx context.Context, channel Not
 	return wrapper.NotificationChannel, nil
 }
 
-func (client *Client) UpdateNotificationChannel(ctx context.Context, channel NotificationChannel) (NotificationChannel, error) {
+func (c *Client) UpdateNotificationChannel(ctx context.Context, channel NotificationChannel) (nc NotificationChannel, err error) {
 	payload, err := Marshal(notificationChannelWrapper{
 		NotificationChannel: channel,
 	})
@@ -108,14 +120,18 @@ func (client *Client) UpdateNotificationChannel(ctx context.Context, channel Not
 		return NotificationChannel{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.GetNotificationChannelUrl(channel.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.getNotificationChannelURL(channel.ID), payload)
 	if err != nil {
 		return NotificationChannel{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return NotificationChannel{}, client.ErrorFromResponse(response)
+		return NotificationChannel{}, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[notificationChannelWrapper](response.Body)
@@ -126,24 +142,28 @@ func (client *Client) UpdateNotificationChannel(ctx context.Context, channel Not
 	return wrapper.NotificationChannel, nil
 }
 
-func (client *Client) DeleteNotificationChannel(ctx context.Context, id int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.GetNotificationChannelUrl(id), nil)
+func (c *Client) DeleteNotificationChannel(ctx context.Context, id int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.getNotificationChannelURL(id), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *Client) GetNotificationChannelsUrl() string {
-	return fmt.Sprintf(GetNotificationChannels, client.config.url)
+func (c *Client) getNotificationChannelsURL() string {
+	return fmt.Sprintf(getNotificationChannels, c.config.url)
 }
 
-func (client *Client) GetNotificationChannelUrl(id int) string {
-	return fmt.Sprintf(GetNotificationChannel, client.config.url, id)
+func (c *Client) getNotificationChannelURL(id int) string {
+	return fmt.Sprintf(getNotificationChannel, c.config.url, id)
 }

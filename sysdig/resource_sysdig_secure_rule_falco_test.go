@@ -174,7 +174,6 @@ func TestRuleFalcoAzureAuditlog(t *testing.T) {
 }
 
 func TestRuleFalcoKubeAudit(t *testing.T) {
-
 	steps := []resource.TestStep{
 		{
 			Config: ruleFalcoKubeAudit(randomString()),
@@ -319,7 +318,6 @@ func runTest(steps []resource.TestStep, t *testing.T) {
 		},
 		Steps: steps,
 	})
-
 }
 
 func ruleFalcoTerminalShell(name string) string {

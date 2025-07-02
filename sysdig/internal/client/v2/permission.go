@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const PermissionsURL = "%s/api/permissions/%s/dependencies?requestedPermissions=%s"
+const permissionsURL = "%s/api/permissions/%s/dependencies?requestedPermissions=%s"
 
 type CustomRolePermissionInterface interface {
 	Base
@@ -15,28 +15,27 @@ type CustomRolePermissionInterface interface {
 	GetPermissionsDependencies(ctx context.Context, product Product, permissions []string) ([]Dependency, error)
 }
 
-func (client *Client) GetPermissionsDependencies(ctx context.Context, product Product, permissions []string) ([]Dependency, error) {
+func (c *Client) GetPermissionsDependencies(ctx context.Context, product Product, permissions []string) ([]Dependency, error) {
 	segments := map[Product]string{MonitorProduct: "monitor", SecureProduct: "secure"}
-	url := fmt.Sprintf(PermissionsURL, client.config.url, segments[product], strings.Join(permissions, ","))
+	url := fmt.Sprintf(permissionsURL, c.config.url, segments[product], strings.Join(permissions, ","))
 
-	return client.getPermissionsDependencies(ctx, url)
+	return c.getPermissionsDependencies(ctx, url)
 }
 
-func (client *Client) getPermissionsDependencies(ctx context.Context, url string) ([]Dependency, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, url, nil)
+func (c *Client) getPermissionsDependencies(ctx context.Context, url string) (dependencies []Dependency, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return []Dependency{}, err
+		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return []Dependency{}, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	dependencies, err := Unmarshal[Dependencies](response.Body)
-	if err != nil {
-		return []Dependency{}, err
-	}
-
-	return dependencies, nil
+	return Unmarshal[Dependencies](response.Body)
 }

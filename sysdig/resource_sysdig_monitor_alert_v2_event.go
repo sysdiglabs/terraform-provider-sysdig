@@ -78,7 +78,7 @@ func getAlertV2EventClient(c SysdigClients) (v2.AlertV2EventInterface, error) {
 	return getAlertV2Client(c)
 }
 
-func resourceSysdigMonitorAlertV2EventCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2EventCreate(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2EventClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -104,7 +104,7 @@ func resourceSysdigMonitorAlertV2EventCreate(ctx context.Context, d *schema.Reso
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2EventRead(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2EventRead(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2EventClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -115,9 +115,9 @@ func resourceSysdigMonitorAlertV2EventRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	a, err := client.GetAlertV2Event(ctx, id)
+	a, err := client.GetAlertV2EventByID(ctx, id)
 	if err != nil {
-		if err == v2.AlertV2NotFound {
+		if err == v2.ErrAlertV2NotFound {
 			d.SetId("")
 			return nil
 		}
@@ -131,7 +131,7 @@ func resourceSysdigMonitorAlertV2EventRead(ctx context.Context, d *schema.Resour
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2EventUpdate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2EventUpdate(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2EventClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -157,7 +157,7 @@ func resourceSysdigMonitorAlertV2EventUpdate(ctx context.Context, d *schema.Reso
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2EventDelete(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2EventDelete(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2EventClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

@@ -34,7 +34,7 @@ func TestMarshalProto(t *testing.T) {
 	}
 	marshaled := buf.String()
 
-	if strings.Replace(marshaled, " ", "", -1) != strings.Replace(expected, " ", "", -1) {
+	if strings.ReplaceAll(marshaled, " ", "") != strings.ReplaceAll(expected, " ", "") {
 		t.Errorf("expected %v, got %v", expected, marshaled)
 	}
 }

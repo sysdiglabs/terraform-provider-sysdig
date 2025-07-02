@@ -49,7 +49,7 @@ func resourceSysdigSecureRuleProcess() *schema.Resource {
 	}
 }
 
-func resourceSysdigRuleProcessCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleProcessCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -71,7 +71,7 @@ func resourceSysdigRuleProcessCreate(ctx context.Context, d *schema.ResourceData
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -83,7 +83,6 @@ func resourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	rule, statusCode, err := client.GetRuleByID(ctx, id)
-
 	if err != nil {
 		if statusCode == http.StatusNotFound {
 			d.SetId("")
@@ -103,7 +102,7 @@ func resourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceSysdigRuleProcessUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleProcessUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -124,7 +123,7 @@ func resourceSysdigRuleProcessUpdate(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigRuleProcessDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleProcessDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -152,7 +151,7 @@ func resourceSysdigRuleProcessFromResourceData(d *schema.ResourceData) v2.Rule {
 	rule.Details.Processes = &v2.Processes{}
 	rule.Details.Processes.MatchItems = d.Get("matching").(bool)
 	rule.Details.Processes.Items = []string{}
-	if processes, ok := d.Get("processes").([]interface{}); ok {
+	if processes, ok := d.Get("processes").([]any); ok {
 		for _, rawProcess := range processes {
 			if process, ok := rawProcess.(string); ok {
 				rule.Details.Processes.Items = append(rule.Details.Processes.Items, process)

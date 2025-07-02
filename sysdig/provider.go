@@ -11,7 +11,7 @@ type SysdigProvider struct {
 	SysdigClient SysdigClients
 }
 
-// Used by tests to get the provider
+// Provider is used by tests to get the provider
 func Provider() *schema.Provider {
 	sysdigClient := NewSysdigClients()
 	provider := &SysdigProvider{SysdigClient: sysdigClient}
@@ -269,7 +269,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 	}
 }
 
-func (p *SysdigProvider) providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func (p *SysdigProvider) providerConfigure(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 	p.SysdigClient.Configure(ctx, d)
 	return p.SysdigClient, nil
 }

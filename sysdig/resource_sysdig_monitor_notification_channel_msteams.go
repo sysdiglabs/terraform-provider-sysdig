@@ -39,7 +39,7 @@ func resourceSysdigMonitorNotificationChannelMSTeams() *schema.Resource {
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelMSTeamsCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelMSTeamsCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -65,7 +65,7 @@ func resourceSysdigMonitorNotificationChannelMSTeamsCreate(ctx context.Context, 
 	return resourceSysdigMonitorNotificationChannelMSTeamsRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelMSTeamsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelMSTeamsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -76,9 +76,9 @@ func resourceSysdigMonitorNotificationChannelMSTeamsRead(ctx context.Context, d 
 		return diag.FromErr(err)
 	}
 
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -93,7 +93,7 @@ func resourceSysdigMonitorNotificationChannelMSTeamsRead(ctx context.Context, d 
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelMSTeamsUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelMSTeamsUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -123,7 +123,7 @@ func resourceSysdigMonitorNotificationChannelMSTeamsUpdate(ctx context.Context, 
 	return resourceSysdigMonitorNotificationChannelMSTeamsRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelMSTeamsDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelMSTeamsDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -148,8 +148,8 @@ func monitorNotificationChannelMSTeamsFromResourceData(d *schema.ResourceData, t
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_MS_TEAMS
-	nc.Options.Url = d.Get("url").(string)
+	nc.Type = notificationChannelTypeMSTeams
+	nc.Options.URL = d.Get("url").(string)
 	return
 }
 
@@ -159,7 +159,7 @@ func monitorNotificationChannelMSTeamsToResourceData(nc *v2.NotificationChannel,
 		return
 	}
 
-	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("url", nc.Options.URL)
 
 	return
 }

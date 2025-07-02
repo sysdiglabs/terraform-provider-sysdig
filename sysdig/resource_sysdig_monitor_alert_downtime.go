@@ -48,7 +48,7 @@ func resourceSysdigMonitorAlertDowntime() *schema.Resource {
 	}
 }
 
-func resourceSysdigAlertDowntimeCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertDowntimeCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -70,7 +70,7 @@ func resourceSysdigAlertDowntimeCreate(ctx context.Context, data *schema.Resourc
 	return nil
 }
 
-func resourceSysdigAlertDowntimeUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertDowntimeUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -91,7 +91,7 @@ func resourceSysdigAlertDowntimeUpdate(ctx context.Context, data *schema.Resourc
 	return nil
 }
 
-func resourceSysdigAlertDowntimeRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertDowntimeRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -116,7 +116,7 @@ func resourceSysdigAlertDowntimeRead(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigAlertDowntimeDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertDowntimeDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -127,7 +127,7 @@ func resourceSysdigAlertDowntimeDelete(ctx context.Context, data *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteAlert(ctx, id)
+	err = client.DeleteAlertByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -144,7 +144,7 @@ func downtimeAlertFromResourceData(d *schema.ResourceData) (alert *v2.Alert, err
 	alert.SegmentCondition = &v2.SegmentCondition{Type: "ANY"}
 	alert.Condition = fmt.Sprintf("avg(timeAvg(uptime)) <= %.2f", 1.0-(cast.ToFloat64(d.Get("trigger_after_pct"))/100.0))
 
-	entitiesRaw := d.Get("entities_to_monitor").([]interface{})
+	entitiesRaw := d.Get("entities_to_monitor").([]any)
 	for _, entityRaw := range entitiesRaw {
 		alert.SegmentBy = append(alert.SegmentBy, entityRaw.(string))
 	}
@@ -158,11 +158,11 @@ func downtimeAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (er
 		return
 	}
 
-	var trigger_after_pct float64
-	_, _ = fmt.Sscanf(alert.Condition, "avg(timeAvg(uptime)) <= %f", &trigger_after_pct)
-	trigger_after_pct = (1 - trigger_after_pct) * 100
+	var triggerAfterPct float64
+	_, _ = fmt.Sscanf(alert.Condition, "avg(timeAvg(uptime)) <= %f", &triggerAfterPct)
+	triggerAfterPct = (1 - triggerAfterPct) * 100
 
-	_ = data.Set("trigger_after_pct", int(trigger_after_pct))
+	_ = data.Set("trigger_after_pct", int(triggerAfterPct))
 	_ = data.Set("entities_to_monitor", alert.SegmentBy)
 
 	return

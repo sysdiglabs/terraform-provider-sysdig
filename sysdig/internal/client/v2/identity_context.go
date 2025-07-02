@@ -6,26 +6,30 @@ import (
 	"net/http"
 )
 
-const GetIdentityContextPath = "%s/api/identity/context"
+const getIdentityContextPath = "%s/api/identity/context"
 
 type IdentityContextInterface interface {
 	GetIdentityContext(ctx context.Context) (*IdentityContext, error)
 }
 
-func (client *Client) GetIdentityContext(ctx context.Context) (*IdentityContext, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetIdentityContextURL(), nil)
+func (c *Client) GetIdentityContext(ctx context.Context) (idx *IdentityContext, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getIdentityContextURL(), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[*IdentityContext](response.Body)
 }
 
-func (client *Client) GetIdentityContextURL() string {
-	return fmt.Sprintf(GetIdentityContextPath, client.config.url)
+func (c *Client) getIdentityContextURL() string {
+	return fmt.Sprintf(getIdentityContextPath, c.config.url)
 }

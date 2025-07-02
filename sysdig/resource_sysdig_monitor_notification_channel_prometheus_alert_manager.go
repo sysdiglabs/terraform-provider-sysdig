@@ -49,7 +49,7 @@ func resourceSysdigMonitorNotificationChannelPrometheusAlertManager() *schema.Re
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelPrometheusAlertManagerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelPrometheusAlertManagerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -75,16 +75,16 @@ func resourceSysdigMonitorNotificationChannelPrometheusAlertManagerCreate(ctx co
 	return resourceSysdigMonitorNotificationChannelPrometheusAlertManagerRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelPrometheusAlertManagerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelPrometheusAlertManagerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -99,7 +99,7 @@ func resourceSysdigMonitorNotificationChannelPrometheusAlertManagerRead(ctx cont
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelPrometheusAlertManagerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelPrometheusAlertManagerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -126,7 +126,7 @@ func resourceSysdigMonitorNotificationChannelPrometheusAlertManagerUpdate(ctx co
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelPrometheusAlertManagerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelPrometheusAlertManagerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -148,9 +148,9 @@ func monitorNotificationChannelPrometheusAlertManagerFromResourceData(d *schema.
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_PROMETHEUS_ALERT_MANAGER
-	nc.Options.Url = d.Get("url").(string)
-	nc.Options.AdditionalHeaders = d.Get("additional_headers").(map[string]interface{})
+	nc.Type = notificationChannelTypePrometheusAlertManager
+	nc.Options.URL = d.Get("url").(string)
+	nc.Options.AdditionalHeaders = d.Get("additional_headers").(map[string]any)
 	allowInsecureConnections := d.Get("allow_insecure_connections").(bool)
 	nc.Options.AllowInsecureConnections = &allowInsecureConnections
 	return
@@ -162,7 +162,7 @@ func monitorNotificationChannelPrometheusAlertManagerToResourceData(nc *v2.Notif
 		return
 	}
 
-	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("url", nc.Options.URL)
 	_ = d.Set("additional_headers", nc.Options.AdditionalHeaders)
 
 	if nc.Options.AllowInsecureConnections != nil {

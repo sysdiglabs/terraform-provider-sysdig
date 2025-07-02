@@ -88,7 +88,7 @@ func awsMLPolicyToResourceData(policy *v2.PolicyRulesComposite, d *schema.Resour
 	return awsMLTFResourceReducer(d, *policy)
 }
 
-func resourceSysdigAWSMLPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigAWSMLPolicyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureCompositePolicyClient(sysdigClients)
 	if err != nil {
@@ -115,7 +115,7 @@ func resourceSysdigAWSMLPolicyCreate(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigAWSMLPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigAWSMLPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureCompositePolicyClient(sysdigClients)
 	if err != nil {
@@ -136,7 +136,7 @@ func resourceSysdigAWSMLPolicyUpdate(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigAWSMLPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigAWSMLPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -160,7 +160,7 @@ func resourceSysdigAWSMLPolicyRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceSysdigAWSMLPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigAWSMLPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureCompositePolicyClient(sysdigClients)
 	if err != nil {
@@ -173,7 +173,7 @@ func resourceSysdigAWSMLPolicyDelete(ctx context.Context, d *schema.ResourceData
 	}
 
 	if policy.Policy.ID == 0 {
-		return diag.FromErr(errors.New("Policy ID is missing"))
+		return diag.FromErr(errors.New("policy ID is missing"))
 	}
 
 	err = client.DeleteCompositePolicy(ctx, policy.Policy.ID)
@@ -185,7 +185,7 @@ func resourceSysdigAWSMLPolicyDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigSecureAWSMLPolicyImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceSysdigSecureAWSMLPolicyImportState(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return nil, err
@@ -197,7 +197,7 @@ func resourceSysdigSecureAWSMLPolicyImportState(ctx context.Context, d *schema.R
 	}
 
 	if policy.Policy.ID == 0 {
-		return nil, errors.New("Policy ID is missing")
+		return nil, errors.New("policy ID is missing")
 	}
 
 	policy, _, err = client.GetCompositePolicyByID(ctx, policy.Policy.ID)
@@ -205,7 +205,7 @@ func resourceSysdigSecureAWSMLPolicyImportState(ctx context.Context, d *schema.R
 		return nil, err
 	}
 
-	if policy.Policy.IsDefault || policy.Policy.TemplateId != 0 {
+	if policy.Policy.IsDefault || policy.Policy.TemplateID != 0 {
 		return nil, errors.New("unable to import policy that is not a custom policy")
 	}
 

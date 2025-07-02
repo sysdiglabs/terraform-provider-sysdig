@@ -21,115 +21,130 @@ const (
 type CloudauthAccountSecureInterface interface {
 	Base
 	CreateCloudauthAccountSecure(ctx context.Context, cloudAccount *CloudauthAccountSecure) (*CloudauthAccountSecure, string, error)
-	GetCloudauthAccountSecure(ctx context.Context, accountID string) (*CloudauthAccountSecure, string, error)
+	GetCloudauthAccountSecureByID(ctx context.Context, accountID string) (*CloudauthAccountSecure, string, error)
 	DeleteCloudauthAccountSecure(ctx context.Context, accountID string) (string, error)
 	UpdateCloudauthAccountSecure(ctx context.Context, accountID string, cloudAccount *CloudauthAccountSecure) (*CloudauthAccountSecure, string, error)
 }
 
-func (client *Client) CreateCloudauthAccountSecure(ctx context.Context, cloudAccount *CloudauthAccountSecure) (*CloudauthAccountSecure, string, error) {
-	payload, err := client.marshalCloudauthProto(cloudAccount)
+func (c *Client) CreateCloudauthAccountSecure(ctx context.Context, cloudAccount *CloudauthAccountSecure) (account *CloudauthAccountSecure, errStatus string, err error) {
+	payload, err := c.marshalCloudauthProto(cloudAccount)
 	if err != nil {
 		return nil, "", err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.cloudauthAccountsURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.cloudauthAccountsURL(), payload)
 	if err != nil {
 		return nil, "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
 
 	cloudauthAccount := &CloudauthAccountSecure{}
-	err = client.unmarshalCloudauthProto(response.Body, cloudauthAccount)
+	err = c.unmarshalCloudauthProto(response.Body, cloudauthAccount)
 	if err != nil {
 		return nil, "", err
 	}
 	return cloudauthAccount, "", nil
 }
 
-func (client *Client) GetCloudauthAccountSecure(ctx context.Context, accountID string) (*CloudauthAccountSecure, string, error) {
+func (c *Client) GetCloudauthAccountSecureByID(ctx context.Context, accountID string) (account *CloudauthAccountSecure, errStatus string, err error) {
 	// get the cloud account with decrypt query param true to fetch decrypted details on the cloud account
-	response, err := client.requester.Request(ctx, http.MethodGet, client.getCloudauthAccountURL(accountID, "true"), nil)
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getCloudauthAccountURL(accountID, "true"), nil)
 	if err != nil {
 		return nil, "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
 
 	cloudauthAccount := &CloudauthAccountSecure{}
-	err = client.unmarshalCloudauthProto(response.Body, cloudauthAccount)
+	err = c.unmarshalCloudauthProto(response.Body, cloudauthAccount)
 	if err != nil {
 		return nil, "", err
 	}
 	return cloudauthAccount, "", nil
 }
 
-func (client *Client) DeleteCloudauthAccountSecure(ctx context.Context, accountID string) (string, error) {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.cloudauthAccountURL(accountID), nil)
+func (c *Client) DeleteCloudauthAccountSecure(ctx context.Context, accountID string) (errStatus string, err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.cloudauthAccountURL(accountID), nil)
 	if err != nil {
 		return "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return client.ErrorAndStatusFromResponse(response)
+		return c.ErrorAndStatusFromResponse(response)
 	}
 	return "", nil
 }
 
-func (client *Client) UpdateCloudauthAccountSecure(ctx context.Context, accountID string, cloudAccount *CloudauthAccountSecure) (
-	*CloudauthAccountSecure, string, error) {
-	payload, err := client.marshalCloudauthProto(cloudAccount)
+func (c *Client) UpdateCloudauthAccountSecure(ctx context.Context, accountID string, cloudAccount *CloudauthAccountSecure) (account *CloudauthAccountSecure, errString string, err error) {
+	payload, err := c.marshalCloudauthProto(cloudAccount)
 	if err != nil {
 		return nil, "", err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.cloudauthAccountURL(accountID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.cloudauthAccountURL(accountID), payload)
 	if err != nil {
 		return nil, "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
 
 	cloudauthAccount := &CloudauthAccountSecure{}
-	err = client.unmarshalCloudauthProto(response.Body, cloudauthAccount)
+	err = c.unmarshalCloudauthProto(response.Body, cloudauthAccount)
 	if err != nil {
 		return nil, "", err
 	}
 	return cloudauthAccount, "", nil
 }
 
-func (client *Client) cloudauthAccountsURL() string {
-	return fmt.Sprintf(cloudauthAccountsPath, client.config.url)
+func (c *Client) cloudauthAccountsURL() string {
+	return fmt.Sprintf(cloudauthAccountsPath, c.config.url)
 }
 
-func (client *Client) cloudauthAccountURL(accountID string) string {
-	return fmt.Sprintf(cloudauthAccountPath, client.config.url, accountID)
+func (c *Client) cloudauthAccountURL(accountID string) string {
+	return fmt.Sprintf(cloudauthAccountPath, c.config.url, accountID)
 }
 
-func (client *Client) getCloudauthAccountURL(accountID string, decrypt string) string {
-	return fmt.Sprintf(getCloudauthAccountPath, client.config.url, accountID, decrypt)
+func (c *Client) getCloudauthAccountURL(accountID string, decrypt string) string {
+	return fmt.Sprintf(getCloudauthAccountPath, c.config.url, accountID, decrypt)
 }
 
 // common func for protojson based marshal/unmarshal of any cloudauth proto
-func (client *Client) marshalCloudauthProto(message proto.Message) (io.Reader, error) {
+func (c *Client) marshalCloudauthProto(message proto.Message) (io.Reader, error) {
 	payload, err := protojson.Marshal(message)
 	return bytes.NewBuffer(payload), err
 }
 
-func (client *Client) unmarshalCloudauthProto(data io.ReadCloser, message proto.Message) error {
+func (c *Client) unmarshalCloudauthProto(data io.ReadCloser, message proto.Message) error {
 	body, err := io.ReadAll(data)
 	if err != nil {
 		return err
@@ -139,7 +154,7 @@ func (client *Client) unmarshalCloudauthProto(data io.ReadCloser, message proto.
 	return err
 }
 
-func (client *Client) ErrorAndStatusFromResponse(response *http.Response) (string, error) {
+func (c *Client) ErrorAndStatusFromResponse(response *http.Response) (string, error) {
 	b, err := io.ReadAll(response.Body)
 	if err != nil {
 		return response.Status, err

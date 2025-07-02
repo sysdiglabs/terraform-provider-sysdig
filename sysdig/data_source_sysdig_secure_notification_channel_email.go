@@ -29,7 +29,7 @@ func dataSourceSysdigSecureNotificationChannelEmail() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecureNotificationChannelEmailRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureNotificationChannelEmailRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

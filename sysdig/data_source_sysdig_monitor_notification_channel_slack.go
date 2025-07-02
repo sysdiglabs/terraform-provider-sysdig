@@ -69,7 +69,7 @@ func dataSourceSysdigMonitorNotificationChannelSlack() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigMonitorNotificationChannelSlackRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigMonitorNotificationChannelSlackRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

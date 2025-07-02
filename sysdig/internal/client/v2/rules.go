@@ -8,15 +8,15 @@ import (
 )
 
 const (
-	CreateRulePath           = "%s/api/secure/rules?skipPolicyV2Msg=%t"
-	GetRuleByIDPath          = "%s/api/secure/rules/%d"
-	UpdateRulePath           = "%s/api/secure/rules/%d?skipPolicyV2Msg=%t"
-	DeleteURLPath            = "%s/api/secure/rules/%d?skipPolicyV2Msg=%t"
-	GetRuleGroupPath         = "%s/api/secure/rules/groups?name=%s&type=%s"
-	CreateStatefulRulePath   = "%s/api/policies/v3/statefulRules"
-	UpdateStatefulRulePath   = "%s/api/policies/v3/statefulRules/%d"
-	DeleteStatefulRulePath   = "%s/api/policies/v3/statefulRules/%d"
-	GetStatefulRuleGroupPath = "%s/api/policies/v3/statefulRules/groups?name=%s&type=%s"
+	createRulePath           = "%s/api/secure/rules?skipPolicyV2Msg=%t"
+	getRuleByIDPath          = "%s/api/secure/rules/%d"
+	updateRulePath           = "%s/api/secure/rules/%d?skipPolicyV2Msg=%t"
+	deleteURLPath            = "%s/api/secure/rules/%d?skipPolicyV2Msg=%t"
+	getRuleGroupPath         = "%s/api/secure/rules/groups?name=%s&type=%s"
+	createStatefulRulePath   = "%s/api/policies/v3/statefulRules"
+	updateStatefulRulePath   = "%s/api/policies/v3/statefulRules/%d"
+	deleteStatefulRulePath   = "%s/api/policies/v3/statefulRules/%d"
+	getStatefulRuleGroupPath = "%s/api/policies/v3/statefulRules/groups?name=%s&type=%s"
 )
 
 type RuleInterface interface {
@@ -32,186 +32,222 @@ type RuleInterface interface {
 	GetStatefulRuleGroup(ctx context.Context, ruleName string, ruleType string) ([]Rule, error)
 }
 
-func (client *Client) CreateRule(ctx context.Context, rule Rule) (Rule, error) {
+func (c *Client) CreateRule(ctx context.Context, rule Rule) (createdRule Rule, err error) {
 	payload, err := Marshal(rule)
 	if err != nil {
 		return Rule{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.CreateRuleURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.createRuleURL(), payload)
 	if err != nil {
 		return Rule{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Rule{}, client.ErrorFromResponse(response)
+		return Rule{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[Rule](response.Body)
 }
 
-func (client *Client) GetRuleByID(ctx context.Context, ruleID int) (Rule, int, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetRuleByIDURL(ruleID), nil)
+func (c *Client) GetRuleByID(ctx context.Context, ruleID int) (rule Rule, statusCode int, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getRuleByIDURL(ruleID), nil)
 	if err != nil {
 		return Rule{}, 0, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Rule{}, response.StatusCode, client.ErrorFromResponse(response)
+		return Rule{}, response.StatusCode, c.ErrorFromResponse(response)
 	}
 
-	rule, err := Unmarshal[Rule](response.Body)
+	rule, err = Unmarshal[Rule](response.Body)
 	return rule, 0, err
 }
 
-func (client *Client) UpdateRule(ctx context.Context, rule Rule) (Rule, error) {
+func (c *Client) UpdateRule(ctx context.Context, rule Rule) (updatedRule Rule, err error) {
 	payload, err := Marshal(rule)
 	if err != nil {
 		return Rule{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.UpdateRuleURL(rule.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.updateRuleURL(rule.ID), payload)
 	if err != nil {
 		return Rule{}, err
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Rule{}, client.ErrorFromResponse(response)
+		return Rule{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[Rule](response.Body)
 }
 
-func (client *Client) DeleteRule(ctx context.Context, ruleID int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeleteRuleURL(ruleID), nil)
+func (c *Client) DeleteRule(ctx context.Context, ruleID int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.deleteRuleURL(ruleID), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return err
 }
 
-func (client *Client) GetRuleGroup(ctx context.Context, ruleName string, ruleType string) ([]Rule, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetRuleGroupURL(ruleName, ruleType), nil)
+func (c *Client) GetRuleGroup(ctx context.Context, ruleName string, ruleType string) (rules []Rule, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getRuleGroupURL(ruleName, ruleType), nil)
 	if err != nil {
 		return []Rule{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return []Rule{}, client.ErrorFromResponse(response)
+		return []Rule{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[[]Rule](response.Body)
 }
 
-func (client *Client) CreateRuleURL() string {
-	return fmt.Sprintf(CreateRulePath, client.config.url, client.config.secureSkipPolicyV2Msg)
-}
-
-func (client *Client) GetRuleByIDURL(ruleID int) string {
-	return fmt.Sprintf(GetRuleByIDPath, client.config.url, ruleID)
-}
-
-func (client *Client) UpdateRuleURL(ruleID int) string {
-	return fmt.Sprintf(UpdateRulePath, client.config.url, ruleID, client.config.secureSkipPolicyV2Msg)
-}
-
-func (client *Client) DeleteRuleURL(ruleID int) string {
-	return fmt.Sprintf(DeleteURLPath, client.config.url, ruleID, client.config.secureSkipPolicyV2Msg)
-}
-
-func (client *Client) GetRuleGroupURL(ruleName string, ruleType string) string {
-	return fmt.Sprintf(GetRuleGroupPath, client.config.url, url.QueryEscape(ruleName), url.QueryEscape(ruleType))
-}
-
-func (client *Client) CreateStatefulRuleURL() string {
-	return fmt.Sprintf(CreateStatefulRulePath, client.config.url)
-}
-
-func (client *Client) UpdateStatefulRuleURL(ruleID int) string {
-	return fmt.Sprintf(UpdateStatefulRulePath, client.config.url, ruleID)
-}
-
-func (client *Client) DeleteStatefulRuleURL(ruleID int) string {
-	return fmt.Sprintf(DeleteStatefulRulePath, client.config.url, ruleID)
-}
-
-func (client *Client) GetStatefulRuleGroupURL(ruleName string, ruleType string) string {
-	return fmt.Sprintf(GetStatefulRuleGroupPath, client.config.url, url.QueryEscape(ruleName), url.QueryEscape(ruleType))
-}
-
-func (client *Client) CreateStatefulRule(ctx context.Context, rule Rule) (Rule, error) {
+func (c *Client) CreateStatefulRule(ctx context.Context, rule Rule) (createdRule Rule, err error) {
 	payload, err := Marshal(rule)
 	if err != nil {
 		return Rule{}, err
 	}
-	response, err := client.requester.Request(ctx, http.MethodPost, client.CreateStatefulRuleURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.createStatefulRuleURL(), payload)
 	if err != nil {
 		return Rule{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Rule{}, client.ErrorFromResponse(response)
+		return Rule{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[Rule](response.Body)
 }
 
-func (client *Client) UpdateStatefulRule(ctx context.Context, rule Rule) (Rule, error) {
+func (c *Client) UpdateStatefulRule(ctx context.Context, rule Rule) (updatedRule Rule, err error) {
 	payload, err := Marshal(rule)
 	if err != nil {
 		return Rule{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.UpdateStatefulRuleURL(rule.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.updateStatefulRuleURL(rule.ID), payload)
 	if err != nil {
 		return Rule{}, err
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Rule{}, client.ErrorFromResponse(response)
+		return Rule{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[Rule](response.Body)
 }
 
-func (client *Client) DeleteStatefulRule(ctx context.Context, ruleID int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeleteStatefulRuleURL(ruleID), nil)
+func (c *Client) DeleteStatefulRule(ctx context.Context, ruleID int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.deleteStatefulRuleURL(ruleID), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return err
 }
 
-func (client *Client) GetStatefulRuleGroup(ctx context.Context, ruleName string, ruleType string) ([]Rule, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetStatefulRuleGroupURL(ruleName, ruleType), nil)
+func (c *Client) GetStatefulRuleGroup(ctx context.Context, ruleName string, ruleType string) (rules []Rule, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getStatefulRuleGroupURL(ruleName, ruleType), nil)
 	if err != nil {
 		return []Rule{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return []Rule{}, client.ErrorFromResponse(response)
+		return []Rule{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[[]Rule](response.Body)
+}
+
+func (c *Client) createRuleURL() string {
+	return fmt.Sprintf(createRulePath, c.config.url, c.config.secureSkipPolicyV2Msg)
+}
+
+func (c *Client) getRuleByIDURL(ruleID int) string {
+	return fmt.Sprintf(getRuleByIDPath, c.config.url, ruleID)
+}
+
+func (c *Client) updateRuleURL(ruleID int) string {
+	return fmt.Sprintf(updateRulePath, c.config.url, ruleID, c.config.secureSkipPolicyV2Msg)
+}
+
+func (c *Client) deleteRuleURL(ruleID int) string {
+	return fmt.Sprintf(deleteURLPath, c.config.url, ruleID, c.config.secureSkipPolicyV2Msg)
+}
+
+func (c *Client) getRuleGroupURL(ruleName string, ruleType string) string {
+	return fmt.Sprintf(getRuleGroupPath, c.config.url, url.QueryEscape(ruleName), url.QueryEscape(ruleType))
+}
+
+func (c *Client) createStatefulRuleURL() string {
+	return fmt.Sprintf(createStatefulRulePath, c.config.url)
+}
+
+func (c *Client) updateStatefulRuleURL(ruleID int) string {
+	return fmt.Sprintf(updateStatefulRulePath, c.config.url, ruleID)
+}
+
+func (c *Client) deleteStatefulRuleURL(ruleID int) string {
+	return fmt.Sprintf(deleteStatefulRulePath, c.config.url, ruleID)
+}
+
+func (c *Client) getStatefulRuleGroupURL(ruleName string, ruleType string) string {
+	return fmt.Sprintf(getStatefulRuleGroupPath, c.config.url, url.QueryEscape(ruleName), url.QueryEscape(ruleType))
 }

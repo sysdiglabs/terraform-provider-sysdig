@@ -87,7 +87,7 @@ func dataSourceSysdigSecureTeam() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	clients := meta.(SysdigClients)
 	client, err := getSecureTeamClient(clients)
 	if err != nil {
@@ -99,7 +99,7 @@ func dataSourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	team, err := client.GetTeamById(ctx, id)
+	team, err := client.GetTeamByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}

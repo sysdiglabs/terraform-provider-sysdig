@@ -40,7 +40,7 @@ func resourceSysdigMonitorAlertPromql() *schema.Resource {
 	}
 }
 
-func resourceSysdigAlertPromqlCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertPromqlCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -62,7 +62,7 @@ func resourceSysdigAlertPromqlCreate(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigAlertPromqlUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertPromqlUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -83,7 +83,7 @@ func resourceSysdigAlertPromqlUpdate(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigAlertPromqlRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertPromqlRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -108,7 +108,7 @@ func resourceSysdigAlertPromqlRead(ctx context.Context, data *schema.ResourceDat
 	return nil
 }
 
-func resourceSysdigAlertPromqlDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertPromqlDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -119,7 +119,7 @@ func resourceSysdigAlertPromqlDelete(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteAlert(ctx, id)
+	err = client.DeleteAlertByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -150,8 +150,8 @@ func promqlAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err 
 	}
 
 	if alert.Duration != nil {
-		trigger_after_minutes := int((time.Duration(*alert.Duration) * time.Second).Minutes())
-		_ = data.Set("trigger_after_minutes", trigger_after_minutes)
+		triggerAfterMinutes := int((time.Duration(*alert.Duration) * time.Second).Minutes())
+		_ = data.Set("trigger_after_minutes", triggerAfterMinutes)
 	}
 
 	_ = data.Set("promql", alert.Condition)

@@ -53,5 +53,4 @@ func runStatefulTest(steps []resource.TestStep, t *testing.T) {
 		},
 		Steps: steps,
 	})
-
 }

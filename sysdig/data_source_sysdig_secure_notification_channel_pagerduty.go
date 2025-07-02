@@ -36,7 +36,7 @@ func dataSourceSysdigSecureNotificationChannelPagerduty() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecureNotificationChannelPagerdutyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureNotificationChannelPagerdutyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

@@ -46,7 +46,7 @@ func resourceSysdigMonitorAlertAnomaly() *schema.Resource {
 	}
 }
 
-func resourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -67,7 +67,7 @@ func resourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.Resource
 	return nil
 }
 
-func resourceSysdigAlertAnomalyUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertAnomalyUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -88,7 +88,7 @@ func resourceSysdigAlertAnomalyUpdate(ctx context.Context, data *schema.Resource
 	return nil
 }
 
-func resourceSysdigAlertAnomalyRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertAnomalyRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -113,7 +113,7 @@ func resourceSysdigAlertAnomalyRead(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
-func resourceSysdigAlertAnomalyDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertAnomalyDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -124,7 +124,7 @@ func resourceSysdigAlertAnomalyDelete(ctx context.Context, data *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteAlert(ctx, id)
+	err = client.DeleteAlertByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -140,16 +140,16 @@ func anomalyAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, e
 
 	alert.Type = "BASELINE"
 
-	for _, metric := range data.Get("monitor").([]interface{}) {
+	for _, metric := range data.Get("monitor").([]any) {
 		alert.Monitor = append(alert.Monitor, &v2.Monitor{
 			Metric:       metric.(string),
 			StdDevFactor: 2,
 		})
 	}
 
-	if alerts_by, ok := data.GetOk("multiple_alerts_by"); ok {
+	if alertsBy, ok := data.GetOk("multiple_alerts_by"); ok {
 		alert.SegmentCondition = &v2.SegmentCondition{Type: "ANY"}
-		for _, v := range alerts_by.([]interface{}) {
+		for _, v := range alertsBy.([]any) {
 			alert.SegmentBy = append(alert.SegmentBy, v.(string))
 		}
 	}
@@ -165,10 +165,10 @@ func anomalyAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err
 
 	_ = data.Set("multiple_alerts_by", alert.SegmentBy)
 
-	monitor_metrics := []string{}
+	monitorMetrics := []string{}
 	for _, v := range alert.Monitor {
-		monitor_metrics = append(monitor_metrics, v.Metric)
+		monitorMetrics = append(monitorMetrics, v.Metric)
 	}
-	_ = data.Set("monitor", monitor_metrics)
+	_ = data.Set("monitor", monitorMetrics)
 	return
 }

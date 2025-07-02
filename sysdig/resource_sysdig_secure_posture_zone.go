@@ -105,7 +105,7 @@ func getPostureZoneClient(c SysdigClients) (v2.PostureZoneInterface, error) {
 	return client, nil
 }
 
-func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	policiesData := d.Get(SchemaPolicyIDsKey).(*schema.Set).List()
 	policies := make([]string, len(policiesData))
 	for i, p := range policiesData {
@@ -115,9 +115,9 @@ func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceDa
 	scopesList := d.Get(SchemaScopesKey).(*schema.Set).List()
 	scopes := make([]v2.PostureZoneScope, 0)
 	if len(scopesList) > 0 {
-		scopeList := scopesList[0].(map[string]interface{})[SchemaScopeKey].(*schema.Set).List()
+		scopeList := scopesList[0].(map[string]any)[SchemaScopeKey].(*schema.Set).List()
 		for _, attr := range scopeList {
-			s := attr.(map[string]interface{})
+			s := attr.(map[string]any)
 			scopes = append(scopes, v2.PostureZoneScope{
 				TargetType: s[SchemaTargetTypeKey].(string),
 				Rules:      s[SchemaRulesKey].(string),
@@ -149,7 +149,7 @@ func resourceCreateOrUpdatePostureZone(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getPostureZoneClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -160,7 +160,7 @@ func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	zone, err := client.GetPostureZone(ctx, id)
+	zone, err := client.GetPostureZoneByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -203,16 +203,16 @@ func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	scopes := make([]map[string]interface{}, len(zone.Scopes))
+	scopes := make([]map[string]any, len(zone.Scopes))
 	for i, s := range zone.Scopes {
-		scopes[i] = map[string]interface{}{
+		scopes[i] = map[string]any{
 			SchemaTargetTypeKey: s.TargetType,
 			SchemaRulesKey:      s.Rules,
 		}
 	}
 	if len(scopes) > 0 {
-		err = d.Set(SchemaScopesKey, []interface{}{
-			map[string]interface{}{
+		err = d.Set(SchemaScopesKey, []any{
+			map[string]any{
 				SchemaScopeKey: scopes,
 			},
 		})
@@ -224,7 +224,7 @@ func resourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-func resourceSysdigSecurePostureZoneDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePostureZoneDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getPostureZoneClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

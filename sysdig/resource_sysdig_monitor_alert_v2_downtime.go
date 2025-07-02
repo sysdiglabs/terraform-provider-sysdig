@@ -69,7 +69,7 @@ func getAlertV2DowntimeClient(c SysdigClients) (v2.AlertV2DowntimeInterface, err
 	return getAlertV2Client(c)
 }
 
-func resourceSysdigMonitorAlertV2DowntimeCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2DowntimeCreate(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2DowntimeClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -92,7 +92,7 @@ func resourceSysdigMonitorAlertV2DowntimeCreate(ctx context.Context, d *schema.R
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2DowntimeRead(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2DowntimeRead(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2DowntimeClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -103,9 +103,9 @@ func resourceSysdigMonitorAlertV2DowntimeRead(ctx context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 
-	a, err := client.GetAlertV2Downtime(ctx, id)
+	a, err := client.GetAlertV2DowntimeByID(ctx, id)
 	if err != nil {
-		if err == v2.AlertV2NotFound {
+		if err == v2.ErrAlertV2NotFound {
 			d.SetId("")
 			return nil
 		}
@@ -120,7 +120,7 @@ func resourceSysdigMonitorAlertV2DowntimeRead(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2DowntimeUpdate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2DowntimeUpdate(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2DowntimeClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -143,7 +143,7 @@ func resourceSysdigMonitorAlertV2DowntimeUpdate(ctx context.Context, d *schema.R
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2DowntimeDelete(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2DowntimeDelete(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2DowntimeClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

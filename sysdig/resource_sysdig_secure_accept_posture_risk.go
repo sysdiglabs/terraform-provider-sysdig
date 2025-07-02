@@ -96,7 +96,7 @@ func resourceSysdigSecureAcceptPostureRisk() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureAcceptPostureControlCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureAcceptPostureControlCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	// Extract 'group' field from Terraform configuration
 	client, err := getPostureAcceptRiskClient(meta.(SysdigClients))
 	if err != nil {
@@ -113,17 +113,18 @@ func resourceSysdigSecureAcceptPostureControlCreate(ctx context.Context, d *sche
 	}
 	var endTime int64
 	expiresIn := d.Get(SchemaExpiresInKey).(string)
-	if expiresIn == "7 Days" {
+	switch expiresIn {
+	case "7 Days":
 		endTime = time.Now().AddDate(0, 0, 7).UTC().UnixMilli()
-	} else if expiresIn == "30 Days" {
+	case "30 Days":
 		endTime = time.Now().AddDate(0, 0, 30).UTC().UnixMilli()
-	} else if expiresIn == "60 Days" {
+	case "60 Days":
 		endTime = time.Now().AddDate(0, 0, 60).UTC().UnixMilli()
-	} else if expiresIn == "90 Days" {
+	case "90 Days":
 		endTime = time.Now().AddDate(0, 0, 90).UTC().UnixMilli()
-	} else if expiresIn == "Never" {
+	case "Never":
 		endTime = 0
-	} else {
+	default:
 		t := d.Get(SchemaEndTimeKey).(string)
 		endTime, _ = strconv.ParseInt(t, 10, 64)
 	}
@@ -140,7 +141,7 @@ func resourceSysdigSecureAcceptPostureControlCreate(ctx context.Context, d *sche
 	return nil
 }
 
-func resourceSysdigSecureAcceptPostureControlUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureAcceptPostureControlUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	// Extract 'group' field from Terraform configuration
 	client, err := getPostureAcceptRiskClient(meta.(SysdigClients))
 	if err != nil {
@@ -153,22 +154,23 @@ func resourceSysdigSecureAcceptPostureControlUpdate(ctx context.Context, d *sche
 	}
 	expiresIn := d.Get(SchemaExpiresInKey).(string)
 	var millis int64
-	if expiresIn == "7 Days" {
+	switch expiresIn {
+	case "7 Days":
 		req.Acceptance.AcceptPeriod = "7"
 		millis = time.Now().AddDate(0, 0, 7).UTC().UnixMilli()
-	} else if expiresIn == "30 Days" {
+	case "30 Days":
 		req.Acceptance.AcceptPeriod = "30"
 		millis = time.Now().AddDate(0, 0, 30).UTC().UnixMilli()
-	} else if expiresIn == "60 Days" {
+	case "60 Days":
 		req.Acceptance.AcceptPeriod = "60"
 		millis = time.Now().AddDate(0, 0, 60).UTC().UnixMilli()
-	} else if expiresIn == "90 Days" {
+	case "90 Days":
 		req.Acceptance.AcceptPeriod = "90"
 		millis = time.Now().AddDate(0, 0, 90).UTC().UnixMilli()
-	} else if expiresIn == "Never" {
+	case "Never":
 		req.Acceptance.AcceptPeriod = "Never"
 		millis = 0
-	} else {
+	default:
 		req.Acceptance.AcceptPeriod = "Custom"
 		t := d.Get(SchemaEndTimeKey).(string)
 		millis, err = strconv.ParseInt(t, 10, 64)
@@ -192,7 +194,7 @@ func resourceSysdigSecureAcceptPostureControlUpdate(ctx context.Context, d *sche
 	return nil
 }
 
-func resourceSysdigSecureAcceptPostureControlRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureAcceptPostureControlRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getPostureAcceptRiskClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -273,7 +275,7 @@ func resourceSysdigSecureAcceptPostureControlRead(ctx context.Context, d *schema
 	return nil
 }
 
-func resourceSysdigSecureAcceptPostureControlDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureAcceptPostureControlDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getPostureAcceptRiskClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

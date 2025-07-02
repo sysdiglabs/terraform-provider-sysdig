@@ -108,7 +108,7 @@ func dataSourceSysdigMonitorTeam() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	clients := meta.(SysdigClients)
 	client, err := getMonitorTeamClient(clients)
 	if err != nil {
@@ -120,7 +120,7 @@ func dataSourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	team, err := client.GetTeamById(ctx, id)
+	team, err := client.GetTeamByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}

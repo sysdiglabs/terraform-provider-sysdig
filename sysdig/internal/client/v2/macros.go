@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	CreateMacroPath  = "%s/api/secure/falco/macros?skipPolicyV2Msg=%t"
-	GetMacroByIDPath = "%s/api/secure/falco/macros/%d"
-	UpdateMacroPath  = "%s/api/secure/falco/macros/%d?skipPolicyV2Msg=%t"
-	DeleteMacroPath  = "%s/api/secure/falco/macros/%d?skipPolicyV2Msg=%t"
+	createMacroPath  = "%s/api/secure/falco/macros?skipPolicyV2Msg=%t"
+	getMacroByIDPath = "%s/api/secure/falco/macros/%d"
+	updateMacroPath  = "%s/api/secure/falco/macros/%d?skipPolicyV2Msg=%t"
+	deleteMacroPath  = "%s/api/secure/falco/macros/%d?skipPolicyV2Msg=%t"
 )
 
 type MacroInterface interface {
@@ -21,37 +21,45 @@ type MacroInterface interface {
 	DeleteMacro(ctx context.Context, id int) error
 }
 
-func (client *Client) CreateMacro(ctx context.Context, macro Macro) (Macro, error) {
+func (c *Client) CreateMacro(ctx context.Context, macro Macro) (createdMacro Macro, err error) {
 	payload, err := Marshal(macro)
 	if err != nil {
 		return Macro{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.CreateMacroURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.createMacroURL(), payload)
 	if err != nil {
 		return Macro{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		return Macro{}, client.ErrorFromResponse(response)
+		return Macro{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[Macro](response.Body)
 }
 
-func (client *Client) GetMacroByID(ctx context.Context, id int) (Macro, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetMacroByIDURL(id), nil)
+func (c *Client) GetMacroByID(ctx context.Context, id int) (macro Macro, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getMacroByIDURL(id), nil)
 	if err != nil {
 		return Macro{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Macro{}, client.ErrorFromResponse(response)
+		return Macro{}, c.ErrorFromResponse(response)
 	}
 
-	macro, err := Unmarshal[Macro](response.Body)
+	macro, err = Unmarshal[Macro](response.Body)
 	if err != nil {
 		return Macro{}, err
 	}
@@ -63,50 +71,58 @@ func (client *Client) GetMacroByID(ctx context.Context, id int) (Macro, error) {
 	return macro, nil
 }
 
-func (client *Client) UpdateMacro(ctx context.Context, macro Macro) (Macro, error) {
+func (c *Client) UpdateMacro(ctx context.Context, macro Macro) (updateMacro Macro, err error) {
 	payload, err := Marshal(macro)
 	if err != nil {
 		return Macro{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.UpdateMacroURL(macro.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.updateMacroURL(macro.ID), payload)
 	if err != nil {
 		return Macro{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Macro{}, client.ErrorFromResponse(response)
+		return Macro{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[Macro](response.Body)
 }
 
-func (client *Client) DeleteMacro(ctx context.Context, id int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeleteMacroURL(id), nil)
+func (c *Client) DeleteMacro(ctx context.Context, id int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.deleteMacroURL(id), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 	return nil
 }
 
-func (client *Client) CreateMacroURL() string {
-	return fmt.Sprintf(CreateMacroPath, client.config.url, client.config.secureSkipPolicyV2Msg)
+func (c *Client) createMacroURL() string {
+	return fmt.Sprintf(createMacroPath, c.config.url, c.config.secureSkipPolicyV2Msg)
 }
 
-func (client *Client) GetMacroByIDURL(id int) string {
-	return fmt.Sprintf(GetMacroByIDPath, client.config.url, id)
+func (c *Client) getMacroByIDURL(id int) string {
+	return fmt.Sprintf(getMacroByIDPath, c.config.url, id)
 }
 
-func (client *Client) UpdateMacroURL(id int) string {
-	return fmt.Sprintf(UpdateMacroPath, client.config.url, id, client.config.secureSkipPolicyV2Msg)
+func (c *Client) updateMacroURL(id int) string {
+	return fmt.Sprintf(updateMacroPath, c.config.url, id, c.config.secureSkipPolicyV2Msg)
 }
 
-func (client *Client) DeleteMacroURL(id int) string {
-	return fmt.Sprintf(DeleteMacroPath, client.config.url, id, client.config.secureSkipPolicyV2Msg)
+func (c *Client) deleteMacroURL(id int) string {
+	return fmt.Sprintf(deleteMacroPath, c.config.url, id, c.config.secureSkipPolicyV2Msg)
 }

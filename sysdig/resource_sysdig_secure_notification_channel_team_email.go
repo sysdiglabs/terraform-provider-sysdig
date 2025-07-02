@@ -40,7 +40,7 @@ func resourceSysdigSecureNotificationChannelTeamEmail() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureNotificationChannelTeamEmailCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelTeamEmailCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -66,16 +66,16 @@ func resourceSysdigSecureNotificationChannelTeamEmailCreate(ctx context.Context,
 	return resourceSysdigSecureNotificationChannelTeamEmailRead(ctx, d, meta)
 }
 
-func resourceSysdigSecureNotificationChannelTeamEmailRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelTeamEmailRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -90,7 +90,7 @@ func resourceSysdigSecureNotificationChannelTeamEmailRead(ctx context.Context, d
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelTeamEmailUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelTeamEmailUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -117,7 +117,7 @@ func resourceSysdigSecureNotificationChannelTeamEmailUpdate(ctx context.Context,
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelTeamEmailDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelTeamEmailDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -139,8 +139,8 @@ func secureNotificationChannelTeamEmailFromResourceData(d *schema.ResourceData, 
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_TEAM_EMAIL
-	nc.Options.TeamId = d.Get("team_id").(int)
+	nc.Type = notificationChannelTypeTeamEmail
+	nc.Options.TeamID = d.Get("team_id").(int)
 	return
 }
 
@@ -150,7 +150,7 @@ func secureNotificationChannelTeamEmailToResourceData(nc *v2.NotificationChannel
 		return
 	}
 
-	_ = d.Set("team_id", nc.Options.TeamId)
+	_ = d.Set("team_id", nc.Options.TeamID)
 
 	return
 }

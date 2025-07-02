@@ -59,7 +59,7 @@ func resourceSysdigMonitorNotificationChannelCustomWebhook() *schema.Resource {
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelCustomWebhookCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelCustomWebhookCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	clients := meta.(SysdigClients)
 	client, err := getMonitorNotificationChannelClient(clients)
 	if err != nil {
@@ -86,16 +86,16 @@ func resourceSysdigMonitorNotificationChannelCustomWebhookCreate(ctx context.Con
 	return resourceSysdigMonitorNotificationChannelCustomWebhookRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelCustomWebhookRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelCustomWebhookRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -110,7 +110,7 @@ func resourceSysdigMonitorNotificationChannelCustomWebhookRead(ctx context.Conte
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelCustomWebhookUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelCustomWebhookUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -137,7 +137,7 @@ func resourceSysdigMonitorNotificationChannelCustomWebhookUpdate(ctx context.Con
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelCustomWebhookDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelCustomWebhookDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -159,11 +159,11 @@ func monitorNotificationChannelCustomWebhookFromResourceData(d *schema.ResourceD
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_CUSTOM_WEBHOOK
-	nc.Options.Url = d.Get("url").(string)
-	nc.Options.HttpMethod = d.Get("http_method").(string)
+	nc.Type = notificationChannelTypeCustomWebhook
+	nc.Options.URL = d.Get("url").(string)
+	nc.Options.HTTPMethod = d.Get("http_method").(string)
 	nc.Options.MonitorTemplate = d.Get("template").(string)
-	nc.Options.AdditionalHeaders = d.Get("additional_headers").(map[string]interface{})
+	nc.Options.AdditionalHeaders = d.Get("additional_headers").(map[string]any)
 	allowInsecureConnections := d.Get("allow_insecure_connections").(bool)
 	nc.Options.AllowInsecureConnections = &allowInsecureConnections
 	return
@@ -175,9 +175,9 @@ func monitorNotificationChannelCustomWebhookToResourceData(nc *v2.NotificationCh
 		return
 	}
 
-	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("url", nc.Options.URL)
 	_ = d.Set("additional_headers", nc.Options.AdditionalHeaders)
-	_ = d.Set("http_method", nc.Options.HttpMethod)
+	_ = d.Set("http_method", nc.Options.HTTPMethod)
 	_ = d.Set("template", nc.Options.MonitorTemplate)
 	if nc.Options.AllowInsecureConnections != nil {
 		_ = d.Set("allow_insecure_connections", *nc.Options.AllowInsecureConnections)

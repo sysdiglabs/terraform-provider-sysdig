@@ -70,7 +70,7 @@ func resourceSysdigSecureCustomPolicy() *schema.Resource {
 	}
 }
 
-func resourceSysdigCustomPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigCustomPolicyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
@@ -100,7 +100,7 @@ func customPolicyFromResourceData(d *schema.ResourceData) v2.Policy {
 	policy.Rules = []*v2.PolicyRule{}
 
 	for _, ruleItr := range d.Get("rules").(*schema.Set).List() {
-		ruleInfo := ruleItr.(map[string]interface{})
+		ruleInfo := ruleItr.(map[string]any)
 		rule := &v2.PolicyRule{
 			Name:    ruleInfo["name"].(string),
 			Enabled: ruleInfo["enabled"].(bool),
@@ -123,16 +123,16 @@ func customPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	}
 
 	rules := getPolicyRulesFromResourceData(d)
-	newRules := []map[string]interface{}{}
+	newRules := []map[string]any{}
 	for _, rule := range policy.Rules {
-		newRules = append(newRules, map[string]interface{}{
+		newRules = append(newRules, map[string]any{
 			"name":    rule.Name,
 			"enabled": rule.Enabled,
 		})
 	}
-	currentRules := []map[string]interface{}{}
+	currentRules := []map[string]any{}
 	for _, rule := range rules {
-		currentRules = append(currentRules, map[string]interface{}{
+		currentRules = append(currentRules, map[string]any{
 			"name":    rule.Name,
 			"enabled": rule.Enabled,
 		})
@@ -150,7 +150,7 @@ func getPolicyRulesFromResourceData(d *schema.ResourceData) []*v2.PolicyRule {
 	policyRules := make([]*v2.PolicyRule, len(rules))
 
 	for i, ruleItr := range rules {
-		ruleInfo := ruleItr.(map[string]interface{})
+		ruleInfo := ruleItr.(map[string]any)
 		policyRules[i] = &v2.PolicyRule{
 			Name:    ruleInfo["name"].(string),
 			Enabled: ruleInfo["enabled"].(bool),
@@ -160,7 +160,7 @@ func getPolicyRulesFromResourceData(d *schema.ResourceData) []*v2.PolicyRule {
 	return policyRules
 }
 
-func arePolicyRulesEquivalent(newRules []map[string]interface{}, currentRules []map[string]interface{}) bool {
+func arePolicyRulesEquivalent(newRules []map[string]any, currentRules []map[string]any) bool {
 	if len(newRules) != len(currentRules) {
 		return false
 	}
@@ -182,7 +182,7 @@ func arePolicyRulesEquivalent(newRules []map[string]interface{}, currentRules []
 	return true
 }
 
-func resourceSysdigCustomPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigCustomPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -203,7 +203,7 @@ func resourceSysdigCustomPolicyRead(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceSysdigCustomPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigCustomPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
@@ -221,7 +221,7 @@ func resourceSysdigCustomPolicyDelete(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceSysdigCustomPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigCustomPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
@@ -243,7 +243,7 @@ func resourceSysdigCustomPolicyUpdate(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceSysdigSecureCustomPolicyImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceSysdigSecureCustomPolicyImportState(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return nil, err
@@ -259,7 +259,7 @@ func resourceSysdigSecureCustomPolicyImportState(ctx context.Context, d *schema.
 		return nil, err
 	}
 
-	if policy.IsDefault || policy.TemplateId != 0 {
+	if policy.IsDefault || policy.TemplateID != 0 {
 		return nil, errors.New("unable to import policy that is not a custom policy")
 	}
 

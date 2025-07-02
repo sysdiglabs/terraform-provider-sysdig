@@ -23,7 +23,7 @@ func dataSourceSysdigSecureDriftPolicy() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecureDriftPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureDriftPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	return driftPolicyDataSourceRead(ctx, d, meta, "custom drift policy", isCustomCompositePolicy)
 }
 
@@ -73,7 +73,7 @@ func createDriftPolicyDataSourceSchema() map[string]*schema.Schema {
 	}
 }
 
-func driftPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {
+func driftPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta any, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {
 	policy, err := compositePolicyDataSourceRead(ctx, d, meta, resourceName, policyTypeDrift, validationFunc)
 	if err != nil {
 		return diag.FromErr(err)

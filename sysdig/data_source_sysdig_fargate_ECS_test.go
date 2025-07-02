@@ -21,10 +21,10 @@ import (
 // sortContainerEnv goes into a container definition and sorts the environment variables
 func sortContainerEnv(json []byte) string {
 	jsonObject, _ := gabs.ParseJSON(json)
-	containers, _ := jsonObject.Data().([]interface{})
+	containers, _ := jsonObject.Data().([]any)
 	for _, container := range containers {
-		if env, ok := container.(map[string]interface{})["Environment"]; ok {
-			envSort := env.([]interface{})
+		if env, ok := container.(map[string]any)["Environment"]; ok {
+			envSort := env.([]any)
 			sort.Slice(envSort, func(i, j int) bool {
 				return gabs.Wrap(envSort[i]).S("Name").Data().(string) < gabs.Wrap(envSort[j]).S("Name").Data().(string)
 			})
@@ -137,22 +137,22 @@ func TestNewPatchOptions(t *testing.T) {
 	data := resource.Data(nil)
 
 	var err error
-	err = data.Set("bare_pdig_on_containers", []interface{}{
+	err = data.Set("bare_pdig_on_containers", []any{
 		"gimme", "fried", "chicken",
 	})
 	if err != nil {
 		assert.FailNow(t, fmt.Sprintf("Could not set bare_pdig_on_containers, got error: %v", err))
 	}
 
-	err = data.Set("ignore_containers", []interface{}{
+	err = data.Set("ignore_containers", []any{
 		"gimme", "fried", "chicken",
 	})
 	if err != nil {
 		assert.FailNow(t, fmt.Sprintf("Could not set ignore_containers, got error: %v", err))
 	}
 
-	err = data.Set("log_configuration", []interface{}{
-		map[string]interface{}{
+	err = data.Set("log_configuration", []any{
+		map[string]any{
 			"group":         "gimme",
 			"stream_prefix": "fried",
 			"region":        "chicken",
@@ -166,7 +166,7 @@ func TestNewPatchOptions(t *testing.T) {
 	expectedPatchOptions := &patchOptions{
 		BarePdigOnContainers: []string{"gimme", "fried", "chicken"},
 		IgnoreContainers:     []string{"gimme", "fried", "chicken"},
-		LogConfiguration: map[string]interface{}{
+		LogConfiguration: map[string]any{
 			"group":         "gimme",
 			"stream_prefix": "fried",
 			"region":        "chicken",
@@ -289,7 +289,7 @@ func TestPatchFargateTaskDefinition(t *testing.T) {
 		{
 			testName: `fargate_log_group`,
 			patchOpts: &patchOptions{
-				LogConfiguration: map[string]interface{}{
+				LogConfiguration: map[string]any{
 					"group":         "test_log_group",
 					"stream_prefix": "test_prefix",
 					"region":        "test_region",

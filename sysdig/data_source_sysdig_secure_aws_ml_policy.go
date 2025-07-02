@@ -23,7 +23,7 @@ func dataSourceSysdigSecureAWSMLPolicy() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecureAWSMLPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureAWSMLPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	return awsMLPolicyDataSourceRead(ctx, d, meta, "custom AWS ML policy", isCustomCompositePolicy)
 }
 
@@ -59,7 +59,7 @@ func createAWSMLPolicyDataSourceSchema() map[string]*schema.Schema {
 	}
 }
 
-func awsMLPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {
+func awsMLPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta any, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {
 	policy, err := compositePolicyDataSourceRead(ctx, d, meta, resourceName, policyTypeAWSML, validationFunc)
 	if err != nil {
 		return diag.FromErr(err)

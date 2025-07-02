@@ -34,7 +34,7 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			SchemaManagementAccountId: {
+			SchemaManagementAccountID: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -91,7 +91,7 @@ func getSecureOrganizationClient(c SysdigClients) (v2.OrganizationSecureInterfac
 	return c.sysdigSecureClientV2()
 }
 
-func resourceSysdigSecureOrganizationCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigSecureOrganizationCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getSecureOrganizationClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -109,7 +109,7 @@ func resourceSysdigSecureOrganizationCreate(ctx context.Context, data *schema.Re
 	return nil
 }
 
-func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getSecureOrganizationClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -126,7 +126,7 @@ func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.Re
 	return nil
 }
 
-func resourceSysdigSecureOrganizationRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigSecureOrganizationRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getSecureOrganizationClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -148,7 +148,7 @@ func resourceSysdigSecureOrganizationRead(ctx context.Context, data *schema.Reso
 	return nil
 }
 
-func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getSecureOrganizationClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -169,45 +169,45 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 
 func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.OrganizationSecure {
 	secureOrganization := &v2.OrganizationSecure{CloudOrganization: cloudauth.CloudOrganization{}}
-	secureOrganization.CloudOrganization.ManagementAccountId = data.Get(SchemaManagementAccountId).(string)
-	secureOrganization.CloudOrganization.OrganizationRootId = data.Get(SchemaOrganizationRootID).(string)
-	secureOrganization.CloudOrganization.AutomaticOnboarding = data.Get(SchemaAutomaticOnboarding).(bool)
-	organizationalUnitIdsData := data.Get(SchemaOrganizationalUnitIds).([]interface{})
-	for _, organizationalUnitIdData := range organizationalUnitIdsData {
-		secureOrganization.CloudOrganization.OrganizationalUnitIds = append(
-			secureOrganization.CloudOrganization.OrganizationalUnitIds,
-			organizationalUnitIdData.(string),
+	secureOrganization.ManagementAccountId = data.Get(SchemaManagementAccountID).(string)
+	secureOrganization.OrganizationRootId = data.Get(SchemaOrganizationRootID).(string)
+	secureOrganization.AutomaticOnboarding = data.Get(SchemaAutomaticOnboarding).(bool)
+	organizationalUnitIdsData := data.Get(SchemaOrganizationalUnitIds).([]any)
+	for _, organizationalUnitIDData := range organizationalUnitIdsData {
+		secureOrganization.OrganizationalUnitIds = append(
+			secureOrganization.OrganizationalUnitIds,
+			organizationalUnitIDData.(string),
 		)
 	}
 
-	includedOrganizationalGroups := data.Get(SchemaIncludedOrganizationalGroups).([]interface{})
+	includedOrganizationalGroups := data.Get(SchemaIncludedOrganizationalGroups).([]any)
 	for _, includedOrganizationalGroup := range includedOrganizationalGroups {
-		secureOrganization.CloudOrganization.IncludedOrganizationalGroups = append(
-			secureOrganization.CloudOrganization.IncludedOrganizationalGroups,
+		secureOrganization.IncludedOrganizationalGroups = append(
+			secureOrganization.IncludedOrganizationalGroups,
 			includedOrganizationalGroup.(string),
 		)
 	}
 
-	excludedOrganizationalGroups := data.Get(SchemaExcludedOrganizationalGroups).([]interface{})
+	excludedOrganizationalGroups := data.Get(SchemaExcludedOrganizationalGroups).([]any)
 	for _, excludedOrganizationalGroup := range excludedOrganizationalGroups {
-		secureOrganization.CloudOrganization.ExcludedOrganizationalGroups = append(
-			secureOrganization.CloudOrganization.ExcludedOrganizationalGroups,
+		secureOrganization.ExcludedOrganizationalGroups = append(
+			secureOrganization.ExcludedOrganizationalGroups,
 			excludedOrganizationalGroup.(string),
 		)
 	}
 
-	includedCloudAccounts := data.Get(SchemaIncludedCloudAccounts).([]interface{})
+	includedCloudAccounts := data.Get(SchemaIncludedCloudAccounts).([]any)
 	for _, includedCloudAccount := range includedCloudAccounts {
-		secureOrganization.CloudOrganization.IncludedCloudAccounts = append(
-			secureOrganization.CloudOrganization.IncludedCloudAccounts,
+		secureOrganization.IncludedCloudAccounts = append(
+			secureOrganization.IncludedCloudAccounts,
 			includedCloudAccount.(string),
 		)
 	}
 
-	excludedCloudAccounts := data.Get(SchemaExcludedCloudAccounts).([]interface{})
+	excludedCloudAccounts := data.Get(SchemaExcludedCloudAccounts).([]any)
 	for _, excludedCloudAccount := range excludedCloudAccounts {
-		secureOrganization.CloudOrganization.ExcludedCloudAccounts = append(
-			secureOrganization.CloudOrganization.ExcludedCloudAccounts,
+		secureOrganization.ExcludedCloudAccounts = append(
+			secureOrganization.ExcludedCloudAccounts,
 			excludedCloudAccount.(string),
 		)
 	}
@@ -215,7 +215,7 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.Organizat
 }
 
 func secureOrganizationToResourceData(data *schema.ResourceData, org *v2.OrganizationSecure) error {
-	err := data.Set(SchemaManagementAccountId, org.ManagementAccountId)
+	err := data.Set(SchemaManagementAccountID, org.ManagementAccountId)
 	if err != nil {
 		return err
 	}

@@ -44,7 +44,7 @@ func resourceSysdigSecureNotificationChannelMSTeams() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureNotificationChannelMSTeamsCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelMSTeamsCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -70,7 +70,7 @@ func resourceSysdigSecureNotificationChannelMSTeamsCreate(ctx context.Context, d
 	return resourceSysdigSecureNotificationChannelMSTeamsRead(ctx, d, meta)
 }
 
-func resourceSysdigSecureNotificationChannelMSTeamsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelMSTeamsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -81,9 +81,9 @@ func resourceSysdigSecureNotificationChannelMSTeamsRead(ctx context.Context, d *
 		return diag.FromErr(err)
 	}
 
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -98,7 +98,7 @@ func resourceSysdigSecureNotificationChannelMSTeamsRead(ctx context.Context, d *
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelMSTeamsUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelMSTeamsUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -128,7 +128,7 @@ func resourceSysdigSecureNotificationChannelMSTeamsUpdate(ctx context.Context, d
 	return resourceSysdigSecureNotificationChannelMSTeamsRead(ctx, d, meta)
 }
 
-func resourceSysdigSecureNotificationChannelMSTeamsDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelMSTeamsDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -153,8 +153,8 @@ func secureNotificationChannelMSTeamsFromResourceData(d *schema.ResourceData, te
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_MS_TEAMS
-	nc.Options.Url = d.Get("url").(string)
+	nc.Type = notificationChannelTypeMSTeams
+	nc.Options.URL = d.Get("url").(string)
 
 	setNotificationChannelMSTeamsTemplateConfig(&nc, d)
 
@@ -168,10 +168,10 @@ func setNotificationChannelMSTeamsTemplateConfig(nc *v2.NotificationChannel, d *
 	case "v1":
 		nc.Options.TemplateConfiguration = []v2.NotificationChannelTemplateConfiguration{
 			{
-				TemplateKey: NOTIFICATION_CHANNEL_TYPE_MS_TEAMS_TEMPLATE_KEY_V1,
+				TemplateKey: notificationChannelTypeMSTeamsTemplateKeyV1,
 				TemplateConfigurationSections: []v2.NotificationChannelTemplateConfigurationSection{
 					{
-						SectionName: NOTIFICATION_CHANNEL_SECURE_EVENT_NOTIFICATION_CONTENT_SECTION,
+						SectionName: notificationChannelSecureEventNotificationContentSection,
 						ShouldShow:  true,
 					},
 				},
@@ -180,10 +180,10 @@ func setNotificationChannelMSTeamsTemplateConfig(nc *v2.NotificationChannel, d *
 	case "v2":
 		nc.Options.TemplateConfiguration = []v2.NotificationChannelTemplateConfiguration{
 			{
-				TemplateKey: NOTIFICATION_CHANNEL_TYPE_MS_TEAMS_TEMPLATE_KEY_V2,
+				TemplateKey: notificationChannelTypeMSTeamsTemplateKeyV2,
 				TemplateConfigurationSections: []v2.NotificationChannelTemplateConfigurationSection{
 					{
-						SectionName: NOTIFICATION_CHANNEL_SECURE_EVENT_NOTIFICATION_CONTENT_SECTION,
+						SectionName: notificationChannelSecureEventNotificationContentSection,
 						ShouldShow:  true,
 					},
 				},
@@ -198,7 +198,7 @@ func secureNotificationChannelMSTeamsToResourceData(nc *v2.NotificationChannel, 
 		return
 	}
 
-	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("url", nc.Options.URL)
 
 	err = getTemplateVersionFromNotificationChannelMSTeams(nc, d)
 
@@ -215,7 +215,7 @@ func getTemplateVersionFromNotificationChannelMSTeams(nc *v2.NotificationChannel
 	}
 
 	switch nc.Options.TemplateConfiguration[0].TemplateKey {
-	case NOTIFICATION_CHANNEL_TYPE_MS_TEAMS_TEMPLATE_KEY_V2:
+	case notificationChannelTypeMSTeamsTemplateKeyV2:
 		_ = d.Set("template_version", "v2")
 	default:
 		_ = d.Set("template_version", "v1")

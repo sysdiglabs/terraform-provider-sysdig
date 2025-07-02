@@ -45,7 +45,7 @@ func resourceSysdigMonitorAlertMetric() *schema.Resource {
 	}
 }
 
-func resourceSysdigAlertMetricCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertMetricCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -67,7 +67,7 @@ func resourceSysdigAlertMetricCreate(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigAlertMetricUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertMetricUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -88,7 +88,7 @@ func resourceSysdigAlertMetricUpdate(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigAlertMetricRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertMetricRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -113,7 +113,7 @@ func resourceSysdigAlertMetricRead(ctx context.Context, data *schema.ResourceDat
 	return nil
 }
 
-func resourceSysdigAlertMetricDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertMetricDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -124,7 +124,7 @@ func resourceSysdigAlertMetricDelete(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteAlert(ctx, id)
+	err = client.DeleteAlertByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -139,9 +139,9 @@ func metricAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, er
 	}
 	alert.Condition = data.Get("metric").(string)
 
-	if alerts_by, ok := data.GetOk("multiple_alerts_by"); ok {
+	if alertsBy, ok := data.GetOk("multiple_alerts_by"); ok {
 		alert.SegmentCondition = &v2.SegmentCondition{Type: "ANY"}
-		for _, v := range alerts_by.([]interface{}) {
+		for _, v := range alertsBy.([]any) {
 			alert.SegmentBy = append(alert.SegmentBy, v.(string))
 		}
 	}

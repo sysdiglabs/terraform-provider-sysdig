@@ -15,7 +15,6 @@ import (
 )
 
 func TestAccRuleStatefulDataSource(t *testing.T) {
-
 	if strings.HasSuffix(os.Getenv("SYSDIG_SECURE_URL"), "ibm.com") {
 		t.Skip("Skipping stateful tests for IBM Cloud")
 		return

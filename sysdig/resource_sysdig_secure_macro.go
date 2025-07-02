@@ -61,7 +61,7 @@ func getSecureMacroClient(c SysdigClients) (v2.MacroInterface, error) {
 	return c.sysdigSecureClientV2()
 }
 
-func resourceSysdigMacroCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMacroCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureMacroClient(sysdigClients)
 	if err != nil {
@@ -81,7 +81,7 @@ func resourceSysdigMacroCreate(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceSysdigMacroUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMacroUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureMacroClient(sysdigClients)
 	if err != nil {
@@ -103,7 +103,7 @@ func resourceSysdigMacroUpdate(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceSysdigMacroRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMacroRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureMacroClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -126,7 +126,7 @@ func resourceSysdigMacroRead(ctx context.Context, d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceSysdigMacroDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMacroDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureMacroClient(sysdigClients)
 	if err != nil {

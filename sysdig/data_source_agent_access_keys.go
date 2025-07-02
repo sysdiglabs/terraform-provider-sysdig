@@ -61,14 +61,14 @@ func dataSourceSysdigAgentAccessKey() *schema.Resource {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(SysdigClients).commonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	agentKeyId := d.Get("id").(int)
-	agentAccessKey, err := client.GetAgentAccessKeyByID(ctx, strconv.Itoa(agentKeyId))
+	agentKeyID := d.Get("id").(int)
+	agentAccessKey, err := client.GetAgentAccessKeyByID(ctx, strconv.Itoa(agentKeyID))
 	if err != nil {
 		return diag.FromErr(err)
 	}

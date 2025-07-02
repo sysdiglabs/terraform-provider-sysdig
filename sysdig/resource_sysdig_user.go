@@ -53,7 +53,7 @@ func resourceSysdigUser() *schema.Resource {
 	}
 }
 
-func resourceSysdigUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigUserCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -73,14 +73,14 @@ func resourceSysdigUserCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	u, err := client.GetUserById(ctx, id)
+	u, err := client.GetUserByID(ctx, id)
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
@@ -95,7 +95,7 @@ func resourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceSysdigUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigUserUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -114,7 +114,7 @@ func resourceSysdigUserUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceSysdigUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigUserDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)

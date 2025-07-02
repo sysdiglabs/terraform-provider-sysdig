@@ -23,7 +23,7 @@ func dataSourceSysdigSecureManagedPolicy() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecureManagedPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureManagedPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	return commonDataSourceSecurePolicyRead(ctx, d, meta, "managed policy", isManagedPolicy)
 }
 
