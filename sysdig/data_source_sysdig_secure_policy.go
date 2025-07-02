@@ -141,11 +141,12 @@ func policyDataSourceToResourceData(policy v2.Policy, d *schema.ResourceData) {
 	_ = d.Set("notification_channels", policy.NotificationChannelIds)
 	_ = d.Set("runbook", policy.Runbook)
 
-	actions := []map[string]interface{}{{}}
+	actions := []map[string]any{{}}
 
 	for _, action := range policy.Actions {
-		if action.Type == "POLICY_ACTION_CAPTURE" {
-			actions[0]["capture"] = []map[string]interface{}{{
+		switch action.Type {
+		case "POLICY_ACTION_CAPTURE":
+			actions[0]["capture"] = []map[string]any{{
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
 				"name":                 action.Name,
@@ -154,9 +155,9 @@ func policyDataSourceToResourceData(policy v2.Policy, d *schema.ResourceData) {
 				"folder":               action.Folder,
 			}}
 
-		} else if action.Type == "POLICY_ACTION_KILL_PROCESS" {
+		case "POLICY_ACTION_KILL_PROCESS":
 			actions[0]["kill_process"] = "true"
-		} else {
+		default:
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
 			actions[0]["container"] = strings.ToLower(action)
 		}
@@ -164,10 +165,10 @@ func policyDataSourceToResourceData(policy v2.Policy, d *schema.ResourceData) {
 
 	_ = d.Set("actions", actions)
 
-	rules := []map[string]interface{}{}
+	rules := []map[string]any{}
 
 	for _, rule := range policy.Rules {
-		rules = append(rules, map[string]interface{}{
+		rules = append(rules, map[string]any{
 			"name":    rule.Name,
 			"enabled": rule.Enabled,
 		})
@@ -176,7 +177,7 @@ func policyDataSourceToResourceData(policy v2.Policy, d *schema.ResourceData) {
 	_ = d.Set("rules", rules)
 }
 
-func commonDataSourceSecurePolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, isPolicyCorrectType func(v2.Policy) bool) diag.Diagnostics {
+func commonDataSourceSecurePolicyRead(ctx context.Context, d *schema.ResourceData, meta any, resourceName string, isPolicyCorrectType func(v2.Policy) bool) diag.Diagnostics {
 	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

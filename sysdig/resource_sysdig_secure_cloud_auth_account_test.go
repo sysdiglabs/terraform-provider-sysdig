@@ -765,5 +765,4 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 		})
 	  }
 	}`, fmt.Sprintf("ocid1.tenancy.oc1..%s", compartmentID), fmt.Sprintf("ocid1.tenancy.oc1..%s", tenantID))
-
 }

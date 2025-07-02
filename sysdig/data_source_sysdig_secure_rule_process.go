@@ -35,7 +35,7 @@ func dataSourceSysdigSecureRuleProcess() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	return commonDataSourceSysdigRuleRead(ctx, d, meta, v2.RuleTypeProcess, processRuleDataSourceToResourceData)
 }
 

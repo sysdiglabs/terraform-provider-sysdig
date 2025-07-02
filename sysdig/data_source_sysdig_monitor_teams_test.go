@@ -4,9 +4,10 @@ package sysdig_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )

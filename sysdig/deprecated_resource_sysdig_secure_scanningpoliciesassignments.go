@@ -100,7 +100,7 @@ func getDeprecatedSecureScanningPolicyAssignmentClient(c SysdigClients) (v2.Depr
 	return c.sysdigSecureClientV2()
 }
 
-func deprecatedResourceSysdigScanningPolicyAssignmentCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigScanningPolicyAssignmentCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getDeprecatedSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -123,7 +123,7 @@ func deprecatedResourceSysdigScanningPolicyAssignmentCreate(ctx context.Context,
 	return nil
 }
 
-func deprecatedResourceSysdigScanningPolicyAssignmentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigScanningPolicyAssignmentRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getDeprecatedSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -139,7 +139,7 @@ func deprecatedResourceSysdigScanningPolicyAssignmentRead(ctx context.Context, d
 	return nil
 }
 
-func deprecatedResourceSysdigScanningPolicyAssignmentUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigScanningPolicyAssignmentUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getDeprecatedSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -162,7 +162,7 @@ func deprecatedResourceSysdigScanningPolicyAssignmentUpdate(ctx context.Context,
 }
 
 // As Policy Assignments cannot be empty (default assignment cannot be deleted), pushing the default one
-func deprecatedResourceSysdigScanningPolicyAssignmentDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigScanningPolicyAssignmentDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getDeprecatedSecureScanningPolicyAssignmentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -182,7 +182,7 @@ func deprecatedResourceSysdigScanningPolicyAssignmentDelete(ctx context.Context,
 	}
 
 	scanningPolicyAssignmentList := v2.DeprecatedScanningPolicyAssignmentList{
-		PolicyBundleId: "default", // this is forced because there is no other possible value
+		PolicyBundleID: "default", // this is forced because there is no other possible value
 		Items:          []v2.DeprecatedScanningPolicyAssignment{defaultItem},
 	}
 
@@ -195,9 +195,9 @@ func deprecatedResourceSysdigScanningPolicyAssignmentDelete(ctx context.Context,
 }
 
 func deprecatedScanningPolicyAssignmentListToResourceData(scanningPolicyAssignmentList *v2.DeprecatedScanningPolicyAssignmentList, d *schema.ResourceData) {
-	d.SetId(scanningPolicyAssignmentList.PolicyBundleId)
-	_ = d.Set("policy_bundle_id", scanningPolicyAssignmentList.PolicyBundleId)
-	var items []map[string]interface{}
+	d.SetId(scanningPolicyAssignmentList.PolicyBundleID)
+	_ = d.Set("policy_bundle_id", scanningPolicyAssignmentList.PolicyBundleID)
+	var items []map[string]any
 
 	for _, item := range scanningPolicyAssignmentList.Items {
 		itemInfo := deprecatedScanningPolicyAssignmentToResourceData(item)
@@ -208,8 +208,8 @@ func deprecatedScanningPolicyAssignmentListToResourceData(scanningPolicyAssignme
 	_ = d.Set("items", items)
 }
 
-func deprecatedScanningPolicyAssignmentToResourceData(scanningPolicyAssignment v2.DeprecatedScanningPolicyAssignment) map[string]interface{} {
-	item := map[string]interface{}{
+func deprecatedScanningPolicyAssignmentToResourceData(scanningPolicyAssignment v2.DeprecatedScanningPolicyAssignment) map[string]any {
+	item := map[string]any{
 		"id":            scanningPolicyAssignment.ID,
 		"name":          scanningPolicyAssignment.Name,
 		"registry":      scanningPolicyAssignment.Registry,
@@ -218,7 +218,7 @@ func deprecatedScanningPolicyAssignmentToResourceData(scanningPolicyAssignment v
 		"whitelist_ids": scanningPolicyAssignment.WhitelistIDs,
 	}
 
-	image := []map[string]interface{}{{
+	image := []map[string]any{{
 		"type":  scanningPolicyAssignment.Image.Type,
 		"value": scanningPolicyAssignment.Image.Value,
 	}}
@@ -230,7 +230,7 @@ func deprecatedScanningPolicyAssignmentToResourceData(scanningPolicyAssignment v
 
 func deprecatedScanningPolicyAssignmentListFromResourceData(d *schema.ResourceData) v2.DeprecatedScanningPolicyAssignmentList {
 	scanningPolicyAssignmentList := v2.DeprecatedScanningPolicyAssignmentList{
-		PolicyBundleId: "default", // this is forced because there is no other possible value
+		PolicyBundleID: "default", // this is forced because there is no other possible value
 	}
 
 	scanningPolicyAssignmentList.Items = deprecatedScanningPolicyAssignmentFromResourceData(d)
@@ -239,8 +239,8 @@ func deprecatedScanningPolicyAssignmentListFromResourceData(d *schema.ResourceDa
 }
 
 func deprecatedScanningPolicyAssignmentFromResourceData(d *schema.ResourceData) (scanningPolicyAssignmentItems []v2.DeprecatedScanningPolicyAssignment) {
-	for _, item := range d.Get("items").([]interface{}) {
-		assignmentInfo := item.(map[string]interface{})
+	for _, item := range d.Get("items").([]any) {
+		assignmentInfo := item.(map[string]any)
 		assignment := v2.DeprecatedScanningPolicyAssignment{
 			Name:       assignmentInfo["name"].(string),
 			Registry:   assignmentInfo["registry"].(string),
@@ -248,24 +248,24 @@ func deprecatedScanningPolicyAssignmentFromResourceData(d *schema.ResourceData) 
 		}
 
 		assignment.PolicyIDs = []string{}
-		policyIDsSet := assignmentInfo["policy_ids"].([]interface{})
+		policyIDsSet := assignmentInfo["policy_ids"].([]any)
 		for _, policy := range policyIDsSet {
 			assignment.PolicyIDs = append(assignment.PolicyIDs, policy.(string))
 		}
 
 		assignment.WhitelistIDs = []string{}
-		whitelistIDsSet := assignmentInfo["whitelist_ids"].([]interface{})
+		whitelistIDsSet := assignmentInfo["whitelist_ids"].([]any)
 		for _, policy := range whitelistIDsSet {
 			assignment.WhitelistIDs = append(assignment.WhitelistIDs, policy.(string))
 		}
-		imageSet := assignmentInfo["image"].([]interface{})
+		imageSet := assignmentInfo["image"].([]any)
 		if len(imageSet) == 0 {
 			return
 		}
 		for _, image := range imageSet {
 			assignment.Image = v2.DeprecatedScanningPolicyAssignmentImage{
-				Type:  image.(map[string]interface{})["type"].(string),
-				Value: image.(map[string]interface{})["value"].(string),
+				Type:  image.(map[string]any)["type"].(string),
+				Value: image.(map[string]any)["value"].(string),
 			}
 		}
 
@@ -286,7 +286,7 @@ func deprecatedValidateScanningPolicyAssignment(scanningPolicyAssignmentList v2.
 	// validate default assignment
 	lastItem := scanningPolicyAssignmentList.Items[len(scanningPolicyAssignmentList.Items)-1]
 	if lastItem.Image.Value != "*" || lastItem.Registry != "*" || lastItem.Repository != "*" {
-		return diag.FromErr(errors.New("Default policy assignment has to be registry='*', repository='*' and image.tag='*?"))
+		return diag.FromErr(errors.New("default policy assignment has to be registry='*', repository='*' and image.tag='*?"))
 	}
 
 	return nil

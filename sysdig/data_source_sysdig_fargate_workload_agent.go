@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/Jeffail/gabs/v2"
@@ -180,9 +181,9 @@ type cfnTag struct {
 }
 
 type cfnProperties struct {
-	RequiresCompatibilities []string                 `json:"RequiresCompatibilities"`
-	ContainerDefinitions    []map[string]interface{} `json:"ContainerDefinitions"`
-	Tags                    []cfnTag                 `json:"Tags"`
+	RequiresCompatibilities []string         `json:"RequiresCompatibilities"`
+	ContainerDefinitions    []map[string]any `json:"ContainerDefinitions"`
+	Tags                    []cfnTag         `json:"Tags"`
 }
 
 type cfnResource struct {
@@ -195,12 +196,7 @@ type cfnStack struct {
 }
 
 func contains(items []string, target string) bool {
-	for _, item := range items {
-		if item == target {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(items, target)
 }
 
 // fargatePostKiltModifications performs any additional changes needed after Kilt has applied it's transformations
@@ -247,8 +243,8 @@ func fargatePostKiltModifications(patchedBytes []byte, patchOpts *patchOptions) 
 				}
 			}
 
-			if patchOpts.CpuShares != 0 {
-				_, err := container.Set(patchOpts.CpuShares, "cpu")
+			if patchOpts.CPUShares != 0 {
+				_, err := container.Set(patchOpts.CPUShares, "cpu")
 				if err != nil {
 					return nil, fmt.Errorf("failed to set cpu shares: %s", err)
 				}
@@ -270,7 +266,7 @@ func fargatePostKiltModifications(patchedBytes []byte, patchOpts *patchOptions) 
 		} else {
 			// Use bare pdig in the current workload container if instrumented
 			if contains(patchOpts.BarePdigOnContainers, containerName) && !contains(patchOpts.IgnoreContainers, containerName) {
-				envars := map[string]interface{}{
+				envars := map[string]any{
 					"Name":  "__INSTRUMENTATION_WRAPPER",
 					"Value": "/opt/draios/bin/pdig,-C,-t,-1",
 				}
@@ -287,7 +283,7 @@ func fargatePostKiltModifications(patchedBytes []byte, patchOpts *patchOptions) 
 
 // PatchFargateTaskDefinition modifies the container definitions
 func patchFargateTaskDefinition(ctx context.Context, containerDefinitions string, kiltConfig *cfnpatcher.Configuration, patchOpts *patchOptions) (patched *string, err error) {
-	var cdefs []map[string]interface{}
+	var cdefs []map[string]any
 	err = json.Unmarshal([]byte(containerDefinitions), &cdefs)
 	if err != nil {
 		return nil, err
@@ -376,9 +372,9 @@ type KiltRecipeConfig struct {
 type patchOptions struct {
 	BarePdigOnContainers []string
 	IgnoreContainers     []string
-	LogConfiguration     map[string]interface{}
+	LogConfiguration     map[string]any
 	Essential            bool
-	CpuShares            int
+	CPUShares            int
 	MemoryLimit          int
 	MemoryReservation    int
 }
@@ -387,11 +383,11 @@ func newPatchOptions(d *schema.ResourceData) *patchOptions {
 	opts := &patchOptions{
 		BarePdigOnContainers: []string{},
 		IgnoreContainers:     []string{},
-		LogConfiguration:     map[string]interface{}{},
+		LogConfiguration:     map[string]any{},
 	}
 
 	if items := d.Get("bare_pdig_on_containers"); items != nil {
-		for _, itemRaw := range items.([]interface{}) {
+		for _, itemRaw := range items.([]any) {
 			if itemStr, ok := itemRaw.(string); ok {
 				opts.BarePdigOnContainers = append(opts.BarePdigOnContainers, strings.TrimSpace(itemStr))
 			}
@@ -399,7 +395,7 @@ func newPatchOptions(d *schema.ResourceData) *patchOptions {
 	}
 
 	if items := d.Get("ignore_containers"); items != nil {
-		for _, itemRaw := range items.([]interface{}) {
+		for _, itemRaw := range items.([]any) {
 			if itemStr, ok := itemRaw.(string); ok {
 				opts.IgnoreContainers = append(opts.IgnoreContainers, strings.TrimSpace(itemStr))
 			}
@@ -407,7 +403,7 @@ func newPatchOptions(d *schema.ResourceData) *patchOptions {
 	}
 
 	if logConfiguration := d.Get("log_configuration").(*schema.Set).List(); len(logConfiguration) > 0 {
-		opts.LogConfiguration = logConfiguration[0].(map[string]interface{})
+		opts.LogConfiguration = logConfiguration[0].(map[string]any)
 	}
 
 	if essential := d.Get("instrumentation_essential"); essential != nil {
@@ -418,9 +414,9 @@ func newPatchOptions(d *schema.ResourceData) *patchOptions {
 	}
 
 	if cpuShares := d.Get("instrumentation_cpu"); cpuShares != nil {
-		opts.CpuShares = cpuShares.(int)
+		opts.CPUShares = cpuShares.(int)
 	} else {
-		opts.CpuShares = 0
+		opts.CPUShares = 0
 	}
 
 	if memoryLimit := d.Get("instrumentation_memory_limit"); memoryLimit != nil {
@@ -438,7 +434,7 @@ func newPatchOptions(d *schema.ResourceData) *patchOptions {
 	return opts
 }
 
-func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	priority := d.Get("priority").(string)
 	if priority != "security" && priority != "availability" {
 		return diag.Errorf("Invalid priority: %s. must be either \"security\" or \"availability\"", priority)
@@ -496,9 +492,5 @@ func dataSourceSysdigFargateWorkloadAgentRead(ctx context.Context, d *schema.Res
 	cdefChecksum := sha256.Sum256([]byte(containerDefinitions))
 	d.SetId(fmt.Sprintf("%x", cdefChecksum))
 	_ = d.Set("output_container_definitions", *outputContainerDefinitions)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	return nil
 }

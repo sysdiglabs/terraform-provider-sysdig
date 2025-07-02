@@ -22,7 +22,7 @@ type DeprecatedScanningPolicy struct {
 	Name           string                   `json:"name"`
 	Comment        string                   `json:"comment"`
 	IsDefault      bool                     `json:"isDefault,omitempty"`
-	PolicyBundleId string                   `json:"policyBundleId,omitempty"`
+	PolicyBundleID string                   `json:"policyBundleId,omitempty"`
 	Rules          []DeprecatedScanningGate `json:"rules"`
 }
 
@@ -41,7 +41,7 @@ type DeprecatedScanningGateParam struct {
 
 type DeprecatedScanningPolicyAssignmentList struct {
 	Items          []DeprecatedScanningPolicyAssignment `json:"items"`
-	PolicyBundleId string                               `json:"policyBundleId"`
+	PolicyBundleID string                               `json:"policyBundleId"`
 }
 
 type DeprecatedScanningPolicyAssignment struct {

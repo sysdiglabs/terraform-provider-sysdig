@@ -153,14 +153,14 @@ func getMonitorTeamClient(c SysdigClients) (v2.TeamInterface, error) {
 	return client, nil
 }
 
-func resourceSysdigMonitorTeamCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorTeamCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	clients := meta.(SysdigClients)
 	client, err := getMonitorTeamClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	team := teamFromResourceData(d, clients.GetClientType())
+	team := teamFromResourceData(d)
 	team.Products = []string{"SDC"}
 
 	team, err = client.CreateTeam(ctx, team)
@@ -175,7 +175,7 @@ func resourceSysdigMonitorTeamCreate(ctx context.Context, d *schema.ResourceData
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	clients := meta.(SysdigClients)
 	client, err := getMonitorTeamClient(clients)
 	if err != nil {
@@ -183,7 +183,7 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	t, err := client.GetTeamById(ctx, id)
+	t, err := client.GetTeamByID(ctx, id)
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
@@ -216,13 +216,13 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func userMonitorRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface{}) {
+func userMonitorRolesToSet(userRoles []v2.UserRoles) (res []map[string]any) {
 	for _, role := range userRoles {
 		if role.Admin { // Admins are added by default, so skip them
 			continue
 		}
 
-		roleMap := map[string]interface{}{
+		roleMap := map[string]any{
 			"email": role.Email,
 			"role":  role.Role,
 		}
@@ -231,7 +231,7 @@ func userMonitorRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface
 	return
 }
 
-func entrypointToSet(entrypoint *v2.EntryPoint) (res []map[string]interface{}) {
+func entrypointToSet(entrypoint *v2.EntryPoint) (res []map[string]any) {
 	if entrypoint == nil {
 		return
 	}
@@ -240,21 +240,21 @@ func entrypointToSet(entrypoint *v2.EntryPoint) (res []map[string]interface{}) {
 	if module == "Overview" {
 		module = "Advisor"
 	}
-	entrypointMap := map[string]interface{}{
+	entrypointMap := map[string]any{
 		"type":      module,
 		"selection": entrypoint.Selection,
 	}
 	return append(res, entrypointMap)
 }
 
-func resourceSysdigMonitorTeamUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorTeamUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	clients := meta.(SysdigClients)
 	client, err := getMonitorTeamClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	t := teamFromResourceData(d, clients.GetClientType())
+	t := teamFromResourceData(d)
 	t.Products = []string{"SDC"}
 
 	t.Version = d.Get("version").(int)
@@ -269,7 +269,7 @@ func resourceSysdigMonitorTeamUpdate(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigMonitorTeamDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorTeamDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorTeamClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -284,7 +284,7 @@ func resourceSysdigMonitorTeamDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team {
+func teamFromResourceData(d *schema.ResourceData) v2.Team {
 	canUseSysdigCapture := d.Get("can_use_sysdig_capture").(bool)
 	canUseCustomEvents := d.Get("can_see_infrastructure_events").(bool)
 	canUseAgentCli := d.Get("can_use_agent_cli").(bool)
@@ -304,7 +304,7 @@ func teamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team
 
 	userRoles := make([]v2.UserRoles, 0)
 	for _, userRole := range d.Get("user_roles").(*schema.Set).List() {
-		ur := userRole.(map[string]interface{})
+		ur := userRole.(map[string]any)
 		userRoles = append(userRoles, v2.UserRoles{
 			Email: ur["email"].(string),
 			Role:  ur["role"].(string),

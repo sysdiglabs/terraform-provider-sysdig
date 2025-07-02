@@ -60,7 +60,7 @@ func resourceSysdigSecureNotificationChannelSlack() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureNotificationChannelSlackCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelSlackCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -86,7 +86,7 @@ func resourceSysdigSecureNotificationChannelSlackCreate(ctx context.Context, d *
 	return resourceSysdigSecureNotificationChannelSlackRead(ctx, d, meta)
 }
 
-func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -97,9 +97,9 @@ func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *sc
 		return diag.FromErr(err)
 	}
 
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -114,7 +114,7 @@ func resourceSysdigSecureNotificationChannelSlackRead(ctx context.Context, d *sc
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelSlackUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelSlackUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -146,7 +146,7 @@ func resourceSysdigSecureNotificationChannelSlackUpdate(ctx context.Context, d *
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelSlackDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelSlackDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -171,11 +171,11 @@ func secureNotificationChannelSlackFromResourceData(d *schema.ResourceData, team
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_SLACK
-	nc.Options.Url = d.Get("url").(string)
+	nc.Type = notificationChannelTypeSlack
+	nc.Options.URL = d.Get("url").(string)
 	nc.Options.Channel = d.Get("channel").(string)
 	nc.Options.PrivateChannel = d.Get("is_private_channel").(bool)
-	nc.Options.PrivateChannelUrl = d.Get("private_channel_url").(string)
+	nc.Options.PrivateChannelURL = d.Get("private_channel_url").(string)
 
 	setNotificationChannelSlackTemplateConfig(&nc, d)
 
@@ -189,10 +189,10 @@ func setNotificationChannelSlackTemplateConfig(nc *v2.NotificationChannel, d *sc
 	case "v1":
 		nc.Options.TemplateConfiguration = []v2.NotificationChannelTemplateConfiguration{
 			{
-				TemplateKey: NOTIFICATION_CHANNEL_TYPE_SLACK_TEMPLATE_KEY_V1,
+				TemplateKey: notificationChannelTypeSlackTemplateKeyV1,
 				TemplateConfigurationSections: []v2.NotificationChannelTemplateConfigurationSection{
 					{
-						SectionName: NOTIFICATION_CHANNEL_SECURE_EVENT_NOTIFICATION_CONTENT_SECTION,
+						SectionName: notificationChannelSecureEventNotificationContentSection,
 						ShouldShow:  true,
 					},
 				},
@@ -201,10 +201,10 @@ func setNotificationChannelSlackTemplateConfig(nc *v2.NotificationChannel, d *sc
 	case "v2":
 		nc.Options.TemplateConfiguration = []v2.NotificationChannelTemplateConfiguration{
 			{
-				TemplateKey: NOTIFICATION_CHANNEL_TYPE_SLACK_TEMPLATE_KEY_V2,
+				TemplateKey: notificationChannelTypeSlackTemplateKeyV2,
 				TemplateConfigurationSections: []v2.NotificationChannelTemplateConfigurationSection{
 					{
-						SectionName: NOTIFICATION_CHANNEL_SECURE_EVENT_NOTIFICATION_CONTENT_SECTION,
+						SectionName: notificationChannelSecureEventNotificationContentSection,
 						ShouldShow:  true,
 					},
 				},
@@ -219,10 +219,10 @@ func secureNotificationChannelSlackToResourceData(nc *v2.NotificationChannel, d 
 		return
 	}
 
-	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("url", nc.Options.URL)
 	_ = d.Set("channel", nc.Options.Channel)
 	_ = d.Set("is_private_channel", nc.Options.PrivateChannel)
-	_ = d.Set("private_channel_url", nc.Options.PrivateChannelUrl)
+	_ = d.Set("private_channel_url", nc.Options.PrivateChannelURL)
 
 	err = getTemplateVersionFromNotificationChannelSlack(nc, d)
 
@@ -239,7 +239,7 @@ func getTemplateVersionFromNotificationChannelSlack(nc *v2.NotificationChannel, 
 	}
 
 	switch nc.Options.TemplateConfiguration[0].TemplateKey {
-	case NOTIFICATION_CHANNEL_TYPE_SLACK_TEMPLATE_KEY_V2:
+	case notificationChannelTypeSlackTemplateKeyV2:
 		_ = d.Set("template_version", "v2")
 	default:
 		_ = d.Set("template_version", "v1")

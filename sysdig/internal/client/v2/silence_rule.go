@@ -12,7 +12,7 @@ const (
 	silenceRulePath  = "%s/api/v1/silencingRules/%d"
 )
 
-var SilenceRuleNotFound = errors.New("silence rule not found")
+var ErrSilenceRuleNotFound = errors.New("silence rule not found")
 
 type SilenceRuleInterface interface {
 	Base
@@ -22,84 +22,95 @@ type SilenceRuleInterface interface {
 	DeleteSilenceRule(ctx context.Context, id int) error
 }
 
-func (client *Client) GetSilenceRule(ctx context.Context, id int) (SilenceRule, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.getSilenceRuleURL(id), nil)
+func (c *Client) GetSilenceRule(ctx context.Context, id int) (rule SilenceRule, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getSilenceRuleURL(id), nil)
 	if err != nil {
 		return SilenceRule{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode == http.StatusNotFound {
-		return SilenceRule{}, SilenceRuleNotFound
+		return SilenceRule{}, ErrSilenceRuleNotFound
 	}
 	if response.StatusCode != http.StatusOK {
-		return SilenceRule{}, client.ErrorFromResponse(response)
+		return SilenceRule{}, c.ErrorFromResponse(response)
 	}
 
-	silenceRule, err := Unmarshal[SilenceRule](response.Body)
-	if err != nil {
-		return SilenceRule{}, err
-	}
-
-	return silenceRule, nil
+	return Unmarshal[SilenceRule](response.Body)
 }
 
-func (client *Client) CreateSilenceRule(ctx context.Context, silenceRule SilenceRule) (SilenceRule, error) {
+func (c *Client) CreateSilenceRule(ctx context.Context, silenceRule SilenceRule) (rule SilenceRule, err error) {
 	payload, err := Marshal(silenceRule)
 	if err != nil {
 		return SilenceRule{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.getSilenceRulesURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.getSilenceRulesURL(), payload)
 	if err != nil {
 		return SilenceRule{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		return SilenceRule{}, client.ErrorFromResponse(response)
+		return SilenceRule{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[SilenceRule](response.Body)
 }
 
-func (client *Client) UpdateSilenceRule(ctx context.Context, silenceRule SilenceRule) (SilenceRule, error) {
+func (c *Client) UpdateSilenceRule(ctx context.Context, silenceRule SilenceRule) (rule SilenceRule, err error) {
 	payload, err := Marshal(silenceRule)
 	if err != nil {
 		return SilenceRule{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.getSilenceRuleURL(silenceRule.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.getSilenceRuleURL(silenceRule.ID), payload)
 	if err != nil {
 		return SilenceRule{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return SilenceRule{}, client.ErrorFromResponse(response)
+		return SilenceRule{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[SilenceRule](response.Body)
 }
 
-func (client *Client) DeleteSilenceRule(ctx context.Context, id int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.getSilenceRuleURL(id), nil)
+func (c *Client) DeleteSilenceRule(ctx context.Context, id int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.getSilenceRuleURL(id), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *Client) getSilenceRulesURL() string {
-	return fmt.Sprintf(silenceRulesPath, client.config.url)
+func (c *Client) getSilenceRulesURL() string {
+	return fmt.Sprintf(silenceRulesPath, c.config.url)
 }
 
-func (client *Client) getSilenceRuleURL(id int) string {
-	return fmt.Sprintf(silenceRulePath, client.config.url, id)
+func (c *Client) getSilenceRuleURL(id int) string {
+	return fmt.Sprintf(silenceRulePath, c.config.url, id)
 }

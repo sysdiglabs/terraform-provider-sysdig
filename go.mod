@@ -12,7 +12,6 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.8.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.26.1
 	github.com/jmespath/go-jmespath v0.4.0
-	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/cast v1.5.1
 	github.com/stretchr/testify v1.8.4
@@ -63,6 +62,7 @@ require (
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc3 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/sysdiglabs/agent-kilt/pkg v0.0.0-20240201123620-2272de6dee9f // indirect

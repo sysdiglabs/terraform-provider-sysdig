@@ -20,100 +20,113 @@ type OrganizationSecureInterface interface {
 	UpdateOrganizationSecure(ctx context.Context, orgID string, org *OrganizationSecure) (*OrganizationSecure, string, error)
 }
 
-func (client *Client) CreateOrganizationSecure(ctx context.Context, org *OrganizationSecure) (*OrganizationSecure, string, error) {
-	payload, err := client.marshalCloudauthProto(org)
+func (c *Client) CreateOrganizationSecure(ctx context.Context, org *OrganizationSecure) (organization *OrganizationSecure, errString string, err error) {
+	payload, err := c.marshalCloudauthProto(org)
 	if err != nil {
 		return nil, "", err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.organizationsURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.organizationsURL(), payload)
 	if err != nil {
 		return nil, "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
 
-	organization := &OrganizationSecure{}
-	err = client.unmarshalCloudauthProto(response.Body, organization)
+	err = c.unmarshalCloudauthProto(response.Body, organization)
 	if err != nil {
 		return nil, "", err
 	}
 	return organization, "", nil
 }
 
-func (client *Client) GetOrganizationSecure(ctx context.Context, orgID string) (*OrganizationSecure, string, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.organizationURL(orgID), nil)
+func (c *Client) GetOrganizationSecure(ctx context.Context, orgID string) (organization *OrganizationSecure, errString string, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.organizationURL(orgID), nil)
 	if err != nil {
 		return nil, "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
 
-	organization := &OrganizationSecure{}
-	err = client.unmarshalCloudauthProto(response.Body, organization)
+	err = c.unmarshalCloudauthProto(response.Body, organization)
 	if err != nil {
 		return nil, "", err
 	}
 	return organization, "", nil
 }
 
-func (client *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) (string, error) {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.organizationURL(orgID), nil)
+func (c *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) (errString string, err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.organizationURL(orgID), nil)
 	if err != nil {
 		return "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return errStatus, err
 	}
 	return "", nil
 }
 
-func (client *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org *OrganizationSecure) (*OrganizationSecure, string, error) {
+func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org *OrganizationSecure) (organization *OrganizationSecure, errString string, err error) {
 	payload, err := Marshal(org)
 	if err != nil {
 		return nil, "", err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.organizationURL(orgID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.organizationURL(orgID), payload)
 	if err != nil {
 		return nil, "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
 
-	organization := &OrganizationSecure{}
-	err = client.unmarshalCloudauthProto(response.Body, organization)
+	err = c.unmarshalCloudauthProto(response.Body, organization)
 	if err != nil {
 		return nil, "", err
 	}
 	return organization, "", nil
 }
 
-func (client *Client) organizationsURL() string {
-	url := fmt.Sprintf(organizationsPath, client.config.url)
+func (c *Client) organizationsURL() string {
+	url := fmt.Sprintf(organizationsPath, c.config.url)
 	if os.Getenv("SYSDIG_ORG_API_ASYNC") == "true" {
 		url += "?async=true"
 	}
 	return url
 }
 
-func (client *Client) organizationURL(orgId string) string {
-	url := fmt.Sprintf(organizationPath, client.config.url, orgId)
+func (c *Client) organizationURL(orgID string) string {
+	url := fmt.Sprintf(organizationPath, c.config.url, orgID)
 	if os.Getenv("SYSDIG_ORG_API_ASYNC") == "true" {
 		url += "?async=true"
 	}

@@ -20,7 +20,7 @@ const (
 type CloudAccountSecureInterface interface {
 	Base
 	CreateCloudAccountSecure(ctx context.Context, cloudAccount *CloudAccountSecure) (*CloudAccountSecure, error)
-	GetCloudAccountSecure(ctx context.Context, accountID string) (*CloudAccountSecure, error)
+	GetCloudAccountSecureByID(ctx context.Context, accountID string) (*CloudAccountSecure, error)
 	DeleteCloudAccountSecure(ctx context.Context, accountID string) error
 	UpdateCloudAccountSecure(ctx context.Context, accountID string, cloudAccount *CloudAccountSecure) (*CloudAccountSecure, error)
 }
@@ -31,106 +31,112 @@ type CloudAccountMonitorInterface interface {
 	CreateCloudAccountMonitorForCost(ctx context.Context, provider *CloudAccountMonitorForCost) (*CloudAccountCreatedForCost, error)
 	UpdateCloudAccountMonitor(ctx context.Context, id int, provider *CloudAccountMonitor) (*CloudAccountMonitor, error)
 	UpdateCloudAccountMonitorForCost(ctx context.Context, provider *CloudAccountCostProvider) (*CloudAccountCostProvider, error)
-	GetCloudAccountMonitor(ctx context.Context, id int) (*CloudAccountMonitor, error)
-	GetCloudAccountMonitorForCost(ctx context.Context, id int) (*CloudAccountCostProvider, error)
+	GetCloudAccountMonitorByID(ctx context.Context, id int) (*CloudAccountMonitor, error)
+	GetCloudAccountMonitorForCostByID(ctx context.Context, id int) (*CloudAccountCostProvider, error)
 	DeleteCloudAccountMonitor(ctx context.Context, id int) error
 }
 
-func (client *Client) CreateCloudAccountSecure(ctx context.Context, cloudAccount *CloudAccountSecure) (*CloudAccountSecure, error) {
+func (c *Client) CreateCloudAccountSecure(ctx context.Context, cloudAccount *CloudAccountSecure) (createdAccount *CloudAccountSecure, err error) {
 	payload, err := Marshal(cloudAccount)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.cloudAccountsURL(true), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.cloudAccountsURL(true), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		err = client.ErrorFromResponse(response)
+		err = c.ErrorFromResponse(response)
 		return nil, err
 	}
 
 	return Unmarshal[*CloudAccountSecure](response.Body)
 }
 
-func (client *Client) GetCloudAccountSecure(ctx context.Context, accountID string) (*CloudAccountSecure, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.cloudAccountURL(accountID, true), nil)
+func (c *Client) GetCloudAccountSecureByID(ctx context.Context, accountID string) (cloudAccount *CloudAccountSecure, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.cloudAccountURL(accountID, true), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[*CloudAccountSecure](response.Body)
 }
 
-func (client *Client) DeleteCloudAccountSecure(ctx context.Context, accountID string) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.cloudAccountURL(accountID, false), nil)
+func (c *Client) DeleteCloudAccountSecure(ctx context.Context, accountID string) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.cloudAccountURL(accountID, false), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 	return nil
 }
 
-func (client *Client) UpdateCloudAccountSecure(ctx context.Context, accountID string, cloudAccount *CloudAccountSecure) (*CloudAccountSecure, error) {
+func (c *Client) UpdateCloudAccountSecure(ctx context.Context, accountID string, cloudAccount *CloudAccountSecure) (updatedAccount *CloudAccountSecure, err error) {
 	payload, err := Marshal(cloudAccount)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.cloudAccountURL(accountID, true), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.cloudAccountURL(accountID, true), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		err = client.ErrorFromResponse(response)
+		err = c.ErrorFromResponse(response)
 		return nil, err
 	}
 
 	return Unmarshal[*CloudAccountSecure](response.Body)
 }
 
-func (client *Client) cloudAccountsURL(includeExternalID bool) string {
-	if includeExternalID {
-		return fmt.Sprintf(cloudAccountsWithExternalIDPath, client.config.url)
-	}
-	return fmt.Sprintf(cloudAccountsPath, client.config.url)
-}
-
-func (client *Client) cloudAccountURL(accountID string, includeExternalID bool) string {
-	if includeExternalID {
-		return fmt.Sprintf(cloudAccountWithExternalIDPath, client.config.url, accountID)
-	}
-	return fmt.Sprintf(cloudAccountPath, client.config.url, accountID)
-}
-
-func (client *Client) CreateCloudAccountMonitor(ctx context.Context, provider *CloudAccountMonitor) (*CloudAccountMonitor, error) {
+func (c *Client) CreateCloudAccountMonitor(ctx context.Context, provider *CloudAccountMonitor) (createdProvider *CloudAccountMonitor, err error) {
 	payload, err := Marshal(provider)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.getProvidersURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.getProvidersURL(), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusCreated {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[cloudAccountWrapperMonitor](response.Body)
@@ -141,20 +147,24 @@ func (client *Client) CreateCloudAccountMonitor(ctx context.Context, provider *C
 	return &wrapper.CloudAccount, nil
 }
 
-func (client *Client) CreateCloudAccountMonitorForCost(ctx context.Context, provider *CloudAccountMonitorForCost) (*CloudAccountCreatedForCost, error) {
+func (c *Client) CreateCloudAccountMonitorForCost(ctx context.Context, provider *CloudAccountMonitorForCost) (createdProvider *CloudAccountCreatedForCost, err error) {
 	payload, err := Marshal(provider)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.getCostProvidersURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.getCostProvidersURL(), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[CloudAccountCreatedForCost](response.Body)
@@ -165,20 +175,24 @@ func (client *Client) CreateCloudAccountMonitorForCost(ctx context.Context, prov
 	return &wrapper, nil
 }
 
-func (client *Client) UpdateCloudAccountMonitor(ctx context.Context, id int, provider *CloudAccountMonitor) (*CloudAccountMonitor, error) {
+func (c *Client) UpdateCloudAccountMonitor(ctx context.Context, id int, provider *CloudAccountMonitor) (updatedProvider *CloudAccountMonitor, err error) {
 	payload, err := Marshal(provider)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.getProviderURL(id), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.getProviderURL(id), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[cloudAccountWrapperMonitor](response.Body)
@@ -189,20 +203,24 @@ func (client *Client) UpdateCloudAccountMonitor(ctx context.Context, id int, pro
 	return &wrapper.CloudAccount, nil
 }
 
-func (client *Client) UpdateCloudAccountMonitorForCost(ctx context.Context, provider *CloudAccountCostProvider) (*CloudAccountCostProvider, error) {
+func (c *Client) UpdateCloudAccountMonitorForCost(ctx context.Context, provider *CloudAccountCostProvider) (updatedProvider *CloudAccountCostProvider, err error) {
 	payload, err := Marshal(provider)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.getUpdateCostProviderURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.getUpdateCostProviderURL(), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[CloudAccountCostProviderWrapper](response.Body)
@@ -213,15 +231,19 @@ func (client *Client) UpdateCloudAccountMonitorForCost(ctx context.Context, prov
 	return &wrapper.CloudAccountCostProvider, nil
 }
 
-func (client *Client) GetCloudAccountMonitor(ctx context.Context, id int) (*CloudAccountMonitor, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.getProviderURL(id), nil)
+func (c *Client) GetCloudAccountMonitorByID(ctx context.Context, id int) (account *CloudAccountMonitor, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getProviderURL(id), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[cloudAccountWrapperMonitor](response.Body)
@@ -232,15 +254,19 @@ func (client *Client) GetCloudAccountMonitor(ctx context.Context, id int) (*Clou
 	return &wrapper.CloudAccount, nil
 }
 
-func (client *Client) GetCloudAccountMonitorForCost(ctx context.Context, id int) (*CloudAccountCostProvider, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.getCostProviderURL(id), nil)
+func (c *Client) GetCloudAccountMonitorForCostByID(ctx context.Context, id int) (provider *CloudAccountCostProvider, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getCostProviderURL(id), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[CloudAccountCostProviderWrapper](response.Body)
@@ -251,36 +277,54 @@ func (client *Client) GetCloudAccountMonitorForCost(ctx context.Context, id int)
 	return &wrapper.CloudAccountCostProvider, nil
 }
 
-func (client *Client) DeleteCloudAccountMonitor(ctx context.Context, id int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.getProviderURL(id), nil)
+func (c *Client) DeleteCloudAccountMonitor(ctx context.Context, id int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.getProviderURL(id), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *Client) getProviderURL(id int) string {
-	return fmt.Sprintf("%v/%v", client.getProvidersURL(), id)
+func (c *Client) cloudAccountsURL(includeExternalID bool) string {
+	if includeExternalID {
+		return fmt.Sprintf(cloudAccountsWithExternalIDPath, c.config.url)
+	}
+	return fmt.Sprintf(cloudAccountsPath, c.config.url)
 }
 
-func (client *Client) getProvidersURL() string {
-	return fmt.Sprintf(providersPath, client.config.url)
+func (c *Client) cloudAccountURL(accountID string, includeExternalID bool) string {
+	if includeExternalID {
+		return fmt.Sprintf(cloudAccountWithExternalIDPath, c.config.url, accountID)
+	}
+	return fmt.Sprintf(cloudAccountPath, c.config.url, accountID)
 }
 
-func (client *Client) getCostProvidersURL() string {
-	return fmt.Sprintf(costCloudAccountPath, client.config.url)
+func (c *Client) getProviderURL(id int) string {
+	return fmt.Sprintf("%v/%v", c.getProvidersURL(), id)
 }
 
-func (client *Client) getCostProviderURL(id int) string {
-	return fmt.Sprintf(costProviderURL, client.config.url, id)
+func (c *Client) getProvidersURL() string {
+	return fmt.Sprintf(providersPath, c.config.url)
 }
 
-func (client *Client) getUpdateCostProviderURL() string {
-	return fmt.Sprintf(updateCostProviderURL, client.config.url)
+func (c *Client) getCostProvidersURL() string {
+	return fmt.Sprintf(costCloudAccountPath, c.config.url)
+}
+
+func (c *Client) getCostProviderURL(id int) string {
+	return fmt.Sprintf(costProviderURL, c.config.url, id)
+}
+
+func (c *Client) getUpdateCostProviderURL() string {
+	return fmt.Sprintf(updateCostProviderURL, c.config.url)
 }

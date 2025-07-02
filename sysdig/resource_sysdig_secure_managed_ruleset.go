@@ -76,7 +76,7 @@ func resourceSysdigSecureManagedRuleset() *schema.Resource {
 	}
 }
 
-func resourceSysdigManagedRulesetCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigManagedRulesetCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
@@ -95,7 +95,7 @@ func resourceSysdigManagedRulesetCreate(ctx context.Context, d *schema.ResourceD
 
 	policy.Rules = managedPolicy.Rules
 	updateManagedRulesetFromResourceData(&policy, d)
-	policy.TemplateId = managedPolicy.TemplateId
+	policy.TemplateID = managedPolicy.TemplateID
 	policy.TemplateVersion = managedPolicy.TemplateVersion
 
 	createdPolicy, err := client.CreatePolicy(ctx, policy)
@@ -114,7 +114,7 @@ func managedRulesetToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 
 	_ = d.Set("description", policy.Description)
 	_ = d.Set("severity", policy.Severity)
-	_ = d.Set("template_id", policy.TemplateId)
+	_ = d.Set("template_id", policy.TemplateID)
 
 	disabledRules := []string{}
 	for _, rule := range policy.Rules {
@@ -129,7 +129,7 @@ func updateManagedRulesetFromResourceData(policy *v2.Policy, d *schema.ResourceD
 	commonPolicyFromResourceData(policy, d)
 	policy.Description = d.Get("description").(string)
 	policy.Severity = d.Get("severity").(int)
-	policy.TemplateId = d.Get("template_id").(int)
+	policy.TemplateID = d.Get("template_id").(int)
 
 	disabledRules := d.Get("disabled_rules").(*schema.Set)
 	for _, rule := range policy.Rules {
@@ -141,7 +141,7 @@ func updateManagedRulesetFromResourceData(policy *v2.Policy, d *schema.ResourceD
 	}
 }
 
-func resourceSysdigManagedRulesetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigManagedRulesetRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -162,7 +162,7 @@ func resourceSysdigManagedRulesetRead(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceSysdigManagedRulesetDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigManagedRulesetDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
@@ -180,7 +180,7 @@ func resourceSysdigManagedRulesetDelete(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigManagedRulesetUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigManagedRulesetUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
@@ -209,7 +209,7 @@ func resourceSysdigManagedRulesetUpdate(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigSecureManagedRulesetImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceSysdigSecureManagedRulesetImportState(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return nil, err
@@ -225,7 +225,7 @@ func resourceSysdigSecureManagedRulesetImportState(ctx context.Context, d *schem
 		return nil, err
 	}
 
-	if managedRuleset.TemplateId == 0 || managedRuleset.IsDefault {
+	if managedRuleset.TemplateID == 0 || managedRuleset.IsDefault {
 		return nil, errors.New("unable to import policy that is not a managed ruleset")
 	}
 
@@ -235,7 +235,7 @@ func resourceSysdigSecureManagedRulesetImportState(ctx context.Context, d *schem
 	}
 
 	for _, policy := range policies {
-		if policy.IsDefault && policy.TemplateId == managedRuleset.TemplateId {
+		if policy.IsDefault && policy.TemplateID == managedRuleset.TemplateID {
 			inheritedFrom := map[string]string{
 				"name": policy.Name,
 				"type": policy.Type,

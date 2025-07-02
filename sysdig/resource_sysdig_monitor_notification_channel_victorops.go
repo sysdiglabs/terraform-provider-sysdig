@@ -43,7 +43,7 @@ func resourceSysdigMonitorNotificationChannelVictorOps() *schema.Resource {
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelVictorOpsCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelVictorOpsCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -69,16 +69,16 @@ func resourceSysdigMonitorNotificationChannelVictorOpsCreate(ctx context.Context
 	return resourceSysdigMonitorNotificationChannelVictorOpsRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelVictorOpsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelVictorOpsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -93,7 +93,7 @@ func resourceSysdigMonitorNotificationChannelVictorOpsRead(ctx context.Context, 
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelVictorOpsUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelVictorOpsUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -120,7 +120,7 @@ func resourceSysdigMonitorNotificationChannelVictorOpsUpdate(ctx context.Context
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelVictorOpsDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelVictorOpsDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -141,7 +141,7 @@ func monitorNotificationChannelVictorOpsFromResourceData(d *schema.ResourceData,
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_VICTOROPS
+	nc.Type = notificationChannelTypeVictorOps
 	nc.Options.APIKey = d.Get("api_key").(string)
 	nc.Options.RoutingKey = d.Get("routing_key").(string)
 	return

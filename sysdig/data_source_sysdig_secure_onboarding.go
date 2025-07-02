@@ -72,7 +72,7 @@ func dataSourceSysdigSecureTrustedCloudIdentity() *schema.Resource {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureTrustedCloudIdentityRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureOnboardingClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -181,7 +181,7 @@ func dataSourceSysdigSecureTrustedAzureApp() *schema.Resource {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigSecureTrustedAzureAppRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureTrustedAzureAppRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureOnboardingClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -224,19 +224,19 @@ func dataSourceSysdigSecureTenantExternalID() *schema.Resource {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigSecureTenantExternalIDRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureTenantExternalIDRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureOnboardingClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	externalId, err := client.GetTenantExternalIDSecure(ctx)
+	externalID, err := client.GetTenantExternalIDSecure(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(externalId)
-	err = d.Set("external_id", externalId)
+	d.SetId(externalID)
+	err = d.Set("external_id", externalID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -288,7 +288,7 @@ func dataSourceSysdigSecureAgentlessScanningAssets() *schema.Resource {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigSecureAgentlessScanningAssetsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureAgentlessScanningAssetsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureOnboardingClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -299,33 +299,33 @@ func dataSourceSysdigSecureAgentlessScanningAssetsRead(ctx context.Context, d *s
 		return diag.FromErr(err)
 	}
 
-	assetsAws, _ := assets["aws"].(map[string]interface{})
-	assetsAzure, _ := assets["azure"].(map[string]interface{})
-	assetsBackend, _ := assets["backend"].(map[string]interface{})
-	assetsGcp, _ := assets["gcp"].(map[string]interface{})
+	assetsAws, _ := assets["aws"].(map[string]any)
+	assetsAzure, _ := assets["azure"].(map[string]any)
+	assetsBackend, _ := assets["backend"].(map[string]any)
+	assetsGcp, _ := assets["gcp"].(map[string]any)
 
 	d.SetId("agentlessScanningAssets")
-	err = d.Set("aws", map[string]interface{}{
+	err = d.Set("aws", map[string]any{
 		"account_id": assetsAws["accountId"],
 	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = d.Set("azure", map[string]interface{}{
+	err = d.Set("azure", map[string]any{
 		"service_principal_id": assetsAzure["servicePrincipalId"],
 		"tenant_id":            assetsAzure["tenantId"],
 	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = d.Set("backend", map[string]interface{}{
+	err = d.Set("backend", map[string]any{
 		"cloud_id": assetsBackend["cloudId"],
 		"type":     assetsBackend["type"],
 	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = d.Set("gcp", map[string]interface{}{
+	err = d.Set("gcp", map[string]any{
 		"worker_identity": assetsGcp["workerIdentity"],
 	})
 	if err != nil {
@@ -379,7 +379,7 @@ func dataSourceSysdigSecureCloudIngestionAssets() *schema.Resource {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureOnboardingClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -408,7 +408,7 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 	d.SetId("cloudIngestionAssets")
 
 	// Set GCP data if available
-	if gcpAssets, ok := assets["gcp"].(map[string]interface{}); ok {
+	if gcpAssets, ok := assets["gcp"].(map[string]any); ok {
 		if routingKey, exists := gcpAssets["routingKey"]; exists {
 			if err := d.Set("gcp_routing_key", routingKey); err != nil {
 				return diag.FromErr(err)
@@ -423,8 +423,8 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 	}
 
 	// Set AWS data if available
-	if awsAssets, ok := assets["aws"].(map[string]interface{}); ok {
-		awsData := map[string]interface{}{
+	if awsAssets, ok := assets["aws"].(map[string]any); ok {
+		awsData := map[string]any{
 			"eventBusARN":    awsAssets["eventBusARN"],
 			"eventBusARNGov": awsAssets["eventBusARNGov"],
 		}
@@ -434,7 +434,7 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 			awsData["sns_routing_key"] = awsAssets["snsRoutingKey"]
 		}
 
-		if snsMetadata, ok := awsAssets["snsMetadata"].(map[string]interface{}); ok && snsMetadata != nil {
+		if snsMetadata, ok := awsAssets["snsMetadata"].(map[string]any); ok && snsMetadata != nil {
 			if ingestionURL, exists := snsMetadata["ingestionURL"]; exists {
 				awsData["sns_routing_url"] = ingestionURL
 			}
@@ -445,7 +445,7 @@ func dataSourceSysdigSecureCloudIngestionAssetsRead(ctx context.Context, d *sche
 			awsData["eb_routing_key"] = awsAssets["ebRoutingKey"]
 		}
 
-		if ebMetadata, ok := awsAssets["ebMetadata"].(map[string]interface{}); ok && ebMetadata != nil {
+		if ebMetadata, ok := awsAssets["ebMetadata"].(map[string]any); ok && ebMetadata != nil {
 			if ingestionURL, exists := ebMetadata["ingestionURL"]; exists {
 				awsData["eb_routing_url"] = ingestionURL
 			}
@@ -495,7 +495,7 @@ func dataSourceSysdigSecureTrustedOracleApp() *schema.Resource {
 }
 
 // Retrieves the information of a resource from the file and loads it in Terraform
-func dataSourceSysdigSecureTrustedOracleAppRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureTrustedOracleAppRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureOnboardingClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

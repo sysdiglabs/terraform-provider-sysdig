@@ -31,12 +31,12 @@ func dataSourceSysdigCustomRoleSchema() map[string]*schema.Schema {
 }
 
 func getDataSourceSysdigCustomRoleMonitorPermissionsRead(product v2.Product) schema.ReadContextFunc {
-	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return func(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 		client, err := m.(SysdigClients).sysdigCommonClientV2()
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		rp := d.Get(SchemaRequestedPermKey).([]interface{})
+		rp := d.Get(SchemaRequestedPermKey).([]any)
 
 		rps := readPermissions(rp)
 		dependencies, err := client.GetPermissionsDependencies(ctx, product, rps)
@@ -57,7 +57,7 @@ func getDataSourceSysdigCustomRoleMonitorPermissionsRead(product v2.Product) sch
 	}
 }
 
-func readPermissions(rp []interface{}) []string {
+func readPermissions(rp []any) []string {
 	permissions := make([]string, len(rp))
 	for i, permission := range rp {
 		permissions[i] = permission.(string)

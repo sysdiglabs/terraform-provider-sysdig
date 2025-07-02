@@ -77,7 +77,7 @@ func resourceSysdigSecureRuleFilesystem() *schema.Resource {
 	}
 }
 
-func resourceSysdigRuleFilesystemCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleFilesystemCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -102,7 +102,7 @@ func resourceSysdigRuleFilesystemCreate(ctx context.Context, d *schema.ResourceD
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -133,13 +133,13 @@ func resourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceDat
 	}
 
 	if len(rule.Details.ReadPaths.Items) > 0 {
-		_ = d.Set("read_only", []map[string]interface{}{{
+		_ = d.Set("read_only", []map[string]any{{
 			"matching": rule.Details.ReadPaths.MatchItems,
 			"paths":    rule.Details.ReadPaths.Items,
 		}})
 	}
 	if len(rule.Details.ReadWritePaths.Items) > 0 {
-		_ = d.Set("read_write", []map[string]interface{}{{
+		_ = d.Set("read_write", []map[string]any{{
 			"matching": rule.Details.ReadWritePaths.MatchItems,
 			"paths":    rule.Details.ReadWritePaths.Items,
 		}})
@@ -148,7 +148,7 @@ func resourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceSysdigRuleFilesystemUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleFilesystemUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -172,7 +172,7 @@ func resourceSysdigRuleFilesystemUpdate(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigRuleFilesystemDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleFilesystemDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -206,9 +206,9 @@ func resourceSysdigRuleFilesystemFromResourceData(d *schema.ResourceData) (rule 
 		Items:      []string{},
 	}
 
-	if readOnlyRules, ok := d.Get("read_only").([]interface{}); ok && len(readOnlyRules) > 0 {
+	if readOnlyRules, ok := d.Get("read_only").([]any); ok && len(readOnlyRules) > 0 {
 		rule.Details.ReadPaths.MatchItems = d.Get("read_only.0.matching").(bool)
-		for _, path := range d.Get("read_only.0.paths").([]interface{}) {
+		for _, path := range d.Get("read_only.0.paths").([]any) {
 			if pathStr, ok := path.(string); ok {
 				rule.Details.ReadPaths.Items = append(rule.Details.ReadPaths.Items, pathStr)
 			}
@@ -216,9 +216,9 @@ func resourceSysdigRuleFilesystemFromResourceData(d *schema.ResourceData) (rule 
 
 	}
 
-	if readWriteRules, ok := d.Get("read_write").([]interface{}); ok && len(readWriteRules) > 0 {
+	if readWriteRules, ok := d.Get("read_write").([]any); ok && len(readWriteRules) > 0 {
 		rule.Details.ReadWritePaths.MatchItems = d.Get("read_write.0.matching").(bool)
-		for _, path := range d.Get("read_write.0.paths").([]interface{}) {
+		for _, path := range d.Get("read_write.0.paths").([]any) {
 			if pathStr, ok := path.(string); ok {
 				rule.Details.ReadWritePaths.Items = append(rule.Details.ReadWritePaths.Items, pathStr)
 			}

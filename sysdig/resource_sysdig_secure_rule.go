@@ -72,7 +72,7 @@ func updateResourceDataForRule(d *schema.ResourceData, rule v2.Rule) {
 
 func getTagsFromResourceData(d *schema.ResourceData) []string {
 	result := []string{}
-	if tags, ok := d.Get("tags").([]interface{}); ok {
+	if tags, ok := d.Get("tags").([]any); ok {
 		for _, rawTag := range tags {
 			if tag, ok := rawTag.(string); ok {
 				result = append(result, tag)

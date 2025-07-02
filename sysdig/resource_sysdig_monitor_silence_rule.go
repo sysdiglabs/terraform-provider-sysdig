@@ -94,7 +94,7 @@ func getMonitorSilenceRuleClient(c SysdigClients) (v2.SilenceRuleInterface, erro
 	return client, nil
 }
 
-func resourceSysdigMonitorSilenceRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorSilenceRuleCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorSilenceRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -115,7 +115,7 @@ func resourceSysdigMonitorSilenceRuleCreate(ctx context.Context, d *schema.Resou
 	return resourceSysdigMonitorSilenceRuleRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorSilenceRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorSilenceRuleRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorSilenceRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -128,7 +128,7 @@ func resourceSysdigMonitorSilenceRuleRead(ctx context.Context, d *schema.Resourc
 
 	silenceRule, err := client.GetSilenceRule(ctx, id)
 	if err != nil {
-		if err == v2.SilenceRuleNotFound {
+		if err == v2.ErrSilenceRuleNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -137,7 +137,7 @@ func resourceSysdigMonitorSilenceRuleRead(ctx context.Context, d *schema.Resourc
 
 	// suppress diff of "enabled" field if the silence interval is over: it will always be false from the api
 	// any update of an ended silence rule results in a 422 Unprocessable Entity error from the api
-	silenceRuleEnd := time.Unix(silenceRule.StartTs/1000+int64(silenceRule.DurationInSec), 0)
+	silenceRuleEnd := time.Unix(silenceRule.StartTS/1000+int64(silenceRule.DurationInSec), 0)
 	if time.Now().After(silenceRuleEnd) {
 		silenceRule.Enabled = d.Get("enabled").(bool)
 	}
@@ -150,7 +150,7 @@ func resourceSysdigMonitorSilenceRuleRead(ctx context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceSysdigMonitorSilenceRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorSilenceRuleUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorSilenceRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -175,7 +175,7 @@ func resourceSysdigMonitorSilenceRuleUpdate(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceSysdigMonitorSilenceRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorSilenceRuleDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorSilenceRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -199,23 +199,23 @@ func monitorSilenceRuleFromResourceData(d *schema.ResourceData) (v2.SilenceRule,
 
 	silenceRule.Name = d.Get("name").(string)
 	silenceRule.Enabled = d.Get("enabled").(bool)
-	startTs, err := strconv.ParseInt(d.Get("start_ts").(string), 10, 64)
+	startTS, err := strconv.ParseInt(d.Get("start_ts").(string), 10, 64)
 	if err != nil {
 		return silenceRule, err
 	}
-	silenceRule.StartTs = startTs
+	silenceRule.StartTS = startTS
 	silenceRule.DurationInSec = d.Get("duration_seconds").(int)
 	silenceRule.Scope = d.Get("scope").(string)
 	alertIds := d.Get("alert_ids").(*schema.Set)
-	for _, rawAlertId := range alertIds.List() {
-		if alertId, ok := rawAlertId.(int); ok {
-			silenceRule.AlertIds = append(silenceRule.AlertIds, alertId)
+	for _, rawAlertID := range alertIds.List() {
+		if alertID, ok := rawAlertID.(int); ok {
+			silenceRule.AlertIds = append(silenceRule.AlertIds, alertID)
 		}
 	}
 	notificationChannelIds := d.Get("notification_channel_ids").(*schema.Set)
-	for _, rawNotificationChannelId := range notificationChannelIds.List() {
-		if notificationChannelId, ok := rawNotificationChannelId.(int); ok {
-			silenceRule.NotificationChannelIds = append(silenceRule.NotificationChannelIds, notificationChannelId)
+	for _, rawNotificationChannelID := range notificationChannelIds.List() {
+		if notificationChannelID, ok := rawNotificationChannelID.(int); ok {
+			silenceRule.NotificationChannelIds = append(silenceRule.NotificationChannelIds, notificationChannelID)
 		}
 	}
 	return silenceRule, nil
@@ -224,7 +224,7 @@ func monitorSilenceRuleFromResourceData(d *schema.ResourceData) (v2.SilenceRule,
 func monitorSilenceRuleToResourceData(silenceRule v2.SilenceRule, d *schema.ResourceData) (err error) {
 	_ = d.Set("name", silenceRule.Name)
 	_ = d.Set("enabled", silenceRule.Enabled)
-	_ = d.Set("start_ts", strconv.FormatInt(silenceRule.StartTs, 10))
+	_ = d.Set("start_ts", strconv.FormatInt(silenceRule.StartTS, 10))
 	_ = d.Set("duration_seconds", silenceRule.DurationInSec)
 	_ = d.Set("alert_ids", silenceRule.AlertIds)
 	_ = d.Set("scope", silenceRule.Scope)

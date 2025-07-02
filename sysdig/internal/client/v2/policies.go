@@ -4,17 +4,15 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-
-	"github.com/pkg/errors"
 )
 
 const (
-	CreatePolicyPath         = "%s/api/v2/policies?skipPolicyV2Msg=%t"
-	DeletePolicyPath         = "%s/api/v2/policies/%d?skipPolicyV2Msg=%t"
-	UpdatePolicyPath         = "%s/api/v2/policies/%d?skipPolicyV2Msg=%t"
-	GetPolicyPath            = "%s/api/v2/policies/%d"
-	GetPoliciesPath          = "%s/api/v2/policies"
-	SendPoliciesToAgentsPath = "%s/api/v2/policies/actions?action=forwardPolicyV2Msg"
+	createPolicyPath         = "%s/api/v2/policies?skipPolicyV2Msg=%t"
+	deletePolicyPath         = "%s/api/v2/policies/%d?skipPolicyV2Msg=%t"
+	updatePolicyPath         = "%s/api/v2/policies/%d?skipPolicyV2Msg=%t"
+	getPolicyPath            = "%s/api/v2/policies/%d"
+	getPoliciesPath          = "%s/api/v2/policies"
+	sendPoliciesToAgentsPath = "%s/api/v2/policies/actions?action=forwardPolicyV2Msg"
 )
 
 type PolicyInterface interface {
@@ -27,70 +25,86 @@ type PolicyInterface interface {
 	SendPoliciesToAgents(ctx context.Context) error
 }
 
-func (client *Client) CreatePolicy(ctx context.Context, policy Policy) (Policy, error) {
+func (c *Client) CreatePolicy(ctx context.Context, policy Policy) (createdPolicy Policy, err error) {
 	payload, err := Marshal(policy)
 	if err != nil {
 		return Policy{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.CreatePolicyURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.createPolicyURL(), payload)
 	if err != nil {
 		return Policy{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Policy{}, client.ErrorFromResponse(response)
+		return Policy{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[Policy](response.Body)
 }
 
-func (client *Client) DeletePolicy(ctx context.Context, policyID int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeletePolicyURL(policyID), nil)
+func (c *Client) DeletePolicy(ctx context.Context, policyID int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.deletePolicyURL(policyID), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return err
 }
 
-func (client *Client) UpdatePolicy(ctx context.Context, policy Policy) (Policy, error) {
+func (c *Client) UpdatePolicy(ctx context.Context, policy Policy) (updatedPolicy Policy, err error) {
 	payload, err := Marshal(policy)
 	if err != nil {
 		return Policy{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.UpdatePolicyURL(policy.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.updatePolicyURL(policy.ID), payload)
 	if err != nil {
 		return Policy{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Policy{}, client.ErrorFromResponse(response)
+		return Policy{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[Policy](response.Body)
 }
 
-func (client *Client) GetPolicyByID(ctx context.Context, policyID int) (Policy, int, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetPolicyURL(policyID), nil)
+func (c *Client) GetPolicyByID(ctx context.Context, policyID int) (policy Policy, statusCode int, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getPolicyURL(policyID), nil)
 	if err != nil {
 		return Policy{}, 0, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Policy{}, response.StatusCode, client.ErrorFromResponse(response)
+		return Policy{}, response.StatusCode, c.ErrorFromResponse(response)
 	}
 
-	policy, err := Unmarshal[Policy](response.Body)
+	policy, err = Unmarshal[Policy](response.Body)
 	if err != nil {
 		return Policy{}, 0, err
 	}
@@ -98,18 +112,22 @@ func (client *Client) GetPolicyByID(ctx context.Context, policyID int) (Policy, 
 	return policy, http.StatusOK, nil
 }
 
-func (client *Client) GetPolicies(ctx context.Context) ([]Policy, int, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetPoliciesURL(), nil)
+func (c *Client) GetPolicies(ctx context.Context) (policies []Policy, statusCode int, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getPoliciesURL(), nil)
 	if err != nil {
 		return []Policy{}, 0, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return []Policy{}, response.StatusCode, client.ErrorFromResponse(response)
+		return []Policy{}, response.StatusCode, c.ErrorFromResponse(response)
 	}
 
-	policies, err := Unmarshal[[]Policy](response.Body)
+	policies, err = Unmarshal[[]Policy](response.Body)
 	if err != nil {
 		return []Policy{}, 0, err
 	}
@@ -117,42 +135,46 @@ func (client *Client) GetPolicies(ctx context.Context) ([]Policy, int, error) {
 	return policies, http.StatusOK, nil
 }
 
-func (client *Client) SendPoliciesToAgents(ctx context.Context) error {
-	if client.config.secureSkipPolicyV2Msg {
+func (c *Client) SendPoliciesToAgents(ctx context.Context) (err error) {
+	if c.config.secureSkipPolicyV2Msg {
 		// We only need to send policies if we've been configured to skip sending them during updates
-		response, err := client.requester.Request(ctx, http.MethodPost, client.SendPoliciesToAgentsURL(), nil)
+		response, err := c.requester.Request(ctx, http.MethodPost, c.sendPoliciesToAgentsURL(), nil)
 		if err != nil {
 			return err
 		}
-		defer response.Body.Close()
+		defer func() {
+			if dErr := response.Body.Close(); dErr != nil {
+				err = fmt.Errorf("unable to close response body: %w", dErr)
+			}
+		}()
 
 		if response.StatusCode != http.StatusOK {
-			return errors.Errorf("Unexpected response when sending policies to agents: %s", response.Status)
+			return fmt.Errorf("unexpected response when sending policies to agents: %s", response.Status)
 		}
 	}
 	return nil
 }
 
-func (client *Client) CreatePolicyURL() string {
-	return fmt.Sprintf(CreatePolicyPath, client.config.url, client.config.secureSkipPolicyV2Msg)
+func (c *Client) createPolicyURL() string {
+	return fmt.Sprintf(createPolicyPath, c.config.url, c.config.secureSkipPolicyV2Msg)
 }
 
-func (client *Client) DeletePolicyURL(policyID int) string {
-	return fmt.Sprintf(DeletePolicyPath, client.config.url, policyID, client.config.secureSkipPolicyV2Msg)
+func (c *Client) deletePolicyURL(policyID int) string {
+	return fmt.Sprintf(deletePolicyPath, c.config.url, policyID, c.config.secureSkipPolicyV2Msg)
 }
 
-func (client *Client) UpdatePolicyURL(policyID int) string {
-	return fmt.Sprintf(UpdatePolicyPath, client.config.url, policyID, client.config.secureSkipPolicyV2Msg)
+func (c *Client) updatePolicyURL(policyID int) string {
+	return fmt.Sprintf(updatePolicyPath, c.config.url, policyID, c.config.secureSkipPolicyV2Msg)
 }
 
-func (client *Client) GetPolicyURL(policyID int) string {
-	return fmt.Sprintf(GetPolicyPath, client.config.url, policyID)
+func (c *Client) getPolicyURL(policyID int) string {
+	return fmt.Sprintf(getPolicyPath, c.config.url, policyID)
 }
 
-func (client *Client) GetPoliciesURL() string {
-	return fmt.Sprintf(GetPoliciesPath, client.config.url)
+func (c *Client) getPoliciesURL() string {
+	return fmt.Sprintf(getPoliciesPath, c.config.url)
 }
 
-func (client *Client) SendPoliciesToAgentsURL() string {
-	return fmt.Sprintf(SendPoliciesToAgentsPath, client.config.url)
+func (c *Client) sendPoliciesToAgentsURL() string {
+	return fmt.Sprintf(sendPoliciesToAgentsPath, c.config.url)
 }

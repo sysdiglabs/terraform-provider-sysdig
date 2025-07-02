@@ -61,7 +61,7 @@ func dataSourceSysdigSecurePosturePolicy() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getPosturePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -71,7 +71,7 @@ func dataSourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Reso
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	policy, err := client.GetPosturePolicy(ctx, id)
+	policy, err := client.GetPosturePolicyByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}

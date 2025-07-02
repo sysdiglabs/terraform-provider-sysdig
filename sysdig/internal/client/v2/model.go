@@ -42,7 +42,7 @@ type NamespaceFilters struct {
 }
 
 type UserRoles struct {
-	UserId int    `json:"userId"`
+	UserID int    `json:"userId"`
 	Email  string `json:"userName,omitempty"`
 	Role   string `json:"role"`
 	Admin  bool   `json:"admin,omitempty"`
@@ -70,11 +70,11 @@ type TeamServiceAccount struct {
 	ID             int    `json:"id,omitempty"`
 	Name           string `json:"name"`
 	SystemRole     string `json:"systemRole"`
-	TeamId         int    `json:"teamId"`
+	TeamID         int    `json:"teamId"`
 	TeamRole       string `json:"teamRole"`
 	DateCreated    int64  `json:"dateCreated,omitempty"`
 	ExpirationDate int64  `json:"expirationDate"`
-	ApiKey         string `json:"apiKey,omitempty"`
+	APIKey         string `json:"apiKey,omitempty"`
 }
 
 type EntryPoint struct {
@@ -119,22 +119,22 @@ type NotificationChannelOptions struct {
 	SnsTopicARNs             []string                                   `json:"snsTopicARNs,omitempty"`             // Type: SNS
 	APIKey                   string                                     `json:"apiKey,omitempty"`                   // Type: VictorOps, ibm event function
 	RoutingKey               string                                     `json:"routingKey,omitempty"`               // Type: VictorOps
-	Url                      string                                     `json:"url,omitempty"`                      // Type: OpsGenie, Webhook, Slack, google chat, prometheus alert manager, custom webhook, ms teams
+	URL                      string                                     `json:"url,omitempty"`                      // Type: OpsGenie, Webhook, Slack, google chat, prometheus alert manager, custom webhook, ms teams
 	Channel                  string                                     `json:"channel,omitempty"`                  // Type: Slack
 	PrivateChannel           bool                                       `json:"privateChannel,omitempty"`           // Type: Slack
-	PrivateChannelUrl        string                                     `json:"privateChannelUrl,omitempty"`        // Type: Slack
+	PrivateChannelURL        string                                     `json:"privateChannelUrl,omitempty"`        // Type: Slack
 	Account                  string                                     `json:"account,omitempty"`                  // Type: PagerDuty
 	ServiceKey               string                                     `json:"serviceKey,omitempty"`               // Type: PagerDuty
 	ServiceName              string                                     `json:"serviceName,omitempty"`              // Type: PagerDuty
-	AdditionalHeaders        map[string]interface{}                     `json:"additionalHeaders,omitempty"`        // Type: Webhook, prometheus alert manager, custom webhook, ibm function
+	AdditionalHeaders        map[string]any                             `json:"additionalHeaders,omitempty"`        // Type: Webhook, prometheus alert manager, custom webhook, ibm function
 	Region                   string                                     `json:"region,omitempty"`                   // Type: OpsGenie
 	AllowInsecureConnections *bool                                      `json:"allowInsecureConnections,omitempty"` // Type: prometheus alert manager, custom webhook, Webhook
-	TeamId                   int                                        `json:"teamId,omitempty"`                   // Type: team email
-	HttpMethod               string                                     `json:"httpMethod,omitempty"`               // Type: custom webhook
+	TeamID                   int                                        `json:"teamId,omitempty"`                   // Type: team email
+	HTTPMethod               string                                     `json:"httpMethod,omitempty"`               // Type: custom webhook
 	MonitorTemplate          string                                     `json:"monitorTemplate,omitempty"`          // Type: custom webhook
-	InstanceId               string                                     `json:"instanceId,omitempty"`               // Type: ibm event notification
+	InstanceID               string                                     `json:"instanceId,omitempty"`               // Type: ibm event notification
 	IbmFunctionType          string                                     `json:"ibmFunctionType,omitempty"`          // Type: ibm event function
-	CustomData               map[string]interface{}                     `json:"customData,omitempty"`               // Type: ibm function, Webhook
+	CustomData               map[string]any                             `json:"customData,omitempty"`               // Type: ibm function, Webhook
 	TemplateConfiguration    []NotificationChannelTemplateConfiguration `json:"templateConfiguration,omitempty"`    // Type: slack, ms teams
 
 	NotifyOnOk           bool `json:"notifyOnOk"`
@@ -233,14 +233,14 @@ type CustomNotification struct {
 }
 
 type SysdigCapture struct {
-	Name       string      `json:"name"`
-	Filters    string      `json:"filters,omitempty"`
-	Duration   int         `json:"duration"`
-	Type       string      `json:"type,omitempty"`
-	BucketName string      `json:"bucketName"`
-	Folder     string      `json:"folder,omitempty"`
-	Enabled    bool        `json:"enabled"`
-	StorageID  interface{} `json:"storageId,omitempty"`
+	Name       string `json:"name"`
+	Filters    string `json:"filters,omitempty"`
+	Duration   int    `json:"duration"`
+	Type       string `json:"type,omitempty"`
+	BucketName string `json:"bucketName"`
+	Folder     string `json:"folder,omitempty"`
+	Enabled    bool   `json:"enabled"`
+	StorageID  any    `json:"storageId,omitempty"`
 }
 
 type SegmentCondition struct {
@@ -273,7 +273,7 @@ type Policy struct {
 	Type                   string        `json:"type"`
 	Origin                 string        `json:"origin"`
 	Runbook                string        `json:"runbook"`
-	TemplateId             int           `json:"templateId"`
+	TemplateID             int           `json:"templateId"`
 	TemplateVersion        string        `json:"templateVersion"`
 }
 
@@ -293,10 +293,10 @@ type RuntimePolicyRuleDetails interface {
 }
 
 type RuntimePolicyRule struct {
-	Id          *FlexInt                   `json:"id"`
+	ID          *FlexInt                   `json:"id"`
 	Name        string                     `json:"name"`
 	Origin      *RuntimePolicyObjectOrigin `json:"origin"`
-	VersionId   string                     `json:"versionId"`
+	VersionID   string                     `json:"versionId"`
 	Filename    string                     `json:"filename"`
 	Description string                     `json:"description"`
 	Details     RuntimePolicyRuleDetails   `json:"details"`
@@ -306,18 +306,16 @@ type RuntimePolicyRule struct {
 	ModifiedOn  int64                      `json:"modifiedOn"`
 }
 
-// TODO: This should be exported into a common package
-// Copied from: https://github.com/draios/secure-backend/blob/main/policies/model/model_rules.go#L676C1-L779C2
 func (r *RuntimePolicyRule) UnmarshalJSON(b []byte) error {
 	type findType struct {
 		RuleType string `json:"ruleType"`
 	}
 	findDetails := struct {
 		FindType    findType                   `json:"details"`
-		Id          *FlexInt                   `json:"id"`
+		ID          *FlexInt                   `json:"id"`
 		Name        string                     `json:"name"`
 		Origin      *RuntimePolicyObjectOrigin `json:"origin"`
-		VersionId   string                     `json:"versionId"`
+		VersionID   string                     `json:"versionId"`
 		Filename    string                     `json:"filename"`
 		Description string                     `json:"description"`
 		Tags        []string                   `json:"tags"`
@@ -333,21 +331,6 @@ func (r *RuntimePolicyRule) UnmarshalJSON(b []byte) error {
 
 	var d RuntimePolicyRuleDetails
 	switch findDetails.FindType.RuleType {
-	// case "FALCO":
-	// 	d = &FalcoRuleDetails{}
-	// case "CONTAINER":
-	// 	d = &ContainerImageRuleDetails{}
-	// case "FILESYSTEM":
-	// 	d = &FilesystemRuleDetails{}
-	// case "NETWORK":
-	// 	d = &NetworkRuleDetails{
-	// 		AllInbound:  true,
-	// 		AllOutbound: true,
-	// 	}
-	// case "PROCESS":
-	// 	d = &ProcessRuleDetails{}
-	// case "SYSCALL":
-	// 	d = &SyscallRuleDetails{}
 	case "DRIFT":
 		d = &DriftRuleDetails{}
 	case "MACHINE_LEARNING":
@@ -356,8 +339,6 @@ func (r *RuntimePolicyRule) UnmarshalJSON(b []byte) error {
 		d = &AWSMLRuleDetails{}
 	case "MALWARE":
 		d = &MalwareRuleDetails{}
-	// case "OKTA_MACHINE_LEARNING":
-	// 	d = &OktaMLRuleDetails{}
 	default:
 		return errors.New("The field details has an unknown ruleType: " + findDetails.FindType.RuleType)
 	}
@@ -375,16 +356,16 @@ func (r *RuntimePolicyRule) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	var findDetailsIdPtr *FlexInt
-	if findDetails.Id != nil {
-		findDetailsId := FlexInt(*findDetails.Id)
-		findDetailsIdPtr = &findDetailsId
+	var findDetailsIDPtr *FlexInt
+	if findDetails.ID != nil {
+		findDetailsID := FlexInt(*findDetails.ID)
+		findDetailsIDPtr = &findDetailsID
 	}
 
-	r.Id = findDetailsIdPtr
+	r.ID = findDetailsIDPtr
 	r.Name = findDetails.Name
 	r.Origin = findDetails.Origin
-	r.VersionId = findDetails.VersionId
+	r.VersionID = findDetails.VersionID
 	r.Filename = findDetails.Filename
 	r.Description = findDetails.Description
 	r.Tags = findDetails.Tags
@@ -460,7 +441,6 @@ type PolicyRule struct {
 	Enabled bool   `json:"enabled"`
 }
 
-// Did not add support storageId because FE does not support it yet
 type Action struct {
 	AfterEventNs         int     `json:"afterEventNs,omitempty"`
 	BeforeEventNs        int     `json:"beforeEventNs,omitempty"`
@@ -472,6 +452,7 @@ type Action struct {
 	IsLimitedToContainer bool    `json:"isLimitedToContainer"`
 	Type                 string  `json:"type"`
 	Msg                  *string `json:"msg,omitempty"`
+	// Note: Did not add support storageId because FE does not support it yet
 }
 
 type List struct {
@@ -587,15 +568,15 @@ type Syscalls struct {
 }
 
 type Condition struct {
-	Condition  string        `json:"condition"`
-	Components []interface{} `json:"components"`
+	Condition  string `json:"condition"`
+	Components []any  `json:"components"`
 }
 
 type Exception struct {
-	Name   string      `json:"name"`
-	Fields interface{} `json:"fields,omitempty"`
-	Comps  interface{} `json:"comps,omitempty"`
-	Values interface{} `json:"values,omitempty"`
+	Name   string `json:"name"`
+	Fields any    `json:"fields,omitempty"`
+	Comps  any    `json:"comps,omitempty"`
+	Values any    `json:"values,omitempty"`
 }
 
 type CloudAccountSecure struct {
@@ -671,7 +652,7 @@ type AlertV2Common struct {
 	CustomNotificationTemplate    *CustomNotificationTemplateV2 `json:"customNotificationTemplate,omitempty"`
 	CaptureConfig                 *CaptureConfigV2              `json:"captureConfig,omitempty"`
 	Links                         []AlertLinkV2                 `json:"links"`
-	Labels                        map[string]interface{}        `json:"labels,omitempty"`
+	Labels                        map[string]any                `json:"labels,omitempty"`
 }
 
 type AlertV2ConfigPrometheus struct {
@@ -877,14 +858,14 @@ type alertV2ChangeWrapper struct {
 }
 
 type CloudAccountCredentialsMonitor struct {
-	AccountId   string `json:"accountId"`
+	AccountID   string `json:"accountId"`
 	RoleName    string `json:"roleName"`
 	SecretKey   string `json:"key"`
-	AccessKeyId string `json:"id"`
+	AccessKeyID string `json:"id"`
 }
 
 type CloudAccountMonitor struct {
-	Id                int                            `json:"id"`
+	ID                int                            `json:"id"`
 	Platform          string                         `json:"platform"`
 	IntegrationType   string                         `json:"integrationType"`
 	Credentials       CloudAccountCredentialsMonitor `json:"credentials"`
@@ -908,15 +889,15 @@ type CloudCostConfiguration struct {
 }
 
 type CloudAccountCreatedForCost struct {
-	Id              string `json:"id"`
-	CustomerId      int    `json:"customerId"`
-	ProviderId      string `json:"providerId"`
+	ID              string `json:"id"`
+	CustomerID      int    `json:"customerId"`
+	ProviderID      string `json:"providerId"`
 	Provider        string `json:"provider"`
 	SkipFetch       bool   `json:"skipFetch"`
 	IntegrationType string `json:"integrationType"`
 	CredentialsType string `json:"credentialsType"`
 	RoleArn         string `json:"roleArn"`
-	ExternalId      string `json:"externalId"`
+	ExternalID      string `json:"externalId"`
 }
 
 type cloudAccountWrapperMonitor struct {
@@ -924,7 +905,7 @@ type cloudAccountWrapperMonitor struct {
 }
 
 type CloudConfigForCost struct {
-	AthenaProjectId      string `json:"athenaProjectId"`
+	AthenaProjectID      string `json:"athenaProjectId"`
 	AthenaBucketName     string `json:"athenaBucketName"`
 	AthenaRegion         string `json:"athenaRegion"`
 	AthenaDatabaseName   string `json:"athenaDatabaseName"`
@@ -935,16 +916,16 @@ type CloudConfigForCost struct {
 }
 
 type CloudAccountCostProvider struct {
-	CustomerId      int                `json:"customerId"`
-	ProviderId      string             `json:"providerId"`
+	CustomerID      int                `json:"customerId"`
+	ProviderID      string             `json:"providerId"`
 	Provider        string             `json:"provider"`
-	CredentialsId   string             `json:"credentialsId"`
+	CredentialsID   string             `json:"credentialsId"`
 	Feature         string             `json:"feature"`
 	Config          CloudConfigForCost `json:"config"`
 	Enabled         bool               `json:"enabled"`
 	CredentialsType string             `json:"credentialsType"`
 	RoleArn         string             `json:"roleArn"`
-	ExternalId      string             `json:"externalId"`
+	ExternalID      string             `json:"externalId"`
 }
 
 type CloudAccountCostProviderWrapper struct {
@@ -1011,7 +992,7 @@ type RequirementsGroup struct {
 type Requirement struct {
 	ID                  string    `json:"id,omitempty"`
 	Name                string    `json:"name,omitempty"`
-	RequirementFolderId string    `json:"requirementFolderId,omitempty"`
+	RequirementFolderID string    `json:"requirementFolderId,omitempty"`
 	Description         string    `json:"description,omitempty"`
 	Controls            []Control `json:"controls,omitempty"`
 	Authors             string    `json:"authors,omitempty"`
@@ -1118,7 +1099,7 @@ type IdentityContext struct {
 type SilenceRule struct {
 	Name                   string `json:"name"`
 	Enabled                bool   `json:"enabled"`
-	StartTs                int64  `json:"startTs"`
+	StartTS                int64  `json:"startTs"`
 	DurationInSec          int    `json:"durationInSec"`
 	Scope                  string `json:"scope,omitempty"`
 	AlertIds               []int  `json:"alertIds,omitempty"`
