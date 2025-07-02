@@ -499,22 +499,6 @@ type MacroCondition struct {
 	Condition string `json:"condition"`
 }
 
-type VulnerabilityExceptionList struct {
-	ID      string `json:"id,omitempty"`
-	Version string `json:"version"`
-	Name    string `json:"name"`
-	Comment string `json:"comment"`
-}
-
-type VulnerabilityException struct {
-	ID             string `json:"id"`
-	Gate           string `json:"gate"`
-	TriggerID      string `json:"trigger_id"`
-	Notes          string `json:"notes"`
-	ExpirationDate *int   `json:"expiration_date,omitempty"`
-	Enabled        bool   `json:"enabled"`
-}
-
 type Rule struct {
 	ID          int      `json:"id,omitempty"`
 	Name        string   `json:"name"`

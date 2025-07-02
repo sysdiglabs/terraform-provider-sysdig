@@ -1,5 +1,21 @@
 package v2
 
+type DeprecatedVulnerabilityExceptionList struct {
+	ID      string `json:"id,omitempty"`
+	Version string `json:"version"`
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
+}
+
+type DeprecatedVulnerabilityException struct {
+	ID             string `json:"id"`
+	Gate           string `json:"gate"`
+	TriggerID      string `json:"trigger_id"`
+	Notes          string `json:"notes"`
+	ExpirationDate *int   `json:"expiration_date,omitempty"`
+	Enabled        bool   `json:"enabled"`
+}
+
 type DeprecatedScanningPolicy struct {
 	ID             string                   `json:"id,omitempty"`
 	Version        string                   `json:"version,omitempty"`

@@ -43,8 +43,8 @@ type SysdigSecure interface {
 	MacroInterface
 	DeprecatedScanningPolicyInterface
 	DeprecatedScanningPolicyAssignmentInterface
-	VulnerabilityExceptionListInterface
-	VulnerabilityExceptionInterface
+	DeprecatedVulnerabilityExceptionListInterface
+	DeprecatedVulnerabilityExceptionInterface
 	CloudAccountSecureInterface
 	CloudauthAccountSecureInterface
 	OrganizationSecureInterface
