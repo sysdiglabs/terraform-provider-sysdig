@@ -1,4 +1,3 @@
-
 package buildinfo
 
 func init() {

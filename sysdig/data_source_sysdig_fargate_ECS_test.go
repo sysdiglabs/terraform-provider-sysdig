@@ -1,4 +1,3 @@
-
 package sysdig
 
 import (

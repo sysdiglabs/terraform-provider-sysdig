@@ -1,4 +1,3 @@
-
 package sysdig_test
 
 import (
