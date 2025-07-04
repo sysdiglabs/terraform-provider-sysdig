@@ -209,7 +209,7 @@ func resourceSysdigSecurePosturePolicy() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	// Extract 'group' field from Terraform configuration
 	client, err := getPosturePolicyClient(meta.(SysdigClients))
 	if err != nil {
@@ -232,7 +232,6 @@ func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *sch
 	}
 
 	new, errStatus, err := client.CreateOrUpdatePosturePolicy(ctx, req)
-
 	if err != nil {
 		return diag.Errorf("Error creating new policy with groups. error status: %s err: %s", errStatus, err)
 	}
@@ -242,7 +241,7 @@ func resourceSysdigSecurePosturePolicyCreateOrUpdate(ctx context.Context, d *sch
 	return nil
 }
 
-func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getPosturePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -253,7 +252,7 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	policy, err := client.GetPosturePolicy(ctx, id)
+	policy, err := client.GetPosturePolicyByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -303,7 +302,6 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 	}
 
 	err = setVersionConstraints(d, SchemaTargetKey, policy.VersionConstraints)
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -321,7 +319,7 @@ func resourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Resour
 	return nil
 }
 
-func resourceSysdigSecurePosturePolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePosturePolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getPosturePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -340,10 +338,10 @@ func resourceSysdigSecurePosturePolicyDelete(ctx context.Context, d *schema.Reso
 	return nil
 }
 
-func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) ([]interface{}, error) {
-	var groupsData []interface{}
+func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) ([]any, error) {
+	var groupsData []any
 	for _, group := range groups {
-		groupData := map[string]interface{}{
+		groupData := map[string]any{
 			"id":          group.ID,
 			"name":        group.Name,
 			"description": group.Description,
@@ -366,10 +364,10 @@ func setGroups(d *schema.ResourceData, groups []v2.RequirementsGroup) ([]interfa
 	return groupsData, nil
 }
 
-func setRequirements(requirements []v2.Requirement) []interface{} {
-	var requirementsData []interface{}
+func setRequirements(requirements []v2.Requirement) []any {
+	var requirementsData []any
 	for _, req := range requirements {
-		reqData := map[string]interface{}{
+		reqData := map[string]any{
 			"id":          req.ID,
 			"name":        req.Name,
 			"description": req.Description,
@@ -386,10 +384,10 @@ func setRequirements(requirements []v2.Requirement) []interface{} {
 	return requirementsData
 }
 
-func setControls(controls []v2.Control) []interface{} {
-	var controlsData []interface{}
+func setControls(controls []v2.Control) []any {
+	var controlsData []any
 	for _, ctrl := range controls {
-		ctrlData := map[string]interface{}{
+		ctrlData := map[string]any{
 			"name":    ctrl.Name,
 			"enabled": ctrl.Status,
 		}
@@ -409,12 +407,12 @@ func getStringValue(d *schema.ResourceData, key string) string {
 // Helper function to retrieve version constraints value from ResourceData and handle nil case
 func getVersionConstraintsValue(d *schema.ResourceData, key string) []v2.VersionConstraint {
 	pvc := []v2.VersionConstraint{}
-	versionContraintsMap, ok := d.Get(key).([]interface{})
+	versionContraintsMap, ok := d.Get(key).([]any)
 	if !ok {
 		return nil
 	}
 	for _, vc := range versionContraintsMap {
-		vcMap := vc.(map[string]interface{})
+		vcMap := vc.(map[string]any)
 		minVersion := 0.0
 		maxVersion := 0.0
 		if vcMap["min_version"] != nil {
@@ -449,15 +447,15 @@ func getBoolValue(d *schema.ResourceData, key string) bool {
 	return false
 }
 
-func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
+func extractGroupsRecursive(data any) []v2.CreateRequirementsGroup {
 	var groups []v2.CreateRequirementsGroup
 
 	switch d := data.(type) {
-	case []interface{}:
+	case []any:
 		for _, item := range d {
 			groups = append(groups, extractGroupsRecursive(item)...)
 		}
-	case map[string]interface{}:
+	case map[string]any:
 		group := v2.CreateRequirementsGroup{
 			ID:          d["id"].(string),
 			Name:        d["name"].(string),
@@ -466,7 +464,7 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 
 		if reqs, ok := d["requirement"].(*schema.Set); ok {
 			for _, reqData := range reqs.List() {
-				reqMap := reqData.(map[string]interface{})
+				reqMap := reqData.(map[string]any)
 				requirement := v2.CreateRequirement{
 					ID:          reqMap["id"].(string),
 					Name:        reqMap["name"].(string),
@@ -475,7 +473,7 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 
 				if controlsData, ok := reqMap["control"].(*schema.Set); ok {
 					for _, controlData := range controlsData.List() {
-						controlMap := controlData.(map[string]interface{})
+						controlMap := controlData.(map[string]any)
 						control := v2.CreateRequirementControl{
 							Name:    controlMap["name"].(string),
 							Enabled: controlMap["enabled"].(bool),
@@ -500,9 +498,9 @@ func extractGroupsRecursive(data interface{}) []v2.CreateRequirementsGroup {
 
 // Helper function to set version constraints in the Terraform schema
 func setVersionConstraints(d *schema.ResourceData, key string, constraints []v2.VersionConstraint) error {
-	var constraintsData []interface{}
+	var constraintsData []any
 	for _, vc := range constraints {
-		constraint := map[string]interface{}{
+		constraint := map[string]any{
 			"min_version": vc.MinVersion,
 			"max_version": vc.MaxVersion,
 			"platform":    vc.Platform,

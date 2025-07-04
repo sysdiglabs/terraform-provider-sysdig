@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	CreateListPath = "%s/api/secure/falco/lists?skipPolicyV2Msg=%t"
-	GetListPath    = "%s/api/secure/falco/lists/%d"
-	UpdateListPath = "%s/api/secure/falco/lists/%d?skipPolicyV2Msg=%t"
-	DeleteListPath = "%s/api/secure/falco/lists/%d?skipPolicyV2Msg=%t"
+	createListPath = "%s/api/secure/falco/lists?skipPolicyV2Msg=%t"
+	getListPath    = "%s/api/secure/falco/lists/%d"
+	updateListPath = "%s/api/secure/falco/lists/%d?skipPolicyV2Msg=%t"
+	deleteListPath = "%s/api/secure/falco/lists/%d?skipPolicyV2Msg=%t"
 )
 
 type ListInterface interface {
@@ -21,37 +21,45 @@ type ListInterface interface {
 	DeleteList(ctx context.Context, id int) error
 }
 
-func (client *Client) CreateList(ctx context.Context, list List) (List, error) {
-	payload, err := Marshal[List](list)
+func (c *Client) CreateList(ctx context.Context, list List) (createdList List, err error) {
+	payload, err := Marshal(list)
 	if err != nil {
 		return List{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.CreateListURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.createListURL(), payload)
 	if err != nil {
 		return List{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		return List{}, client.ErrorFromResponse(response)
+		return List{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[List](response.Body)
 }
 
-func (client *Client) GetListByID(ctx context.Context, id int) (List, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetListURL(id), nil)
+func (c *Client) GetListByID(ctx context.Context, id int) (list List, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getListURL(id), nil)
 	if err != nil {
 		return List{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return List{}, client.ErrorFromResponse(response)
+		return List{}, c.ErrorFromResponse(response)
 	}
 
-	list, err := Unmarshal[List](response.Body)
+	list, err = Unmarshal[List](response.Body)
 	if err != nil {
 		return List{}, err
 	}
@@ -63,51 +71,59 @@ func (client *Client) GetListByID(ctx context.Context, id int) (List, error) {
 	return list, nil
 }
 
-func (client *Client) UpdateList(ctx context.Context, list List) (List, error) {
-	payload, err := Marshal[List](list)
+func (c *Client) UpdateList(ctx context.Context, list List) (updatedList List, err error) {
+	payload, err := Marshal(list)
 	if err != nil {
 		return List{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.UpdateListURL(list.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.updateListURL(list.ID), payload)
 	if err != nil {
 		return List{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return List{}, client.ErrorFromResponse(response)
+		return List{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[List](response.Body)
 }
 
-func (client *Client) DeleteList(ctx context.Context, id int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeleteListURL(id), nil)
+func (c *Client) DeleteList(ctx context.Context, id int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.deleteListURL(id), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *Client) CreateListURL() string {
-	return fmt.Sprintf(CreateListPath, client.config.url, client.config.secureSkipPolicyV2Msg)
+func (c *Client) createListURL() string {
+	return fmt.Sprintf(createListPath, c.config.url, c.config.secureSkipPolicyV2Msg)
 }
 
-func (client *Client) GetListURL(id int) string {
-	return fmt.Sprintf(GetListPath, client.config.url, id)
+func (c *Client) getListURL(id int) string {
+	return fmt.Sprintf(getListPath, c.config.url, id)
 }
 
-func (client *Client) UpdateListURL(id int) string {
-	return fmt.Sprintf(UpdateListPath, client.config.url, id, client.config.secureSkipPolicyV2Msg)
+func (c *Client) updateListURL(id int) string {
+	return fmt.Sprintf(updateListPath, c.config.url, id, c.config.secureSkipPolicyV2Msg)
 }
 
-func (client *Client) DeleteListURL(id int) string {
-	return fmt.Sprintf(DeleteListPath, client.config.url, id, client.config.secureSkipPolicyV2Msg)
+func (c *Client) deleteListURL(id int) string {
+	return fmt.Sprintf(deleteListPath, c.config.url, id, c.config.secureSkipPolicyV2Msg)
 }

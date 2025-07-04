@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 	"time"
 
@@ -42,15 +43,13 @@ func resourceSysdigSecureCloudauthAccountComponent() *schema.Resource {
 func getAccountComponentSchema() map[string]*schema.Schema {
 	// for AccountComponent resource, account_id is needed additionally
 	componentSchema := map[string]*schema.Schema{
-		SchemaAccountId: {
+		SchemaAccountID: {
 			Type:     schema.TypeString,
 			Required: true,
 		},
 	}
 
-	for field, schema := range accountComponent.Schema {
-		componentSchema[field] = schema
-	}
+	maps.Copy(componentSchema, accountComponent.Schema)
 	return componentSchema
 }
 
@@ -58,21 +57,21 @@ func getSecureCloudauthAccountComponentClient(client SysdigClients) (v2.Cloudaut
 	return client.sysdigSecureClientV2()
 }
 
-func resourceSysdigSecureCloudauthAccountComponentCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountComponentCreate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountComponentClient((meta.(SysdigClients)))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	accountId := data.Get(SchemaAccountId).(string)
-	cloudauthAccountComponent, errStatus, err := client.CreateCloudauthAccountComponentSecure(ctx, accountId, cloudauthAccountComponentFromResourceData(data))
+	accountID := data.Get(SchemaAccountID).(string)
+	cloudauthAccountComponent, errStatus, err := client.CreateCloudauthAccountComponentSecure(ctx, accountID, cloudauthAccountComponentFromResourceData(data))
 	if err != nil {
 		return diag.Errorf("Error creating resource: %s %s", errStatus, err)
 	}
 
 	// using tuple 'accountId/componentType/componentInstance' as TF resource identifier
-	data.SetId(accountId + "/" + cloudauthAccountComponent.GetType().String() + "/" + cloudauthAccountComponent.GetInstance())
-	err = data.Set(SchemaAccountId, accountId)
+	data.SetId(accountID + "/" + cloudauthAccountComponent.GetType().String() + "/" + cloudauthAccountComponent.GetInstance())
+	err = data.Set(SchemaAccountID, accountID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -80,15 +79,14 @@ func resourceSysdigSecureCloudauthAccountComponentCreate(ctx context.Context, da
 	return nil
 }
 
-func resourceSysdigSecureCloudauthAccountComponentRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountComponentRead(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountComponentClient((meta.(SysdigClients)))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	cloudauthAccountComponent, errStatus, err := client.GetCloudauthAccountComponentSecure(
-		ctx, data.Get(SchemaAccountId).(string), data.Get(SchemaType).(string), data.Get(SchemaInstance).(string))
-
+		ctx, data.Get(SchemaAccountID).(string), data.Get(SchemaType).(string), data.Get(SchemaInstance).(string))
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -104,15 +102,15 @@ func resourceSysdigSecureCloudauthAccountComponentRead(ctx context.Context, data
 	return nil
 }
 
-func resourceSysdigSecureCloudauthAccountComponentUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountComponentUpdate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountComponentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	accountId := data.Get(SchemaAccountId).(string)
+	accountID := data.Get(SchemaAccountID).(string)
 	existingCloudAccountComponent, errStatus, err := client.GetCloudauthAccountComponentSecure(
-		ctx, accountId, data.Get(SchemaType).(string), data.Get(SchemaInstance).(string))
+		ctx, accountID, data.Get(SchemaType).(string), data.Get(SchemaInstance).(string))
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -129,7 +127,7 @@ func resourceSysdigSecureCloudauthAccountComponentUpdate(ctx context.Context, da
 	}
 
 	_, errStatus, err = client.UpdateCloudauthAccountComponentSecure(
-		ctx, accountId, data.Get(SchemaType).(string), data.Get(SchemaInstance).(string), newCloudAccountComponent)
+		ctx, accountID, data.Get(SchemaType).(string), data.Get(SchemaInstance).(string), newCloudAccountComponent)
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -140,14 +138,14 @@ func resourceSysdigSecureCloudauthAccountComponentUpdate(ctx context.Context, da
 	return nil
 }
 
-func resourceSysdigSecureCloudauthAccountComponentDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountComponentDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountComponentClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	errStatus, err := client.DeleteCloudauthAccountComponentSecure(
-		ctx, data.Get(SchemaAccountId).(string), data.Get(SchemaType).(string), data.Get(SchemaInstance).(string))
+		ctx, data.Get(SchemaAccountID).(string), data.Get(SchemaType).(string), data.Get(SchemaInstance).(string))
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -225,11 +223,10 @@ func cloudauthAccountComponentFromResourceData(data *schema.ResourceData) *v2.Cl
 }
 
 func cloudauthAccountComponentToResourceData(data *schema.ResourceData, cloudAccountComponent *v2.CloudauthAccountComponentSecure) error {
+	accountID := data.Get(SchemaAccountID).(string)
+	data.SetId(accountID + "/" + cloudAccountComponent.GetType().String() + "/" + cloudAccountComponent.GetInstance())
 
-	accountId := data.Get(SchemaAccountId).(string)
-	data.SetId(accountId + "/" + cloudAccountComponent.GetType().String() + "/" + cloudAccountComponent.GetInstance())
-
-	err := data.Set(SchemaAccountId, accountId)
+	err := data.Set(SchemaAccountID, accountID)
 	if err != nil {
 		return err
 	}
@@ -284,13 +281,13 @@ func cloudauthAccountComponentToResourceData(data *schema.ResourceData, cloudAcc
 // This exists because in terraform, the key is originally provided in the form of a base64 encoded json string
 
 // note; caution with order of fields, they have to go in alphabetical ASC so that the json marshalled on the tf read phase produces no drift https://github.com/golang/go/issues/27179
-type internalServicePrincipalMetadata_GCP struct {
+type internalServicePrincipalMetadataGCP struct {
 	Email                      string                                                             `json:"email,omitempty"`
 	Key                        string                                                             `json:"key,omitempty"` // base64 encoded
 	WorkloadIdentityFederation *cloudauth.ServicePrincipalMetadata_GCP_WorkloadIdentityFederation `json:"workload_identity_federation,omitempty"`
 }
 type internalServicePrincipalMetadata struct {
-	Gcp *internalServicePrincipalMetadata_GCP `json:"gcp,omitempty"`
+	Gcp *internalServicePrincipalMetadataGCP `json:"gcp,omitempty"`
 }
 
 /*
@@ -349,7 +346,7 @@ func getGcpServicePrincipalMetadata(metadata *cloudauth.ServicePrincipalMetadata
 		gcpKeyBytes = append(gcpKeyBytesBuffer.Bytes(), '\n')
 	}
 	spGcpBytes, err := json.Marshal(&internalServicePrincipalMetadata{
-		Gcp: &internalServicePrincipalMetadata_GCP{
+		Gcp: &internalServicePrincipalMetadataGCP{
 			Key:                        base64.StdEncoding.EncodeToString(gcpKeyBytes),
 			WorkloadIdentityFederation: metadata.GetGcp().GetWorkloadIdentityFederation(),
 			Email:                      metadata.GetGcp().GetEmail(),

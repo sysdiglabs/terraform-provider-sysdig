@@ -42,7 +42,7 @@ func resourceSysdigMonitorNotificationChannelEmail() *schema.Resource {
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelEmailCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelEmailCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -68,16 +68,16 @@ func resourceSysdigMonitorNotificationChannelEmailCreate(ctx context.Context, d 
 	return resourceSysdigMonitorNotificationChannelEmailRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelEmailRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelEmailRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -92,7 +92,7 @@ func resourceSysdigMonitorNotificationChannelEmailRead(ctx context.Context, d *s
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelEmailUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelEmailUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -119,7 +119,7 @@ func resourceSysdigMonitorNotificationChannelEmailUpdate(ctx context.Context, d 
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelEmailDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelEmailDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -141,7 +141,7 @@ func monitorNotificationChannelEmailFromResourceData(d *schema.ResourceData, tea
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_EMAIL
+	nc.Type = notificationChannelTypeEmail
 	nc.Options.EmailRecipients = cast.ToStringSlice(d.Get("recipients").(*schema.Set).List())
 	return
 }

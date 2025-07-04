@@ -1,5 +1,3 @@
-//go:build unit
-
 package v2
 
 import (

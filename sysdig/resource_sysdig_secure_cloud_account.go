@@ -74,7 +74,7 @@ func getSecureCloudAccountClient(c SysdigClients) (v2.CloudAccountSecureInterfac
 	return c.sysdigSecureClientV2()
 }
 
-func resourceSysdigSecureCloudAccountCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudAccountCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudAccountClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -98,14 +98,14 @@ func resourceSysdigSecureCloudAccountCreate(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceSysdigSecureCloudAccountRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudAccountRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudAccountClient(meta.(SysdigClients))
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
 	}
 
-	cloudAccount, err := client.GetCloudAccountSecure(ctx, d.Id())
+	cloudAccount, err := client.GetCloudAccountSecureByID(ctx, d.Id())
 	if err != nil {
 		d.SetId("")
 		if strings.Contains(err.Error(), "404") {
@@ -126,7 +126,7 @@ func resourceSysdigSecureCloudAccountRead(ctx context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceSysdigSecureCloudAccountUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudAccountUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudAccountClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -143,7 +143,7 @@ func resourceSysdigSecureCloudAccountUpdate(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceSysdigSecureCloudAccountDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudAccountDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudAccountClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

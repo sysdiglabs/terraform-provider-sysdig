@@ -1,5 +1,3 @@
-//go:build tf_acc_sysdig_secure || tf_acc_sysdig_common
-
 package sysdig_test
 
 import (
@@ -128,8 +126,7 @@ resource "sysdig_secure_organization" "sample-org" {
 }
 
 func getEncodedGCPServiceAccountKeyForOrg(resourceName string, accountID string) string {
-
-	test_service_account_key_bytes, err := json.Marshal(map[string]interface{}{
+	test_service_account_key_bytes, err := json.Marshal(map[string]any{
 		"type":                        "service_account",
 		"project_id":                  fmt.Sprintf("%s-%s", resourceName, accountID),
 		"private_key_id":              "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",

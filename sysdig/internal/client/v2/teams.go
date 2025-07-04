@@ -7,15 +7,15 @@ import (
 )
 
 const (
-	GetUsersLightPath = "%s/api/users/light"
-	GetTeamsPath      = "%s/api/teams"
-	GetTeamPath       = "%s/api/teams/%d"
+	getUsersLightPath = "%s/api/users/light"
+	getTeamsPath      = "%s/api/teams"
+	getTeamPath       = "%s/api/teams/%d"
 )
 
 type TeamInterface interface {
 	Base
 	GetUserIDByEmail(ctx context.Context, userRoles []UserRoles) ([]UserRoles, error)
-	GetTeamById(ctx context.Context, id int) (t Team, err error)
+	GetTeamByID(ctx context.Context, id int) (t Team, err error)
 	CreateTeam(ctx context.Context, tRequest Team) (t Team, err error)
 	UpdateTeam(ctx context.Context, tRequest Team) (t Team, err error)
 	DeleteTeam(ctx context.Context, id int) error
@@ -26,15 +26,19 @@ type teamsWrapper struct {
 	Teams []Team `json:"teams"`
 }
 
-func (client *Client) GetUserIDByEmail(ctx context.Context, userRoles []UserRoles) ([]UserRoles, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetUsersLightURL(), nil)
+func (c *Client) GetUserIDByEmail(ctx context.Context, userRoles []UserRoles) (modifiedUserRoles []UserRoles, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getUsersLightURL(), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		err = client.ErrorFromResponse(response)
+		err = c.ErrorFromResponse(response)
 		return nil, err
 	}
 
@@ -48,43 +52,45 @@ func (client *Client) GetUserIDByEmail(ctx context.Context, userRoles []UserRole
 		usersMap[u.Email] = u.ID
 	}
 
-	modifiedUserRoles := make([]UserRoles, 0)
+	modifiedUserRoles = make([]UserRoles, 0)
 	for _, userRole := range userRoles {
 		ur := userRole
 		id, ok := usersMap[ur.Email]
 		if !ok {
 			return nil, fmt.Errorf("email %s doesn't exist", ur.Email)
 		}
-		ur.UserId = id
+		ur.UserID = id
 		modifiedUserRoles = append(modifiedUserRoles, ur)
 	}
 
 	return modifiedUserRoles, nil
 }
 
-func (client *Client) GetTeamById(ctx context.Context, id int) (Team, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetTeamURL(id), nil)
+func (c *Client) GetTeamByID(ctx context.Context, id int) (team Team, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getTeamURL(id), nil)
 	if err != nil {
 		return Team{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Team{}, client.ErrorFromResponse(response)
+		return Team{}, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[teamWrapper](response.Body)
 	if err != nil {
-		return Team{}, client.ErrorFromResponse(response)
+		return Team{}, c.ErrorFromResponse(response)
 	}
 
 	return wrapper.Team, err
 }
 
-func (client *Client) CreateTeam(ctx context.Context, team Team) (Team, error) {
-	var err error
-
-	team.UserRoles, err = client.GetUserIDByEmail(ctx, team.UserRoles)
+func (c *Client) CreateTeam(ctx context.Context, team Team) (createdTeam Team, err error) {
+	team.UserRoles, err = c.GetUserIDByEmail(ctx, team.UserRoles)
 	if err != nil {
 		return Team{}, err
 	}
@@ -96,14 +102,18 @@ func (client *Client) CreateTeam(ctx context.Context, team Team) (Team, error) {
 		return Team{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.GetTeamsURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.getTeamsURL(), payload)
 	if err != nil {
 		return Team{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		return Team{}, client.ErrorFromResponse(response)
+		return Team{}, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[teamWrapper](response.Body)
@@ -114,10 +124,8 @@ func (client *Client) CreateTeam(ctx context.Context, team Team) (Team, error) {
 	return wrapper.Team, nil
 }
 
-func (client *Client) UpdateTeam(ctx context.Context, team Team) (Team, error) {
-	var err error
-
-	team.UserRoles, err = client.GetUserIDByEmail(ctx, team.UserRoles)
+func (c *Client) UpdateTeam(ctx context.Context, team Team) (updatedTeam Team, err error) {
+	team.UserRoles, err = c.GetUserIDByEmail(ctx, team.UserRoles)
 	if err != nil {
 		return Team{}, err
 	}
@@ -127,14 +135,18 @@ func (client *Client) UpdateTeam(ctx context.Context, team Team) (Team, error) {
 		return Team{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.GetTeamURL(team.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.getTeamURL(team.ID), payload)
 	if err != nil {
 		return Team{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Team{}, client.ErrorFromResponse(response)
+		return Team{}, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[teamWrapper](response.Body)
@@ -145,29 +157,37 @@ func (client *Client) UpdateTeam(ctx context.Context, team Team) (Team, error) {
 	return wrapper.Team, nil
 }
 
-func (client *Client) DeleteTeam(ctx context.Context, id int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.GetTeamURL(id), nil)
+func (c *Client) DeleteTeam(ctx context.Context, id int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.getTeamURL(id), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *Client) ListTeams(ctx context.Context) ([]Team, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetTeamsURL(), nil)
+func (c *Client) ListTeams(ctx context.Context) (teams []Team, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getTeamsURL(), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[teamsWrapper](response.Body)
@@ -178,14 +198,14 @@ func (client *Client) ListTeams(ctx context.Context) ([]Team, error) {
 	return wrapper.Teams, nil
 }
 
-func (client *Client) GetUsersLightURL() string {
-	return fmt.Sprintf(GetUsersLightPath, client.config.url)
+func (c *Client) getUsersLightURL() string {
+	return fmt.Sprintf(getUsersLightPath, c.config.url)
 }
 
-func (client *Client) GetTeamsURL() string {
-	return fmt.Sprintf(GetTeamsPath, client.config.url)
+func (c *Client) getTeamsURL() string {
+	return fmt.Sprintf(getTeamsPath, c.config.url)
 }
 
-func (client *Client) GetTeamURL(id int) string {
-	return fmt.Sprintf(GetTeamPath, client.config.url, id)
+func (c *Client) getTeamURL(id int) string {
+	return fmt.Sprintf(getTeamPath, c.config.url, id)
 }

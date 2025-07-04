@@ -68,7 +68,7 @@ func dataSourceSysdigSecureRuleStateful() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

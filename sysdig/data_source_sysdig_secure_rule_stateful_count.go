@@ -37,7 +37,7 @@ func dataSourceSysdigSecureRuleStatefulCount() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigRuleStatefulCountRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigRuleStatefulCountRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

@@ -16,7 +16,7 @@ type DeprecatedScanningPolicyInterface interface {
 	Base
 	CreateDeprecatedScanningPolicy(ctx context.Context, scanningPolicy DeprecatedScanningPolicy) (DeprecatedScanningPolicy, error)
 	GetDeprecatedScanningPolicyByID(ctx context.Context, scanningPolicyID string) (DeprecatedScanningPolicy, error)
-	UpdateDeprecatedScanningPolicyByID(ctx context.Context, scanningPolicy DeprecatedScanningPolicy) (DeprecatedScanningPolicy, error)
+	UpdateDeprecatedScanningPolicy(ctx context.Context, scanningPolicy DeprecatedScanningPolicy) (DeprecatedScanningPolicy, error)
 	DeleteDeprecatedScanningPolicyByID(ctx context.Context, scanningPolicyID string) error
 }
 
@@ -27,132 +27,160 @@ type DeprecatedScanningPolicyAssignmentInterface interface {
 	GetDeprecatedScanningPolicyAssignmentList(ctx context.Context) (DeprecatedScanningPolicyAssignmentList, error)
 }
 
-func (client *Client) CreateDeprecatedScanningPolicy(ctx context.Context, scanningPolicy DeprecatedScanningPolicy) (DeprecatedScanningPolicy, error) {
+func (c *Client) CreateDeprecatedScanningPolicy(ctx context.Context, scanningPolicy DeprecatedScanningPolicy) (policy DeprecatedScanningPolicy, err error) {
 	payload, err := Marshal(scanningPolicy)
 	if err != nil {
 		return DeprecatedScanningPolicy{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.deprecatedScanningPoliciesURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.deprecatedScanningPoliciesURL(), payload)
 	if err != nil {
 		return DeprecatedScanningPolicy{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return DeprecatedScanningPolicy{}, client.ErrorFromResponse(response)
+		return DeprecatedScanningPolicy{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[DeprecatedScanningPolicy](response.Body)
 }
 
-func (client *Client) GetDeprecatedScanningPolicyByID(ctx context.Context, scanningPolicyID string) (DeprecatedScanningPolicy, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.deprecatedScanningPolicyURL(scanningPolicyID), nil)
+func (c *Client) GetDeprecatedScanningPolicyByID(ctx context.Context, scanningPolicyID string) (policy DeprecatedScanningPolicy, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.deprecatedScanningPolicyURL(scanningPolicyID), nil)
 	if err != nil {
 		return DeprecatedScanningPolicy{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return DeprecatedScanningPolicy{}, client.ErrorFromResponse(response)
+		return DeprecatedScanningPolicy{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[DeprecatedScanningPolicy](response.Body)
 }
 
-func (client *Client) UpdateDeprecatedScanningPolicyByID(ctx context.Context, scanningPolicy DeprecatedScanningPolicy) (DeprecatedScanningPolicy, error) {
+func (c *Client) UpdateDeprecatedScanningPolicy(ctx context.Context, scanningPolicy DeprecatedScanningPolicy) (policy DeprecatedScanningPolicy, err error) {
 	payload, err := Marshal(scanningPolicy)
 	if err != nil {
 		return DeprecatedScanningPolicy{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.deprecatedScanningPolicyURL(scanningPolicy.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.deprecatedScanningPolicyURL(scanningPolicy.ID), payload)
 	if err != nil {
 		return DeprecatedScanningPolicy{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return DeprecatedScanningPolicy{}, client.ErrorFromResponse(response)
+		return DeprecatedScanningPolicy{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[DeprecatedScanningPolicy](response.Body)
 }
 
-func (client *Client) DeleteDeprecatedScanningPolicyByID(ctx context.Context, scanningPolicyID string) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.deprecatedScanningPolicyURL(scanningPolicyID), nil)
+func (c *Client) DeleteDeprecatedScanningPolicyByID(ctx context.Context, scanningPolicyID string) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.deprecatedScanningPolicyURL(scanningPolicyID), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return err
 }
 
-func (client *Client) CreateDeprecatedScanningPolicyAssignmentList(ctx context.Context, scanningPolicyAssignmentList DeprecatedScanningPolicyAssignmentList) (DeprecatedScanningPolicyAssignmentList, error) {
+func (c *Client) CreateDeprecatedScanningPolicyAssignmentList(ctx context.Context, scanningPolicyAssignmentList DeprecatedScanningPolicyAssignmentList) (list DeprecatedScanningPolicyAssignmentList, err error) {
 	payload, err := Marshal(scanningPolicyAssignmentList)
 	if err != nil {
 		return DeprecatedScanningPolicyAssignmentList{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.scanningPolicyAssignmentURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.scanningPolicyAssignmentURL(), payload)
 	if err != nil {
 		return DeprecatedScanningPolicyAssignmentList{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return DeprecatedScanningPolicyAssignmentList{}, client.ErrorFromResponse(response)
+		return DeprecatedScanningPolicyAssignmentList{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[DeprecatedScanningPolicyAssignmentList](response.Body)
 }
 
-func (client *Client) DeleteDeprecatedScanningPolicyAssignmentList(ctx context.Context, scanningPolicyAssignmentList DeprecatedScanningPolicyAssignmentList) error {
+func (c *Client) DeleteDeprecatedScanningPolicyAssignmentList(ctx context.Context, scanningPolicyAssignmentList DeprecatedScanningPolicyAssignmentList) (err error) {
 	payload, err := Marshal(scanningPolicyAssignmentList)
 	if err != nil {
 		return err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.scanningPolicyAssignmentURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.scanningPolicyAssignmentURL(), payload)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return err
 }
 
-func (client *Client) GetDeprecatedScanningPolicyAssignmentList(ctx context.Context) (DeprecatedScanningPolicyAssignmentList, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.scanningPolicyAssignmentURL(), nil)
+func (c *Client) GetDeprecatedScanningPolicyAssignmentList(ctx context.Context) (list DeprecatedScanningPolicyAssignmentList, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.scanningPolicyAssignmentURL(), nil)
 	if err != nil {
 		return DeprecatedScanningPolicyAssignmentList{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return DeprecatedScanningPolicyAssignmentList{}, client.ErrorFromResponse(response)
+		return DeprecatedScanningPolicyAssignmentList{}, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[DeprecatedScanningPolicyAssignmentList](response.Body)
 }
 
-func (client *Client) deprecatedScanningPoliciesURL() string {
-	return fmt.Sprintf(deprecatedScanningPoliciesPath, client.config.url)
+func (c *Client) deprecatedScanningPoliciesURL() string {
+	return fmt.Sprintf(deprecatedScanningPoliciesPath, c.config.url)
 }
 
-func (client *Client) deprecatedScanningPolicyURL(scanningPolicyID string) string {
-	return fmt.Sprintf(deprecatedScanningPolicyPath, client.config.url, scanningPolicyID)
+func (c *Client) deprecatedScanningPolicyURL(scanningPolicyID string) string {
+	return fmt.Sprintf(deprecatedScanningPolicyPath, c.config.url, scanningPolicyID)
 }
 
-func (client *Client) scanningPolicyAssignmentURL() string {
-	return fmt.Sprintf(deprecatedScanningPolicyAssigmentPath, client.config.url)
+func (c *Client) scanningPolicyAssignmentURL() string {
+	return fmt.Sprintf(deprecatedScanningPolicyAssigmentPath, c.config.url)
 }

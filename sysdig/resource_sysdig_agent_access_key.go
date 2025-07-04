@@ -67,7 +67,7 @@ func resourceSysdigAgentAccessKey() *schema.Resource {
 	}
 }
 
-func resourceSysdigAgentAccessKeyDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigAgentAccessKeyDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(SysdigClients).commonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -81,7 +81,7 @@ func resourceSysdigAgentAccessKeyDelete(ctx context.Context, data *schema.Resour
 	return nil
 }
 
-func resourceSysdigAgentAccessKeyCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigAgentAccessKeyCreate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(SysdigClients).commonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -101,7 +101,7 @@ func resourceSysdigAgentAccessKeyCreate(ctx context.Context, data *schema.Resour
 	return nil
 }
 
-func resourceSysdigAgentAccessKeyUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigAgentAccessKeyUpdate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(SysdigClients).commonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -124,7 +124,7 @@ func resourceSysdigAgentAccessKeyUpdate(ctx context.Context, data *schema.Resour
 }
 
 func agentAccessKeyFromResourceData(data *schema.ResourceData) (*v2.AgentAccessKey, error) {
-	metadataFromResourceData := data.Get("metadata").(map[string]interface{})
+	metadataFromResourceData := data.Get("metadata").(map[string]any)
 	metadata := make(map[string]string)
 
 	for key, val := range metadataFromResourceData {
@@ -149,15 +149,15 @@ func agentAccessKeyFromResourceData(data *schema.ResourceData) (*v2.AgentAccessK
 	}, nil
 }
 
-func resourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(SysdigClients).commonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	agentKeyId := d.Id()
+	agentKeyID := d.Id()
 
-	agentAccessKey, err := client.GetAgentAccessKeyByID(ctx, agentKeyId)
+	agentAccessKey, err := client.GetAgentAccessKeyByID(ctx, agentKeyID)
 	if err != nil {
 		return diag.FromErr(err)
 	}

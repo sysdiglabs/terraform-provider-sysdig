@@ -7,11 +7,11 @@ import (
 	"net/http"
 )
 
-var CustomRoleNotFound = errors.New("custom role not found")
+var ErrCustomRoleNotFound = errors.New("custom role not found")
 
 const (
-	CustomRolesPath = "%s/api/roles"
-	CustomRolePath  = "%s/api/roles/%d"
+	customRolesPath = "%s/api/roles"
+	customRolePath  = "%s/api/roles/%d"
 )
 
 type CustomRoleInterface interface {
@@ -19,102 +19,107 @@ type CustomRoleInterface interface {
 	CreateCustomRole(ctx context.Context, cr *CustomRole) (*CustomRole, error)
 	UpdateCustomRole(ctx context.Context, cr *CustomRole, id int) (*CustomRole, error)
 	DeleteCustomRole(ctx context.Context, id int) error
-	GetCustomRole(ctx context.Context, id int) (*CustomRole, error)
+	GetCustomRoleByID(ctx context.Context, id int) (*CustomRole, error)
 	GetCustomRoleByName(ctx context.Context, name string) (*CustomRole, error)
 }
 
-func (client *Client) CreateCustomRole(ctx context.Context, cr *CustomRole) (*CustomRole, error) {
+func (c *Client) CreateCustomRole(ctx context.Context, cr *CustomRole) (customRole *CustomRole, err error) {
 	payload, err := Marshal(cr)
 	if err != nil {
 		return nil, err
 	}
-	response, err := client.requester.Request(ctx, http.MethodPost, client.CreateCustomRoleURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.createCustomRoleURL(), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	created, err := Unmarshal[CustomRole](response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &created, nil
+	return Unmarshal[*CustomRole](response.Body)
 }
 
-func (client *Client) UpdateCustomRole(ctx context.Context, cr *CustomRole, id int) (*CustomRole, error) {
+func (c *Client) UpdateCustomRole(ctx context.Context, cr *CustomRole, id int) (customRole *CustomRole, err error) {
 	payload, err := Marshal(cr)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.UpdateCustomRoleURL(id), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.updateCustomRoleURL(id), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	updated, err := Unmarshal[CustomRole](response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &updated, nil
+	return Unmarshal[*CustomRole](response.Body)
 }
 
-func (client *Client) DeleteCustomRole(ctx context.Context, id int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeleteCustomRoleURL(id), nil)
+func (c *Client) DeleteCustomRole(ctx context.Context, id int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.deleteCustomRoleURL(id), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *Client) GetCustomRole(ctx context.Context, id int) (*CustomRole, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetCustomRoleURL(id), nil)
+func (c *Client) GetCustomRoleByID(ctx context.Context, id int) (customRole *CustomRole, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getCustomRoleURL(id), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
 		if response.StatusCode == http.StatusNotFound {
-			return nil, CustomRoleNotFound
+			return nil, ErrCustomRoleNotFound
 		}
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	cr, err := Unmarshal[CustomRole](response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &cr, nil
+	return Unmarshal[*CustomRole](response.Body)
 }
 
-func (client *Client) GetCustomRoleByName(ctx context.Context, name string) (*CustomRole, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetCustomRolesURL(), nil)
+func (c *Client) GetCustomRoleByName(ctx context.Context, name string) (customRole *CustomRole, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getCustomRolesURL(), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[customRoleListWrapper](response.Body)
@@ -128,25 +133,25 @@ func (client *Client) GetCustomRoleByName(ctx context.Context, name string) (*Cu
 		}
 	}
 
-	return nil, fmt.Errorf("custom role with name: %s does not exist", name)
+	return nil, fmt.Errorf("custom role with name, %s does not exist: %w", name, ErrCustomRoleNotFound)
 }
 
-func (client *Client) CreateCustomRoleURL() string {
-	return fmt.Sprintf(CustomRolesPath, client.config.url)
+func (c *Client) createCustomRoleURL() string {
+	return fmt.Sprintf(customRolesPath, c.config.url)
 }
 
-func (client *Client) UpdateCustomRoleURL(id int) string {
-	return fmt.Sprintf(CustomRolePath, client.config.url, id)
+func (c *Client) updateCustomRoleURL(id int) string {
+	return fmt.Sprintf(customRolePath, c.config.url, id)
 }
 
-func (client *Client) DeleteCustomRoleURL(id int) string {
-	return fmt.Sprintf(CustomRolePath, client.config.url, id)
+func (c *Client) deleteCustomRoleURL(id int) string {
+	return fmt.Sprintf(customRolePath, c.config.url, id)
 }
 
-func (client *Client) GetCustomRoleURL(id int) string {
-	return fmt.Sprintf(CustomRolePath, client.config.url, id)
+func (c *Client) getCustomRoleURL(id int) string {
+	return fmt.Sprintf(customRolePath, c.config.url, id)
 }
 
-func (client *Client) GetCustomRolesURL() string {
-	return fmt.Sprintf(CustomRolesPath, client.config.url)
+func (c *Client) getCustomRolesURL() string {
+	return fmt.Sprintf(customRolesPath, c.config.url)
 }

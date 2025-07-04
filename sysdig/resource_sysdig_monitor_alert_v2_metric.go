@@ -99,7 +99,7 @@ func getAlertV2MetricClient(c SysdigClients) (v2.AlertV2MetricInterface, error) 
 	return getAlertV2Client(c)
 }
 
-func resourceSysdigMonitorAlertV2MetricCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2MetricCreate(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2MetricClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -125,7 +125,7 @@ func resourceSysdigMonitorAlertV2MetricCreate(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2MetricRead(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2MetricRead(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2MetricClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -136,9 +136,9 @@ func resourceSysdigMonitorAlertV2MetricRead(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	a, err := client.GetAlertV2Metric(ctx, id)
+	a, err := client.GetAlertV2MetricByID(ctx, id)
 	if err != nil {
-		if err == v2.AlertV2NotFound {
+		if err == v2.ErrAlertV2NotFound {
 			d.SetId("")
 			return nil
 		}
@@ -153,7 +153,7 @@ func resourceSysdigMonitorAlertV2MetricRead(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2MetricUpdate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2MetricUpdate(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2MetricClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -179,7 +179,7 @@ func resourceSysdigMonitorAlertV2MetricUpdate(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2MetricDelete(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2MetricDelete(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2MetricClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

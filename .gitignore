@@ -3,6 +3,7 @@
 .DS_Store
 .envrc
 .env
+.direnv/
 example.tf
 terraform.tfplan
 terraform.tfstate

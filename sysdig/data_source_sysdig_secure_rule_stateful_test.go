@@ -1,5 +1,3 @@
-//go:build tf_acc_sysdig || tf_acc_sysdig_secure || tf_acc_policies || tf_acc_onprem_secure
-
 package sysdig_test
 
 import (
@@ -15,7 +13,6 @@ import (
 )
 
 func TestAccRuleStatefulDataSource(t *testing.T) {
-
 	if strings.HasSuffix(os.Getenv("SYSDIG_SECURE_URL"), "ibm.com") {
 		t.Skip("Skipping stateful tests for IBM Cloud")
 		return

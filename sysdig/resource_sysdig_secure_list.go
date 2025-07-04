@@ -61,7 +61,7 @@ func getSecureListClient(c SysdigClients) (v2.ListInterface, error) {
 	return c.sysdigSecureClientV2()
 }
 
-func resourceSysdigListCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigListCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureListClient(sysdigClients)
 	if err != nil {
@@ -81,7 +81,7 @@ func resourceSysdigListCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceSysdigListUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigListUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureListClient(sysdigClients)
 	if err != nil {
@@ -103,7 +103,7 @@ func resourceSysdigListUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceSysdigListRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigListRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureListClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -123,7 +123,7 @@ func resourceSysdigListRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceSysdigListDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigListDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureListClient(sysdigClients)
 	if err != nil {
@@ -148,11 +148,11 @@ func listFromResourceData(d *schema.ResourceData) v2.List {
 		Items:  v2.Items{Items: []string{}},
 	}
 
-	items := d.Get("items").([]interface{})
+	items := d.Get("items").([]any)
 	for _, item := range items {
-		if item_str, ok := item.(string); ok {
-			item_str = strings.TrimSpace(item_str)
-			list.Items.Items = append(list.Items.Items, item_str)
+		if itemStr, ok := item.(string); ok {
+			itemStr = strings.TrimSpace(itemStr)
+			list.Items.Items = append(list.Items.Items, itemStr)
 		}
 	}
 

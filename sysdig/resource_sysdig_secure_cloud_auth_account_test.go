@@ -1,5 +1,3 @@
-//go:build tf_acc_sysdig_secure || tf_acc_sysdig_common
-
 package sysdig_test
 
 import (
@@ -765,5 +763,4 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 		})
 	  }
 	}`, fmt.Sprintf("ocid1.tenancy.oc1..%s", compartmentID), fmt.Sprintf("ocid1.tenancy.oc1..%s", tenantID))
-
 }

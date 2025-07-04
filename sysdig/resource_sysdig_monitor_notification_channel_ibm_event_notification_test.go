@@ -1,5 +1,3 @@
-//go:build tf_acc_ibm_monitor || tf_acc_ibm_common
-
 package sysdig_test
 
 import (

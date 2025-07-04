@@ -46,7 +46,7 @@ func dataSourceSysdigCustomRole() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigCustomRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceSysdigCustomRoleRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)

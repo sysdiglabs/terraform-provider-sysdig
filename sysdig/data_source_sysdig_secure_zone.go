@@ -73,7 +73,7 @@ func dataSourceSysdigSecureZone() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := getZoneClient(m.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -86,7 +86,7 @@ func dataSourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData,
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("invalid zone id: %s", err))
 		}
-		zone, err = client.GetZoneById(ctx, zoneID)
+		zone, err = client.GetZoneByID(ctx, zoneID)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error fetching zone by ID: %s", err))
 		}

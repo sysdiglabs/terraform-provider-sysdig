@@ -62,7 +62,7 @@ func dataSourceSysdigSecureRuleFilesystem() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -88,13 +88,13 @@ func dataSourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceD
 
 	ruleDataSourceToResourceData(rule, d)
 	if len(rule.Details.ReadPaths.Items) > 0 {
-		_ = d.Set("read_only", []map[string]interface{}{{
+		_ = d.Set("read_only", []map[string]any{{
 			"matching": rule.Details.ReadPaths.MatchItems,
 			"paths":    rule.Details.ReadPaths.Items,
 		}})
 	}
 	if len(rule.Details.ReadWritePaths.Items) > 0 {
-		_ = d.Set("read_write", []map[string]interface{}{{
+		_ = d.Set("read_write", []map[string]any{{
 			"matching": rule.Details.ReadWritePaths.MatchItems,
 			"paths":    rule.Details.ReadWritePaths.Items,
 		}})

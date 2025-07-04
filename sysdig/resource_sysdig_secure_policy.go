@@ -90,7 +90,7 @@ func getSecurePolicyClient(c SysdigClients) (v2.PolicyInterface, error) {
 	return c.sysdigSecureClientV2()
 }
 
-func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
@@ -121,10 +121,11 @@ func commonPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	_ = d.Set("version", policy.Version)
 	_ = d.Set("runbook", policy.Runbook)
 
-	actions := []map[string]interface{}{{}}
+	actions := []map[string]any{{}}
 	for _, action := range policy.Actions {
-		if action.Type == "POLICY_ACTION_CAPTURE" {
-			actions[0]["capture"] = []map[string]interface{}{{
+		switch action.Type {
+		case "POLICY_ACTION_CAPTURE":
+			actions[0]["capture"] = []map[string]any{{
 				"seconds_after_event":  action.AfterEventNs / 1000000000,
 				"seconds_before_event": action.BeforeEventNs / 1000000000,
 				"name":                 action.Name,
@@ -133,16 +134,16 @@ func commonPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 				"folder":               action.Folder,
 			}}
 
-		} else if action.Type == "POLICY_ACTION_KILL_PROCESS" {
+		case "POLICY_ACTION_KILL_PROCESS":
 			actions[0]["kill_process"] = true
-		} else {
+		default:
 			action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
 			actions[0]["container"] = strings.ToLower(action)
 		}
 	}
 
 	currentContainerAction := d.Get("actions.0.container").(string)
-	currentCaptureAction := d.Get("actions.0.capture").([]interface{})
+	currentCaptureAction := d.Get("actions.0.capture").([]any)
 	// If the policy retrieved from service has no actions and the current state is default values,
 	// then do not set the "actions" key as it may cause terraform to think there has been a state change
 	if len(policy.Actions) > 0 || currentContainerAction != "" || len(currentCaptureAction) > 0 {
@@ -175,8 +176,8 @@ func commonPolicyFromResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	addActionsToPolicy(d, policy)
 
 	policy.NotificationChannelIds = []int{}
-	notificationChannelIdSet := d.Get("notification_channels").(*schema.Set)
-	for _, id := range notificationChannelIdSet.List() {
+	notificationChannelIDSet := d.Get("notification_channels").(*schema.Set)
+	for _, id := range notificationChannelIDSet.List() {
 		policy.NotificationChannelIds = append(policy.NotificationChannelIds, id.(int))
 	}
 }
@@ -190,11 +191,11 @@ func policyFromResourceData(d *schema.ResourceData) v2.Policy {
 	policy.Type = d.Get("type").(string)
 
 	policy.RuleNames = []string{}
-	rule_names := d.Get("rule_names").(*schema.Set)
-	for _, name := range rule_names.List() {
-		if rule_name, ok := name.(string); ok {
-			rule_name = strings.TrimSpace(rule_name)
-			policy.RuleNames = append(policy.RuleNames, rule_name)
+	ruleNames := d.Get("rule_names").(*schema.Set)
+	for _, name := range ruleNames.List() {
+		if ruleName, ok := name.(string); ok {
+			ruleName = strings.TrimSpace(ruleName)
+			policy.RuleNames = append(policy.RuleNames, ruleName)
 		}
 	}
 
@@ -203,7 +204,7 @@ func policyFromResourceData(d *schema.ResourceData) v2.Policy {
 
 func addActionsToPolicy(d *schema.ResourceData, policy *v2.Policy) {
 	policy.Actions = []v2.Action{}
-	actions := d.Get("actions").([]interface{})
+	actions := d.Get("actions").([]any)
 	if len(actions) == 0 {
 		return
 	}
@@ -230,7 +231,7 @@ func addActionsToPolicy(d *schema.ResourceData, policy *v2.Policy) {
 		policy.Actions = append(policy.Actions, v2.Action{Type: containerAction})
 	}
 
-	if captureAction := d.Get("actions.0.capture").([]interface{}); len(captureAction) > 0 {
+	if captureAction := d.Get("actions.0.capture").([]any); len(captureAction) > 0 {
 		afterEventNs := d.Get("actions.0.capture.0.seconds_after_event").(int) * 1000000000
 		beforeEventNs := d.Get("actions.0.capture.0.seconds_before_event").(int) * 1000000000
 		name := d.Get("actions.0.capture.0.name").(string)
@@ -251,7 +252,7 @@ func addActionsToPolicy(d *schema.ResourceData, policy *v2.Policy) {
 	}
 }
 
-func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -272,7 +273,7 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
@@ -290,7 +291,7 @@ func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceSysdigPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {

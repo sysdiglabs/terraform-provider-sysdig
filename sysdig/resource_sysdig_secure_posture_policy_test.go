@@ -1,5 +1,3 @@
-//go:build tf_acc_sysdig_secure
-
 package sysdig_test
 
 import (
@@ -29,6 +27,7 @@ func TestSecurePosturePolicy(t *testing.T) {
 		},
 	})
 }
+
 func createPolicyResource(name string) string {
 	return fmt.Sprintf(`resource "sysdig_secure_posture_policy" "sample" {
 		name = "policy-test-%s"

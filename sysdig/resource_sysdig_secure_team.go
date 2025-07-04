@@ -24,7 +24,7 @@ func resourceSysdigSecureTeam() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
+		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i any) error {
 			plan := diff.GetRawPlan().AsValueMap()
 			zoneIDsPlan := plan[SchemaZonesIDsKey]
 			allZonesPlan := plan[SchemaAllZones]
@@ -157,14 +157,14 @@ func getSecureTeamClient(c SysdigClients) (v2.TeamInterface, error) {
 	return client, nil
 }
 
-func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	clients := meta.(SysdigClients)
 	client, err := getSecureTeamClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	team := secureTeamFromResourceData(d, clients.GetClientType())
+	team := secureTeamFromResourceData(d)
 	team.Products = []string{"SDS"}
 
 	team, err = client.CreateTeam(ctx, team)
@@ -180,7 +180,7 @@ func resourceSysdigSecureTeamCreate(ctx context.Context, d *schema.ResourceData,
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	clients := meta.(SysdigClients)
 	client, err := getSecureTeamClient(clients)
 	if err != nil {
@@ -188,7 +188,7 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	t, err := client.GetTeamById(ctx, id)
+	t, err := client.GetTeamByID(ctx, id)
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
@@ -226,12 +226,12 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func userSecureRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface{}) {
+func userSecureRolesToSet(userRoles []v2.UserRoles) (res []map[string]any) {
 	for _, role := range userRoles {
 		if role.Admin {
 			continue // Admins are added by default, so skip them
 		}
-		roleMap := map[string]interface{}{
+		roleMap := map[string]any{
 			"email": role.Email,
 			"role":  role.Role,
 		}
@@ -240,14 +240,14 @@ func userSecureRolesToSet(userRoles []v2.UserRoles) (res []map[string]interface{
 	return
 }
 
-func resourceSysdigSecureTeamUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureTeamUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	clients := meta.(SysdigClients)
 	client, err := getSecureTeamClient(clients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	t := secureTeamFromResourceData(d, clients.GetClientType())
+	t := secureTeamFromResourceData(d)
 	t.Products = []string{"SDS"}
 
 	t.Version = d.Get("version").(int)
@@ -262,7 +262,7 @@ func resourceSysdigSecureTeamUpdate(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureTeamClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -277,7 +277,7 @@ func resourceSysdigSecureTeamDelete(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v2.Team {
+func secureTeamFromResourceData(d *schema.ResourceData) v2.Team {
 	canUseSysdigCapture := d.Get("use_sysdig_capture").(bool)
 	canUseAgentCli := d.Get("can_use_agent_cli").(bool)
 	canUseRapidResponse := d.Get("can_use_rapid_response").(bool)
@@ -299,7 +299,7 @@ func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v
 
 	userRoles := make([]v2.UserRoles, 0)
 	for _, userRole := range d.Get("user_roles").(*schema.Set).List() {
-		ur := userRole.(map[string]interface{})
+		ur := userRole.(map[string]any)
 		userRoles = append(userRoles, v2.UserRoles{
 			Email: ur["email"].(string),
 			Role:  ur["role"].(string),
@@ -307,7 +307,7 @@ func secureTeamFromResourceData(d *schema.ResourceData, clientType ClientType) v
 	}
 	t.UserRoles = userRoles
 
-	zonesData := d.Get("zone_ids").([]interface{})
+	zonesData := d.Get("zone_ids").([]any)
 	t.ZoneIDs = make([]int, len(zonesData))
 	for i, z := range zonesData {
 		t.ZoneIDs[i] = z.(int)

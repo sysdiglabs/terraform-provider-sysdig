@@ -48,7 +48,7 @@ func resourceSysdigMonitorNotificationChannelPagerduty() *schema.Resource {
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelPagerdutyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelPagerdutyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -74,16 +74,16 @@ func resourceSysdigMonitorNotificationChannelPagerdutyCreate(ctx context.Context
 	return resourceSysdigMonitorNotificationChannelPagerdutyRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelPagerdutyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelPagerdutyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -98,7 +98,7 @@ func resourceSysdigMonitorNotificationChannelPagerdutyRead(ctx context.Context, 
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelPagerdutyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelPagerdutyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -125,7 +125,7 @@ func resourceSysdigMonitorNotificationChannelPagerdutyUpdate(ctx context.Context
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelPagerdutyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelPagerdutyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -147,7 +147,7 @@ func monitorNotificationChannelPagerdutyFromResourceData(d *schema.ResourceData,
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_PAGERDUTY
+	nc.Type = notificationChannelTypePagerduty
 	nc.Options.Account = d.Get("account").(string)
 	nc.Options.ServiceKey = d.Get("service_key").(string)
 	nc.Options.ServiceName = d.Get("service_name").(string)

@@ -1,11 +1,3 @@
-/*
-This file contains definition for the following functions.
-
-terraformPreModifications is used to modify the container definitions passed to the cfn patcher such that it modifies casing issues in any ECS json content so that it can be processed by the kilt patcher.
-
-GetValueFromTemplate is used to obtain key, value information from JSON object
-*/
-
 package sysdig
 
 import (
@@ -39,7 +31,7 @@ func capitalize(key string) string {
 	return string(r)
 }
 
-// updateKey recursively capitalizes the first letter of each key in the input object
+// updateKeys recursively capitalizes the first letter of each key in the input object
 func updateKeys(inputMap gabs.Container) error {
 	// in this case, the object is probably an array, so update each child
 	if len(inputMap.ChildrenMap()) == 0 {
@@ -87,7 +79,7 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 				passthrough, _ := GetValueFromTemplate(container.S("image"))
 				_, err = container.Set(passthrough, "Image")
 				if err != nil {
-					return nil, fmt.Errorf("Could not update Image field: %v", err)
+					return nil, fmt.Errorf("could not update Image field: %v", err)
 				}
 
 				err = container.Delete("image")
@@ -100,7 +92,7 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 				passthrough, _ := GetValueFromTemplate(container.S("name"))
 				_, err = container.Set(passthrough, "Name")
 				if err != nil {
-					return nil, fmt.Errorf("Could not update Name field: %v", err)
+					return nil, fmt.Errorf("could not update Name field: %v", err)
 				}
 
 				err = container.Delete("name")
@@ -115,22 +107,22 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 						name, _ := env.S("name").Data().(string)
 						err = env.Delete("name")
 						if err != nil {
-							return nil, fmt.Errorf("Could not delete \"name\" key in Environment: %v", err)
+							return nil, fmt.Errorf("could not delete \"name\" key in Environment: %v", err)
 						}
 						_, err = env.Set(name, "Name")
 						if err != nil {
-							return nil, fmt.Errorf("Could not assign \"Name\" key in Environment: %v", err)
+							return nil, fmt.Errorf("could not assign \"Name\" key in Environment: %v", err)
 						}
 					}
 					if env.Exists("value") {
 						value, _ := env.S("value").Data().(string)
 						err = env.Delete("value")
 						if err != nil {
-							return nil, fmt.Errorf("Could not delete \"value\" key in Environment: %v", err)
+							return nil, fmt.Errorf("could not delete \"value\" key in Environment: %v", err)
 						}
 						_, err = env.Set(value, "Value")
 						if err != nil {
-							return nil, fmt.Errorf("Could not assign \"Value\" key in Environment: %v", err)
+							return nil, fmt.Errorf("could not assign \"Value\" key in Environment: %v", err)
 						}
 					}
 				}
@@ -139,7 +131,7 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 				parsedPassthrough, _ := gabs.ParseJSON([]byte(passthrough))
 				_, err = container.Set(parsedPassthrough, "Environment")
 				if err != nil {
-					return nil, fmt.Errorf("Could not update Environment field: %v", err)
+					return nil, fmt.Errorf("could not update Environment field: %v", err)
 				}
 
 				err = container.Delete("environment")
@@ -153,7 +145,7 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 				parsedPassthrough, _ := gabs.ParseJSON([]byte(passthrough))
 				_, err = container.Set(parsedPassthrough, "EntryPoint")
 				if err != nil {
-					return nil, fmt.Errorf("Could not update EntryPoint field: %v", err)
+					return nil, fmt.Errorf("could not update EntryPoint field: %v", err)
 				}
 
 				err = container.Delete("entryPoint")
@@ -167,7 +159,7 @@ func terraformPreModifications(ctx context.Context, patchedStack []byte) ([]byte
 				parsedPassthrough, _ := gabs.ParseJSON([]byte(passthrough))
 				_, err = container.Set(parsedPassthrough, "Command")
 				if err != nil {
-					return nil, fmt.Errorf("Could not update Command field: %v", err)
+					return nil, fmt.Errorf("could not update Command field: %v", err)
 				}
 
 				err = container.Delete("command")

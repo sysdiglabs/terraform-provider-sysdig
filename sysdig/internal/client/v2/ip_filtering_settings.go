@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	IPFiltersSettingsPath = "%s/platform/v1/ip-filters-settings"
+	ipFiltersSettingsPath = "%s/platform/v1/ip-filters-settings"
 )
 
 type IPFilteringSettingsInterface interface {
@@ -16,50 +16,48 @@ type IPFilteringSettingsInterface interface {
 	UpdateIPFilteringSettings(ctx context.Context, ipFiltersSettings *IPFiltersSettings) (*IPFiltersSettings, error)
 }
 
-func (client *Client) GetIPFilteringSettings(ctx context.Context) (*IPFiltersSettings, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetIPFiltersSettingsURL(), nil)
+func (c *Client) GetIPFilteringSettings(ctx context.Context) (settings *IPFiltersSettings, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.GetIPFiltersSettingsURL(), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		err = client.ErrorFromResponse(response)
+		err = c.ErrorFromResponse(response)
 		return nil, err
 	}
 
-	ipFiltersSettings, err := Unmarshal[IPFiltersSettings](response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &ipFiltersSettings, nil
+	return Unmarshal[*IPFiltersSettings](response.Body)
 }
 
-func (client *Client) UpdateIPFilteringSettings(ctx context.Context, ipFiltersSettings *IPFiltersSettings) (*IPFiltersSettings, error) {
+func (c *Client) UpdateIPFilteringSettings(ctx context.Context, ipFiltersSettings *IPFiltersSettings) (settings *IPFiltersSettings, err error) {
 	payload, err := Marshal(ipFiltersSettings)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.GetIPFiltersSettingsURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.GetIPFiltersSettingsURL(), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	updated, err := Unmarshal[IPFiltersSettings](response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &updated, nil
+	return Unmarshal[*IPFiltersSettings](response.Body)
 }
 
-func (client *Client) GetIPFiltersSettingsURL() string {
-	return fmt.Sprintf(IPFiltersSettingsPath, client.config.url)
+func (c *Client) GetIPFiltersSettingsURL() string {
+	return fmt.Sprintf(ipFiltersSettingsPath, c.config.url)
 }

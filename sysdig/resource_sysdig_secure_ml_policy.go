@@ -88,7 +88,7 @@ func mlPolicyToResourceData(policy *v2.PolicyRulesComposite, d *schema.ResourceD
 	return mlTFResourceReducer(d, *policy)
 }
 
-func resourceSysdigMLPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMLPolicyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureCompositePolicyClient(sysdigClients)
 	if err != nil {
@@ -115,7 +115,7 @@ func resourceSysdigMLPolicyCreate(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceSysdigMLPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMLPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureCompositePolicyClient(sysdigClients)
 	if err != nil {
@@ -136,7 +136,7 @@ func resourceSysdigMLPolicyUpdate(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceSysdigMLPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMLPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -160,7 +160,7 @@ func resourceSysdigMLPolicyRead(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceSysdigMLPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMLPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureCompositePolicyClient(sysdigClients)
 	if err != nil {
@@ -173,7 +173,7 @@ func resourceSysdigMLPolicyDelete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if policy.Policy.ID == 0 {
-		return diag.FromErr(errors.New("Policy ID is missing"))
+		return diag.FromErr(errors.New("policy ID is missing"))
 	}
 
 	err = client.DeleteCompositePolicy(ctx, policy.Policy.ID)
@@ -185,7 +185,7 @@ func resourceSysdigMLPolicyDelete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceSysdigSecureMLPolicyImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceSysdigSecureMLPolicyImportState(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return nil, err
@@ -197,7 +197,7 @@ func resourceSysdigSecureMLPolicyImportState(ctx context.Context, d *schema.Reso
 	}
 
 	if policy.Policy.ID == 0 {
-		return nil, errors.New("Policy ID is missing")
+		return nil, errors.New("policy ID is missing")
 	}
 
 	policy, _, err = client.GetCompositePolicyByID(ctx, policy.Policy.ID)
@@ -205,7 +205,7 @@ func resourceSysdigSecureMLPolicyImportState(ctx context.Context, d *schema.Reso
 		return nil, err
 	}
 
-	if policy.Policy.IsDefault || policy.Policy.TemplateId != 0 {
+	if policy.Policy.IsDefault || policy.Policy.TemplateID != 0 {
 		return nil, errors.New("unable to import policy that is not a custom policy")
 	}
 

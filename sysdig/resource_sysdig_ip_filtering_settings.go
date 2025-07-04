@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -22,7 +23,7 @@ func resourceSysdigIPFilteringSettings() *schema.Resource {
 	}
 }
 
-func resourceSysdigIPFilteringSettingsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIPFilteringSettingsRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -41,22 +42,21 @@ func resourceSysdigIPFilteringSettingsRead(ctx context.Context, d *schema.Resour
 	return nil
 }
 
-func resourceSysdigIPFilteringSettingsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
+func resourceSysdigIPFilteringSettingsCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	d.SetId("ip_filtering_settings_id") // It's singleton resource so we use a fixed ID
 
 	return updateIPFilteringSettings(ctx, d, m)
 }
 
-func resourceSysdigIPFilteringSettingsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIPFilteringSettingsUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	return updateIPFilteringSettings(ctx, d, m)
 }
 
-func resourceSysdigIPFilteringSettingsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIPFilteringSettingsDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	return nil
 }
 
-func updateIPFilteringSettings(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func updateIPFilteringSettings(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)

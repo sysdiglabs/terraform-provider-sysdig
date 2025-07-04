@@ -73,8 +73,8 @@ type Client struct {
 	requester Requester
 }
 
-func (client *Client) ErrorFromResponse(response *http.Response) error {
-	var data interface{}
+func (c *Client) ErrorFromResponse(response *http.Response) error {
+	var data any
 	err := json.NewDecoder(response.Body).Decode(&data)
 	if err != nil {
 		return errors.New(response.Status)
@@ -85,7 +85,7 @@ func (client *Client) ErrorFromResponse(response *http.Response) error {
 		return errors.New(response.Status)
 	}
 
-	if searchArray, ok := search.([]interface{}); ok {
+	if searchArray, ok := search.([]any); ok {
 		return errors.New(strings.Join(cast.ToStringSlice(searchArray), ", "))
 	}
 
@@ -97,7 +97,7 @@ func (client *Client) ErrorFromResponse(response *http.Response) error {
 	return errors.New(response.Status)
 }
 
-func Unmarshal[T any](data io.ReadCloser) (T, error) {
+func Unmarshal[T any](data io.Reader) (T, error) {
 	var result T
 
 	body, err := io.ReadAll(data)
@@ -143,7 +143,7 @@ func request(httpClient *http.Client, cfg *config, request *http.Request) (*http
 	return response, err
 }
 
-func getMe(ctx context.Context, cfg *config, httpClient *http.Client, headers map[string]string) (*User, error) {
+func getMe(ctx context.Context, cfg *config, httpClient *http.Client, headers map[string]string) (user *User, err error) {
 	r, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("%s%s", cfg.url, GetMePath),
@@ -162,7 +162,11 @@ func getMe(ctx context.Context, cfg *config, httpClient *http.Client, headers ma
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if dErr := resp.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	wrapper, err := Unmarshal[userWrapper](resp.Body)
 	if err != nil {
@@ -172,8 +176,8 @@ func getMe(ctx context.Context, cfg *config, httpClient *http.Client, headers ma
 	return &wrapper.User, nil
 }
 
-func (client *Client) CurrentTeamID(ctx context.Context) (int, error) {
-	return client.requester.CurrentTeamID(ctx)
+func (c *Client) CurrentTeamID(ctx context.Context) (int, error) {
+	return c.requester.CurrentTeamID(ctx)
 }
 
 func newHTTPClient(cfg *config) *http.Client {

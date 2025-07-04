@@ -7,13 +7,13 @@ import (
 	"net/http"
 )
 
-var GroupMappingNotFound = errors.New("group mapping not found")
+var ErrGroupMappingNotFound = errors.New("group mapping not found")
 
 const (
-	CreateGroupMappingPath = "%s/api/groupmappings"
-	UpdateGroupMappingPath = "%s/api/groupmappings/%d"
-	DeleteGroupMappingPath = "%s/api/groupmappings/%d"
-	GetGroupMappingPath    = "%s/api/groupmappings/%d"
+	createGroupMappingPath = "%s/api/groupmappings"
+	updateGroupMappingPath = "%s/api/groupmappings/%d"
+	deleteGroupMappingPath = "%s/api/groupmappings/%d"
+	getGroupMappingPath    = "%s/api/groupmappings/%d"
 )
 
 type GroupMappingInterface interface {
@@ -24,102 +24,103 @@ type GroupMappingInterface interface {
 	GetGroupMapping(ctx context.Context, id int) (*GroupMapping, error)
 }
 
-func (client *Client) CreateGroupMapping(ctx context.Context, gm *GroupMapping) (*GroupMapping, error) {
+func (c *Client) CreateGroupMapping(ctx context.Context, gm *GroupMapping) (mapping *GroupMapping, err error) {
 	payload, err := Marshal(gm)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.CreateGroupMappingURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.createGroupMappingURL(), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	created, err := Unmarshal[GroupMapping](response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &created, nil
+	return Unmarshal[*GroupMapping](response.Body)
 }
 
-func (client *Client) UpdateGroupMapping(ctx context.Context, gm *GroupMapping, id int) (*GroupMapping, error) {
+func (c *Client) UpdateGroupMapping(ctx context.Context, gm *GroupMapping, id int) (mapping *GroupMapping, err error) {
 	payload, err := Marshal(gm)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.UpdateGroupMappingURL(id), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.updateGroupMappingURL(id), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	updated, err := Unmarshal[GroupMapping](response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &updated, nil
+	return Unmarshal[*GroupMapping](response.Body)
 }
 
-func (client *Client) DeleteGroupMapping(ctx context.Context, id int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeleteGroupMappingURL(id), nil)
+func (c *Client) DeleteGroupMapping(ctx context.Context, id int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.deleteGroupMappingURL(id), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *Client) GetGroupMapping(ctx context.Context, id int) (*GroupMapping, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetGroupMappingURL(id), nil)
+func (c *Client) GetGroupMapping(ctx context.Context, id int) (mapping *GroupMapping, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getGroupMappingURL(id), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		if response.StatusCode == http.StatusNotFound {
-			return nil, GroupMappingNotFound
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
 		}
-		return nil, client.ErrorFromResponse(response)
+	}()
+
+	if response.StatusCode == http.StatusNotFound {
+		return nil, ErrGroupMappingNotFound
+	}
+	if response.StatusCode != http.StatusOK {
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	gm, err := Unmarshal[GroupMapping](response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &gm, nil
+	return Unmarshal[*GroupMapping](response.Body)
 }
 
-func (client *Client) CreateGroupMappingURL() string {
-	return fmt.Sprintf(CreateGroupMappingPath, client.config.url)
+func (c *Client) createGroupMappingURL() string {
+	return fmt.Sprintf(createGroupMappingPath, c.config.url)
 }
 
-func (client *Client) UpdateGroupMappingURL(id int) string {
-	return fmt.Sprintf(UpdateGroupMappingPath, client.config.url, id)
+func (c *Client) updateGroupMappingURL(id int) string {
+	return fmt.Sprintf(updateGroupMappingPath, c.config.url, id)
 }
 
-func (client *Client) DeleteGroupMappingURL(id int) string {
-	return fmt.Sprintf(DeleteGroupMappingPath, client.config.url, id)
+func (c *Client) deleteGroupMappingURL(id int) string {
+	return fmt.Sprintf(deleteGroupMappingPath, c.config.url, id)
 }
 
-func (client *Client) GetGroupMappingURL(id int) string {
-	return fmt.Sprintf(GetGroupMappingPath, client.config.url, id)
+func (c *Client) getGroupMappingURL(id int) string {
+	return fmt.Sprintf(getGroupMappingPath, c.config.url, id)
 }

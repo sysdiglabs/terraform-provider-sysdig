@@ -1,13 +1,12 @@
-//go:build tf_acc_sysdig_secure || tf_acc_ibm_secure || tf_acc_onprem_secure
-
 package sysdig_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
