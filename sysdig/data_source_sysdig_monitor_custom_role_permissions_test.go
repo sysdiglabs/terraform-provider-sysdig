@@ -1,4 +1,3 @@
-//go:build tf_acc_sysdig_monitor || tf_acc_onprem_monitor
 
 package sysdig_test
 

@@ -1,4 +1,3 @@
-//go:build tf_acc_ibm_secure
 
 package buildinfo
 

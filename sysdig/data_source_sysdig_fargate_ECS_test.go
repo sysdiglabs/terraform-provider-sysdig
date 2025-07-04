@@ -1,4 +1,3 @@
-//go:build unit
 
 package sysdig
 

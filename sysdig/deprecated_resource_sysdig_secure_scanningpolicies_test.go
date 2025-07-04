@@ -1,4 +1,3 @@
-//go:build tf_acc_sysdig_secure || tf_acc_scanning_legacy
 
 package sysdig_test
 
