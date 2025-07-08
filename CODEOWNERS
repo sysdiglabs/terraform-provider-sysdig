@@ -1,25 +1,26 @@
+* @airadier @tembleking @mateobur
 # Fargate workload agent
-*fargate* @marojor @francesco-racciatti @pgcrooks-sysdig @gnosek
+*fargate* @airadier @tembleking @mateobur @marojor @francesco-racciatti @pgcrooks-sysdig @gnosek
 
 # compliance
-*benchmark* @haresh-suresh @nkraemer-sysdig
+*benchmark* @airadier @tembleking @mateobur @haresh-suresh @nkraemer-sysdig
 
 # monitor
-*monitor*alert* @michelevergnano @dkutsanov @antonio-cuomo @dbonf
-*monitor*dashboard* @rossifrancesco
-*monitor*groupmapping* @shadow649
-*notification_channel* @michelevergnano @dkutsanov @antonio-cuomo @dbonf
-*inhibition_rule* @michelevergnano @dkutsanov @antonio-cuomo @dbonf
-*silence_rule* @michelevergnano @dkutsanov @antonio-cuomo @dbonf
+*monitor*alert* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf
+*monitor*dashboard* @airadier @tembleking @mateobur @rossifrancesco
+*monitor*groupmapping* @airadier @tembleking @mateobur @shadow649
+*notification_channel* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf
+*inhibition_rule* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf
+*silence_rule* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf
 
 # policies/rules
-*secure*policy* @rosenbloomb-sysdig @ombellare @miguelgordo @ivanlysiuk-sysdig @daniel-almeida @jbainbridgesysdig
+*secure*policy* @airadier @tembleking @mateobur @rosenbloomb-sysdig @ombellare @miguelgordo @ivanlysiuk-sysdig @daniel-almeida @jbainbridgesysdig
 
 # internal components
-/sysdig/internal/client/v2/client.go @filiptubic @mbarbieri @draraksysdig
-/sysdig/internal/client/v2/config.go @filiptubic @mbarbieri @draraksysdig
-/sysdig/internal/client/v2/ibm.go @filiptubic @mbarbieri @draraksysdig
-/sysdig/internal/client/v2/agentaccesskey.go @igoreulalio @filiptubic @mbarbieri @draraksysdig
-/main.go @filiptubic @mbarbieri @draraksysdig
-/.goreleaser.yml @filiptubic @mbarbieri @draraksysdig
-/.github/ @filiptubic @mbarbieri @draraksysdig
+/sysdig/internal/client/v2/client.go @airadier @tembleking @mateobur @filiptubic @mbarbieri @draraksysdig
+/sysdig/internal/client/v2/config.go @airadier @tembleking @mateobur @filiptubic @mbarbieri @draraksysdig
+/sysdig/internal/client/v2/ibm.go @airadier @tembleking @mateobur @filiptubic @mbarbieri @draraksysdig
+/sysdig/internal/client/v2/agentaccesskey.go @airadier @tembleking @mateobur @igoreulalio @filiptubic @mbarbieri @draraksysdig
+/main.go @airadier @tembleking @mateobur @filiptubic @mbarbieri @draraksysdig
+/.goreleaser.yml @airadier @tembleking @mateobur @filiptubic @mbarbieri @draraksysdig
+/.github/ @airadier @tembleking @mateobur @filiptubic @mbarbieri @draraksysdig
