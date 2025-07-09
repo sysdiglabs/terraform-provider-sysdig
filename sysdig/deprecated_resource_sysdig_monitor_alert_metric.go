@@ -11,15 +11,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceSysdigMonitorAlertAnomaly() *schema.Resource {
+func deprecatedResourceSysdigMonitorAlertMetric() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		DeprecationMessage: "Anomaly Detection Alerts have been deprecated, \"sysdig_monitor_alert_anomaly\" will be removed in future releases",
-		CreateContext:      resourceSysdigAlertAnomalyCreate,
-		UpdateContext:      resourceSysdigAlertAnomalyUpdate,
-		ReadContext:        resourceSysdigAlertAnomalyRead,
-		DeleteContext:      resourceSysdigAlertAnomalyDelete,
+		DeprecationMessage: "\"sysdig_monitor_alert_metric\" has been deprecated and will be removed in future releases, use \"sysdig_monitor_alert_v2_metric\" instead",
+		CreateContext:      deprecatedResourceSysdigAlertMetricCreate,
+		UpdateContext:      deprecatedResourceSysdigAlertMetricUpdate,
+		ReadContext:        deprecatedResourceSysdigAlertMetricRead,
+		DeleteContext:      deprecatedResourceSysdigAlertMetricDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -32,10 +32,9 @@ func resourceSysdigMonitorAlertAnomaly() *schema.Resource {
 		},
 
 		Schema: createAlertSchema(map[string]*schema.Schema{
-			"monitor": {
-				Type:     schema.TypeList,
+			"metric": {
+				Type:     schema.TypeString,
 				Required: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"multiple_alerts_by": {
 				Type:     schema.TypeList,
@@ -46,13 +45,13 @@ func resourceSysdigMonitorAlertAnomaly() *schema.Resource {
 	}
 }
 
-func resourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertMetricCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	alert, err := anomalyAlertFromResourceData(data)
+	alert, err := deprecatedMetricAlertFromResourceData(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -64,16 +63,17 @@ func resourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.Resource
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
 	_ = data.Set("version", alertCreated.Version)
+
 	return nil
 }
 
-func resourceSysdigAlertAnomalyUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertMetricUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	alert, err := anomalyAlertFromResourceData(data)
+	alert, err := deprecatedMetricAlertFromResourceData(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -88,7 +88,7 @@ func resourceSysdigAlertAnomalyUpdate(ctx context.Context, data *schema.Resource
 	return nil
 }
 
-func resourceSysdigAlertAnomalyRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertMetricRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -105,7 +105,7 @@ func resourceSysdigAlertAnomalyRead(ctx context.Context, data *schema.ResourceDa
 		return nil
 	}
 
-	err = anomalyAlertToResourceData(&alert, data)
+	err = deprecatedMetricAlertToResourceData(&alert, data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -113,7 +113,7 @@ func resourceSysdigAlertAnomalyRead(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
-func resourceSysdigAlertAnomalyDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertMetricDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -132,20 +132,12 @@ func resourceSysdigAlertAnomalyDelete(ctx context.Context, data *schema.Resource
 	return nil
 }
 
-func anomalyAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err error) {
+func deprecatedMetricAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err error) {
 	alert, err = alertFromResourceData(data)
 	if err != nil {
 		return
 	}
-
-	alert.Type = "BASELINE"
-
-	for _, metric := range data.Get("monitor").([]any) {
-		alert.Monitor = append(alert.Monitor, &v2.Monitor{
-			Metric:       metric.(string),
-			StdDevFactor: 2,
-		})
-	}
+	alert.Condition = data.Get("metric").(string)
 
 	if alertsBy, ok := data.GetOk("multiple_alerts_by"); ok {
 		alert.SegmentCondition = &v2.SegmentCondition{Type: "ANY"}
@@ -153,22 +145,17 @@ func anomalyAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, e
 			alert.SegmentBy = append(alert.SegmentBy, v.(string))
 		}
 	}
-
 	return
 }
 
-func anomalyAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
+func deprecatedMetricAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
 	if err != nil {
 		return
 	}
 
+	_ = data.Set("metric", alert.Condition)
 	_ = data.Set("multiple_alerts_by", alert.SegmentBy)
 
-	monitorMetrics := []string{}
-	for _, v := range alert.Monitor {
-		monitorMetrics = append(monitorMetrics, v.Metric)
-	}
-	_ = data.Set("monitor", monitorMetrics)
 	return
 }

@@ -2,8 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"fmt"
-	"regexp"
 	"strconv"
 	"time"
 
@@ -13,15 +11,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceSysdigMonitorAlertEvent() *schema.Resource {
+func deprecatedResourceSysdigMonitorAlertAnomaly() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		DeprecationMessage: "\"sysdig_monitor_alert_event\" has been deprecated and will be removed in future releases, use \"sysdig_monitor_alert_v2_event\" instead",
-		CreateContext:      resourceSysdigAlertEventCreate,
-		UpdateContext:      resourceSysdigAlertEventUpdate,
-		ReadContext:        resourceSysdigAlertEventRead,
-		DeleteContext:      resourceSysdigAlertEventDelete,
+		DeprecationMessage: "Anomaly Detection Alerts have been deprecated, \"sysdig_monitor_alert_anomaly\" will be removed in future releases",
+		CreateContext:      deprecatedResourceSysdigAlertAnomalyCreate,
+		UpdateContext:      deprecatedResourceSysdigAlertAnomalyUpdate,
+		ReadContext:        deprecatedResourceSysdigAlertAnomalyRead,
+		DeleteContext:      deprecatedResourceSysdigAlertAnomalyDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -34,21 +32,10 @@ func resourceSysdigMonitorAlertEvent() *schema.Resource {
 		},
 
 		Schema: createAlertSchema(map[string]*schema.Schema{
-			"event_name": {
-				Type:     schema.TypeString,
+			"monitor": {
+				Type:     schema.TypeList,
 				Required: true,
-			},
-			"source": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"event_rel": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"event_count": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"multiple_alerts_by": {
 				Type:     schema.TypeList,
@@ -59,13 +46,13 @@ func resourceSysdigMonitorAlertEvent() *schema.Resource {
 	}
 }
 
-func resourceSysdigAlertEventCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	alert, err := eventAlertFromResourceData(data)
+	alert, err := deprecatedAnomalyAlertFromResourceData(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -77,17 +64,16 @@ func resourceSysdigAlertEventCreate(ctx context.Context, data *schema.ResourceDa
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
 	_ = data.Set("version", alertCreated.Version)
-
 	return nil
 }
 
-func resourceSysdigAlertEventUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertAnomalyUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	alert, err := eventAlertFromResourceData(data)
+	alert, err := deprecatedAnomalyAlertFromResourceData(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -102,7 +88,7 @@ func resourceSysdigAlertEventUpdate(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
-func resourceSysdigAlertEventRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertAnomalyRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -119,7 +105,7 @@ func resourceSysdigAlertEventRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
-	err = eventAlertToResourceData(&alert, data)
+	err = deprecatedAnomalyAlertToResourceData(&alert, data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -127,7 +113,7 @@ func resourceSysdigAlertEventRead(ctx context.Context, data *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigAlertEventDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertAnomalyDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -146,19 +132,19 @@ func resourceSysdigAlertEventDelete(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
-func eventAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err error) {
+func deprecatedAnomalyAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err error) {
 	alert, err = alertFromResourceData(data)
 	if err != nil {
 		return
 	}
 
-	eventRel := data.Get("event_rel").(string)
-	eventCount := data.Get("event_count").(int)
-	alert.Condition = fmt.Sprintf("count(customEvent) %s %d", eventRel, eventCount)
-	alert.Type = "EVENT"
-	alert.Criteria = &v2.Criteria{
-		Text:   data.Get("event_name").(string),
-		Source: data.Get("source").(string),
+	alert.Type = "BASELINE"
+
+	for _, metric := range data.Get("monitor").([]any) {
+		alert.Monitor = append(alert.Monitor, &v2.Monitor{
+			Metric:       metric.(string),
+			StdDevFactor: 2,
+		})
 	}
 
 	if alertsBy, ok := data.GetOk("multiple_alerts_by"); ok {
@@ -171,33 +157,18 @@ func eventAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err
 	return
 }
 
-// https://regex101.com/r/79VIkC/1
-var alertConditionRegex = regexp.MustCompile(`count\(customEvent\)\s*(?P<rel>[^\w\s]+)\s*(?P<count>\d+)`)
-
-func eventAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
+func deprecatedAnomalyAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
 	if err != nil {
 		return
 	}
 
-	relIndex := alertConditionRegex.SubexpIndex("rel")
-	countIndex := alertConditionRegex.SubexpIndex("count")
-	matches := alertConditionRegex.FindStringSubmatch(alert.Condition)
-	if matches == nil {
-		return fmt.Errorf("alert condition %s does not match expected expression %s", alert.Condition, alertConditionRegex.String())
-	}
-
-	eventRel := matches[relIndex]
-	eventCount, err := strconv.Atoi(matches[countIndex])
-	if err != nil {
-		return
-	}
-
-	_ = data.Set("event_rel", eventRel)
-	_ = data.Set("event_count", eventCount)
-	_ = data.Set("event_name", alert.Criteria.Text)
-	_ = data.Set("source", alert.Criteria.Source)
 	_ = data.Set("multiple_alerts_by", alert.SegmentBy)
 
+	monitorMetrics := []string{}
+	for _, v := range alert.Monitor {
+		monitorMetrics = append(monitorMetrics, v.Metric)
+	}
+	_ = data.Set("monitor", monitorMetrics)
 	return
 }

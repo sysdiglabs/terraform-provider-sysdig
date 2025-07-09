@@ -11,15 +11,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceSysdigMonitorAlertMetric() *schema.Resource {
+func deprecatedResourceSysdigMonitorAlertPromql() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		DeprecationMessage: "\"sysdig_monitor_alert_metric\" has been deprecated and will be removed in future releases, use \"sysdig_monitor_alert_v2_metric\" instead",
-		CreateContext:      resourceSysdigAlertMetricCreate,
-		UpdateContext:      resourceSysdigAlertMetricUpdate,
-		ReadContext:        resourceSysdigAlertMetricRead,
-		DeleteContext:      resourceSysdigAlertMetricDelete,
+		DeprecationMessage: "\"sysdig_monitor_alert_promql\" has been deprecated and will be removed in future releases, use \"sysdig_monitor_alert_v2_prometheus\" instead",
+		CreateContext:      deprecatedResourceSysdigAlertPromqlCreate,
+		UpdateContext:      deprecatedResourceSysdigAlertPromqlUpdate,
+		ReadContext:        deprecatedResourceSysdigAlertPromqlRead,
+		DeleteContext:      deprecatedResourceSysdigAlertPromqlDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -32,26 +32,21 @@ func resourceSysdigMonitorAlertMetric() *schema.Resource {
 		},
 
 		Schema: createAlertSchema(map[string]*schema.Schema{
-			"metric": {
+			"promql": {
 				Type:     schema.TypeString,
 				Required: true,
-			},
-			"multiple_alerts_by": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		}),
 	}
 }
 
-func resourceSysdigAlertMetricCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertPromqlCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	alert, err := metricAlertFromResourceData(data)
+	alert, err := deprecatedPromqlAlertFromResourceData(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -67,13 +62,13 @@ func resourceSysdigAlertMetricCreate(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigAlertMetricUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertPromqlUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	alert, err := metricAlertFromResourceData(data)
+	alert, err := deprecatedPromqlAlertFromResourceData(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -88,7 +83,7 @@ func resourceSysdigAlertMetricUpdate(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigAlertMetricRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertPromqlRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -105,7 +100,7 @@ func resourceSysdigAlertMetricRead(ctx context.Context, data *schema.ResourceDat
 		return nil
 	}
 
-	err = metricAlertToResourceData(&alert, data)
+	err = deprecatedPromqlAlertToResourceData(&alert, data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -113,7 +108,7 @@ func resourceSysdigAlertMetricRead(ctx context.Context, data *schema.ResourceDat
 	return nil
 }
 
-func resourceSysdigAlertMetricDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertPromqlDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -132,30 +127,34 @@ func resourceSysdigAlertMetricDelete(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func metricAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err error) {
+func deprecatedPromqlAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err error) {
 	alert, err = alertFromResourceData(data)
 	if err != nil {
 		return
 	}
-	alert.Condition = data.Get("metric").(string)
+	duration := int((time.Duration(*alert.Timespan) * time.Microsecond).Seconds())
+	alert.Duration = &duration
+	alert.Timespan = nil
 
-	if alertsBy, ok := data.GetOk("multiple_alerts_by"); ok {
-		alert.SegmentCondition = &v2.SegmentCondition{Type: "ANY"}
-		for _, v := range alertsBy.([]any) {
-			alert.SegmentBy = append(alert.SegmentBy, v.(string))
-		}
-	}
+	alert.Type = "PROMETHEUS"
+
+	alert.Condition = data.Get("promql").(string)
+
 	return
 }
 
-func metricAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
+func deprecatedPromqlAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
 	if err != nil {
 		return
 	}
 
-	_ = data.Set("metric", alert.Condition)
-	_ = data.Set("multiple_alerts_by", alert.SegmentBy)
+	if alert.Duration != nil {
+		triggerAfterMinutes := int((time.Duration(*alert.Duration) * time.Second).Minutes())
+		_ = data.Set("trigger_after_minutes", triggerAfterMinutes)
+	}
+
+	_ = data.Set("promql", alert.Condition)
 
 	return
 }

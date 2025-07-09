@@ -36,14 +36,14 @@ var validatePolicyType = validation.StringInSlice([]string{
 	"awscloudtrail_stateful",
 }, false)
 
-func resourceSysdigSecurePolicy() *schema.Resource {
+func deprecatedResourceSysdigSecurePolicy() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigPolicyCreate,
-		ReadContext:   resourceSysdigPolicyRead,
-		UpdateContext: resourceSysdigPolicyUpdate,
-		DeleteContext: resourceSysdigPolicyDelete,
+		CreateContext: deprecatedResourceSysdigPolicyCreate,
+		ReadContext:   deprecatedResourceSysdigPolicyRead,
+		UpdateContext: deprecatedResourceSysdigPolicyUpdate,
+		DeleteContext: deprecatedResourceSysdigPolicyDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -90,21 +90,21 @@ func getSecurePolicyClient(c SysdigClients) (v2.PolicyInterface, error) {
 	return c.sysdigSecureClientV2()
 }
 
-func resourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func deprecatedResourceSysdigPolicyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	policy := policyFromResourceData(d)
+	policy := deprecatedPolicyFromResourceData(d)
 	policy, err = client.CreatePolicy(ctx, policy)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
-	policyToResourceData(&policy, d)
+	deprecatedPolicyToResourceData(&policy, d)
 
 	return nil
 }
@@ -153,7 +153,7 @@ func commonPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	_ = d.Set("notification_channels", policy.NotificationChannelIds)
 }
 
-func policyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
+func deprecatedPolicyToResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	commonPolicyToResourceData(policy, d)
 
 	_ = d.Set("description", policy.Description)
@@ -182,7 +182,7 @@ func commonPolicyFromResourceData(policy *v2.Policy, d *schema.ResourceData) {
 	}
 }
 
-func policyFromResourceData(d *schema.ResourceData) v2.Policy {
+func deprecatedPolicyFromResourceData(d *schema.ResourceData) v2.Policy {
 	policy := &v2.Policy{}
 	commonPolicyFromResourceData(policy, d)
 
@@ -252,7 +252,7 @@ func addActionsToPolicy(d *schema.ResourceData, policy *v2.Policy) {
 	}
 }
 
-func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func deprecatedResourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -268,12 +268,12 @@ func resourceSysdigPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	policyToResourceData(&policy, d)
+	deprecatedPolicyToResourceData(&policy, d)
 
 	return nil
 }
 
-func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func deprecatedResourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
@@ -291,14 +291,14 @@ func resourceSysdigPolicyDelete(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceSysdigPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func deprecatedResourceSysdigPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	policy := policyFromResourceData(d)
+	policy := deprecatedPolicyFromResourceData(d)
 	policy.Version = d.Get("version").(int)
 
 	id, _ := strconv.Atoi(d.Id())

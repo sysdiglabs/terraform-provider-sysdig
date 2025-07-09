@@ -34,11 +34,11 @@ const (
 	notificationChannelSecureEventNotificationContentSection = "SECURE_EVENT_NOTIFICATION_CONTENT"
 )
 
-func dataSourceSysdigSecureNotificationChannel() *schema.Resource {
+func deprecatedDataSourceSysdigSecureNotificationChannel() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		ReadContext: dataSourceSysdigNotificationChannelRead,
+		ReadContext: deprecatedDataSourceSysdigNotificationChannelRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),
@@ -118,7 +118,7 @@ func dataSourceSysdigSecureNotificationChannel() *schema.Resource {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func deprecatedDataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
