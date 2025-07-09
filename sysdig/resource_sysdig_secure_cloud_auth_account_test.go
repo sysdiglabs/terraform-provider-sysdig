@@ -296,7 +296,7 @@ func TestAccGCPSecureCloudAuthAccountThreatDetection(t *testing.T) {
 		    feature {
 			  secure_threat_detection {
 			    enabled    = true
-			    components = ["COMPONENT_WEBHOOK_DATASOURCE/secure-runtime", "COMPONENT_SERVICE_PRINCIPAL/secure-runtime"]
+			    components = ["COMPONENT_SERVICE_PRINCIPAL/secure-runtime", "COMPONENT_WEBHOOK_DATASOURCE/secure-runtime"]
 			  }
 		    }
 			component {
