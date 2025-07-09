@@ -71,7 +71,7 @@ func resourceSysdigSecureZone() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureZoneCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigSecureZoneCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := getZoneClient(m.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -88,7 +88,7 @@ func resourceSysdigSecureZoneCreate(ctx context.Context, d *schema.ResourceData,
 	return resourceSysdigSecureZoneRead(ctx, d, m)
 }
 
-func resourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := getZoneClient(m.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -96,7 +96,7 @@ func resourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m
 
 	id, _ := strconv.Atoi(d.Id())
 
-	zone, err := client.GetZoneById(ctx, id)
+	zone, err := client.GetZoneByID(ctx, id)
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
@@ -116,7 +116,7 @@ func resourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceSysdigSecureZoneUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigSecureZoneUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := getZoneClient(m.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -132,7 +132,7 @@ func resourceSysdigSecureZoneUpdate(ctx context.Context, d *schema.ResourceData,
 	return resourceSysdigSecureZoneRead(ctx, d, m)
 }
 
-func resourceSysdigSecureZoneDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigSecureZoneDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := getZoneClient(m.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -168,7 +168,7 @@ func zoneRequestFromResourceData(d *schema.ResourceData) *v2.ZoneRequest {
 func toZoneScopesRequest(scopes *schema.Set) []v2.ZoneScope {
 	var zoneScopes []v2.ZoneScope
 	for _, attr := range scopes.List() {
-		s := attr.(map[string]interface{})
+		s := attr.(map[string]any)
 		zoneScopes = append(zoneScopes, v2.ZoneScope{
 			ID:         s[SchemaIDKey].(int),
 			TargetType: s[SchemaTargetTypeKey].(string),
@@ -178,10 +178,10 @@ func toZoneScopesRequest(scopes *schema.Set) []v2.ZoneScope {
 	return zoneScopes
 }
 
-func fromZoneScopesResponse(scopes []v2.ZoneScope) []interface{} {
-	var flattenedScopes []interface{}
+func fromZoneScopesResponse(scopes []v2.ZoneScope) []any {
+	var flattenedScopes []any
 	for _, scope := range scopes {
-		flattenedScopes = append(flattenedScopes, map[string]interface{}{
+		flattenedScopes = append(flattenedScopes, map[string]any{
 			SchemaIDKey:         scope.ID,
 			SchemaTargetTypeKey: scope.TargetType,
 			SchemaRulesKey:      scope.Rules,

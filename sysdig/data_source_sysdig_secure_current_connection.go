@@ -28,18 +28,18 @@ func dataSourceSysdigSecureConnection() *schema.Resource {
 	}
 }
 
-func dataSourceSecureConnectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSecureConnectionRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	endpoint, err := meta.(SysdigClients).GetSecureEndpoint()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	apiToken, err := meta.(SysdigClients).GetSecureApiToken()
+	apiToken, err := meta.(SysdigClients).GetSecureAPIToken()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(fmt.Sprintf("%x", sha256.Sum256([]byte(fmt.Sprintf("%s,%s", endpoint, apiToken)))))
+	d.SetId(fmt.Sprintf("%x", sha256.Sum256(fmt.Appendf(nil, "%s,%s", endpoint, apiToken))))
 
 	err = d.Set("secure_url", endpoint)
 	if err != nil {

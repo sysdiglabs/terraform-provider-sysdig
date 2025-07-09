@@ -39,7 +39,7 @@ func resourceSysdigMonitorNotificationChannelIBMEventNotification() *schema.Reso
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelIBMEventNotificationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelIBMEventNotificationCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -65,7 +65,7 @@ func resourceSysdigMonitorNotificationChannelIBMEventNotificationCreate(ctx cont
 	return resourceSysdigMonitorNotificationChannelIBMEventNotificationRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelIBMEventNotificationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelIBMEventNotificationRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -76,9 +76,9 @@ func resourceSysdigMonitorNotificationChannelIBMEventNotificationRead(ctx contex
 		return diag.FromErr(err)
 	}
 
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -93,7 +93,7 @@ func resourceSysdigMonitorNotificationChannelIBMEventNotificationRead(ctx contex
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelIBMEventNotificationUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelIBMEventNotificationUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -123,7 +123,7 @@ func resourceSysdigMonitorNotificationChannelIBMEventNotificationUpdate(ctx cont
 	return resourceSysdigMonitorNotificationChannelIBMEventNotificationRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelIBMEventNotificationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelIBMEventNotificationDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -148,8 +148,8 @@ func monitorNotificationChannelIBMEventNotificationFromResourceData(d *schema.Re
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_IBM_EVENT_NOTIFICATION
-	nc.Options.InstanceId = d.Get("instance_id").(string)
+	nc.Type = notificationChannelTypeIBMEventNotification
+	nc.Options.InstanceID = d.Get("instance_id").(string)
 	return
 }
 
@@ -159,7 +159,7 @@ func monitorNotificationChannelIBMEventNotificationToResourceData(nc *v2.Notific
 		return
 	}
 
-	_ = d.Set("instance_id", nc.Options.InstanceId)
+	_ = d.Set("instance_id", nc.Options.InstanceID)
 
 	return
 }

@@ -35,7 +35,7 @@ func dataSourceSysdigSecureRuleContainer() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	return commonDataSourceSysdigRuleRead(ctx, d, meta, v2.RuleTypeContainer, containerRuleDataSourceToResourceData)
 }
 

@@ -76,7 +76,7 @@ func getMonitorCloudAccountClient(c SysdigClients) (v2.CloudAccountMonitorInterf
 	return c.sysdigMonitorClientV2()
 }
 
-func resourceSysdigMonitorCloudAccountCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorCloudAccountCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorCloudAccountClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -85,27 +85,25 @@ func resourceSysdigMonitorCloudAccountCreate(ctx context.Context, data *schema.R
 	if data.Get("integration_type").(string) == "Cost" {
 		cloudAccount := monitorCloudAccountForCostFromResourceData(data)
 		cloudAccountCreated, err := client.CreateCloudAccountMonitorForCost(ctx, &cloudAccount)
-
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
-		data.SetId(cloudAccountCreated.Id)
+		data.SetId(cloudAccountCreated.ID)
 	} else {
 		cloudAccount := monitorCloudAccountFromResourceData(data)
 		cloudAccountCreated, err := client.CreateCloudAccountMonitor(ctx, &cloudAccount)
-
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
-		data.SetId(strconv.Itoa(cloudAccountCreated.Id))
+		data.SetId(strconv.Itoa(cloudAccountCreated.ID))
 	}
 
 	return nil
 }
 
-func resourceSysdigMonitorCloudAccountDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorCloudAccountDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorCloudAccountClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -124,7 +122,7 @@ func resourceSysdigMonitorCloudAccountDelete(ctx context.Context, data *schema.R
 	return nil
 }
 
-func resourceSysdigMonitorCloudAccountRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorCloudAccountRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorCloudAccountClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -136,7 +134,7 @@ func resourceSysdigMonitorCloudAccountRead(ctx context.Context, data *schema.Res
 	}
 
 	if data.Get("integration_type").(string) == "Cost" {
-		cloudAccount, err := client.GetCloudAccountMonitorForCost(ctx, id)
+		cloudAccount, err := client.GetCloudAccountMonitorForCostByID(ctx, id)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -146,7 +144,7 @@ func resourceSysdigMonitorCloudAccountRead(ctx context.Context, data *schema.Res
 			return diag.FromErr(err)
 		}
 	} else {
-		cloudAccount, err := client.GetCloudAccountMonitor(ctx, id)
+		cloudAccount, err := client.GetCloudAccountMonitorByID(ctx, id)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -160,7 +158,7 @@ func resourceSysdigMonitorCloudAccountRead(ctx context.Context, data *schema.Res
 	return nil
 }
 
-func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorCloudAccountClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -174,7 +172,7 @@ func resourceSysdigMonitorCloudAccountUpdate(ctx context.Context, data *schema.R
 	if data.Get("integration_type").(string) == "Cost" {
 		putObjectAccount := monitorCloudAccountForCostFromResourceDataPutMethod(data)
 
-		cloudAccount, err := client.GetCloudAccountMonitorForCost(ctx, id)
+		cloudAccount, err := client.GetCloudAccountMonitorForCostByID(ctx, id)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -208,19 +206,18 @@ func monitorCloudAccountFromResourceData(data *schema.ResourceData) v2.CloudAcco
 		IntegrationType:   data.Get("integration_type").(string),
 		AdditionalOptions: data.Get("additional_options").(string),
 		Credentials: v2.CloudAccountCredentialsMonitor{
-			AccountId:   data.Get("account_id").(string),
+			AccountID:   data.Get("account_id").(string),
 			RoleName:    data.Get("role_name").(string),
 			SecretKey:   data.Get("secret_key").(string),
-			AccessKeyId: data.Get("access_key_id").(string),
+			AccessKeyID: data.Get("access_key_id").(string),
 		},
 	}
 }
 
 func monitorCloudAccountForCostFromResourceData(data *schema.ResourceData) v2.CloudAccountMonitorForCost {
-
 	configuration := v2.CloudCostConfiguration{}
 
-	if config, ok := data.Get("config").(map[string]interface{}); ok {
+	if config, ok := data.Get("config").(map[string]any); ok {
 		if val, exists := config["athena_bucket_name"]; exists {
 			configuration.AthenaBucketName = val.(string)
 		}
@@ -246,7 +243,7 @@ func monitorCloudAccountForCostFromResourceData(data *schema.ResourceData) v2.Cl
 		Platform:      data.Get("cloud_provider").(string),
 		Configuration: configuration,
 		Credentials: v2.CloudAccountCredentialsMonitor{
-			AccountId: data.Get("account_id").(string),
+			AccountID: data.Get("account_id").(string),
 			RoleName:  data.Get("role_name").(string),
 		},
 	}
@@ -257,12 +254,12 @@ func monitorCloudAccountForCostFromResourceDataPutMethod(data *schema.ResourceDa
 		Provider: data.Get("cloud_provider").(string),
 		RoleArn:  "arn:aws:iam::" + data.Get("account_id").(string) + ":role/" + data.Get("role_name").(string),
 		Config: v2.CloudConfigForCost{
-			AthenaBucketName:     data.Get("config").(map[string]interface{})["athena_bucket_name"].(string),
-			AthenaDatabaseName:   data.Get("config").(map[string]interface{})["athena_database_name"].(string),
-			AthenaRegion:         data.Get("config").(map[string]interface{})["athena_region"].(string),
-			AthenaWorkgroup:      data.Get("config").(map[string]interface{})["athena_workgroup"].(string),
-			AthenaTableName:      data.Get("config").(map[string]interface{})["athena_table_name"].(string),
-			SpotPricesBucketName: data.Get("config").(map[string]interface{})["spot_prices_bucket_name"].(string),
+			AthenaBucketName:     data.Get("config").(map[string]any)["athena_bucket_name"].(string),
+			AthenaDatabaseName:   data.Get("config").(map[string]any)["athena_database_name"].(string),
+			AthenaRegion:         data.Get("config").(map[string]any)["athena_region"].(string),
+			AthenaWorkgroup:      data.Get("config").(map[string]any)["athena_workgroup"].(string),
+			AthenaTableName:      data.Get("config").(map[string]any)["athena_table_name"].(string),
+			SpotPricesBucketName: data.Get("config").(map[string]any)["spot_prices_bucket_name"].(string),
 			IntegrationType:      data.Get("integration_type").(string),
 		},
 	}
@@ -284,7 +281,7 @@ func monitorCloudAccountToResourceData(data *schema.ResourceData, cloudAccount *
 		return err
 	}
 
-	err = data.Set("account_id", cloudAccount.Credentials.AccountId)
+	err = data.Set("account_id", cloudAccount.Credentials.AccountID)
 	if err != nil {
 		return err
 	}
@@ -299,7 +296,7 @@ func monitorCloudAccountToResourceData(data *schema.ResourceData, cloudAccount *
 		return err
 	}
 
-	err = data.Set("access_key_id", cloudAccount.Credentials.AccessKeyId)
+	err = data.Set("access_key_id", cloudAccount.Credentials.AccessKeyID)
 	if err != nil {
 		return err
 	}
@@ -313,7 +310,7 @@ func monitorCloudAccountForCostToResourceData(data *schema.ResourceData, cloudAc
 		return err
 	}
 
-	err = data.Set("config", map[string]interface{}{
+	err = data.Set("config", map[string]any{
 		"athena_bucket_name":      cloudAccount.Config.AthenaBucketName,
 		"athena_database_name":    cloudAccount.Config.AthenaDatabaseName,
 		"athena_region":           cloudAccount.Config.AthenaRegion,
@@ -330,7 +327,7 @@ func monitorCloudAccountForCostToResourceData(data *schema.ResourceData, cloudAc
 		return err
 	}
 
-	err = data.Set("account_id", cloudAccount.ProviderId)
+	err = data.Set("account_id", cloudAccount.ProviderID)
 	if err != nil {
 		return err
 	}
@@ -344,11 +341,11 @@ func monitorCloudAccountForCostToResourceData(data *schema.ResourceData, cloudAc
 }
 
 func completeEmptyFieldsForUpdateRequest(putObject *v2.CloudAccountCostProvider, currentStatusObject *v2.CloudAccountCostProvider) {
-	putObject.ExternalId = currentStatusObject.ExternalId
+	putObject.ExternalID = currentStatusObject.ExternalID
 	putObject.CredentialsType = currentStatusObject.CredentialsType
-	putObject.CustomerId = currentStatusObject.CustomerId
-	putObject.ProviderId = currentStatusObject.ProviderId
-	putObject.CredentialsId = currentStatusObject.CredentialsId
+	putObject.CustomerID = currentStatusObject.CustomerID
+	putObject.ProviderID = currentStatusObject.ProviderID
+	putObject.CredentialsID = currentStatusObject.CredentialsID
 	putObject.Feature = currentStatusObject.Feature
 	putObject.Enabled = currentStatusObject.Enabled
 }

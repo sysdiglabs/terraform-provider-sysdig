@@ -38,7 +38,7 @@ func getAccountFeatureSchema() map[string]*schema.Schema {
 	// though the schema fields are already defined in cloud_auth_account resource, for AccountFeature
 	// calls they are required fields. Also, account_id & flags are needed additionally.
 	featureSchema := map[string]*schema.Schema{
-		SchemaAccountId: {
+		SchemaAccountID: {
 			Type:     schema.TypeString,
 			Required: true,
 		},
@@ -70,22 +70,22 @@ func getSecureCloudauthAccountFeatureClient(client SysdigClients) (v2.CloudauthA
 	return client.sysdigSecureClientV2()
 }
 
-func resourceSysdigSecureCloudauthAccountFeatureCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountFeatureCreate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountFeatureClient((meta.(SysdigClients)))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	accountId := data.Get(SchemaAccountId).(string)
+	accountID := data.Get(SchemaAccountID).(string)
 	cloudauthAccountFeature, errStatus, err := client.CreateOrUpdateCloudauthAccountFeatureSecure(
-		ctx, accountId, data.Get(SchemaType).(string), cloudauthAccountFeatureFromResourceData(data))
+		ctx, accountID, data.Get(SchemaType).(string), cloudauthAccountFeatureFromResourceData(data))
 	if err != nil {
 		return diag.Errorf("Error creating resource: %s %s", errStatus, err)
 	}
 
 	// using tuple 'accountId/featureType' as TF resource identifier
-	data.SetId(accountId + "/" + cloudauthAccountFeature.GetType().String())
-	err = data.Set(SchemaAccountId, accountId)
+	data.SetId(accountID + "/" + cloudauthAccountFeature.GetType().String())
+	err = data.Set(SchemaAccountID, accountID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -93,15 +93,14 @@ func resourceSysdigSecureCloudauthAccountFeatureCreate(ctx context.Context, data
 	return nil
 }
 
-func resourceSysdigSecureCloudauthAccountFeatureRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountFeatureRead(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountFeatureClient((meta.(SysdigClients)))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	cloudauthAccountFeature, errStatus, err := client.GetCloudauthAccountFeatureSecure(
-		ctx, data.Get(SchemaAccountId).(string), data.Get(SchemaType).(string))
-
+		ctx, data.Get(SchemaAccountID).(string), data.Get(SchemaType).(string))
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -117,15 +116,15 @@ func resourceSysdigSecureCloudauthAccountFeatureRead(ctx context.Context, data *
 	return nil
 }
 
-func resourceSysdigSecureCloudauthAccountFeatureUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountFeatureUpdate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountFeatureClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	accountId := data.Get(SchemaAccountId).(string)
+	accountID := data.Get(SchemaAccountID).(string)
 	existingCloudAccountFeature, errStatus, err := client.GetCloudauthAccountFeatureSecure(
-		ctx, accountId, data.Get(SchemaType).(string))
+		ctx, accountID, data.Get(SchemaType).(string))
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -142,7 +141,7 @@ func resourceSysdigSecureCloudauthAccountFeatureUpdate(ctx context.Context, data
 	}
 
 	_, errStatus, err = client.CreateOrUpdateCloudauthAccountFeatureSecure(
-		ctx, accountId, data.Get(SchemaType).(string), newCloudAccountFeature)
+		ctx, accountID, data.Get(SchemaType).(string), newCloudAccountFeature)
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -153,14 +152,14 @@ func resourceSysdigSecureCloudauthAccountFeatureUpdate(ctx context.Context, data
 	return nil
 }
 
-func resourceSysdigSecureCloudauthAccountFeatureDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountFeatureDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountFeatureClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	errStatus, err := client.DeleteCloudauthAccountFeatureSecure(
-		ctx, data.Get(SchemaAccountId).(string), data.Get(SchemaType).(string))
+		ctx, data.Get(SchemaAccountID).(string), data.Get(SchemaType).(string))
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -185,7 +184,7 @@ func validateCloudauthAccountFeatureUpdate(existingFeature *v2.CloudauthAccountF
 
 func getFeatureComponentsList(data *schema.ResourceData) []string {
 	componentsList := []string{}
-	componentsResourceList := data.Get(SchemaComponents).([]interface{})
+	componentsResourceList := data.Get(SchemaComponents).([]any)
 	for _, componentID := range componentsResourceList {
 		componentsList = append(componentsList, componentID.(string))
 	}
@@ -194,7 +193,7 @@ func getFeatureComponentsList(data *schema.ResourceData) []string {
 
 func getFeatureFlags(data *schema.ResourceData) map[string]string {
 	featureFlags := map[string]string{}
-	flagsResource := data.Get(SchemaFeatureFlags).(map[string]interface{})
+	flagsResource := data.Get(SchemaFeatureFlags).(map[string]any)
 	for name, value := range flagsResource {
 		featureFlags[name] = value.(string)
 	}
@@ -215,11 +214,10 @@ func cloudauthAccountFeatureFromResourceData(data *schema.ResourceData) *v2.Clou
 }
 
 func cloudauthAccountFeatureToResourceData(data *schema.ResourceData, cloudAccountFeature *v2.CloudauthAccountFeatureSecure) error {
+	accountID := data.Get(SchemaAccountID).(string)
+	data.SetId(accountID + "/" + cloudAccountFeature.GetType().String())
 
-	accountId := data.Get(SchemaAccountId).(string)
-	data.SetId(accountId + "/" + cloudAccountFeature.GetType().String())
-
-	err := data.Set(SchemaAccountId, accountId)
+	err := data.Set(SchemaAccountID, accountID)
 	if err != nil {
 		return err
 	}

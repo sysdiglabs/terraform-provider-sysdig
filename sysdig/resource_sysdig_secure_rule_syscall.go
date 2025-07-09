@@ -48,7 +48,7 @@ func resourceSysdigSecureRuleSyscall() *schema.Resource {
 	}
 }
 
-func resourceSysdigRuleSyscallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleSyscallCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -70,7 +70,7 @@ func resourceSysdigRuleSyscallCreate(ctx context.Context, d *schema.ResourceData
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleSyscallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleSyscallRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -82,7 +82,6 @@ func resourceSysdigRuleSyscallRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	rule, statusCode, err := client.GetRuleByID(ctx, id)
-
 	if err != nil {
 		if statusCode == http.StatusNotFound {
 			d.SetId("")
@@ -102,7 +101,7 @@ func resourceSysdigRuleSyscallRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceSysdigRuleSyscallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleSyscallUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -123,7 +122,7 @@ func resourceSysdigRuleSyscallUpdate(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigRuleSyscallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleSyscallDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -151,7 +150,7 @@ func resourceSysdigRuleSyscallFromResourceData(d *schema.ResourceData) v2.Rule {
 	rule.Details.Syscalls = &v2.Syscalls{}
 	rule.Details.Syscalls.MatchItems = d.Get("matching").(bool)
 	rule.Details.Syscalls.Items = []string{}
-	if syscalls, ok := d.Get("syscalls").([]interface{}); ok {
+	if syscalls, ok := d.Get("syscalls").([]any); ok {
 		for _, rawSyscall := range syscalls {
 			if syscall, ok := rawSyscall.(string); ok {
 				rule.Details.Syscalls.Items = append(rule.Details.Syscalls.Items, syscall)

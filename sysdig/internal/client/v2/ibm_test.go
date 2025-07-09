@@ -35,7 +35,7 @@ func TestIBMClient_DoIBMRequest(t *testing.T) {
 		token := "token"
 		iamEndpointCalled := 0
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path == IBMIAMPath {
+			if r.URL.Path == ibmIAMPath {
 				iamEndpointCalled++
 				data, err := json.Marshal(IAMTokenResponse{
 					AccessToken: token,
@@ -55,7 +55,7 @@ func TestIBMClient_DoIBMRequest(t *testing.T) {
 			if value := r.Header.Get(AuthorizationHeader); value != fmt.Sprintf("Bearer %s", token) {
 				t.Errorf("invalid authorization header, %v", value)
 			}
-			if value := r.Header.Get(IBMInstanceIDHeader); value != instanceID {
+			if value := r.Header.Get(ibmInstanceIDHeader); value != instanceID {
 				t.Errorf("expected instance id %v, got %v", instanceID, value)
 			}
 			if value := r.Header.Get(SysdigProviderHeader); value != SysdigProviderHeaderValue {
@@ -138,14 +138,14 @@ func TestIBMClient_CurrentTeamID(t *testing.T) {
 		var data []byte
 
 		switch r.URL.Path {
-		case fmt.Sprintf("%steam", GetTeamByNamePath):
+		case fmt.Sprintf("%steam", getTeamByNamePath):
 			data, err = json.Marshal(teamWrapper{Team: Team{
 				ID: teamID3,
 			}})
 			if err != nil {
 				t.Errorf("failed to create team response, err: %v", err)
 			}
-		case IBMIAMPath:
+		case ibmIAMPath:
 			data, err = json.Marshal(IAMTokenResponse{
 				AccessToken: token,
 				Expiration:  time.Now().Add(time.Hour).Unix(),

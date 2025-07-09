@@ -110,7 +110,7 @@ func getDeprecatedSecureScanningPolicyClient(c SysdigClients) (v2.DeprecatedScan
 	return c.sysdigSecureClientV2()
 }
 
-func deprecatedResourceSysdigScanningPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigScanningPolicyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getDeprecatedSecureScanningPolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -127,7 +127,7 @@ func deprecatedResourceSysdigScanningPolicyCreate(ctx context.Context, d *schema
 	return nil
 }
 
-func deprecatedResourceSysdigScanningPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigScanningPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getDeprecatedSecureScanningPolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -136,7 +136,7 @@ func deprecatedResourceSysdigScanningPolicyUpdate(ctx context.Context, d *schema
 	scanningPolicy := deprecatedScanningPolicyFromResourceData(d)
 	id := d.Get("id").(string)
 	scanningPolicy.ID = id
-	_, err = client.UpdateDeprecatedScanningPolicyByID(ctx, scanningPolicy)
+	_, err = client.UpdateDeprecatedScanningPolicy(ctx, scanningPolicy)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -144,7 +144,7 @@ func deprecatedResourceSysdigScanningPolicyUpdate(ctx context.Context, d *schema
 	return nil
 }
 
-func deprecatedResourceSysdigScanningPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigScanningPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getDeprecatedSecureScanningPolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -161,7 +161,7 @@ func deprecatedResourceSysdigScanningPolicyRead(ctx context.Context, d *schema.R
 	return nil
 }
 
-func deprecatedResourceSysdigScanningPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigScanningPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getDeprecatedSecureScanningPolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -182,9 +182,9 @@ func deprecatedScanningPolicyToResourceData(scanningPolicy *v2.DeprecatedScannin
 	_ = d.Set("version", scanningPolicy.Version)
 	_ = d.Set("comment", scanningPolicy.Comment)
 	_ = d.Set("isdefault", scanningPolicy.IsDefault)
-	_ = d.Set("policy_bundle_id", scanningPolicy.PolicyBundleId)
+	_ = d.Set("policy_bundle_id", scanningPolicy.PolicyBundleID)
 
-	var rules []map[string]interface{}
+	var rules []map[string]any
 	for _, rule := range scanningPolicy.Rules {
 		ruleInfo := deprecatedScanningPolicyRulesToResourceData(rule)
 
@@ -194,17 +194,17 @@ func deprecatedScanningPolicyToResourceData(scanningPolicy *v2.DeprecatedScannin
 	_ = d.Set("rules", rules)
 }
 
-func deprecatedScanningPolicyRulesToResourceData(scanningPolicyRule v2.DeprecatedScanningGate) map[string]interface{} {
-	rule := map[string]interface{}{
+func deprecatedScanningPolicyRulesToResourceData(scanningPolicyRule v2.DeprecatedScanningGate) map[string]any {
+	rule := map[string]any{
 		"id":      scanningPolicyRule.ID,
 		"gate":    scanningPolicyRule.Gate,
 		"trigger": scanningPolicyRule.Trigger,
 		"action":  scanningPolicyRule.Action,
 	}
 
-	var params []map[string]interface{}
+	var params []map[string]any
 	for _, param := range scanningPolicyRule.Params {
-		params = append(params, map[string]interface{}{
+		params = append(params, map[string]any{
 			"name":  param.Name,
 			"value": param.Value,
 		})
@@ -221,7 +221,7 @@ func deprecatedScanningPolicyFromResourceData(d *schema.ResourceData) v2.Depreca
 		Comment:        d.Get("comment").(string),
 		Version:        d.Get("version").(string),
 		IsDefault:      d.Get("isdefault").(bool),
-		PolicyBundleId: d.Get("policy_bundle_id").(string),
+		PolicyBundleID: d.Get("policy_bundle_id").(string),
 	}
 	scanningPolicy.Rules = deprecatedScanningPolicyRulesFromResourceData(d)
 
@@ -230,7 +230,7 @@ func deprecatedScanningPolicyFromResourceData(d *schema.ResourceData) v2.Depreca
 
 func deprecatedScanningPolicyRulesFromResourceData(d *schema.ResourceData) (rules []v2.DeprecatedScanningGate) {
 	for _, ruleItr := range d.Get("rules").(*schema.Set).List() {
-		ruleInfo := ruleItr.(map[string]interface{})
+		ruleInfo := ruleItr.(map[string]any)
 		rule := v2.DeprecatedScanningGate{
 			Gate:    ruleInfo["gate"].(string),
 			ID:      ruleInfo["id"].(string),
@@ -239,7 +239,7 @@ func deprecatedScanningPolicyRulesFromResourceData(d *schema.ResourceData) (rule
 		}
 		var params []v2.DeprecatedScanningGateParam
 		for _, paramsItr := range ruleInfo["params"].(*schema.Set).List() {
-			paramsInfo := paramsItr.(map[string]interface{})
+			paramsInfo := paramsItr.(map[string]any)
 			param := v2.DeprecatedScanningGateParam{
 				Name:  paramsInfo["name"].(string),
 				Value: paramsInfo["value"].(string),

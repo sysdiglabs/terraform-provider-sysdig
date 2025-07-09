@@ -41,7 +41,7 @@ func resourceSysdigMonitorAlertGroupOutlier() *schema.Resource {
 	}
 }
 
-func resourceSysdigAlertGroupOutlierCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertGroupOutlierCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -63,7 +63,7 @@ func resourceSysdigAlertGroupOutlierCreate(ctx context.Context, data *schema.Res
 	return nil
 }
 
-func resourceSysdigAlertGroupOutlierUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertGroupOutlierUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -84,7 +84,7 @@ func resourceSysdigAlertGroupOutlierUpdate(ctx context.Context, data *schema.Res
 	return nil
 }
 
-func resourceSysdigAlertGroupOutlierRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertGroupOutlierRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -109,7 +109,7 @@ func resourceSysdigAlertGroupOutlierRead(ctx context.Context, data *schema.Resou
 	return nil
 }
 
-func resourceSysdigAlertGroupOutlierDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigAlertGroupOutlierDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -120,7 +120,7 @@ func resourceSysdigAlertGroupOutlierDelete(ctx context.Context, data *schema.Res
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteAlert(ctx, id)
+	err = client.DeleteAlertByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -136,7 +136,7 @@ func groupOutlierAlertFromResourceData(data *schema.ResourceData) (alert *v2.Ale
 
 	alert.Type = "HOST_COMPARISON"
 
-	for _, metric := range data.Get("monitor").([]interface{}) {
+	for _, metric := range data.Get("monitor").([]any) {
 		alert.Monitor = append(alert.Monitor, &v2.Monitor{
 			Metric:       metric.(string),
 			StdDevFactor: 2,
@@ -155,11 +155,11 @@ func groupOutlierAlertToResourceData(alert *v2.Alert, data *schema.ResourceData)
 		return
 	}
 
-	monitor_metrics := []string{}
+	monitorMetrics := []string{}
 	for _, v := range alert.Monitor {
-		monitor_metrics = append(monitor_metrics, v.Metric)
+		monitorMetrics = append(monitorMetrics, v.Metric)
 	}
-	_ = data.Set("monitor", monitor_metrics)
+	_ = data.Set("monitor", monitorMetrics)
 
 	return
 }

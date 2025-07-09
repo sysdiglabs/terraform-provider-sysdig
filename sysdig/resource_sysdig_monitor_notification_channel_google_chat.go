@@ -39,7 +39,7 @@ func resourceSysdigMonitorNotificationChannelGoogleChat() *schema.Resource {
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelGoogleChatCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelGoogleChatCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -65,7 +65,7 @@ func resourceSysdigMonitorNotificationChannelGoogleChatCreate(ctx context.Contex
 	return resourceSysdigMonitorNotificationChannelGoogleChatRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelGoogleChatRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelGoogleChatRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -76,9 +76,9 @@ func resourceSysdigMonitorNotificationChannelGoogleChatRead(ctx context.Context,
 		return diag.FromErr(err)
 	}
 
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -93,7 +93,7 @@ func resourceSysdigMonitorNotificationChannelGoogleChatRead(ctx context.Context,
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelGoogleChatUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelGoogleChatUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -123,7 +123,7 @@ func resourceSysdigMonitorNotificationChannelGoogleChatUpdate(ctx context.Contex
 	return resourceSysdigMonitorNotificationChannelGoogleChatRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelGoogleChatDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelGoogleChatDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -148,8 +148,8 @@ func monitorNotificationChannelGoogleChatFromResourceData(d *schema.ResourceData
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_GCHAT
-	nc.Options.Url = d.Get("url").(string)
+	nc.Type = notificationChannelTypeGChat
+	nc.Options.URL = d.Get("url").(string)
 	return
 }
 
@@ -159,7 +159,7 @@ func monitorNotificationChannelGoogleChatToResourceData(nc *v2.NotificationChann
 		return
 	}
 
-	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("url", nc.Options.URL)
 
 	return
 }

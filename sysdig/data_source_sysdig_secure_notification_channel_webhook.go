@@ -40,7 +40,7 @@ func dataSourceSysdigSecureNotificationChannelWebhook() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecureNotificationChannelWebhookRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureNotificationChannelWebhookRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

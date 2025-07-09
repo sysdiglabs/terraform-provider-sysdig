@@ -123,7 +123,7 @@ func getPosturePolicyClient(c SysdigClients) (v2.PosturePolicyInterface, error) 
 	return client, nil
 }
 
-func dataSourceSysdigSecurePosturePoliciesRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecurePosturePoliciesRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getPosturePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -134,11 +134,11 @@ func dataSourceSysdigSecurePosturePoliciesRead(ctx context.Context, d *schema.Re
 		return diag.FromErr(err)
 	}
 
-	policies := make([]map[string]interface{}, len(resp))
+	policies := make([]map[string]any, len(resp))
 	for i, p := range resp {
-		zones := make([]map[string]interface{}, len(p.Zones))
+		zones := make([]map[string]any, len(p.Zones))
 		for j, z := range p.Zones {
-			zones[j] = map[string]interface{}{
+			zones[j] = map[string]any{
 				SchemaIDKey:   z.ID,
 				SchemaNameKey: z.Name,
 			}
@@ -147,7 +147,7 @@ func dataSourceSysdigSecurePosturePoliciesRead(ctx context.Context, d *schema.Re
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		policies[i] = map[string]interface{}{
+		policies[i] = map[string]any{
 			SchemaIDKey:             policyID,
 			SchemaNameKey:           p.Name,
 			SchemaTypeKey:           p.Type,

@@ -14,8 +14,8 @@ import (
 //
 // Deprecated: use your own functions, this wrapper will be removed as
 // soon as the new validate functions are supported by the SDK
-func validateDiagFunc(validateFunc func(interface{}, string) ([]string, []error)) schema.SchemaValidateDiagFunc {
-	return func(i interface{}, path cty.Path) diag.Diagnostics {
+func validateDiagFunc(validateFunc func(any, string) ([]string, []error)) schema.SchemaValidateDiagFunc {
+	return func(i any, path cty.Path) diag.Diagnostics {
 		warnings, errs := validateFunc(i, fmt.Sprintf("%+v", path))
 		var diags diag.Diagnostics
 		for _, warning := range warnings {
@@ -38,7 +38,7 @@ func validateDiagFunc(validateFunc func(interface{}, string) ([]string, []error)
 func parseAzureCreds(azureTrustedIdentity string) (tenantID string, spID string, err error) {
 	tokens := strings.Split(azureTrustedIdentity, ":")
 	if len(tokens) != 2 {
-		return "", "", errors.New("Not a valid Azure Trusted Identity")
+		return "", "", errors.New("not a valid Azure Trusted Identity")
 	}
 	return tokens[0], tokens[1], nil
 }

@@ -98,7 +98,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer response.Body.Close()
+	defer func() {
+		err := response.Body.Close()
+		if err != nil {
+			log.Fatalf("error closing response body: %s", err)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
 		log.Fatal(errors.New(response.Status))

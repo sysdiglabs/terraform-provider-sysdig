@@ -41,7 +41,7 @@ func resourceSysdigMonitorNotificationChannelSNS() *schema.Resource {
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelSNSCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelSNSCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -67,16 +67,16 @@ func resourceSysdigMonitorNotificationChannelSNSCreate(ctx context.Context, d *s
 	return resourceSysdigMonitorNotificationChannelSNSRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelSNSRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelSNSRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -91,7 +91,7 @@ func resourceSysdigMonitorNotificationChannelSNSRead(ctx context.Context, d *sch
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelSNSUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelSNSUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -118,7 +118,7 @@ func resourceSysdigMonitorNotificationChannelSNSUpdate(ctx context.Context, d *s
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelSNSDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelSNSDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -140,7 +140,7 @@ func monitorNotificationChannelSNSFromResourceData(d *schema.ResourceData, teamI
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_AMAZON_SNS
+	nc.Type = notificationChannelTypeAmazonSNS
 	nc.Options.SnsTopicARNs = cast.ToStringSlice(d.Get("topics").(*schema.Set).List())
 	return
 }
