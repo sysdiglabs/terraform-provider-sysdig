@@ -392,10 +392,10 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *v2.AlertV2Common) (
 	_ = d.Set("notification_channels", notificationChannels)
 
 	if alert.CustomNotificationTemplate != nil &&
-		!(alert.CustomNotificationTemplate.Subject == "" &&
-			alert.CustomNotificationTemplate.AppendText == "" &&
-			alert.CustomNotificationTemplate.PrependText == "" &&
-			len(alert.CustomNotificationTemplate.AdditionalNotificationFields) == 0) {
+		(alert.CustomNotificationTemplate.Subject != "" ||
+			alert.CustomNotificationTemplate.AppendText != "" ||
+			alert.CustomNotificationTemplate.PrependText != "" ||
+			len(alert.CustomNotificationTemplate.AdditionalNotificationFields) != 0) {
 		customNotification := map[string]interface{}{}
 		customNotification["subject"] = alert.CustomNotificationTemplate.Subject
 		customNotification["append"] = alert.CustomNotificationTemplate.AppendText
