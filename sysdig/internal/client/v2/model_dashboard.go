@@ -14,11 +14,11 @@ type Layout struct {
 }
 
 type QueryParams struct {
-	Severities    []interface{} `json:"severities"`
-	AlertStatuses []interface{} `json:"alertStatuses"`
-	Categories    []interface{} `json:"categories"`
-	Filter        string        `json:"filter"`
-	TeamScope     bool          `json:"teamScope"`
+	Severities    []any  `json:"severities"`
+	AlertStatuses []any  `json:"alertStatuses"`
+	Categories    []any  `json:"categories"`
+	Filter        string `json:"filter"`
+	TeamScope     bool   `json:"teamScope"`
 }
 
 type EventDisplaySettings struct {
@@ -31,29 +31,29 @@ type Bottom struct {
 }
 
 type Left struct {
-	Enabled        bool        `json:"enabled"`
-	DisplayName    interface{} `json:"displayName"`
-	Unit           string      `json:"unit"`
-	DisplayFormat  string      `json:"displayFormat"`
-	Decimals       interface{} `json:"decimals"`
-	MinValue       float64     `json:"minValue"`
-	MaxValue       interface{} `json:"maxValue"`
-	MinInputFormat string      `json:"minInputFormat"`
-	MaxInputFormat string      `json:"maxInputFormat"`
-	Scale          string      `json:"scale"`
+	Enabled        bool    `json:"enabled"`
+	DisplayName    any     `json:"displayName"`
+	Unit           string  `json:"unit"`
+	DisplayFormat  string  `json:"displayFormat"`
+	Decimals       any     `json:"decimals"`
+	MinValue       float64 `json:"minValue"`
+	MaxValue       any     `json:"maxValue"`
+	MinInputFormat string  `json:"minInputFormat"`
+	MaxInputFormat string  `json:"maxInputFormat"`
+	Scale          string  `json:"scale"`
 }
 
 type Right struct {
-	Enabled        bool        `json:"enabled"`
-	DisplayName    interface{} `json:"displayName"`
-	Unit           string      `json:"unit"`
-	DisplayFormat  string      `json:"displayFormat"`
-	Decimals       interface{} `json:"decimals"`
-	MinValue       float64     `json:"minValue"`
-	MaxValue       interface{} `json:"maxValue"`
-	MinInputFormat string      `json:"minInputFormat"`
-	MaxInputFormat string      `json:"maxInputFormat"`
-	Scale          string      `json:"scale"`
+	Enabled        bool    `json:"enabled"`
+	DisplayName    any     `json:"displayName"`
+	Unit           string  `json:"unit"`
+	DisplayFormat  string  `json:"displayFormat"`
+	Decimals       any     `json:"decimals"`
+	MinValue       float64 `json:"minValue"`
+	MaxValue       any     `json:"maxValue"`
+	MinInputFormat string  `json:"minInputFormat"`
+	MaxInputFormat string  `json:"maxInputFormat"`
+	Scale          string  `json:"scale"`
 }
 
 type AxesConfiguration struct {
@@ -63,12 +63,12 @@ type AxesConfiguration struct {
 }
 
 type LegendConfiguration struct {
-	Enabled     bool        `json:"enabled"`
-	Position    string      `json:"position"`
-	Layout      string      `json:"layout"`
-	ShowCurrent bool        `json:"showCurrent"`
-	Width       interface{} `json:"width"`
-	Height      interface{} `json:"height"`
+	Enabled     bool   `json:"enabled"`
+	Position    string `json:"position"`
+	Layout      string `json:"layout"`
+	ShowCurrent bool   `json:"showCurrent"`
+	Width       any    `json:"width"`
+	Height      any    `json:"height"`
 }
 
 type DisplayInfo struct {
@@ -374,7 +374,7 @@ func (p *Panels) WithLayout(xPos, yPos, width, height int) (*Panels, error) {
 
 type NumberThresholds struct {
 	Base   NumberThresholdBase `json:"base"`
-	Values []interface{}       `json:"values"`
+	Values []any               `json:"values"`
 }
 
 type NumberThresholdBase struct {
@@ -383,9 +383,9 @@ type NumberThresholdBase struct {
 }
 
 type TeamSharingOptions struct {
-	Type          string        `json:"type"`
-	UserTeamsRole string        `json:"userTeamsRole"`
-	SelectedTeams []interface{} `json:"selectedTeams"`
+	Type          string `json:"type"`
+	UserTeamsRole string `json:"userTeamsRole"`
+	SelectedTeams []any  `json:"selectedTeams"`
 }
 
 type SharingOptions struct {
@@ -399,24 +399,24 @@ type SharingMember struct {
 }
 
 type ScopeExpressionList struct {
-	Operand     string      `json:"operand"`
-	Operator    string      `json:"operator"`
-	DisplayName string      `json:"displayName"`
-	Value       []string    `json:"value"`
-	Descriptor  interface{} `json:"descriptor"`
-	IsVariable  bool        `json:"isVariable"`
+	Operand     string   `json:"operand"`
+	Operator    string   `json:"operator"`
+	DisplayName string   `json:"displayName"`
+	Value       []string `json:"value"`
+	Descriptor  any      `json:"descriptor"`
+	IsVariable  bool     `json:"isVariable"`
 }
 
 type Dashboard struct {
 	Version                 int                    `json:"version,omitempty"`
-	CustomerID              interface{}            `json:"customerId"`
+	CustomerID              any                    `json:"customerId"`
 	TeamID                  int                    `json:"teamId"`
 	Schema                  int                    `json:"schema"`
 	AutoCreated             bool                   `json:"autoCreated"`
 	PublicToken             string                 `json:"publicToken"`
 	ScopeExpressionList     []*ScopeExpressionList `json:"scopeExpressionList"`
 	Layout                  []*Layout              `json:"layout"`
-	TeamScope               interface{}            `json:"teamScope"`
+	TeamScope               any                    `json:"teamScope"`
 	EventDisplaySettings    EventDisplaySettings   `json:"eventDisplaySettings"`
 	ID                      int                    `json:"id,omitempty"`
 	Name                    string                 `json:"name"`
@@ -429,7 +429,7 @@ type Dashboard struct {
 	CreatedOn               int64                  `json:"createdOn"`
 	ModifiedOn              int64                  `json:"modifiedOn"`
 	Panels                  []*Panels              `json:"panels"`
-	TeamScopeExpressionList []interface{}          `json:"teamScopeExpressionList"`
+	TeamScopeExpressionList []any                  `json:"teamScopeExpressionList"`
 	CreatedOnDate           string                 `json:"createdOnDate"`
 	ModifiedOnDate          string                 `json:"modifiedOnDate"`
 	TeamSharingOptions      TeamSharingOptions     `json:"teamSharingOptions"`

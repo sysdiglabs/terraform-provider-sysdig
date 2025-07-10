@@ -2,10 +2,11 @@ package sysdig
 
 import (
 	"context"
+	"strconv"
+
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strconv"
 )
 
 func resourceSysdigIPFilter() *schema.Resource {
@@ -31,7 +32,7 @@ func resourceSysdigIPFilter() *schema.Resource {
 	}
 }
 
-func resourceSysdigIPFilterRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIPFilterRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -42,9 +43,9 @@ func resourceSysdigIPFilterRead(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	ipFilter, err := client.GetIPFilterById(ctx, id)
+	ipFilter, err := client.GetIPFilterByID(ctx, id)
 	if err != nil {
-		if err == v2.IPFilterNotFound {
+		if err == v2.ErrIPFilterNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -59,7 +60,7 @@ func resourceSysdigIPFilterRead(ctx context.Context, d *schema.ResourceData, m i
 	return nil
 }
 
-func resourceSysdigIPFilterCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIPFilterCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -82,7 +83,7 @@ func resourceSysdigIPFilterCreate(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceSysdigIPFilterUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIPFilterUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -96,7 +97,6 @@ func resourceSysdigIPFilterUpdate(ctx context.Context, d *schema.ResourceData, m
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
-
 	}
 
 	ipFilter.ID = id
@@ -110,7 +110,7 @@ func resourceSysdigIPFilterUpdate(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceSysdigIPFilterDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigIPFilterDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)

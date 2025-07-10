@@ -25,7 +25,7 @@ func dataSourceSysdigSecureMLPolicy() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecureMLPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureMLPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	return mlPolicyDataSourceRead(ctx, d, meta, "custom ML policy", isCustomCompositePolicy)
 }
 
@@ -61,8 +61,7 @@ func createMLPolicyDataSourceSchema() map[string]*schema.Schema {
 	}
 }
 
-func mlPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {
-
+func mlPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta any, resourceName string, validationFunc func(v2.PolicyRulesComposite) bool) diag.Diagnostics {
 	policy, err := compositePolicyDataSourceRead(ctx, d, meta, resourceName, policyTypeML, validationFunc)
 	if err != nil {
 		return diag.FromErr(err)
@@ -75,7 +74,7 @@ func mlPolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func compositePolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}, resourceName string, policyType string, validationFunc func(v2.PolicyRulesComposite) bool) (*v2.PolicyRulesComposite, error) {
+func compositePolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, meta any, resourceName string, policyType string, validationFunc func(v2.PolicyRulesComposite) bool) (*v2.PolicyRulesComposite, error) {
 	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return nil, err
@@ -83,14 +82,14 @@ func compositePolicyDataSourceRead(ctx context.Context, d *schema.ResourceData, 
 
 	policyName := d.Get("name").(string)
 
-	policies, _, err := client.FilterCompositePoliciesByNameAndType(ctx, policyType, policyName)
+	policies, _, err := client.ListCompositePoliciesByNameAndType(ctx, policyType, policyName)
 	if err != nil {
 		return nil, err
 	}
 
 	var policy v2.PolicyRulesComposite
 	for _, existingPolicy := range policies {
-		tflog.Debug(ctx, "Filtered policies", map[string]interface{}{"name": existingPolicy.Policy.Name})
+		tflog.Debug(ctx, "Filtered policies", map[string]any{"name": existingPolicy.Policy.Name})
 
 		if existingPolicy.Policy.Name == policyName && existingPolicy.Policy.Type == policyType {
 			if !validationFunc(existingPolicy) {

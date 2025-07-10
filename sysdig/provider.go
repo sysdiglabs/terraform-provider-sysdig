@@ -11,7 +11,7 @@ type SysdigProvider struct {
 	SysdigClient SysdigClients
 }
 
-// Used by tests to get the provider
+// Provider is used by tests to get the provider
 func Provider() *schema.Provider {
 	sysdigClient := NewSysdigClients()
 	provider := &SysdigProvider{SysdigClient: sysdigClient}
@@ -152,11 +152,11 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_team":                                          resourceSysdigSecureTeam(),
 			"sysdig_secure_list":                                          resourceSysdigSecureList(),
 			"sysdig_secure_macro":                                         resourceSysdigSecureMacro(),
-			"sysdig_secure_vulnerability_exception":                       resourceSysdigSecureVulnerabilityException(),
-			"sysdig_secure_vulnerability_exception_list":                  resourceSysdigSecureVulnerabilityExceptionList(),
+			"sysdig_secure_vulnerability_exception":                       deprecatedResourceSysdigSecureVulnerabilityException(),
+			"sysdig_secure_vulnerability_exception_list":                  deprecatedResourceSysdigSecureVulnerabilityExceptionList(),
 			"sysdig_secure_cloud_account":                                 resourceSysdigSecureCloudAccount(),
-			"sysdig_secure_scanning_policy":                               resourceSysdigSecureScanningPolicy(),
-			"sysdig_secure_scanning_policy_assignment":                    resourceSysdigSecureScanningPolicyAssignment(),
+			"sysdig_secure_scanning_policy":                               deprecatedResourceSysdigSecureScanningPolicy(),
+			"sysdig_secure_scanning_policy_assignment":                    deprecatedResourceSysdigSecureScanningPolicyAssignment(),
 			"sysdig_secure_cloud_auth_account":                            resourceSysdigSecureCloudauthAccount(),
 			"sysdig_secure_cloud_auth_account_component":                  resourceSysdigSecureCloudauthAccountComponent(),
 			"sysdig_secure_cloud_auth_account_feature":                    resourceSysdigSecureCloudauthAccountFeature(),
@@ -269,7 +269,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 	}
 }
 
-func (p *SysdigProvider) providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func (p *SysdigProvider) providerConfigure(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 	p.SysdigClient.Configure(ctx, d)
 	return p.SysdigClient, nil
 }

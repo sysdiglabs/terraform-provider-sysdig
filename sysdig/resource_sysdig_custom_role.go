@@ -64,7 +64,7 @@ func resourceSysdigCustomRole() *schema.Resource {
 	}
 }
 
-func resourceSysdigCustomRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigCustomRoleRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -75,9 +75,9 @@ func resourceSysdigCustomRoleRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	customRole, err := client.GetCustomRole(ctx, id)
+	customRole, err := client.GetCustomRoleByID(ctx, id)
 	if err != nil {
-		if err == v2.CustomRoleNotFound {
+		if err == v2.ErrCustomRoleNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -92,7 +92,7 @@ func resourceSysdigCustomRoleRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceSysdigCustomRoleCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigCustomRoleCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	var err error
 
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
@@ -116,7 +116,7 @@ func resourceSysdigCustomRoleCreate(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceSysdigCustomRoleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigCustomRoleUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	var err error
 
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
@@ -144,7 +144,7 @@ func resourceSysdigCustomRoleUpdate(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceSysdigCustomRoleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigCustomRoleDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -184,7 +184,7 @@ type permission struct {
 }
 
 func (p *permission) readPermissions(product string) []string {
-	permissionsMap := p.s.List()[0].(map[string]interface{})
+	permissionsMap := p.s.List()[0].(map[string]any)
 	permissionsInterface := permissionsMap[product].(*schema.Set).List()
 	permissions := make([]string, len(permissionsInterface))
 	for i, permission := range permissionsInterface {
@@ -210,7 +210,7 @@ func customRoleToResourceData(customRole *v2.CustomRole, d *schema.ResourceData)
 	if err != nil {
 		return err
 	}
-	err = d.Set(SchemaPermissionsKey, []map[string]interface{}{
+	err = d.Set(SchemaPermissionsKey, []map[string]any{
 		permissionsToResourceData(customRole.MonitorPermissions, customRole.SecurePermissions),
 	})
 	if err != nil {
@@ -219,8 +219,8 @@ func customRoleToResourceData(customRole *v2.CustomRole, d *schema.ResourceData)
 	return nil
 }
 
-func permissionsToResourceData(monitorPermissions []string, securePermissions []string) map[string]interface{} {
-	return map[string]interface{}{
+func permissionsToResourceData(monitorPermissions []string, securePermissions []string) map[string]any {
+	return map[string]any{
 		SchemaMonitorPermKey: monitorPermissions,
 		SchemaSecurePermKey:  securePermissions,
 	}

@@ -3,6 +3,7 @@
 .DS_Store
 .envrc
 .env
+.direnv/
 example.tf
 terraform.tfplan
 terraform.tfstate
@@ -53,3 +54,4 @@ oanc
 # Local test folder
 local-terraform-test/
 dist/
+.secrets

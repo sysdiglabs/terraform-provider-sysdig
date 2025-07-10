@@ -64,7 +64,7 @@ func dataSourceSysdigSecurePostureZone() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getPostureZoneClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -75,7 +75,7 @@ func dataSourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	postureZone, err := client.GetPostureZone(ctx, id)
+	postureZone, err := client.GetPostureZoneByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -119,9 +119,9 @@ func dataSourceSysdigSecurePostureZoneRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	scopes := make([]map[string]interface{}, len(postureZone.Scopes))
+	scopes := make([]map[string]any, len(postureZone.Scopes))
 	for i, s := range postureZone.Scopes {
-		scopes[i] = map[string]interface{}{
+		scopes[i] = map[string]any{
 			"target_type": s.TargetType,
 			"rules":       s.Rules,
 		}

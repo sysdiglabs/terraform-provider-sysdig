@@ -12,21 +12,25 @@ const (
 )
 
 type DashboardInterface interface {
-	GetDashboard(ctx context.Context, ID int) (*Dashboard, error)
+	GetDashboardByID(ctx context.Context, ID int) (*Dashboard, error)
 	CreateDashboard(ctx context.Context, dashboard *Dashboard) (*Dashboard, error)
 	UpdateDashboard(ctx context.Context, dashboard *Dashboard) (*Dashboard, error)
 	DeleteDashboard(ctx context.Context, ID int) error
 }
 
-func (client *Client) GetDashboard(ctx context.Context, ID int) (*Dashboard, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.getDashboardURL(ID), nil)
+func (c *Client) GetDashboardByID(ctx context.Context, ID int) (dashboard *Dashboard, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getDashboardURL(ID), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[*dashboardWrapper](response.Body)
@@ -37,20 +41,24 @@ func (client *Client) GetDashboard(ctx context.Context, ID int) (*Dashboard, err
 	return wrapper.Dashboard, nil
 }
 
-func (client *Client) CreateDashboard(ctx context.Context, dashboard *Dashboard) (*Dashboard, error) {
+func (c *Client) CreateDashboard(ctx context.Context, dashboard *Dashboard) (createdDashboard *Dashboard, err error) {
 	payload, err := Marshal(dashboardWrapper{Dashboard: dashboard})
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.getDashboardsURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.getDashboardsURL(), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[*dashboardWrapper](response.Body)
@@ -61,20 +69,24 @@ func (client *Client) CreateDashboard(ctx context.Context, dashboard *Dashboard)
 	return wrapper.Dashboard, nil
 }
 
-func (client *Client) UpdateDashboard(ctx context.Context, dashboard *Dashboard) (*Dashboard, error) {
+func (c *Client) UpdateDashboard(ctx context.Context, dashboard *Dashboard) (updatedDashboard *Dashboard, err error) {
 	payload, err := Marshal(dashboardWrapper{Dashboard: dashboard})
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.getDashboardURL(dashboard.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.getDashboardURL(dashboard.ID), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[*dashboardWrapper](response.Body)
@@ -85,24 +97,28 @@ func (client *Client) UpdateDashboard(ctx context.Context, dashboard *Dashboard)
 	return wrapper.Dashboard, nil
 }
 
-func (client *Client) DeleteDashboard(ctx context.Context, ID int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.getDashboardURL(ID), nil)
+func (c *Client) DeleteDashboard(ctx context.Context, ID int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.getDashboardURL(ID), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *Client) getDashboardsURL() string {
-	return fmt.Sprintf(dashboardsPath, client.config.url)
+func (c *Client) getDashboardsURL() string {
+	return fmt.Sprintf(dashboardsPath, c.config.url)
 }
 
-func (client *Client) getDashboardURL(id int) string {
-	return fmt.Sprintf(dashboardPath, client.config.url, id)
+func (c *Client) getDashboardURL(id int) string {
+	return fmt.Sprintf(dashboardPath, c.config.url, id)
 }

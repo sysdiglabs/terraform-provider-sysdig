@@ -47,7 +47,7 @@ func resourceSysdigSecureNotificationChannelOpsGenie() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecureNotificationChannelOpsGenieCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelOpsGenieCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -73,16 +73,16 @@ func resourceSysdigSecureNotificationChannelOpsGenieCreate(ctx context.Context, 
 	return resourceSysdigSecureNotificationChannelOpsGenieRead(ctx, d, meta)
 }
 
-func resourceSysdigSecureNotificationChannelOpsGenieRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelOpsGenieRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -97,7 +97,7 @@ func resourceSysdigSecureNotificationChannelOpsGenieRead(ctx context.Context, d 
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelOpsGenieUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelOpsGenieUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -124,7 +124,7 @@ func resourceSysdigSecureNotificationChannelOpsGenieUpdate(ctx context.Context, 
 	return nil
 }
 
-func resourceSysdigSecureNotificationChannelOpsGenieDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureNotificationChannelOpsGenieDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -146,7 +146,7 @@ func secureNotificationChannelOpsGenieFromResourceData(d *schema.ResourceData, t
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_OPSGENIE
+	nc.Type = notificationChannelTypeOpsGenie
 	apiKey := d.Get("api_key").(string)
 	nc.Options.APIKey = apiKey
 	nc.Options.Region = d.Get("region").(string)

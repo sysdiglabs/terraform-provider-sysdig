@@ -120,7 +120,7 @@ func getMonitorInhibitionRuleClient(c SysdigClients) (v2.InhibitionRuleInterface
 	return client, nil
 }
 
-func resourceSysdigMonitorInhibitionRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorInhibitionRuleCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorInhibitionRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -141,7 +141,7 @@ func resourceSysdigMonitorInhibitionRuleCreate(ctx context.Context, d *schema.Re
 	return resourceSysdigMonitorInhibitionRuleRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorInhibitionRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorInhibitionRuleRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorInhibitionRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -152,9 +152,9 @@ func resourceSysdigMonitorInhibitionRuleRead(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	inhibitionRule, err := client.GetInhibitionRule(ctx, id)
+	inhibitionRule, err := client.GetInhibitionRuleByID(ctx, id)
 	if err != nil {
-		if err == v2.AlertV2NotFound {
+		if err == v2.ErrAlertV2NotFound {
 			d.SetId("")
 			return nil
 		}
@@ -169,7 +169,7 @@ func resourceSysdigMonitorInhibitionRuleRead(ctx context.Context, d *schema.Reso
 	return nil
 }
 
-func resourceSysdigMonitorInhibitionRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorInhibitionRuleUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorInhibitionRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -194,7 +194,7 @@ func resourceSysdigMonitorInhibitionRuleUpdate(ctx context.Context, d *schema.Re
 	return nil
 }
 
-func resourceSysdigMonitorInhibitionRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorInhibitionRuleDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorInhibitionRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -220,8 +220,8 @@ func monitorInhibitionRuleFromResourceData(d *schema.ResourceData) (v2.Inhibitio
 	inhibitionRule.Description = d.Get("description").(string)
 	inhibitionRule.Enabled = d.Get("enabled").(bool)
 
-	for _, sourceMatcher := range d.Get("source_matchers").([]interface{}) {
-		sourceMatcherMap := sourceMatcher.(map[string]interface{})
+	for _, sourceMatcher := range d.Get("source_matchers").([]any) {
+		sourceMatcherMap := sourceMatcher.(map[string]any)
 		labelName := sourceMatcherMap["label_name"].(string)
 		operator := sourceMatcherMap["operator"].(string)
 		value := sourceMatcherMap["value"].(string)
@@ -232,8 +232,8 @@ func monitorInhibitionRuleFromResourceData(d *schema.ResourceData) (v2.Inhibitio
 		})
 	}
 
-	for _, targetMatcher := range d.Get("target_matchers").([]interface{}) {
-		targetMatcherMap := targetMatcher.(map[string]interface{})
+	for _, targetMatcher := range d.Get("target_matchers").([]any) {
+		targetMatcherMap := targetMatcher.(map[string]any)
 		labelName := targetMatcherMap["label_name"].(string)
 		operator := targetMatcherMap["operator"].(string)
 		value := targetMatcherMap["value"].(string)
@@ -244,7 +244,7 @@ func monitorInhibitionRuleFromResourceData(d *schema.ResourceData) (v2.Inhibitio
 		})
 	}
 
-	for _, equalItemRaw := range d.Get("equal").([]interface{}) {
+	for _, equalItemRaw := range d.Get("equal").([]any) {
 		if equalItem, ok := equalItemRaw.(string); ok {
 			inhibitionRule.Equal = append(inhibitionRule.Equal, equalItem)
 		}
@@ -259,9 +259,9 @@ func monitorInhibitionRuleToResourceData(inhibitionRule v2.InhibitionRule, d *sc
 	_ = d.Set("description", inhibitionRule.Description)
 	_ = d.Set("enabled", inhibitionRule.Enabled)
 
-	var sourceMatchers []interface{}
+	var sourceMatchers []any
 	for _, m := range inhibitionRule.SourceMatchers {
-		sourceMatchers = append(sourceMatchers, map[string]interface{}{
+		sourceMatchers = append(sourceMatchers, map[string]any{
 			"label_name": m.LabelName,
 			"operator":   m.Operator,
 			"value":      m.Value,
@@ -269,9 +269,9 @@ func monitorInhibitionRuleToResourceData(inhibitionRule v2.InhibitionRule, d *sc
 	}
 	_ = d.Set("source_matchers", sourceMatchers)
 
-	var targetMatchers []interface{}
+	var targetMatchers []any
 	for _, m := range inhibitionRule.TargetMatchers {
-		targetMatchers = append(targetMatchers, map[string]interface{}{
+		targetMatchers = append(targetMatchers, map[string]any{
 			"label_name": m.LabelName,
 			"operator":   m.Operator,
 			"value":      m.Value,

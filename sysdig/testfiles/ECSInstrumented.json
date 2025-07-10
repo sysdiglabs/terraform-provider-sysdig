@@ -4,8 +4,7 @@
       "watch",
       "-n60",
       "cat",
-      "/etc/shadow",
-      "/bin/sh"
+      "/etc/shadow"
     ],
     "EntryPoint": [
       "/opt/draios/bin/instrument"

@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	GetAgentAccessKeyByIdPath = "%s/platform/v1/access-keys/%s"
-	CreateAgentAccessKeyPath  = "%s/platform/v1/access-keys"
-	DeleteAgentAccessKeyPath  = "%s/platform/v1/access-keys/%s"
-	PutAgentAccessKeyPath     = "%s/platform/v1/access-keys/%s"
+	getAgentAccessKeyByIDPath = "%s/platform/v1/access-keys/%s"
+	createAgentAccessKeyPath  = "%s/platform/v1/access-keys"
+	deleteAgentAccessKeyPath  = "%s/platform/v1/access-keys/%s"
+	putAgentAccessKeyPath     = "%s/platform/v1/access-keys/%s"
 )
 
 type AgentAccessKeyInterface interface {
@@ -21,102 +21,101 @@ type AgentAccessKeyInterface interface {
 	UpdateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey, id string) (*AgentAccessKey, error)
 }
 
-func (client *Client) GetAgentAccessKeyByID(ctx context.Context, id string) (*AgentAccessKey, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetAgentAccessKeyByIdUrl(id), nil)
+func (c *Client) GetAgentAccessKeyByID(ctx context.Context, id string) (accessKey *AgentAccessKey, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getAgentAccessKeyByIDUrl(id), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		err = client.ErrorFromResponse(response)
+		err = c.ErrorFromResponse(response)
 		return nil, err
 	}
 
-	agentAccessKey, err := Unmarshal[AgentAccessKey](response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &agentAccessKey, nil
+	return Unmarshal[*AgentAccessKey](response.Body)
 }
 
-func (client *Client) CreateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey) (*AgentAccessKey, error) {
+func (c *Client) CreateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey) (createdAccessKey *AgentAccessKey, err error) {
 	payload, err := Marshal(agentAccessKey)
 	if err != nil {
 		return nil, err
 	}
-	response, err := client.requester.Request(ctx, http.MethodPost, client.PostAgentAccessKeyUrl(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.postAgentAccessKeyURL(), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusCreated {
-		err = client.ErrorFromResponse(response)
+		err = c.ErrorFromResponse(response)
 		return nil, err
 	}
 
-	createdAgentAccessKey, err := Unmarshal[AgentAccessKey](response.Body)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &createdAgentAccessKey, nil
+	return Unmarshal[*AgentAccessKey](response.Body)
 }
 
-func (client *Client) UpdateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey, id string) (*AgentAccessKey, error) {
-
+func (c *Client) UpdateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey, id string) (updatedAccessKey *AgentAccessKey, err error) {
 	payload, err := Marshal(agentAccessKey)
 	if err != nil {
 		return nil, err
 	}
-	response, err := client.requester.Request(ctx, http.MethodPut, client.PutAgentAccessKeyUrl(id), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.putAgentAccessKeyURL(id), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		err = client.ErrorFromResponse(response)
+		err = c.ErrorFromResponse(response)
 		return nil, err
 	}
 
-	updatedAgentAccessKey, err := Unmarshal[AgentAccessKey](response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &updatedAgentAccessKey, nil
+	return Unmarshal[*AgentAccessKey](response.Body)
 }
 
-func (client *Client) DeleteAgentAccessKey(ctx context.Context, id string) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeleteAgentAccessKeyUrl(id), nil)
+func (c *Client) DeleteAgentAccessKey(ctx context.Context, id string) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.DeleteAgentAccessKeyURL(id), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *Client) GetAgentAccessKeyByIdUrl(id string) string {
-	return fmt.Sprintf(GetAgentAccessKeyByIdPath, client.config.url, id)
+func (c *Client) getAgentAccessKeyByIDUrl(id string) string {
+	return fmt.Sprintf(getAgentAccessKeyByIDPath, c.config.url, id)
 }
 
-func (client *Client) PostAgentAccessKeyUrl() string {
-	return fmt.Sprintf(CreateAgentAccessKeyPath, client.config.url)
+func (c *Client) postAgentAccessKeyURL() string {
+	return fmt.Sprintf(createAgentAccessKeyPath, c.config.url)
 }
 
-func (client *Client) PutAgentAccessKeyUrl(id string) string {
-	return fmt.Sprintf(PutAgentAccessKeyPath, client.config.url, id)
+func (c *Client) putAgentAccessKeyURL(id string) string {
+	return fmt.Sprintf(putAgentAccessKeyPath, c.config.url, id)
 }
 
-func (client *Client) DeleteAgentAccessKeyUrl(id string) string {
-	return fmt.Sprintf(DeleteAgentAccessKeyPath, client.config.url, id)
+func (c *Client) DeleteAgentAccessKeyURL(id string) string {
+	return fmt.Sprintf(deleteAgentAccessKeyPath, c.config.url, id)
 }

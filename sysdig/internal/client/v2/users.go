@@ -7,18 +7,17 @@ import (
 )
 
 const (
-	GetUserByUsernamePath = "%s/api/users/%s"
-	GetUserPath           = "%s/api/users/%d"
-	GetUsersPath          = "%s/api/users"
-	CreateUserPath        = "%s/api/user/provisioning/"
-	UpdateUserPath        = "%s/api/users/%d"
-	DeleteUserPath        = "%s/api/users/%d"
-	GetCurrentUserPath    = "%s/api/users/me"
+	getUserByUsernamePath = "%s/api/users/%s"
+	getUserPath           = "%s/api/users/%d"
+	createUserPath        = "%s/api/user/provisioning/"
+	updateUserPath        = "%s/api/users/%d"
+	deleteUserPath        = "%s/api/users/%d"
+	getCurrentUserPath    = "%s/api/users/me"
 )
 
 type UserInterface interface {
 	Base
-	GetUserById(ctx context.Context, id int) (*User, error)
+	GetUserByID(ctx context.Context, id int) (*User, error)
 	GetUserByUsername(ctx context.Context, username string) (*User, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	CreateUser(ctx context.Context, user *User) (*User, error)
@@ -27,16 +26,19 @@ type UserInterface interface {
 	GetCurrentUser(ctx context.Context) (u *User, err error)
 }
 
-func (client *Client) GetUserById(ctx context.Context, id int) (*User, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetUserUrl(id), nil)
+func (c *Client) GetUserByID(ctx context.Context, id int) (user *User, error error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getUserURL(id), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		err = client.ErrorFromResponse(response)
-		return nil, err
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[userWrapper](response.Body)
@@ -47,16 +49,19 @@ func (client *Client) GetUserById(ctx context.Context, id int) (*User, error) {
 	return &wrapper.User, nil
 }
 
-func (client *Client) GetUserByUsername(ctx context.Context, username string) (*User, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetUserByUsernameURL(username), nil)
+func (c *Client) GetUserByUsername(ctx context.Context, username string) (user *User, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getUserByUsernameURL(username), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		err = client.ErrorFromResponse(response)
-		return nil, err
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[userWrapper](response.Body)
@@ -67,24 +72,27 @@ func (client *Client) GetUserByUsername(ctx context.Context, username string) (*
 	return &wrapper.User, nil
 }
 
-func (client *Client) GetUserByEmail(ctx context.Context, email string) (*User, error) {
-	return client.GetUserByUsername(ctx, email)
+func (c *Client) GetUserByEmail(ctx context.Context, email string) (*User, error) {
+	return c.GetUserByUsername(ctx, email)
 }
 
-func (client *Client) CreateUser(ctx context.Context, user *User) (*User, error) {
+func (c *Client) CreateUser(ctx context.Context, user *User) (createdUser *User, err error) {
 	payload, err := Marshal(user)
 	if err != nil {
 		return nil, err
 	}
-	response, err := client.requester.Request(ctx, http.MethodPost, client.CreateUsersURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.createUsersURL(), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		err = client.ErrorFromResponse(response)
-		return nil, err
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[userWrapper](response.Body)
@@ -95,21 +103,24 @@ func (client *Client) CreateUser(ctx context.Context, user *User) (*User, error)
 	return &wrapper.User, nil
 }
 
-func (client *Client) UpdateUser(ctx context.Context, user *User) (*User, error) {
+func (c *Client) UpdateUser(ctx context.Context, user *User) (updated *User, err error) {
 	payload, err := Marshal(user)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.UpdateUserURL(user.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.updateUserURL(user.ID), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		err = client.ErrorFromResponse(response)
-		return nil, err
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[userWrapper](response.Body)
@@ -120,29 +131,37 @@ func (client *Client) UpdateUser(ctx context.Context, user *User) (*User, error)
 	return &wrapper.User, nil
 }
 
-func (client *Client) DeleteUser(ctx context.Context, id int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeleteUserURL(id), nil)
+func (c *Client) DeleteUser(ctx context.Context, id int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.deleteUserURL(id), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *Client) GetCurrentUser(ctx context.Context) (u *User, err error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetCurrentUserURL(), nil)
+func (c *Client) GetCurrentUser(ctx context.Context) (u *User, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getCurrentUserURL(), nil)
 	if err != nil {
 		return
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		err = client.ErrorFromResponse(response)
+		err = c.ErrorFromResponse(response)
 		return
 	}
 
@@ -154,30 +173,26 @@ func (client *Client) GetCurrentUser(ctx context.Context) (u *User, err error) {
 	return &wrapper.User, nil
 }
 
-func (client *Client) GetUserUrl(id int) string {
-	return fmt.Sprintf(GetUserPath, client.config.url, id)
+func (c *Client) getUserURL(id int) string {
+	return fmt.Sprintf(getUserPath, c.config.url, id)
 }
 
-func (client *Client) GetUsersUrl() string {
-	return fmt.Sprintf(GetUsersPath, client.config.url)
+func (c *Client) getUserByUsernameURL(username string) string {
+	return fmt.Sprintf(getUserByUsernamePath, c.config.url, username)
 }
 
-func (client *Client) GetUserByUsernameURL(username string) string {
-	return fmt.Sprintf(GetUserByUsernamePath, client.config.url, username)
+func (c *Client) createUsersURL() string {
+	return fmt.Sprintf(createUserPath, c.config.url)
 }
 
-func (client *Client) CreateUsersURL() string {
-	return fmt.Sprintf(CreateUserPath, client.config.url)
+func (c *Client) updateUserURL(id int) string {
+	return fmt.Sprintf(updateUserPath, c.config.url, id)
 }
 
-func (client *Client) UpdateUserURL(id int) string {
-	return fmt.Sprintf(UpdateUserPath, client.config.url, id)
+func (c *Client) deleteUserURL(id int) string {
+	return fmt.Sprintf(deleteUserPath, c.config.url, id)
 }
 
-func (client *Client) DeleteUserURL(id int) string {
-	return fmt.Sprintf(DeleteUserPath, client.config.url, id)
-}
-
-func (client *Client) GetCurrentUserURL() string {
-	return fmt.Sprintf(GetCurrentUserPath, client.config.url)
+func (c *Client) getCurrentUserURL() string {
+	return fmt.Sprintf(getCurrentUserPath, c.config.url)
 }

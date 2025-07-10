@@ -49,7 +49,7 @@ func resourceSysdigSecureRuleContainer() *schema.Resource {
 	}
 }
 
-func resourceSysdigRuleContainerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleContainerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -71,7 +71,7 @@ func resourceSysdigRuleContainerCreate(ctx context.Context, d *schema.ResourceDa
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -83,7 +83,6 @@ func resourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	rule, statusCode, err := client.GetRuleByID(ctx, id)
-
 	if err != nil {
 		if statusCode == http.StatusNotFound {
 			d.SetId("")
@@ -103,7 +102,7 @@ func resourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigRuleContainerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleContainerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -124,7 +123,7 @@ func resourceSysdigRuleContainerUpdate(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceSysdigRuleContainerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleContainerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -152,7 +151,7 @@ func resourceSysdigRuleContainerFromResourceData(d *schema.ResourceData) v2.Rule
 	rule.Details.Containers = &v2.Containers{}
 	rule.Details.Containers.MatchItems = d.Get("matching").(bool)
 	rule.Details.Containers.Items = []string{}
-	if containers, ok := d.Get("containers").([]interface{}); ok {
+	if containers, ok := d.Get("containers").([]any); ok {
 		for _, rawContainer := range containers {
 			if container, ok := rawContainer.(string); ok {
 				rule.Details.Containers.Items = append(rule.Details.Containers.Items, container)

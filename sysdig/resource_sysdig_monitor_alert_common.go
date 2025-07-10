@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"errors"
+	"maps"
 	"regexp"
 	"strings"
 	"time"
@@ -116,16 +117,14 @@ func createAlertSchema(original map[string]*schema.Schema) map[string]*schema.Sc
 		},
 	}
 
-	for k, v := range original {
-		alertSchema[k] = v
-	}
+	maps.Copy(alertSchema, original)
 
 	return alertSchema
 }
 
 func alertFromResourceData(d *schema.ResourceData) (alert *v2.Alert, err error) {
-	trigger_after_minutes := time.Duration(d.Get("trigger_after_minutes").(int)) * time.Minute
-	timespan := int(trigger_after_minutes.Microseconds())
+	triggerAfterMinutes := time.Duration(d.Get("trigger_after_minutes").(int)) * time.Minute
+	timespan := int(triggerAfterMinutes.Microseconds())
 	alert = &v2.Alert{
 		Name:                   d.Get("name").(string),
 		Type:                   "MANUAL",
@@ -203,16 +202,16 @@ func alertFromResourceData(d *schema.ResourceData) (alert *v2.Alert, err error) 
 }
 
 func alertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
-	var trigger_after_minutes int
+	var triggerAfterMinutes int
 	if alert.Timespan != nil {
-		trigger_after_minutes = int((time.Duration(*alert.Timespan) * time.Microsecond).Minutes())
+		triggerAfterMinutes = int((time.Duration(*alert.Timespan) * time.Microsecond).Minutes())
 	}
 
 	_ = data.Set("version", alert.Version)
 	_ = data.Set("name", alert.Name)
 	_ = data.Set("description", alert.Description)
 	_ = data.Set("scope", alert.Filter)
-	_ = data.Set("trigger_after_minutes", trigger_after_minutes)
+	_ = data.Set("trigger_after_minutes", triggerAfterMinutes)
 	_ = data.Set("group_name", alert.GroupName)
 	_ = data.Set("team", alert.TeamID)
 	_ = data.Set("enabled", alert.Enabled)
@@ -228,7 +227,7 @@ func alertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error)
 
 	if alert.CustomNotification != nil &&
 		(alert.CustomNotification.TitleTemplate != defaultAlertTitle || alert.CustomNotification.AppendText != "" || alert.CustomNotification.PrependText != "") {
-		customNotification := map[string]interface{}{
+		customNotification := map[string]any{
 			"title": alert.CustomNotification.TitleTemplate,
 		}
 
@@ -240,18 +239,18 @@ func alertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error)
 			customNotification["prepend"] = alert.CustomNotification.PrependText
 		}
 
-		_ = data.Set("custom_notification", []interface{}{customNotification})
+		_ = data.Set("custom_notification", []any{customNotification})
 	}
 
 	if alert.SysdigCapture != nil && alert.SysdigCapture.Enabled {
-		capture := map[string]interface{}{
+		capture := map[string]any{
 			"filename": alert.SysdigCapture.Name,
 			"duration": alert.SysdigCapture.Duration,
 		}
 		if alert.SysdigCapture.Filters != "" {
 			capture["filters"] = alert.SysdigCapture.Filters
 		}
-		_ = data.Set("capture", []interface{}{capture})
+		_ = data.Set("capture", []any{capture})
 	}
 
 	return
@@ -259,7 +258,7 @@ func alertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error)
 
 func sysdigCaptureFromSet(d *schema.Set) (captures []*v2.SysdigCapture, err error) {
 	for _, v := range d.List() {
-		m := v.(map[string]interface{})
+		m := v.(map[string]any)
 		capture := &v2.SysdigCapture{
 			Name:     m["filename"].(string),
 			Duration: m["duration"].(int),

@@ -35,7 +35,7 @@ func dataSourceSysdigSecureRuleSyscall() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigRuleSyscallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigRuleSyscallRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	return commonDataSourceSysdigRuleRead(ctx, d, meta, v2.RuleTypeSyscall, syscallRuleDataSourceToResourceData)
 }
 

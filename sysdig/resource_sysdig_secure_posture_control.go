@@ -59,7 +59,7 @@ func resourceSysdigSecurePostureControl() *schema.Resource {
 	}
 }
 
-func resourceSysdigSecurePostureControlCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePostureControlCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	// Extract 'group' field from Terraform configuration
 	client, err := getPostureControlClient(meta.(SysdigClients))
 	if err != nil {
@@ -86,7 +86,7 @@ func resourceSysdigSecurePostureControlCreateOrUpdate(ctx context.Context, d *sc
 	return nil
 }
 
-func resourceSysdigSecurePostureContorlRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePostureContorlRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getPostureControlClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -97,7 +97,7 @@ func resourceSysdigSecurePostureContorlRead(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	control, err := client.GetPostureControl(ctx, id)
+	control, err := client.GetPostureControlByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -139,7 +139,7 @@ func resourceSysdigSecurePostureContorlRead(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceSysdigSecurePostureControlDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecurePostureControlDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getPostureControlClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -150,7 +150,7 @@ func resourceSysdigSecurePostureControlDelete(ctx context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 
-	err = client.DeletePostureControl(ctx, id)
+	err = client.DeletePostureControlByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}

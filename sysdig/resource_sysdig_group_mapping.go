@@ -70,7 +70,7 @@ func resourceSysdigGroupMapping() *schema.Resource {
 	}
 }
 
-func resourceSysdigGroupMappingRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigGroupMappingRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -83,7 +83,7 @@ func resourceSysdigGroupMappingRead(ctx context.Context, d *schema.ResourceData,
 
 	groupMapping, err := client.GetGroupMapping(ctx, id)
 	if err != nil {
-		if err == v2.GroupMappingNotFound {
+		if err == v2.ErrGroupMappingNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -98,7 +98,7 @@ func resourceSysdigGroupMappingRead(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceSysdigGroupMappingCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigGroupMappingCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	var err error
 
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
@@ -119,7 +119,7 @@ func resourceSysdigGroupMappingCreate(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceSysdigGroupMappingUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigGroupMappingUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	var err error
 
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
@@ -144,7 +144,7 @@ func resourceSysdigGroupMappingUpdate(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceSysdigGroupMappingDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigGroupMappingDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -174,8 +174,8 @@ func groupMappingFromResourceData(d *schema.ResourceData) *v2.GroupMapping {
 }
 
 func teamMapFromResourceData(d *schema.ResourceData) *v2.TeamMap {
-	teamMap := d.Get("team_map").(*schema.Set).List()[0].(map[string]interface{})
-	teamIDsInterface := teamMap["team_ids"].([]interface{})
+	teamMap := d.Get("team_map").(*schema.Set).List()[0].(map[string]any)
+	teamIDsInterface := teamMap["team_ids"].([]any)
 	teamIDs := make([]int, len(teamIDsInterface))
 	for i, teamID := range teamIDsInterface {
 		teamIDs[i] = teamID.(int)
@@ -187,8 +187,8 @@ func teamMapFromResourceData(d *schema.ResourceData) *v2.TeamMap {
 	}
 }
 
-func teamMapToResourceData(teamMap *v2.TeamMap) map[string]interface{} {
-	return map[string]interface{}{
+func teamMapToResourceData(teamMap *v2.TeamMap) map[string]any {
+	return map[string]any{
 		"all_teams": teamMap.AllTeams,
 		"team_ids":  teamMap.TeamIDs,
 	}
@@ -207,7 +207,7 @@ func groupMappingToResourceData(groupMapping *v2.GroupMapping, d *schema.Resourc
 	if err != nil {
 		return err
 	}
-	err = d.Set("team_map", []map[string]interface{}{teamMapToResourceData(groupMapping.TeamMap)})
+	err = d.Set("team_map", []map[string]any{teamMapToResourceData(groupMapping.TeamMap)})
 	if err != nil {
 		return err
 	}

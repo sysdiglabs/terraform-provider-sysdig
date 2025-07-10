@@ -7,14 +7,13 @@ import (
 	"os"
 	"testing"
 
+	"github.com/draios/terraform-provider-sysdig/sysdig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccVulnerabilityExceptionList(t *testing.T) {
+func TestAccDeprecatedScanningPolicyAssignment(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -30,25 +29,39 @@ func TestAccVulnerabilityExceptionList(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: vulnerabilityExceptionList(rText()),
-			},
-			{
-				ResourceName:      "sysdig_secure_vulnerability_exception_list.sample",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: vulnerabilityExceptionList(rText()),
+				Config: deprecatedScanningPolicyAssignmentWithWhitelistIDs(rText()),
 			},
 		},
 	})
 }
 
-func vulnerabilityExceptionList(name string) string {
+func deprecatedScanningPolicyAssignmentWithWhitelistIDs(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_vulnerability_exception_list" "sample" {
-  name = "TERRAFORM TEST 1 %s"
-  description = "TERRAFORM TEST %s"
+resource "sysdig_secure_scanning_policy_assignment" "sample" {
+  items {
+    name = "example %s"
+    image {
+      type = "tag"
+      value = "latest"
+    }
+    registry = "icr.io"
+    repository = "example"
+
+    policy_ids = ["default"]
+  }
+
+  items {
+    name = ""
+    image {
+      type = "tag"
+      value = "*"
+    }
+    registry = "*"
+    repository = "*"
+
+    policy_ids = ["default"]
+	  whitelist_ids = []
+  }
 }
-`, name, name)
+`, name)
 }

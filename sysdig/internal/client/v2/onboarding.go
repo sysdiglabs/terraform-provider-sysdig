@@ -27,99 +27,127 @@ type OnboardingSecureInterface interface {
 	GetTrustedOracleAppSecure(ctx context.Context, app string) (map[string]string, error)
 }
 
-func (client *Client) GetTrustedCloudIdentitySecure(ctx context.Context, provider string) (string, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingTrustedIdentityPath, client.config.url, provider), nil)
+func (c *Client) GetTrustedCloudIdentitySecure(ctx context.Context, provider string) (identity string, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingTrustedIdentityPath, c.config.url, provider), nil)
 	if err != nil {
 		return "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return "", client.ErrorFromResponse(response)
+		return "", c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[string](response.Body)
 }
 
-func (client *Client) GetTrustedAzureAppSecure(ctx context.Context, app string) (map[string]string, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingTrustedAzureAppPath, client.config.url, app), nil)
+func (c *Client) GetTrustedAzureAppSecure(ctx context.Context, app string) (trusted map[string]string, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingTrustedAzureAppPath, c.config.url, app), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[map[string]string](response.Body)
 }
 
-func (client *Client) GetTenantExternalIDSecure(ctx context.Context) (string, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingTenantExternaIDPath, client.config.url), nil)
+func (c *Client) GetTenantExternalIDSecure(ctx context.Context) (tenant string, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingTenantExternaIDPath, c.config.url), nil)
 	if err != nil {
 		return "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return "", client.ErrorFromResponse(response)
+		return "", c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[string](response.Body)
 }
 
-func (client *Client) GetAgentlessScanningAssetsSecure(ctx context.Context) (map[string]interface{}, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingAgentlessScanningAssetsPath, client.config.url), nil)
+func (c *Client) GetAgentlessScanningAssetsSecure(ctx context.Context) (assets map[string]any, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingAgentlessScanningAssetsPath, c.config.url), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	return Unmarshal[map[string]interface{}](response.Body)
+	return Unmarshal[map[string]any](response.Body)
 }
 
-func (client *Client) GetCloudIngestionAssetsSecure(ctx context.Context, provider, providerID, componentType string) (map[string]interface{}, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingCloudIngestionAssetsPath, client.config.url, provider, providerID, componentType), nil)
+func (c *Client) GetCloudIngestionAssetsSecure(ctx context.Context, provider, providerID, componentType string) (assets map[string]any, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingCloudIngestionAssetsPath, c.config.url, provider, providerID, componentType), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	return Unmarshal[map[string]interface{}](response.Body)
+	return Unmarshal[map[string]any](response.Body)
 }
 
-func (client *Client) GetTrustedCloudRegulationAssetsSecure(ctx context.Context, provider string) (map[string]string, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingTrustedRegulationAssetsPath, client.config.url, provider), nil)
+func (c *Client) GetTrustedCloudRegulationAssetsSecure(ctx context.Context, provider string) (assets map[string]string, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingTrustedRegulationAssetsPath, c.config.url, provider), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[map[string]string](response.Body)
 }
 
-func (client *Client) GetTrustedOracleAppSecure(ctx context.Context, app string) (map[string]string, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingTrustedOracleAppPath, client.config.url, app), nil)
+func (c *Client) GetTrustedOracleAppSecure(ctx context.Context, app string) (trustedApp map[string]string, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, fmt.Sprintf(onboardingTrustedOracleAppPath, c.config.url, app), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
 	return Unmarshal[map[string]string](response.Body)

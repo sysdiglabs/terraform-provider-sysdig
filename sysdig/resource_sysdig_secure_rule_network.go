@@ -85,7 +85,7 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 	}
 }
 
-func resourceSysdigRuleNetworkCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleNetworkCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -110,7 +110,7 @@ func resourceSysdigRuleNetworkCreate(ctx context.Context, d *schema.ResourceData
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -122,7 +122,6 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	rule, statusCode, err := client.GetRuleByID(ctx, id)
-
 	if err != nil {
 		if statusCode == http.StatusNotFound {
 			d.SetId("")
@@ -152,7 +151,7 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 			}
 			tcpPorts = append(tcpPorts, intPort)
 		}
-		_ = d.Set("tcp", []map[string]interface{}{{
+		_ = d.Set("tcp", []map[string]any{{
 			"matching": rule.Details.TCPListenPorts.MatchItems,
 			"ports":    tcpPorts,
 		}})
@@ -166,7 +165,7 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 			}
 			udpPorts = append(udpPorts, intPort)
 		}
-		_ = d.Set("udp", []map[string]interface{}{{
+		_ = d.Set("udp", []map[string]any{{
 			"matching": rule.Details.UDPListenPorts.MatchItems,
 			"ports":    udpPorts,
 		}})
@@ -175,7 +174,7 @@ func resourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceSysdigRuleNetworkUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleNetworkUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -199,7 +198,7 @@ func resourceSysdigRuleNetworkUpdate(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigRuleNetworkDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleNetworkDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -231,7 +230,7 @@ func resourceSysdigRuleNetworkFromResourceData(d *schema.ResourceData) (rule v2.
 	rule.Details.AllOutbound = !d.Get("block_outbound").(bool)
 
 	rule.Details.TCPListenPorts.Items = []string{}
-	if tcpRules := d.Get("tcp").([]interface{}); len(tcpRules) > 0 {
+	if tcpRules := d.Get("tcp").([]any); len(tcpRules) > 0 {
 		rule.Details.TCPListenPorts.MatchItems = d.Get("tcp.0.matching").(bool)
 		for _, port := range d.Get("tcp.0.ports").(*schema.Set).List() {
 			portStr := port.(int)
@@ -240,7 +239,7 @@ func resourceSysdigRuleNetworkFromResourceData(d *schema.ResourceData) (rule v2.
 	}
 
 	rule.Details.UDPListenPorts.Items = []string{}
-	if udpRules, ok := d.Get("udp").([]interface{}); ok && len(udpRules) > 0 {
+	if udpRules, ok := d.Get("udp").([]any); ok && len(udpRules) > 0 {
 		rule.Details.UDPListenPorts.MatchItems = d.Get("udp.0.matching").(bool)
 		for _, port := range d.Get("udp.0.ports").(*schema.Set).List() {
 			portStr := port.(int)

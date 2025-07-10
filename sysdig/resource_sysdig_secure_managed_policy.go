@@ -45,7 +45,7 @@ func resourceSysdigSecureManagedPolicy() *schema.Resource {
 	}
 }
 
-func resourceSysdigManagedPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigManagedPolicyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
@@ -104,7 +104,7 @@ func updateManagedPolicyFromResourceData(policy *v2.Policy, d *schema.ResourceDa
 	}
 }
 
-func resourceSysdigManagedPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigManagedPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecurePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -125,7 +125,7 @@ func resourceSysdigManagedPolicyRead(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigManagedPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigManagedPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {
@@ -163,7 +163,7 @@ func resourceSysdigManagedPolicyDelete(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceSysdigManagedPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigManagedPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecurePolicyClient(sysdigClients)
 	if err != nil {

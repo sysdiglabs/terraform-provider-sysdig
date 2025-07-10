@@ -87,7 +87,7 @@ func resourceSysdigSecureStatefulRule() *schema.Resource {
 	}
 }
 
-func resourceSysdigRuleStatefulCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleStatefulCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -110,7 +110,7 @@ func resourceSysdigRuleStatefulCreate(ctx context.Context, d *schema.ResourceDat
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -183,7 +183,7 @@ func resourceSysdigRuleStatefulRead(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceSysdigRuleStatefulUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleStatefulUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -215,7 +215,7 @@ func resourceSysdigRuleStatefulUpdate(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceSysdigRuleStatefulDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigRuleStatefulDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureRuleClient(sysdigClients)
 	if err != nil {
@@ -257,8 +257,8 @@ func resourceSysdigRuleStatefulFromResourceData(d *schema.ResourceData) (v2.Rule
 
 	if exceptionsField, ok := d.GetOk("exceptions"); ok {
 		StatefulExceptions := []*v2.Exception{}
-		for _, exception := range exceptionsField.([]interface{}) {
-			exceptionMap := exception.(map[string]interface{})
+		for _, exception := range exceptionsField.([]any) {
+			exceptionMap := exception.(map[string]any)
 			newStatefulException := &v2.Exception{
 				Name: exceptionMap["name"].(string),
 			}

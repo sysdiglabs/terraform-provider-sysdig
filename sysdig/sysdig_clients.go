@@ -16,7 +16,7 @@ type SysdigClients interface {
 	io.Closer
 	GetClientType() ClientType
 	GetSecureEndpoint() (string, error)
-	GetSecureApiToken() (string, error)
+	GetSecureAPIToken() (string, error)
 
 	Configure(context.Context, *schema.ResourceData)
 	AddCleanupHook(func(context.Context, SysdigClients) error)
@@ -88,7 +88,7 @@ type ibmVariables struct {
 
 func getSysdigMonitorVariables(data *schema.ResourceData) (*sysdigVariables, error) {
 	var ok bool
-	var apiURL, token interface{}
+	var apiURL, token any
 
 	if apiURL, ok = data.GetOk("sysdig_monitor_url"); !ok {
 		return nil, errors.New("missing sysdig monitor URL")
@@ -110,7 +110,7 @@ func getSysdigMonitorVariables(data *schema.ResourceData) (*sysdigVariables, err
 
 func getSysdigSecureVariables(data *schema.ResourceData) (*sysdigSecureVariables, error) {
 	var ok bool
-	var apiURL, token interface{}
+	var apiURL, token any
 
 	if apiURL, ok = data.GetOk("sysdig_secure_url"); !ok {
 		return nil, errors.New("missing sysdig secure URL")
@@ -140,7 +140,7 @@ func getSysdigSecureVariables(data *schema.ResourceData) (*sysdigSecureVariables
 
 func getIBMVariables(product string, data *schema.ResourceData) (*ibmVariables, error) {
 	var ok bool
-	var apiURL, iamURL, instanceID, apiKey interface{}
+	var apiURL, iamURL, instanceID, apiKey any
 	var teamID *int
 
 	if apiURL, ok = data.GetOk(fmt.Sprintf("sysdig_%s_url", product)); !ok {
@@ -214,7 +214,7 @@ func (c *sysdigClients) GetSecureEndpoint() (string, error) {
 	return endpoint, nil
 }
 
-func (c *sysdigClients) GetSecureApiToken() (string, error) {
+func (c *sysdigClients) GetSecureAPIToken() (string, error) {
 	secureAPIToken := c.d.Get("sysdig_secure_api_token").(string)
 	if secureAPIToken == "" {
 		return "", errors.New("GetSecureApiToken, sysdig secure token not provided")
@@ -386,7 +386,7 @@ func (c *sysdigClients) GetClientType() ClientType {
 
 func getExtraHeaders(d *schema.ResourceData) map[string]string {
 	if headers, ok := d.GetOk("extra_headers"); ok {
-		extraHeaders := headers.(map[string]interface{})
+		extraHeaders := headers.(map[string]any)
 		extraHeadersTransformed := map[string]string{}
 		for key := range extraHeaders {
 			extraHeadersTransformed[key] = extraHeaders[key].(string)

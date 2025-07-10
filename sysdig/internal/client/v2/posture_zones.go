@@ -7,18 +7,18 @@ import (
 )
 
 const (
-	PostureZonesPath = "%s/api/cspm/v1/policy/zones"
-	PostureZonePath  = "%s/api/cspm/v1/policy/zones/%d"
+	postureZonesPath = "%s/api/cspm/v1/policy/zones"
+	postureZonePath  = "%s/api/cspm/v1/policy/zones/%d"
 )
 
 type PostureZoneInterface interface {
 	Base
 	CreateOrUpdatePostureZone(ctx context.Context, z *PostureZoneRequest) (*PostureZone, string, error)
-	GetPostureZone(ctx context.Context, id int) (*PostureZone, error)
+	GetPostureZoneByID(ctx context.Context, id int) (*PostureZone, error)
 	DeletePostureZone(ctx context.Context, id int) error
 }
 
-func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZoneRequest) (*PostureZone, string, error) {
+func (c *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZoneRequest) (zone *PostureZone, errStatus string, err error) {
 	if r.ID == "" {
 		r.ID = "0"
 	}
@@ -28,14 +28,18 @@ func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZ
 		return nil, "", err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.createPostureZoneURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.createPostureZoneURL(), payload)
 	if err != nil {
 		return nil, "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
 
@@ -47,15 +51,19 @@ func (client *Client) CreateOrUpdatePostureZone(ctx context.Context, r *PostureZ
 	return &wrapper.Data, "", nil
 }
 
-func (client *Client) GetPostureZone(ctx context.Context, id int) (*PostureZone, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.getPostureZoneURL(id), nil)
+func (c *Client) GetPostureZoneByID(ctx context.Context, id int) (zone *PostureZone, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getPostureZoneURL(id), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 	wrapper, err := Unmarshal[PostureZoneResponse](response.Body)
 	if err != nil {
@@ -65,24 +73,28 @@ func (client *Client) GetPostureZone(ctx context.Context, id int) (*PostureZone,
 	return &wrapper.Data, nil
 }
 
-func (client *Client) DeletePostureZone(ctx context.Context, id int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.getPostureZoneURL(id), nil)
+func (c *Client) DeletePostureZone(ctx context.Context, id int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.getPostureZoneURL(id), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *Client) createPostureZoneURL() string {
-	return fmt.Sprintf(PostureZonesPath, client.config.url)
+func (c *Client) createPostureZoneURL() string {
+	return fmt.Sprintf(postureZonesPath, c.config.url)
 }
 
-func (client *Client) getPostureZoneURL(id int) string {
-	return fmt.Sprintf(PostureZonePath, client.config.url, id)
+func (c *Client) getPostureZoneURL(id int) string {
+	return fmt.Sprintf(postureZonePath, c.config.url, id)
 }

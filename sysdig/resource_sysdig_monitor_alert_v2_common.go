@@ -1,6 +1,7 @@
 package sysdig
 
 import (
+	"maps"
 	"regexp"
 	"strings"
 	"time"
@@ -199,9 +200,7 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 		},
 	}
 
-	for k, v := range original {
-		alertSchema[k] = v
-	}
+	maps.Copy(alertSchema, original)
 
 	return alertSchema
 }
@@ -254,7 +253,7 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 		channels := []v2.NotificationChannelConfigV2{}
 
 		for _, channel := range attr.(*schema.Set).List() {
-			channelMap := channel.(map[string]interface{})
+			channelMap := channel.(map[string]any)
 			newChannel := v2.NotificationChannelConfigV2{
 				ChannelID: channelMap["id"].(int),
 				// Type: will be added by the sysdig client before the put/post
@@ -271,12 +270,12 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 			newChannel.OverrideOptions.NotifyOnResolve = channelMap["notify_on_resolve"].(bool)
 
 			newChannel.OverrideOptions.Thresholds = []string{}
-			main_threshold := channelMap["main_threshold"].(bool)
-			if main_threshold {
+			mainThreshold := channelMap["main_threshold"].(bool)
+			if mainThreshold {
 				newChannel.OverrideOptions.Thresholds = append(newChannel.OverrideOptions.Thresholds, "MAIN")
 			}
-			warning_threshold := channelMap["warning_threshold"].(bool)
-			if warning_threshold {
+			warningThreshold := channelMap["warning_threshold"].(bool)
+			if warningThreshold {
 				newChannel.OverrideOptions.Thresholds = append(newChannel.OverrideOptions.Thresholds, "WARNING")
 			}
 
@@ -310,8 +309,8 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 	if attr, ok := d.GetOk("capture"); ok && attr != nil {
 		capture := v2.CaptureConfigV2{}
 
-		if len(attr.([]interface{})) > 0 {
-			m := attr.([]interface{})[0].(map[string]interface{})
+		if len(attr.([]any)) > 0 {
+			m := attr.([]any)[0].(map[string]any)
 
 			capture.DurationSec = m["duration_seconds"].(int)
 			capture.FileName = m["filename"].(string)
@@ -328,7 +327,7 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 	alert.Links = []v2.AlertLinkV2{}
 	if attr, ok := d.GetOk("link"); ok && attr != nil {
 		for _, link := range attr.(*schema.Set).List() {
-			linkMap := link.(map[string]interface{})
+			linkMap := link.(map[string]any)
 			alert.Links = append(alert.Links, v2.AlertLinkV2{
 				Type: linkMap["type"].(string),
 				Href: linkMap["href"].(string),
@@ -337,7 +336,7 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 		}
 	}
 
-	alert.Labels = d.Get("labels").(map[string]interface{})
+	alert.Labels = d.Get("labels").(map[string]any)
 
 	return alert
 }
@@ -358,9 +357,9 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *v2.AlertV2Common) (
 	_ = d.Set("team", alert.TeamID)
 	_ = d.Set("version", alert.Version)
 
-	var notificationChannels []interface{}
+	var notificationChannels []any
 	for _, ncc := range alert.NotificationChannelConfigList {
-		config := map[string]interface{}{
+		config := map[string]any{
 			"id":                ncc.ChannelID,
 			"notify_on_resolve": ncc.OverrideOptions.NotifyOnResolve,
 		}
@@ -424,7 +423,7 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *v2.AlertV2Common) (
 	}
 
 	if alert.CaptureConfig != nil {
-		capture := map[string]interface{}{
+		capture := map[string]any{
 			"duration_seconds": alert.CaptureConfig.DurationSec,
 			"storage":          alert.CaptureConfig.Storage,
 			"filename":         alert.CaptureConfig.FileName,
@@ -432,13 +431,13 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *v2.AlertV2Common) (
 			"filter":           alert.CaptureConfig.Filter,
 		}
 
-		_ = d.Set("capture", []interface{}{capture})
+		_ = d.Set("capture", []any{capture})
 	}
 
 	if alert.Links != nil {
-		var links []interface{}
+		var links []any
 		for _, link := range alert.Links {
-			links = append(links, map[string]interface{}{
+			links = append(links, map[string]any{
 				"type": link.Type,
 				"href": link.Href,
 				"id":   link.ID,
@@ -484,9 +483,7 @@ func createScopedSegmentedAlertV2Schema(original map[string]*schema.Schema) map[
 		},
 	}
 
-	for k, v := range original {
-		sysdigAlertSchema[k] = v
-	}
+	maps.Copy(sysdigAlertSchema, original)
 
 	return sysdigAlertSchema
 }
@@ -495,11 +492,11 @@ func buildScopedSegmentedConfigStruct(d *schema.ResourceData, config *v2.ScopedS
 	// scope
 	expressions := make([]v2.ScopeExpressionV2, 0)
 	for _, scope := range d.Get("scope").(*schema.Set).List() {
-		scopeMap := scope.(map[string]interface{})
+		scopeMap := scope.(map[string]any)
 		operator := scopeMap["operator"].(string)
 		operand := scopeMap["label"].(string)
 		value := make([]string, 0)
-		for _, v := range scopeMap["values"].([]interface{}) {
+		for _, v := range scopeMap["values"].([]any) {
 			value = append(value, v.(string))
 		}
 		expressions = append(expressions, v2.ScopeExpressionV2{
@@ -518,7 +515,7 @@ func buildScopedSegmentedConfigStruct(d *schema.ResourceData, config *v2.ScopedS
 	config.SegmentBy = make([]v2.AlertLabelDescriptorV2, 0)
 	labels, ok := d.GetOk("group_by")
 	if ok {
-		for _, l := range labels.([]interface{}) {
+		for _, l := range labels.([]any) {
 			config.SegmentBy = append(config.SegmentBy, v2.AlertLabelDescriptorV2{
 				ID: l.(string), // the sysdig client will rewrite this to be in dot notation
 			})
@@ -528,7 +525,7 @@ func buildScopedSegmentedConfigStruct(d *schema.ResourceData, config *v2.ScopedS
 
 func updateScopedSegmentedConfigState(d *schema.ResourceData, config *v2.ScopedSegmentedConfig) error {
 	if config.Scope != nil && len(config.Scope.Expressions) > 0 {
-		var scope []interface{}
+		var scope []any
 		for _, e := range config.Scope.Expressions {
 			// operand possibly holds the old dot notation, we want "label" to be in public notation
 			// if the label does not yet exist the descriptor will be empty, use what's in the operand
@@ -536,7 +533,7 @@ func updateScopedSegmentedConfigState(d *schema.ResourceData, config *v2.ScopedS
 			if e.Descriptor != nil && e.Descriptor.PublicID != "" {
 				label = e.Descriptor.PublicID
 			}
-			config := map[string]interface{}{
+			config := map[string]any{
 				"label":    label,
 				"operator": e.Operator,
 				"values":   e.Value,

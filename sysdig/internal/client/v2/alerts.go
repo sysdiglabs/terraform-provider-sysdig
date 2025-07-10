@@ -7,34 +7,38 @@ import (
 )
 
 const (
-	CreateAlertPath = "%s/api/alerts"
-	DeleteAlertPath = "%s/api/alerts/%d"
-	UpdateAlertPath = "%s/api/alerts/%d"
-	GetAlertPath    = "%s/api/alerts/%d"
+	createAlertPath = "%s/api/alerts"
+	deleteAlertPath = "%s/api/alerts/%d"
+	updateAlertPath = "%s/api/alerts/%d"
+	getAlertPath    = "%s/api/alerts/%d"
 )
 
 type AlertInterface interface {
 	Base
 	CreateAlert(ctx context.Context, alert Alert) (Alert, error)
-	DeleteAlert(ctx context.Context, alertID int) error
-	UpdateAlert(ctx context.Context, alert Alert) (Alert, error)
 	GetAlertByID(ctx context.Context, alertID int) (Alert, error)
+	UpdateAlert(ctx context.Context, alert Alert) (Alert, error)
+	DeleteAlertByID(ctx context.Context, alertID int) error
 }
 
-func (client *Client) CreateAlert(ctx context.Context, alert Alert) (Alert, error) {
-	payload, err := Marshal[alertWrapper](alertWrapper{Alert: alert})
+func (c *Client) CreateAlert(ctx context.Context, alert Alert) (createdAlert Alert, err error) {
+	payload, err := Marshal(alertWrapper{Alert: alert})
 	if err != nil {
 		return Alert{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.CreateAlertURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.createAlertURL(), payload)
 	if err != nil {
 		return Alert{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Alert{}, client.ErrorFromResponse(response)
+		return Alert{}, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[alertWrapper](response.Body)
@@ -45,34 +49,42 @@ func (client *Client) CreateAlert(ctx context.Context, alert Alert) (Alert, erro
 	return wrapper.Alert, nil
 }
 
-func (client *Client) DeleteAlert(ctx context.Context, alertID int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeleteAlertURL(alertID), nil)
+func (c *Client) DeleteAlertByID(ctx context.Context, alertID int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.deleteAlertURL(alertID), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return err
 }
 
-func (client *Client) UpdateAlert(ctx context.Context, alert Alert) (Alert, error) {
-	payload, err := Marshal[alertWrapper](alertWrapper{Alert: alert})
+func (c *Client) UpdateAlert(ctx context.Context, alert Alert) (updatedAlert Alert, err error) {
+	payload, err := Marshal(alertWrapper{Alert: alert})
 	if err != nil {
 		return Alert{}, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.UpdateAlertURL(alert.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.updateAlertURL(alert.ID), payload)
 	if err != nil {
 		return Alert{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Alert{}, client.ErrorFromResponse(response)
+		return Alert{}, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[alertWrapper](response.Body)
@@ -83,15 +95,19 @@ func (client *Client) UpdateAlert(ctx context.Context, alert Alert) (Alert, erro
 	return wrapper.Alert, nil
 }
 
-func (client *Client) GetAlertByID(ctx context.Context, alertID int) (Alert, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetAlertByIDURL(alertID), nil)
+func (c *Client) GetAlertByID(ctx context.Context, alertID int) (alert Alert, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getAlertByIDURL(alertID), nil)
 	if err != nil {
 		return Alert{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Alert{}, client.ErrorFromResponse(response)
+		return Alert{}, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[alertWrapper](response.Body)
@@ -102,18 +118,18 @@ func (client *Client) GetAlertByID(ctx context.Context, alertID int) (Alert, err
 	return wrapper.Alert, nil
 }
 
-func (client *Client) CreateAlertURL() string {
-	return fmt.Sprintf(CreateAlertPath, client.config.url)
+func (c *Client) createAlertURL() string {
+	return fmt.Sprintf(createAlertPath, c.config.url)
 }
 
-func (client *Client) DeleteAlertURL(alertID int) string {
-	return fmt.Sprintf(DeleteAlertPath, client.config.url, alertID)
+func (c *Client) deleteAlertURL(alertID int) string {
+	return fmt.Sprintf(deleteAlertPath, c.config.url, alertID)
 }
 
-func (client *Client) UpdateAlertURL(alertID int) string {
-	return fmt.Sprintf(UpdateAlertPath, client.config.url, alertID)
+func (c *Client) updateAlertURL(alertID int) string {
+	return fmt.Sprintf(updateAlertPath, c.config.url, alertID)
 }
 
-func (client *Client) GetAlertByIDURL(alertID int) string {
-	return fmt.Sprintf(GetAlertPath, client.config.url, alertID)
+func (c *Client) getAlertByIDURL(alertID int) string {
+	return fmt.Sprintf(getAlertPath, c.config.url, alertID)
 }
