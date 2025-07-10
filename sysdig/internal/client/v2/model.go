@@ -419,6 +419,7 @@ type DriftRuleDetails struct {
 	ProhibitedBinaries        *RuntimePolicyRuleList `json:"prohibitedBinaries"`
 	Mode                      string                 `json:"mode"`
 	MountedVolumeDriftEnabled bool                   `json:"mountedVolumeDriftEnabled"`
+	UseRegex                  bool                   `json:"useRegex"`
 	Details                   `json:"-"`
 }
 

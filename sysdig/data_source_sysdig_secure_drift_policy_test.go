@@ -47,12 +47,20 @@ resource "sysdig_secure_drift_policy" "policy_1" {
   rule {
     description = "Test Drift Rule Description"
     enabled = true
+    mounted_volume_drift_enabled = true
+    use_regex = true
 
     exceptions {
       items = ["/usr/bin/sh"]
     }
     prohibited_binaries {
       items = ["/usr/bin/curl"]
+    }
+    process_based_exceptions {
+      items = ["/usr/bin/curl"]
+    }
+    process_based_prohibited_binaries {
+      items = ["/usr/bin/sh"]
     }
   }
 

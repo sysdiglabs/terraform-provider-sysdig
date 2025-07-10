@@ -123,6 +123,4 @@ The rule block is required and supports:
 * `process_based_prohibited_binaries` - (Optional) List of processes that will be prohibited to execute a drifted file
     * `items` - (Required) Specify comma separated list of processes, e.g. `/usr/bin/rm, /usr/bin/curl`.
 * `mounted_volume_drift_enabled` - (Optional) Treat all binaries from mounted volumes as drifted. Default value is false/disabled.
-
-
-
+* `use_regex` - (Optional) Pass exceptions and prohibited binaries as regex strings. Requires agent version 13.2.0 and above
