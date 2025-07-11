@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -9,17 +10,18 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/spf13/cast"
 )
 
-func resourceSysdigMonitorAlertGroupOutlier() *schema.Resource {
+func deprecatedResourceSysdigMonitorAlertDowntime() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		DeprecationMessage: "Group Outlier Alerts have been deprecated, \"sysdig_monitor_alert_group_outlier\" will be removed in future releases",
-		CreateContext:      resourceSysdigAlertGroupOutlierCreate,
-		UpdateContext:      resourceSysdigAlertGroupOutlierUpdate,
-		ReadContext:        resourceSysdigAlertGroupOutlierRead,
-		DeleteContext:      resourceSysdigAlertGroupOutlierDelete,
+		DeprecationMessage: "\"sysdig_monitor_alert_downtime\" has been deprecated and will be removed in future releases, use \"sysdig_monitor_alert_v2_downtime\" instead",
+		CreateContext:      deprecatedResourceSysdigAlertDowntimeCreate,
+		UpdateContext:      deprecatedResourceSysdigAlertDowntimeUpdate,
+		ReadContext:        deprecatedResourceSysdigAlertDowntimeRead,
+		DeleteContext:      deprecatedResourceSysdigAlertDowntimeDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -32,22 +34,27 @@ func resourceSysdigMonitorAlertGroupOutlier() *schema.Resource {
 		},
 
 		Schema: createAlertSchema(map[string]*schema.Schema{
-			"monitor": {
+			"entities_to_monitor": {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"trigger_after_pct": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  100,
 			},
 		}),
 	}
 }
 
-func resourceSysdigAlertGroupOutlierCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertDowntimeCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	alert, err := groupOutlierAlertFromResourceData(data)
+	alert, err := deprecatedDowntimeAlertFromResourceData(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -63,13 +70,13 @@ func resourceSysdigAlertGroupOutlierCreate(ctx context.Context, data *schema.Res
 	return nil
 }
 
-func resourceSysdigAlertGroupOutlierUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertDowntimeUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	alert, err := groupOutlierAlertFromResourceData(data)
+	alert, err := deprecatedDowntimeAlertFromResourceData(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -84,7 +91,7 @@ func resourceSysdigAlertGroupOutlierUpdate(ctx context.Context, data *schema.Res
 	return nil
 }
 
-func resourceSysdigAlertGroupOutlierRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertDowntimeRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -101,7 +108,7 @@ func resourceSysdigAlertGroupOutlierRead(ctx context.Context, data *schema.Resou
 		return nil
 	}
 
-	err = groupOutlierAlertToResourceData(&alert, data)
+	err = deprecatedDowntimeAlertToResourceData(&alert, data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -109,7 +116,7 @@ func resourceSysdigAlertGroupOutlierRead(ctx context.Context, data *schema.Resou
 	return nil
 }
 
-func resourceSysdigAlertGroupOutlierDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
+func deprecatedResourceSysdigAlertDowntimeDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -128,38 +135,35 @@ func resourceSysdigAlertGroupOutlierDelete(ctx context.Context, data *schema.Res
 	return nil
 }
 
-func groupOutlierAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err error) {
-	alert, err = alertFromResourceData(data)
+func deprecatedDowntimeAlertFromResourceData(d *schema.ResourceData) (alert *v2.Alert, err error) {
+	alert, err = alertFromResourceData(d)
 	if err != nil {
 		return
 	}
 
-	alert.Type = "HOST_COMPARISON"
-
-	for _, metric := range data.Get("monitor").([]any) {
-		alert.Monitor = append(alert.Monitor, &v2.Monitor{
-			Metric:       metric.(string),
-			StdDevFactor: 2,
-		})
-	}
-
 	alert.SegmentCondition = &v2.SegmentCondition{Type: "ANY"}
-	alert.SegmentBy = []string{"host.mac"}
+	alert.Condition = fmt.Sprintf("avg(timeAvg(uptime)) <= %.2f", 1.0-(cast.ToFloat64(d.Get("trigger_after_pct"))/100.0))
+
+	entitiesRaw := d.Get("entities_to_monitor").([]any)
+	for _, entityRaw := range entitiesRaw {
+		alert.SegmentBy = append(alert.SegmentBy, entityRaw.(string))
+	}
 
 	return
 }
 
-func groupOutlierAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
+func deprecatedDowntimeAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
 	if err != nil {
 		return
 	}
 
-	monitorMetrics := []string{}
-	for _, v := range alert.Monitor {
-		monitorMetrics = append(monitorMetrics, v.Metric)
-	}
-	_ = data.Set("monitor", monitorMetrics)
+	var triggerAfterPct float64
+	_, _ = fmt.Sscanf(alert.Condition, "avg(timeAvg(uptime)) <= %f", &triggerAfterPct)
+	triggerAfterPct = (1 - triggerAfterPct) * 100
+
+	_ = data.Set("trigger_after_pct", int(triggerAfterPct))
+	_ = data.Set("entities_to_monitor", alert.SegmentBy)
 
 	return
 }
