@@ -73,6 +73,11 @@ By defining this field, the user can modify the title and the body of the messag
 * `subject` - (Optional) Sets the title of the alert.
 * `prepend` - (Optional) Text to add before the alert template.
 * `append` - (Optional) Text to add after the alert template.
+* `additional_field` - (Optional) Set of additional fields to add to the notification.
+
+#### `additional_field`
+* `name` - (Required) field name.
+* `value` - (Required) field value.
 
 ### `link`
 
