@@ -41,6 +41,7 @@ func (c *Client) CreateOrganizationSecure(ctx context.Context, org *Organization
 		return nil, errStatus, err
 	}
 
+	organization = &OrganizationSecure{}
 	err = c.unmarshalCloudauthProto(response.Body, organization)
 	if err != nil {
 		return nil, "", err
@@ -64,6 +65,7 @@ func (c *Client) GetOrganizationSecure(ctx context.Context, orgID string) (organ
 		return nil, errStatus, err
 	}
 
+	organization = &OrganizationSecure{}
 	err = c.unmarshalCloudauthProto(response.Body, organization)
 	if err != nil {
 		return nil, "", err
@@ -110,6 +112,7 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 		return nil, errStatus, err
 	}
 
+	organization = &OrganizationSecure{}
 	err = c.unmarshalCloudauthProto(response.Body, organization)
 	if err != nil {
 		return nil, "", err
