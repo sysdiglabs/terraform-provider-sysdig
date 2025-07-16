@@ -32,11 +32,50 @@ func TestAccDriftPolicyDataSource(t *testing.T) {
 			{
 				Config: driftPolicyDataSource(rText),
 			},
+			{
+				Config: driftPolicyWithUseRegexDataSource(rText),
+			},
+			{
+				Config: driftPolicyWithProcessExceptionsDataSource(rText),
+			},
 		},
 	})
 }
 
 func driftPolicyDataSource(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_drift_policy" "policy_1" {
+  name        = "Test Drift Policy %s"
+  description = "Test Drift Policy Description %s"
+  enabled     = true
+  severity    = 4
+
+  rule {
+    description = "Test Drift Rule Description"
+    enabled = true
+
+    exceptions {
+      items = ["/usr/bin/sh"]
+    }
+    prohibited_binaries {
+      items = ["/usr/bin/curl"]
+    }
+  }
+
+  actions {
+    prevent_drift = true
+  }
+
+}
+	
+data "sysdig_secure_drift_policy" "policy_2" {
+  name       = sysdig_secure_drift_policy.policy_1.name
+  depends_on = [sysdig_secure_drift_policy.policy_1]
+}
+`, name, name)
+}
+
+func driftPolicyWithUseRegexDataSource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_drift_policy" "policy_1" {
   name        = "Test Drift Policy %s"
@@ -56,6 +95,40 @@ resource "sysdig_secure_drift_policy" "policy_1" {
     prohibited_binaries {
       items = ["/usr/bin/curl"]
     }
+    process_based_exceptions {
+      items = ["/usr/bin/curl"]
+    }
+    process_based_prohibited_binaries {
+      items = ["/usr/bin/sh"]
+    }
+  }
+
+  actions {
+    prevent_drift = true
+  }
+
+}
+	
+data "sysdig_secure_drift_policy" "policy_2" {
+  name       = sysdig_secure_drift_policy.policy_1.name
+  depends_on = [sysdig_secure_drift_policy.policy_1]
+}
+`, name, name)
+}
+
+func driftPolicyWithProcessExceptionsDataSource(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_drift_policy" "policy_1" {	
+  name        = "Test Drift Policy %s"
+  description = "Test Drift Policy Description %s"
+  enabled     = true
+  severity    = 4
+
+  rule {
+    description = "Test Drift Rule Description"
+    enabled = true
+	mounted_volume_drift_enabled = true
+
     process_based_exceptions {
       items = ["/usr/bin/curl"]
     }
