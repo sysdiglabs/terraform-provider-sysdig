@@ -72,7 +72,7 @@ resource "sysdig_secure_drift_policy" "sample" {
     }
     process_based_exceptions {
       items = ["/usr/bin/curl"]
-	  }
+    }
   }
 
   actions {
