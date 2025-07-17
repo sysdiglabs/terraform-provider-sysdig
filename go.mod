@@ -2,8 +2,6 @@ module github.com/draios/terraform-provider-sysdig
 
 go 1.24.4
 
-replace github.com/sysdiglabs/agent-kilt/pkg => github.com/sysdiglabs/agent-kilt/pkg v0.0.0-20250617143519-c6c40780f72f // fixes local replacement in upstream github.com/sysdiglabs/agent-kilt/runtimes/cloudformation
-
 require (
 	github.com/Jeffail/gabs/v2 v2.7.0
 	github.com/aws/aws-sdk-go v1.55.7
@@ -15,7 +13,7 @@ require (
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cast v1.9.2
 	github.com/stretchr/testify v1.10.0
-	github.com/sysdiglabs/agent-kilt/runtimes/cloudformation v0.0.0-20250617143519-c6c40780f72f
+	github.com/sysdiglabs/agent-kilt v1.0.0
 	google.golang.org/protobuf v1.36.6
 )
 
@@ -26,7 +24,7 @@ require (
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.16.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/docker/cli v28.3.1+incompatible // indirect
+	github.com/docker/cli v28.3.2+incompatible // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.3 // indirect
 	github.com/fatih/color v1.18.0 // indirect
@@ -66,7 +64,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/sysdiglabs/agent-kilt/pkg v0.0.0-replace // indirect
 	github.com/vbatts/tar-split v0.12.1 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
@@ -75,8 +72,8 @@ require (
 	golang.org/x/crypto v0.39.0 // indirect
 	golang.org/x/mod v0.25.0 // indirect
 	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/sync v0.15.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/tools v0.34.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
