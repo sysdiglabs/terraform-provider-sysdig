@@ -70,6 +70,9 @@ resource "sysdig_secure_drift_policy" "sample" {
     prohibited_binaries {
       items = ["/usr/bin/curl"]
     }
+    process_based_exceptions {
+      items = ["/usr/bin/curl"]
+    }
   }
 
   actions {
@@ -106,9 +109,6 @@ resource "sysdig_secure_drift_policy" "sample" {
     }
     process_based_exceptions {
       items = ["/usr/bin/curl"]
-    } 
-    process_based_prohibited_binaries {
-      items = ["/usr/bin/sh"]
     }
   }
 
@@ -185,9 +185,6 @@ resource "sysdig_secure_drift_policy" "sample" {
     process_based_exceptions {
       items = ["/usr/bin/curl"]
     }
-    process_based_prohibited_binaries {
-      items = ["/usr/bin/sh"]
-    }
   }
 
   actions {
@@ -235,11 +232,39 @@ resource "sysdig_secure_drift_policy" "sample" {
 
   rule {
     description = "Test Drift Rule Description"
-
-    enabled = true
     mounted_volume_drift_enabled = true
 
     enabled = true
+    
+    exceptions {
+      items = ["/usr/bin/sh"]
+    }
+    prohibited_binaries {
+      items = ["/usr/bin/curl"]
+    }
+    process_based_exceptions {
+      items = ["/usr/bin/curl"]
+    }
+  }
+}
+  `, name)
+}
+
+func driftPolicyWithProcessBasedAndRegexEnabled(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_drift_policy" "sample" {
+
+  name        = "Test Drift Policy %s"
+  description = "Test Drift Policy Description"
+  enabled     = true
+  severity    = 4
+
+  rule {
+    description = "Test Drift Rule Description"
+    mounted_volume_drift_enabled = true
+
+    enabled = true
+    use_regex = true
     
     exceptions {
       items = ["/usr/bin/sh"]
