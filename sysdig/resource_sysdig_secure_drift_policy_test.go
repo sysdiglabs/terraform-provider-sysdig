@@ -99,7 +99,6 @@ resource "sysdig_secure_drift_policy" "sample" {
     description = "Test Drift Rule Description"
 
     enabled = true
-    use_regex = true
 
     exceptions {
       items = ["/usr/bin/sh"]
@@ -142,7 +141,6 @@ resource "sysdig_secure_drift_policy" "sample" {
     description = "Test Drift Rule Description"
 
     enabled = true
-    use_regex = true
 
     exceptions {
       items = ["/usr/bin/sh"]
