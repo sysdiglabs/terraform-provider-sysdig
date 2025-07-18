@@ -216,6 +216,7 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 			"tags":                         rule.Tags,
 			"enabled":                      enabled,
 			"mounted_volume_drift_enabled": driftDetails.MountedVolumeDriftEnabled,
+			"use_regex":                    driftDetails.UseRegex,
 		}
 
 		if exceptionsBlock != nil {
@@ -498,6 +499,7 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 		}
 
 		mountedVolumeDriftEnabled := d.Get("rule.0.mounted_volume_drift_enabled").(bool)
+		useRegex := d.Get("rule.0.use_regex").(bool)
 
 		rule := &v2.RuntimePolicyRule{
 			// TODO: Do not hardcode the indexes
@@ -512,6 +514,7 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 				ProcessBasedExceptions:    &processBasedExceptions,
 				ProcessBasedDenylist:      &processBasedProhibitedBinaries,
 				MountedVolumeDriftEnabled: mountedVolumeDriftEnabled,
+				UseRegex:                  useRegex,
 			},
 		}
 
