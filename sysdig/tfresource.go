@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"errors"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -109,19 +110,25 @@ func setTFResourcePolicyRulesMalware(d *schema.ResourceData, policy v2.PolicyRul
 
 	rules := []map[string]any{}
 	for _, rule := range policy.Rules {
-		additionalHashes := []map[string]any{}
-		for k := range rule.Details.(*v2.MalwareRuleDetails).AdditionalHashes {
-			additionalHashes = append(additionalHashes, map[string]any{
-				"hash": k,
-			})
-		}
+		malwareRuleDetails := rule.Details.(*v2.MalwareRuleDetails)
 
-		ignoreHashes := []map[string]any{}
-		for k := range rule.Details.(*v2.MalwareRuleDetails).IgnoreHashes {
-			ignoreHashes = append(ignoreHashes, map[string]any{
-				"hash": k,
-			})
+		additionalHashes := []string{}
+		for k := range malwareRuleDetails.AdditionalHashes {
+			additionalHashes = append(additionalHashes, k)
 		}
+		slices.Sort(additionalHashes)
+
+		ignoreHashes := []string{}
+		for k := range malwareRuleDetails.IgnoreHashes {
+			ignoreHashes = append(ignoreHashes, k)
+		}
+		slices.Sort(ignoreHashes)
+
+		ignorePaths := []string{}
+		for k := range malwareRuleDetails.IgnorePaths {
+			ignorePaths = append(ignorePaths, k)
+		}
+		slices.Sort(ignorePaths)
 
 		rules = append(rules, map[string]any{
 			"id":                 rule.ID,
@@ -129,9 +136,12 @@ func setTFResourcePolicyRulesMalware(d *schema.ResourceData, policy v2.PolicyRul
 			"description":        rule.Description,
 			"version":            rule.Version,
 			"tags":               rule.Tags,
-			"use_managed_hashes": rule.Details.(*v2.MalwareRuleDetails).UseManagedHashes,
+			"use_managed_hashes": malwareRuleDetails.UseManagedHashes,
+			"use_yara_rules":     malwareRuleDetails.UseYaraRules,
 			"additional_hashes":  additionalHashes,
 			"ignore_hashes":      ignoreHashes,
+			"use_regex":          malwareRuleDetails.UseRegex,
+			"ignore_paths":       ignorePaths,
 		})
 	}
 
@@ -216,6 +226,7 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 			"tags":                         rule.Tags,
 			"enabled":                      enabled,
 			"mounted_volume_drift_enabled": driftDetails.MountedVolumeDriftEnabled,
+			"use_regex":                    driftDetails.UseRegex,
 		}
 
 		if exceptionsBlock != nil {
@@ -419,9 +430,8 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 		additionalHashes := map[string][]string{}
 		if items, ok := d.GetOk("rule.0.additional_hashes"); ok { // TODO: Do not hardcode the indexes
 			for _, item := range items.([]any) {
-				item := item.(map[string]any)
-				k := item["hash"].(string)
-				additionalHashes[k] = []string{}
+				hash := item.(string)
+				additionalHashes[hash] = []string{}
 			}
 		}
 
@@ -429,9 +439,8 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 		ignoreHashes := map[string][]string{}
 		if items, ok := d.GetOk("rule.0.ignore_hashes"); ok { // TODO: Do not hardcode the indexes
 			for _, item := range items.([]any) {
-				item := item.(map[string]any)
-				k := item["hash"].(string)
-				ignoreHashes[k] = []string{}
+				hash := item.(string)
+				ignoreHashes[hash] = []string{}
 			}
 		}
 
@@ -439,6 +448,14 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 		// Set default tags as field tags must not be null
 		if len(tags) == 0 {
 			tags = []string{defaultMalwareTag}
+		}
+
+		ignorePaths := map[string][]string{}
+		if items, ok := d.GetOk("rule.0.ignore_paths"); ok { // TODO: Do not hardcode the indexes
+			for _, item := range items.([]any) {
+				path := item.(string)
+				ignorePaths[path] = []string{}
+			}
 		}
 
 		rule := &v2.RuntimePolicyRule{
@@ -449,8 +466,11 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 			Details: v2.MalwareRuleDetails{
 				RuleType:         v2.ElementType("MALWARE"), // TODO: Use const
 				UseManagedHashes: d.Get("rule.0.use_managed_hashes").(bool),
+				UseYaraRules:     d.Get("rule.0.use_yara_rules").(bool),
 				AdditionalHashes: additionalHashes,
 				IgnoreHashes:     ignoreHashes,
+				UseRegex:         d.Get("rule.0.use_regex").(bool),
+				IgnorePaths:      ignorePaths,
 			},
 		}
 
@@ -498,6 +518,7 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 		}
 
 		mountedVolumeDriftEnabled := d.Get("rule.0.mounted_volume_drift_enabled").(bool)
+		useRegex := d.Get("rule.0.use_regex").(bool)
 
 		rule := &v2.RuntimePolicyRule{
 			// TODO: Do not hardcode the indexes
@@ -512,6 +533,7 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 				ProcessBasedExceptions:    &processBasedExceptions,
 				ProcessBasedDenylist:      &processBasedProhibitedBinaries,
 				MountedVolumeDriftEnabled: mountedVolumeDriftEnabled,
+				UseRegex:                  useRegex,
 			},
 		}
 

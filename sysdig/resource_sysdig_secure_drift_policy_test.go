@@ -42,6 +42,9 @@ func TestAccDriftPolicy(t *testing.T) {
 			{
 				Config: driftPolicyWithMountedVolumeDriftEnabled(rText()),
 			},
+			{
+				Config: driftPolicyWithProcessBasedAndRegexEnabled(rText()),
+			},
 		},
 	})
 }
@@ -67,9 +70,6 @@ resource "sysdig_secure_drift_policy" "sample" {
     prohibited_binaries {
       items = ["/usr/bin/curl"]
     }
-	process_based_exceptions {
-      items = ["/usr/bin/curl"]
-	} 
   }
 
   actions {
@@ -96,6 +96,7 @@ resource "sysdig_secure_drift_policy" "sample" {
     description = "Test Drift Rule Description"
 
     enabled = true
+    use_regex = true
 
     exceptions {
       items = ["/usr/bin/sh"]
@@ -103,9 +104,12 @@ resource "sysdig_secure_drift_policy" "sample" {
     prohibited_binaries {
       items = ["/usr/bin/curl"]
     }
-	process_based_exceptions {
+    process_based_exceptions {
       items = ["/usr/bin/curl"]
-	} 
+    } 
+    process_based_prohibited_binaries {
+      items = ["/usr/bin/sh"]
+    }
   }
 
   actions {
@@ -138,6 +142,7 @@ resource "sysdig_secure_drift_policy" "sample" {
     description = "Test Drift Rule Description"
 
     enabled = true
+    use_regex = true
 
     exceptions {
       items = ["/usr/bin/sh"]
@@ -145,9 +150,9 @@ resource "sysdig_secure_drift_policy" "sample" {
     prohibited_binaries {
       items = ["/usr/bin/curl"]
     }
-	process_based_exceptions {
+    process_based_exceptions {
       items = ["/usr/bin/curl"]
-	} 
+    } 
   }
 
   actions {}
@@ -177,9 +182,12 @@ resource "sysdig_secure_drift_policy" "sample" {
     prohibited_binaries {
       items = ["/usr/bin/curl"]
     }
-	process_based_exceptions {
+    process_based_exceptions {
       items = ["/usr/bin/curl"]
-	} 
+    }
+    process_based_prohibited_binaries {
+      items = ["/usr/bin/sh"]
+    }
   }
 
   actions {
@@ -227,19 +235,25 @@ resource "sysdig_secure_drift_policy" "sample" {
 
   rule {
     description = "Test Drift Rule Description"
-    mounted_volume_drift_enabled = true
-    enabled = true
 
+    enabled = true
+    mounted_volume_drift_enabled = true
+
+    enabled = true
+    
     exceptions {
       items = ["/usr/bin/sh"]
     }
     prohibited_binaries {
       items = ["/usr/bin/curl"]
     }
-	  process_based_exceptions {
+    process_based_exceptions {
       items = ["/usr/bin/curl"]
     }
-	} 
+    process_based_prohibited_binaries {
+      items = ["/usr/bin/sh"]
+    }
+  }
 }
   `, name)
 }
