@@ -326,6 +326,26 @@ func HashesComputedSchema() *schema.Schema {
 	}
 }
 
+func StringListSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	}
+}
+
+func StringListComputedSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	}
+}
+
 func TagsSchema() *schema.Schema {
 	// Tags are always set automatically by Sysdig
 	return &schema.Schema{
