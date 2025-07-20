@@ -162,6 +162,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_monitor_silence_rule":                                  resourceSysdigMonitorSilenceRule(),
 			"sysdig_monitor_team":                                          resourceSysdigMonitorTeam(),
 
+			"sysdig_secure_automation":                                    resourceSysdigSecureAutomation(),
 			"sysdig_secure_aws_ml_policy":                                 resourceSysdigSecureAWSMLPolicy(),
 			"sysdig_secure_cloud_account":                                 resourceSysdigSecureCloudAccount(),
 			"sysdig_secure_cloud_auth_account":                            resourceSysdigSecureCloudauthAccount(),

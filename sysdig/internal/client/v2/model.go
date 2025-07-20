@@ -1185,3 +1185,29 @@ type ZoneScope struct {
 	TargetType string `json:"targetType"`
 	Rules      string `json:"rules"`
 }
+
+type AutomationResponse struct {
+	Automation AutomationDetails `json:"automation"`
+}
+
+type AutomationDetails struct {
+	ID                       string  `json:"id"`
+	CustomerID               string  `json:"customerId"`
+	TeamID                   string  `json:"teamId"`
+	Author                   string  `json:"author"`
+	Name                     string  `json:"name"`
+	Enabled                  bool    `json:"enabled"`
+	Group                    string  `json:"group"`
+	CreatedAt                string  `json:"createdAt"`
+	UpdatedAt                *string `json:"updatedAt"`
+	LastExecutedAt           *string `json:"lastExecutedAt"`
+	Version                  string  `json:"version"`
+	ValidationError          *string `json:"validationError"`
+	RateLimitDiscardedEvents string  `json:"rateLimitDiscardedEvents"`
+	LatestRateLimitHit       *string `json:"latestRateLimitHit"`
+	RateLimitDiscardedNodes  string  `json:"rateLimitDiscardedNodes"`
+	LatestNodeRateLimitHit   *string `json:"latestNodeRateLimitHit"`
+	// Keep trigger and nodes as raw JSON - we don't need to model their structure
+	Trigger map[string]any `json:"trigger"`
+	Nodes   map[string]any `json:"nodes"`
+}
