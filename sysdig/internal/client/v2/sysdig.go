@@ -18,39 +18,43 @@ type SysdigRequest struct {
 
 type SysdigCommon interface {
 	Common
-	GroupMappingInterface
-	GroupMappingConfigInterface
+
 	CustomRoleInterface
 	CustomRolePermissionInterface
-	TeamServiceAccountInterface
-	IPFiltersInterface
+	GroupMappingConfigInterface
+	GroupMappingInterface
 	IPFilteringSettingsInterface
+	IPFiltersInterface
+	TeamServiceAccountInterface
 }
 
 type SysdigMonitor interface {
 	SysdigCommon
 	MonitorCommon
+
 	CloudAccountMonitorInterface
 }
 
 type SysdigSecure interface {
 	SysdigCommon
 	SecureCommon
-	PolicyInterface
-	CompositePolicyInterface
-	RuleInterface
-	ListInterface
-	MacroInterface
-	DeprecatedScanningPolicyInterface
-	DeprecatedScanningPolicyAssignmentInterface
-	DeprecatedVulnerabilityExceptionListInterface
-	DeprecatedVulnerabilityExceptionInterface
+
 	CloudAccountSecureInterface
-	CloudauthAccountSecureInterface
-	OrganizationSecureInterface
 	CloudauthAccountComponentSecureInterface
 	CloudauthAccountFeatureSecureInterface
+	CloudauthAccountSecureInterface
+	CompositePolicyInterface
+	DeprecatedScanningPolicyAssignmentInterface
+	DeprecatedScanningPolicyInterface
+	DeprecatedVulnerabilityExceptionInterface
+	DeprecatedVulnerabilityExceptionListInterface
+	ListInterface
+	MacroInterface
 	OnboardingSecureInterface
+	OrganizationSecureInterface
+	PolicyInterface
+	RuleInterface
+	VulnerabilityPolicyClient
 }
 
 func (sr *SysdigRequest) Request(ctx context.Context, method string, url string, payload io.Reader) (*http.Response, error) {
