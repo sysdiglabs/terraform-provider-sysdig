@@ -397,8 +397,11 @@ func (p MLRuleDetails) GetRuleType() ElementType {
 type MalwareRuleDetails struct {
 	RuleType         ElementType         `json:"ruleType"`
 	UseManagedHashes bool                `json:"useManagedHashes"`
+	UseYaraRules     bool                `json:"usePolymorphicRules"`
 	AdditionalHashes map[string][]string `json:"additionalHashes"`
 	IgnoreHashes     map[string][]string `json:"ignoreHashes"`
+	UseRegex         bool                `json:"useRegex"`
+	IgnorePaths      map[string][]string `json:"ignorePaths"`
 	Details          `json:"-"`
 }
 
