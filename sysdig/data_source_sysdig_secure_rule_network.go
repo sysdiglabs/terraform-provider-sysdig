@@ -71,7 +71,7 @@ func dataSourceSysdigSecureRuleNetwork() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigRuleNetworkRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	return commonDataSourceSysdigRuleRead(ctx, d, meta, v2.RuleTypeNetwork, networkRuleDataSourceToResourceData)
 }
 
@@ -96,7 +96,7 @@ func networkRuleDataSourceToResourceData(rule v2.Rule, d *schema.ResourceData) d
 			}
 			tcpPorts = append(tcpPorts, intPort)
 		}
-		_ = d.Set("tcp", []map[string]interface{}{{
+		_ = d.Set("tcp", []map[string]any{{
 			"matching": rule.Details.TCPListenPorts.MatchItems,
 			"ports":    tcpPorts,
 		}})
@@ -110,7 +110,7 @@ func networkRuleDataSourceToResourceData(rule v2.Rule, d *schema.ResourceData) d
 			}
 			udpPorts = append(udpPorts, intPort)
 		}
-		_ = d.Set("udp", []map[string]interface{}{{
+		_ = d.Set("udp", []map[string]any{{
 			"matching": rule.Details.UDPListenPorts.MatchItems,
 			"ports":    udpPorts,
 		}})

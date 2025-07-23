@@ -75,7 +75,7 @@ func getAlertV2FormBasedPrometheusClient(c SysdigClients) (v2.AlertV2FormBasedPr
 	return getAlertV2Client(c)
 }
 
-func resourceSysdigMonitorAlertV2FormBasedPrometheusCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2FormBasedPrometheusCreate(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2FormBasedPrometheusClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -101,7 +101,7 @@ func resourceSysdigMonitorAlertV2FormBasedPrometheusCreate(ctx context.Context, 
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2FormBasedPrometheusRead(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2FormBasedPrometheusRead(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2FormBasedPrometheusClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -112,9 +112,9 @@ func resourceSysdigMonitorAlertV2FormBasedPrometheusRead(ctx context.Context, d 
 		return diag.FromErr(err)
 	}
 
-	a, err := client.GetAlertV2FormBasedPrometheus(ctx, id)
+	a, err := client.GetAlertV2FormBasedPrometheusByID(ctx, id)
 	if err != nil {
-		if err == v2.AlertV2NotFound {
+		if err == v2.ErrAlertV2NotFound {
 			d.SetId("")
 			return nil
 		}
@@ -129,7 +129,7 @@ func resourceSysdigMonitorAlertV2FormBasedPrometheusRead(ctx context.Context, d 
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2FormBasedPrometheusUpdate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2FormBasedPrometheusUpdate(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2FormBasedPrometheusClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -155,7 +155,7 @@ func resourceSysdigMonitorAlertV2FormBasedPrometheusUpdate(ctx context.Context, 
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2FormBasedPrometheusDelete(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2FormBasedPrometheusDelete(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2FormBasedPrometheusClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

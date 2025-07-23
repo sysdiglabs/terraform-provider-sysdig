@@ -1,6 +1,7 @@
 package sysdig
 
 import (
+	"maps"
 	// "github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,7 +41,7 @@ func BoolComputedSchema() *schema.Schema {
 	}
 }
 
-// Can be omitted for composite policies
+// RuleNamesSchema can be omitted for composite policies
 func RuleNamesSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeSet,
@@ -51,7 +52,7 @@ func RuleNamesSchema() *schema.Schema {
 	}
 }
 
-// Can be omitted for Composite policies
+// RulesSchema can be omitted for Composite policies
 func RulesSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
@@ -325,8 +326,28 @@ func HashesComputedSchema() *schema.Schema {
 	}
 }
 
-// Tags are always set automatically by Sysdig
+func StringListSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	}
+}
+
+func StringListComputedSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	}
+}
+
 func TagsSchema() *schema.Schema {
+	// Tags are always set automatically by Sysdig
 	return &schema.Schema{
 		Type:     schema.TypeSet,
 		Computed: true,
@@ -464,9 +485,7 @@ func createPolicySchema(original map[string]*schema.Schema) map[string]*schema.S
 		},
 	}
 
-	for k, v := range original {
-		policySchema[k] = v
-	}
+	maps.Copy(policySchema, original)
 
 	return policySchema
 }

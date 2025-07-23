@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"errors"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -54,7 +55,7 @@ func Reduce[T Target, S Source](target T, source S, reducers ...func(T, S) error
 	return nil
 }
 
-func schemaSetToList(values interface{}) []string {
+func schemaSetToList(values any) []string {
 	v := values.(*schema.Set).List()
 
 	x := make([]string, len(v))
@@ -64,7 +65,7 @@ func schemaSetToList(values interface{}) []string {
 	return x
 }
 
-func toIntPtr(value interface{}) *int {
+func toIntPtr(value any) *int {
 	ptr := new(int)
 	v, ok := value.(int)
 	if ok {
@@ -104,34 +105,43 @@ func setTFResourcePolicyType(policyType string) func(d *schema.ResourceData, pol
 
 func setTFResourcePolicyRulesMalware(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
 	if len(policy.Rules) == 0 {
-		return errors.New("The policy must have at least one rule attached to it")
+		return errors.New("the policy must have at least one rule attached to it")
 	}
 
-	rules := []map[string]interface{}{}
+	rules := []map[string]any{}
 	for _, rule := range policy.Rules {
-		additionalHashes := []map[string]interface{}{}
-		for k := range rule.Details.(*v2.MalwareRuleDetails).AdditionalHashes {
-			additionalHashes = append(additionalHashes, map[string]interface{}{
-				"hash": k,
-			})
-		}
+		malwareRuleDetails := rule.Details.(*v2.MalwareRuleDetails)
 
-		ignoreHashes := []map[string]interface{}{}
-		for k := range rule.Details.(*v2.MalwareRuleDetails).IgnoreHashes {
-			ignoreHashes = append(ignoreHashes, map[string]interface{}{
-				"hash": k,
-			})
+		additionalHashes := []string{}
+		for k := range malwareRuleDetails.AdditionalHashes {
+			additionalHashes = append(additionalHashes, k)
 		}
+		slices.Sort(additionalHashes)
 
-		rules = append(rules, map[string]interface{}{
-			"id":                 rule.Id,
+		ignoreHashes := []string{}
+		for k := range malwareRuleDetails.IgnoreHashes {
+			ignoreHashes = append(ignoreHashes, k)
+		}
+		slices.Sort(ignoreHashes)
+
+		ignorePaths := []string{}
+		for k := range malwareRuleDetails.IgnorePaths {
+			ignorePaths = append(ignorePaths, k)
+		}
+		slices.Sort(ignorePaths)
+
+		rules = append(rules, map[string]any{
+			"id":                 rule.ID,
 			"name":               rule.Name,
 			"description":        rule.Description,
 			"version":            rule.Version,
 			"tags":               rule.Tags,
-			"use_managed_hashes": rule.Details.(*v2.MalwareRuleDetails).UseManagedHashes,
+			"use_managed_hashes": malwareRuleDetails.UseManagedHashes,
+			"use_yara_rules":     malwareRuleDetails.UseYaraRules,
 			"additional_hashes":  additionalHashes,
 			"ignore_hashes":      ignoreHashes,
+			"use_regex":          malwareRuleDetails.UseRegex,
+			"ignore_paths":       ignorePaths,
 		})
 	}
 
@@ -142,10 +152,10 @@ func setTFResourcePolicyRulesMalware(d *schema.ResourceData, policy v2.PolicyRul
 
 func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
 	if len(policy.Rules) == 0 {
-		return errors.New("The policy must have at least one rule attached to it")
+		return errors.New("the policy must have at least one rule attached to it")
 	}
 
-	var rules []map[string]interface{}
+	var rules []map[string]any
 	for _, rule := range policy.Rules {
 		driftDetails, ok := rule.Details.(*v2.DriftRuleDetails)
 		if !ok {
@@ -156,9 +166,9 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 		exceptionsItems := driftDetails.Exceptions.Items
 		exceptionsMatchItems := driftDetails.Exceptions.MatchItems
 
-		var exceptionsBlock []map[string]interface{}
+		var exceptionsBlock []map[string]any
 		if len(exceptionsItems) > 0 || exceptionsMatchItems {
-			exceptionsBlock = []map[string]interface{}{
+			exceptionsBlock = []map[string]any{
 				{
 					"items":       exceptionsItems,
 					"match_items": exceptionsMatchItems,
@@ -169,9 +179,9 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 		prohibitedItems := driftDetails.ProhibitedBinaries.Items
 		prohibitedMatchItems := driftDetails.ProhibitedBinaries.MatchItems
 
-		var prohibitedBinariesBlock []map[string]interface{}
+		var prohibitedBinariesBlock []map[string]any
 		if len(prohibitedItems) > 0 || prohibitedMatchItems {
-			prohibitedBinariesBlock = []map[string]interface{}{
+			prohibitedBinariesBlock = []map[string]any{
 				{
 					"items":       prohibitedItems,
 					"match_items": prohibitedMatchItems,
@@ -182,9 +192,9 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 		processBasedExceptionsItems := driftDetails.ProcessBasedExceptions.Items
 		processBasedExceptionMatchItems := driftDetails.ProcessBasedExceptions.MatchItems
 
-		var processBasedExceptionsBlock []map[string]interface{}
+		var processBasedExceptionsBlock []map[string]any
 		if len(processBasedExceptionsItems) > 0 || processBasedExceptionMatchItems {
-			processBasedExceptionsBlock = []map[string]interface{}{
+			processBasedExceptionsBlock = []map[string]any{
 				{
 					"items":       processBasedExceptionsItems,
 					"match_items": processBasedExceptionMatchItems,
@@ -195,9 +205,9 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 		processBasedProhibitedBinariesItems := driftDetails.ProcessBasedDenylist.Items
 		processBasedProhibitedBinariesMatchItems := driftDetails.ProcessBasedDenylist.MatchItems
 
-		var processBasedProhibitedBinariesBlock []map[string]interface{}
+		var processBasedProhibitedBinariesBlock []map[string]any
 		if len(processBasedProhibitedBinariesItems) > 0 || processBasedProhibitedBinariesMatchItems {
-			processBasedProhibitedBinariesBlock = []map[string]interface{}{
+			processBasedProhibitedBinariesBlock = []map[string]any{
 				{
 					"items":       processBasedProhibitedBinariesItems,
 					"match_items": processBasedProhibitedBinariesMatchItems,
@@ -208,14 +218,15 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 		mode := driftDetails.Mode
 		enabled := (mode != "disabled")
 
-		ruleMap := map[string]interface{}{
-			"id":                           rule.Id,
+		ruleMap := map[string]any{
+			"id":                           rule.ID,
 			"name":                         rule.Name,
 			"description":                  rule.Description,
 			"version":                      rule.Version,
 			"tags":                         rule.Tags,
 			"enabled":                      enabled,
 			"mounted_volume_drift_enabled": driftDetails.MountedVolumeDriftEnabled,
+			"use_regex":                    driftDetails.UseRegex,
 		}
 
 		if exceptionsBlock != nil {
@@ -243,25 +254,25 @@ func setTFResourcePolicyRulesDrift(d *schema.ResourceData, policy v2.PolicyRules
 
 func setTFResourcePolicyRulesML(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
 	if len(policy.Rules) == 0 {
-		return errors.New("The policy must have at least one rule attached to it")
+		return errors.New("the policy must have at least one rule attached to it")
 	}
 
-	rules := []map[string]interface{}{}
+	rules := []map[string]any{}
 	for _, rule := range policy.Rules {
 		// Only a single block of anomaly detection trigger and cryptomining trigger is allowed
-		// anomalyDetectionTrigger := []map[string]interface{}{{
+		// anomalyDetectionTrigger := []map[string]any{{
 		// 	"enabled":   rule.Details.(*v2.MLRuleDetails).AnomalyDetectionTrigger.Enabled,
 		// 	"threshold": rule.Details.(*v2.MLRuleDetails).AnomalyDetectionTrigger.Threshold,
 		// 	"severity":  rule.Details.(*v2.MLRuleDetails).AnomalyDetectionTrigger.Severity,
 		// }}
 
-		cryptominingTrigger := []map[string]interface{}{{
+		cryptominingTrigger := []map[string]any{{
 			"enabled":   rule.Details.(*v2.MLRuleDetails).CryptominingTrigger.Enabled,
 			"threshold": rule.Details.(*v2.MLRuleDetails).CryptominingTrigger.Threshold,
 		}}
 
-		rules = append(rules, map[string]interface{}{
-			"id":                   rule.Id,
+		rules = append(rules, map[string]any{
+			"id":                   rule.ID,
 			"name":                 rule.Name,
 			"description":          rule.Description,
 			"version":              rule.Version,
@@ -277,18 +288,18 @@ func setTFResourcePolicyRulesML(d *schema.ResourceData, policy v2.PolicyRulesCom
 
 func setTFResourcePolicyRulesAWSML(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
 	if len(policy.Rules) == 0 {
-		return errors.New("The policy must have at least one rule attached to it")
+		return errors.New("the policy must have at least one rule attached to it")
 	}
 
-	rules := []map[string]interface{}{}
+	rules := []map[string]any{}
 	for _, rule := range policy.Rules {
-		anomalousConsoleLogin := []map[string]interface{}{{
+		anomalousConsoleLogin := []map[string]any{{
 			"enabled":   rule.Details.(*v2.AWSMLRuleDetails).AnomalousConsoleLogin.Enabled,
 			"threshold": rule.Details.(*v2.AWSMLRuleDetails).AnomalousConsoleLogin.Threshold,
 		}}
 
-		rules = append(rules, map[string]interface{}{
-			"id":                      rule.Id,
+		rules = append(rules, map[string]any{
+			"id":                      rule.ID,
 			"name":                    rule.Name,
 			"description":             rule.Description,
 			"version":                 rule.Version,
@@ -305,17 +316,18 @@ func setTFResourcePolicyRulesAWSML(d *schema.ResourceData, policy v2.PolicyRules
 // TODO: Split this func into smaller composable functions
 func setTFResourcePolicyActions(key string) func(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
 	return func(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
-		actions := []map[string]interface{}{{}}
+		actions := []map[string]any{{}}
 		prevent := false
 		for _, action := range policy.Policy.Actions {
-			if action.Type == "POLICY_ACTION_PREVENT_MALWARE" || action.Type == "POLICY_ACTION_PREVENT_DRIFT" {
+			switch action.Type {
+			case "POLICY_ACTION_PREVENT_MALWARE", "POLICY_ACTION_PREVENT_DRIFT":
 				actions[0][key] = true
 				prevent = true
-			} else if action.Type == "POLICY_ACTION_PAUSE" || action.Type == "POLICY_ACTION_STOP" || action.Type == "POLICY_ACTION_KILL" { // TODO: Refactor
+			case "POLICY_ACTION_PAUSE", "POLICY_ACTION_STOP", "POLICY_ACTION_KILL": // TODO: Refactor
 				action := strings.Replace(action.Type, "POLICY_ACTION_", "", 1)
 				actions[0]["container"] = strings.ToLower(action)
-			} else {
-				actions[0]["capture"] = []map[string]interface{}{{
+			default:
+				actions[0]["capture"] = []map[string]any{{
 					"seconds_after_event":  action.AfterEventNs / 1000000000,
 					"seconds_before_event": action.BeforeEventNs / 1000000000,
 					"name":                 action.Name,
@@ -332,7 +344,7 @@ func setTFResourcePolicyActions(key string) func(d *schema.ResourceData, policy 
 		}
 
 		currentContainerAction := d.Get("actions.0.container").(string)
-		currentCaptureAction := d.Get("actions.0.capture").([]interface{})
+		currentCaptureAction := d.Get("actions.0.capture").([]any)
 		// If the policy retrieved from service has no actions and the current state is default values,
 		// then do not set the "actions" key as it may cause terraform to think there has been a state change
 		if len(policy.Policy.Actions) > 0 || currentContainerAction != "" || len(currentCaptureAction) > 0 {
@@ -394,8 +406,8 @@ func setPolicyBaseAttrs(policyType string) func(policy *v2.PolicyRulesComposite,
 		policy.Policy.Scope = d.Get("scope").(string)
 
 		policy.Policy.NotificationChannelIds = []int{}
-		notificationChannelIdSet := d.Get("notification_channels").(*schema.Set)
-		for _, id := range notificationChannelIdSet.List() {
+		notificationChannelIDSet := d.Get("notification_channels").(*schema.Set)
+		for _, id := range notificationChannelIDSet.List() {
 			policy.Policy.NotificationChannelIds = append(policy.Policy.NotificationChannelIds, id.(int))
 		}
 
@@ -417,20 +429,18 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 
 		additionalHashes := map[string][]string{}
 		if items, ok := d.GetOk("rule.0.additional_hashes"); ok { // TODO: Do not hardcode the indexes
-			for _, item := range items.([]interface{}) {
-				item := item.(map[string]interface{})
-				k := item["hash"].(string)
-				additionalHashes[k] = []string{}
+			for _, item := range items.([]any) {
+				hash := item.(string)
+				additionalHashes[hash] = []string{}
 			}
 		}
 
 		// TODO: Extract into a function
 		ignoreHashes := map[string][]string{}
 		if items, ok := d.GetOk("rule.0.ignore_hashes"); ok { // TODO: Do not hardcode the indexes
-			for _, item := range items.([]interface{}) {
-				item := item.(map[string]interface{})
-				k := item["hash"].(string)
-				ignoreHashes[k] = []string{}
+			for _, item := range items.([]any) {
+				hash := item.(string)
+				ignoreHashes[hash] = []string{}
 			}
 		}
 
@@ -438,6 +448,14 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 		// Set default tags as field tags must not be null
 		if len(tags) == 0 {
 			tags = []string{defaultMalwareTag}
+		}
+
+		ignorePaths := map[string][]string{}
+		if items, ok := d.GetOk("rule.0.ignore_paths"); ok { // TODO: Do not hardcode the indexes
+			for _, item := range items.([]any) {
+				path := item.(string)
+				ignorePaths[path] = []string{}
+			}
 		}
 
 		rule := &v2.RuntimePolicyRule{
@@ -448,14 +466,17 @@ func setPolicyRulesMalware(policy *v2.PolicyRulesComposite, d *schema.ResourceDa
 			Details: v2.MalwareRuleDetails{
 				RuleType:         v2.ElementType("MALWARE"), // TODO: Use const
 				UseManagedHashes: d.Get("rule.0.use_managed_hashes").(bool),
+				UseYaraRules:     d.Get("rule.0.use_yara_rules").(bool),
 				AdditionalHashes: additionalHashes,
 				IgnoreHashes:     ignoreHashes,
+				UseRegex:         d.Get("rule.0.use_regex").(bool),
+				IgnorePaths:      ignorePaths,
 			},
 		}
 
 		id := v2.FlexInt(d.Get("rule.0.id").(int))
 		if int(id) != 0 {
-			rule.Id = &id
+			rule.ID = &id
 		}
 
 		v := toIntPtr(d.Get("rule.0.version"))
@@ -497,6 +518,7 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 		}
 
 		mountedVolumeDriftEnabled := d.Get("rule.0.mounted_volume_drift_enabled").(bool)
+		useRegex := d.Get("rule.0.use_regex").(bool)
 
 		rule := &v2.RuntimePolicyRule{
 			// TODO: Do not hardcode the indexes
@@ -511,12 +533,13 @@ func setPolicyRulesDrift(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 				ProcessBasedExceptions:    &processBasedExceptions,
 				ProcessBasedDenylist:      &processBasedProhibitedBinaries,
 				MountedVolumeDriftEnabled: mountedVolumeDriftEnabled,
+				UseRegex:                  useRegex,
 			},
 		}
 
 		id := v2.FlexInt(d.Get("rule.0.id").(int))
 		if int(id) != 0 {
-			rule.Id = &id
+			rule.ID = &id
 		}
 
 		v := toIntPtr(d.Get("rule.0.version"))
@@ -583,7 +606,7 @@ func setPolicyRulesML(policy *v2.PolicyRulesComposite, d *schema.ResourceData) e
 
 		id := v2.FlexInt(d.Get("rule.0.id").(int))
 		if int(id) != 0 {
-			rule.Id = &id
+			rule.ID = &id
 		}
 
 		v := toIntPtr(d.Get("rule.0.version"))
@@ -631,7 +654,7 @@ func setPolicyRulesAWSML(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 
 		id := v2.FlexInt(d.Get("rule.0.id").(int))
 		if int(id) != 0 {
-			rule.Id = &id
+			rule.ID = &id
 		}
 
 		v := toIntPtr(d.Get("rule.0.version"))

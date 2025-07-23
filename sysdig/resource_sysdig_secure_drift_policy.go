@@ -67,6 +67,7 @@ func resourceSysdigSecureDriftPolicy() *schema.Resource {
 						"process_based_exceptions":          ExceptionsSchema(),
 						"process_based_prohibited_binaries": ExceptionsSchema(),
 						"mounted_volume_drift_enabled":      BoolSchema(),
+						"use_regex":                         BoolSchema(),
 					},
 				},
 			},
@@ -103,7 +104,7 @@ func driftPolicyToResourceData(policy *v2.PolicyRulesComposite, d *schema.Resour
 	return driftTFResourceReducer(d, *policy)
 }
 
-func resourceSysdigDriftPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigDriftPolicyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureCompositePolicyClient(sysdigClients)
 	if err != nil {
@@ -129,7 +130,7 @@ func resourceSysdigDriftPolicyCreate(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigDriftPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigDriftPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureCompositePolicyClient(sysdigClients)
 	if err != nil {
@@ -150,7 +151,7 @@ func resourceSysdigDriftPolicyUpdate(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigDriftPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigDriftPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -174,7 +175,7 @@ func resourceSysdigDriftPolicyRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceSysdigDriftPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigDriftPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	sysdigClients := meta.(SysdigClients)
 	client, err := getSecureCompositePolicyClient(sysdigClients)
 	if err != nil {
@@ -187,7 +188,7 @@ func resourceSysdigDriftPolicyDelete(ctx context.Context, d *schema.ResourceData
 	}
 
 	if policy.Policy.ID == 0 {
-		return diag.FromErr(errors.New("Policy ID is missing"))
+		return diag.FromErr(errors.New("policy ID is missing"))
 	}
 
 	err = client.DeleteCompositePolicy(ctx, policy.Policy.ID)
@@ -199,7 +200,7 @@ func resourceSysdigDriftPolicyDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceSysdigSecureDriftPolicyImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceSysdigSecureDriftPolicyImportState(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client, err := getSecureCompositePolicyClient(meta.(SysdigClients))
 	if err != nil {
 		return nil, err
@@ -211,7 +212,7 @@ func resourceSysdigSecureDriftPolicyImportState(ctx context.Context, d *schema.R
 	}
 
 	if policy.Policy.ID == 0 {
-		return nil, errors.New("Policy ID is missing")
+		return nil, errors.New("policy ID is missing")
 	}
 
 	policy, _, err = client.GetCompositePolicyByID(ctx, policy.Policy.ID)
@@ -219,7 +220,7 @@ func resourceSysdigSecureDriftPolicyImportState(ctx context.Context, d *schema.R
 		return nil, err
 	}
 
-	if policy.Policy.IsDefault || policy.Policy.TemplateId != 0 {
+	if policy.Policy.IsDefault || policy.Policy.TemplateID != 0 {
 		return nil, errors.New("unable to import policy that is not a custom policy")
 	}
 

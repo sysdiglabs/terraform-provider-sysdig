@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	cloudauthAccountComponentsPath = "%s/api/cloudauth/v1/accounts/%s/components"       // POST
-	cloudauthAccountComponentPath  = "%s/api/cloudauth/v1/accounts/%s/components/%s/%s" // GET, PUT, DEL
+	cloudauthAccountComponentsPath = "%s/api/cloudauth/v1/accounts/%s/components"
+	cloudauthAccountComponentPath  = "%s/api/cloudauth/v1/accounts/%s/components/%s/%s"
 )
 
 type CloudauthAccountComponentSecureInterface interface {
@@ -19,94 +19,109 @@ type CloudauthAccountComponentSecureInterface interface {
 	UpdateCloudauthAccountComponentSecure(ctx context.Context, accountID, componentType, componentInstance string, cloudAccountComponent *CloudauthAccountComponentSecure) (*CloudauthAccountComponentSecure, string, error)
 }
 
-func (client *Client) CreateCloudauthAccountComponentSecure(ctx context.Context, accountID string, cloudAccountComponent *CloudauthAccountComponentSecure) (*CloudauthAccountComponentSecure, string, error) {
-	payload, err := client.marshalCloudauthProto(cloudAccountComponent)
+func (c *Client) CreateCloudauthAccountComponentSecure(ctx context.Context, accountID string, cloudAccountComponent *CloudauthAccountComponentSecure) (component *CloudauthAccountComponentSecure, errString string, err error) {
+	payload, err := c.marshalCloudauthProto(cloudAccountComponent)
 	if err != nil {
 		return nil, "", err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.cloudauthAccountComponentsURL(accountID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.cloudauthAccountComponentsURL(accountID), payload)
 	if err != nil {
 		return nil, "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
 
 	cloudauthAccountComponent := &CloudauthAccountComponentSecure{}
-	err = client.unmarshalCloudauthProto(response.Body, cloudauthAccountComponent)
+	err = c.unmarshalCloudauthProto(response.Body, cloudauthAccountComponent)
 	if err != nil {
 		return nil, "", err
 	}
 	return cloudauthAccountComponent, "", nil
 }
 
-func (client *Client) GetCloudauthAccountComponentSecure(ctx context.Context, accountID, componentType, componentInstance string) (*CloudauthAccountComponentSecure, string, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.cloudauthAccountComponentURL(accountID, componentType, componentInstance), nil)
+func (c *Client) GetCloudauthAccountComponentSecure(ctx context.Context, accountID, componentType, componentInstance string) (component *CloudauthAccountComponentSecure, errString string, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.cloudauthAccountComponentURL(accountID, componentType, componentInstance), nil)
 	if err != nil {
 		return nil, "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
 
 	cloudauthAccountComponent := &CloudauthAccountComponentSecure{}
-	err = client.unmarshalCloudauthProto(response.Body, cloudauthAccountComponent)
+	err = c.unmarshalCloudauthProto(response.Body, cloudauthAccountComponent)
 	if err != nil {
 		return nil, "", err
 	}
 	return cloudauthAccountComponent, "", nil
 }
 
-func (client *Client) DeleteCloudauthAccountComponentSecure(ctx context.Context, accountID, componentType, componentInstance string) (string, error) {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.cloudauthAccountComponentURL(accountID, componentType, componentInstance), nil)
+func (c *Client) DeleteCloudauthAccountComponentSecure(ctx context.Context, accountID, componentType, componentInstance string) (errString string, err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.cloudauthAccountComponentURL(accountID, componentType, componentInstance), nil)
 	if err != nil {
 		return "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return client.ErrorAndStatusFromResponse(response)
+		return c.ErrorAndStatusFromResponse(response)
 	}
 	return "", nil
 }
 
-func (client *Client) UpdateCloudauthAccountComponentSecure(ctx context.Context, accountID, componentType, componentInstance string, cloudAccountComponent *CloudauthAccountComponentSecure) (
-	*CloudauthAccountComponentSecure, string, error) {
-	payload, err := client.marshalCloudauthProto(cloudAccountComponent)
+func (c *Client) UpdateCloudauthAccountComponentSecure(ctx context.Context, accountID, componentType, componentInstance string, cloudAccountComponent *CloudauthAccountComponentSecure) (component *CloudauthAccountComponentSecure, errString string, err error) {
+	payload, err := c.marshalCloudauthProto(cloudAccountComponent)
 	if err != nil {
 		return nil, "", err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.cloudauthAccountComponentURL(accountID, componentType, componentInstance), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.cloudauthAccountComponentURL(accountID, componentType, componentInstance), payload)
 	if err != nil {
 		return nil, "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		errStatus, err := client.ErrorAndStatusFromResponse(response)
+		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
 
 	cloudauthAccountComponent := &CloudauthAccountComponentSecure{}
-	err = client.unmarshalCloudauthProto(response.Body, cloudauthAccountComponent)
+	err = c.unmarshalCloudauthProto(response.Body, cloudauthAccountComponent)
 	if err != nil {
 		return nil, "", err
 	}
 	return cloudauthAccountComponent, "", nil
 }
 
-func (client *Client) cloudauthAccountComponentsURL(accountID string) string {
-	return fmt.Sprintf(cloudauthAccountComponentsPath, client.config.url, accountID)
+func (c *Client) cloudauthAccountComponentsURL(accountID string) string {
+	return fmt.Sprintf(cloudauthAccountComponentsPath, c.config.url, accountID)
 }
 
-func (client *Client) cloudauthAccountComponentURL(accountID string, componentType string, componentInstance string) string {
-	return fmt.Sprintf(cloudauthAccountComponentPath, client.config.url, accountID, componentType, componentInstance)
+func (c *Client) cloudauthAccountComponentURL(accountID string, componentType string, componentInstance string) string {
+	return fmt.Sprintf(cloudauthAccountComponentPath, c.config.url, accountID, componentType, componentInstance)
 }

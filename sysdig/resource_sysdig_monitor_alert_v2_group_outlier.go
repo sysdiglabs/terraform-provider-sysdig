@@ -85,7 +85,7 @@ func resourceSysdigMonitorAlertV2GroupOutlier() *schema.Resource {
 			},
 		})),
 
-		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
+		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i any) error {
 			algorithm := diff.Get("algorithm").(string)
 			madThreshold := diff.Get("mad_threshold").(float64)
 			madTolerance := diff.Get("mad_tolerance").(float64)
@@ -111,7 +111,7 @@ func getAlertV2GroupOutlierClient(c SysdigClients) (v2.AlertV2GroupOutlierInterf
 	return getAlertV2Client(c)
 }
 
-func resourceSysdigMonitorAlertV2GroupOutlierCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2GroupOutlierCreate(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2GroupOutlierClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -137,7 +137,7 @@ func resourceSysdigMonitorAlertV2GroupOutlierCreate(ctx context.Context, d *sche
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2GroupOutlierRead(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2GroupOutlierRead(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2GroupOutlierClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -148,9 +148,9 @@ func resourceSysdigMonitorAlertV2GroupOutlierRead(ctx context.Context, d *schema
 		return diag.FromErr(err)
 	}
 
-	a, err := client.GetAlertV2GroupOutlier(ctx, id)
+	a, err := client.GetAlertV2GroupOutlierByID(ctx, id)
 	if err != nil {
-		if err == v2.AlertV2NotFound {
+		if err == v2.ErrAlertV2NotFound {
 			d.SetId("")
 			return nil
 		}
@@ -165,7 +165,7 @@ func resourceSysdigMonitorAlertV2GroupOutlierRead(ctx context.Context, d *schema
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2GroupOutlierUpdate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2GroupOutlierUpdate(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2GroupOutlierClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -191,7 +191,7 @@ func resourceSysdigMonitorAlertV2GroupOutlierUpdate(ctx context.Context, d *sche
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2GroupOutlierDelete(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2GroupOutlierDelete(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2GroupOutlierClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

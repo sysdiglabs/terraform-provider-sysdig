@@ -52,7 +52,7 @@ func ruleDataSourceToResourceData(rule v2.Rule, d *schema.ResourceData) {
 	_ = d.Set("version", rule.Version)
 }
 
-func commonDataSourceSysdigRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}, ruleType string, setResourceData func(v2.Rule, *schema.ResourceData) diag.Diagnostics) diag.Diagnostics {
+func commonDataSourceSysdigRuleRead(ctx context.Context, d *schema.ResourceData, meta any, ruleType string, setResourceData func(v2.Rule, *schema.ResourceData) diag.Diagnostics) diag.Diagnostics {
 	client, err := getSecureRuleClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

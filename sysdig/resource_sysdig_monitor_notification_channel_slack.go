@@ -90,7 +90,7 @@ func resourceSysdigMonitorNotificationChannelSlack() *schema.Resource {
 	}
 }
 
-func resourceSysdigMonitorNotificationChannelSlackCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelSlackCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -116,7 +116,7 @@ func resourceSysdigMonitorNotificationChannelSlackCreate(ctx context.Context, d 
 	return resourceSysdigMonitorNotificationChannelSlackRead(ctx, d, meta)
 }
 
-func resourceSysdigMonitorNotificationChannelSlackRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelSlackRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -127,9 +127,9 @@ func resourceSysdigMonitorNotificationChannelSlackRead(ctx context.Context, d *s
 		return diag.FromErr(err)
 	}
 
-	nc, err := client.GetNotificationChannelById(ctx, id)
+	nc, err := client.GetNotificationChannelByID(ctx, id)
 	if err != nil {
-		if err == v2.NotificationChannelNotFound {
+		if err == v2.ErrNotificationChannelNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -144,7 +144,7 @@ func resourceSysdigMonitorNotificationChannelSlackRead(ctx context.Context, d *s
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelSlackUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelSlackUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -176,7 +176,7 @@ func resourceSysdigMonitorNotificationChannelSlackUpdate(ctx context.Context, d 
 	return nil
 }
 
-func resourceSysdigMonitorNotificationChannelSlackDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigMonitorNotificationChannelSlackDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -201,11 +201,11 @@ func monitorNotificationChannelSlackFromResourceData(d *schema.ResourceData, tea
 		return
 	}
 
-	nc.Type = NOTIFICATION_CHANNEL_TYPE_SLACK
-	nc.Options.Url = d.Get("url").(string)
+	nc.Type = notificationChannelTypeSlack
+	nc.Options.URL = d.Get("url").(string)
 	nc.Options.Channel = d.Get("channel").(string)
 	nc.Options.PrivateChannel = d.Get("is_private_channel").(bool)
-	nc.Options.PrivateChannelUrl = d.Get("private_channel_url").(string)
+	nc.Options.PrivateChannelURL = d.Get("private_channel_url").(string)
 	nc.Options.TemplateConfiguration = []v2.NotificationChannelTemplateConfiguration{
 		{
 			TemplateKey: "SLACK_MONITOR_ALERT_NOTIFICATION_TEMPLATE_METADATA_v1",
@@ -255,10 +255,10 @@ func monitorNotificationChannelSlackToResourceData(nc *v2.NotificationChannel, d
 		return
 	}
 
-	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("url", nc.Options.URL)
 	_ = d.Set("channel", nc.Options.Channel)
 	_ = d.Set("is_private_channel", nc.Options.PrivateChannel)
-	_ = d.Set("private_channel_url", nc.Options.PrivateChannelUrl)
+	_ = d.Set("private_channel_url", nc.Options.PrivateChannelURL)
 
 	runbookLinks := true
 	eventDetails := true

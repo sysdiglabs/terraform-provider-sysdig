@@ -57,7 +57,7 @@ func resourceSysdigTeamServiceAccount() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			SchemaApiKeyKey: {
+			SchemaAPIKeyKey: {
 				Type:      schema.TypeString,
 				Computed:  true,
 				Sensitive: true,
@@ -66,7 +66,7 @@ func resourceSysdigTeamServiceAccount() *schema.Resource {
 	}
 }
 
-func resourceSysdigTeamServiceAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigTeamServiceAccountRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		diag.FromErr(err)
@@ -79,7 +79,7 @@ func resourceSysdigTeamServiceAccountRead(ctx context.Context, d *schema.Resourc
 
 	teamServiceAccount, err := client.GetTeamServiceAccountByID(ctx, id)
 	if err != nil {
-		if err == v2.TeamServiceAccountNotFound {
+		if err == v2.ErrTeamServiceAccountNotFound {
 			d.SetId("")
 			return nil
 		}
@@ -94,7 +94,7 @@ func resourceSysdigTeamServiceAccountRead(ctx context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceSysdigTeamServiceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigTeamServiceAccountCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	var err error
 
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
@@ -109,7 +109,7 @@ func resourceSysdigTeamServiceAccountCreate(ctx context.Context, d *schema.Resou
 	}
 
 	d.SetId(strconv.Itoa(teamServiceAccount.ID))
-	err = d.Set(SchemaApiKeyKey, teamServiceAccount.ApiKey)
+	err = d.Set(SchemaAPIKeyKey, teamServiceAccount.APIKey)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -119,7 +119,7 @@ func resourceSysdigTeamServiceAccountCreate(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceSysdigTeamServiceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigTeamServiceAccountUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	var err error
 
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
@@ -144,7 +144,7 @@ func resourceSysdigTeamServiceAccountUpdate(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceSysdigTeamServiceAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigTeamServiceAccountDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -167,9 +167,9 @@ func teamServiceAccountFromResourceData(d *schema.ResourceData) *v2.TeamServiceA
 		Name:           d.Get(SchemaNameKey).(string),
 		TeamRole:       d.Get(SchemaRoleKey).(string),
 		ExpirationDate: int64(d.Get(SchemaExpirationDateKey).(int) * 1000),
-		TeamId:         d.Get(SchemaTeamIDKey).(int),
+		TeamID:         d.Get(SchemaTeamIDKey).(int),
 		SystemRole:     d.Get(SchemaSystemRoleKey).(string),
-		ApiKey:         d.Get(SchemaApiKeyKey).(string),
+		APIKey:         d.Get(SchemaAPIKeyKey).(string),
 	}
 }
 
@@ -186,7 +186,7 @@ func teamServiceAccountToResourceData(teamServiceAccount *v2.TeamServiceAccount,
 	if err != nil {
 		return err
 	}
-	err = d.Set(SchemaTeamIDKey, teamServiceAccount.TeamId)
+	err = d.Set(SchemaTeamIDKey, teamServiceAccount.TeamID)
 	if err != nil {
 		return err
 	}

@@ -7,12 +7,12 @@ import (
 	"net/http"
 )
 
-var TeamServiceAccountNotFound = errors.New("team service account not found")
+var ErrTeamServiceAccountNotFound = errors.New("team service account not found")
 
 const (
-	ServiceAccountsPath      = "%s/api/serviceaccounts/team"
-	ServiceAccountPath       = "%s/api/serviceaccounts/team/%d"
-	ServiceAccountDeletePath = "%s/api/serviceaccounts/team/%d/delete"
+	serviceAccountsPath      = "%s/api/serviceaccounts/team"
+	serviceAccountPath       = "%s/api/serviceaccounts/team/%d"
+	serviceAccountDeletePath = "%s/api/serviceaccounts/team/%d/delete"
 )
 
 type TeamServiceAccountInterface interface {
@@ -23,101 +23,103 @@ type TeamServiceAccountInterface interface {
 	DeleteTeamServiceAccount(ctx context.Context, id int) error
 }
 
-func (client *Client) GetTeamServiceAccountByID(ctx context.Context, id int) (*TeamServiceAccount, error) {
-	response, err := client.requester.Request(ctx, http.MethodGet, client.GetTeamServiceAccountURL(id), nil)
+func (c *Client) GetTeamServiceAccountByID(ctx context.Context, id int) (team *TeamServiceAccount, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getTeamServiceAccountURL(id), nil)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		if response.StatusCode == http.StatusNotFound {
-			return nil, TeamServiceAccountNotFound
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
 		}
-		return nil, client.ErrorFromResponse(response)
+	}()
+
+	if response.StatusCode == http.StatusNotFound {
+		return nil, ErrTeamServiceAccountNotFound
+	}
+	if response.StatusCode != http.StatusOK {
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	teamServiceAccount, err := Unmarshal[TeamServiceAccount](response.Body)
-	if err != nil {
-		return nil, err
-	}
-	return &teamServiceAccount, nil
+	return Unmarshal[*TeamServiceAccount](response.Body)
 }
 
-func (client *Client) CreateTeamServiceAccount(ctx context.Context, account *TeamServiceAccount) (*TeamServiceAccount, error) {
+func (c *Client) CreateTeamServiceAccount(ctx context.Context, account *TeamServiceAccount) (teamAccount *TeamServiceAccount, err error) {
 	payload, err := Marshal(account)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPost, client.CreateTeamServiceAccountURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.createTeamServiceAccountURL(), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	created, err := Unmarshal[TeamServiceAccount](response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &created, nil
+	return Unmarshal[*TeamServiceAccount](response.Body)
 }
 
-func (client *Client) UpdateTeamServiceAccount(ctx context.Context, account *TeamServiceAccount, id int) (*TeamServiceAccount, error) {
+func (c *Client) UpdateTeamServiceAccount(ctx context.Context, account *TeamServiceAccount, id int) (serviceAccount *TeamServiceAccount, err error) {
 	payload, err := Marshal(account)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.requester.Request(ctx, http.MethodPut, client.UpdateTeamServiceAccountURL(id), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.updateTeamServiceAccountURL(id), payload)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, client.ErrorFromResponse(response)
+		return nil, c.ErrorFromResponse(response)
 	}
 
-	updated, err := Unmarshal[TeamServiceAccount](response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &updated, nil
+	return Unmarshal[*TeamServiceAccount](response.Body)
 }
 
-func (client *Client) DeleteTeamServiceAccount(ctx context.Context, id int) error {
-	response, err := client.requester.Request(ctx, http.MethodDelete, client.DeleteTeamServiceAccountURL(id), nil)
+func (c *Client) DeleteTeamServiceAccount(ctx context.Context, id int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.deleteTeamServiceAccountURL(id), nil)
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
 	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
-		return client.ErrorFromResponse(response)
+		return c.ErrorFromResponse(response)
 	}
 
 	return nil
 }
 
-func (client *Client) GetTeamServiceAccountURL(id int) string {
-	return fmt.Sprintf(ServiceAccountPath, client.config.url, id)
+func (c *Client) getTeamServiceAccountURL(id int) string {
+	return fmt.Sprintf(serviceAccountPath, c.config.url, id)
 }
 
-func (client *Client) CreateTeamServiceAccountURL() string {
-	return fmt.Sprintf(ServiceAccountsPath, client.config.url)
+func (c *Client) createTeamServiceAccountURL() string {
+	return fmt.Sprintf(serviceAccountsPath, c.config.url)
 }
 
-func (client *Client) UpdateTeamServiceAccountURL(id int) string {
-	return fmt.Sprintf(ServiceAccountPath, client.config.url, id)
+func (c *Client) updateTeamServiceAccountURL(id int) string {
+	return fmt.Sprintf(serviceAccountPath, c.config.url, id)
 }
 
-func (client *Client) DeleteTeamServiceAccountURL(id int) string {
-	return fmt.Sprintf(ServiceAccountDeletePath, client.config.url, id)
+func (c *Client) deleteTeamServiceAccountURL(id int) string {
+	return fmt.Sprintf(serviceAccountDeletePath, c.config.url, id)
 }

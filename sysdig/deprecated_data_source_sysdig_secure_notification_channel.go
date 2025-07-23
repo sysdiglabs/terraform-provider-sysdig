@@ -12,33 +12,33 @@ import (
 )
 
 const (
-	NOTIFICATION_CHANNEL_TYPE_EMAIL                    = "EMAIL"
-	NOTIFICATION_CHANNEL_TYPE_AMAZON_SNS               = "SNS"
-	NOTIFICATION_CHANNEL_TYPE_OPSGENIE                 = "OPSGENIE"
-	NOTIFICATION_CHANNEL_TYPE_VICTOROPS                = "VICTOROPS"
-	NOTIFICATION_CHANNEL_TYPE_WEBHOOK                  = "WEBHOOK"
-	NOTIFICATION_CHANNEL_TYPE_SLACK                    = "SLACK"
-	NOTIFICATION_CHANNEL_TYPE_PAGERDUTY                = "PAGER_DUTY"
-	NOTIFICATION_CHANNEL_TYPE_MS_TEAMS                 = "MS_TEAMS"
-	NOTIFICATION_CHANNEL_TYPE_GCHAT                    = "GCHAT"
-	NOTIFICATION_CHANNEL_TYPE_PROMETHEUS_ALERT_MANAGER = "PROMETHEUS_ALERT_MANAGER"
-	NOTIFICATION_CHANNEL_TYPE_TEAM_EMAIL               = "TEAM_EMAIL"
-	NOTIFICATION_CHANNEL_TYPE_CUSTOM_WEBHOOK           = "POWER_WEBHOOK"
-	NOTIFICATION_CHANNEL_TYPE_IBM_EVENT_NOTIFICATION   = "IBM_EVENT_NOTIFICATIONS"
+	notificationChannelTypeEmail                  = "EMAIL"
+	notificationChannelTypeAmazonSNS              = "SNS"
+	notificationChannelTypeOpsGenie               = "OPSGENIE"
+	notificationChannelTypeVictorOps              = "VICTOROPS"
+	notificationChannelTypeWebhook                = "WEBHOOK"
+	notificationChannelTypeSlack                  = "SLACK"
+	notificationChannelTypePagerduty              = "PAGER_DUTY"
+	notificationChannelTypeMSTeams                = "MS_TEAMS"
+	notificationChannelTypeGChat                  = "GCHAT"
+	notificationChannelTypePrometheusAlertManager = "PROMETHEUS_ALERT_MANAGER"
+	notificationChannelTypeTeamEmail              = "TEAM_EMAIL"
+	notificationChannelTypeCustomWebhook          = "POWER_WEBHOOK"
+	notificationChannelTypeIBMEventNotification   = "IBM_EVENT_NOTIFICATIONS"
 
-	NOTIFICATION_CHANNEL_TYPE_SLACK_TEMPLATE_KEY_V1    = "SLACK_SECURE_EVENT_NOTIFICATION_TEMPLATE_METADATA_v1"
-	NOTIFICATION_CHANNEL_TYPE_SLACK_TEMPLATE_KEY_V2    = "SLACK_SECURE_EVENT_NOTIFICATION_TEMPLATE_METADATA_v2"
-	NOTIFICATION_CHANNEL_TYPE_MS_TEAMS_TEMPLATE_KEY_V1 = "MS_TEAMS_SECURE_EVENT_NOTIFICATION_TEMPLATE_METADATA_v1"
-	NOTIFICATION_CHANNEL_TYPE_MS_TEAMS_TEMPLATE_KEY_V2 = "MS_TEAMS_SECURE_EVENT_NOTIFICATION_TEMPLATE_METADATA_v2"
+	notificationChannelTypeSlackTemplateKeyV1   = "SLACK_SECURE_EVENT_NOTIFICATION_TEMPLATE_METADATA_v1"
+	notificationChannelTypeSlackTemplateKeyV2   = "SLACK_SECURE_EVENT_NOTIFICATION_TEMPLATE_METADATA_v2"
+	notificationChannelTypeMSTeamsTemplateKeyV1 = "MS_TEAMS_SECURE_EVENT_NOTIFICATION_TEMPLATE_METADATA_v1"
+	notificationChannelTypeMSTeamsTemplateKeyV2 = "MS_TEAMS_SECURE_EVENT_NOTIFICATION_TEMPLATE_METADATA_v2"
 
-	NOTIFICATION_CHANNEL_SECURE_EVENT_NOTIFICATION_CONTENT_SECTION = "SECURE_EVENT_NOTIFICATION_CONTENT"
+	notificationChannelSecureEventNotificationContentSection = "SECURE_EVENT_NOTIFICATION_CONTENT"
 )
 
-func dataSourceSysdigSecureNotificationChannel() *schema.Resource {
+func deprecatedDataSourceSysdigSecureNotificationChannel() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		ReadContext: dataSourceSysdigNotificationChannelRead,
+		ReadContext: deprecatedDataSourceSysdigNotificationChannelRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),
@@ -118,7 +118,7 @@ func dataSourceSysdigSecureNotificationChannel() *schema.Resource {
 }
 
 // Retrieves the information of a resource form the file and loads it in Terraform
-func dataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deprecatedDataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -137,7 +137,7 @@ func dataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.Reso
 	_ = d.Set("recipients", strings.Join(nc.Options.EmailRecipients, ","))
 	_ = d.Set("topics", strings.Join(nc.Options.SnsTopicARNs, ","))
 	_ = d.Set("api_key", nc.Options.APIKey)
-	_ = d.Set("url", nc.Options.Url)
+	_ = d.Set("url", nc.Options.URL)
 	_ = d.Set("channel", nc.Options.Channel)
 	_ = d.Set("account", nc.Options.Account)
 	_ = d.Set("service_key", nc.Options.ServiceKey)
@@ -154,12 +154,12 @@ func dataSourceSysdigNotificationChannelRead(ctx context.Context, d *schema.Reso
 	// didn't change at all.
 	// We need to extract the key from the url the API gives us
 	// to avoid this Terraform's behaviour.
-	if nc.Type == NOTIFICATION_CHANNEL_TYPE_OPSGENIE {
+	if nc.Type == notificationChannelTypeOpsGenie {
 		regex, err := regexp.Compile("apiKey=(.*)?$")
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		key := regex.FindStringSubmatch(nc.Options.Url)[1]
+		key := regex.FindStringSubmatch(nc.Options.URL)[1]
 		_ = d.Set("api_key", key)
 		_ = d.Set("url", "")
 

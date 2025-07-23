@@ -13,14 +13,14 @@ import (
 )
 
 const (
-	IBMInstanceIDHeader   = "IBMInstanceID"
-	IBMIAMPath            = "/identity/token"
-	IBMGrantTypeFormValue = "grant_type"
-	IBMApiKeyFormValue    = "apikey"
-	IBMAPIKeyGrantType    = "urn:ibm:params:oauth:grant-type:apikey"
-	SysdigTeamIDHeader    = "SysdigTeamID"
-	GetTeamByNamePath     = "/api/v2/teams/light/name/"
-	IBMProductHeader      = "SysdigProduct"
+	ibmInstanceIDHeader   = "IBMInstanceID"
+	ibmIAMPath            = "/identity/token"
+	ibmGrantTypeFormValue = "grant_type"
+	ibmAPIKeyFormValue    = "apikey"
+	ibmAPIKeyGrantType    = "urn:ibm:params:oauth:grant-type:apikey"
+	sysdigTeamIDHeader    = "SysdigTeamID"
+	getTeamByNamePath     = "/api/v2/teams/light/name/"
+	ibmProductHeader      = "SysdigProduct"
 )
 
 type IBMCommon interface {
@@ -59,7 +59,7 @@ type IAMTokenResponse struct {
 	Expiration  int64  `json:"expiration"`
 }
 
-func (ir *IBMRequest) getIBMIAMToken() (IBMAccessToken, error) {
+func (ir *IBMRequest) getIBMIAMToken() (token IBMAccessToken, err error) {
 	ir.tokenLock.Lock()
 	defer ir.tokenLock.Unlock()
 
@@ -68,9 +68,9 @@ func (ir *IBMRequest) getIBMIAMToken() (IBMAccessToken, error) {
 	}
 
 	data := url.Values{}
-	data.Set(IBMGrantTypeFormValue, IBMAPIKeyGrantType)
-	data.Set(IBMApiKeyFormValue, ir.config.ibmAPIKey)
-	identityURL := fmt.Sprintf("%s%s", ir.config.ibmIamURL, IBMIAMPath)
+	data.Set(ibmGrantTypeFormValue, ibmAPIKeyGrantType)
+	data.Set(ibmAPIKeyFormValue, ir.config.ibmAPIKey)
+	identityURL := fmt.Sprintf("%s%s", ir.config.ibmIamURL, ibmIAMPath)
 
 	r, err := http.NewRequest(http.MethodPost, identityURL, strings.NewReader(data.Encode()))
 	if err != nil {
@@ -79,13 +79,17 @@ func (ir *IBMRequest) getIBMIAMToken() (IBMAccessToken, error) {
 
 	r.Header.Set(ContentTypeHeader, ContentTypeFormURLEncoded)
 
-	resp, err := request(ir.httpClient, ir.config, r)
+	response, err := request(ir.httpClient, ir.config, r)
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
-	iamToken, err := Unmarshal[IAMTokenResponse](resp.Body)
+	iamToken, err := Unmarshal[IAMTokenResponse](response.Body)
 	if err != nil {
 		return "", err
 	}
@@ -96,10 +100,10 @@ func (ir *IBMRequest) getIBMIAMToken() (IBMAccessToken, error) {
 	return ir.token, nil
 }
 
-func (ir *IBMRequest) getTeamIDByName(ctx context.Context, name string, token IBMAccessToken) (int, error) {
+func (ir *IBMRequest) getTeamIDByName(ctx context.Context, name string, token IBMAccessToken) (teamID int, err error) {
 	r, err := http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf("%s%s%s", ir.config.url, GetTeamByNamePath, name),
+		fmt.Sprintf("%s%s%s", ir.config.url, getTeamByNamePath, name),
 		nil,
 	)
 	if err != nil {
@@ -107,18 +111,22 @@ func (ir *IBMRequest) getTeamIDByName(ctx context.Context, name string, token IB
 	}
 
 	r = r.WithContext(ctx)
-	r.Header.Set(IBMInstanceIDHeader, ir.config.ibmInstanceID)
+	r.Header.Set(ibmInstanceIDHeader, ir.config.ibmInstanceID)
 	r.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", token))
 	r.Header.Set(SysdigProductHeader, ir.config.product)
-	r.Header.Set(IBMProductHeader, ir.config.product)
+	r.Header.Set(ibmProductHeader, ir.config.product)
 
-	resp, err := request(ir.httpClient, ir.config, r)
+	response, err := request(ir.httpClient, ir.config, r)
 	if err != nil {
 		return -1, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if dErr := response.Body.Close(); dErr != nil {
+			err = fmt.Errorf("unable to close response body: %w", dErr)
+		}
+	}()
 
-	wrapper, err := Unmarshal[teamWrapper](resp.Body)
+	wrapper, err := Unmarshal[teamWrapper](response.Body)
 	if err != nil {
 		return -1, err
 	}
@@ -151,10 +159,10 @@ func (ir *IBMRequest) CurrentTeamID(ctx context.Context) (int, error) {
 
 	// use default current team
 	user, err := getMe(ctx, ir.config, ir.httpClient, map[string]string{
-		IBMInstanceIDHeader: ir.config.ibmInstanceID,
+		ibmInstanceIDHeader: ir.config.ibmInstanceID,
 		AuthorizationHeader: fmt.Sprintf("Bearer %s", token),
 		SysdigProductHeader: ir.config.product,
-		IBMProductHeader:    ir.config.product,
+		ibmProductHeader:    ir.config.product,
 	})
 	if err != nil {
 		return -1, err
@@ -186,13 +194,13 @@ func (ir *IBMRequest) Request(ctx context.Context, method string, url string, pa
 	}
 
 	r = r.WithContext(ctx)
-	r.Header.Set(IBMInstanceIDHeader, ir.config.ibmInstanceID)
+	r.Header.Set(ibmInstanceIDHeader, ir.config.ibmInstanceID)
 	r.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", token))
-	r.Header.Set(SysdigTeamIDHeader, strconv.Itoa(teamID))
+	r.Header.Set(sysdigTeamIDHeader, strconv.Itoa(teamID))
 	r.Header.Set(ContentTypeHeader, ContentTypeJSON)
 	r.Header.Set(SysdigProviderHeader, SysdigProviderHeaderValue)
 	r.Header.Set(SysdigProductHeader, ir.config.product)
-	r.Header.Set(IBMProductHeader, ir.config.product)
+	r.Header.Set(ibmProductHeader, ir.config.product)
 
 	return request(ir.httpClient, ir.config, r)
 }

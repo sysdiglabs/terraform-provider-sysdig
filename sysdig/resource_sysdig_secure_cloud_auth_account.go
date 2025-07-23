@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"reflect"
 	"strings"
 	"time"
@@ -149,7 +150,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			SchemaCloudProviderId: {
+			SchemaCloudProviderID: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -176,7 +177,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			SchemaCloudProviderTenantId: {
+			SchemaCloudProviderTenantID: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -196,7 +197,7 @@ func getSecureCloudauthAccountClient(client SysdigClients) (v2.CloudauthAccountS
 	return client.sysdigSecureClientV2()
 }
 
-func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountClient((meta.(SysdigClients)))
 	if err != nil {
 		return diag.FromErr(err)
@@ -216,13 +217,13 @@ func resourceSysdigSecureCloudauthAccountCreate(ctx context.Context, data *schem
 	return nil
 }
 
-func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	cloudauthAccount, errStatus, err := client.GetCloudauthAccountSecure(ctx, data.Id())
+	cloudauthAccount, errStatus, err := client.GetCloudauthAccountSecureByID(ctx, data.Id())
 	if err != nil {
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
@@ -235,13 +236,13 @@ func resourceSysdigSecureCloudauthAccountRead(ctx context.Context, data *schema.
 	return nil
 }
 
-func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	existingCloudAccount, errStatus, err := client.GetCloudauthAccountSecure(ctx, data.Id())
+	existingCloudAccount, errStatus, err := client.GetCloudauthAccountSecureByID(ctx, data.Id())
 	if err != nil {
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
@@ -262,7 +263,7 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 	return nil
 }
 
-func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getSecureCloudauthAccountClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -295,14 +296,12 @@ func validateCloudauthAccountUpdate(existingCloudAccount *v2.CloudauthAccountSec
 /*
 This function converts a schema set to map for iteration.
 */
-func convertSchemaSetToMap(set *schema.Set) map[string]interface{} {
-	result := make(map[string]interface{})
+func convertSchemaSetToMap(set *schema.Set) map[string]any {
+	result := make(map[string]any)
 
 	for _, element := range set.List() {
-		if entry, ok := element.(map[string]interface{}); ok {
-			for key, value := range entry {
-				result[key] = value
-			}
+		if entry, ok := element.(map[string]any); ok {
+			maps.Copy(result, entry)
 		}
 	}
 
@@ -312,7 +311,7 @@ func convertSchemaSetToMap(set *schema.Set) map[string]interface{} {
 /*
 This helper function dynamically populates the account features object for account creation
 */
-func setAccountFeature(accountFeatures *cloudauth.AccountFeatures, fieldName string, featureType cloudauth.Feature, valueMap map[string]interface{}) {
+func setAccountFeature(accountFeatures *cloudauth.AccountFeatures, fieldName string, featureType cloudauth.Feature, valueMap map[string]any) {
 	target := reflect.ValueOf(accountFeatures).Elem().FieldByName(fieldName)
 	target.Elem().FieldByName("Type").Set(reflect.ValueOf(cloudauth.Feature(featureType)))
 
@@ -321,7 +320,7 @@ func setAccountFeature(accountFeatures *cloudauth.AccountFeatures, fieldName str
 		case SchemaEnabled:
 			target.Elem().FieldByName("Enabled").SetBool(value.(bool))
 		case SchemaComponents:
-			for _, componentID := range value.([]interface{}) {
+			for _, componentID := range value.([]any) {
 				target.Elem().FieldByName("Components").Set(reflect.Append(target.Elem().FieldByName("Components"), reflect.ValueOf(componentID.(string))))
 			}
 		}
@@ -370,7 +369,7 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 	accountComponents := []*cloudauth.AccountComponent{}
 
 	for _, rc := range data.Get(SchemaComponent).(*schema.Set).List() {
-		resourceComponent := rc.(map[string]interface{})
+		resourceComponent := rc.(map[string]any)
 		component := &cloudauth.AccountComponent{}
 		var err error
 
@@ -425,11 +424,11 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 		CloudAccount: cloudauth.CloudAccount{
 			Enabled:           data.Get(SchemaEnabled).(bool),
 			OrganizationId:    data.Get(SchemaOrganizationIDKey).(string),
-			ProviderId:        data.Get(SchemaCloudProviderId).(string),
+			ProviderId:        data.Get(SchemaCloudProviderID).(string),
 			Provider:          cloudauth.Provider(cloudauth.Provider_value[data.Get(SchemaCloudProviderType).(string)]),
 			Components:        constructAccountComponents(data),
 			Feature:           constructAccountFeatures(data),
-			ProviderTenantId:  data.Get(SchemaCloudProviderTenantId).(string),
+			ProviderTenantId:  data.Get(SchemaCloudProviderTenantID).(string),
 			ProviderAlias:     data.Get(SchemaCloudProviderAlias).(string),
 			ProviderPartition: cloudauth.ProviderPartition(cloudauth.ProviderPartition_value[data.Get(SchemaProviderPartition).(string)]),
 		},
@@ -439,8 +438,8 @@ func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAc
 /*
 This helper function converts feature values from *cloudauth.AccountFeature to resource data schema.
 */
-func featureValuesToResourceData(feature *cloudauth.AccountFeature) map[string]interface{} {
-	valuesMap := make(map[string]interface{})
+func featureValuesToResourceData(feature *cloudauth.AccountFeature) map[string]any {
+	valuesMap := make(map[string]any)
 
 	valuesMap["type"] = feature.Type.String()
 	valuesMap["enabled"] = feature.Enabled
@@ -453,10 +452,10 @@ func featureValuesToResourceData(feature *cloudauth.AccountFeature) map[string]i
 This helper function converts the features data from *cloudauth.AccountFeatures to resource data schema.
 This is needed to set the value in cloudauthAccountToResourceData().
 */
-func featureToResourceData(features *cloudauth.AccountFeatures) []interface{} {
+func featureToResourceData(features *cloudauth.AccountFeatures) []any {
 	// In the resource data, SchemaFeature field is a nested set[] of sets[] of individual features
 	// Hence we need to return this uber level set[] to cloudauthAccountToResourceData
-	featureMap := []interface{}{}
+	featureMap := []any{}
 
 	featureFields := map[string]*cloudauth.AccountFeature{
 		SchemaSecureThreatDetection:     features.SecureThreatDetection,
@@ -466,10 +465,10 @@ func featureToResourceData(features *cloudauth.AccountFeatures) []interface{} {
 		SchemaSecureAgentlessScanning:   features.SecureAgentlessScanning,
 	}
 
-	allFeatures := make(map[string]interface{})
+	allFeatures := make(map[string]any)
 	for name, feature := range featureFields {
 		if feature != nil {
-			featureBlock := make([]map[string]interface{}, 0)
+			featureBlock := make([]map[string]any, 0)
 			value := featureValuesToResourceData(feature)
 			featureBlock = append(featureBlock, value)
 
@@ -489,10 +488,10 @@ func featureToResourceData(features *cloudauth.AccountFeatures) []interface{} {
 This helper function converts the components data from []*cloudauth.AccountComponent to resource data schema.
 This is needed to set the value in cloudauthAccountToResourceData().
 */
-func componentsToResourceData(components []*cloudauth.AccountComponent) []map[string]interface{} {
-	resourceList := []map[string]interface{}{}
+func componentsToResourceData(components []*cloudauth.AccountComponent) []map[string]any {
+	resourceList := []map[string]any{}
 	for _, component := range components {
-		resourceData := map[string]interface{}{}
+		resourceData := map[string]any{}
 		resourceData[SchemaType] = component.GetType().String()
 		resourceData[SchemaInstance] = component.GetInstance()
 		resourceData[SchemaVersion] = component.GetVersion()
@@ -526,13 +525,13 @@ func componentsToResourceData(components []*cloudauth.AccountComponent) []map[st
 
 func getComponentMetadataString(message protoreflect.ProtoMessage) string {
 	// marshal through protojson get correct snake case keys
-	protoJsonMessage, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(message)
+	protoJSONMessage, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(message)
 	if err != nil {
 		diag.FromErr(err)
 	}
 	// re-marshal through encoding/json to get consistent key ordering, avoiding diff errors with TF internals
-	metadataMap := make(map[string]interface{})
-	err = json.Unmarshal(protoJsonMessage, &metadataMap)
+	metadataMap := make(map[string]any)
+	err = json.Unmarshal(protoJSONMessage, &metadataMap)
 	if err != nil {
 		diag.FromErr(err)
 	}
@@ -554,7 +553,7 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 		return err
 	}
 
-	err = data.Set(SchemaCloudProviderId, cloudAccount.ProviderId)
+	err = data.Set(SchemaCloudProviderID, cloudAccount.ProviderId)
 	if err != nil {
 		return err
 	}
@@ -580,7 +579,7 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 	}
 
 	if cloudAccount.Provider == cloudauth.Provider_PROVIDER_AZURE {
-		err = data.Set(SchemaCloudProviderTenantId, cloudAccount.ProviderTenantId)
+		err = data.Set(SchemaCloudProviderTenantID, cloudAccount.ProviderTenantId)
 		if err != nil {
 			return err
 		}
@@ -592,13 +591,13 @@ func cloudauthAccountToResourceData(data *schema.ResourceData, cloudAccount *v2.
 	}
 
 	if cloudAccount.Provider == cloudauth.Provider_PROVIDER_ORACLECLOUD {
-		err = data.Set(SchemaCloudProviderTenantId, cloudAccount.ProviderTenantId)
+		err = data.Set(SchemaCloudProviderTenantID, cloudAccount.ProviderTenantId)
 		if err != nil {
 			return err
 		}
 	}
 
-	if !(cloudAccount.ProviderPartition.String() == cloudauth.ProviderPartition_PROVIDER_PARTITION_UNSPECIFIED.String()) {
+	if cloudAccount.ProviderPartition.String() != cloudauth.ProviderPartition_PROVIDER_PARTITION_UNSPECIFIED.String() {
 		err = data.Set(SchemaProviderPartition, cloudAccount.ProviderPartition.String())
 		if err != nil {
 			return err

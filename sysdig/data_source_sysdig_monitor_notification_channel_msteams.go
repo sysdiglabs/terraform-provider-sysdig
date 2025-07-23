@@ -28,7 +28,7 @@ func dataSourceSysdigMonitorNotificationChannelMSTeams() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigMonitorNotificationChannelMSTeamsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigMonitorNotificationChannelMSTeamsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := getMonitorNotificationChannelClient(meta.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)

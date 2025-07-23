@@ -10,10 +10,10 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v8
         with:
           args: --timeout 30m --build-tags unit,tf_acc_sysdig_monitor,tf_acc_sysdig_secure,tf_acc_ibm_monitor,tf_acc_ibm_secure
 
@@ -23,14 +23,12 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
-          check-latest: true
-          cache: true
+          go-version-file: go.mod
 
       - name: Test
         run: make test
@@ -42,14 +40,12 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
-          check-latest: true
-          cache: true
+          go-version-file: go.mod
 
       - name: Test
         run: make testacc
@@ -65,14 +61,12 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
-          check-latest: true
-          cache: true
+          go-version-file: go.mod
 
       - name: Test
         run: make testacc
@@ -88,14 +82,12 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
-          check-latest: true
-          cache: true
+          go-version-file: go.mod
 
       - name: Test
         run: make testacc
@@ -114,14 +106,12 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
-          check-latest: true
-          cache: true
+          go-version-file: go.mod
 
       - name: Test
         run: make testacc

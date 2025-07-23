@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -9,17 +10,18 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/spf13/cast"
 )
 
-func resourceSysdigMonitorAlertAnomaly() *schema.Resource {
+func deprecatedResourceSysdigMonitorAlertDowntime() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		DeprecationMessage: "Anomaly Detection Alerts have been deprecated, \"sysdig_monitor_alert_anomaly\" will be removed in future releases",
-		CreateContext:      resourceSysdigAlertAnomalyCreate,
-		UpdateContext:      resourceSysdigAlertAnomalyUpdate,
-		ReadContext:        resourceSysdigAlertAnomalyRead,
-		DeleteContext:      resourceSysdigAlertAnomalyDelete,
+		DeprecationMessage: "\"sysdig_monitor_alert_downtime\" has been deprecated and will be removed in future releases, use \"sysdig_monitor_alert_v2_downtime\" instead",
+		CreateContext:      deprecatedResourceSysdigAlertDowntimeCreate,
+		UpdateContext:      deprecatedResourceSysdigAlertDowntimeUpdate,
+		ReadContext:        deprecatedResourceSysdigAlertDowntimeRead,
+		DeleteContext:      deprecatedResourceSysdigAlertDowntimeDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -32,27 +34,27 @@ func resourceSysdigMonitorAlertAnomaly() *schema.Resource {
 		},
 
 		Schema: createAlertSchema(map[string]*schema.Schema{
-			"monitor": {
+			"entities_to_monitor": {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"multiple_alerts_by": {
-				Type:     schema.TypeList,
+			"trigger_after_pct": {
+				Type:     schema.TypeInt,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Default:  100,
 			},
 		}),
 	}
 }
 
-func resourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigAlertDowntimeCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	alert, err := anomalyAlertFromResourceData(data)
+	alert, err := deprecatedDowntimeAlertFromResourceData(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -64,16 +66,17 @@ func resourceSysdigAlertAnomalyCreate(ctx context.Context, data *schema.Resource
 
 	data.SetId(strconv.Itoa(alertCreated.ID))
 	_ = data.Set("version", alertCreated.Version)
+
 	return nil
 }
 
-func resourceSysdigAlertAnomalyUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigAlertDowntimeUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	alert, err := anomalyAlertFromResourceData(data)
+	alert, err := deprecatedDowntimeAlertFromResourceData(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -88,7 +91,7 @@ func resourceSysdigAlertAnomalyUpdate(ctx context.Context, data *schema.Resource
 	return nil
 }
 
-func resourceSysdigAlertAnomalyRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigAlertDowntimeRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -105,7 +108,7 @@ func resourceSysdigAlertAnomalyRead(ctx context.Context, data *schema.ResourceDa
 		return nil
 	}
 
-	err = anomalyAlertToResourceData(&alert, data)
+	err = deprecatedDowntimeAlertToResourceData(&alert, data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -113,7 +116,7 @@ func resourceSysdigAlertAnomalyRead(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
-func resourceSysdigAlertAnomalyDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigAlertDowntimeDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -124,7 +127,7 @@ func resourceSysdigAlertAnomalyDelete(ctx context.Context, data *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteAlert(ctx, id)
+	err = client.DeleteAlertByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -132,43 +135,35 @@ func resourceSysdigAlertAnomalyDelete(ctx context.Context, data *schema.Resource
 	return nil
 }
 
-func anomalyAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err error) {
-	alert, err = alertFromResourceData(data)
+func deprecatedDowntimeAlertFromResourceData(d *schema.ResourceData) (alert *v2.Alert, err error) {
+	alert, err = alertFromResourceData(d)
 	if err != nil {
 		return
 	}
 
-	alert.Type = "BASELINE"
+	alert.SegmentCondition = &v2.SegmentCondition{Type: "ANY"}
+	alert.Condition = fmt.Sprintf("avg(timeAvg(uptime)) <= %.2f", 1.0-(cast.ToFloat64(d.Get("trigger_after_pct"))/100.0))
 
-	for _, metric := range data.Get("monitor").([]interface{}) {
-		alert.Monitor = append(alert.Monitor, &v2.Monitor{
-			Metric:       metric.(string),
-			StdDevFactor: 2,
-		})
-	}
-
-	if alerts_by, ok := data.GetOk("multiple_alerts_by"); ok {
-		alert.SegmentCondition = &v2.SegmentCondition{Type: "ANY"}
-		for _, v := range alerts_by.([]interface{}) {
-			alert.SegmentBy = append(alert.SegmentBy, v.(string))
-		}
+	entitiesRaw := d.Get("entities_to_monitor").([]any)
+	for _, entityRaw := range entitiesRaw {
+		alert.SegmentBy = append(alert.SegmentBy, entityRaw.(string))
 	}
 
 	return
 }
 
-func anomalyAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
+func deprecatedDowntimeAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
 	if err != nil {
 		return
 	}
 
-	_ = data.Set("multiple_alerts_by", alert.SegmentBy)
+	var triggerAfterPct float64
+	_, _ = fmt.Sscanf(alert.Condition, "avg(timeAvg(uptime)) <= %f", &triggerAfterPct)
+	triggerAfterPct = (1 - triggerAfterPct) * 100
 
-	monitor_metrics := []string{}
-	for _, v := range alert.Monitor {
-		monitor_metrics = append(monitor_metrics, v.Metric)
-	}
-	_ = data.Set("monitor", monitor_metrics)
+	_ = data.Set("trigger_after_pct", int(triggerAfterPct))
+	_ = data.Set("entities_to_monitor", alert.SegmentBy)
+
 	return
 }

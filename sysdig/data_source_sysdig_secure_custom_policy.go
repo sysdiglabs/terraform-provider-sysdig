@@ -23,10 +23,10 @@ func dataSourceSysdigSecureCustomPolicy() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecureCustomPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureCustomPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	return commonDataSourceSecurePolicyRead(ctx, d, meta, "custom policy", isCustomPolicy)
 }
 
 func isCustomPolicy(policy v2.Policy) bool {
-	return !policy.IsDefault && policy.TemplateId == 0
+	return !policy.IsDefault && policy.TemplateID == 0
 }

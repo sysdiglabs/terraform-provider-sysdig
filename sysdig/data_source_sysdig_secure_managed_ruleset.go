@@ -23,10 +23,10 @@ func dataSourceSysdigSecureManagedRuleset() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigManagedRulesetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigManagedRulesetRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	return commonDataSourceSecurePolicyRead(ctx, d, meta, "managed ruleset", isManagedRuleset)
 }
 
 func isManagedRuleset(policy v2.Policy) bool {
-	return !policy.IsDefault && policy.TemplateId != 0
+	return !policy.IsDefault && policy.TemplateID != 0
 }

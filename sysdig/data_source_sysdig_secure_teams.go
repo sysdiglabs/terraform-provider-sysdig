@@ -31,7 +31,7 @@ func dataSourceSysdigSecureTeams() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigSecureTeamsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSysdigSecureTeamsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	clients := meta.(SysdigClients)
 	client, err := getSecureTeamClient(clients)
 	if err != nil {
@@ -43,9 +43,9 @@ func dataSourceSysdigSecureTeamsRead(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	var result []map[string]interface{}
+	var result []map[string]any
 	for _, team := range teams {
-		result = append(result, map[string]interface{}{
+		result = append(result, map[string]any{
 			"id":   team.ID,
 			"name": team.Name,
 		})

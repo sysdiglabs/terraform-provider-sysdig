@@ -38,7 +38,7 @@ func resourceSysdigGroupMappingConfig() *schema.Resource {
 	}
 }
 
-func resourceSysdigGroupMappingConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigGroupMappingConfigRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -46,7 +46,7 @@ func resourceSysdigGroupMappingConfigRead(ctx context.Context, d *schema.Resourc
 
 	groupMappingConfig, err := client.GetGroupMappingConfig(ctx)
 	if err != nil {
-		if err == v2.GroupMappingConfigNotFound {
+		if err == v2.ErrGroupMappingConfigNotFound {
 			return nil
 		}
 		return diag.FromErr(err)
@@ -60,7 +60,7 @@ func resourceSysdigGroupMappingConfigRead(ctx context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceSysdigGroupMappingConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigGroupMappingConfigCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -79,7 +79,7 @@ func resourceSysdigGroupMappingConfigCreate(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceSysdigGroupMappingConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigGroupMappingConfigUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -96,7 +96,7 @@ func resourceSysdigGroupMappingConfigUpdate(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceSysdigGroupMappingConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSysdigGroupMappingConfigDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	return nil
 }
 

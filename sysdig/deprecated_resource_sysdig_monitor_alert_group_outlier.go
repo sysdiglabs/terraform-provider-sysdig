@@ -11,15 +11,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceSysdigMonitorAlertPromql() *schema.Resource {
+func deprecatedResourceSysdigMonitorAlertGroupOutlier() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		DeprecationMessage: "\"sysdig_monitor_alert_promql\" has been deprecated and will be removed in future releases, use \"sysdig_monitor_alert_v2_prometheus\" instead",
-		CreateContext:      resourceSysdigAlertPromqlCreate,
-		UpdateContext:      resourceSysdigAlertPromqlUpdate,
-		ReadContext:        resourceSysdigAlertPromqlRead,
-		DeleteContext:      resourceSysdigAlertPromqlDelete,
+		DeprecationMessage: "Group Outlier Alerts have been deprecated, \"sysdig_monitor_alert_group_outlier\" will be removed in future releases",
+		CreateContext:      deprecatedResourceSysdigAlertGroupOutlierCreate,
+		UpdateContext:      deprecatedResourceSysdigAlertGroupOutlierUpdate,
+		ReadContext:        deprecatedResourceSysdigAlertGroupOutlierRead,
+		DeleteContext:      deprecatedResourceSysdigAlertGroupOutlierDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -32,21 +32,22 @@ func resourceSysdigMonitorAlertPromql() *schema.Resource {
 		},
 
 		Schema: createAlertSchema(map[string]*schema.Schema{
-			"promql": {
-				Type:     schema.TypeString,
+			"monitor": {
+				Type:     schema.TypeList,
 				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		}),
 	}
 }
 
-func resourceSysdigAlertPromqlCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigAlertGroupOutlierCreate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	alert, err := promqlAlertFromResourceData(data)
+	alert, err := deprecatedGroupOutlierAlertFromResourceData(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -62,13 +63,13 @@ func resourceSysdigAlertPromqlCreate(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigAlertPromqlUpdate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigAlertGroupOutlierUpdate(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	alert, err := promqlAlertFromResourceData(data)
+	alert, err := deprecatedGroupOutlierAlertFromResourceData(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -83,7 +84,7 @@ func resourceSysdigAlertPromqlUpdate(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func resourceSysdigAlertPromqlRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigAlertGroupOutlierRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -100,7 +101,7 @@ func resourceSysdigAlertPromqlRead(ctx context.Context, data *schema.ResourceDat
 		return nil
 	}
 
-	err = promqlAlertToResourceData(&alert, data)
+	err = deprecatedGroupOutlierAlertToResourceData(&alert, data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -108,7 +109,7 @@ func resourceSysdigAlertPromqlRead(ctx context.Context, data *schema.ResourceDat
 	return nil
 }
 
-func resourceSysdigAlertPromqlDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+func deprecatedResourceSysdigAlertGroupOutlierDelete(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getMonitorAlertClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -119,7 +120,7 @@ func resourceSysdigAlertPromqlDelete(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteAlert(ctx, id)
+	err = client.DeleteAlertByID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -127,34 +128,38 @@ func resourceSysdigAlertPromqlDelete(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func promqlAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err error) {
+func deprecatedGroupOutlierAlertFromResourceData(data *schema.ResourceData) (alert *v2.Alert, err error) {
 	alert, err = alertFromResourceData(data)
 	if err != nil {
 		return
 	}
-	duration := int((time.Duration(*alert.Timespan) * time.Microsecond).Seconds())
-	alert.Duration = &duration
-	alert.Timespan = nil
 
-	alert.Type = "PROMETHEUS"
+	alert.Type = "HOST_COMPARISON"
 
-	alert.Condition = data.Get("promql").(string)
+	for _, metric := range data.Get("monitor").([]any) {
+		alert.Monitor = append(alert.Monitor, &v2.Monitor{
+			Metric:       metric.(string),
+			StdDevFactor: 2,
+		})
+	}
+
+	alert.SegmentCondition = &v2.SegmentCondition{Type: "ANY"}
+	alert.SegmentBy = []string{"host.mac"}
 
 	return
 }
 
-func promqlAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
+func deprecatedGroupOutlierAlertToResourceData(alert *v2.Alert, data *schema.ResourceData) (err error) {
 	err = alertToResourceData(alert, data)
 	if err != nil {
 		return
 	}
 
-	if alert.Duration != nil {
-		trigger_after_minutes := int((time.Duration(*alert.Duration) * time.Second).Minutes())
-		_ = data.Set("trigger_after_minutes", trigger_after_minutes)
+	monitorMetrics := []string{}
+	for _, v := range alert.Monitor {
+		monitorMetrics = append(monitorMetrics, v.Metric)
 	}
-
-	_ = data.Set("promql", alert.Condition)
+	_ = data.Set("monitor", monitorMetrics)
 
 	return
 }

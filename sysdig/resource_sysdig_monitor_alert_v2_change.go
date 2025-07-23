@@ -134,7 +134,7 @@ func resourceSysdigMonitorAlertV2Change() *schema.Resource {
 			},
 		})),
 
-		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
+		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i any) error {
 			shorterTimeRangeSeconds := diff.Get("shorter_time_range_seconds").(int)
 			longerTimeRangeSeconds := diff.Get("longer_time_range_seconds").(int)
 
@@ -165,7 +165,7 @@ func getAlertV2ChangeClient(c SysdigClients) (v2.AlertV2ChangeInterface, error) 
 	return getAlertV2Client(c)
 }
 
-func resourceSysdigMonitorAlertV2ChangeCreate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2ChangeCreate(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2ChangeClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -191,7 +191,7 @@ func resourceSysdigMonitorAlertV2ChangeCreate(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2ChangeRead(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2ChangeRead(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2ChangeClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -202,9 +202,9 @@ func resourceSysdigMonitorAlertV2ChangeRead(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	a, err := client.GetAlertV2Change(ctx, id)
+	a, err := client.GetAlertV2ChangeByID(ctx, id)
 	if err != nil {
-		if err == v2.AlertV2NotFound {
+		if err == v2.ErrAlertV2NotFound {
 			d.SetId("")
 			return nil
 		}
@@ -219,7 +219,7 @@ func resourceSysdigMonitorAlertV2ChangeRead(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2ChangeUpdate(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2ChangeUpdate(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2ChangeClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
@@ -245,7 +245,7 @@ func resourceSysdigMonitorAlertV2ChangeUpdate(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func resourceSysdigMonitorAlertV2ChangeDelete(ctx context.Context, d *schema.ResourceData, i interface{}) diag.Diagnostics {
+func resourceSysdigMonitorAlertV2ChangeDelete(ctx context.Context, d *schema.ResourceData, i any) diag.Diagnostics {
 	client, err := getAlertV2ChangeClient(i.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
