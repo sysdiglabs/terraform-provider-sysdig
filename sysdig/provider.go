@@ -200,6 +200,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_team":                                          resourceSysdigSecureTeam(),
 			"sysdig_secure_vulnerability_accept_risk":                     resourceSysdigSecureVulnerabilityAcceptRisk(),
 			"sysdig_secure_vulnerability_policy":                          resourceSysdigSecureVulnerabilityPolicy(),
+			"sysdig_secure_vulnerability_rule_bundle":                     resourceSysdigSecureVulnerabilityRuleBundle(),
 			"sysdig_secure_zone":                                          resourceSysdigSecureZone(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
