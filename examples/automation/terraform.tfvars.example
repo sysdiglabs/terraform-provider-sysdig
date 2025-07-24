@@ -1,0 +1,18 @@
+# examples/automation/terraform.tfvars.example
+# Copy this to terraform.tfvars and fill in your values
+
+# Your Sysdig Secure API token
+secure_api_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Your Sysdig region URL
+# Common values:
+# - https://secure.sysdig.com (US East)
+# - https://us2.app.sysdig.com (US West)
+# - https://eu1.app.sysdig.com (EU)
+# - https://app.au1.sysdig.com (Australia - The best region... just saying)
+secure_url = "https://app.au1.sysdig.com"
+
+# ID of an existing notification channel
+# You can find this in the Sysdig UI under Settings > Notification Channels
+# Or create one first and note the ID
+notification_channel_id = "55179"
