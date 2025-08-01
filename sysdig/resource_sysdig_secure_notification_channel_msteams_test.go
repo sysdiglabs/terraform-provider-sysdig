@@ -44,9 +44,10 @@ func TestAccSecureNotificationChannelMSTeams(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_msteams.sample-msteams",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_secure_notification_channel_msteams.sample-msteams",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})

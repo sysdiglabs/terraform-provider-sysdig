@@ -31,9 +31,10 @@ func TestAccMonitorNotificationChannelSNS(t *testing.T) {
 				Config: monitorNotificationChannelAmazonSNSShareWithCurrentTeam(rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_sns.sample-amazon-sns",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_sns.sample-amazon-sns",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})

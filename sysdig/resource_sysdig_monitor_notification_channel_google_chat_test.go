@@ -28,17 +28,19 @@ func TestAccMonitorNotificationChannelGoogleChat(t *testing.T) {
 				Config: monitorNotificationChannelGoogleChatWithName(rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_google_chat.sample_google_chat1",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_google_chat.sample_google_chat1",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 			{
 				Config: monitorNotificationChannelGoogleChatSharedWithCurrentTeam(rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_google_chat.sample_google_chat2",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_google_chat.sample_google_chat2",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})

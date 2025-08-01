@@ -34,9 +34,10 @@ func TestAccMonitorNotificationChannelEmail(t *testing.T) {
 				Config: monitorNotificationChannelEmailSharedWithCurrentTeam(rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_email.sample_email",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_email.sample_email",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})

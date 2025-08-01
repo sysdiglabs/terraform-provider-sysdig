@@ -28,17 +28,19 @@ func TestAccSecureNotificationChannelTeamEmail(t *testing.T) {
 				Config: secureNotificationChannelTeamEmailWithName(rText()),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_team_email.sample_team_email1",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_secure_notification_channel_team_email.sample_team_email1",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 			{
 				Config: secureNotificationChannelTeamEmailSharedWithCurrentTeam(rText()),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_team_email.sample_team_email2",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_secure_notification_channel_team_email.sample_team_email2",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})

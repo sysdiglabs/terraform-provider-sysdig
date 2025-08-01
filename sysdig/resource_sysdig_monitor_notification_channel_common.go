@@ -84,7 +84,7 @@ func monitorNotificationChannelToResourceData(nc *v2.NotificationChannel, data *
 	}
 	_ = data.Set("notify_when_ok", nc.Options.NotifyOnOk)
 	_ = data.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
-	_ = data.Set("send_test_notification", nc.Options.SendTestNotification)
+	// do not update "send_test_notification" from the api response as it will always be "false" on subsequent reads because the fields is not persisted
 
 	return
 }

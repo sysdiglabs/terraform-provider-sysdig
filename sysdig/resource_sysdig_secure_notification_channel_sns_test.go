@@ -32,9 +32,10 @@ func TestAccSecureNotificationChannelSNS(t *testing.T) {
 				Config: secureNotificationChannelAmazonSNSShareWithCurrentTeam(rText()),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_sns.sample-amazon-sns",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_secure_notification_channel_sns.sample-amazon-sns",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})
