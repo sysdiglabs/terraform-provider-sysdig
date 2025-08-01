@@ -29,25 +29,28 @@ func TestAccSecureNotificationChannelOpsGenie(t *testing.T) {
 				Config: secureNotificationChannelOpsGenieWithName(rText()),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_opsgenie.sample-opsgenie",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_secure_notification_channel_opsgenie.sample-opsgenie",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 			{
 				Config: secureNotificationChannelOpsGenieWithNameAndRegion(rText()),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_opsgenie.sample-opsgenie-2",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_secure_notification_channel_opsgenie.sample-opsgenie-2",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 			{
 				Config: secureNotificationChannelOpsGenieSharedWithCurrentTeam(rText()),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_opsgenie.sample-opsgenie-3",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_secure_notification_channel_opsgenie.sample-opsgenie-3",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})

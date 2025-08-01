@@ -42,9 +42,10 @@ func TestAccAlertMetric(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_pagerduty.sample-pagerduty",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_secure_notification_channel_pagerduty.sample-pagerduty",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 				SkipFunc: func() (bool, error) {
 					return buildinfo.IBMMonitor, nil
 				},
@@ -62,7 +63,7 @@ resource "sysdig_monitor_alert_metric" "sample" {
 
 	metric = "avg(avg(cpu.used.percent)) > 50"
 	scope = "agent.id in (\"foo\")"
-	
+
 	trigger_after_minutes = 10
 
 	enabled = false
@@ -86,7 +87,7 @@ resource "sysdig_monitor_alert_metric" "sample" {
 
 	metric = "avg(avg(cpu.used.percent)) > 50"
 	scope = "agent.id in (\"foo\")"
-	
+
 	trigger_after_minutes = 10
 	group_name = "sample_group_name"
 	enabled = false
@@ -109,7 +110,7 @@ resource "sysdig_monitor_alert_metric" "sample2" {
 	severity = 3
 
 	metric = "avg(avg(cpu.used.percent)) > 50"
-	
+
 	trigger_after_minutes = 10
 
 	enabled = false
