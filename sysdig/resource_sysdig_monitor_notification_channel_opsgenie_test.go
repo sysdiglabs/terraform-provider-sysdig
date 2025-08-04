@@ -29,25 +29,28 @@ func TestAccMonitorNotificationChannelOpsGenie(t *testing.T) {
 				Config: monitorNotificationChannelOpsGenieWithName(rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_opsgenie.sample-opsgenie",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_opsgenie.sample-opsgenie",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 			{
 				Config: monitorNotificationChannelOpsGenieWithNameAndRegion(rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_opsgenie.sample-opsgenie-2",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_opsgenie.sample-opsgenie-2",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 			{
 				Config: monitorNotificationChannelOpsGenieSharedWithCurrentTeam(rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_opsgenie.sample-opsgenie-3",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_opsgenie.sample-opsgenie-3",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})

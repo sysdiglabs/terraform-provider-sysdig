@@ -44,17 +44,19 @@ func TestAccSecureNotificationChannelSlack(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_slack.sample-slack",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_secure_notification_channel_slack.sample-slack",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 			{
 				Config: secureNotificationChannelSlackSharedWithPrivateChannel(rText()),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_slack.sample-slack-private",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_secure_notification_channel_slack.sample-slack-private",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})

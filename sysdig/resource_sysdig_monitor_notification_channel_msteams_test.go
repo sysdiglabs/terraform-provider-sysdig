@@ -28,17 +28,19 @@ func TestAccMonitorNotificationChannelMSTeams(t *testing.T) {
 				Config: monitorNotificationChannelMSTeamsWithName(rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_msteams.sample-msteams1",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_msteams.sample-msteams1",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 			{
 				Config: monitorNotificationChannelMSTeamsSharedWithCurrentTeam(rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_msteams.sample-msteams2",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_msteams.sample-msteams2",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})

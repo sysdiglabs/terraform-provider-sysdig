@@ -32,9 +32,10 @@ func TestAccSecureNotificationChannelVictorOps(t *testing.T) {
 				Config: secureNotificationChannelVictorOpsShareWithCurrentTeam(rText()),
 			},
 			{
-				ResourceName:      "sysdig_secure_notification_channel_victorops.sample-victorops",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_secure_notification_channel_victorops.sample-victorops",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})

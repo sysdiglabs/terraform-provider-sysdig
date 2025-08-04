@@ -31,25 +31,28 @@ func TestAccMonitorNotificationChannelSlack(t *testing.T) {
 				Config: monitorNotificationChannelSlackSharedWithCurrentTeam(rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_slack.sample-slack",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_slack.sample-slack",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 			{
 				Config: monitorNotificationChannelSlackSharedWithShowSection(rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_slack.sample-slack",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_slack.sample-slack",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 			{
 				Config: monitorNotificationChannelSlackSharedWithPrivateChannel(rText()),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_slack.sample-slack-private",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_slack.sample-slack-private",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})

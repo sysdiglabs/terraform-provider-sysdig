@@ -35,17 +35,19 @@ func TestAccMonitorNotificationChannelIBMEventNotification(t *testing.T) {
 				Config: monitorNotificationChannelIBMEventNotificationWithName(rText(), ibmEventNotificationInstanceId),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_ibm_event_notification.sample1",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_ibm_event_notification.sample1",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 			{
 				Config: monitorNotificationChannelIBMEventNotificationSharedWithCurrentTeam(rText(), ibmEventNotificationInstanceId),
 			},
 			{
-				ResourceName:      "sysdig_monitor_notification_channel_ibm_event_notification.sample2",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "sysdig_monitor_notification_channel_ibm_event_notification.sample2",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
 		},
 	})
