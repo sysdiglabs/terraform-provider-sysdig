@@ -72,7 +72,7 @@ provider "sysdig" {
 
 
 // create a new secure policy
-resource "sysdig_secure_policy" "unexpected_inbound_tcp_connection_traefik" {
+resource "sysdig_secure_custom_policy" "unexpected_inbound_tcp_connection_traefik" {
 # ...
 }
 ```

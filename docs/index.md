@@ -153,14 +153,18 @@ are applied. The policy will stop the affected container and trigger a capture f
 further troubleshooting. 
 
 ```hcl
-resource "sysdig_secure_policy" "terminal_shell_or_ssh_in_container" {
+resource "sysdig_secure_custom_policy" "terminal_shell_or_ssh_in_container" {
   name        = "Terminal shell or SSH detected in container"
   description = "Detects a terminal shell or a ssh spawned in a container"
   enabled     = true
   severity    = 0 // HIGH
   scope       = "container.id != \"\""
-  rule_names  = [sysdig_secure_rule_network.disallowed_ssh_connection.name,
-                 sysdig_secure_rule_process.terminal_shell.name]
+  rules {
+    name = sysdig_secure_rule_network.disallowed_ssh_connection.name
+  }
+  rules {
+    name = sysdig_secure_rule_process.terminal_shell.name
+  }
 
   actions {
     container               = "stop"
@@ -221,14 +225,18 @@ resource "sysdig_secure_notification_channel_slack" "devops-slack" {
 Bind them to the policy, modifying the file `policy.tf`; note the `notification_channels` property:
 
 ```hcl
-resource "sysdig_secure_policy" "terminal_shell_or_ssh_in_container" {
+resource "sysdig_secure_custom_policy" "terminal_shell_or_ssh_in_container" {
   name        = "Terminal shell or SSH detected in container"
   description = "Detects a terminal shell or a ssh spawned in a container"
   enabled     = true
   severity    = 0 // HIGH
   scope       = "container.id != \"\""
-  rule_names  = [sysdig_secure_rule_network.disallowed_ssh_connection.name,
-                 sysdig_secure_rule_process.terminal_shell.name]
+  rules {
+    name = sysdig_secure_rule_network.disallowed_ssh_connection.name
+  }
+  rules {
+    name = sysdig_secure_rule_process.terminal_shell.name
+  }
 
   actions {
     container               = "stop"
