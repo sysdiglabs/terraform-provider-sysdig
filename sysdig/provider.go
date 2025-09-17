@@ -131,8 +131,6 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_monitor_alert_metric":                deprecatedResourceSysdigMonitorAlertMetric(),
 			"sysdig_monitor_alert_promql":                deprecatedResourceSysdigMonitorAlertPromql(),
 			"sysdig_secure_policy":                       deprecatedResourceSysdigSecurePolicy(),
-			"sysdig_secure_scanning_policy":              deprecatedResourceSysdigSecureScanningPolicy(),
-			"sysdig_secure_scanning_policy_assignment":   deprecatedResourceSysdigSecureScanningPolicyAssignment(),
 			"sysdig_secure_vulnerability_exception":      deprecatedResourceSysdigSecureVulnerabilityException(),
 			"sysdig_secure_vulnerability_exception_list": deprecatedResourceSysdigSecureVulnerabilityExceptionList(),
 
