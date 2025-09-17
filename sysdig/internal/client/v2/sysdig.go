@@ -44,8 +44,6 @@ type SysdigSecure interface {
 	CloudauthAccountFeatureSecureInterface
 	CloudauthAccountSecureInterface
 	CompositePolicyInterface
-	DeprecatedVulnerabilityExceptionInterface
-	DeprecatedVulnerabilityExceptionListInterface
 	ListInterface
 	MacroInterface
 	OnboardingSecureInterface
