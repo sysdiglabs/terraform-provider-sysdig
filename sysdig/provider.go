@@ -126,7 +126,6 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 
 			"sysdig_monitor_alert_event":         deprecatedResourceSysdigMonitorAlertEvent(),
 			"sysdig_monitor_alert_group_outlier": deprecatedResourceSysdigMonitorAlertGroupOutlier(),
-			"sysdig_monitor_alert_promql":        deprecatedResourceSysdigMonitorAlertPromql(),
 
 			"sysdig_monitor_alert_v2_change":                               resourceSysdigMonitorAlertV2Change(),
 			"sysdig_monitor_alert_v2_downtime":                             resourceSysdigMonitorAlertV2Downtime(),
