@@ -220,7 +220,7 @@ func userSecureRolesToSet(userRoles []v2.UserRoles) (res []map[string]any) {
 		}
 		res = append(res, roleMap)
 	}
-	return
+	return res
 }
 
 func resourceSysdigSecureTeamUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {

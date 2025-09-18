@@ -228,12 +228,12 @@ func userMonitorRolesToSet(userRoles []v2.UserRoles) (res []map[string]any) {
 		}
 		res = append(res, roleMap)
 	}
-	return
+	return res
 }
 
 func entrypointToSet(entrypoint *v2.EntryPoint) (res []map[string]any) {
 	if entrypoint == nil {
-		return
+		return res
 	}
 
 	module := entrypoint.Module

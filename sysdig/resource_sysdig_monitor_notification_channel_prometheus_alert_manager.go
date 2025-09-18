@@ -145,7 +145,7 @@ func resourceSysdigMonitorNotificationChannelPrometheusAlertManagerDelete(ctx co
 func monitorNotificationChannelPrometheusAlertManagerFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = monitorNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypePrometheusAlertManager
@@ -153,13 +153,13 @@ func monitorNotificationChannelPrometheusAlertManagerFromResourceData(d *schema.
 	nc.Options.AdditionalHeaders = d.Get("additional_headers").(map[string]any)
 	allowInsecureConnections := d.Get("allow_insecure_connections").(bool)
 	nc.Options.AllowInsecureConnections = &allowInsecureConnections
-	return
+	return nc, err
 }
 
 func monitorNotificationChannelPrometheusAlertManagerToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("url", nc.Options.URL)
@@ -169,5 +169,5 @@ func monitorNotificationChannelPrometheusAlertManagerToResourceData(nc *v2.Notif
 		_ = d.Set("allow_insecure_connections", *nc.Options.AllowInsecureConnections)
 	}
 
-	return
+	return err
 }

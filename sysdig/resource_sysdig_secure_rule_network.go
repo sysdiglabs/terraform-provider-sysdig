@@ -247,5 +247,5 @@ func resourceSysdigRuleNetworkFromResourceData(d *schema.ResourceData) (rule v2.
 		}
 	}
 
-	return
+	return rule, err
 }

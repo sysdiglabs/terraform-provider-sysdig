@@ -33,10 +33,10 @@ func resourceSysdigMonitorAlertV2Prometheus() *schema.Resource {
 
 		Schema: createAlertV2Schema(map[string]*schema.Schema{
 			"duration_seconds": {
-				Type:          schema.TypeInt,
-				Optional:      true,
-				Computed:      true, // computed if trigger_after_minutes is defined
-				ValidateFunc:  validation.IntAtLeast(0),
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true, // computed if trigger_after_minutes is defined
+				ValidateFunc: validation.IntAtLeast(0),
 			},
 			"query": {
 				Type:     schema.TypeString,
@@ -173,7 +173,7 @@ func buildAlertV2PrometheusStruct(d *schema.ResourceData) *v2.AlertV2Prometheus 
 func updateAlertV2PrometheusState(d *schema.ResourceData, alert *v2.AlertV2Prometheus) (err error) {
 	err = updateAlertV2CommonState(d, &alert.AlertV2Common)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("duration_seconds", alert.Config.Duration)
@@ -186,5 +186,5 @@ func updateAlertV2PrometheusState(d *schema.ResourceData, alert *v2.AlertV2Prome
 		_ = d.Set("keep_firing_for_minutes", nil)
 	}
 
-	return
+	return err
 }

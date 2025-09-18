@@ -138,23 +138,23 @@ func resourceSysdigSecureNotificationChannelVictorOpsDelete(ctx context.Context,
 func secureNotificationChannelVictorOpsFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypeVictorOps
 	nc.Options.APIKey = d.Get("api_key").(string)
 	nc.Options.RoutingKey = d.Get("routing_key").(string)
-	return
+	return nc, err
 }
 
 func secureNotificationChannelVictorOpsToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = secureNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("api_key", nc.Options.APIKey)
 	_ = d.Set("routing_key", nc.Options.RoutingKey)
 
-	return
+	return err
 }

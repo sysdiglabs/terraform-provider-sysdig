@@ -66,7 +66,7 @@ func secureNotificationChannelFromResourceData(d *schema.ResourceData, teamID in
 			SendTestNotification: d.Get("send_test_notification").(bool),
 		},
 	}
-	return
+	return nc, err
 }
 
 func secureNotificationChannelToResourceData(nc *v2.NotificationChannel, data *schema.ResourceData) (err error) {
@@ -86,7 +86,7 @@ func secureNotificationChannelToResourceData(nc *v2.NotificationChannel, data *s
 	_ = data.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
 	// do not update "send_test_notification" from the api response as it will always be "false" on subsequent reads because the fields is not persisted
 
-	return
+	return err
 }
 
 func getSecureNotificationChannelClient(c SysdigClients) (v2.NotificationChannelInterface, error) {
