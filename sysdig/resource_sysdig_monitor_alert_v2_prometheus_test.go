@@ -65,7 +65,7 @@ resource "sysdig_monitor_alert_v2_prometheus" "sample" {
 	description = "TERRAFORM TEST - PROMQL %s"
 	severity = "high"
 	query = "(elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"}) * 100 > 80"
-	trigger_after_minutes = 10
+	duration_seconds = 600
 	enabled = false
 }
 `, name, name)

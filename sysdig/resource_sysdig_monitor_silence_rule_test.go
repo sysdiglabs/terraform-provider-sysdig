@@ -73,16 +73,16 @@ resource "sysdig_monitor_silence_rule" "sample1" {
 
 func monitorSilenceRuleWithAlertIds(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_monitor_alert_promql" "sample1" {
+resource "sysdig_monitor_alert_v2_prometheus" "sample1" {
 	name = "TERRAFORM TEST - PROMQL %s 1"
-	promql = "up"
-	trigger_after_minutes = 1
+	query = "up"
+	duration_seconds = 60
 	enabled = false
 }
-resource "sysdig_monitor_alert_promql" "sample2" {
+resource "sysdig_monitor_alert_v2_prometheus" "sample2" {
 	name = "TERRAFORM TEST - PROMQL %s 2"
-	promql = "up"
-	trigger_after_minutes = 1
+	query = "up"
+	duration_seconds = 60
 	enabled = false
 }
 resource "sysdig_monitor_silence_rule" "sample2" {
@@ -90,22 +90,22 @@ resource "sysdig_monitor_silence_rule" "sample2" {
 	enabled = false
 	start_ts = 1691168134153
 	duration_seconds = 3600
-	alert_ids = [ sysdig_monitor_alert_promql.sample1.id, sysdig_monitor_alert_promql.sample2.id ]
+	alert_ids = [ sysdig_monitor_alert_v2_prometheus.sample1.id, sysdig_monitor_alert_v2_prometheus.sample2.id ]
 }`, name, name, name)
 }
 
 func monitorSilenceRuleWithAlertIdsAndScope(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_monitor_alert_promql" "sample3" {
+resource "sysdig_monitor_alert_v2_prometheus" "sample3" {
 	name = "TERRAFORM TEST - PROMQL %s 3"
-	promql = "up"
-	trigger_after_minutes = 1
+	query = "up"
+	duration_seconds = 60
 	enabled = false
 }
-resource "sysdig_monitor_alert_promql" "sample4" {
+resource "sysdig_monitor_alert_v2_prometheus" "sample4" {
 	name = "TERRAFORM TEST - PROMQL %s 4"
-	promql = "up"
-	trigger_after_minutes = 1
+	query = "up"
+	duration_seconds = 60
 	enabled = false
 }
 resource "sysdig_monitor_silence_rule" "sample3" {
@@ -114,7 +114,7 @@ resource "sysdig_monitor_silence_rule" "sample3" {
 	start_ts = 1691168134153
 	duration_seconds = 3600
 	scope = "container.name in (\"test\")"
-	alert_ids = [ sysdig_monitor_alert_promql.sample3.id, sysdig_monitor_alert_promql.sample4.id ]
+	alert_ids = [ sysdig_monitor_alert_v2_prometheus.sample3.id, sysdig_monitor_alert_v2_prometheus.sample4.id ]
 }`, name, name, name)
 }
 

@@ -85,7 +85,7 @@ resource "sysdig_monitor_alert_v2_event" "sample" {
 		values = ["thom-cluster1", "demo-env-prom"]
 	}
 
-	trigger_after_minutes = 15
+	range_seconds = 900
 
 }
 
