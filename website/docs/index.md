@@ -208,60 +208,6 @@ When IBM Workload Protection resources are to be created, this authentication mu
   It has exactly the same meaning as `sysdig_secure_team_id`, but instead of specifying team ID you are specifying a team name.</br>
   It can also be configured from the `SYSDIG_SECURE_TEAM_NAME` environment variable.<br/><br/>
 
-> **Note**
-> Enabling resources and data sources on IBM is under active development.
->
-> For now, you can manage following resources:
-> - `sysdig_monitor_team`
-> - `sysdig_secure_team`
-> - `sysdig_monitor_notification_channel_email`
-> - `sysdig_secure_notification_channel_email`
-> - `sysdig_monitor_notification_channel_opsgenie`
-> - `sysdig_secure_notification_channel_opsgenie`
-> - `sysdig_monitor_notification_channel_pagerduty`
-> - `sysdig_secure_notification_channel_pagerduty`
-> - `sysdig_monitor_notification_channel_slack`
-> - `sysdig_secure_notification_channel_slack`
-> - `sysdig_monitor_notification_channel_sns`
-> - `sysdig_secure_notification_channel_sns`
-> - `sysdig_monitor_notification_channel_victorops`
-> - `sysdig_secure_notification_channel_victorops`
-> - `sysdig_monitor_notification_channel_webhook`
-> - `sysdig_secure_notification_channel_webhook`
-> - `sysdig_monitor_notification_channel_prometheus_alert_manager`
-> - `sysdig_secure_notification_channel_prometheus_alert_manager`
-> - `sysdig_monitor_notification_channel_team_email`
-> - `sysdig_secure_notification_channel_team_email`
-> - `sysdig_monitor_notification_channel_google_chat`
-> - `sysdig_monitor_notification_channel_custom_webhook`
-> - `sysdig_monitor_notification_channel_ibm_event_notification`
-> - `sysdig_monitor_silence_rule`
-> - `sysdig_monitor_inhibition_rule`
-> - `sysdig_monitor_alert_downtime`
-> - `sysdig_monitor_alert_event`
-> - `sysdig_monitor_alert_metric`
-> - `sysdig_monitor_alert_promql`
-> - `sysdig_monitor_alert_anomaly`
-> - `sysdig_monitor_alert_group_outlier`
-> - `sysdig_monitor_alert_v2_downtime`
-> - `sysdig_monitor_alert_v2_event`
-> - `sysdig_monitor_alert_v2_metric`
-> - `sysdig_monitor_alert_v2_prometheus`
-> - `sysdig_monitor_alert_v2_change`
-> - `sysdig_monitor_alert_v2_form_based_prometheus`
-> - `sysdig_monitor_alert_v2_group_outlier`
-> - `sysdig_monitor_dashboard`
-> - `sysdig_secure_posture_zone`
-> - `sysdig_secure_posture_policy`
-
->
-> And data sources:
-> - `sysdig_monitor_notification_channel_pagerduty`
-> - `sysdig_monitor_notification_channel_email`
-> - `sysdig_current_user`
-> - `sysdig_secure_notification_channel`
-> - `sysdig_secure_posture_policies`
-> - `sysdig_secure_posture_policy`
 
 ###  Others
 * `extra_headers` - (Optional) Defines extra HTTP headers that will be added to the client
