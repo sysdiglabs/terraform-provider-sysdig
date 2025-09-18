@@ -205,8 +205,6 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_fargate_workload_agent": dataSourceSysdigFargateWorkloadAgent(),
 			"sysdig_user":                   dataSourceSysdigUser(),
 
-			"sysdig_secure_notification_channel": deprecatedDataSourceSysdigSecureNotificationChannel(),
-
 			"sysdig_monitor_custom_role_permissions":                       dataSourceSysdigMonitorCustomRolePermissions(),
 			"sysdig_monitor_notification_channel_custom_webhook":           dataSourceSysdigMonitorNotificationChannelCustomWebhook(),
 			"sysdig_monitor_notification_channel_email":                    dataSourceSysdigMonitorNotificationChannelEmail(),
