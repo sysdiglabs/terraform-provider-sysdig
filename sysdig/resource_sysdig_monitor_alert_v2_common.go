@@ -73,12 +73,6 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 						Type:     schema.TypeInt,
 						Required: true,
 					},
-					"type": {
-						Type:       schema.TypeString,
-						Optional:   true, // for retro compatibility, content will be discarded, remove this is the next major release
-						Default:    "",
-						Deprecated: "no need to define \"type\" attribute anymore, please remove it",
-					},
 					"renotify_every_minutes": {
 						Type:     schema.TypeInt,
 						Optional: true,
