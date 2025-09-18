@@ -21,13 +21,12 @@
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) > 0.12.x
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.0 is recommended (the provider supports > 0.12.x)
 - [Go](https://golang.org/doc/install) > Go version specified in [go.mod](./go.mod#L3)
-  - Correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
 ## Develop
 
-First **clone** source repository to: `$GOPATH/src/github.com/draios/terraform-provider-sysdig`
+First **clone** the source repository:
 
 ```sh
 $ git clone git@github.com:draios/terraform-provider-sysdig
@@ -47,7 +46,7 @@ TL;DR;
 
 ## Compile
 
-To **compile** the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
+To **compile** the provider, run `make build`. This will build the provider and put the provider binary in the `$(go env GOPATH)/bin` directory, which should be in your `PATH`.
 
 ```sh
 $ make build
@@ -82,7 +81,7 @@ terraform {
   required_providers {
     sysdig = {
       source = "local/sysdiglabs/sysdig"
-      version = "~> 1.0.0"
+      version = "~> 2.0.0"
     }
   }
 }
