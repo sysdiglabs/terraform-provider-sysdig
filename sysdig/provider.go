@@ -124,8 +124,6 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_team_service_account":  resourceSysdigTeamServiceAccount(),
 			"sysdig_user":                  resourceSysdigUser(),
 
-			"sysdig_monitor_alert_event":         deprecatedResourceSysdigMonitorAlertEvent(),
-
 			"sysdig_monitor_alert_v2_change":                               resourceSysdigMonitorAlertV2Change(),
 			"sysdig_monitor_alert_v2_downtime":                             resourceSysdigMonitorAlertV2Downtime(),
 			"sysdig_monitor_alert_v2_event":                                resourceSysdigMonitorAlertV2Event(),
