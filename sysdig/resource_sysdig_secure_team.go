@@ -71,16 +71,6 @@ func resourceSysdigSecureTeam() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"enable_ibm_platform_metrics": {
-				Type:       schema.TypeBool,
-				Optional:   true,
-				Deprecated: "This option should be not used anymore and will be removed in the future",
-			},
-			"ibm_platform_metrics": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "This option should be not used anymore and will be removed in the future",
-			},
 			"use_sysdig_capture": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -216,13 +206,6 @@ func resourceSysdigSecureTeamRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	var ibmPlatformMetrics *string
-	if t.NamespaceFilters != nil {
-		ibmPlatformMetrics = t.NamespaceFilters.IBMPlatformMetrics
-	}
-	_ = d.Set("enable_ibm_platform_metrics", t.CanUseBeaconMetrics)
-	_ = d.Set("ibm_platform_metrics", ibmPlatformMetrics)
-
 	return nil
 }
 
@@ -311,17 +294,6 @@ func secureTeamFromResourceData(d *schema.ResourceData) v2.Team {
 	t.ZoneIDs = make([]int, len(zonesData))
 	for i, z := range zonesData {
 		t.ZoneIDs[i] = z.(int)
-	}
-
-	canUseBeaconMetrics := d.Get("enable_ibm_platform_metrics").(bool)
-	t.CanUseBeaconMetrics = &canUseBeaconMetrics
-
-	if v, ok := d.GetOk("ibm_platform_metrics"); ok {
-		metrics := v.(string)
-		if t.NamespaceFilters == nil {
-			t.NamespaceFilters = &v2.NamespaceFilters{}
-		}
-		t.NamespaceFilters.IBMPlatformMetrics = &metrics
 	}
 
 	return t
