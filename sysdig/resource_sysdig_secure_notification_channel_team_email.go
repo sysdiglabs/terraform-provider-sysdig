@@ -136,21 +136,21 @@ func resourceSysdigSecureNotificationChannelTeamEmailDelete(ctx context.Context,
 func secureNotificationChannelTeamEmailFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypeTeamEmail
 	nc.Options.TeamID = d.Get("team_id").(int)
-	return
+	return nc, err
 }
 
 func secureNotificationChannelTeamEmailToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = secureNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("team_id", nc.Options.TeamID)
 
-	return
+	return err
 }

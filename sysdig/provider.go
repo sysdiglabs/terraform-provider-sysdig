@@ -124,18 +124,6 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_team_service_account":  resourceSysdigTeamServiceAccount(),
 			"sysdig_user":                  resourceSysdigUser(),
 
-			"sysdig_monitor_alert_anomaly":               deprecatedResourceSysdigMonitorAlertAnomaly(),
-			"sysdig_monitor_alert_downtime":              deprecatedResourceSysdigMonitorAlertDowntime(),
-			"sysdig_monitor_alert_event":                 deprecatedResourceSysdigMonitorAlertEvent(),
-			"sysdig_monitor_alert_group_outlier":         deprecatedResourceSysdigMonitorAlertGroupOutlier(),
-			"sysdig_monitor_alert_metric":                deprecatedResourceSysdigMonitorAlertMetric(),
-			"sysdig_monitor_alert_promql":                deprecatedResourceSysdigMonitorAlertPromql(),
-			"sysdig_secure_policy":                       deprecatedResourceSysdigSecurePolicy(),
-			"sysdig_secure_scanning_policy":              deprecatedResourceSysdigSecureScanningPolicy(),
-			"sysdig_secure_scanning_policy_assignment":   deprecatedResourceSysdigSecureScanningPolicyAssignment(),
-			"sysdig_secure_vulnerability_exception":      deprecatedResourceSysdigSecureVulnerabilityException(),
-			"sysdig_secure_vulnerability_exception_list": deprecatedResourceSysdigSecureVulnerabilityExceptionList(),
-
 			"sysdig_monitor_alert_v2_change":                               resourceSysdigMonitorAlertV2Change(),
 			"sysdig_monitor_alert_v2_downtime":                             resourceSysdigMonitorAlertV2Downtime(),
 			"sysdig_monitor_alert_v2_event":                                resourceSysdigMonitorAlertV2Event(),
@@ -209,8 +197,6 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_custom_role":            dataSourceSysdigCustomRole(),
 			"sysdig_fargate_workload_agent": dataSourceSysdigFargateWorkloadAgent(),
 			"sysdig_user":                   dataSourceSysdigUser(),
-
-			"sysdig_secure_notification_channel": deprecatedDataSourceSysdigSecureNotificationChannel(),
 
 			"sysdig_monitor_custom_role_permissions":                       dataSourceSysdigMonitorCustomRolePermissions(),
 			"sysdig_monitor_notification_channel_custom_webhook":           dataSourceSysdigMonitorNotificationChannelCustomWebhook(),

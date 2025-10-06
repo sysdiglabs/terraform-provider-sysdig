@@ -150,7 +150,7 @@ func resourceSysdigSecureNotificationChannelMSTeamsDelete(ctx context.Context, d
 func secureNotificationChannelMSTeamsFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypeMSTeams
@@ -158,7 +158,7 @@ func secureNotificationChannelMSTeamsFromResourceData(d *schema.ResourceData, te
 
 	setNotificationChannelMSTeamsTemplateConfig(&nc, d)
 
-	return
+	return nc, err
 }
 
 func setNotificationChannelMSTeamsTemplateConfig(nc *v2.NotificationChannel, d *schema.ResourceData) {
@@ -195,19 +195,19 @@ func setNotificationChannelMSTeamsTemplateConfig(nc *v2.NotificationChannel, d *
 func secureNotificationChannelMSTeamsToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = secureNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("url", nc.Options.URL)
 
 	err = getTemplateVersionFromNotificationChannelMSTeams(nc, d)
 
-	return
+	return err
 }
 
 func getTemplateVersionFromNotificationChannelMSTeams(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	if len(nc.Options.TemplateConfiguration) == 0 {
-		return
+		return err
 	}
 
 	if len(nc.Options.TemplateConfiguration) > 1 {

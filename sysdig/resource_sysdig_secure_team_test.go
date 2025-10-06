@@ -34,12 +34,6 @@ func TestAccSecureTeam(t *testing.T) {
 				Config: secureTeamMinimumConfiguration(randomText(10)),
 			},
 			{
-				Config: secureTeamWithPlatformMetricsIBM(randomText(10)),
-				SkipFunc: func() (bool, error) {
-					return !buildinfo.IBMSecure, nil
-				},
-			},
-			{
 				Config: secureTeamWithPostureZones(randomText(10)),
 				SkipFunc: func() (bool, error) {
 					return buildinfo.OnpremSecure, nil
@@ -93,15 +87,6 @@ func secureTeamMinimumConfiguration(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_team" "sample" {
   name = "sample-%s"
-}`, name)
-}
-
-func secureTeamWithPlatformMetricsIBM(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_secure_team" "sample" {
-  name                        = "sample-%s"
-  enable_ibm_platform_metrics = true
-  ibm_platform_metrics        = "foo in (\"0\") and bar in (\"3\")"
 }`, name)
 }
 

@@ -145,21 +145,21 @@ func resourceSysdigMonitorNotificationChannelGoogleChatDelete(ctx context.Contex
 func monitorNotificationChannelGoogleChatFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = monitorNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypeGChat
 	nc.Options.URL = d.Get("url").(string)
-	return
+	return nc, err
 }
 
 func monitorNotificationChannelGoogleChatToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("url", nc.Options.URL)
 
-	return
+	return err
 }

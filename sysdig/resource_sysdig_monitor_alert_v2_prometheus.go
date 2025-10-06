@@ -32,19 +32,11 @@ func resourceSysdigMonitorAlertV2Prometheus() *schema.Resource {
 		},
 
 		Schema: createAlertV2Schema(map[string]*schema.Schema{
-			"trigger_after_minutes": {
+			"duration_seconds": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Computed:     true, // computed if duration_seconds is defined
-				Deprecated:   "Use duration_seconds instead",
+				Computed:     true, // computed if trigger_after_minutes is defined
 				ValidateFunc: validation.IntAtLeast(0),
-			},
-			"duration_seconds": {
-				Type:          schema.TypeInt,
-				Optional:      true,
-				Computed:      true, // computed if trigger_after_minutes is defined
-				ConflictsWith: []string{"trigger_after_minutes"},
-				ValidateFunc:  validation.IntAtLeast(0),
 			},
 			"query": {
 				Type:     schema.TypeString,
@@ -171,15 +163,6 @@ func buildAlertV2PrometheusStruct(d *schema.ResourceData) *v2.AlertV2Prometheus 
 		config.Duration = d.Get("duration_seconds").(int)
 	}
 
-	if d.HasChange("trigger_after_minutes") {
-		// GetOk returns true even if the value is stored only in the state and not in the user config:
-		// to avoid applying a trigger_after_minutes old value from the state even if the user removed it from the config
-		// we use HasChange that is true only if the user has changed (or created) it - and so it must be in the config
-		if attr, ok := d.GetOk("trigger_after_minutes"); ok && attr != nil {
-			config.Duration = minutesToSeconds(d.Get("trigger_after_minutes").(int))
-		}
-	}
-
 	alert := &v2.AlertV2Prometheus{
 		AlertV2Common: *alertV2Common,
 		Config:        config,
@@ -190,10 +173,9 @@ func buildAlertV2PrometheusStruct(d *schema.ResourceData) *v2.AlertV2Prometheus 
 func updateAlertV2PrometheusState(d *schema.ResourceData, alert *v2.AlertV2Prometheus) (err error) {
 	err = updateAlertV2CommonState(d, &alert.AlertV2Common)
 	if err != nil {
-		return
+		return err
 	}
 
-	_ = d.Set("trigger_after_minutes", secondsToMinutes(alert.Config.Duration))
 	_ = d.Set("duration_seconds", alert.Config.Duration)
 
 	_ = d.Set("query", alert.Config.Query)
@@ -204,5 +186,5 @@ func updateAlertV2PrometheusState(d *schema.ResourceData, alert *v2.AlertV2Prome
 		_ = d.Set("keep_firing_for_minutes", nil)
 	}
 
-	return
+	return err
 }

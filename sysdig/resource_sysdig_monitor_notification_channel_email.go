@@ -138,21 +138,21 @@ func resourceSysdigMonitorNotificationChannelEmailDelete(ctx context.Context, d 
 func monitorNotificationChannelEmailFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = monitorNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypeEmail
 	nc.Options.EmailRecipients = cast.ToStringSlice(d.Get("recipients").(*schema.Set).List())
-	return
+	return nc, err
 }
 
 func monitorNotificationChannelEmailToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("recipients", nc.Options.EmailRecipients)
 
-	return
+	return err
 }

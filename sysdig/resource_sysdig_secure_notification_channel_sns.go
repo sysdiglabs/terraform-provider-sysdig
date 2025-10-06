@@ -137,21 +137,21 @@ func resourceSysdigSecureNotificationChannelSNSDelete(ctx context.Context, d *sc
 func secureNotificationChannelSNSFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypeAmazonSNS
 	nc.Options.SnsTopicARNs = cast.ToStringSlice(d.Get("topics").(*schema.Set).List())
-	return
+	return nc, err
 }
 
 func secureNotificationChannelSNSToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = secureNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("topics", nc.Options.SnsTopicARNs)
 
-	return
+	return err
 }

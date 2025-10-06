@@ -144,7 +144,7 @@ func resourceSysdigSecureNotificationChannelPagerdutyDelete(ctx context.Context,
 func secureNotificationChannelPagerdutyFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypePagerduty
@@ -152,18 +152,18 @@ func secureNotificationChannelPagerdutyFromResourceData(d *schema.ResourceData, 
 	nc.Options.ServiceKey = d.Get("service_key").(string)
 	nc.Options.ServiceName = d.Get("service_name").(string)
 
-	return
+	return nc, err
 }
 
 func secureNotificationChannelPagerdutyToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = secureNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("account", nc.Options.Account)
 	_ = d.Set("service_key", nc.Options.ServiceKey)
 	_ = d.Set("service_name", nc.Options.ServiceName)
 
-	return
+	return err
 }
