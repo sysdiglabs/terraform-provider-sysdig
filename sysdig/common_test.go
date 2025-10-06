@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 const (
@@ -45,12 +44,4 @@ func sysdigOrIBMMonitorPreCheck(t *testing.T) func() {
 
 func randomText(len int) string {
 	return acctest.RandStringFromCharSet(len, acctest.CharSetAlphaNum)
-}
-
-// testCaseWithRetry wraps a TestCase to handle it with retry logic for 409 Conflict errors
-// Note: This returns the original TestCase since Terraform's SDK doesn't support
-// automatic retries at the TestCase level. The retry logic should be implemented
-// at the HTTP client level using retryablehttp.CheckRetry
-func testCaseWithRetry(testCase resource.TestCase) resource.TestCase {
-	return testCase
 }

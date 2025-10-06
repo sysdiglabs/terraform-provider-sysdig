@@ -17,7 +17,7 @@ func TestAccMacro(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	fixedRandomText := rText()
 
-	resource.Test(t, testCaseWithRetry(resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
@@ -52,7 +52,7 @@ func TestAccMacro(t *testing.T) {
 				Config: macroWithMinimumEngineVersion(rText()),
 			},
 		},
-	}))
+	})
 }
 
 func macroWithName(name string) string {
