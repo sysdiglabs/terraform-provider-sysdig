@@ -4,7 +4,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -48,30 +47,10 @@ func randomText(len int) string {
 	return acctest.RandStringFromCharSet(len, acctest.CharSetAlphaNum)
 }
 
-// retryOn409 wraps a TestStep to retry on 409 Conflict errors
-func retryOn409(step resource.TestStep) resource.TestStep {
-	if step.PlanOnly {
-		return step
-	}
-
-	originalConfig := step.Config
-	step.Config = ""
-	step.PreConfig = func() {
-		for i := 0; i < 5; i++ {
-			if i > 0 {
-				time.Sleep(time.Duration(i*2) * time.Second)
-			}
-			step.Config = originalConfig
-			break
-		}
-	}
-	return step
-}
-
-// testCaseWithRetry creates a TestCase with retry logic for all steps
+// testCaseWithRetry wraps a TestCase to handle it with retry logic for 409 Conflict errors
+// Note: This returns the original TestCase since Terraform's SDK doesn't support
+// automatic retries at the TestCase level. The retry logic should be implemented
+// at the HTTP client level using retryablehttp.CheckRetry
 func testCaseWithRetry(testCase resource.TestCase) resource.TestCase {
-	for i := range testCase.Steps {
-		testCase.Steps[i] = retryOn409(testCase.Steps[i])
-	}
 	return testCase
 }
