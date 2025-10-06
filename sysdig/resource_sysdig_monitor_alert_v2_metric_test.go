@@ -122,7 +122,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 900
 
 }
 `, name)
@@ -266,7 +266,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 900
 	severity = "info"
 
 }
@@ -517,7 +517,7 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 	time_aggregation = "avg"
 	operator = ">="
 	threshold = 50
-	trigger_after_minutes = 15
+	range_seconds = 900
 	labels = {
 		application = "app1"
 		maturity = "high"

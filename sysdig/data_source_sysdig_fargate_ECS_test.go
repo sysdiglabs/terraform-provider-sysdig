@@ -44,10 +44,10 @@ func getKiltRecipe(t *testing.T) string {
 	recipeConfig := KiltRecipeConfig{
 		SysdigAccessKey:  "sysdig_access_key",
 		AgentImage:       "workload_agent_image",
-		OrchestratorHost: "orchestrator_host",
-		OrchestratorPort: "orchestrator_port",
 		CollectorHost:    "collector_host",
 		CollectorPort:    "collector_port",
+		OrchestratorHost: "orchestrator_host",
+		OrchestratorPort: "orchestrator_port",
 		SysdigLogging:    "sysdig_logging",
 		Priority:         "priority",
 	}

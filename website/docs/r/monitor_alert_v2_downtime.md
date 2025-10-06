@@ -47,8 +47,7 @@ These arguments are common to all alerts in Sysdig Monitor.
 
 * `name` - (Required) The name of the alert rule. It must be unique.
 * `description` - (Optional) The description of Monitor alert.
-* `range_seconds` - (Optional, required if `trigger_after_minutes` is not defined): The rolling time aggregation period in which the relevant metric data is evaluated.
-* `trigger_after_minutes` - (Optional, Deprecated) The rolling time aggregation period in which the relevant metric data is evaluated. Deprecated: use `range_seconds` instead.
+* `range_seconds` - (Optional): The rolling time aggregation period in which the relevant metric data is evaluated.
 * `group` - (Optional) Used to group alert rules in the UI. This value must be a lowercase string.
 * `severity` - (Optional) Severity of the Monitor alert. It must be `high`, `medium`, `low` or `info`. Default: `low`.
 * `enabled` - (Optional) Boolean that defines if the alert is enabled or not. Default: `true`.

@@ -168,7 +168,7 @@ func resourceSysdigSecureNotificationChannelSlackDelete(ctx context.Context, d *
 func secureNotificationChannelSlackFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypeSlack
@@ -179,7 +179,7 @@ func secureNotificationChannelSlackFromResourceData(d *schema.ResourceData, team
 
 	setNotificationChannelSlackTemplateConfig(&nc, d)
 
-	return
+	return nc, err
 }
 
 func setNotificationChannelSlackTemplateConfig(nc *v2.NotificationChannel, d *schema.ResourceData) {
@@ -216,7 +216,7 @@ func setNotificationChannelSlackTemplateConfig(nc *v2.NotificationChannel, d *sc
 func secureNotificationChannelSlackToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = secureNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("url", nc.Options.URL)
@@ -226,12 +226,12 @@ func secureNotificationChannelSlackToResourceData(nc *v2.NotificationChannel, d 
 
 	err = getTemplateVersionFromNotificationChannelSlack(nc, d)
 
-	return
+	return err
 }
 
 func getTemplateVersionFromNotificationChannelSlack(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	if len(nc.Options.TemplateConfiguration) == 0 {
-		return
+		return err
 	}
 
 	if len(nc.Options.TemplateConfiguration) > 1 {

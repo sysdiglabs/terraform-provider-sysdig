@@ -156,7 +156,7 @@ func resourceSysdigMonitorNotificationChannelCustomWebhookDelete(ctx context.Con
 func monitorNotificationChannelCustomWebhookFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = monitorNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypeCustomWebhook
@@ -166,13 +166,13 @@ func monitorNotificationChannelCustomWebhookFromResourceData(d *schema.ResourceD
 	nc.Options.AdditionalHeaders = d.Get("additional_headers").(map[string]any)
 	allowInsecureConnections := d.Get("allow_insecure_connections").(bool)
 	nc.Options.AllowInsecureConnections = &allowInsecureConnections
-	return
+	return nc, err
 }
 
 func monitorNotificationChannelCustomWebhookToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("url", nc.Options.URL)
@@ -183,5 +183,5 @@ func monitorNotificationChannelCustomWebhookToResourceData(nc *v2.NotificationCh
 		_ = d.Set("allow_insecure_connections", *nc.Options.AllowInsecureConnections)
 	}
 
-	return
+	return err
 }

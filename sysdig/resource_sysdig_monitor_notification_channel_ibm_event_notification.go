@@ -145,21 +145,21 @@ func resourceSysdigMonitorNotificationChannelIBMEventNotificationDelete(ctx cont
 func monitorNotificationChannelIBMEventNotificationFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = monitorNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypeIBMEventNotification
 	nc.Options.InstanceID = d.Get("instance_id").(string)
-	return
+	return nc, err
 }
 
 func monitorNotificationChannelIBMEventNotificationToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("instance_id", nc.Options.InstanceID)
 
-	return
+	return err
 }

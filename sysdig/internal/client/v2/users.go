@@ -152,7 +152,7 @@ func (c *Client) DeleteUser(ctx context.Context, id int) (err error) {
 func (c *Client) GetCurrentUser(ctx context.Context) (u *User, err error) {
 	response, err := c.requester.Request(ctx, http.MethodGet, c.getCurrentUserURL(), nil)
 	if err != nil {
-		return
+		return u, err
 	}
 	defer func() {
 		if dErr := response.Body.Close(); dErr != nil {
@@ -162,7 +162,7 @@ func (c *Client) GetCurrentUser(ctx context.Context) (u *User, err error) {
 
 	if response.StatusCode != http.StatusOK {
 		err = c.ErrorFromResponse(response)
-		return
+		return u, err
 	}
 
 	wrapper, err := Unmarshal[userWrapper](response.Body)

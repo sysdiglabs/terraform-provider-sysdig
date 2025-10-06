@@ -220,7 +220,7 @@ resource "sysdig_secure_custom_policy" "sample_%d" {
 
 `, i, name, i, name, i, i)
 	}
-	return
+	return res
 }
 
 func customPoliciesWithKillAction(name string) (res string) {

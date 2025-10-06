@@ -198,7 +198,7 @@ func resourceSysdigMonitorNotificationChannelSlackDelete(ctx context.Context, d 
 func monitorNotificationChannelSlackFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = monitorNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypeSlack
@@ -246,13 +246,13 @@ func monitorNotificationChannelSlackFromResourceData(d *schema.ResourceData, tea
 		},
 	}
 
-	return
+	return nc, err
 }
 
 func monitorNotificationChannelSlackToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = monitorNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("url", nc.Options.URL)
@@ -297,5 +297,5 @@ func monitorNotificationChannelSlackToResourceData(nc *v2.NotificationChannel, d
 	_ = d.Set("show_section_alert_details", alertDetails)
 	_ = d.Set("show_section_capturing_information", capturingInformation)
 
-	return
+	return err
 }

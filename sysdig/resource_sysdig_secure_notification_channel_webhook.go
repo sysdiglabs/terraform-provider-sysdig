@@ -149,7 +149,7 @@ func resourceSysdigSecureNotificationChannelWebhookDelete(ctx context.Context, d
 func secureNotificationChannelWebhookFromResourceData(d *schema.ResourceData, teamID int) (nc v2.NotificationChannel, err error) {
 	nc, err = secureNotificationChannelFromResourceData(d, teamID)
 	if err != nil {
-		return
+		return nc, err
 	}
 
 	nc.Type = notificationChannelTypeWebhook
@@ -158,13 +158,13 @@ func secureNotificationChannelWebhookFromResourceData(d *schema.ResourceData, te
 	nc.Options.CustomData = d.Get("custom_data").(map[string]any)
 	allowInsecureConnections := d.Get("allow_insecure_connections").(bool)
 	nc.Options.AllowInsecureConnections = &allowInsecureConnections
-	return
+	return nc, err
 }
 
 func secureNotificationChannelWebhookToResourceData(nc *v2.NotificationChannel, d *schema.ResourceData) (err error) {
 	err = secureNotificationChannelToResourceData(nc, d)
 	if err != nil {
-		return
+		return err
 	}
 
 	_ = d.Set("url", nc.Options.URL)
@@ -174,5 +174,5 @@ func secureNotificationChannelWebhookToResourceData(nc *v2.NotificationChannel, 
 		_ = d.Set("allow_insecure_connections", *nc.Options.AllowInsecureConnections)
 	}
 
-	return
+	return err
 }

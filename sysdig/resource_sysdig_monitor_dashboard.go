@@ -428,7 +428,7 @@ func sharingFromResourceData(data *schema.ResourceData) (sharingSettings []*v2.S
 				Role: shareInfo["role"].(string),
 			})
 	}
-	return
+	return sharingSettings, err
 }
 
 func panelsFromResourceData(data *schema.ResourceData) (panels []*v2.Panels, err error) {
@@ -452,7 +452,7 @@ func panelsFromResourceData(data *schema.ResourceData) (panels []*v2.Panels, err
 
 		panels = append(panels, panel)
 	}
-	return
+	return panels, err
 }
 
 func defaultLegendConfiguration() *v2.LegendConfiguration {
@@ -726,7 +726,7 @@ func queriesFromResourceData(panelInfo map[string]any, panel *v2.Panels) (newQue
 
 		newQueries = append(newQueries, promqlQuery)
 	}
-	return
+	return newQueries, err
 }
 
 func dashboardToResourceData(dashboard *v2.Dashboard, data *schema.ResourceData) (err error) {

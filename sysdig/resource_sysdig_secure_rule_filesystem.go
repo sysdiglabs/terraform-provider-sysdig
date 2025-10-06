@@ -224,5 +224,5 @@ func resourceSysdigRuleFilesystemFromResourceData(d *schema.ResourceData) (rule 
 			}
 		}
 	}
-	return
+	return rule, err
 }
