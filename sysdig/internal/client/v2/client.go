@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"strings"
+	"time"
 
 	"github.com/draios/terraform-provider-sysdig/buildinfo"
 	"github.com/hashicorp/go-retryablehttp"
@@ -185,5 +186,27 @@ func newHTTPClient(cfg *config) *http.Client {
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: cfg.insecure}
 	httpClient.HTTPClient = &http.Client{Transport: transport}
+
+	// Configure retry logic for 409 Conflict errors with exponential backoff
+	httpClient.RetryMax = 5
+	httpClient.RetryWaitMin = 1 * time.Second
+	httpClient.RetryWaitMax = 30 * time.Second
+	httpClient.Backoff = retryablehttp.DefaultBackoff // Exponential backoff strategy
+
+	httpClient.CheckRetry = func(ctx context.Context, resp *http.Response, err error) (bool, error) {
+		// Use default retry logic for connection errors and 5xx
+		shouldRetry, checkErr := retryablehttp.DefaultRetryPolicy(ctx, resp, err)
+		if shouldRetry || checkErr != nil {
+			return shouldRetry, checkErr
+		}
+
+		// Additionally retry on 409 Conflict
+		if resp != nil && resp.StatusCode == http.StatusConflict {
+			return true, nil
+		}
+
+		return false, nil
+	}
+
 	return httpClient.StandardClient()
 }
