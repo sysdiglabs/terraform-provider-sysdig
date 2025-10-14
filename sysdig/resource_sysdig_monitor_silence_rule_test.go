@@ -75,13 +75,13 @@ func monitorSilenceRuleWithAlertIds(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_alert_v2_prometheus" "sample1" {
 	name = "TERRAFORM TEST - PROMQL %s 1"
-	query = "up"
+	query = "up{kube_cluster_name=\"asd\"}"
 	duration_seconds = 60
 	enabled = false
 }
 resource "sysdig_monitor_alert_v2_prometheus" "sample2" {
 	name = "TERRAFORM TEST - PROMQL %s 2"
-	query = "up"
+	query = "up{kube_cluster_name=\"asd\"}"
 	duration_seconds = 60
 	enabled = false
 }
@@ -98,13 +98,13 @@ func monitorSilenceRuleWithAlertIdsAndScope(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_alert_v2_prometheus" "sample3" {
 	name = "TERRAFORM TEST - PROMQL %s 3"
-	query = "up"
+	query = "up{kube_cluster_name=\"asd\"}"
 	duration_seconds = 60
 	enabled = false
 }
 resource "sysdig_monitor_alert_v2_prometheus" "sample4" {
 	name = "TERRAFORM TEST - PROMQL %s 4"
-	query = "up"
+	query = "up{kube_cluster_name=\"asd\"}"
 	duration_seconds = 60
 	enabled = false
 }
