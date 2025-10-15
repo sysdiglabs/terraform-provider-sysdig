@@ -39,7 +39,6 @@ type SysdigSecure interface {
 	SysdigCommon
 	SecureCommon
 
-	CloudAccountSecureInterface
 	CloudauthAccountComponentSecureInterface
 	CloudauthAccountFeatureSecureInterface
 	CloudauthAccountSecureInterface

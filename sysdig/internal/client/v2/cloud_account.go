@@ -7,23 +7,11 @@ import (
 )
 
 const (
-	cloudAccountsPath               = "%s/api/cloud/v2/accounts"
-	cloudAccountsWithExternalIDPath = "%s/api/cloud/v2/accounts?includeExternalID=true&upsert=true"
-	cloudAccountPath                = "%s/api/cloud/v2/accounts/%s"
-	cloudAccountWithExternalIDPath  = "%s/api/cloud/v2/accounts/%s?includeExternalID=true"
-	providersPath                   = "%v/api/v2/providers"
-	costCloudAccountPath            = "%s/api/cloudaccount"
-	costProviderURL                 = "%s/api/cloudaccount/features/cost/account?id=%d"
-	updateCostProviderURL           = "%s/api/cloudaccount/features/cost"
+	providersPath         = "%v/api/v2/providers"
+	costCloudAccountPath  = "%s/api/cloudaccount"
+	costProviderURL       = "%s/api/cloudaccount/features/cost/account?id=%d"
+	updateCostProviderURL = "%s/api/cloudaccount/features/cost"
 )
-
-type CloudAccountSecureInterface interface {
-	Base
-	CreateCloudAccountSecure(ctx context.Context, cloudAccount *CloudAccountSecure) (*CloudAccountSecure, error)
-	GetCloudAccountSecureByID(ctx context.Context, accountID string) (*CloudAccountSecure, error)
-	DeleteCloudAccountSecure(ctx context.Context, accountID string) error
-	UpdateCloudAccountSecure(ctx context.Context, accountID string, cloudAccount *CloudAccountSecure) (*CloudAccountSecure, error)
-}
 
 type CloudAccountMonitorInterface interface {
 	Base
@@ -34,89 +22,6 @@ type CloudAccountMonitorInterface interface {
 	GetCloudAccountMonitorByID(ctx context.Context, id int) (*CloudAccountMonitor, error)
 	GetCloudAccountMonitorForCostByID(ctx context.Context, id int) (*CloudAccountCostProvider, error)
 	DeleteCloudAccountMonitor(ctx context.Context, id int) error
-}
-
-func (c *Client) CreateCloudAccountSecure(ctx context.Context, cloudAccount *CloudAccountSecure) (createdAccount *CloudAccountSecure, err error) {
-	payload, err := Marshal(cloudAccount)
-	if err != nil {
-		return nil, err
-	}
-
-	response, err := c.requester.Request(ctx, http.MethodPost, c.cloudAccountsURL(true), payload)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if dErr := response.Body.Close(); dErr != nil {
-			err = fmt.Errorf("unable to close response body: %w", dErr)
-		}
-	}()
-
-	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
-		err = c.ErrorFromResponse(response)
-		return nil, err
-	}
-
-	return Unmarshal[*CloudAccountSecure](response.Body)
-}
-
-func (c *Client) GetCloudAccountSecureByID(ctx context.Context, accountID string) (cloudAccount *CloudAccountSecure, err error) {
-	response, err := c.requester.Request(ctx, http.MethodGet, c.cloudAccountURL(accountID, true), nil)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if dErr := response.Body.Close(); dErr != nil {
-			err = fmt.Errorf("unable to close response body: %w", dErr)
-		}
-	}()
-
-	if response.StatusCode != http.StatusOK {
-		return nil, c.ErrorFromResponse(response)
-	}
-
-	return Unmarshal[*CloudAccountSecure](response.Body)
-}
-
-func (c *Client) DeleteCloudAccountSecure(ctx context.Context, accountID string) (err error) {
-	response, err := c.requester.Request(ctx, http.MethodDelete, c.cloudAccountURL(accountID, false), nil)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if dErr := response.Body.Close(); dErr != nil {
-			err = fmt.Errorf("unable to close response body: %w", dErr)
-		}
-	}()
-
-	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
-		return c.ErrorFromResponse(response)
-	}
-	return nil
-}
-
-func (c *Client) UpdateCloudAccountSecure(ctx context.Context, accountID string, cloudAccount *CloudAccountSecure) (updatedAccount *CloudAccountSecure, err error) {
-	payload, err := Marshal(cloudAccount)
-	if err != nil {
-		return nil, err
-	}
-
-	response, err := c.requester.Request(ctx, http.MethodPut, c.cloudAccountURL(accountID, true), payload)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if dErr := response.Body.Close(); dErr != nil {
-			err = fmt.Errorf("unable to close response body: %w", dErr)
-		}
-	}()
-
-	if response.StatusCode != http.StatusOK {
-		err = c.ErrorFromResponse(response)
-		return nil, err
-	}
-
-	return Unmarshal[*CloudAccountSecure](response.Body)
 }
 
 func (c *Client) CreateCloudAccountMonitor(ctx context.Context, provider *CloudAccountMonitor) (createdProvider *CloudAccountMonitor, err error) {
@@ -293,20 +198,6 @@ func (c *Client) DeleteCloudAccountMonitor(ctx context.Context, id int) (err err
 	}
 
 	return nil
-}
-
-func (c *Client) cloudAccountsURL(includeExternalID bool) string {
-	if includeExternalID {
-		return fmt.Sprintf(cloudAccountsWithExternalIDPath, c.config.url)
-	}
-	return fmt.Sprintf(cloudAccountsPath, c.config.url)
-}
-
-func (c *Client) cloudAccountURL(accountID string, includeExternalID bool) string {
-	if includeExternalID {
-		return fmt.Sprintf(cloudAccountWithExternalIDPath, c.config.url, accountID)
-	}
-	return fmt.Sprintf(cloudAccountPath, c.config.url, accountID)
 }
 
 func (c *Client) getProviderURL(id int) string {
