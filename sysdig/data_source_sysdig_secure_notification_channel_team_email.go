@@ -24,6 +24,10 @@ func dataSourceSysdigSecureNotificationChannelTeamEmail() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"include_admin_users": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		}),
 	}
 }

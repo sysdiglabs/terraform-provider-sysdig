@@ -30,6 +30,16 @@ func TestAccMonitorNotificationChannelTeamEmailDataSource(t *testing.T) {
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email.nc_team_email", "id", "sysdig_monitor_notification_channel_team_email.nc_team_email", "id"),
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email.nc_team_email", "name", "sysdig_monitor_notification_channel_team_email.nc_team_email", "name"),
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email.nc_team_email", "team_id", "sysdig_monitor_notification_channel_team_email.nc_team_email", "team_id"),
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email.nc_team_email", "include_admin_users", "sysdig_monitor_notification_channel_team_email.nc_team_email", "include_admin_users"),
+				),
+			},
+			{
+				Config: resourceMonitorNotificationChannelTeamEmailWithIncludeAdminUsers(rText),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "id", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "id"),
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "name", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "name"),
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "team_id", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "team_id"),
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "include_admin_users", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "include_admin_users"),
 				),
 			},
 		},
@@ -51,6 +61,26 @@ resource "sysdig_monitor_notification_channel_team_email" "nc_team_email" {
 
 data "sysdig_monitor_notification_channel_team_email" "nc_team_email" {
 	name = sysdig_monitor_notification_channel_team_email.nc_team_email.name
+}
+`, name, name)
+}
+
+func resourceMonitorNotificationChannelTeamEmailWithIncludeAdminUsers(name string) string {
+	return fmt.Sprintf(`
+	resource "sysdig_monitor_team" "sample_data_2" {
+		name = "monitor-sample-data-%s"
+		entrypoint {
+		type = "Explore"
+		}
+	}
+resource "sysdig_monitor_notification_channel_team_email" "nc_team_email_2" {
+	name = "%s"
+	team_id = sysdig_monitor_team.sample_data_2.id
+	include_admin_users = true
+}
+
+data "sysdig_monitor_notification_channel_team_email" "nc_team_email_2" {
+	name = sysdig_monitor_notification_channel_team_email.nc_team_email_2.name
 }
 `, name, name)
 }
