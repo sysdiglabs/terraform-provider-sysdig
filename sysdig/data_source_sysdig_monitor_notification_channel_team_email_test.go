@@ -36,10 +36,10 @@ func TestAccMonitorNotificationChannelTeamEmailDataSource(t *testing.T) {
 			{
 				Config: resourceMonitorNotificationChannelTeamEmailWithIncludeAdminUsers(rText),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "id", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "id"),
-					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "name", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "name"),
-					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "team_id", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "team_id"),
-					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "include_admin_users", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "include_admin_users"),
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email.nc_team_email_2", "id", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "id"),
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email.nc_team_email_2", "name", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "name"),
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email.nc_team_email_2", "team_id", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "team_id"),
+					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email.nc_team_email_2", "include_admin_users", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "include_admin_users"),
 				),
 			},
 		},
