@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccSecureNotificationChannelTeamEmailDataSource(t *testing.T) {
-	rText := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
@@ -25,7 +25,7 @@ func TestAccSecureNotificationChannelTeamEmailDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureNotificationChannelTeamEmail(rText),
+				Config: secureNotificationChannelTeamEmail(rText()),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.sysdig_secure_notification_channel_team_email.nc_team_email", "id", "sysdig_secure_notification_channel_team_email.nc_team_email", "id"),
 					resource.TestCheckResourceAttrPair("data.sysdig_secure_notification_channel_team_email.nc_team_email", "name", "sysdig_secure_notification_channel_team_email.nc_team_email", "name"),
@@ -34,7 +34,7 @@ func TestAccSecureNotificationChannelTeamEmailDataSource(t *testing.T) {
 				),
 			},
 			{
-				Config: resourceSecureNotificationChannelTeamEmailWithIncludeAdminUsers(rText),
+				Config: resourceSecureNotificationChannelTeamEmailWithIncludeAdminUsers(rText()),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.sysdig_secure_notification_channel_team_email.nc_team_email_2", "id", "sysdig_secure_notification_channel_team_email_2.nc_team_email_2", "id"),
 					resource.TestCheckResourceAttrPair("data.sysdig_secure_notification_channel_team_email.nc_team_email_2", "name", "sysdig_secure_notification_channel_team_email_2.nc_team_email_2", "name"),

@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccMonitorNotificationChannelTeamEmailDataSource(t *testing.T) {
-	rText := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: sysdigOrIBMMonitorPreCheck(t),
@@ -25,7 +25,7 @@ func TestAccMonitorNotificationChannelTeamEmailDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: monitorNotificationChannelTeamEmail(rText),
+				Config: monitorNotificationChannelTeamEmail(rText()),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email.nc_team_email", "id", "sysdig_monitor_notification_channel_team_email.nc_team_email", "id"),
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email.nc_team_email", "name", "sysdig_monitor_notification_channel_team_email.nc_team_email", "name"),
@@ -34,7 +34,7 @@ func TestAccMonitorNotificationChannelTeamEmailDataSource(t *testing.T) {
 				),
 			},
 			{
-				Config: resourceMonitorNotificationChannelTeamEmailWithIncludeAdminUsers(rText),
+				Config: resourceMonitorNotificationChannelTeamEmailWithIncludeAdminUsers(rText()),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email.nc_team_email_2", "id", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "id"),
 					resource.TestCheckResourceAttrPair("data.sysdig_monitor_notification_channel_team_email.nc_team_email_2", "name", "sysdig_monitor_notification_channel_team_email_2.nc_team_email_2", "name"),
