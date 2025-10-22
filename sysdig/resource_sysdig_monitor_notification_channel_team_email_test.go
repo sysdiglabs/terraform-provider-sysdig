@@ -60,7 +60,7 @@ func monitorNotificationChannelTeamEmailWithName(name string) string {
 resource "sysdig_monitor_team" "sample1" {
 	name = "monitor-sample-%s"
 	entrypoint {
-	type = "Explore"
+		type = "Explore"
 	}
 }
 resource "sysdig_monitor_notification_channel_team_email" "sample_team_email1" {
@@ -77,7 +77,7 @@ func monitorNotificationChannelTeamEmailSharedWithCurrentTeam(name string) strin
 resource "sysdig_monitor_team" "sample2" {
 	name = "monitor-sample-%s"
 	entrypoint {
-	type = "Explore"
+		type = "Explore"
 	}
 }
 resource "sysdig_monitor_notification_channel_team_email" "sample_team_email2" {
@@ -94,7 +94,9 @@ func monitorNotificationChannelTeamEmailWithIncludeAdminUsers(name string) strin
 	return fmt.Sprintf(`
 resource "sysdig_monitor_team" "sample3" {
 	name = "monitor-sample-%s"
-	all_zones = "true"
+	entrypoint {
+		type = "Explore"
+	}
 }
 resource "sysdig_monitor_notification_channel_team_email" "sample_team_email3" {
 	name = "Example Channel %s - team email"
