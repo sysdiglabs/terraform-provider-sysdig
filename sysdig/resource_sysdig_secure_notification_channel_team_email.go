@@ -36,6 +36,11 @@ func resourceSysdigSecureNotificationChannelTeamEmail() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
+			"include_admin_users": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		}),
 	}
 }
@@ -141,6 +146,8 @@ func secureNotificationChannelTeamEmailFromResourceData(d *schema.ResourceData, 
 
 	nc.Type = notificationChannelTypeTeamEmail
 	nc.Options.TeamID = d.Get("team_id").(int)
+	includeAdminUsers := d.Get("include_admin_users").(bool)
+	nc.Options.IncludeAdminUsers = &includeAdminUsers
 	return nc, err
 }
 
@@ -151,6 +158,9 @@ func secureNotificationChannelTeamEmailToResourceData(nc *v2.NotificationChannel
 	}
 
 	_ = d.Set("team_id", nc.Options.TeamID)
+	if nc.Options.IncludeAdminUsers != nil {
+		_ = d.Set("include_admin_users", *nc.Options.IncludeAdminUsers)
+	}
 
 	return err
 }

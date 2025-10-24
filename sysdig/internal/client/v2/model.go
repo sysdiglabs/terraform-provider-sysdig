@@ -130,6 +130,7 @@ type NotificationChannelOptions struct {
 	Region                   string                                     `json:"region,omitempty"`                   // Type: OpsGenie
 	AllowInsecureConnections *bool                                      `json:"allowInsecureConnections,omitempty"` // Type: prometheus alert manager, custom webhook, Webhook
 	TeamID                   int                                        `json:"teamId,omitempty"`                   // Type: team email
+	IncludeAdminUsers        *bool                                      `json:"includeAdminUsers,omitempty"`        // Type: team email
 	HTTPMethod               string                                     `json:"httpMethod,omitempty"`               // Type: custom webhook
 	MonitorTemplate          string                                     `json:"monitorTemplate,omitempty"`          // Type: custom webhook
 	InstanceID               string                                     `json:"instanceId,omitempty"`               // Type: ibm event notification

@@ -31,6 +31,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The Notification Channel ID.
 * `name` - The Notification Channel Name.
 * `team_id` - id of the team.
+* `include_admin_users` - Whether the Notification Channel includes admin users in notifications.
 * `enabled` - Whether the Notification Channel is active or not.
 * `notify_when_ok` - Whether the Notification Channel sends a notification when the condition is no longer triggered.
 * `notify_when_resolved` - Whether the Notification Channel sends a notification if it's manually acknowledged by a

@@ -15,9 +15,10 @@ Creates a Sysdig Monitor Notification Channel of type Team Email.
 ## Example Usage
 
 ```terraform
-resource "sysdig_monitor_notification_channel_team_email" "sample-gchat" {
+resource "sysdig_monitor_notification_channel_team_email" "sample-team-email" {
   name                    = "Example Channel - team email"
   team_id                 = 1
+  include_admin_users     = false
   enabled                 = true
   notify_when_ok          = false
   notify_when_resolved    = false
@@ -30,6 +31,8 @@ resource "sysdig_monitor_notification_channel_team_email" "sample-gchat" {
 * `name` - (Required) The name of the Notification Channel. Must be unique.
 
 * `team_id` - (Required) id of the team.
+
+* `include_admin_users` - (Optional) If set to `true`, it will include admin users in notifications. Default is false.
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
