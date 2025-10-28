@@ -42,6 +42,15 @@ func TestAccSecureNotificationChannelTeamEmail(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
+			{
+				Config: secureNotificationChannelTeamEmailWithIncludeAdminUsers(rText()),
+			},
+			{
+				ResourceName:            "sysdig_secure_notification_channel_team_email.sample_team_email3",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
+			},
 		},
 	})
 }
@@ -74,5 +83,21 @@ resource "sysdig_secure_notification_channel_team_email" "sample_team_email2" {
 	notify_when_ok = true
 	notify_when_resolved = true
 	share_with_current_team = true
+}`, name, name)
+}
+
+func secureNotificationChannelTeamEmailWithIncludeAdminUsers(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_team" "sample3" {
+	name = "secure-sample-%s"
+	all_zones = "true"
+}
+resource "sysdig_secure_notification_channel_team_email" "sample_team_email3" {
+	name = "Example Channel %s - team email"
+	enabled = true
+	team_id = sysdig_secure_team.sample3.id
+	include_admin_users = true
+	notify_when_ok = true
+	notify_when_resolved = true
 }`, name, name)
 }
