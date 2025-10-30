@@ -16,6 +16,7 @@ const (
 	policyTypeDrift   = "drift"
 	policyTypeML      = "machine_learning"
 	policyTypeAWSML   = "aws_machine_learning"
+	policyTypeOktaML  = "okta_machine_learning"
 
 	preventMalwareKey = "prevent_malware"
 	preventDriftKey   = "prevent_drift"
@@ -313,6 +314,33 @@ func setTFResourcePolicyRulesAWSML(d *schema.ResourceData, policy v2.PolicyRules
 	return nil
 }
 
+func setTFResourcePolicyRulesOktaML(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
+	if len(policy.Rules) == 0 {
+		return errors.New("the policy must have at least one rule attached to it")
+	}
+
+	rules := []map[string]any{}
+	for _, rule := range policy.Rules {
+		anomalousLogin := []map[string]any{{
+			"enabled":   rule.Details.(*v2.OktaMLRuleDetails).AnomalousConsoleLogin.Enabled,
+			"threshold": rule.Details.(*v2.OktaMLRuleDetails).AnomalousConsoleLogin.Threshold,
+		}}
+
+		rules = append(rules, map[string]any{
+			"id":                      rule.ID,
+			"name":                    rule.Name,
+			"description":             rule.Description,
+			"version":                 rule.Version,
+			"tags":                    rule.Tags,
+			"anomalous_console_login": anomalousLogin,
+		})
+	}
+
+	_ = d.Set("rule", rules)
+
+	return nil
+}
+
 // TODO: Split this func into smaller composable functions
 func setTFResourcePolicyActions(key string) func(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
 	return func(d *schema.ResourceData, policy v2.PolicyRulesComposite) error {
@@ -379,6 +407,12 @@ var awsMLTFResourceReducer = Reducer(
 	setTFResourceBaseAttrs,
 	setTFResourcePolicyType(policyTypeAWSML),
 	setTFResourcePolicyRulesAWSML,
+)
+
+var oktaMLTFResourceReducer = Reducer(
+	setTFResourceBaseAttrs,
+	setTFResourcePolicyType(policyTypeOktaML),
+	setTFResourcePolicyRulesOktaML,
 )
 
 func setPolicyBaseAttrs(policyType string) func(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
@@ -668,6 +702,54 @@ func setPolicyRulesAWSML(policy *v2.PolicyRulesComposite, d *schema.ResourceData
 	return nil
 }
 
+func setPolicyRulesOktaML(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
+	policy.Policy.Rules = []*v2.PolicyRule{}
+	policy.Rules = []*v2.RuntimePolicyRule{}
+	if _, ok := d.GetOk("rule"); ok {
+		// TODO: Iterate over a list of rules instead of hard-coding the index values
+		// TODO: Should we assume that only a single Malware rule can be attached to a policy?
+
+		anomalousLogin := &v2.MLRuleThresholdAndSeverity{}
+		if _, ok := d.GetOk("rule.0.anomalous_console_login"); ok { // TODO: Do not hardcode the indexes
+			anomalousLogin.Enabled = d.Get("rule.0.anomalous_console_login.0.enabled").(bool)
+			anomalousLogin.Threshold = float64(d.Get("rule.0.anomalous_console_login.0.threshold").(int))
+		}
+
+		tags := schemaSetToList(d.Get("rule.0.tags"))
+		// Set default tags as field tags must not be null
+		if len(tags) == 0 {
+			tags = []string{defaultMLTag}
+		}
+
+		rule := &v2.RuntimePolicyRule{
+			// TODO: Do not hardcode the indexes
+			Name:        d.Get("rule.0.name").(string),
+			Description: d.Get("rule.0.description").(string),
+			// IMPORTANT: In order to update an ML policy,
+			// correct version number must be provided
+			Tags: tags,
+			Details: v2.OktaMLRuleDetails{
+				RuleType:              v2.ElementType("OKTA_MACHINE_LEARNING"), // TODO: Use const
+				AnomalousConsoleLogin: anomalousLogin,
+			},
+		}
+
+		id := v2.FlexInt(d.Get("rule.0.id").(int))
+		if int(id) != 0 {
+			rule.ID = &id
+		}
+
+		v := toIntPtr(d.Get("rule.0.version"))
+		if *v != 0 {
+			// Version can only be provided when updating existing rules
+			rule.Version = v
+		}
+
+		policy.Rules = append(policy.Rules, rule)
+	}
+	return nil
+}
+
 var malwarePolicyReducer = Reducer(
 	setPolicyBaseAttrs(policyTypeMalware),
 	setPolicyActions,
@@ -688,4 +770,9 @@ var mlPolicyReducer = Reducer(
 var awsMLPolicyReducer = Reducer(
 	setPolicyBaseAttrs(policyTypeAWSML),
 	setPolicyRulesAWSML,
+)
+
+var oktaMLPolicyReducer = Reducer(
+	setPolicyBaseAttrs(policyTypeOktaML),
+	setPolicyRulesOktaML,
 )

@@ -337,6 +337,8 @@ func (r *RuntimePolicyRule) UnmarshalJSON(b []byte) error {
 		d = &MLRuleDetails{}
 	case "AWS_MACHINE_LEARNING":
 		d = &AWSMLRuleDetails{}
+	case "OKTA_MACHINE_LEARNING":
+		d = &OktaMLRuleDetails{}
 	case "MALWARE":
 		d = &MalwareRuleDetails{}
 	default:
@@ -437,6 +439,16 @@ type AWSMLRuleDetails struct {
 }
 
 func (p AWSMLRuleDetails) GetRuleType() ElementType {
+	return p.RuleType
+}
+
+type OktaMLRuleDetails struct {
+	RuleType              ElementType                 `json:"ruleType" yaml:"ruleType"`
+	AnomalousConsoleLogin *MLRuleThresholdAndSeverity `json:"anomalousConsoleLogin" yaml:"anomalousConsoleLogin"`
+	Details               `json:"-"`
+}
+
+func (p OktaMLRuleDetails) GetRuleType() ElementType {
 	return p.RuleType
 }
 

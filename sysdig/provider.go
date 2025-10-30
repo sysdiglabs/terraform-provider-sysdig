@@ -151,6 +151,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_monitor_team":                                          resourceSysdigMonitorTeam(),
 
 			"sysdig_secure_aws_ml_policy":                                 resourceSysdigSecureAWSMLPolicy(),
+			"sysdig_secure_okta_ml_policy":                                resourceSysdigSecureOktaMLPolicy(),
 			"sysdig_secure_cloud_account":                                 resourceSysdigSecureCloudAccount(),
 			"sysdig_secure_cloud_auth_account":                            resourceSysdigSecureCloudauthAccount(),
 			"sysdig_secure_cloud_auth_account_component":                  resourceSysdigSecureCloudauthAccountComponent(),
@@ -217,6 +218,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 
 			"sysdig_secure_agentless_scanning_assets":                     dataSourceSysdigSecureAgentlessScanningAssets(),
 			"sysdig_secure_aws_ml_policy":                                 dataSourceSysdigSecureAWSMLPolicy(),
+			"sysdig_secure_okta_ml_policy":                                dataSourceSysdigSecureOktaMLPolicy(),
 			"sysdig_secure_cloud_ingestion_assets":                        dataSourceSysdigSecureCloudIngestionAssets(),
 			"sysdig_secure_connection":                                    dataSourceSysdigSecureConnection(),
 			"sysdig_secure_custom_policy":                                 dataSourceSysdigSecureCustomPolicy(),
