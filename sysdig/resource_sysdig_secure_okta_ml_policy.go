@@ -142,7 +142,11 @@ func resourceSysdigOktaMLPolicyRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	id, _ := strconv.Atoi(d.Id())
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	policy, statusCode, err := client.GetCompositePolicyByID(ctx, id)
 	if err != nil {
 		if statusCode == http.StatusNotFound {

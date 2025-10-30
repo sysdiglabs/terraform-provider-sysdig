@@ -336,7 +336,9 @@ func setTFResourcePolicyRulesOktaML(d *schema.ResourceData, policy v2.PolicyRule
 		})
 	}
 
-	_ = d.Set("rule", rules)
+	if err := d.Set("rule", rules); err != nil {
+		return err
+	}
 
 	return nil
 }
