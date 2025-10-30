@@ -72,16 +72,16 @@ func resourceSysdigSecureOktaMLPolicy() *schema.Resource {
 }
 
 func oktaMLPolicyFromResourceData(d *schema.ResourceData) (v2.PolicyRulesComposite, error) {
-	policy := &v2.PolicyRulesComposite{
+	policy := v2.PolicyRulesComposite{
 		Policy: &v2.Policy{},
 		Rules:  []*v2.RuntimePolicyRule{},
 	}
-	err := oktaMLPolicyReducer(policy, d)
+	err := oktaMLPolicyReducer(&policy, d)
 	if err != nil {
-		return *policy, err
+		return policy, err
 	}
 
-	return *policy, nil
+	return policy, nil
 }
 
 func oktaMLPolicyToResourceData(policy *v2.PolicyRulesComposite, d *schema.ResourceData) error {
