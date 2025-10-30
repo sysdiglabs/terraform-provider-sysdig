@@ -42,6 +42,15 @@ func TestAccMonitorNotificationChannelTeamEmail(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
+			{
+				Config: monitorNotificationChannelTeamEmailWithIncludeAdminUsers(rText()),
+			},
+			{
+				ResourceName:            "sysdig_monitor_notification_channel_team_email.sample_team_email3",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"send_test_notification"},
+			},
 		},
 	})
 }
@@ -51,7 +60,7 @@ func monitorNotificationChannelTeamEmailWithName(name string) string {
 resource "sysdig_monitor_team" "sample1" {
 	name = "monitor-sample-%s"
 	entrypoint {
-	type = "Explore"
+		type = "Explore"
 	}
 }
 resource "sysdig_monitor_notification_channel_team_email" "sample_team_email1" {
@@ -68,7 +77,7 @@ func monitorNotificationChannelTeamEmailSharedWithCurrentTeam(name string) strin
 resource "sysdig_monitor_team" "sample2" {
 	name = "monitor-sample-%s"
 	entrypoint {
-	type = "Explore"
+		type = "Explore"
 	}
 }
 resource "sysdig_monitor_notification_channel_team_email" "sample_team_email2" {
@@ -78,5 +87,23 @@ resource "sysdig_monitor_notification_channel_team_email" "sample_team_email2" {
 	notify_when_ok = true
 	notify_when_resolved = true
 	share_with_current_team = true
+}`, name, name)
+}
+
+func monitorNotificationChannelTeamEmailWithIncludeAdminUsers(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_team" "sample3" {
+	name = "monitor-sample-%s"
+	entrypoint {
+		type = "Explore"
+	}
+}
+resource "sysdig_monitor_notification_channel_team_email" "sample_team_email3" {
+	name = "Example Channel %s - team email"
+	enabled = true
+	team_id = sysdig_monitor_team.sample3.id
+	include_admin_users = true
+	notify_when_ok = true
+	notify_when_resolved = true
 }`, name, name)
 }
