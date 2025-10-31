@@ -46,7 +46,7 @@ junit-report.xml
 # Binaries
 terraform-provider-sysdig
 oanc
-.vscode/settings.json
+.vscode/
 
 # goland .run
 .run/
