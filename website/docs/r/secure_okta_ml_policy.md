@@ -62,4 +62,4 @@ The rule block is required and supports:
 * `description` - (Required) Rule description.
 * `anomalous_console_login` - (Required) This attribute allows you to activate anomaly detection for logins and adjust its settings.
     * `enabled` - (Optional) Whether anomaly detection is enabled. Defaults to `true`.
-    * `threshold` - (Required) Trigger at or above confidence level. Valid values are: 1 (High), 2 (Medium), 3 (Low).
+    * `threshold` - (Required) Trigger at or above confidence level. Valid values are: 1 (Default), 2 (High), 3 (Higher).
