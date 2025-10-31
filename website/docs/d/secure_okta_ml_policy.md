@@ -62,4 +62,4 @@ The rule block contains:
 
 * `anomalous_console_login` - Anomaly detection settings for logins.
     * `enabled` - Whether anomaly detection is enabled.
-    * `threshold` - Confidence level threshold for triggering alerts.
+    * `threshold` - Confidence level threshold for triggering alerts. Valid values are: 1 (High), 2 (Medium), 3 (Low).

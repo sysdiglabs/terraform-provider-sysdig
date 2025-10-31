@@ -708,8 +708,6 @@ func setPolicyRulesOktaML(policy *v2.PolicyRulesComposite, d *schema.ResourceDat
 	policy.Policy.Rules = []*v2.PolicyRule{}
 	policy.Rules = []*v2.RuntimePolicyRule{}
 	if _, ok := d.GetOk("rule"); ok {
-		// TODO: Iterate over a list of rules instead of hard-coding the index values
-		// TODO: Should we assume that only a single Malware rule can be attached to a policy?
 
 		anomalousLogin := &v2.MLRuleThresholdAndSeverity{}
 		if _, ok := d.GetOk("rule.0.anomalous_console_login"); ok { // TODO: Do not hardcode the indexes
