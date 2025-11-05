@@ -30,13 +30,19 @@ func TestAccOktaMLPolicyDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: oktaOktaMLPolicyDataSource(rText),
+				Config: oktaMLPolicyDataSource(rText),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.sysdig_secure_okta_ml_policy.policy_2", "name", fmt.Sprintf("Test Okta ML Policy %s", rText)),
+					resource.TestCheckResourceAttr("data.sysdig_secure_okta_ml_policy.policy_2", "description", fmt.Sprintf("Test Okta ML Policy Description %s", rText)),
+					resource.TestCheckResourceAttr("data.sysdig_secure_okta_ml_policy.policy_2", "enabled", "true"),
+					resource.TestCheckResourceAttr("data.sysdig_secure_okta_ml_policy.policy_2", "severity", "4"),
+				),
 			},
 		},
 	})
 }
 
-func oktaOktaMLPolicyDataSource(name string) string {
+func oktaMLPolicyDataSource(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_okta_ml_policy" "policy_1" {
   name        = "Test Okta ML Policy %s"

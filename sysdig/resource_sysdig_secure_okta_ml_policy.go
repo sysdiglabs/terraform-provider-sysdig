@@ -54,6 +54,7 @@ func resourceSysdigSecureOktaMLPolicy() *schema.Resource {
 			"rule": {
 				Type:     schema.TypeList,
 				Required: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id":   ReadOnlyIntSchema(),
@@ -171,16 +172,12 @@ func resourceSysdigOktaMLPolicyDelete(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	policy, err := oktaMLPolicyFromResourceData(d)
+	id, err := strconv.Atoi(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if policy.Policy.ID == 0 {
-		return diag.FromErr(errors.New("policy ID is missing"))
-	}
-
-	err = client.DeleteCompositePolicy(ctx, policy.Policy.ID)
+	err = client.DeleteCompositePolicy(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}

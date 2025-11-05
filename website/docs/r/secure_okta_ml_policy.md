@@ -3,12 +3,12 @@ subcategory: "Sysdig Secure"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_okta_ml_policy"
 description: |-
-  Retrieves a Sysdig Secure Okta ML Policy.
+  Manages a Sysdig Secure Okta ML Policy.
 ---
 
 # Resource: sysdig_secure_okta_ml_policy
 
-Retrieves the information of an existing Sysdig Secure Okta ML Policy.
+Manages a Sysdig Secure Okta ML Policy.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
@@ -28,6 +28,7 @@ resource "sysdig_secure_okta_ml_policy" "policy" {
       enabled   = true
       threshold = 1
     }
+  }
 }
 ```
 

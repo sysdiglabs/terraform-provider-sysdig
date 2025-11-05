@@ -321,10 +321,14 @@ func setTFResourcePolicyRulesOktaML(d *schema.ResourceData, policy v2.PolicyRule
 
 	rules := []map[string]any{}
 	for _, rule := range policy.Rules {
-		anomalousLogin := []map[string]any{{
-			"enabled":   rule.Details.(*v2.OktaMLRuleDetails).AnomalousConsoleLogin.Enabled,
-			"threshold": rule.Details.(*v2.OktaMLRuleDetails).AnomalousConsoleLogin.Threshold,
-		}}
+		anomalousLogin := []map[string]any{}
+
+		if d, ok := rule.Details.(*v2.OktaMLRuleDetails); ok && d.AnomalousConsoleLogin != nil {
+			anomalousLogin = []map[string]any{{
+				"enabled":   d.AnomalousConsoleLogin.Enabled,
+				"threshold": int(d.AnomalousConsoleLogin.Threshold),
+			}}
+		}
 
 		rules = append(rules, map[string]any{
 			"id":                      rule.ID,
