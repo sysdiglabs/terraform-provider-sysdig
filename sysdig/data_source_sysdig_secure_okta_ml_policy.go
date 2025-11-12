@@ -45,7 +45,6 @@ func createOktaMLPolicyDataSourceSchema() map[string]*schema.Schema {
 		"rule": {
 			Type:     schema.TypeList,
 			Computed: true,
-			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"id":                      ReadOnlyIntSchema(),
