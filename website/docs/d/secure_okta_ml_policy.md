@@ -1,28 +1,28 @@
 ---
 subcategory: "Sysdig Secure"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_secure_aws_ml_policy"
+page_title: "Sysdig: sysdig_secure_okta_ml_policy"
 description: |-
-  Retrieves a Sysdig Secure AWS ML Policy.
+  Retrieves a Sysdig Secure Okta ML Policy.
 ---
 
-# Data Source: sysdig_secure_aws_ml_policy
+# Data Source: sysdig_secure_okta_ml_policy
 
-Retrieves the information of an existing Sysdig Secure ML Policy.
+Retrieves information about an existing Sysdig Secure Okta ML Policy.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
 ```terraform
-data "sysdig_secure_aws_ml_policy" "policy" {
-  name = "ML Policy 1"
+data "sysdig_secure_okta_ml_policy" "policy" {
+  name = "My Okta ML Policy"
 }
 ```
 
 ## Argument Reference
 
-* `name` - (Required) The name of the Secure managed policy.
+* `name` - (Required) The name of the Secure Okta ML policy.
 
 ## Attributes Reference
 
@@ -30,7 +30,9 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The id for the policy.
 
-* `description` - The description for the managed policy.
+* `type` - The type of the policy. Always set to "okta_machine_learning".
+
+* `description` - The description for the policy.
 
 * `severity` -  The severity of Secure policy. The accepted values
     are: 0, 1, 2, 3 (High), 4, 5 (Medium), 6 (Low) and 7 (Info).
@@ -46,9 +48,18 @@ In addition to all arguments above, the following attributes are exported:
 
 ### `rule` block
 
-The rule block is required and supports:
+The rule block contains:
 
-* `description` - (Required) Rule description.
-* `anomalous_console_login` - (Required) This attribute allows you to activate anomaly detection for console logins and adjust its settings.
-    * `threshold` - (Required) Trigger at or above confidence level. Valid values are: 1 (Default), 2 (High), 3 (Higher).
+* `id` - The ID of the rule.
 
+* `name` - The name of the rule.
+
+* `description` - Rule description.
+
+* `tags` - Tags associated with the rule.
+
+* `version` - The version of the rule.
+
+* `anomalous_console_login` - Anomaly detection settings for logins.
+    * `enabled` - Whether anomaly detection is enabled.
+    * `threshold` - Confidence level threshold for triggering alerts. Valid values are: 1 (Default), 2 (High), 3 (Higher).

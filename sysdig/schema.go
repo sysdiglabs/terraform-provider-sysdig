@@ -413,8 +413,9 @@ func MLRuleThresholdAndSeveritySchema() *schema.Schema {
 					Default:  true,
 				},
 				"threshold": {
-					Type:     schema.TypeInt,
-					Required: true,
+					Type:             schema.TypeInt,
+					Required:         true,
+					ValidateDiagFunc: validateDiagFunc(validation.IntBetween(1, 3)),
 				},
 			},
 		},

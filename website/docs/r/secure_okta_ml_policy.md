@@ -1,22 +1,34 @@
 ---
 subcategory: "Sysdig Secure"
 layout: "sysdig"
-page_title: "Sysdig: sysdig_secure_aws_ml_policy"
+page_title: "Sysdig: sysdig_secure_okta_ml_policy"
 description: |-
-  Retrieves a Sysdig Secure AWS ML Policy.
+  Manages a Sysdig Secure Okta ML Policy.
 ---
 
-# Data Source: sysdig_secure_aws_ml_policy
+# Resource: sysdig_secure_okta_ml_policy
 
-Retrieves the information of an existing Sysdig Secure ML Policy.
+Manages a Sysdig Secure Okta ML Policy.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
 ```terraform
-data "sysdig_secure_aws_ml_policy" "policy" {
-  name = "ML Policy 1"
+resource "sysdig_secure_okta_ml_policy" "policy" {
+  name        = "Test Okta ML Policy 1"
+  description = "Test Okta ML Policy Description"
+  enabled     = true
+  severity    = 4
+
+  rule {
+    description = "Test Okta ML Rule Description"
+
+    anomalous_console_login {
+      enabled   = true
+      threshold = 1
+    }
+  }
 }
 ```
 
@@ -49,6 +61,6 @@ In addition to all arguments above, the following attributes are exported:
 The rule block is required and supports:
 
 * `description` - (Required) Rule description.
-* `anomalous_console_login` - (Required) This attribute allows you to activate anomaly detection for console logins and adjust its settings.
+* `anomalous_console_login` - (Required) This attribute allows you to activate anomaly detection for logins and adjust its settings.
+    * `enabled` - (Optional) Whether anomaly detection is enabled. Defaults to `true`.
     * `threshold` - (Required) Trigger at or above confidence level. Valid values are: 1 (Default), 2 (High), 3 (Higher).
-
