@@ -1,8 +1,8 @@
 *.dll
 *.exe
 .DS_Store
-.envrc
 .env
+.secrets
 .direnv/
 example.tf
 terraform.tfplan
@@ -54,4 +54,4 @@ oanc
 # Local test folder
 local-terraform-test/
 dist/
-.secrets
+
