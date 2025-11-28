@@ -83,6 +83,11 @@ func createAlertV2Schema(original map[string]*schema.Schema) map[string]*schema.
 						Optional: true,
 						Default:  true,
 					},
+					"notify_on_acknowledge": {
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validation.StringInSlice([]string{"true", "false"}, false),
+					},
 					"main_threshold": {
 						Type:     schema.TypeBool,
 						Optional: true,
@@ -262,6 +267,16 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 			}
 
 			newChannel.OverrideOptions.NotifyOnResolve = channelMap["notify_on_resolve"].(bool)
+			if notifyOnAcknowledge, ok := channelMap["notify_on_acknowledge"]; ok && notifyOnAcknowledge.(string) != "" {
+				if notifyOnAcknowledge.(string) == "true" {
+					trueValue := true
+					newChannel.OverrideOptions.NotifyOnAcknowledge = &trueValue
+				} else {
+					falseValue := false
+					newChannel.OverrideOptions.NotifyOnAcknowledge = &falseValue
+				}
+				// else do not set any value for newChannel.OverrideOptions.NotifyOnAcknowledge
+			}
 
 			newChannel.OverrideOptions.Thresholds = []string{}
 			mainThreshold := channelMap["main_threshold"].(bool)
@@ -356,6 +371,14 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *v2.AlertV2Common) (
 		config := map[string]any{
 			"id":                ncc.ChannelID,
 			"notify_on_resolve": ncc.OverrideOptions.NotifyOnResolve,
+		}
+
+		if ncc.OverrideOptions.NotifyOnAcknowledge != nil {
+			if *ncc.OverrideOptions.NotifyOnAcknowledge {
+				config["notify_on_acknowledge"] = "true"
+			} else {
+				config["notify_on_acknowledge"] = "false"
+			}
 		}
 
 		if ncc.OverrideOptions.ReNotifyEverySec != nil {
