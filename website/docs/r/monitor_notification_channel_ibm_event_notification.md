@@ -20,8 +20,6 @@ resource "sysdig_monitor_notification_channel_ibm_event_notification" "sample" {
 	name                    = "Example Channel - IBM Event Notification"
 	enabled                 = true
 	instance_id             = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-	notify_when_ok          = false
-	notify_when_resolved    = false
 	share_with_current_team = true
 }
 ```
@@ -32,8 +30,6 @@ resource "sysdig_monitor_notification_channel_ibm_event_notification" "sample" {
 	name                    = "Example Channel - IBM Event Notification"
 	enabled                 = true
 	instance_id             = "crn:v1:bluemix:public:event-notifications:global:a/59bcbfa6ea2f006b4ed7094c1a08dcdd:1a0ec336-f391-4091-a6fb-5e084a4c56f4::"
-	notify_when_ok          = false
-	notify_when_resolved    = false
 	share_with_current_team = true
 }
 ```
@@ -46,11 +42,9 @@ resource "sysdig_monitor_notification_channel_ibm_event_notification" "sample" {
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
-* `notify_when_ok` - (Optional) Send a new notification when the alert condition is
-    no longer triggered. Default is false.
+* `notify_when_ok` - (Optional, Deprecated) Send a new notification when the alert condition is no longer triggered. Default is `true`. This option is deprecated; use `notify_on_resolve` within the `notification_channels` options in the `sysdig_monitor_alert_v2_*` resources instead, which takes precedence over this setting.
 
-* `notify_when_resolved` - (Optional) Send a new notification when the alert is manually
-    acknowledged by a user. Default is false.
+* `notify_when_resolved` - (Optional, Deprecated) Send a new notification when the alert is manually acknowledged by a user. Default is `true`. This option is deprecated; use `notify_on_acknowledge` within the `notification_channels` options in the `sysdig_monitor_alert_v2_*` resources instead, which takes precedence over this setting.
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
