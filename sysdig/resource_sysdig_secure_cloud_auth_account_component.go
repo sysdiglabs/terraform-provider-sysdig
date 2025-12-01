@@ -210,7 +210,12 @@ func cloudauthAccountComponentFromResourceData(data *schema.ResourceData) *v2.Cl
 	} else if resourceMetadata = data.Get(SchemaCloudLogsMetadata).(string); resourceMetadata != "" {
 		cloudAccountComponent.Metadata = &cloudauth.AccountComponent_CloudLogsMetadata{CloudLogsMetadata: &cloudauth.CloudLogsMetadata{}}
 		err = protojson.Unmarshal([]byte(resourceMetadata), cloudAccountComponent.GetCloudLogsMetadata())
-
+	} else if resourceMetadata = data.Get(SchemaCloudResponderMetadata).(string); resourceMetadata != "" {
+		cloudAccountComponent.Metadata = &cloudauth.AccountComponent_CloudResponderMetadata{CloudResponderMetadata: &cloudauth.CloudResponderMetadata{}}
+		err = protojson.Unmarshal([]byte(resourceMetadata), cloudAccountComponent.GetCloudResponderMetadata())
+	} else if resourceMetadata = data.Get(SchemaCloudResponderRolesMetadata).(string); resourceMetadata != "" {
+		cloudAccountComponent.Metadata = &cloudauth.AccountComponent_CloudResponderRolesMetadata{CloudResponderRolesMetadata: &cloudauth.CloudResponderRolesMetadata{}}
+		err = protojson.Unmarshal([]byte(resourceMetadata), cloudAccountComponent.GetCloudResponderRolesMetadata())
 	} else {
 		diag.FromErr(errors.New("bad request, invalid account component metadata type"))
 	}
@@ -268,6 +273,10 @@ func cloudauthAccountComponentToResourceData(data *schema.ResourceData, cloudAcc
 		err = data.Set(SchemaCryptoKeyMetadata, getComponentMetadataString(cloudAccountComponent.GetCryptoKeyMetadata()))
 	case cloudauth.Component_COMPONENT_CLOUD_LOGS:
 		err = data.Set(SchemaCloudLogsMetadata, getComponentMetadataString(cloudAccountComponent.GetCloudLogsMetadata()))
+	case cloudauth.Component_COMPONENT_CLOUD_RESPONDER:
+		err = data.Set(SchemaCloudResponderMetadata, getComponentMetadataString(cloudAccountComponent.GetCloudResponderMetadata()))
+	case cloudauth.Component_COMPONENT_CLOUD_RESPONDER_ROLES:
+		err = data.Set(SchemaCloudResponderRolesMetadata, getComponentMetadataString(cloudAccountComponent.GetCloudResponderRolesMetadata()))
 	}
 
 	if err != nil {

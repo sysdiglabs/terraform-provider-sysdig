@@ -73,6 +73,16 @@ var (
 				Optional: true,
 				Default:  "",
 			},
+			SchemaCloudResponderMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			SchemaCloudResponderRolesMetadata: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
 		},
 	}
 )
@@ -407,7 +417,14 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 				case SchemaCloudLogsMetadata:
 					component.Metadata = &cloudauth.AccountComponent_CloudLogsMetadata{CloudLogsMetadata: &cloudauth.CloudLogsMetadata{}}
 					err = protojson.Unmarshal([]byte(value.(string)), component.GetCloudLogsMetadata())
+				case SchemaCloudResponderMetadata:
+					component.Metadata = &cloudauth.AccountComponent_CloudResponderMetadata{CloudResponderMetadata: &cloudauth.CloudResponderMetadata{}}
+					err = protojson.Unmarshal([]byte(value.(string)), component.GetCloudResponderMetadata())
+				case SchemaCloudResponderRolesMetadata:
+					component.Metadata = &cloudauth.AccountComponent_CloudResponderRolesMetadata{CloudResponderRolesMetadata: &cloudauth.CloudResponderRolesMetadata{}}
+					err = protojson.Unmarshal([]byte(value.(string)), component.GetCloudResponderRolesMetadata())
 				}
+
 				if err != nil {
 					diag.FromErr(err)
 				}
@@ -516,7 +533,12 @@ func componentsToResourceData(components []*cloudauth.AccountComponent) []map[st
 			resourceData[SchemaCryptoKeyMetadata] = getComponentMetadataString(component.GetCryptoKeyMetadata())
 		case cloudauth.Component_COMPONENT_CLOUD_LOGS:
 			resourceData[SchemaCloudLogsMetadata] = getComponentMetadataString(component.GetCloudLogsMetadata())
+		case cloudauth.Component_COMPONENT_CLOUD_RESPONDER:
+			resourceData[SchemaCloudResponderMetadata] = getComponentMetadataString(component.GetCloudResponderMetadata())
+		case cloudauth.Component_COMPONENT_CLOUD_RESPONDER_ROLES:
+			resourceData[SchemaCloudResponderMetadata] = getComponentMetadataString(component.GetCloudResponderRolesMetadata())
 		}
+
 		resourceList = append(resourceList, resourceData)
 	}
 
