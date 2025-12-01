@@ -137,6 +137,11 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Optional: true,
 				Elem:     accountFeature,
 			},
+			SchemaSecureResponseActions: {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     accountFeature,
+			},
 		},
 	}
 
@@ -364,6 +369,9 @@ func constructAccountFeatures(data *schema.ResourceData) *cloudauth.AccountFeatu
 			case SchemaMonitorCloudMetrics:
 				accountFeatures.MonitorCloudMetrics = &cloudauth.AccountFeature{}
 				setAccountFeature(accountFeatures, "MonitorCloudMetrics", cloudauth.Feature_FEATURE_MONITOR_CLOUD_METRICS, valueMap)
+			case SchemaSecureResponseActions:
+				accountFeatures.MonitorCloudMetrics = &cloudauth.AccountFeature{}
+				setAccountFeature(accountFeatures, "SecureResponseActions", cloudauth.Feature_FEATURE_SECURE_RESPONSE_ACTIONS, valueMap)
 			}
 		}
 	}
@@ -480,6 +488,7 @@ func featureToResourceData(features *cloudauth.AccountFeatures) []any {
 		SchemaSecureIdentityEntitlement: features.SecureIdentityEntitlement,
 		SchemaMonitorCloudMetrics:       features.MonitorCloudMetrics,
 		SchemaSecureAgentlessScanning:   features.SecureAgentlessScanning,
+		SchemaSecureResponseActions:     features.SecureResponseActions,
 	}
 
 	allFeatures := make(map[string]any)
