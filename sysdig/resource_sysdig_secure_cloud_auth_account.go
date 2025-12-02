@@ -370,7 +370,7 @@ func constructAccountFeatures(data *schema.ResourceData) *cloudauth.AccountFeatu
 				accountFeatures.MonitorCloudMetrics = &cloudauth.AccountFeature{}
 				setAccountFeature(accountFeatures, "MonitorCloudMetrics", cloudauth.Feature_FEATURE_MONITOR_CLOUD_METRICS, valueMap)
 			case SchemaSecureResponseActions:
-				accountFeatures.MonitorCloudMetrics = &cloudauth.AccountFeature{}
+				accountFeatures.SecureResponseActions = &cloudauth.AccountFeature{}
 				setAccountFeature(accountFeatures, "SecureResponseActions", cloudauth.Feature_FEATURE_SECURE_RESPONSE_ACTIONS, valueMap)
 			}
 		}
