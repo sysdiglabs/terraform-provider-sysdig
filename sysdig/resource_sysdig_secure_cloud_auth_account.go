@@ -545,7 +545,7 @@ func componentsToResourceData(components []*cloudauth.AccountComponent) []map[st
 		case cloudauth.Component_COMPONENT_CLOUD_RESPONDER:
 			resourceData[SchemaCloudResponderMetadata] = getComponentMetadataString(component.GetCloudResponderMetadata())
 		case cloudauth.Component_COMPONENT_CLOUD_RESPONDER_ROLES:
-			resourceData[SchemaCloudResponderMetadata] = getComponentMetadataString(component.GetCloudResponderRolesMetadata())
+			resourceData[SchemaCloudResponderRolesMetadata] = getComponentMetadataString(component.GetCloudResponderRolesMetadata())
 		}
 
 		resourceList = append(resourceList, resourceData)
