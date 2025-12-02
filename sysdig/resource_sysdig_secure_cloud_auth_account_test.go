@@ -84,33 +84,6 @@ func TestAccGCPSecureCloudAuthAccountConfigPosture(t *testing.T) {
 	})
 }
 
-func TestAccAWSSecureCloudAuthAccountResponseActions(t *testing.T) {
-	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
-	accID := rText()
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
-				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
-		ProviderFactories: map[string]func() (*schema.Provider, error){
-			"sysdig": func() (*schema.Provider, error) {
-				return sysdig.Provider(), nil
-			},
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: secureAWSCloudAuthAccountWithResponseActions(accID),
-			},
-			{
-				ResourceName:      "sysdig_secure_cloud_auth_account.aws_response_actions",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func secureGCPCloudAuthAccountWithConfigPosture(accountID string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "gcp_config_posture" {
@@ -160,49 +133,6 @@ resource "sysdig_secure_cloud_auth_account" "gcp_config_posture" {
 	}
 }
 `, accountID, getEncodedServiceAccountKey("gcp-cspm-test", accountID))
-}
-
-func secureAWSCloudAuthAccountWithResponseActions(accountID string) string {
-	return fmt.Sprintf(`
-resource "sysdig_secure_cloud_auth_account" "aws_response_actions" {
-  provider_id   = "aws-cspm-test-%s"
-  provider_type = "PROVIDER_AWS"
-  enabled       = true
-  feature {
-    secure_response_actions {
-      enabled    = true
-      components = ["COMPONENT_CLOUD_RESPONDER/cloud-responder", "COMPONENT_CLOUD_RESPONDER_ROLES/cloud-responder"]
-    }
-  }
-  
-  component {
-		type                        = "COMPONENT_CLOUD_RESPONDER"
-		instance                    = "cloud-responder"
-		cloud_responder_metadata = jsonencode({
-			aws = {
-			  responder_lambdas = {
-				lambda_names       = ["l1", "l2", "l3"]
-				regions            = ["us-east-1", "eu-west-1"]
-				delegate_role_name = "sysdig-delegate-role"
-			  }
-			}
-		  }
-        )
-  }
-  
-  component {
-		type                        = "COMPONENT_CLOUD_RESPONDER_ROLES"
-		instance                    = "cloud-responder"
-		cloud_responder_roles_metadata = jsonencode({
-    		roles = [
- 			    {aws = {role_name: "role1"}},
-				{aws = {role_name: "role2"}},
-				{aws = {role_name: "role3"}}
-			]
-  		})
-  }
-}
-`, accountID)
 }
 
 func TestAccGCPSecureCloudAuthAccountAgentlesScanning(t *testing.T) {
@@ -620,6 +550,33 @@ func secureAzureCloudAuthAccountWithThreatDetection(accountID string) string {
 /************
 * AWS tests
 ************/
+func TestAccAWSSecureCloudAuthAccountResponseActions(t *testing.T) {
+	accountID := fmt.Sprintf("%012d", rand.Intn(99999999999))
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: secureAWSCloudAuthAccountWithResponseActions(accountID),
+			},
+			{
+				ResourceName:      "sysdig_secure_cloud_auth_account.aws_response_actions",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+
+}
+
 func TestAccAWSSecureCloudAccountThreatDetection(t *testing.T) {
 	accountID := fmt.Sprintf("%012d", rand.Intn(99999999999))
 	resource.ParallelTest(t, resource.TestCase{
@@ -744,6 +701,49 @@ func TestAccAWSSecureCloudAccountConfigPostureAndAgentlessScanning(t *testing.T)
 			},
 		},
 	})
+}
+
+func secureAWSCloudAuthAccountWithResponseActions(accountID string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_cloud_auth_account" "aws_response_actions_%[1]s" {
+  provider_id   = "aws-cspm-test-%[1]s"
+  provider_type = "PROVIDER_AWS"
+  enabled       = true
+  feature {
+    secure_response_actions {
+      enabled    = true
+      components = ["COMPONENT_CLOUD_RESPONDER/cloud-responder", "COMPONENT_CLOUD_RESPONDER_ROLES/cloud-responder"]
+    }
+  }
+  
+  component {
+		type                        = "COMPONENT_CLOUD_RESPONDER"
+		instance                    = "cloud-responder"
+		cloud_responder_metadata = jsonencode({
+			aws = {
+			  responder_lambdas = {
+				lambda_names       = ["l1", "l2", "l3"]
+				regions            = ["us-east-1", "eu-west-1"]
+				delegate_role_name = "sysdig-delegate-role"
+			  }
+			}
+		  }
+        )
+  }
+  
+  component {
+		type                        = "COMPONENT_CLOUD_RESPONDER_ROLES"
+		instance                    = "cloud-responder"
+		cloud_responder_roles_metadata = jsonencode({
+    		roles = [
+ 			    {aws = {role_name: "role1"}},
+				{aws = {role_name: "role2"}},
+				{aws = {role_name: "role3"}}
+			]
+  		})
+  }
+}
+`, accountID)
 }
 
 /*************
