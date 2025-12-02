@@ -706,7 +706,7 @@ func TestAccAWSSecureCloudAccountConfigPostureAndAgentlessScanning(t *testing.T)
 func secureAWSCloudAuthAccountWithResponseActions(accountID string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "aws_response_actions_%[1]s" {
-  provider_id   = "aws-cspm-test-%[1]s"
+  provider_id   = "%[1]s"
   provider_type = "PROVIDER_AWS"
   enabled       = true
   feature {
