@@ -568,7 +568,7 @@ func TestAccAWSSecureCloudAuthAccountResponseActions(t *testing.T) {
 				Config: secureAWSCloudAuthAccountWithResponseActions(accountID),
 			},
 			{
-				ResourceName:      "sysdig_secure_cloud_auth_account.aws_response_actions",
+				ResourceName:      fmt.Sprintf("sysdig_secure_cloud_auth_account.aws_response_actions_%s", accountID),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
