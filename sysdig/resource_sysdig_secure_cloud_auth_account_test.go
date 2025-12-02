@@ -188,7 +188,6 @@ resource "sysdig_secure_cloud_auth_account" "aws_response_actions" {
 			}
 		  }
         )
-	}
   }
   
   component {
