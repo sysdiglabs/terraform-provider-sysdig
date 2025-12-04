@@ -92,25 +92,33 @@ resource "sysdig_secure_team" "sample" {
 
 func secureTeamWithPostureZones(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_posture_zone" "z1" {
+resource "sysdig_secure_zone" "z1" {
   name = "Zone-%[1]s"
+  scope {
+    target_type = "azure"
+    rules       = "organization contains \"o1\""
+  }
 }
 
 resource "sysdig_secure_team" "sample" {
   name     = "sample-%[1]s"
-  zone_ids = [sysdig_secure_posture_zone.z1.id]
+  zone_ids = [sysdig_secure_zone.z1.id]
 }`, name)
 }
 
 func secureTeamWithPostureZonesAndAllZones(name string) string {
 	return fmt.Sprintf(`
-resource "sysdig_secure_posture_zone" "z1" {
+resource "sysdig_secure_zone" "z1" {
   name = "Zone-%[1]s"
+  scope {
+    target_type = "azure"
+    rules       = "organization contains \"o1\""
+  }
 }
 
 resource "sysdig_secure_team" "sample" {
   name      = "sample-%[1]s"
-  zone_ids  = [sysdig_secure_posture_zone.z1.id]
+  zone_ids  = [sysdig_secure_zone.z1.id]
   all_zones = true
 }`, name)
 }
