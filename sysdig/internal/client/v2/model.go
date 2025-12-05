@@ -3,6 +3,7 @@ package v2
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
@@ -1185,6 +1186,10 @@ type ZonesWrapper struct {
 	Zones []Zone `json:"data"`
 }
 
+type ZonesV2Wrapper struct {
+	Zones []ZoneV2 `json:"data"`
+}
+
 type ZoneRequest struct {
 	ID          int         `json:"id,omitempty"`
 	Name        string      `json:"name"`
@@ -1313,4 +1318,107 @@ type SSOGroupMappingSettings struct {
 type SSOGlobalSettings struct {
 	Product                string `json:"product,omitempty"`
 	IsPasswordLoginEnabled bool   `json:"isPasswordLoginEnabled"`
+}
+
+// ZoneV2 models the REST API contract for zones v2.
+type ZoneV2 struct {
+	ID             int       `json:"id,omitempty"`
+	Name           string    `json:"name"`
+	Description    string    `json:"description,omitempty"`
+	Scopes         []ScopeV2 `json:"scopes"`
+	Author         string    `json:"author,omitempty"`
+	LastModifiedBy string    `json:"lastModifiedBy,omitempty"`
+	LastUpdated    int64     `json:"lastUpdated,omitempty"`
+	IsSystem       bool      `json:"isSystem,omitempty"`
+}
+
+// ScopeV2 corresponds to one scope entry
+type ScopeV2 struct {
+	Filters []FilterV2 `json:"filters"`
+}
+
+// FilterV2 matches the REST filter definition.
+// It supports both structured expressions and a rules string.
+// When Rules is set, Expressions should be empty and vice versa.
+type FilterV2 struct {
+	ID           int            `json:"id,omitempty"`
+	ResourceType string         `json:"resourceType"`
+	Expressions  []ExpressionV2 `json:"expressions,omitempty"`
+	Rules        string         `json:"rules,omitempty"`
+}
+
+// ExpressionV2 matches REST expression definition
+type ExpressionV2 struct {
+	Field    string   `json:"field"`
+	Operator string   `json:"operator"`
+	Value    string   `json:"value,omitempty"`
+	Values   []string `json:"values,omitempty"`
+}
+
+// MarshalJSON ensures the API receives the "value" key always as an array.
+// The backend rejects scalar values — even single-element lists must be sent as arrays.
+func (e ExpressionV2) MarshalJSON() ([]byte, error) {
+	m := map[string]interface{}{
+		"field":    e.Field,
+		"operator": e.Operator,
+	}
+	if len(e.Values) > 0 {
+		m["value"] = e.Values
+	} else if e.Value != "" {
+		m["value"] = []string{e.Value}
+	}
+	return json.Marshal(m)
+}
+
+// UnmarshalJSON accepts either "value": []string or "value": string (or "values": [])
+// and normalizes into ExpressionV2.Value or ExpressionV2.Values.
+func (e *ExpressionV2) UnmarshalJSON(b []byte) error {
+	// minimal struct to grab field/operator
+	type alias struct {
+		Field    string `json:"field"`
+		Operator string `json:"operator"`
+	}
+	var a alias
+	if err := json.Unmarshal(b, &a); err != nil {
+		return err
+	}
+	e.Field = a.Field
+	e.Operator = a.Operator
+
+	// reset
+	e.Value = ""
+	e.Values = nil
+
+	// try to decode "value" (array or string)
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+
+	if v, ok := raw["value"]; ok {
+		// try array
+		var arr []string
+		if err := json.Unmarshal(v, &arr); err == nil {
+			e.Values = arr
+			return nil
+		}
+		// try single string
+		var s string
+		if err := json.Unmarshal(v, &s); err == nil {
+			e.Value = s
+			return nil
+		}
+		return fmt.Errorf("unsupported value type for ExpressionV2.value")
+	}
+
+	// fallback to "values"
+	if v, ok := raw["values"]; ok {
+		var arr []string
+		if err := json.Unmarshal(v, &arr); err != nil {
+			return err
+		}
+		e.Values = arr
+	}
+
+	return nil
 }
