@@ -8,21 +8,21 @@ import (
 )
 
 const (
-	platformZonesPath = "%s/platform/v1/zones"
-	platformZonePath  = "%s/platform/v1/zones/%d"
+	platformZonesPathV2 = "%s/platform/v2/zones"
+	platformZonePathV2  = "%s/platform/v2/zones/%d"
 )
 
-type ZoneInterface interface {
+type ZoneV2Interface interface {
 	Base
-	GetZones(ctx context.Context, name string) ([]Zone, error)
-	GetZoneByID(ctx context.Context, id int) (*Zone, error)
-	CreateZone(ctx context.Context, zone *ZoneRequest) (*Zone, error)
-	UpdateZone(ctx context.Context, zone *ZoneRequest) (*Zone, error)
-	DeleteZone(ctx context.Context, id int) error
+	GetZonesV2(ctx context.Context, name string) ([]ZoneV2, error)
+	GetZoneV2(ctx context.Context, id int) (*ZoneV2, error)
+	CreateZoneV2(ctx context.Context, zone *ZoneV2) (*ZoneV2, error)
+	UpdateZoneV2(ctx context.Context, zone *ZoneV2) (*ZoneV2, error)
+	DeleteZoneV2(ctx context.Context, id int) error
 }
 
-func (c *Client) GetZones(ctx context.Context, name string) (zones []Zone, err error) {
-	zonesURL := c.getZonesURL()
+func (c *Client) GetZonesV2(ctx context.Context, name string) (zones []ZoneV2, err error) {
+	zonesURL := c.getZonesV2URL()
 	zonesURL = fmt.Sprintf("%s?filter=name:%s", zonesURL, url.QueryEscape(name))
 
 	response, err := c.requester.Request(ctx, http.MethodGet, zonesURL, nil)
@@ -38,7 +38,7 @@ func (c *Client) GetZones(ctx context.Context, name string) (zones []Zone, err e
 	if response.StatusCode != http.StatusOK {
 		return nil, c.APIErrorFromResponse(response)
 	}
-	wrapper, err := Unmarshal[ZonesWrapper](response.Body)
+	wrapper, err := Unmarshal[ZonesV2Wrapper](response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -46,8 +46,8 @@ func (c *Client) GetZones(ctx context.Context, name string) (zones []Zone, err e
 	return wrapper.Zones, nil
 }
 
-func (c *Client) GetZoneByID(ctx context.Context, id int) (zone *Zone, err error) {
-	response, err := c.requester.Request(ctx, http.MethodGet, c.getZoneURL(id), nil)
+func (c *Client) GetZoneV2(ctx context.Context, id int) (zone *ZoneV2, err error) {
+	response, err := c.requester.Request(ctx, http.MethodGet, c.getZoneV2URL(id), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -61,16 +61,16 @@ func (c *Client) GetZoneByID(ctx context.Context, id int) (zone *Zone, err error
 		return nil, c.APIErrorFromResponse(response)
 	}
 
-	return Unmarshal[*Zone](response.Body)
+	return Unmarshal[*ZoneV2](response.Body)
 }
 
-func (c *Client) CreateZone(ctx context.Context, zone *ZoneRequest) (createdZone *Zone, err error) {
+func (c *Client) CreateZoneV2(ctx context.Context, zone *ZoneV2) (createdZone *ZoneV2, err error) {
 	payload, err := Marshal(zone)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := c.requester.Request(ctx, http.MethodPost, c.getZonesURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.getZonesV2URL(), payload)
 	if err != nil {
 		return nil, err
 	}
@@ -84,16 +84,16 @@ func (c *Client) CreateZone(ctx context.Context, zone *ZoneRequest) (createdZone
 		return nil, c.APIErrorFromResponse(response)
 	}
 
-	return Unmarshal[*Zone](response.Body)
+	return Unmarshal[*ZoneV2](response.Body)
 }
 
-func (c *Client) UpdateZone(ctx context.Context, zone *ZoneRequest) (updatedZone *Zone, err error) {
+func (c *Client) UpdateZoneV2(ctx context.Context, zone *ZoneV2) (updatedZone *ZoneV2, err error) {
 	payload, err := Marshal(zone)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := c.requester.Request(ctx, http.MethodPut, c.getZoneURL(zone.ID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.getZoneV2URL(zone.ID), payload)
 	if err != nil {
 		return nil, err
 	}
@@ -107,11 +107,11 @@ func (c *Client) UpdateZone(ctx context.Context, zone *ZoneRequest) (updatedZone
 		return nil, c.APIErrorFromResponse(response)
 	}
 
-	return Unmarshal[*Zone](response.Body)
+	return Unmarshal[*ZoneV2](response.Body)
 }
 
-func (c *Client) DeleteZone(ctx context.Context, id int) (err error) {
-	response, err := c.requester.Request(ctx, http.MethodDelete, c.getZoneURL(id), nil)
+func (c *Client) DeleteZoneV2(ctx context.Context, id int) (err error) {
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.getZoneV2URL(id), nil)
 	if err != nil {
 		return err
 	}
@@ -128,10 +128,10 @@ func (c *Client) DeleteZone(ctx context.Context, id int) (err error) {
 	return nil
 }
 
-func (c *Client) getZonesURL() string {
-	return fmt.Sprintf(platformZonesPath, c.config.url)
+func (c *Client) getZonesV2URL() string {
+	return fmt.Sprintf(platformZonesPathV2, c.config.url)
 }
 
-func (c *Client) getZoneURL(id int) string {
-	return fmt.Sprintf(platformZonePath, c.config.url, id)
+func (c *Client) getZoneV2URL(id int) string {
+	return fmt.Sprintf(platformZonePathV2, c.config.url, id)
 }
