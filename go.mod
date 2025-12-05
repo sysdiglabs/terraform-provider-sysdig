@@ -10,6 +10,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.40.0
+	github.com/hashicorp/terraform-plugin-testing v1.14.0
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cast v1.10.0
