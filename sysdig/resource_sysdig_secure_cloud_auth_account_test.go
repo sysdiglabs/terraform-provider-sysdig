@@ -736,9 +736,9 @@ resource "sysdig_secure_cloud_auth_account" "aws_response_actions_%[1]s" {
     instance                    = "cloud-responder"
     cloud_responder_roles_metadata = jsonencode({
     		roles = [
- 			    {aws = {role_name: "role1"}},
-				{aws = {role_name: "role2"}},
-				{aws = {role_name: "role3"}}
+ 			    {aws = {role_name = "role1"}},
+				{aws = {role_name = "role2"}},
+				{aws = {role_name = "role3"}}
 			]
   		})
   }
