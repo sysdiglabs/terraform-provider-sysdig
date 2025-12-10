@@ -717,9 +717,9 @@ resource "sysdig_secure_cloud_auth_account" "aws_response_actions_%[1]s" {
   }
   
   component {
-		type                        = "COMPONENT_CLOUD_RESPONDER"
-		instance                    = "cloud-responder"
-		cloud_responder_metadata = jsonencode({
+    type                        = "COMPONENT_CLOUD_RESPONDER"
+    instance                    = "cloud-responder"
+    cloud_responder_metadata = jsonencode({
 			aws = {
 			  responder_lambdas = {
 				lambda_names       = ["l1", "l2", "l3"]
