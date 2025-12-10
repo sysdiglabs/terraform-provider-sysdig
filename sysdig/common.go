@@ -96,4 +96,7 @@ const (
 	SchemaAccountID                     = "account_id"
 	SchemaFeatureFlags                  = "flags"
 	SchemaProviderPartition             = "provider_partition"
+	SchemaCloudResponderMetadata        = "cloud_responder_metadata"
+	SchemaCloudResponderRolesMetadata   = "cloud_responder_roles_metadata"
+	SchemaSecureResponseActions         = "secure_response_actions"
 )
