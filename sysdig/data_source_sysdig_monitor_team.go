@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"net/http"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -120,8 +121,12 @@ func dataSourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	team, _, err := client.GetTeamByID(ctx, id)
+	team, statusCode, err := client.GetTeamByID(ctx, id)
 	if err != nil {
+		if statusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 

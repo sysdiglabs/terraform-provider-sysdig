@@ -3,6 +3,7 @@ package sysdig
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -159,7 +160,7 @@ func resourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceDat
 
 	agentAccessKey, statusCode, err := client.GetAgentAccessKeyByID(ctx, agentKeyID)
 	if err != nil {
-		if statusCode == 404 {
+		if statusCode == http.StatusNotFound {
 			d.SetId("")
 			return nil
 		}
