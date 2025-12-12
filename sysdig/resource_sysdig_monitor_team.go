@@ -3,7 +3,6 @@ package sysdig
 import (
 	"context"
 	"strconv"
-	"strings"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -184,9 +183,9 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	t, err := client.GetTeamByID(ctx, id)
+	t, statusCode, err := client.GetTeamByID(ctx, id)
 	if err != nil {
-		if strings.Contains(err.Error(), "404") {
+		if statusCode == 404 {
 			d.SetId("")
 			return nil
 		}

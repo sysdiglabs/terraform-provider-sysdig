@@ -15,16 +15,16 @@ const (
 
 type AgentAccessKeyInterface interface {
 	Base
-	GetAgentAccessKeyByID(ctx context.Context, id string) (*AgentAccessKey, error)
+	GetAgentAccessKeyByID(ctx context.Context, id string) (*AgentAccessKey, int, error)
 	CreateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey) (*AgentAccessKey, error)
 	DeleteAgentAccessKey(ctx context.Context, id string) error
 	UpdateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey, id string) (*AgentAccessKey, error)
 }
 
-func (c *Client) GetAgentAccessKeyByID(ctx context.Context, id string) (accessKey *AgentAccessKey, err error) {
+func (c *Client) GetAgentAccessKeyByID(ctx context.Context, id string) (accessKey *AgentAccessKey, statusCode int, err error) {
 	response, err := c.requester.Request(ctx, http.MethodGet, c.getAgentAccessKeyByIDUrl(id), nil)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer func() {
 		if dErr := response.Body.Close(); dErr != nil {
@@ -34,10 +34,11 @@ func (c *Client) GetAgentAccessKeyByID(ctx context.Context, id string) (accessKe
 
 	if response.StatusCode != http.StatusOK {
 		err = c.ErrorFromResponse(response)
-		return nil, err
+		return nil, response.StatusCode, err
 	}
 
-	return Unmarshal[*AgentAccessKey](response.Body)
+	result, err := Unmarshal[*AgentAccessKey](response.Body)
+	return result, response.StatusCode, err
 }
 
 func (c *Client) CreateAgentAccessKey(ctx context.Context, agentAccessKey *AgentAccessKey) (createdAccessKey *AgentAccessKey, err error) {

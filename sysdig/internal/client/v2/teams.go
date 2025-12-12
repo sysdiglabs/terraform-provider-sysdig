@@ -15,7 +15,7 @@ const (
 type TeamInterface interface {
 	Base
 	GetUserIDByEmail(ctx context.Context, userRoles []UserRoles) ([]UserRoles, error)
-	GetTeamByID(ctx context.Context, id int) (t Team, err error)
+	GetTeamByID(ctx context.Context, id int) (t Team, statusCode int, err error)
 	CreateTeam(ctx context.Context, tRequest Team) (t Team, err error)
 	UpdateTeam(ctx context.Context, tRequest Team) (t Team, err error)
 	DeleteTeam(ctx context.Context, id int) error
@@ -66,10 +66,10 @@ func (c *Client) GetUserIDByEmail(ctx context.Context, userRoles []UserRoles) (m
 	return modifiedUserRoles, nil
 }
 
-func (c *Client) GetTeamByID(ctx context.Context, id int) (team Team, err error) {
+func (c *Client) GetTeamByID(ctx context.Context, id int) (team Team, statusCode int, err error) {
 	response, err := c.requester.Request(ctx, http.MethodGet, c.getTeamURL(id), nil)
 	if err != nil {
-		return Team{}, err
+		return Team{}, 0, err
 	}
 	defer func() {
 		if dErr := response.Body.Close(); dErr != nil {
@@ -78,15 +78,15 @@ func (c *Client) GetTeamByID(ctx context.Context, id int) (team Team, err error)
 	}()
 
 	if response.StatusCode != http.StatusOK {
-		return Team{}, c.ErrorFromResponse(response)
+		return Team{}, response.StatusCode, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[teamWrapper](response.Body)
 	if err != nil {
-		return Team{}, c.ErrorFromResponse(response)
+		return Team{}, response.StatusCode, c.ErrorFromResponse(response)
 	}
 
-	return wrapper.Team, err
+	return wrapper.Team, response.StatusCode, err
 }
 
 func (c *Client) CreateTeam(ctx context.Context, team Team) (createdTeam Team, err error) {

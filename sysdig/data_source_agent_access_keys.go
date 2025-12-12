@@ -68,7 +68,7 @@ func dataSourceSysdigAgentAccessKeyRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	agentKeyID := d.Get("id").(int)
-	agentAccessKey, err := client.GetAgentAccessKeyByID(ctx, strconv.Itoa(agentKeyID))
+	agentAccessKey, _, err := client.GetAgentAccessKeyByID(ctx, strconv.Itoa(agentKeyID))
 	if err != nil {
 		return diag.FromErr(err)
 	}
