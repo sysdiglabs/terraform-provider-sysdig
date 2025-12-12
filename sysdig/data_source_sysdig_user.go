@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -50,9 +51,14 @@ func dataSourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 
-	u, err := client.GetUserByEmail(ctx, d.Get("email").(string))
+	u, statusCode, err := client.GetUserByEmail(ctx, d.Get("email").(string))
 	if err != nil {
-		return diag.FromErr(err)
+		if statusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		} else {
+			return diag.FromErr(err)
+		}
 	}
 
 	d.SetId(strconv.Itoa(u.ID))

@@ -17,19 +17,19 @@ const (
 
 type UserInterface interface {
 	Base
-	GetUserByID(ctx context.Context, id int) (*User, error)
-	GetUserByUsername(ctx context.Context, username string) (*User, error)
-	GetUserByEmail(ctx context.Context, email string) (*User, error)
+	GetUserByID(ctx context.Context, id int) (*User, int, error)
+	GetUserByUsername(ctx context.Context, username string) (*User, int, error)
+	GetUserByEmail(ctx context.Context, email string) (*User, int, error)
 	CreateUser(ctx context.Context, user *User) (*User, error)
 	UpdateUser(ctx context.Context, user *User) (*User, error)
 	DeleteUser(ctx context.Context, id int) error
 	GetCurrentUser(ctx context.Context) (u *User, err error)
 }
 
-func (c *Client) GetUserByID(ctx context.Context, id int) (user *User, error error) {
+func (c *Client) GetUserByID(ctx context.Context, id int) (user *User, statusCode int, error error) {
 	response, err := c.requester.Request(ctx, http.MethodGet, c.getUserURL(id), nil)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer func() {
 		if dErr := response.Body.Close(); dErr != nil {
@@ -38,21 +38,21 @@ func (c *Client) GetUserByID(ctx context.Context, id int) (user *User, error err
 	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, c.ErrorFromResponse(response)
+		return nil, response.StatusCode, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[userWrapper](response.Body)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return &wrapper.User, nil
+	return &wrapper.User, response.StatusCode, nil
 }
 
-func (c *Client) GetUserByUsername(ctx context.Context, username string) (user *User, err error) {
+func (c *Client) GetUserByUsername(ctx context.Context, username string) (user *User, statusCode int, err error) {
 	response, err := c.requester.Request(ctx, http.MethodGet, c.getUserByUsernameURL(username), nil)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer func() {
 		if dErr := response.Body.Close(); dErr != nil {
@@ -61,18 +61,18 @@ func (c *Client) GetUserByUsername(ctx context.Context, username string) (user *
 	}()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, c.ErrorFromResponse(response)
+		return nil, response.StatusCode, c.ErrorFromResponse(response)
 	}
 
 	wrapper, err := Unmarshal[userWrapper](response.Body)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return &wrapper.User, nil
+	return &wrapper.User, response.StatusCode, nil
 }
 
-func (c *Client) GetUserByEmail(ctx context.Context, email string) (*User, error) {
+func (c *Client) GetUserByEmail(ctx context.Context, email string) (*User, int, error) {
 	return c.GetUserByUsername(ctx, email)
 }
 
