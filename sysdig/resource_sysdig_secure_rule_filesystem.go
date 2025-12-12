@@ -117,6 +117,7 @@ func resourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		if statusCode == http.StatusNotFound {
 			d.SetId("")
+			return nil
 		} else {
 			return diag.FromErr(err)
 		}
