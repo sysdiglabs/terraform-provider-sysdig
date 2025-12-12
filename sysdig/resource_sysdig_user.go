@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -80,10 +81,14 @@ func resourceSysdigUserRead(ctx context.Context, d *schema.ResourceData, meta an
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	u, err := client.GetUserByID(ctx, id)
+	u, statusCode, err := client.GetUserByID(ctx, id)
 	if err != nil {
-		d.SetId("")
-		return diag.FromErr(err)
+		if statusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		} else {
+			return diag.FromErr(err)
+		}
 	}
 
 	_ = d.Set("version", u.Version)

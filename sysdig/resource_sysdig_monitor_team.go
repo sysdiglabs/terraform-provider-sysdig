@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -183,9 +184,12 @@ func resourceSysdigMonitorTeamRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	id, _ := strconv.Atoi(d.Id())
-	t, err := client.GetTeamByID(ctx, id)
+	t, statusCode, err := client.GetTeamByID(ctx, id)
 	if err != nil {
-		d.SetId("")
+		if statusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
