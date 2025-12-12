@@ -86,6 +86,7 @@ func resourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		if statusCode == http.StatusNotFound {
 			d.SetId("")
+			return nil
 		} else {
 			return diag.FromErr(err)
 		}
