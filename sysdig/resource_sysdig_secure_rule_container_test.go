@@ -15,6 +15,8 @@ import (
 )
 
 func TestAccRuleContainer(t *testing.T) {
+	t.Skip("List matching rules are deprecated - skipping tests")
+
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 
 	resource.ParallelTest(t, resource.TestCase{
