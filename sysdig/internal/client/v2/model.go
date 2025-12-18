@@ -138,9 +138,9 @@ type NotificationChannelOptions struct {
 	CustomData               map[string]any                             `json:"customData,omitempty"`               // Type: ibm function, Webhook
 	TemplateConfiguration    []NotificationChannelTemplateConfiguration `json:"templateConfiguration,omitempty"`    // Type: slack, ms teams
 
-	NotifyOnOk           bool `json:"notifyOnOk"`
-	NotifyOnResolve      bool `json:"notifyOnResolve"`
-	SendTestNotification bool `json:"sendTestNotification"`
+	NotifyOnOk           *bool `json:"notifyOnOk,omitempty"`
+	NotifyOnResolve      *bool `json:"notifyOnResolve,omitempty"`
+	SendTestNotification bool  `json:"sendTestNotification"`
 }
 
 type NotificationChannel struct {
@@ -628,7 +628,7 @@ type NotificationChannelConfigV2 struct {
 }
 
 type NotificationChannelOptionsV2 struct {
-	NotifyOnAcknowledge        bool                          `json:"notifyOnAcknowledge,omitempty"`
+	NotifyOnAcknowledge        *bool                         `json:"notifyOnAcknowledge,omitempty"`
 	NotifyOnResolve            bool                          `json:"notifyOnResolve"`
 	ReNotifyEverySec           *int                          `json:"reNotifyEverySec"`
 	CustomNotificationTemplate *CustomNotificationTemplateV2 `json:"customNotificationTemplate,omitempty"`
