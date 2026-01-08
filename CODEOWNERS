@@ -6,12 +6,12 @@
 *benchmark* @airadier @tembleking @mateobur @haresh-suresh @nkraemer-sysdig
 
 # monitor
-*monitor*alert* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf
+*monitor*alert* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf @vojindj @DagDigg @Shadow649
 *monitor*dashboard* @airadier @tembleking @mateobur @rossifrancesco
 *monitor*groupmapping* @airadier @tembleking @mateobur @shadow649
-*notification_channel* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf
-*inhibition_rule* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf
-*silence_rule* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf
+*notification_channel* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf @vojindj @DagDigg @Shadow649
+*inhibition_rule* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf @vojindj @DagDigg @Shadow649
+*silence_rule* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf @vojindj @DagDigg @Shadow649
 
 # policies/rules
 *secure*policy* @airadier @tembleking @mateobur @rosenbloomb-sysdig @ombellare @miguelgordo @ivanlysiuk-sysdig @daniel-almeida @jbainbridgesysdig
