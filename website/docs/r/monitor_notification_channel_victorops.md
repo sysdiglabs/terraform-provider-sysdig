@@ -20,8 +20,6 @@ resource "sysdig_monitor_notification_channel_victorops" "sample-victorops" {
 	enabled                 = true
 	api_key                 = "1234342-4234243-4234-2"
 	routing_key             = "My team"
-	notify_when_ok          = false
-	notify_when_resolved    = false
 	send_test_notification  = false
 }
 ```
@@ -36,11 +34,9 @@ resource "sysdig_monitor_notification_channel_victorops" "sample-victorops" {
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
-* `notify_when_ok` - (Optional) Send a new notification when the alert condition is
-    no longer triggered. Default is false.
+* `notify_when_ok` - (Optional, Deprecated) Send a new notification when the alert condition is no longer triggered. Default is `false`. This option is deprecated; use `notify_on_resolve` within the `notification_channels` options in the `sysdig_monitor_alert_v2_*` resources instead, which takes precedence over this setting.
 
-* `notify_when_resolved` - (Optional) Send a new notification when the alert is manually
-    acknowledged by a user. Default is false.
+* `notify_when_resolved` - (Optional, Deprecated) Send a new notification when the alert is manually acknowledged by a user. Default is `false`. This option is deprecated; use `notify_on_acknowledge` within the `notification_channels` options in the `sysdig_monitor_alert_v2_*` resources instead, which takes precedence over this setting.
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.

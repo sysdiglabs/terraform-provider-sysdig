@@ -54,7 +54,8 @@ By defining this field, the user can choose to which notification channels send 
 It is a list of objects with the following fields:
 * `id` - (Required) The ID of the notification channel.
 * `renotify_every_minutes` - (Optional) the amount of minutes to wait before re sending the notification to this channel. `0` means no renotification enabled.
-* `notify_on_resolve` - (Optional) Wether to send a notification when the alert is resolved. Default: `true`.
+* `notify_on_resolve` - (Optional) Whether to send a notification when the alert is resolved. Default: `true`.
+* `notify_on_acknowledge` - (Optional) Whether to send a notification when the alert is acknowledged. If not defined, this option is inherited from the `notify_when_resolved` option from the specific notification channel selected.
 * `main_threshold` - (Optional) Whether this notification channel is used for the main threshold of the alert. Default: `true`.
 * `warning_threshold` - (Optional) Whether this notification channel is used for the warning threshold of the alert. Default: `false`.
 

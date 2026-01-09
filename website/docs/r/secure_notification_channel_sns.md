@@ -19,8 +19,6 @@ resource "sysdig_secure_notification_channel_sns" "sample-amazon-sns" {
 	name                    = "Example Channel - Amazon SNS"
 	enabled                 = true
 	topics                  = ["arn:aws:sns:us-east-1:273489009834:my-alerts2", "arn:aws:sns:us-east-1:279948934544:my-alerts"]
-	notify_when_ok          = false
-	notify_when_resolved    = false
 	send_test_notification  = false
 }
 ```
@@ -33,11 +31,9 @@ resource "sysdig_secure_notification_channel_sns" "sample-amazon-sns" {
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
-* `notify_when_ok` - (Optional) Send a new notification when the alert condition is
-    no longer triggered. Default is false.
+* `notify_when_ok` - (Optional, Deprecated) Send a new notification when the alert condition is no longer triggered. Default is `false`. This option is deprecated; use `notify_on_resolve` within the `notification_channels` options in the `sysdig_monitor_alert_v2_*` resources instead, which takes precedence over this setting. This option only applies to Monitor alerts when the channel is shared across all teams. It has no effect on Secure features.
 
-* `notify_when_resolved` - (Optional) Send a new notification when the alert is manually
-    acknowledged by a user. Default is false.
+* `notify_when_resolved` - (Optional, Deprecated) Send a new notification when the alert is manually acknowledged by a user. Default is `false`. This option is deprecated; use `notify_on_acknowledge` within the `notification_channels` options in the `sysdig_monitor_alert_v2_*` resources instead, which takes precedence over this setting. This option only applies to Monitor alerts when the channel is shared across all teams. It has no effect on Secure features.
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
