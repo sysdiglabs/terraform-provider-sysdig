@@ -69,15 +69,6 @@ func TestAccMonitorNotificationChannelCustomWebhook(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"send_test_notification"},
 			},
-			{
-				Config: monitorNotificationChannelCustomWebhookWithoutNotifyFields(rText()),
-			},
-			{
-				ResourceName:            "sysdig_monitor_notification_channel_custom_webhook.sample-custom-webhook6",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"send_test_notification"},
-			},
 		},
 	})
 }
@@ -158,16 +149,4 @@ func monitorNotificationChannelCustomWebhookSharedWithAdditionalHeaders(name str
 		notify_when_resolved = false
 		send_test_notification = false
 	}`, name)
-}
-
-func monitorNotificationChannelCustomWebhookWithoutNotifyFields(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_monitor_notification_channel_custom_webhook" "sample-custom-webhook6" {
-	name = "Example Channel %s - Custom Webhook"
-	enabled = true
-	url = "https://example.com/"
-	http_method = "POST"
-	template = "{\n  \"code\": \"incident\",\n  \"alert\": \"{{@alert_name}}\"\n}"
-	send_test_notification = false
-}`, name)
 }

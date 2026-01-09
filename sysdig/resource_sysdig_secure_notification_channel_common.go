@@ -3,7 +3,6 @@ package sysdig
 import (
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func createSecureNotificationChannelSchema(original map[string]*schema.Schema) map[string]*schema.Schema {
@@ -23,16 +22,16 @@ func createSecureNotificationChannelSchema(original map[string]*schema.Schema) m
 			Default:  false,
 		},
 		"notify_when_ok": {
-			Type:         schema.TypeString,
-			Optional:     true,
-			ValidateFunc: validation.StringInSlice([]string{"true", "false"}, false),
-			Deprecated:   "The notify_when_ok field is deprecated and will be removed in a future version. This flag has been replaced by the `notify_on_resolve` field inside `notification_channels` when defining an alert resource.",
+			Type:       schema.TypeBool,
+			Optional:   true,
+			Default:    false,
+			Deprecated: "The notify_when_ok field is deprecated and will be removed in a future version. This flag has been replaced by the `notify_on_resolve` field inside `notification_channels` when defining an alert resource.",
 		},
 		"notify_when_resolved": {
-			Type:         schema.TypeString,
-			Optional:     true,
-			ValidateFunc: validation.StringInSlice([]string{"true", "false"}, false),
-			Deprecated:   "The notify_when_resolved field is deprecated and will be removed in a future version. This flag has been replaced by the `notify_on_acknowledge` field inside `notification_channels` when defining an alert resource.",
+			Type:       schema.TypeBool,
+			Optional:   true,
+			Default:    false,
+			Deprecated: "The notify_when_resolved field is deprecated and will be removed in a future version. This flag has been replaced by the `notify_on_acknowledge` field inside `notification_channels` when defining an alert resource.",
 		},
 		"version": {
 			Type:     schema.TypeInt,
@@ -59,35 +58,13 @@ func secureNotificationChannelFromResourceData(d *schema.ResourceData, teamID in
 		tID = &teamID
 	}
 
-	var notifyOnOk *bool = nil
-	if onOk, ok := d.GetOk("notify_when_ok"); ok && onOk.(string) != "" {
-		if onOk.(string) == "true" {
-			trueValue := true
-			notifyOnOk = &trueValue
-		} else {
-			falseValue := false
-			notifyOnOk = &falseValue
-		}
-	}
-
-	var notifyOnResolve *bool = nil
-	if onResolve, ok := d.GetOk("notify_when_resolved"); ok && onResolve.(string) != "" {
-		if onResolve.(string) == "true" {
-			trueValue := true
-			notifyOnResolve = &trueValue
-		} else {
-			falseValue := false
-			notifyOnResolve = &falseValue
-		}
-	}
-
 	nc = v2.NotificationChannel{
 		Name:    d.Get("name").(string),
 		Enabled: d.Get("enabled").(bool),
 		TeamID:  tID,
 		Options: v2.NotificationChannelOptions{
-			NotifyOnOk:           notifyOnOk,
-			NotifyOnResolve:      notifyOnResolve,
+			NotifyOnOk:           d.Get("notify_when_ok").(bool),
+			NotifyOnResolve:      d.Get("notify_when_resolved").(bool),
 			SendTestNotification: d.Get("send_test_notification").(bool),
 		},
 	}
@@ -107,23 +84,8 @@ func secureNotificationChannelToResourceData(nc *v2.NotificationChannel, data *s
 	if err != nil {
 		return err
 	}
-
-	if nc.Options.NotifyOnOk != nil {
-		if *nc.Options.NotifyOnOk {
-			_ = data.Set("notify_when_ok", "true")
-		} else {
-			_ = data.Set("notify_when_ok", "false")
-		}
-	}
-
-	if nc.Options.NotifyOnResolve != nil {
-		if *nc.Options.NotifyOnResolve {
-			_ = data.Set("notify_when_resolved", "true")
-		} else {
-			_ = data.Set("notify_when_resolved", "false")
-		}
-	}
-
+	_ = data.Set("notify_when_ok", nc.Options.NotifyOnOk)
+	_ = data.Set("notify_when_resolved", nc.Options.NotifyOnResolve)
 	// do not update "send_test_notification" from the api response as it will always be "false" on subsequent reads because the fields is not persisted
 
 	return err
