@@ -22,14 +22,16 @@ func createMonitorNotificationChannelSchema(original map[string]*schema.Schema) 
 			Default:  false,
 		},
 		"notify_when_ok": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:       schema.TypeBool,
+			Optional:   true,
+			Default:    false,
+			Deprecated: "The notify_when_ok field is deprecated and will be removed in a future version. This flag has been replaced by the `notify_on_resolve` field inside `notification_channels` when defining an alert resource.",
 		},
 		"notify_when_resolved": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:       schema.TypeBool,
+			Optional:   true,
+			Default:    false,
+			Deprecated: "The notify_when_resolved field is deprecated and will be removed in a future version. This flag has been replaced by the `notify_on_acknowledge` field inside `notification_channels` when defining an alert resource.",
 		},
 		"version": {
 			Type:     schema.TypeInt,

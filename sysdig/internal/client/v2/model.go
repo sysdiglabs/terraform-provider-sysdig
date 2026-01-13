@@ -628,7 +628,7 @@ type NotificationChannelConfigV2 struct {
 }
 
 type NotificationChannelOptionsV2 struct {
-	NotifyOnAcknowledge        bool                          `json:"notifyOnAcknowledge,omitempty"`
+	NotifyOnAcknowledge        *bool                         `json:"notifyOnAcknowledge,omitempty"`
 	NotifyOnResolve            bool                          `json:"notifyOnResolve"`
 	ReNotifyEverySec           *int                          `json:"reNotifyEverySec"`
 	CustomNotificationTemplate *CustomNotificationTemplateV2 `json:"customNotificationTemplate,omitempty"`

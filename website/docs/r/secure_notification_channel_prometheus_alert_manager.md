@@ -19,8 +19,6 @@ resource "sysdig_secure_notification_channel_prometheus_alert_manager" "sample" 
   name                    = "Example Channel - Prometheus Alert Manager"
   enabled                 = true
   url                     = "https://testurl:8080"
-  notify_when_ok          = false
-  notify_when_resolved    = false
   send_test_notification  = false
 
   additional_headers = {
@@ -41,11 +39,9 @@ resource "sysdig_secure_notification_channel_prometheus_alert_manager" "sample" 
 
 * `enabled` - (Optional) If false, the channel will not emit notifications. Default is true.
 
-* `notify_when_ok` - (Optional) Send a new notification when the alert condition is
-    no longer triggered. Default is false.
+* `notify_when_ok` - (Optional, Deprecated) Send a new notification when the alert condition is no longer triggered. Default is `false`. This option is deprecated; use `notify_on_resolve` within the `notification_channels` options in the `sysdig_monitor_alert_v2_*` resources instead, which takes precedence over this setting. This option only applies to Monitor alerts when the channel is shared across all teams. It has no effect on Secure features.
 
-* `notify_when_resolved` - (Optional) Send a new notification when the alert is manually
-    acknowledged by a user. Default is false.
+* `notify_when_resolved` - (Optional, Deprecated) Send a new notification when the alert is manually acknowledged by a user. Default is `false`. This option is deprecated; use `notify_on_acknowledge` within the `notification_channels` options in the `sysdig_monitor_alert_v2_*` resources instead, which takes precedence over this setting. This option only applies to Monitor alerts when the channel is shared across all teams. It has no effect on Secure features.
 
 * `send_test_notification` - (Optional) Send an initial test notification to check
     if the notification channel is working. Default is false.
