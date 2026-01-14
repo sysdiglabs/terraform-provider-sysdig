@@ -4836,8 +4836,7 @@ type CloudResponderMetadata_AWS_ResponderLambdas struct {
 	LambdaNames        []string               `protobuf:"bytes,1,rep,name=lambda_names,json=lambdaNames,proto3" json:"lambda_names,omitempty"`
 	Regions            []string               `protobuf:"bytes,2,rep,name=regions,proto3" json:"regions,omitempty"`
 	DelegateRoleName   string                 `protobuf:"bytes,3,opt,name=delegate_role_name,json=delegateRoleName,proto3" json:"delegate_role_name,omitempty"`
-	LambdasHashCode    map[string]string      `protobuf:"bytes,4,rep,name=lambdas_hash_code,json=lambdasHashCode,proto3" json:"lambdas_hash_code,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	ValidationRoleName string                 `protobuf:"bytes,5,opt,name=validation_role_name,json=validationRoleName,proto3" json:"validation_role_name,omitempty"`
+	ValidationRoleName string                 `protobuf:"bytes,4,opt,name=validation_role_name,json=validationRoleName,proto3" json:"validation_role_name,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -4891,13 +4890,6 @@ func (x *CloudResponderMetadata_AWS_ResponderLambdas) GetDelegateRoleName() stri
 		return x.DelegateRoleName
 	}
 	return ""
-}
-
-func (x *CloudResponderMetadata_AWS_ResponderLambdas) GetLambdasHashCode() map[string]string {
-	if x != nil {
-		return x.LambdasHashCode
-	}
-	return nil
 }
 
 func (x *CloudResponderMetadata_AWS_ResponderLambdas) GetValidationRoleName() string {
@@ -5295,20 +5287,16 @@ const file_cloudauth_cloud_account_proto_rawDesc = "" +
 	"bucket_crn\x18\x04 \x01(\tR\tbucketCrn\x12#\n" +
 	"\ringestion_url\x18\x05 \x01(\tR\fingestionUrlB\n" +
 	"\n" +
-	"\bprovider\"\xca\x04\n" +
+	"\bprovider\"\x88\x03\n" +
 	"\x16CloudResponderMetadata\x12>\n" +
-	"\x03aws\x18\x01 \x01(\v2*.cloudauthproto.CloudResponderMetadata.AWSH\x00R\x03aws\x1a\xe3\x03\n" +
+	"\x03aws\x18\x01 \x01(\v2*.cloudauthproto.CloudResponderMetadata.AWSH\x00R\x03aws\x1a\xa1\x02\n" +
 	"\x03AWS\x12h\n" +
-	"\x11responder_lambdas\x18\x01 \x01(\v2;.cloudauthproto.CloudResponderMetadata.AWS.ResponderLambdasR\x10responderLambdas\x1a\xf1\x02\n" +
+	"\x11responder_lambdas\x18\x01 \x01(\v2;.cloudauthproto.CloudResponderMetadata.AWS.ResponderLambdasR\x10responderLambdas\x1a\xaf\x01\n" +
 	"\x10ResponderLambdas\x12!\n" +
 	"\flambda_names\x18\x01 \x03(\tR\vlambdaNames\x12\x18\n" +
 	"\aregions\x18\x02 \x03(\tR\aregions\x12,\n" +
-	"\x12delegate_role_name\x18\x03 \x01(\tR\x10delegateRoleName\x12|\n" +
-	"\x11lambdas_hash_code\x18\x04 \x03(\v2P.cloudauthproto.CloudResponderMetadata.AWS.ResponderLambdas.LambdasHashCodeEntryR\x0flambdasHashCode\x120\n" +
-	"\x14validation_role_name\x18\x05 \x01(\tR\x12validationRoleName\x1aB\n" +
-	"\x14LambdasHashCodeEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\n" +
+	"\x12delegate_role_name\x18\x03 \x01(\tR\x10delegateRoleName\x120\n" +
+	"\x14validation_role_name\x18\x04 \x01(\tR\x12validationRoleNameB\n" +
 	"\n" +
 	"\bprovider\"\x8a\x01\n" +
 	"\x1bCloudResponderRolesMetadata\x129\n" +
@@ -5393,7 +5381,7 @@ func file_cloudauth_cloud_account_proto_rawDescGZIP() []byte {
 }
 
 var file_cloudauth_cloud_account_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
-var file_cloudauth_cloud_account_proto_msgTypes = make([]protoimpl.MessageInfo, 60)
+var file_cloudauth_cloud_account_proto_msgTypes = make([]protoimpl.MessageInfo, 59)
 var file_cloudauth_cloud_account_proto_goTypes = []any{
 	(Provider)(0),                                                   // 0: cloudauthproto.Provider
 	(Feature)(0),                                                    // 1: cloudauthproto.Feature
@@ -5462,17 +5450,16 @@ var file_cloudauth_cloud_account_proto_goTypes = []any{
 	(*CloudLogsMetadata_IBMCloud_IBMActivityTracker)(nil),                  // 64: cloudauthproto.CloudLogsMetadata.IBMCloud.IBMActivityTracker
 	(*CloudResponderMetadata_AWS)(nil),                                     // 65: cloudauthproto.CloudResponderMetadata.AWS
 	(*CloudResponderMetadata_AWS_ResponderLambdas)(nil),                    // 66: cloudauthproto.CloudResponderMetadata.AWS.ResponderLambdas
-	nil,                               // 67: cloudauthproto.CloudResponderMetadata.AWS.ResponderLambdas.LambdasHashCodeEntry
-	(*timestamppb.Timestamp)(nil),     // 68: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),       // 69: google.protobuf.Duration
-	(*structpb.Value)(nil),            // 70: google.protobuf.Value
-	(*descriptorpb.FieldOptions)(nil), // 71: google.protobuf.FieldOptions
+	(*timestamppb.Timestamp)(nil),                                          // 67: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),                                            // 68: google.protobuf.Duration
+	(*structpb.Value)(nil),                                                 // 69: google.protobuf.Value
+	(*descriptorpb.FieldOptions)(nil),                                      // 70: google.protobuf.FieldOptions
 }
 var file_cloudauth_cloud_account_proto_depIdxs = []int32{
 	0,   // 0: cloudauthproto.CloudAccount.provider:type_name -> cloudauthproto.Provider
 	10,  // 1: cloudauthproto.CloudAccount.feature:type_name -> cloudauthproto.AccountFeatures
-	68,  // 2: cloudauthproto.CloudAccount.created_at:type_name -> google.protobuf.Timestamp
-	68,  // 3: cloudauthproto.CloudAccount.updated_at:type_name -> google.protobuf.Timestamp
+	67,  // 2: cloudauthproto.CloudAccount.created_at:type_name -> google.protobuf.Timestamp
+	67,  // 3: cloudauthproto.CloudAccount.updated_at:type_name -> google.protobuf.Timestamp
 	18,  // 4: cloudauthproto.CloudAccount.components:type_name -> cloudauthproto.AccountComponent
 	15,  // 5: cloudauthproto.CloudAccount.validation:type_name -> cloudauthproto.Validation
 	2,   // 6: cloudauthproto.CloudAccount.verbosity:type_name -> cloudauthproto.Verbosity
@@ -5490,23 +5477,23 @@ var file_cloudauth_cloud_account_proto_depIdxs = []int32{
 	11,  // 18: cloudauthproto.AccountFeatures.secure_sensitive_content_posture:type_name -> cloudauthproto.AccountFeature
 	11,  // 19: cloudauthproto.AccountFeatures.secure_response_actions:type_name -> cloudauthproto.AccountFeature
 	1,   // 20: cloudauthproto.AccountFeature.type:type_name -> cloudauthproto.Feature
-	68,  // 21: cloudauthproto.AccountFeature.created_at:type_name -> google.protobuf.Timestamp
+	67,  // 21: cloudauthproto.AccountFeature.created_at:type_name -> google.protobuf.Timestamp
 	15,  // 22: cloudauthproto.AccountFeature.validation:type_name -> cloudauthproto.Validation
 	28,  // 23: cloudauthproto.AccountFeature.flags:type_name -> cloudauthproto.AccountFeature.FlagsEntry
-	69,  // 24: cloudauthproto.ValidationStep.duration:type_name -> google.protobuf.Duration
+	68,  // 24: cloudauthproto.ValidationStep.duration:type_name -> google.protobuf.Duration
 	13,  // 25: cloudauthproto.ValidationStep.error:type_name -> cloudauthproto.ValidationError
 	14,  // 26: cloudauthproto.ValidationStep.warning:type_name -> cloudauthproto.ValidationWarning
 	6,   // 27: cloudauthproto.ValidationStep.stage:type_name -> cloudauthproto.ValidationStage
-	68,  // 28: cloudauthproto.ValidationStep.updated_at:type_name -> google.protobuf.Timestamp
-	70,  // 29: cloudauthproto.ValidationError.detail:type_name -> google.protobuf.Value
-	70,  // 30: cloudauthproto.ValidationWarning.detail:type_name -> google.protobuf.Value
+	67,  // 28: cloudauthproto.ValidationStep.updated_at:type_name -> google.protobuf.Timestamp
+	69,  // 29: cloudauthproto.ValidationError.detail:type_name -> google.protobuf.Value
+	69,  // 30: cloudauthproto.ValidationWarning.detail:type_name -> google.protobuf.Value
 	5,   // 31: cloudauthproto.Validation.result:type_name -> cloudauthproto.ValidationResult
-	68,  // 32: cloudauthproto.Validation.timestamp:type_name -> google.protobuf.Timestamp
+	67,  // 32: cloudauthproto.Validation.timestamp:type_name -> google.protobuf.Timestamp
 	12,  // 33: cloudauthproto.Validation.steps:type_name -> cloudauthproto.ValidationStep
 	6,   // 34: cloudauthproto.Validation.disposition:type_name -> cloudauthproto.ValidationStage
 	8,   // 35: cloudauthproto.CloudOrganization.accounts:type_name -> cloudauthproto.CloudAccount
-	68,  // 36: cloudauthproto.CloudOrganization.created_at:type_name -> google.protobuf.Timestamp
-	68,  // 37: cloudauthproto.CloudOrganization.updated_at:type_name -> google.protobuf.Timestamp
+	67,  // 36: cloudauthproto.CloudOrganization.created_at:type_name -> google.protobuf.Timestamp
+	67,  // 37: cloudauthproto.CloudOrganization.updated_at:type_name -> google.protobuf.Timestamp
 	0,   // 38: cloudauthproto.CloudOrganization.provider:type_name -> cloudauthproto.Provider
 	15,  // 39: cloudauthproto.CloudOrganization.validation:type_name -> cloudauthproto.Validation
 	2,   // 40: cloudauthproto.CloudOrganization.verbosity:type_name -> cloudauthproto.Verbosity
@@ -5521,8 +5508,8 @@ var file_cloudauth_cloud_account_proto_depIdxs = []int32{
 	18,  // 49: cloudauthproto.FeatureComponents.cloud_responder:type_name -> cloudauthproto.AccountComponent
 	18,  // 50: cloudauthproto.FeatureComponents.cloud_responder_roles:type_name -> cloudauthproto.AccountComponent
 	7,   // 51: cloudauthproto.AccountComponent.type:type_name -> cloudauthproto.Component
-	68,  // 52: cloudauthproto.AccountComponent.created_at:type_name -> google.protobuf.Timestamp
-	68,  // 53: cloudauthproto.AccountComponent.updated_at:type_name -> google.protobuf.Timestamp
+	67,  // 52: cloudauthproto.AccountComponent.created_at:type_name -> google.protobuf.Timestamp
+	67,  // 53: cloudauthproto.AccountComponent.updated_at:type_name -> google.protobuf.Timestamp
 	15,  // 54: cloudauthproto.AccountComponent.validation:type_name -> cloudauthproto.Validation
 	19,  // 55: cloudauthproto.AccountComponent.cloud_connector_metadata:type_name -> cloudauthproto.CloudConnectorMetadata
 	20,  // 56: cloudauthproto.AccountComponent.trusted_role_metadata:type_name -> cloudauthproto.TrustedRoleMetadata
@@ -5574,13 +5561,12 @@ var file_cloudauth_cloud_account_proto_depIdxs = []int32{
 	63,  // 102: cloudauthproto.CloudLogsMetadata.AWS.cloudtrail_sns:type_name -> cloudauthproto.CloudLogsMetadata.AWS.CloudTrailSNS
 	64,  // 103: cloudauthproto.CloudLogsMetadata.IBMCloud.ibm_activity_tracker:type_name -> cloudauthproto.CloudLogsMetadata.IBMCloud.IBMActivityTracker
 	66,  // 104: cloudauthproto.CloudResponderMetadata.AWS.responder_lambdas:type_name -> cloudauthproto.CloudResponderMetadata.AWS.ResponderLambdas
-	67,  // 105: cloudauthproto.CloudResponderMetadata.AWS.ResponderLambdas.lambdas_hash_code:type_name -> cloudauthproto.CloudResponderMetadata.AWS.ResponderLambdas.LambdasHashCodeEntry
-	71,  // 106: cloudauthproto.encryption:extendee -> google.protobuf.FieldOptions
-	107, // [107:107] is the sub-list for method output_type
-	107, // [107:107] is the sub-list for method input_type
-	107, // [107:107] is the sub-list for extension type_name
-	106, // [106:107] is the sub-list for extension extendee
-	0,   // [0:106] is the sub-list for field type_name
+	70,  // 105: cloudauthproto.encryption:extendee -> google.protobuf.FieldOptions
+	106, // [106:106] is the sub-list for method output_type
+	106, // [106:106] is the sub-list for method input_type
+	106, // [106:106] is the sub-list for extension type_name
+	105, // [105:106] is the sub-list for extension extendee
+	0,   // [0:105] is the sub-list for field type_name
 }
 
 func init() { file_cloudauth_cloud_account_proto_init() }
@@ -5647,7 +5633,7 @@ func file_cloudauth_cloud_account_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_cloudauth_cloud_account_proto_rawDesc), len(file_cloudauth_cloud_account_proto_rawDesc)),
 			NumEnums:      8,
-			NumMessages:   60,
+			NumMessages:   59,
 			NumExtensions: 1,
 			NumServices:   0,
 		},
