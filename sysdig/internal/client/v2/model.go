@@ -1201,3 +1201,35 @@ type ZoneScope struct {
 	TargetType string `json:"targetType"`
 	Rules      string `json:"rules"`
 }
+
+// SSO OpenID Connect configuration
+type SSOOpenID struct {
+	ID                             int             `json:"id,omitempty"`
+	Version                        int             `json:"version,omitempty"`
+	Type                           string          `json:"type"`
+	IssuerURL                      string          `json:"issuerUrl"`
+	ClientID                       string          `json:"clientId"`
+	ClientSecret                   string          `json:"clientSecret,omitempty"`
+	Product                        string          `json:"product,omitempty"`
+	IsActive                       bool            `json:"isActive"`
+	CreateUserOnLogin              bool            `json:"createUserOnLogin"`
+	IsSingleLogoutEnabled          bool            `json:"isSingleLogoutEnabled"`
+	IsGroupMappingEnabled          bool            `json:"isGroupMappingEnabled"`
+	GroupMappingAttributeName      string          `json:"groupMappingAttributeName,omitempty"`
+	IntegrationName                string          `json:"integrationName,omitempty"`
+	IsMetadataDiscoveryEnabled     bool            `json:"isMetadataDiscoveryEnabled"`
+	Metadata                       *OpenIDMetadata `json:"metadata,omitempty"`
+	GroupAttributeName             string          `json:"groupAttributeName,omitempty"`
+	IsAdditionalScopesCheckEnabled bool            `json:"isAdditionalScopesCheckEnabled"`
+	AdditionalScopes               []string        `json:"additionalScopes,omitempty"`
+}
+
+type OpenIDMetadata struct {
+	Issuer                string `json:"issuer"`
+	AuthorizationEndpoint string `json:"authorizationEndpoint"`
+	TokenEndpoint         string `json:"tokenEndpoint"`
+	JwksURI               string `json:"jwksUri"`
+	TokenAuthMethod       string `json:"tokenAuthMethod"`
+	EndSessionEndpoint    string `json:"endSessionEndpoint,omitempty"`
+	UserInfoEndpoint      string `json:"userInfoEndpoint,omitempty"`
+}
