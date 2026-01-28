@@ -1233,3 +1233,33 @@ type OpenIDMetadata struct {
 	EndSessionEndpoint    string `json:"endSessionEndpoint,omitempty"`
 	UserInfoEndpoint      string `json:"userInfoEndpoint,omitempty"`
 }
+
+// SSO SAML configuration
+type SSOSaml struct {
+	// Identification (response only)
+	ID          int    `json:"id,omitempty"`
+	Version     int    `json:"version,omitempty"`
+	DateCreated string `json:"dateCreated,omitempty"`
+	LastUpdated string `json:"lastUpdated,omitempty"`
+
+	// Discriminator
+	Type string `json:"type"` // "SAML"
+
+	// SAML specific fields
+	MetadataURL                      string `json:"metadataUrl,omitempty"`
+	MetadataXML                      string `json:"metadataXml,omitempty"`
+	EmailParameter                   string `json:"emailParameter"`
+	IsSignatureValidationEnabled     *bool  `json:"isSignatureValidationEnabled,omitempty"`
+	IsSignedAssertionEnabled         *bool  `json:"isSignedAssertionEnabled,omitempty"`
+	IsDestinationVerificationEnabled *bool  `json:"isDestinationVerificationEnabled,omitempty"`
+	IsEncryptionSupportEnabled       *bool  `json:"isEncryptionSupportEnabled,omitempty"`
+
+	// Base SSO common fields
+	Product                   string `json:"product,omitempty"`
+	IsActive                  bool   `json:"isActive"`
+	CreateUserOnLogin         bool   `json:"createUserOnLogin"`
+	IsSingleLogoutEnabled     bool   `json:"isSingleLogoutEnabled"`
+	IsGroupMappingEnabled     bool   `json:"isGroupMappingEnabled"`
+	GroupMappingAttributeName string `json:"groupMappingAttributeName,omitempty"`
+	IntegrationName           string `json:"integrationName,omitempty"`
+}
