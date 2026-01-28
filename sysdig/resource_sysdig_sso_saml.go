@@ -92,7 +92,8 @@ func resourceSysdigSSOSaml() *schema.Resource {
 			"integration_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "A custom name for this SSO integration",
+				ForceNew:    true,
+				Description: "A custom name for this SSO integration (cannot be changed after creation)",
 			},
 
 			// SAML specific optional fields (security)
@@ -166,7 +167,6 @@ func resourceSysdigSSOSamlCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	sso := ssoSamlFromResourceData(d)
-	sso.Type = "SAML"
 
 	created, err := client.CreateSSOSaml(ctx, sso)
 	if err != nil {
@@ -191,7 +191,6 @@ func resourceSysdigSSOSamlUpdate(ctx context.Context, d *schema.ResourceData, m 
 
 	sso := ssoSamlFromResourceData(d)
 	sso.ID = id
-	sso.Type = "SAML"
 	sso.Version = d.Get("version").(int)
 
 	_, err = client.UpdateSSOSaml(ctx, id, sso)
@@ -213,6 +212,19 @@ func resourceSysdigSSOSamlDelete(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
+	// API requires disabling SSO config before deletion
+	if d.Get("is_active").(bool) {
+		sso := ssoSamlFromResourceData(d)
+		sso.ID = id
+		sso.Version = d.Get("version").(int)
+		sso.IsActive = false
+
+		_, err = client.UpdateSSOSaml(ctx, id, sso)
+		if err != nil {
+			return diag.Errorf("failed to disable SSO config before deletion: %s", err)
+		}
+	}
+
 	err = client.DeleteSSOSaml(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
@@ -222,10 +234,29 @@ func resourceSysdigSSOSamlDelete(ctx context.Context, d *schema.ResourceData, m 
 }
 
 func ssoSamlFromResourceData(d *schema.ResourceData) *v2.SSOSaml {
+	// Build the SAML-specific config (nested in API "config" field)
+	config := &v2.SSOSamlConfig{
+		Type:           "SAML",
+		MetadataURL:    d.Get("metadata_url").(string),
+		MetadataXML:    d.Get("metadata_xml").(string),
+		EmailParameter: d.Get("email_parameter").(string),
+	}
+
+	// Handle SAML security fields (using pointers to distinguish unset from false)
+	isSignatureValidationEnabled := d.Get("is_signature_validation_enabled").(bool)
+	config.IsSignatureValidationEnabled = &isSignatureValidationEnabled
+
+	isSignedAssertionEnabled := d.Get("is_signed_assertion_enabled").(bool)
+	config.IsSignedAssertionEnabled = &isSignedAssertionEnabled
+
+	isDestinationVerificationEnabled := d.Get("is_destination_verification_enabled").(bool)
+	config.IsDestinationVerificationEnabled = &isDestinationVerificationEnabled
+
+	isEncryptionSupportEnabled := d.Get("is_encryption_support_enabled").(bool)
+	config.IsEncryptionSupportEnabled = &isEncryptionSupportEnabled
+
+	// Build the main SSO object with base fields at root level
 	sso := &v2.SSOSaml{
-		MetadataURL:               d.Get("metadata_url").(string),
-		MetadataXML:               d.Get("metadata_xml").(string),
-		EmailParameter:            d.Get("email_parameter").(string),
 		Product:                   d.Get("product").(string),
 		IsActive:                  d.Get("is_active").(bool),
 		CreateUserOnLogin:         d.Get("create_user_on_login").(bool),
@@ -233,20 +264,8 @@ func ssoSamlFromResourceData(d *schema.ResourceData) *v2.SSOSaml {
 		IsGroupMappingEnabled:     d.Get("is_group_mapping_enabled").(bool),
 		GroupMappingAttributeName: d.Get("group_mapping_attribute_name").(string),
 		IntegrationName:           d.Get("integration_name").(string),
+		Config:                    config,
 	}
-
-	// Handle SAML security fields (using pointers to distinguish unset from false)
-	isSignatureValidationEnabled := d.Get("is_signature_validation_enabled").(bool)
-	sso.IsSignatureValidationEnabled = &isSignatureValidationEnabled
-
-	isSignedAssertionEnabled := d.Get("is_signed_assertion_enabled").(bool)
-	sso.IsSignedAssertionEnabled = &isSignedAssertionEnabled
-
-	isDestinationVerificationEnabled := d.Get("is_destination_verification_enabled").(bool)
-	sso.IsDestinationVerificationEnabled = &isDestinationVerificationEnabled
-
-	isEncryptionSupportEnabled := d.Get("is_encryption_support_enabled").(bool)
-	sso.IsEncryptionSupportEnabled = &isEncryptionSupportEnabled
 
 	return sso
 }
@@ -254,15 +273,7 @@ func ssoSamlFromResourceData(d *schema.ResourceData) *v2.SSOSaml {
 func ssoSamlToResourceData(sso *v2.SSOSaml, d *schema.ResourceData) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	if err := d.Set("metadata_url", sso.MetadataURL); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("metadata_xml", sso.MetadataXML); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("email_parameter", sso.EmailParameter); err != nil {
-		return diag.FromErr(err)
-	}
+	// Set base SSO fields (root level in API)
 	if err := d.Set("product", sso.Product); err != nil {
 		return diag.FromErr(err)
 	}
@@ -288,25 +299,38 @@ func ssoSamlToResourceData(sso *v2.SSOSaml, d *schema.ResourceData) diag.Diagnos
 		return diag.FromErr(err)
 	}
 
-	// Handle SAML security fields
-	if sso.IsSignatureValidationEnabled != nil {
-		if err := d.Set("is_signature_validation_enabled", *sso.IsSignatureValidationEnabled); err != nil {
+	// Set SAML-specific fields from nested config
+	if sso.Config != nil {
+		if err := d.Set("metadata_url", sso.Config.MetadataURL); err != nil {
 			return diag.FromErr(err)
 		}
-	}
-	if sso.IsSignedAssertionEnabled != nil {
-		if err := d.Set("is_signed_assertion_enabled", *sso.IsSignedAssertionEnabled); err != nil {
+		if err := d.Set("metadata_xml", sso.Config.MetadataXML); err != nil {
 			return diag.FromErr(err)
 		}
-	}
-	if sso.IsDestinationVerificationEnabled != nil {
-		if err := d.Set("is_destination_verification_enabled", *sso.IsDestinationVerificationEnabled); err != nil {
+		if err := d.Set("email_parameter", sso.Config.EmailParameter); err != nil {
 			return diag.FromErr(err)
 		}
-	}
-	if sso.IsEncryptionSupportEnabled != nil {
-		if err := d.Set("is_encryption_support_enabled", *sso.IsEncryptionSupportEnabled); err != nil {
-			return diag.FromErr(err)
+
+		// Handle SAML security fields
+		if sso.Config.IsSignatureValidationEnabled != nil {
+			if err := d.Set("is_signature_validation_enabled", *sso.Config.IsSignatureValidationEnabled); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+		if sso.Config.IsSignedAssertionEnabled != nil {
+			if err := d.Set("is_signed_assertion_enabled", *sso.Config.IsSignedAssertionEnabled); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+		if sso.Config.IsDestinationVerificationEnabled != nil {
+			if err := d.Set("is_destination_verification_enabled", *sso.Config.IsDestinationVerificationEnabled); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+		if sso.Config.IsEncryptionSupportEnabled != nil {
+			if err := d.Set("is_encryption_support_enabled", *sso.Config.IsEncryptionSupportEnabled); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 

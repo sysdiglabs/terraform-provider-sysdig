@@ -89,7 +89,8 @@ func resourceSysdigSSOOpenID() *schema.Resource {
 			"integration_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "A custom name for this SSO integration",
+				ForceNew:    true,
+				Description: "A custom name for this SSO integration (cannot be changed after creation)",
 			},
 
 			// OpenID specific optional fields
@@ -219,7 +220,6 @@ func resourceSysdigSSOOpenIDCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	sso := ssoOpenIDFromResourceData(d)
-	sso.Type = "OPENID"
 
 	created, err := client.CreateSSOOpenID(ctx, sso)
 	if err != nil {
@@ -244,7 +244,6 @@ func resourceSysdigSSOOpenIDUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	sso := ssoOpenIDFromResourceData(d)
 	sso.ID = id
-	sso.Type = "OPENID"
 	sso.Version = d.Get("version").(int)
 
 	_, err = client.UpdateSSOOpenID(ctx, id, sso)
@@ -266,6 +265,21 @@ func resourceSysdigSSOOpenIDDelete(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
+	// API requires disabling SSO config before deletion
+	// We need to build the object from ResourceData to include client_secret
+	// (which is not returned by GET but is required for PUT)
+	if d.Get("is_active").(bool) {
+		sso := ssoOpenIDFromResourceData(d)
+		sso.ID = id
+		sso.Version = d.Get("version").(int)
+		sso.IsActive = false
+
+		_, err = client.UpdateSSOOpenID(ctx, id, sso)
+		if err != nil {
+			return diag.Errorf("failed to disable SSO config before deletion: %s", err)
+		}
+	}
+
 	err = client.DeleteSSOOpenID(ctx, id)
 	if err != nil {
 		return diag.FromErr(err)
@@ -275,17 +289,12 @@ func resourceSysdigSSOOpenIDDelete(ctx context.Context, d *schema.ResourceData, 
 }
 
 func ssoOpenIDFromResourceData(d *schema.ResourceData) *v2.SSOOpenID {
-	sso := &v2.SSOOpenID{
+	// Build the OpenID-specific config (nested in API "config" field)
+	config := &v2.SSOOpenIDConfig{
+		Type:                           "OPENID",
 		IssuerURL:                      d.Get("issuer_url").(string),
 		ClientID:                       d.Get("client_id").(string),
 		ClientSecret:                   d.Get("client_secret").(string),
-		Product:                        d.Get("product").(string),
-		IsActive:                       d.Get("is_active").(bool),
-		CreateUserOnLogin:              d.Get("create_user_on_login").(bool),
-		IsSingleLogoutEnabled:          d.Get("is_single_logout_enabled").(bool),
-		IsGroupMappingEnabled:          d.Get("is_group_mapping_enabled").(bool),
-		GroupMappingAttributeName:      d.Get("group_mapping_attribute_name").(string),
-		IntegrationName:                d.Get("integration_name").(string),
 		IsMetadataDiscoveryEnabled:     d.Get("is_metadata_discovery_enabled").(bool),
 		GroupAttributeName:             d.Get("group_attribute_name").(string),
 		IsAdditionalScopesCheckEnabled: d.Get("is_additional_scopes_check_enabled").(bool),
@@ -298,7 +307,7 @@ func ssoOpenIDFromResourceData(d *schema.ResourceData) *v2.SSOOpenID {
 		for i, s := range scopesInterface {
 			scopes[i] = s.(string)
 		}
-		sso.AdditionalScopes = scopes
+		config.AdditionalScopes = scopes
 	}
 
 	// Handle metadata block
@@ -306,7 +315,7 @@ func ssoOpenIDFromResourceData(d *schema.ResourceData) *v2.SSOOpenID {
 		metadataList := v.([]any)
 		if len(metadataList) > 0 {
 			metadata := metadataList[0].(map[string]any)
-			sso.Metadata = &v2.OpenIDMetadata{
+			config.Metadata = &v2.OpenIDMetadata{
 				Issuer:                metadata["issuer"].(string),
 				AuthorizationEndpoint: metadata["authorization_endpoint"].(string),
 				TokenEndpoint:         metadata["token_endpoint"].(string),
@@ -318,21 +327,25 @@ func ssoOpenIDFromResourceData(d *schema.ResourceData) *v2.SSOOpenID {
 		}
 	}
 
+	// Build the main SSO object with base fields at root level
+	sso := &v2.SSOOpenID{
+		Product:                   d.Get("product").(string),
+		IsActive:                  d.Get("is_active").(bool),
+		CreateUserOnLogin:         d.Get("create_user_on_login").(bool),
+		IsSingleLogoutEnabled:     d.Get("is_single_logout_enabled").(bool),
+		IsGroupMappingEnabled:     d.Get("is_group_mapping_enabled").(bool),
+		GroupMappingAttributeName: d.Get("group_mapping_attribute_name").(string),
+		IntegrationName:           d.Get("integration_name").(string),
+		Config:                    config,
+	}
+
 	return sso
 }
 
 func ssoOpenIDToResourceData(sso *v2.SSOOpenID, d *schema.ResourceData) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	if err := d.Set("issuer_url", sso.IssuerURL); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("client_id", sso.ClientID); err != nil {
-		return diag.FromErr(err)
-	}
-	// Note: client_secret is not returned by the API, so we don't set it here
-	// to avoid diff issues with the sensitive value
-
+	// Set base SSO fields (root level in API)
 	if err := d.Set("product", sso.Product); err != nil {
 		return diag.FromErr(err)
 	}
@@ -354,37 +367,53 @@ func ssoOpenIDToResourceData(sso *v2.SSOOpenID, d *schema.ResourceData) diag.Dia
 	if err := d.Set("integration_name", sso.IntegrationName); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("is_metadata_discovery_enabled", sso.IsMetadataDiscoveryEnabled); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("group_attribute_name", sso.GroupAttributeName); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("is_additional_scopes_check_enabled", sso.IsAdditionalScopesCheckEnabled); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("additional_scopes", sso.AdditionalScopes); err != nil {
-		return diag.FromErr(err)
-	}
 	if err := d.Set("version", sso.Version); err != nil {
 		return diag.FromErr(err)
 	}
 
-	// Handle metadata block
-	if sso.Metadata != nil {
-		metadata := []map[string]any{
-			{
-				"issuer":                 sso.Metadata.Issuer,
-				"authorization_endpoint": sso.Metadata.AuthorizationEndpoint,
-				"token_endpoint":         sso.Metadata.TokenEndpoint,
-				"jwks_uri":               sso.Metadata.JwksURI,
-				"token_auth_method":      sso.Metadata.TokenAuthMethod,
-				"end_session_endpoint":   sso.Metadata.EndSessionEndpoint,
-				"user_info_endpoint":     sso.Metadata.UserInfoEndpoint,
-			},
-		}
-		if err := d.Set("metadata", metadata); err != nil {
+	// Set OpenID-specific fields from nested config
+	if sso.Config != nil {
+		if err := d.Set("issuer_url", sso.Config.IssuerURL); err != nil {
 			return diag.FromErr(err)
+		}
+		if err := d.Set("client_id", sso.Config.ClientID); err != nil {
+			return diag.FromErr(err)
+		}
+		// Note: client_secret is not returned by the API, so we don't set it here
+		// to avoid diff issues with the sensitive value
+
+		if err := d.Set("is_metadata_discovery_enabled", sso.Config.IsMetadataDiscoveryEnabled); err != nil {
+			return diag.FromErr(err)
+		}
+		if err := d.Set("group_attribute_name", sso.Config.GroupAttributeName); err != nil {
+			return diag.FromErr(err)
+		}
+		if err := d.Set("is_additional_scopes_check_enabled", sso.Config.IsAdditionalScopesCheckEnabled); err != nil {
+			return diag.FromErr(err)
+		}
+		// Only set additional_scopes if API returns them (preserves user-configured values)
+		if sso.Config.AdditionalScopes != nil {
+			if err := d.Set("additional_scopes", sso.Config.AdditionalScopes); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+
+		// Handle metadata block
+		if sso.Config.Metadata != nil {
+			metadata := []map[string]any{
+				{
+					"issuer":                 sso.Config.Metadata.Issuer,
+					"authorization_endpoint": sso.Config.Metadata.AuthorizationEndpoint,
+					"token_endpoint":         sso.Config.Metadata.TokenEndpoint,
+					"jwks_uri":               sso.Config.Metadata.JwksURI,
+					"token_auth_method":      sso.Config.Metadata.TokenAuthMethod,
+					"end_session_endpoint":   sso.Config.Metadata.EndSessionEndpoint,
+					"user_info_endpoint":     sso.Config.Metadata.UserInfoEndpoint,
+				},
+			}
+			if err := d.Set("metadata", metadata); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 

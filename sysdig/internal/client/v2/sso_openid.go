@@ -10,10 +10,10 @@ import (
 var ErrSSOOpenIDNotFound = errors.New("SSO OpenID configuration not found")
 
 const (
-	createSSOOpenIDPath = "%s/api/v1/sso-settings/"
-	getSSOOpenIDPath    = "%s/api/v1/sso-settings/%d"
-	updateSSOOpenIDPath = "%s/api/v1/sso-settings/%d"
-	deleteSSOOpenIDPath = "%s/api/v1/sso-settings/%d"
+	createSSOOpenIDPath = "%s/platform/v1/sso-settings/"
+	getSSOOpenIDPath    = "%s/platform/v1/sso-settings/%d"
+	updateSSOOpenIDPath = "%s/platform/v1/sso-settings/%d"
+	deleteSSOOpenIDPath = "%s/platform/v1/sso-settings/%d"
 )
 
 type SSOOpenIDInterface interface {

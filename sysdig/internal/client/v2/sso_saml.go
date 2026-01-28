@@ -10,10 +10,10 @@ import (
 var ErrSSOSamlNotFound = errors.New("SSO SAML configuration not found")
 
 const (
-	createSSOSamlPath = "%s/api/v1/sso-settings/"
-	getSSOSamlPath    = "%s/api/v1/sso-settings/%d"
-	updateSSOSamlPath = "%s/api/v1/sso-settings/%d"
-	deleteSSOSamlPath = "%s/api/v1/sso-settings/%d"
+	createSSOSamlPath = "%s/platform/v1/sso-settings/"
+	getSSOSamlPath    = "%s/platform/v1/sso-settings/%d"
+	updateSSOSamlPath = "%s/platform/v1/sso-settings/%d"
+	deleteSSOSamlPath = "%s/platform/v1/sso-settings/%d"
 )
 
 type SSOSamlInterface interface {
