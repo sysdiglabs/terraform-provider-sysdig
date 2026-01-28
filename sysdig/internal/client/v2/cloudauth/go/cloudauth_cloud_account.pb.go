@@ -2542,11 +2542,11 @@ type CloudResponderMetadata_Aws struct {
 func (*CloudResponderMetadata_Aws) isCloudResponderMetadata_Provider() {}
 
 type CloudResponderRolesMetadata struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	Roles              []*TrustedRoleMetadata `protobuf:"bytes,1,rep,name=roles,proto3" json:"roles,omitempty"`
-	ValidationRoleName string                 `protobuf:"bytes,2,opt,name=validation_role_name,json=validationRoleName,proto3" json:"validation_role_name,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Roles          []*TrustedRoleMetadata `protobuf:"bytes,1,rep,name=roles,proto3" json:"roles,omitempty"`
+	ValidationRole *TrustedRoleMetadata   `protobuf:"bytes,2,opt,name=validation_role,json=validationRole,proto3" json:"validation_role,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *CloudResponderRolesMetadata) Reset() {
@@ -2586,11 +2586,11 @@ func (x *CloudResponderRolesMetadata) GetRoles() []*TrustedRoleMetadata {
 	return nil
 }
 
-func (x *CloudResponderRolesMetadata) GetValidationRoleName() string {
+func (x *CloudResponderRolesMetadata) GetValidationRole() *TrustedRoleMetadata {
 	if x != nil {
-		return x.ValidationRoleName
+		return x.ValidationRole
 	}
-	return ""
+	return nil
 }
 
 type CloudConnectorMetadata_AWS struct {
@@ -5298,10 +5298,10 @@ const file_cloudauth_cloud_account_proto_rawDesc = "" +
 	"\x12delegate_role_name\x18\x03 \x01(\tR\x10delegateRoleName\x120\n" +
 	"\x14validation_role_name\x18\x04 \x01(\tR\x12validationRoleNameB\n" +
 	"\n" +
-	"\bprovider\"\x8a\x01\n" +
+	"\bprovider\"\xa6\x01\n" +
 	"\x1bCloudResponderRolesMetadata\x129\n" +
-	"\x05roles\x18\x01 \x03(\v2#.cloudauthproto.TrustedRoleMetadataR\x05roles\x120\n" +
-	"\x14validation_role_name\x18\x02 \x01(\tR\x12validationRoleName*\xb5\x01\n" +
+	"\x05roles\x18\x01 \x03(\v2#.cloudauthproto.TrustedRoleMetadataR\x05roles\x12L\n" +
+	"\x0fvalidation_role\x18\x02 \x01(\v2#.cloudauthproto.TrustedRoleMetadataR\x0evalidationRole*\xb5\x01\n" +
 	"\bProvider\x12\x18\n" +
 	"\x14PROVIDER_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fPROVIDER_AWS\x10\x01\x12\x12\n" +
@@ -5542,31 +5542,32 @@ var file_cloudauth_cloud_account_proto_depIdxs = []int32{
 	61,  // 83: cloudauthproto.CloudLogsMetadata.ibmcloud:type_name -> cloudauthproto.CloudLogsMetadata.IBMCloud
 	65,  // 84: cloudauthproto.CloudResponderMetadata.aws:type_name -> cloudauthproto.CloudResponderMetadata.AWS
 	20,  // 85: cloudauthproto.CloudResponderRolesMetadata.roles:type_name -> cloudauthproto.TrustedRoleMetadata
-	38,  // 86: cloudauthproto.EventBridgeMetadata.Azure.event_hub_metadata:type_name -> cloudauthproto.EventBridgeMetadata.Azure.EventHubMetadata
-	41,  // 87: cloudauthproto.EventBridgeMetadata.Azure.service_principal:type_name -> cloudauthproto.ServicePrincipalMetadata.Azure
-	43,  // 88: cloudauthproto.ServicePrincipalMetadata.GCP.key:type_name -> cloudauthproto.ServicePrincipalMetadata.GCP.Key
-	44,  // 89: cloudauthproto.ServicePrincipalMetadata.GCP.workload_identity_federation:type_name -> cloudauthproto.ServicePrincipalMetadata.GCP.WorkloadIdentityFederation
-	45,  // 90: cloudauthproto.ServicePrincipalMetadata.Okta.oauth_app:type_name -> cloudauthproto.ServicePrincipalMetadata.Okta.OAuthApp
-	46,  // 91: cloudauthproto.ServicePrincipalMetadata.Azure.active_directory_service_principal:type_name -> cloudauthproto.ServicePrincipalMetadata.Azure.ActiveDirectoryServicePrincipal
-	47,  // 92: cloudauthproto.ServicePrincipalMetadata.Azure.oauth2_permission_grants:type_name -> cloudauthproto.ServicePrincipalMetadata.Azure.Oauth2PermissionGrant
-	48,  // 93: cloudauthproto.ServicePrincipalMetadata.OracleCloud.api_key:type_name -> cloudauthproto.ServicePrincipalMetadata.OracleCloud.ApiKey
-	49,  // 94: cloudauthproto.ServicePrincipalMetadata.OracleCloud.policy:type_name -> cloudauthproto.ServicePrincipalMetadata.OracleCloud.Policy
-	54,  // 95: cloudauthproto.WebhookDatasourceMetadata.Okta.webhook_datasource:type_name -> cloudauthproto.WebhookDatasourceMetadata.Okta.WebhookDatasource
-	55,  // 96: cloudauthproto.WebhookDatasourceMetadata.Github.webhook_datasource:type_name -> cloudauthproto.WebhookDatasourceMetadata.Github.WebhookDatasource
-	56,  // 97: cloudauthproto.WebhookDatasourceMetadata.Gcp.webhook_datasource:type_name -> cloudauthproto.WebhookDatasourceMetadata.Gcp.WebhookDatasource
-	39,  // 98: cloudauthproto.WebhookDatasourceMetadata.Gcp.service_principal:type_name -> cloudauthproto.ServicePrincipalMetadata.GCP
-	57,  // 99: cloudauthproto.WebhookDatasourceMetadata.AWS.webhook_datasource:type_name -> cloudauthproto.WebhookDatasourceMetadata.AWS.WebhookDatasource
-	59,  // 100: cloudauthproto.CryptoKeyMetadata.AWS.kms:type_name -> cloudauthproto.CryptoKeyMetadata.AWS.KMS
-	62,  // 101: cloudauthproto.CloudLogsMetadata.AWS.cloudtrail_s3_bucket:type_name -> cloudauthproto.CloudLogsMetadata.AWS.CloudTrailS3Bucket
-	63,  // 102: cloudauthproto.CloudLogsMetadata.AWS.cloudtrail_sns:type_name -> cloudauthproto.CloudLogsMetadata.AWS.CloudTrailSNS
-	64,  // 103: cloudauthproto.CloudLogsMetadata.IBMCloud.ibm_activity_tracker:type_name -> cloudauthproto.CloudLogsMetadata.IBMCloud.IBMActivityTracker
-	66,  // 104: cloudauthproto.CloudResponderMetadata.AWS.responder_lambdas:type_name -> cloudauthproto.CloudResponderMetadata.AWS.ResponderLambdas
-	70,  // 105: cloudauthproto.encryption:extendee -> google.protobuf.FieldOptions
-	106, // [106:106] is the sub-list for method output_type
-	106, // [106:106] is the sub-list for method input_type
-	106, // [106:106] is the sub-list for extension type_name
-	105, // [105:106] is the sub-list for extension extendee
-	0,   // [0:105] is the sub-list for field type_name
+	20,  // 86: cloudauthproto.CloudResponderRolesMetadata.validation_role:type_name -> cloudauthproto.TrustedRoleMetadata
+	38,  // 87: cloudauthproto.EventBridgeMetadata.Azure.event_hub_metadata:type_name -> cloudauthproto.EventBridgeMetadata.Azure.EventHubMetadata
+	41,  // 88: cloudauthproto.EventBridgeMetadata.Azure.service_principal:type_name -> cloudauthproto.ServicePrincipalMetadata.Azure
+	43,  // 89: cloudauthproto.ServicePrincipalMetadata.GCP.key:type_name -> cloudauthproto.ServicePrincipalMetadata.GCP.Key
+	44,  // 90: cloudauthproto.ServicePrincipalMetadata.GCP.workload_identity_federation:type_name -> cloudauthproto.ServicePrincipalMetadata.GCP.WorkloadIdentityFederation
+	45,  // 91: cloudauthproto.ServicePrincipalMetadata.Okta.oauth_app:type_name -> cloudauthproto.ServicePrincipalMetadata.Okta.OAuthApp
+	46,  // 92: cloudauthproto.ServicePrincipalMetadata.Azure.active_directory_service_principal:type_name -> cloudauthproto.ServicePrincipalMetadata.Azure.ActiveDirectoryServicePrincipal
+	47,  // 93: cloudauthproto.ServicePrincipalMetadata.Azure.oauth2_permission_grants:type_name -> cloudauthproto.ServicePrincipalMetadata.Azure.Oauth2PermissionGrant
+	48,  // 94: cloudauthproto.ServicePrincipalMetadata.OracleCloud.api_key:type_name -> cloudauthproto.ServicePrincipalMetadata.OracleCloud.ApiKey
+	49,  // 95: cloudauthproto.ServicePrincipalMetadata.OracleCloud.policy:type_name -> cloudauthproto.ServicePrincipalMetadata.OracleCloud.Policy
+	54,  // 96: cloudauthproto.WebhookDatasourceMetadata.Okta.webhook_datasource:type_name -> cloudauthproto.WebhookDatasourceMetadata.Okta.WebhookDatasource
+	55,  // 97: cloudauthproto.WebhookDatasourceMetadata.Github.webhook_datasource:type_name -> cloudauthproto.WebhookDatasourceMetadata.Github.WebhookDatasource
+	56,  // 98: cloudauthproto.WebhookDatasourceMetadata.Gcp.webhook_datasource:type_name -> cloudauthproto.WebhookDatasourceMetadata.Gcp.WebhookDatasource
+	39,  // 99: cloudauthproto.WebhookDatasourceMetadata.Gcp.service_principal:type_name -> cloudauthproto.ServicePrincipalMetadata.GCP
+	57,  // 100: cloudauthproto.WebhookDatasourceMetadata.AWS.webhook_datasource:type_name -> cloudauthproto.WebhookDatasourceMetadata.AWS.WebhookDatasource
+	59,  // 101: cloudauthproto.CryptoKeyMetadata.AWS.kms:type_name -> cloudauthproto.CryptoKeyMetadata.AWS.KMS
+	62,  // 102: cloudauthproto.CloudLogsMetadata.AWS.cloudtrail_s3_bucket:type_name -> cloudauthproto.CloudLogsMetadata.AWS.CloudTrailS3Bucket
+	63,  // 103: cloudauthproto.CloudLogsMetadata.AWS.cloudtrail_sns:type_name -> cloudauthproto.CloudLogsMetadata.AWS.CloudTrailSNS
+	64,  // 104: cloudauthproto.CloudLogsMetadata.IBMCloud.ibm_activity_tracker:type_name -> cloudauthproto.CloudLogsMetadata.IBMCloud.IBMActivityTracker
+	66,  // 105: cloudauthproto.CloudResponderMetadata.AWS.responder_lambdas:type_name -> cloudauthproto.CloudResponderMetadata.AWS.ResponderLambdas
+	70,  // 106: cloudauthproto.encryption:extendee -> google.protobuf.FieldOptions
+	107, // [107:107] is the sub-list for method output_type
+	107, // [107:107] is the sub-list for method input_type
+	107, // [107:107] is the sub-list for extension type_name
+	106, // [106:107] is the sub-list for extension extendee
+	0,   // [0:106] is the sub-list for field type_name
 }
 
 func init() { file_cloudauth_cloud_account_proto_init() }
