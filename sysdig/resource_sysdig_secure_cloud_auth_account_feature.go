@@ -51,7 +51,7 @@ func getAccountFeatureSchema() map[string]*schema.Schema {
 			Required: true,
 		},
 		SchemaComponents: {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Required: true,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
@@ -184,7 +184,7 @@ func validateCloudauthAccountFeatureUpdate(existingFeature *v2.CloudauthAccountF
 
 func getFeatureComponentsList(data *schema.ResourceData) []string {
 	componentsList := []string{}
-	componentsResourceList := data.Get(SchemaComponents).([]any)
+	componentsResourceList := data.Get(SchemaComponents).(*schema.Set).List()
 	for _, componentID := range componentsResourceList {
 		componentsList = append(componentsList, componentID.(string))
 	}

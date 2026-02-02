@@ -101,7 +101,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Required: true,
 			},
 			SchemaComponents: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -335,7 +335,7 @@ func setAccountFeature(accountFeatures *cloudauth.AccountFeatures, fieldName str
 		case SchemaEnabled:
 			target.Elem().FieldByName("Enabled").SetBool(value.(bool))
 		case SchemaComponents:
-			for _, componentID := range value.([]any) {
+			for _, componentID := range value.(*schema.Set).List() {
 				target.Elem().FieldByName("Components").Set(reflect.Append(target.Elem().FieldByName("Components"), reflect.ValueOf(componentID.(string))))
 			}
 		}
