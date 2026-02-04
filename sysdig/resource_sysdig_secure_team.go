@@ -31,11 +31,11 @@ func resourceSysdigSecureTeam() *schema.Resource {
 			allZonesPlan := plan[SchemaAllZones]
 
 			var nonEmptyZoneIDs bool
-			if !zoneIDsPlan.IsNull() && len(zoneIDsPlan.AsValueSlice()) > 0 {
+			if !zoneIDsPlan.IsNull() && zoneIDsPlan.IsKnown() && len(zoneIDsPlan.AsValueSlice()) > 0 {
 				nonEmptyZoneIDs = true
 			}
 
-			if nonEmptyZoneIDs && allZonesPlan.True() {
+			if nonEmptyZoneIDs && allZonesPlan.IsKnown() && allZonesPlan.True() {
 				return fmt.Errorf("if %s is enabled, %s must be omitted", SchemaAllZones, SchemaZonesIDsKey)
 			}
 
