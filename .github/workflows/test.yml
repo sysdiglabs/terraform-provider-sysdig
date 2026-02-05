@@ -151,7 +151,7 @@ jobs:
     needs: list-ibm-monitor-tests
     strategy:
       fail-fast: false
-      max-parallel: 20
+      max-parallel: 5
       matrix:
         file: ${{ fromJson(needs.list-ibm-monitor-tests.outputs.matrix) }}
     steps:
@@ -202,7 +202,7 @@ jobs:
     needs: list-ibm-secure-tests
     strategy:
       fail-fast: false
-      max-parallel: 20
+      max-parallel: 5
       matrix:
         file: ${{ fromJson(needs.list-ibm-secure-tests.outputs.matrix) }}
     steps:
