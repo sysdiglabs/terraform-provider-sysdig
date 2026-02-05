@@ -574,7 +574,6 @@ func TestAccAWSSecureCloudAuthAccountResponseActions(t *testing.T) {
 			},
 		},
 	})
-
 }
 
 func TestAccAWSSecureCloudAccountThreatDetection(t *testing.T) {

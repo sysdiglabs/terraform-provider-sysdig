@@ -25,6 +25,8 @@ type SysdigCommon interface {
 	GroupMappingInterface
 	IPFilteringSettingsInterface
 	IPFiltersInterface
+	SSOOpenIDInterface
+	SSOSamlInterface
 	TeamServiceAccountInterface
 }
 

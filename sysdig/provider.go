@@ -121,6 +121,8 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_group_mapping_config":  resourceSysdigGroupMappingConfig(),
 			"sysdig_ip_filter":             resourceSysdigIPFilter(),
 			"sysdig_ip_filtering_settings": resourceSysdigIPFilteringSettings(),
+			"sysdig_sso_openid":            resourceSysdigSSOOpenID(),
+			"sysdig_sso_saml":              resourceSysdigSSOSaml(),
 			"sysdig_team_service_account":  resourceSysdigTeamServiceAccount(),
 			"sysdig_user":                  resourceSysdigUser(),
 
