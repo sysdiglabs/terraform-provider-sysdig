@@ -75,11 +75,6 @@ func TestAccSSOOpenID_Basic(t *testing.T) {
 }
 
 func TestAccSSOOpenID_WithMetadata(t *testing.T) {
-	// FIXME: Platform API returns 500 when isMetadataDiscoveryEnabled=false with manual metadata
-	// The UI uses /api/auth/settings which works, but /platform/v1/sso-settings/ does not
-	// Trace ID for reference: d989888d-dc84-40b6-aaf3-79dcde0f2024
-	t.Skip("Skipping: Platform API bug - returns 500 for manual metadata configuration")
-
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
