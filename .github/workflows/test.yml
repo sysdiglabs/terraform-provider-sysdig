@@ -7,11 +7,9 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-
       - name: Lint
         uses: golangci/golangci-lint-action@v8
         with:
@@ -20,75 +18,158 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-
       - name: Test
         run: make test
 
-  test-sysdig-monitor:
-    name: Sysdig Monitor Acceptance Tests
+  # ============================================
+  # Sysdig Secure - Dynamic Matrix
+  # ============================================
+  list-sysdig-secure-tests:
+    name: List Secure Tests
     runs-on: ubuntu-latest
     needs: test
-
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-
-      - name: Test
-        run: make testacc
-        env:
-          TEST_SUITE: tf_acc_sysdig_monitor
-          SYSDIG_MONITOR_API_TOKEN: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
-          SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
+      - uses: actions/checkout@v4
+      - id: list
+        run: |
+          files=$(grep -l "tf_acc_sysdig_secure" sysdig/*_test.go | xargs -I{} basename {} .go || echo "")
+          if [ -z "$files" ]; then
+            echo "matrix=[]" >> $GITHUB_OUTPUT
+          else
+            matrix=$(echo "$files" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            echo "matrix=$matrix" >> $GITHUB_OUTPUT
+          fi
 
   test-sysdig-secure:
-    name: Sysdig Secure Acceptance Tests
+    name: "Secure: ${{ matrix.file }}"
     runs-on: ubuntu-latest
-    needs: test
-
+    needs: list-sysdig-secure-tests
+    strategy:
+      fail-fast: true
+      max-parallel: 20
+      matrix:
+        file: ${{ fromJson(needs.list-sysdig-secure-tests.outputs.matrix) }}
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-
-      - name: Test
-        run: make testacc
+      - name: Run tests from ${{ matrix.file }}
+        run: |
+          tests=$(grep -oh "func Test[A-Za-z0-9_]*" sysdig/${{ matrix.file }}.go | sed 's/func //' | tr '\n' '|' | sed 's/|$//')
+          if [ -n "$tests" ]; then
+            echo "Running tests: $tests"
+            CGO_ENABLED=1 TF_ACC=1 go test ./sysdig -v -tags=tf_acc_sysdig_secure -timeout 30m -race -run "^($tests)$"
+          else
+            echo "No tests found in file"
+          fi
         env:
-          TEST_SUITE: tf_acc_sysdig_secure
           SYSDIG_MONITOR_API_TOKEN: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
           SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
 
+  sysdig-secure-result:
+    name: Sysdig Secure Tests Result
+    runs-on: ubuntu-latest
+    needs: [list-sysdig-secure-tests, test-sysdig-secure]
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          if [ "${{ needs.test-sysdig-secure.result }}" == "success" ] || [ "${{ needs.test-sysdig-secure.result }}" == "skipped" ]; then
+            echo "All Sysdig Secure tests passed"
+            exit 0
+          else
+            echo "Some Sysdig Secure tests failed"
+            exit 1
+          fi
+
+  # ============================================
+  # Sysdig Monitor - Dynamic Matrix
+  # ============================================
+  list-sysdig-monitor-tests:
+    name: List Monitor Tests
+    runs-on: ubuntu-latest
+    needs: test
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: list
+        run: |
+          files=$(grep -l "tf_acc_sysdig_monitor" sysdig/*_test.go | xargs -I{} basename {} .go || echo "")
+          if [ -z "$files" ]; then
+            echo "matrix=[]" >> $GITHUB_OUTPUT
+          else
+            matrix=$(echo "$files" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            echo "matrix=$matrix" >> $GITHUB_OUTPUT
+          fi
+
+  test-sysdig-monitor:
+    name: "Monitor: ${{ matrix.file }}"
+    runs-on: ubuntu-latest
+    needs: list-sysdig-monitor-tests
+    strategy:
+      fail-fast: true
+      max-parallel: 20
+      matrix:
+        file: ${{ fromJson(needs.list-sysdig-monitor-tests.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Run tests from ${{ matrix.file }}
+        run: |
+          tests=$(grep -oh "func Test[A-Za-z0-9_]*" sysdig/${{ matrix.file }}.go | sed 's/func //' | tr '\n' '|' | sed 's/|$//')
+          if [ -n "$tests" ]; then
+            echo "Running tests: $tests"
+            CGO_ENABLED=1 TF_ACC=1 go test ./sysdig -v -tags=tf_acc_sysdig_monitor -timeout 30m -race -run "^($tests)$"
+          else
+            echo "No tests found in file"
+          fi
+        env:
+          SYSDIG_MONITOR_API_TOKEN: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
+          SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
+
+  sysdig-monitor-result:
+    name: Sysdig Monitor Tests Result
+    runs-on: ubuntu-latest
+    needs: [list-sysdig-monitor-tests, test-sysdig-monitor]
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          if [ "${{ needs.test-sysdig-monitor.result }}" == "success" ] || [ "${{ needs.test-sysdig-monitor.result }}" == "skipped" ]; then
+            echo "All Sysdig Monitor tests passed"
+            exit 0
+          else
+            echo "Some Sysdig Monitor tests failed"
+            exit 1
+          fi
+
+  # ============================================
+  # IBM Monitor - Sequential (no parallelization)
+  # ============================================
   test-ibm-monitor:
     name: IBM Monitor Acceptance Tests
     runs-on: ubuntu-latest
     needs: test
-
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-
       - name: Test
         run: make testacc
         env:
@@ -99,20 +180,20 @@ jobs:
           SYSDIG_MONITOR_URL: "https://eu-gb.monitoring.cloud.ibm.com"
           IBM_EVENT_NOTIFICATION_INSTANCE_ID: ${{ secrets.IBM_EVENT_NOTIFICATION_INSTANCE_ID }}
 
+  # ============================================
+  # IBM Secure - Sequential (no parallelization)
+  # ============================================
   test-ibm-secure:
     name: IBM Secure Acceptance Tests
     runs-on: ubuntu-latest
     needs: test
-
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-
       - name: Test
         run: make testacc
         env:

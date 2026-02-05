@@ -3,8 +3,10 @@
 package sysdig_test
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -12,6 +14,7 @@ import (
 )
 
 func TestAccDataUser(t *testing.T) {
+	randomSuffix := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -21,21 +24,21 @@ func TestAccDataUser(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: getUser(),
+				Config: getUser(randomSuffix),
 			},
 		},
 	})
 }
 
-func getUser() string {
-	return `
+func getUser(suffix string) string {
+	return fmt.Sprintf(`
 resource "sysdig_user" "sample" {
-  email = "terraform-test+user@sysdig.com"
+  email = "terraform-test+user-%s@sysdig.com"
 }
 
 data "sysdig_user" "me" {
 	depends_on = ["sysdig_user.sample"]
 	email = sysdig_user.sample.email
 }
-`
+`, suffix)
 }
