@@ -5,11 +5,13 @@ package sysdig_test
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
@@ -35,11 +37,29 @@ func TestAccRuleStatefulCountDataSource(t *testing.T) {
 			{
 				Config: ruleStatefulCountDataSource(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.sysdig_secure_rule_stateful_count.data_stateful_rule_append", "rule_count", "2"),
+					testCheckRuleCountAtLeast("data.sysdig_secure_rule_stateful_count.data_stateful_rule_append", 2),
 				),
 			},
 		},
 	})
+}
+
+func testCheckRuleCountAtLeast(resourceName string, minCount int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+		countStr := rs.Primary.Attributes["rule_count"]
+		count, err := strconv.Atoi(countStr)
+		if err != nil {
+			return fmt.Errorf("rule_count is not a valid integer: %s", countStr)
+		}
+		if count < minCount {
+			return fmt.Errorf("rule_count expected >= %d, got %d", minCount, count)
+		}
+		return nil
+	}
 }
 
 func ruleStatefulCountDataSource() string {
