@@ -1,26 +1,26 @@
-* @airadier @tembleking @mateobur
+* @sysdiglabs/sysdig-training
 # Fargate workload agent
-*fargate* @airadier @tembleking @mateobur @marojor @francesco-racciatti @pgcrooks-sysdig @gnosek
+*fargate* @sysdiglabs/sysdig-training @marojor @francesco-racciatti @pgcrooks-sysdig @gnosek
 
 # compliance
-*benchmark* @airadier @tembleking @mateobur @haresh-suresh @nkraemer-sysdig
+*benchmark* @sysdiglabs/sysdig-training @haresh-suresh @nkraemer-sysdig
 
 # monitor
-*monitor*alert* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf @vojindj @DagDigg @Shadow649
-*monitor*dashboard* @airadier @tembleking @mateobur @rossifrancesco
-*monitor*groupmapping* @airadier @tembleking @mateobur @shadow649
-*notification_channel* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf @vojindj @DagDigg @Shadow649
-*inhibition_rule* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf @vojindj @DagDigg @Shadow649
-*silence_rule* @airadier @tembleking @mateobur @michelevergnano @dkutsanov @antonio-cuomo @dbonf @vojindj @DagDigg @Shadow649
+*monitor*alert* @sysdiglabs/sysdig-training @michelevergnano @dkutsanov @antonio-cuomo @dbonf @vojindj @DagDigg @Shadow649
+*monitor*dashboard* @sysdiglabs/sysdig-training @rossifrancesco
+*monitor*groupmapping* @sysdiglabs/sysdig-training @shadow649
+*notification_channel* @sysdiglabs/sysdig-training @michelevergnano @dkutsanov @antonio-cuomo @dbonf @vojindj @DagDigg @Shadow649
+*inhibition_rule* @sysdiglabs/sysdig-training @michelevergnano @dkutsanov @antonio-cuomo @dbonf @vojindj @DagDigg @Shadow649
+*silence_rule* @sysdiglabs/sysdig-training @michelevergnano @dkutsanov @antonio-cuomo @dbonf @vojindj @DagDigg @Shadow649
 
 # policies/rules
-*secure*policy* @airadier @tembleking @mateobur @rosenbloomb-sysdig @ombellare @miguelgordo @ivanlysiuk-sysdig @daniel-almeida @jbainbridgesysdig
+*secure*policy* @sysdiglabs/sysdig-training @rosenbloomb-sysdig @ombellare @miguelgordo @ivanlysiuk-sysdig @daniel-almeida @jbainbridgesysdig
 
 # internal components
-/sysdig/internal/client/v2/client.go @airadier @tembleking @mateobur @filiptubic @mbarbieri @draraksysdig
-/sysdig/internal/client/v2/config.go @airadier @tembleking @mateobur @filiptubic @mbarbieri @draraksysdig
-/sysdig/internal/client/v2/ibm.go @airadier @tembleking @mateobur @filiptubic @mbarbieri @draraksysdig
-/sysdig/internal/client/v2/agentaccesskey.go @airadier @tembleking @mateobur @igoreulalio @filiptubic @mbarbieri @draraksysdig
-/main.go @airadier @tembleking @mateobur @filiptubic @mbarbieri @draraksysdig
-/.goreleaser.yml @airadier @tembleking @mateobur @filiptubic @mbarbieri @draraksysdig
-/.github/ @airadier @tembleking @mateobur @filiptubic @mbarbieri @draraksysdig
+/sysdig/internal/client/v2/client.go @sysdiglabs/sysdig-training @filiptubic @mbarbieri @draraksysdig
+/sysdig/internal/client/v2/config.go @sysdiglabs/sysdig-training @filiptubic @mbarbieri @draraksysdig
+/sysdig/internal/client/v2/ibm.go @sysdiglabs/sysdig-training @filiptubic @mbarbieri @draraksysdig
+/sysdig/internal/client/v2/agentaccesskey.go @sysdiglabs/sysdig-training @igoreulalio @filiptubic @mbarbieri @draraksysdig
+/main.go @sysdiglabs/sysdig-training @filiptubic @mbarbieri @draraksysdig
+/.goreleaser.yml @sysdiglabs/sysdig-training @filiptubic @mbarbieri @draraksysdig
+/.github/ @sysdiglabs/sysdig-training @filiptubic @mbarbieri @draraksysdig
