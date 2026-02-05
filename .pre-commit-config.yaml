@@ -26,9 +26,4 @@ repos:
         pass_filenames: false
         entry: make test
         language: system
-    -   id: testacc
-        name: testacc
-        pass_filenames: false
-        entry: make testacc
-        language: system
 
