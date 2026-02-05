@@ -76,6 +76,22 @@ jobs:
           SYSDIG_MONITOR_API_TOKEN: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
           SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
 
+  sysdig-secure-result:
+    name: Sysdig Secure Tests Result
+    runs-on: ubuntu-latest
+    needs: [list-sysdig-secure-tests, test-sysdig-secure]
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          if [ "${{ needs.test-sysdig-secure.result }}" == "success" ] || [ "${{ needs.test-sysdig-secure.result }}" == "skipped" ]; then
+            echo "All Sysdig Secure tests passed"
+            exit 0
+          else
+            echo "Some Sysdig Secure tests failed"
+            exit 1
+          fi
+
   # ============================================
   # Sysdig Monitor - Dynamic Matrix
   # ============================================
@@ -124,126 +140,6 @@ jobs:
           SYSDIG_MONITOR_API_TOKEN: ${{ secrets.KUBELAB_MONITOR_API_TOKEN }}
           SYSDIG_SECURE_API_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
 
-  # ============================================
-  # IBM Monitor - Dynamic Matrix
-  # ============================================
-  list-ibm-monitor-tests:
-    name: List IBM Monitor Tests
-    runs-on: ubuntu-latest
-    needs: test
-    outputs:
-      matrix: ${{ steps.list.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: list
-        run: |
-          files=$(grep -l "tf_acc_ibm_monitor" sysdig/*_test.go | xargs -I{} basename {} .go || echo "")
-          if [ -z "$files" ]; then
-            echo "matrix=[]" >> $GITHUB_OUTPUT
-          else
-            matrix=$(echo "$files" | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            echo "matrix=$matrix" >> $GITHUB_OUTPUT
-          fi
-
-  test-ibm-monitor:
-    name: "IBM Monitor: ${{ matrix.file }}"
-    runs-on: ubuntu-latest
-    needs: list-ibm-monitor-tests
-    strategy:
-      fail-fast: true
-      max-parallel: 3
-      matrix:
-        file: ${{ fromJson(needs.list-ibm-monitor-tests.outputs.matrix) }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - name: Run tests from ${{ matrix.file }}
-        run: |
-          tests=$(grep -oh "func Test[A-Za-z0-9_]*" sysdig/${{ matrix.file }}.go | sed 's/func //' | tr '\n' '|' | sed 's/|$//')
-          if [ -n "$tests" ]; then
-            echo "Running tests: $tests"
-            CGO_ENABLED=1 TF_ACC=1 go test ./sysdig -v -tags=tf_acc_ibm_monitor -timeout 30m -race -run "^($tests)$"
-          else
-            echo "No tests found in file"
-          fi
-        env:
-          SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
-          SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_MONITOR_INSTANCE_ID }}
-          SYSDIG_IBM_MONITOR_IAM_URL: "https://iam.cloud.ibm.com"
-          SYSDIG_MONITOR_URL: "https://eu-gb.monitoring.cloud.ibm.com"
-          IBM_EVENT_NOTIFICATION_INSTANCE_ID: ${{ secrets.IBM_EVENT_NOTIFICATION_INSTANCE_ID }}
-
-  # ============================================
-  # IBM Secure - Dynamic Matrix
-  # ============================================
-  list-ibm-secure-tests:
-    name: List IBM Secure Tests
-    runs-on: ubuntu-latest
-    needs: test
-    outputs:
-      matrix: ${{ steps.list.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: list
-        run: |
-          files=$(grep -l "tf_acc_ibm_secure" sysdig/*_test.go | xargs -I{} basename {} .go || echo "")
-          if [ -z "$files" ]; then
-            echo "matrix=[]" >> $GITHUB_OUTPUT
-          else
-            matrix=$(echo "$files" | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            echo "matrix=$matrix" >> $GITHUB_OUTPUT
-          fi
-
-  test-ibm-secure:
-    name: "IBM Secure: ${{ matrix.file }}"
-    runs-on: ubuntu-latest
-    needs: list-ibm-secure-tests
-    strategy:
-      fail-fast: true
-      max-parallel: 3
-      matrix:
-        file: ${{ fromJson(needs.list-ibm-secure-tests.outputs.matrix) }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - name: Run tests from ${{ matrix.file }}
-        run: |
-          tests=$(grep -oh "func Test[A-Za-z0-9_]*" sysdig/${{ matrix.file }}.go | sed 's/func //' | tr '\n' '|' | sed 's/|$//')
-          if [ -n "$tests" ]; then
-            echo "Running tests: $tests"
-            CGO_ENABLED=1 TF_ACC=1 go test ./sysdig -v -tags=tf_acc_ibm_secure -timeout 30m -race -run "^($tests)$"
-          else
-            echo "No tests found in file"
-          fi
-        env:
-          SYSDIG_IBM_SECURE_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
-          SYSDIG_IBM_SECURE_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_SECURE_INSTANCE_ID }}
-          SYSDIG_IBM_SECURE_IAM_URL: "https://iam.cloud.ibm.com"
-          SYSDIG_SECURE_URL: "https://eu-gb.monitoring.cloud.ibm.com"
-
-  # ============================================
-  # Aggregator Jobs - Collect matrix results
-  # ============================================
-  sysdig-secure-result:
-    name: Sysdig Secure Tests Result
-    runs-on: ubuntu-latest
-    needs: [list-sysdig-secure-tests, test-sysdig-secure]
-    if: always()
-    steps:
-      - name: Check test results
-        run: |
-          if [ "${{ needs.test-sysdig-secure.result }}" == "success" ] || [ "${{ needs.test-sysdig-secure.result }}" == "skipped" ]; then
-            echo "All Sysdig Secure tests passed"
-            exit 0
-          else
-            echo "Some Sysdig Secure tests failed"
-            exit 1
-          fi
-
   sysdig-monitor-result:
     name: Sysdig Monitor Tests Result
     runs-on: ubuntu-latest
@@ -260,34 +156,49 @@ jobs:
             exit 1
           fi
 
-  ibm-monitor-result:
-    name: IBM Monitor Tests Result
+  # ============================================
+  # IBM Monitor - Sequential (no parallelization)
+  # ============================================
+  test-ibm-monitor:
+    name: IBM Monitor Acceptance Tests
     runs-on: ubuntu-latest
-    needs: [list-ibm-monitor-tests, test-ibm-monitor]
-    if: always()
+    needs: test
     steps:
-      - name: Check test results
-        run: |
-          if [ "${{ needs.test-ibm-monitor.result }}" == "success" ] || [ "${{ needs.test-ibm-monitor.result }}" == "skipped" ]; then
-            echo "All IBM Monitor tests passed"
-            exit 0
-          else
-            echo "Some IBM Monitor tests failed"
-            exit 1
-          fi
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test
+        run: make testacc
+        env:
+          TEST_SUITE: tf_acc_ibm_monitor
+          SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
+          SYSDIG_IBM_MONITOR_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_MONITOR_INSTANCE_ID }}
+          SYSDIG_IBM_MONITOR_IAM_URL: "https://iam.cloud.ibm.com"
+          SYSDIG_MONITOR_URL: "https://eu-gb.monitoring.cloud.ibm.com"
+          IBM_EVENT_NOTIFICATION_INSTANCE_ID: ${{ secrets.IBM_EVENT_NOTIFICATION_INSTANCE_ID }}
 
-  ibm-secure-result:
-    name: IBM Secure Tests Result
+  # ============================================
+  # IBM Secure - Sequential (no parallelization)
+  # ============================================
+  test-ibm-secure:
+    name: IBM Secure Acceptance Tests
     runs-on: ubuntu-latest
-    needs: [list-ibm-secure-tests, test-ibm-secure]
-    if: always()
+    needs: test
     steps:
-      - name: Check test results
-        run: |
-          if [ "${{ needs.test-ibm-secure.result }}" == "success" ] || [ "${{ needs.test-ibm-secure.result }}" == "skipped" ]; then
-            echo "All IBM Secure tests passed"
-            exit 0
-          else
-            echo "Some IBM Secure tests failed"
-            exit 1
-          fi
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test
+        run: make testacc
+        env:
+          TEST_SUITE: tf_acc_ibm_secure
+          SYSDIG_IBM_SECURE_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
+          SYSDIG_IBM_SECURE_INSTANCE_ID: ${{ secrets.TERRAFORM_IBM_SECURE_INSTANCE_ID }}
+          SYSDIG_IBM_SECURE_IAM_URL: "https://iam.cloud.ibm.com"
+          SYSDIG_SECURE_URL: "https://eu-gb.monitoring.cloud.ibm.com"
