@@ -99,11 +99,9 @@ resource "sysdig_sso_openid" "okta" {
 
 * `group_mapping_attribute_name` - (Optional) The attribute name for group mapping in the ID token claims. Default is `groups`.
 
-* `integration_name` - (Optional) A custom name for this SSO integration.
+* `integration_name` - (Optional) A name to distinguish different SSO integrations. Users can select this integration on the login page.
 
 * `is_metadata_discovery_enabled` - (Optional) Whether to use automatic metadata discovery from the issuer URL. Default is `true`.
-
-* `group_attribute_name` - (Optional) The attribute name for groups in the ID token. Default is `groups`.
 
 * `is_additional_scopes_check_enabled` - (Optional) Whether additional scopes check is enabled. Default is `false`.
 

@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -90,7 +91,7 @@ func resourceSysdigSSOOpenID() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "A custom name for this SSO integration (cannot be changed after creation)",
+				Description: "A name to distinguish different SSO integrations (cannot be changed after creation)",
 			},
 
 			// OpenID specific optional fields
@@ -99,12 +100,6 @@ func resourceSysdigSSOOpenID() *schema.Resource {
 				Optional:    true,
 				Default:     true,
 				Description: "Whether to use automatic metadata discovery from the issuer URL",
-			},
-			"group_attribute_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "groups",
-				Description: "The attribute name for groups in the ID token",
 			},
 			"is_additional_scopes_check_enabled": {
 				Type:        schema.TypeBool,
@@ -184,7 +179,7 @@ func validateSSOOpenIDMetadata(_ context.Context, diff *schema.ResourceDiff, _ a
 	metadata := diff.Get("metadata").([]any)
 
 	if !isMetadataDiscoveryEnabled && len(metadata) == 0 {
-		return diff.ForceNew("metadata")
+		return fmt.Errorf("metadata block is required when is_metadata_discovery_enabled is false")
 	}
 
 	return nil
@@ -296,7 +291,6 @@ func ssoOpenIDFromResourceData(d *schema.ResourceData) *v2.SSOOpenID {
 		ClientID:                       d.Get("client_id").(string),
 		ClientSecret:                   d.Get("client_secret").(string),
 		IsMetadataDiscoveryEnabled:     d.Get("is_metadata_discovery_enabled").(bool),
-		GroupAttributeName:             d.Get("group_attribute_name").(string),
 		IsAdditionalScopesCheckEnabled: d.Get("is_additional_scopes_check_enabled").(bool),
 	}
 
@@ -383,9 +377,6 @@ func ssoOpenIDToResourceData(sso *v2.SSOOpenID, d *schema.ResourceData) diag.Dia
 		// to avoid diff issues with the sensitive value
 
 		if err := d.Set("is_metadata_discovery_enabled", sso.Config.IsMetadataDiscoveryEnabled); err != nil {
-			return diag.FromErr(err)
-		}
-		if err := d.Set("group_attribute_name", sso.Config.GroupAttributeName); err != nil {
 			return diag.FromErr(err)
 		}
 		if err := d.Set("is_additional_scopes_check_enabled", sso.Config.IsAdditionalScopesCheckEnabled); err != nil {

@@ -260,7 +260,6 @@ resource "sysdig_sso_openid" "test" {
   is_active                    = true
   is_group_mapping_enabled     = true
   group_mapping_attribute_name = "custom_groups"
-  group_attribute_name         = "custom_groups"
 }
 `, integrationName)
 }

@@ -28,7 +28,6 @@ func resourceSysdigSSOSaml() *schema.Resource {
 			Read:   schema.DefaultTimeout(timeout),
 			Delete: schema.DefaultTimeout(timeout),
 		},
-		CustomizeDiff: validateSSOSamlMetadata,
 		Schema: map[string]*schema.Schema{
 			// SAML metadata - mutually exclusive
 			"metadata_url": {
@@ -93,7 +92,7 @@ func resourceSysdigSSOSaml() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "A custom name for this SSO integration (cannot be changed after creation)",
+				Description: "A name to distinguish different SSO integrations (cannot be changed after creation)",
 			},
 
 			// SAML specific optional fields (security)
@@ -130,11 +129,6 @@ func resourceSysdigSSOSaml() *schema.Resource {
 			},
 		},
 	}
-}
-
-func validateSSOSamlMetadata(_ context.Context, diff *schema.ResourceDiff, _ any) error {
-	// ExactlyOneOf already handles mutual exclusion, no additional validation needed
-	return nil
 }
 
 func resourceSysdigSSOSamlRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {

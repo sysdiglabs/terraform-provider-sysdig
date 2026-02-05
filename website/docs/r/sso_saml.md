@@ -91,7 +91,7 @@ resource "sysdig_sso_saml" "example_security" {
 * `is_single_logout_enabled` - (Optional) Whether SAML Single Logout (SLO) is enabled. Default: `false`.
 * `is_group_mapping_enabled` - (Optional) Whether group mapping from SAML attributes is enabled. Default: `false`.
 * `group_mapping_attribute_name` - (Optional) The SAML attribute name that contains group membership information. Default: `groups`.
-* `integration_name` - (Optional) A custom display name for this SSO integration.
+* `integration_name` - (Optional) A name to distinguish different SSO integrations. Users can select this integration on the login page.
 
 ### Security Settings (Optional)
 
