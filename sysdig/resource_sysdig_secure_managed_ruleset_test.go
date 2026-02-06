@@ -7,7 +7,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -15,7 +14,7 @@ import (
 )
 
 func TestAccManagedRuleset(t *testing.T) {
-	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+	rText := randomText(10)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -30,7 +29,7 @@ func TestAccManagedRuleset(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: managedRulesetWithoutNotificationChannels(),
+				Config: managedRulesetWithoutNotificationChannels(rText),
 			},
 			{
 				ResourceName:      "sysdig_secure_managed_ruleset.sample",
@@ -38,16 +37,16 @@ func TestAccManagedRuleset(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: managedRulesetWithoutActions(rText()),
+				Config: managedRulesetWithoutActions(rText),
 			},
 			{
-				Config: managedRuleset(rText()),
+				Config: managedRuleset(rText),
 			},
 			{
-				Config: managedRulesetWithMinimumConfiguration(),
+				Config: managedRulesetWithMinimumConfiguration(rText),
 			},
 			{
-				Config:  managedRulesetWithKillAction(),
+				Config:  managedRulesetWithKillAction(rText),
 				Destroy: true,
 			},
 		},
@@ -58,7 +57,7 @@ func managedRuleset(name string) string {
 	return fmt.Sprintf(`
 %s
 resource "sysdig_secure_managed_ruleset" "sample" {
-	name = "Sysdig Runtime Threat Detection (Copy)"
+	name = "Sysdig Runtime Threat Detection - %s"
 	description = "Test Description"
 	inherited_from {
 		name = "Sysdig Runtime Threat Detection"
@@ -77,17 +76,17 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 		  name = "testcapture"
 		}
 	}
-	
+
 	notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
 }
-	`, secureNotificationChannelEmailWithName(name))
+	`, secureNotificationChannelEmailWithName(name), name)
 }
 
 func managedRulesetWithoutActions(name string) string {
 	return fmt.Sprintf(`
 %s
 resource "sysdig_secure_managed_ruleset" "sample" {
-	name = "Sysdig Runtime Threat Detection (Copy)"
+	name = "Sysdig Runtime Threat Detection - %s"
 	description = "Test Description"
 	inherited_from {
 		name = "Sysdig Runtime Threat Detection"
@@ -99,16 +98,16 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 	runbook = "https://sysdig.com"
 
 	actions {}
-	
+
 	notification_channels = [sysdig_secure_notification_channel_email.sample_email.id]
 }
-	`, secureNotificationChannelEmailWithName(name))
+	`, secureNotificationChannelEmailWithName(name), name)
 }
 
-func managedRulesetWithoutNotificationChannels() string {
-	return `
+func managedRulesetWithoutNotificationChannels(name string) string {
+	return fmt.Sprintf(`
 resource "sysdig_secure_managed_ruleset" "sample" {
-	name = "Sysdig Runtime Threat Detection (Copy)"
+	name = "Sysdig Runtime Threat Detection - %s"
 	description = "Test Description"
 	inherited_from {
 		name = "Sysdig Runtime Threat Detection"
@@ -126,27 +125,27 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 		  seconds_after_event = 10
 		  name = "testcapture"
 		}
-	}	
-}`
+	}
+}`, name)
 }
 
-func managedRulesetWithMinimumConfiguration() string {
-	return `
+func managedRulesetWithMinimumConfiguration(name string) string {
+	return fmt.Sprintf(`
 resource "sysdig_secure_managed_ruleset" "sample" {
-	name = "Sysdig Runtime Threat Detection (Copy)"
+	name = "Sysdig Runtime Threat Detection - %s"
 	description = "Test Description"
 	inherited_from {
 		name = "Sysdig Runtime Threat Detection"
 		type = "falco"
 	}
 	enabled = true
-}`
+}`, name)
 }
 
-func managedRulesetWithKillAction() string {
-	return `
+func managedRulesetWithKillAction(name string) string {
+	return fmt.Sprintf(`
 resource "sysdig_secure_managed_ruleset" "sample" {
-	name = "Sysdig Runtime Threat Detection (Copy)"
+	name = "Sysdig Runtime Threat Detection - %s"
 	description = "Test Description"
 	inherited_from {
 		name = "Sysdig Runtime Threat Detection"
@@ -160,5 +159,5 @@ resource "sysdig_secure_managed_ruleset" "sample" {
 	actions {
 		container = "kill"
 	}
-}`
+}`, name)
 }
