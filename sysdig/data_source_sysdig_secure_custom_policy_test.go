@@ -3,6 +3,7 @@
 package sysdig_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -36,16 +37,16 @@ func TestAccCustomPolicyDataSource(t *testing.T) {
 }
 
 func customPolicyDataSource(name string) string {
-	return `
+	return fmt.Sprintf(`
 resource "sysdig_secure_custom_policy" "sample" {
-	name = "%s"
+	name = "Test Custom Policy %s"
 	description = "Test Description"
 	enabled = true
 }
-	
+
 data "sysdig_secure_custom_policy" "example" {
-	name = "%s"
-	depends_on=[ sysdig_secure_custom_policy.sample ]
+	name = "Test Custom Policy %s"
+	depends_on = [sysdig_secure_custom_policy.sample]
 }
-`
+`, name, name)
 }
