@@ -36,6 +36,18 @@ func dataSourceSysdigCurrentUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"customer_id": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"customer_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"customer_external_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -57,6 +69,12 @@ func dataSourceSysdigCurrentUserRead(ctx context.Context, d *schema.ResourceData
 	_ = d.Set("name", user.FirstName)
 	_ = d.Set("last_name", user.LastName)
 	_ = d.Set("system_role", user.SystemRole)
+
+	if user.Customer != nil {
+		_ = d.Set("customer_id", user.Customer.ID)
+		_ = d.Set("customer_name", user.Customer.Name)
+		_ = d.Set("customer_external_id", user.Customer.ExternalID)
+	}
 
 	return nil
 }

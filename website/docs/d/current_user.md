@@ -32,3 +32,9 @@ In addition to all arguments above, the following attributes are exported:
 * `last_name` - The user's last name.
 
 * `system_role` - The user's system role.
+
+* `customer_id` - The ID of the customer (account) the user belongs to, as shown in [Customer ID, Name, and External ID](https://docs.sysdig.com/en/administration/find-your-customer-id-and-name/).
+
+* `customer_name` - The name of the customer (account) the user belongs to, as shown in [Customer ID, Name, and External ID](https://docs.sysdig.com/en/administration/find-your-customer-id-and-name/).
+
+* `customer_external_id` - The Customer External ID as shown in [Customer ID, Name, and External ID](https://docs.sysdig.com/en/administration/find-your-customer-id-and-name/).
