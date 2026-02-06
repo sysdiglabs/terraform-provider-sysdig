@@ -75,9 +75,9 @@ func dataSourceSysdigCurrentUserRead(ctx context.Context, d *schema.ResourceData
 		_ = d.Set("customer_name", user.Customer.Name)
 		_ = d.Set("customer_external_id", user.Customer.ExternalID)
 	} else {
-		_ = d.Set("customer_id", 0)
-		_ = d.Set("customer_name", "")
-		_ = d.Set("customer_external_id", "")
+		_ = d.Set("customer_id", nil)
+		_ = d.Set("customer_name", nil)
+		_ = d.Set("customer_external_id", nil)
 	}
 
 	return nil
