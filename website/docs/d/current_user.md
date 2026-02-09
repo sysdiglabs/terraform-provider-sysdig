@@ -37,4 +37,4 @@ In addition to all arguments above, the following attributes are exported:
 
 * `customer_name` - The name of the customer (account) the user belongs to, as shown in [Customer ID, Name, and External ID](https://docs.sysdig.com/en/administration/find-your-customer-id-and-name/).
 
-* `customer_external_id` - The Customer External ID as shown in [Customer ID, Name, and External ID](https://docs.sysdig.com/en/administration/find-your-customer-id-and-name/).
+* `customer_external_id` - The Customer External ID as shown in [Customer ID, Name, and External ID](https://docs.sysdig.com/en/administration/find-your-customer-id-and-name/). Only available for users with the Admin role; empty for non-admin users.
