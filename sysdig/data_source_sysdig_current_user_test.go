@@ -22,6 +22,9 @@ func TestAccCurrentUser(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: getCurrentUser(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.sysdig_current_user.me", "customer_id"),
+				),
 			},
 		},
 	})
