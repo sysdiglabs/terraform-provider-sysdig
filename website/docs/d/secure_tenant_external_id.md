@@ -8,7 +8,7 @@ description: |-
 
 # Data Source: sysdig_secure_tenant_external_id
 
-Retrieves the **cloud onboarding** external ID for the Sysdig Secure tenant. This ID is used when configuring trusted relationships for cloud account onboarding (e.g., AWS IAM role trust policies).
+Retrieves the **cloud onboarding** external ID for the Sysdig Secure Tenant. This ID is used when configuring trusted relationships for cloud account onboarding (e.g., AWS IAM role trust policies).
 
 ~> **Note:** This is *not* the Customer External ID shown in [Customer ID, Name, and External ID](https://docs.sysdig.com/en/administration/find-your-customer-id-and-name/). For the customer-level external ID, use [`sysdig_current_user`](current_user.md) and its `customer_external_id` attribute instead.
 
@@ -26,5 +26,5 @@ data "sysdig_secure_tenant_external_id" "external_id" {}
 
 In addition to all arguments above, the following attributes are exported:
 
-* `external_id` - The cloud onboarding external ID for the Sysdig Secure tenant.
+* `external_id` - The cloud onboarding external ID for the Sysdig Secure Tenant.
 
