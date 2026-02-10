@@ -1285,3 +1285,32 @@ type SSOSamlConfig struct {
 	IsDestinationVerificationEnabled *bool  `json:"isDestinationVerificationEnabled,omitempty"`
 	IsEncryptionSupportEnabled       *bool  `json:"isEncryptionSupportEnabled,omitempty"`
 }
+
+// SSO Group Mapping (Platform API)
+type SSOGroupMapping struct {
+	ID               int                     `json:"id,omitempty"`
+	GroupName        string                  `json:"groupName"`
+	StandardTeamRole string                  `json:"standardTeamRole,omitempty"`
+	CustomTeamRoleID int                     `json:"customTeamRoleId,omitempty"`
+	IsAdmin          bool                    `json:"isAdmin"`
+	TeamMap          *SSOGroupMappingTeamMap `json:"teamMap"`
+	Weight           int                     `json:"weight,omitempty"`
+}
+
+type SSOGroupMappingTeamMap struct {
+	IsForAllTeams bool  `json:"isForAllTeams"`
+	TeamIDs       []int `json:"teamIds,omitempty"`
+}
+
+// SSO Group Mapping Settings (Platform API)
+type SSOGroupMappingSettings struct {
+	NoMappingStrategy              string `json:"noMappingStrategy"`
+	DifferentRolesSameTeamStrategy string `json:"differentRolesSameTeamStrategy"`
+	NoMappingsErrorRedirectURL     string `json:"noMappingsErrorRedirectUrl,omitempty"`
+}
+
+// SSO Global Settings (Platform API)
+type SSOGlobalSettings struct {
+	Product                string `json:"product,omitempty"`
+	IsPasswordLoginEnabled bool   `json:"isPasswordLoginEnabled"`
+}
