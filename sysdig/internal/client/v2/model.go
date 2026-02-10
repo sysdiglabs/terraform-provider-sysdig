@@ -86,14 +86,21 @@ type teamWrapper struct {
 	Team Team `json:"team"`
 }
 
+type Customer struct {
+	ID         int    `json:"id,omitempty"`
+	Name       string `json:"name,omitempty"`
+	ExternalID string `json:"externalId,omitempty"`
+}
+
 type User struct {
-	ID          int    `json:"id,omitempty"`
-	Version     int    `json:"version,omitempty"`
-	SystemRole  string `json:"systemRole,omitempty"`
-	Email       string `json:"username"`
-	FirstName   string `json:"firstName,omitempty"`
-	LastName    string `json:"lastName,omitempty"`
-	CurrentTeam *int   `json:"currentTeam"`
+	ID          int       `json:"id,omitempty"`
+	Version     int       `json:"version,omitempty"`
+	SystemRole  string    `json:"systemRole,omitempty"`
+	Email       string    `json:"username"`
+	FirstName   string    `json:"firstName,omitempty"`
+	LastName    string    `json:"lastName,omitempty"`
+	CurrentTeam *int      `json:"currentTeam"`
+	Customer    *Customer `json:"customer,omitempty"`
 }
 
 type userWrapper struct {
