@@ -12,10 +12,11 @@ import (
 func resourceSysdigGroupMappingConfig() *schema.Resource {
 	timeout := 5 * time.Minute
 	return &schema.Resource{
-		ReadContext:   resourceSysdigGroupMappingConfigRead,
-		CreateContext: resourceSysdigGroupMappingConfigCreate,
-		UpdateContext: resourceSysdigGroupMappingConfigUpdate,
-		DeleteContext: resourceSysdigGroupMappingConfigDelete,
+		ReadContext:        resourceSysdigGroupMappingConfigRead,
+		CreateContext:      resourceSysdigGroupMappingConfigCreate,
+		UpdateContext:      resourceSysdigGroupMappingConfigUpdate,
+		DeleteContext:      resourceSysdigGroupMappingConfigDelete,
+		DeprecationMessage: "Use sysdig_sso_group_mapping_settings instead. This resource will be removed in a future version.",
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
