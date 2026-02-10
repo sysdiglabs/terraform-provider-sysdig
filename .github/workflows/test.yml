@@ -63,6 +63,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
       - name: Run tests from ${{ matrix.file }}
         run: |
           tests=$(grep -oh "func Test[A-Za-z0-9_]*" sysdig/${{ matrix.file }}.go | sed 's/func //' | tr '\n' '|' | sed 's/|$//')
@@ -127,6 +130,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
       - name: Run tests from ${{ matrix.file }}
         run: |
           tests=$(grep -oh "func Test[A-Za-z0-9_]*" sysdig/${{ matrix.file }}.go | sed 's/func //' | tr '\n' '|' | sed 's/|$//')
@@ -170,6 +176,10 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
       - name: Test
         run: make testacc
         env:
@@ -194,6 +204,10 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
       - name: Test
         run: make testacc
         env:
