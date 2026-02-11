@@ -66,10 +66,15 @@ resource "sysdig_secure_posture_zone" "z1" {
 
 func securePostureZoneWithPolicies(name string) string {
 	return fmt.Sprintf(`
-data "sysdig_secure_posture_policies" "all" {}
+resource "sysdig_secure_posture_policy" "test" {
+  name        = "%s-policy"
+  description = "test policy for posture zone"
+  is_active   = true
+  type        = "Unknown"
+}
 
 resource "sysdig_secure_posture_zone" "z1" {
-  name = "%s"
-  policy_ids = [data.sysdig_secure_posture_policies.all.policies[0].id]
-}`, name)
+  name       = "%s"
+  policy_ids = [sysdig_secure_posture_policy.test.id]
+}`, name, name)
 }
