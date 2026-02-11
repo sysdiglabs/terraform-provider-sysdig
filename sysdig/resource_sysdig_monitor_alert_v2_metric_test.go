@@ -469,6 +469,10 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 		type = "dashboard"
 		id = sysdig_monitor_dashboard.dashboard.id
 	}
+	link {
+		type = "dashboardTemplate"
+		id   = "view.promcat.mysql"
+	}
 }
 `, name, name, name)
 }

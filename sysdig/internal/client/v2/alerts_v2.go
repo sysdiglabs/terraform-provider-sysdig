@@ -43,8 +43,9 @@ const (
 )
 
 const (
-	AlertLinkV2TypeDashboard AlertLinkV2Type = "dashboard"
-	AlertLinkV2TypeRunbook   AlertLinkV2Type = "runbook"
+	AlertLinkV2TypeDashboard         AlertLinkV2Type = "dashboard"
+	AlertLinkV2TypeDashboardTemplate AlertLinkV2Type = "dashboardTemplate"
+	AlertLinkV2TypeRunbook           AlertLinkV2Type = "runbook"
 )
 
 var labelCache struct {

@@ -216,6 +216,7 @@ func AlertV2SeverityValues() []string {
 func AlertLinkV2TypeValues() []string {
 	return []string{
 		string(v2.AlertLinkV2TypeDashboard),
+		string(v2.AlertLinkV2TypeDashboardTemplate),
 		string(v2.AlertLinkV2TypeRunbook),
 	}
 }
