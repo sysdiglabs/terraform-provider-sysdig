@@ -97,9 +97,9 @@ By defining this field, the user can modify the title and the body of the messag
 
 By defining this field, the user can add link to notifications.
 
-* `type` - (Required) Type of link. Must be `runbook`, for generic links, or `dashboard`, for internal links to existing dashboards.
+* `type` - (Required) Type of link. Must be `runbook` for generic links, `dashboard` for internal links to existing dashboards, or `dashboardTemplate` for links to dashboard templates.
 * `href` - (Optional) When using `runbook` type, url of the external resource.
-* `id` - (Optional) When using `dashboard` type, dashboard id.
+* `id` - (Optional) When using `dashboard` type, dashboard id. When using `dashboardTemplate` type, the dashboard template id (e.g. `view.promcat.mysql`).
 
 ### `capture`
 
