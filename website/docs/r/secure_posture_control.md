@@ -52,7 +52,22 @@ resource "sysdig_secure_posture_control" "c"{
 - `description` - (Required) The description of the Posture Control, eg. `EC2 - Instances should not have a public IP address`
 - `rego` - (Required) The Posture control Rego. `package sysdig\ndefault risky = false\nrisky {\n    input.NetworkInterfaces[_].Association.PublicIp\n    input.      NetworkInterfaces[_].Association.PublicIp != \"\"\n}`
 - `remediation_details`- (Required) The Posture control Remediation details. `Use a non-default VPC so that your instance is not assigned a public IP address by default`
-- `resource_kind` - (Required) The Posture Control Resource kind. It should be a supported resource kind, eg. `AWS_S3_BUCKET` 
+- `resource_kind` - (Required) The resource type this control evaluates. Must be a supported resource kind string matching
+  a resource type in the Sysdig CSPM inventory. The format varies by platform:
+
+  - **AWS** (100+ kinds): `AWS_S3_BUCKET`, `AWS_EC2_INSTANCE`, `AWS_IAM_ROLE`, `AWS_LAMBDA_FUNCTION`, ...
+  - **GCP** (80+ kinds): `GCP_STORAGE_GOOGLEAPIS_COM_BUCKET`, `GCP_COMPUTE_GOOGLEAPIS_COM_INSTANCE`, ...
+  - **Azure** (70+ kinds): `AZURE_MICROSOFT_COMPUTE_VIRTUALMACHINES`, `AZURE_MICROSOFT_STORAGE_STORAGEACCOUNTS`, ...
+  - **Kubernetes**: `DEPLOYMENT`, `SERVICE`, `NAMESPACE`, `CLUSTERROLE`, ...
+  - **IBM Cloud** (100+ kinds): `IBM_USER-MANAGEMENT_USER`, `IBM_IS_VPC_INSTANCE`, `IBM_CLOUD-OBJECT-STORAGE_BUCKET`, ...
+  - **Host** (Linux/Windows/Docker): `host`
+
+  To list all valid values, query the CSPM API:
+  ```
+  GET /api/cspm/v1/policy/controls/resource-template/kinds
+  ```
+  See the [Sysdig API Swagger docs](https://docs.sysdig.com/en/docs/developer-tools/sysdig-api/#swagger-documentation) and
+  the [posture controls API documentation](https://docs.sysdig.com/en/sysdig-secure/posture_controls/#sysdig-api-endpoint) for more details.
 - `severity` - (Required) The Posture Control Severity [`High`, `Medium`, `Low`], case sensitive, e.g., `High`.
 ## Attributes Reference
 
@@ -65,5 +80,5 @@ In addition to all arguments above, the following attributes are exported:
 Posture custom control can be imported using the ID, e.g.
 
 ```
-$ terraform import sysdig_secure_posture_control.example c 12345
+$ terraform import sysdig_secure_posture_control.example 12345
 ```
