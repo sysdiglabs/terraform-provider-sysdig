@@ -333,6 +333,14 @@ func TestAccResourceXxx(t *testing.T) {
 - `randomText(len)` - Generate random strings for unique names
 - `sysdigOrIBMMonitorPreCheck(t)` - Check for either credential type
 
+### Avoiding Name Collisions
+
+Multiple CI runs share the same Sysdig environment, so hardcoded resource names cause race conditions. Follow these rules:
+
+- **Never hardcode resource names** in test configs — always use unique random names via `rText()` (`acctest.RandStringFromCharSet`) or `randomText()`
+- **Prefix with `terraform_test_`** for easy identification and cleanup
+- **Never reference built-in Sysdig resources by name** (e.g., the `"container"` macro) — instead, create your own base resource with a unique name and reference that
+
 ## Development Workflow (TDD)
 
 Follow the **Red-Green-Refactor** cycle:

@@ -40,7 +40,7 @@ func TestAccMacro(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: macroAppendToDefault(),
+				Config: macroAppendToDefault(rText()),
 			},
 			{
 				Config: macroWithMacro(rText(), rText()),
@@ -73,14 +73,20 @@ resource "sysdig_secure_macro" "sample" {
 `, name)
 }
 
-func macroAppendToDefault() string {
-	return `
-resource "sysdig_secure_macro" "sample2" {
-  name = "container"
-  condition = "and always_true"
-  append = true
+func macroAppendToDefault(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_macro" "sample" {
+  name      = "terraform_test_%s"
+  condition = "always_true"
 }
-`
+
+resource "sysdig_secure_macro" "sample2" {
+  name       = "terraform_test_%s"
+  condition  = "and always_true"
+  append     = true
+  depends_on = [sysdig_secure_macro.sample]
+}
+`, name, name)
 }
 
 func macroWithMacro(name1, name2 string) string {
