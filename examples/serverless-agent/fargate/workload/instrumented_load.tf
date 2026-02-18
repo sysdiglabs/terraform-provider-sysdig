@@ -126,7 +126,7 @@ resource "aws_security_group" "security_group" {
   vpc_id      = var.vpc_id
 }
 
-resource "aws_security_group_rule" "orchestrator_agent_ingress_rule" {
+resource "aws_security_group_rule" "ingress_rule" {
   type              = "ingress"
   protocol          = "tcp"
   from_port         = 0
@@ -135,7 +135,7 @@ resource "aws_security_group_rule" "orchestrator_agent_ingress_rule" {
   security_group_id = aws_security_group.security_group.id
 }
 
-resource "aws_security_group_rule" "orchestrator_agent_egress_rule" {
+resource "aws_security_group_rule" "egress_rule" {
   type              = "egress"
   protocol          = "all"
   from_port         = 0
