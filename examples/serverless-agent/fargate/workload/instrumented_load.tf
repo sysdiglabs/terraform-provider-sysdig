@@ -7,20 +7,7 @@ data "sysdig_fargate_workload_agent" "containers_instrumented" {
       "logConfiguration" : {
         "logDriver" : "awslogs",
         "options" : {
-          "awslogs-group" : aws_cloudwatch_log_group.instrumented_logs.name,
-          "awslogs-region" : var.region,
-          "awslogs-stream-prefix" : "task"
-        },
-      }
-    },
-    {
-      "name" : "event-gen-2",
-      "image" : "falcosecurity/event-generator",
-      "command" : ["run", "syscall", "--all", "--loop"],
-      "logConfiguration" : {
-        "logDriver" : "awslogs",
-        "options" : {
-          "awslogs-group" : aws_cloudwatch_log_group.instrumented_logs.name,
+          "awslogs-group" : aws_cloudwatch_log_group.logs.name,
           "awslogs-region" : var.region,
           "awslogs-stream-prefix" : "task"
         },
@@ -35,19 +22,19 @@ data "sysdig_fargate_workload_agent" "containers_instrumented" {
   collector_port    = var.collector_port
 
   log_configuration {
-    group         = aws_cloudwatch_log_group.instrumented_logs.name
+    group         = aws_cloudwatch_log_group.logs.name
     stream_prefix = "instrumentation"
     region        = var.region
   }
 }
 
 resource "aws_ecs_task_definition" "task_definition" {
-  family             = "${var.prefix}-instrumented-task-definition"
+  family             = "${var.prefix}-task-definition"
   task_role_arn      = aws_iam_role.task_role.arn
   execution_role_arn = aws_iam_role.execution_role.arn
 
-  cpu                      = "256"
-  memory                   = "512"
+  cpu                      = "512"
+  memory                   = "1024"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   pid_mode                 = "task"
@@ -57,10 +44,10 @@ resource "aws_ecs_task_definition" "task_definition" {
 
 
 resource "aws_ecs_cluster" "cluster" {
-  name = "${var.prefix}-instrumented-workload"
+  name = "${var.prefix}-cluster"
 }
 
-resource "aws_cloudwatch_log_group" "instrumented_logs" {
+resource "aws_cloudwatch_log_group" "logs" {
 }
 
 data "aws_iam_policy_document" "assume_role_policy" {
@@ -106,7 +93,7 @@ data "aws_iam_policy_document" "task_policy" {
 }
 
 resource "aws_ecs_service" "service" {
-  name = "${var.prefix}-instrumented-service"
+  name = "${var.prefix}-service"
 
   cluster          = aws_ecs_cluster.cluster.id
   task_definition  = aws_ecs_task_definition.task_definition.arn
@@ -115,7 +102,7 @@ resource "aws_ecs_service" "service" {
   platform_version = "1.4.0"
 
   network_configuration {
-    subnets          = [var.subnet_1, var.subnet_2]
+    subnets          = [var.subnet]
     security_groups  = [aws_security_group.security_group.id]
     assign_public_ip = true
   }

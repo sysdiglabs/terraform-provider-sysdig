@@ -13,12 +13,8 @@ variable "region" {
   default     = "us-east-1"
 }
 
-variable "subnet_1" {
-  description = "Subnet-1 Id"
-}
-
-variable "subnet_2" {
-  description = "Subnet-2 Id"
+variable "subnet" {
+  description = "Subnet Id"
 }
 
 variable "vpc_id" {
@@ -33,7 +29,7 @@ variable "tags" {
 
 variable "replicas" {
   description = "Number of workload replicas to run"
-  default     = 2
+  default     = 1
 }
 
 # Serverless Agent Configuration
