@@ -9,16 +9,15 @@ variable "profile" {
 }
 
 variable "region" {
-  description = "AWS Region for deployment"
-  default     = "us-east-1"
-}
-
-variable "subnet" {
-  description = "Subnet Id"
+  description = "AWS Region for deployment, for example: us-east-1"
 }
 
 variable "vpc_id" {
-  description = "VPC Id"
+  description = "VPC Id (for example: vpc-1234567890abcde)"
+}
+
+variable "subnet" {
+  description = "Subnet Id (for example: subnet-1234567890abcde)"
 }
 
 variable "tags" {
