@@ -59,8 +59,9 @@ func resourceSysdigMonitorAlertV2Metric() *schema.Resource {
 				Default:  "",
 			},
 			"metric": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"time_aggregation": {
 				Type:         schema.TypeString,
