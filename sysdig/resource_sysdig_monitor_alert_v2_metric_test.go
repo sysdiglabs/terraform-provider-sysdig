@@ -85,6 +85,18 @@ func TestAccAlertV2Metric(t *testing.T) {
 				Config: alertV2MetricWithLabels(rText()),
 			},
 			{
+				Config: alertV2MetricWithNotEqualOperator(rText()),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sysdig_monitor_alert_v2_metric.sample", "operator", "!="),
+				),
+			},
+			{
+				Config: alertV2MetricWithEqualOperator(rText()),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sysdig_monitor_alert_v2_metric.sample", "operator", "="),
+				),
+			},
+			{
 				Config: alertV2MetricWithWarningThreshold(rText()),
 			},
 			{
@@ -526,6 +538,38 @@ resource "sysdig_monitor_alert_v2_metric" "sample" {
 		application = "app1"
 		maturity = "high"
 	}
+}
+`, name)
+}
+
+func alertV2MetricWithNotEqualOperator(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_metric" "sample" {
+
+	name = "TERRAFORM TEST - METRICV2 %s"
+	metric = "sysdig_container_cpu_used_percent"
+	group_aggregation = "avg"
+	time_aggregation = "avg"
+	operator = "!="
+	threshold = 50
+	range_seconds = 600
+
+}
+`, name)
+}
+
+func alertV2MetricWithEqualOperator(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_metric" "sample" {
+
+	name = "TERRAFORM TEST - METRICV2 %s"
+	metric = "sysdig_container_cpu_used_percent"
+	group_aggregation = "avg"
+	time_aggregation = "avg"
+	operator = "="
+	threshold = 50
+	range_seconds = 600
+
 }
 `, name)
 }
