@@ -773,6 +773,7 @@ type AlertV2ConfigMetric struct {
 	GroupAggregation string                  `json:"groupAggregation"`
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
+	MetricID         string                  `json:"metricId,omitempty"` // Legacy API field, used as fallback when Metric.ID is empty
 	NoDataBehaviour  string                  `json:"noDataBehaviour"`
 
 	Range    int `json:"range"`
