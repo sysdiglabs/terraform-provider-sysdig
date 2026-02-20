@@ -275,7 +275,11 @@ func updateAlertV2MetricState(d *schema.ResourceData, alert *v2.AlertV2Metric) e
 
 	_ = d.Set("group_aggregation", alert.Config.GroupAggregation)
 
-	_ = d.Set("metric", alert.Config.Metric.ID)
+	metricID := alert.Config.Metric.ID
+	if metricID == "" {
+		metricID = alert.Config.MetricID
+	}
+	_ = d.Set("metric", metricID)
 
 	_ = d.Set("no_data_behaviour", alert.Config.NoDataBehaviour)
 
