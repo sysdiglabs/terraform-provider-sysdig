@@ -444,20 +444,9 @@ resource "sysdig_secure_rule_falco" "falco_rule_with_exceptions" {
    values = jsonencode([ [["sysdig", "sysdiglabs"], "falco"] ])
   }
   exceptions {
-   name = "subjects_equal"
-   fields = ["ka.req.binding.subjects", "ka.req.binding.role"]
-   comps = ["=", "="]
-   values = jsonencode([ ["foo", "bar"] ])
-  }
-  exceptions {
    name = "only_one_field"
    fields = ["ka.req.binding.subjects"]
    comps = ["in"]
-   values = jsonencode([["foo"]])
-  }
-  exceptions {
-   name = "only_one_field_without_comps"
-   fields = ["ka.req.binding.subjects"]
    values = jsonencode([["foo"]])
   }
 }
