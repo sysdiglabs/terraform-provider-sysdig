@@ -4,6 +4,7 @@ package sysdig_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -106,6 +107,39 @@ func TestAccAlertV2Metric(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccAlertV2MetricRejectsEmptyMetric(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigIBMMonitorAPIKeyEnv),
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config:      alertV2MetricWithEmptyMetric(rText()),
+				ExpectError: regexp.MustCompile(`expected "metric" to not be an empty string`),
+			},
+		},
+	})
+}
+
+func alertV2MetricWithEmptyMetric(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_monitor_alert_v2_metric" "sample" {
+	name               = "TERRAFORM TEST - METRICV2 %s"
+	metric             = ""
+	group_aggregation  = "avg"
+	time_aggregation   = "avg"
+	operator           = ">="
+	threshold          = 50
+	range_seconds      = 600
+}
+`, name)
 }
 
 func alertV2Metric(name string) string {
