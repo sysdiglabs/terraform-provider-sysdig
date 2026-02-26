@@ -9,20 +9,15 @@ variable "profile" {
 }
 
 variable "region" {
-  description = "AWS Region for deployment"
-  default     = "us-east-1"
-}
-
-variable "subnet_1" {
-  description = "Subnet-1 Id"
-}
-
-variable "subnet_2" {
-  description = "Subnet-2 Id"
+  description = "AWS Region for deployment, for example: us-east-1"
 }
 
 variable "vpc_id" {
-  description = "VPC Id"
+  description = "VPC Id (for example: vpc-1234567890abcde)"
+}
+
+variable "subnet" {
+  description = "Subnet Id (for example: subnet-1234567890abcde)"
 }
 
 variable "tags" {
@@ -33,7 +28,7 @@ variable "tags" {
 
 variable "replicas" {
   description = "Number of workload replicas to run"
-  default     = 2
+  default     = 1
 }
 
 # Serverless Agent Configuration
@@ -46,11 +41,11 @@ variable "agent_workload_image" {
   default     = "quay.io/sysdig/workload-agent:latest"
 }
 
-variable "orchestrator_host" {
-  description = "Orchestrator Host"
+variable "collector_host" {
+  description = "Collector Host"
 }
 
-variable "orchestrator_port" {
-  description = "Orchestrator Port"
-  default     = 6667
+variable "collector_port" {
+  description = "Collector Port"
+  default     = 6443
 }
