@@ -4,15 +4,11 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.35.0"
-    }
-    local = {
-      source  = "hashicorp/local"
-      version = "~> 2.4.1"
+      version = "~>6.32.0"
     }
     sysdig = {
       source  = "sysdiglabs/sysdig"
-      version = "~> 1.24.5"
+      version = "~>3.4.0"
     }
   }
 }
