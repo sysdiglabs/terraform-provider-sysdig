@@ -87,6 +87,8 @@ resource "sysdig_sso_openid" "okta" {
 
 ### Optional Arguments
 
+* `is_system` - (Optional) Whether this is a system SSO configuration (Only applicable to on-prem installations). Default: `false`.
+
 * `product` - (Optional) The Sysdig product to configure SSO for. Valid values are `monitor` or `secure`. Default is `secure`.
 
 * `is_active` - (Optional) Whether the SSO configuration is active. Default is `true`.

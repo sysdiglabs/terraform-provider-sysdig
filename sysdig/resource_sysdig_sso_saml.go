@@ -51,6 +51,13 @@ func resourceSysdigSSOSaml() *schema.Resource {
 			},
 
 			// Optional base SSO fields (shared with OpenID)
+			"is_system": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				ForceNew:    true,
+				Description: "Whether this is a system SSO configuration (Only applicable to on-prem installations)",
+			},
 			"product": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -142,7 +149,9 @@ func resourceSysdigSSOSamlRead(ctx context.Context, d *schema.ResourceData, m an
 		return diag.FromErr(err)
 	}
 
-	sso, err := client.GetSSOSaml(ctx, id)
+	isSystem := d.Get("is_system").(bool)
+
+	sso, err := client.GetSSOSaml(ctx, isSystem, id)
 	if err != nil {
 		if err == v2.ErrSSOSamlNotFound {
 			d.SetId("")
@@ -160,9 +169,10 @@ func resourceSysdigSSOSamlCreate(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
+	isSystem := d.Get("is_system").(bool)
 	sso := ssoSamlFromResourceData(d)
 
-	created, err := client.CreateSSOSaml(ctx, sso)
+	created, err := client.CreateSSOSaml(ctx, isSystem, sso)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -183,11 +193,12 @@ func resourceSysdigSSOSamlUpdate(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
+	isSystem := d.Get("is_system").(bool)
 	sso := ssoSamlFromResourceData(d)
 	sso.ID = id
 	sso.Version = d.Get("version").(int)
 
-	_, err = client.UpdateSSOSaml(ctx, id, sso)
+	_, err = client.UpdateSSOSaml(ctx, isSystem, id, sso)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -206,6 +217,8 @@ func resourceSysdigSSOSamlDelete(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
+	isSystem := d.Get("is_system").(bool)
+
 	// API requires disabling SSO config before deletion
 	if d.Get("is_active").(bool) {
 		sso := ssoSamlFromResourceData(d)
@@ -213,13 +226,13 @@ func resourceSysdigSSOSamlDelete(ctx context.Context, d *schema.ResourceData, m 
 		sso.Version = d.Get("version").(int)
 		sso.IsActive = false
 
-		_, err = client.UpdateSSOSaml(ctx, id, sso)
+		_, err = client.UpdateSSOSaml(ctx, isSystem, id, sso)
 		if err != nil {
 			return diag.Errorf("failed to disable SSO config before deletion: %s", err)
 		}
 	}
 
-	err = client.DeleteSSOSaml(ctx, id)
+	err = client.DeleteSSOSaml(ctx, isSystem, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}

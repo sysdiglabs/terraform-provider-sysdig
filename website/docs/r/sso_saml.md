@@ -85,6 +85,7 @@ resource "sysdig_sso_saml" "example_security" {
 
 ### Optional
 
+* `is_system` - (Optional) Whether this is a system SSO configuration (Only applicable to on-prem installations). Default: `false`.
 * `product` - (Optional) The Sysdig product to configure SSO for. Valid values are `monitor` or `secure`. Default: `secure`.
 * `is_active` - (Optional) Whether the SSO configuration is active. Default: `true`.
 * `create_user_on_login` - (Optional) Whether to automatically create a new user upon first login via SSO. Default: `false`.

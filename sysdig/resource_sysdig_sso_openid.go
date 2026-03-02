@@ -50,6 +50,13 @@ func resourceSysdigSSOOpenID() *schema.Resource {
 			},
 
 			// Optional base SSO fields
+			"is_system": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				ForceNew:    true,
+				Description: "Whether this is a system SSO configuration (Only applicable to on-prem installations)",
+			},
 			"product": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -196,7 +203,9 @@ func resourceSysdigSSOOpenIDRead(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	sso, err := client.GetSSOOpenID(ctx, id)
+	isSystem := d.Get("is_system").(bool)
+
+	sso, err := client.GetSSOOpenID(ctx, isSystem, id)
 	if err != nil {
 		if err == v2.ErrSSOOpenIDNotFound {
 			d.SetId("")
@@ -214,9 +223,10 @@ func resourceSysdigSSOOpenIDCreate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
+	isSystem := d.Get("is_system").(bool)
 	sso := ssoOpenIDFromResourceData(d)
 
-	created, err := client.CreateSSOOpenID(ctx, sso)
+	created, err := client.CreateSSOOpenID(ctx, isSystem, sso)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -237,11 +247,12 @@ func resourceSysdigSSOOpenIDUpdate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
+	isSystem := d.Get("is_system").(bool)
 	sso := ssoOpenIDFromResourceData(d)
 	sso.ID = id
 	sso.Version = d.Get("version").(int)
 
-	_, err = client.UpdateSSOOpenID(ctx, id, sso)
+	_, err = client.UpdateSSOOpenID(ctx, isSystem, id, sso)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -260,6 +271,8 @@ func resourceSysdigSSOOpenIDDelete(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
+	isSystem := d.Get("is_system").(bool)
+
 	// API requires disabling SSO config before deletion
 	// We need to build the object from ResourceData to include client_secret
 	// (which is not returned by GET but is required for PUT)
@@ -269,13 +282,13 @@ func resourceSysdigSSOOpenIDDelete(ctx context.Context, d *schema.ResourceData, 
 		sso.Version = d.Get("version").(int)
 		sso.IsActive = false
 
-		_, err = client.UpdateSSOOpenID(ctx, id, sso)
+		_, err = client.UpdateSSOOpenID(ctx, isSystem, id, sso)
 		if err != nil {
 			return diag.Errorf("failed to disable SSO config before deletion: %s", err)
 		}
 	}
 
-	err = client.DeleteSSOOpenID(ctx, id)
+	err = client.DeleteSSOOpenID(ctx, isSystem, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
