@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccSSOOpenIDOnprem_Basic(t *testing.T) {
@@ -74,6 +75,9 @@ func TestAccSSOOpenIDOnprem_Basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"client_secret"},
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					return "system/" + s.RootModule().Resources["sysdig_sso_openid.test"].Primary.ID, nil
+				},
 			},
 		},
 	})
@@ -141,6 +145,9 @@ func TestAccSSOOpenIDOnprem_WithMetadata(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"client_secret"},
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					return "system/" + s.RootModule().Resources["sysdig_sso_openid.test_metadata"].Primary.ID, nil
+				},
 			},
 		},
 	})

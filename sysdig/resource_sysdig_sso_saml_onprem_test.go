@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccSSOSamlOnprem_WithMetadataURL(t *testing.T) {
@@ -73,6 +74,9 @@ func TestAccSSOSamlOnprem_WithMetadataURL(t *testing.T) {
 				ResourceName:      "sysdig_sso_saml.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					return "system/" + s.RootModule().Resources["sysdig_sso_saml.test"].Primary.ID, nil
+				},
 			},
 		},
 	})
@@ -123,6 +127,9 @@ func TestAccSSOSamlOnprem_WithMetadataXML(t *testing.T) {
 				ResourceName:      "sysdig_sso_saml.test_xml",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					return "system/" + s.RootModule().Resources["sysdig_sso_saml.test_xml"].Primary.ID, nil
+				},
 			},
 		},
 	})
