@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig_monitor || tf_acc_sysdig_secure
+//go:build tf_acc_onprem_monitor || tf_acc_onprem_secure
 
 package sysdig_test
 
@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestAccSSOOpenID_Basic(t *testing.T) {
+func TestAccSSOOpenIDOnprem_Basic(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -31,8 +31,13 @@ func TestAccSSOOpenID_Basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: ssoOpenIDBasicConfig(integrationName),
+				Config: ssoOpenIDOnpremBasicConfig(integrationName),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_sso_openid.test",
+						"is_system",
+						"true",
+					),
 					resource.TestCheckResourceAttr(
 						"sysdig_sso_openid.test",
 						"issuer_url",
@@ -74,7 +79,7 @@ func TestAccSSOOpenID_Basic(t *testing.T) {
 	})
 }
 
-func TestAccSSOOpenID_WithMetadata(t *testing.T) {
+func TestAccSSOOpenIDOnprem_WithMetadata(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -92,8 +97,13 @@ func TestAccSSOOpenID_WithMetadata(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: ssoOpenIDWithMetadataConfig(integrationName),
+				Config: ssoOpenIDOnpremWithMetadataConfig(integrationName),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_sso_openid.test_metadata",
+						"is_system",
+						"true",
+					),
 					resource.TestCheckResourceAttr(
 						"sysdig_sso_openid.test_metadata",
 						"is_metadata_discovery_enabled",
@@ -136,7 +146,7 @@ func TestAccSSOOpenID_WithMetadata(t *testing.T) {
 	})
 }
 
-func TestAccSSOOpenID_Update(t *testing.T) {
+func TestAccSSOOpenIDOnprem_Update(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -154,7 +164,7 @@ func TestAccSSOOpenID_Update(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: ssoOpenIDBasicConfig(integrationName),
+				Config: ssoOpenIDOnpremBasicConfig(integrationName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"sysdig_sso_openid.test",
@@ -169,7 +179,7 @@ func TestAccSSOOpenID_Update(t *testing.T) {
 				),
 			},
 			{
-				Config: ssoOpenIDUpdatedConfig(integrationName),
+				Config: ssoOpenIDOnpremUpdatedConfig(integrationName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"sysdig_sso_openid.test",
@@ -192,7 +202,7 @@ func TestAccSSOOpenID_Update(t *testing.T) {
 	})
 }
 
-func TestAccSSOOpenID_WithAdditionalScopes(t *testing.T) {
+func TestAccSSOOpenIDOnprem_WithAdditionalScopes(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -210,8 +220,13 @@ func TestAccSSOOpenID_WithAdditionalScopes(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: ssoOpenIDWithAdditionalScopesConfig(integrationName),
+				Config: ssoOpenIDOnpremWithAdditionalScopesConfig(integrationName),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_sso_openid.test_scopes",
+						"is_system",
+						"true",
+					),
 					resource.TestCheckResourceAttr(
 						"sysdig_sso_openid.test_scopes",
 						"is_additional_scopes_check_enabled",
@@ -238,9 +253,10 @@ func TestAccSSOOpenID_WithAdditionalScopes(t *testing.T) {
 	})
 }
 
-func ssoOpenIDBasicConfig(integrationName string) string {
+func ssoOpenIDOnpremBasicConfig(integrationName string) string {
 	return fmt.Sprintf(`
 resource "sysdig_sso_openid" "test" {
+  is_system        = true
   issuer_url       = "https://accounts.google.com"
   client_id        = "test-client-id"
   client_secret    = "test-client-secret"
@@ -250,9 +266,10 @@ resource "sysdig_sso_openid" "test" {
 `, integrationName)
 }
 
-func ssoOpenIDUpdatedConfig(integrationName string) string {
+func ssoOpenIDOnpremUpdatedConfig(integrationName string) string {
 	return fmt.Sprintf(`
 resource "sysdig_sso_openid" "test" {
+  is_system                    = true
   issuer_url                   = "https://accounts.google.com"
   client_id                    = "test-client-id"
   client_secret                = "test-client-secret"
@@ -264,9 +281,10 @@ resource "sysdig_sso_openid" "test" {
 `, integrationName)
 }
 
-func ssoOpenIDWithMetadataConfig(integrationName string) string {
+func ssoOpenIDOnpremWithMetadataConfig(integrationName string) string {
 	return fmt.Sprintf(`
 resource "sysdig_sso_openid" "test_metadata" {
+  is_system                      = true
   issuer_url                     = "https://idp.example.com"
   client_id                      = "test-client-id"
   client_secret                  = "test-client-secret"
@@ -286,9 +304,10 @@ resource "sysdig_sso_openid" "test_metadata" {
 `, integrationName)
 }
 
-func ssoOpenIDWithAdditionalScopesConfig(integrationName string) string {
+func ssoOpenIDOnpremWithAdditionalScopesConfig(integrationName string) string {
 	return fmt.Sprintf(`
 resource "sysdig_sso_openid" "test_scopes" {
+  is_system                           = true
   issuer_url                          = "https://accounts.google.com"
   client_id                           = "test-client-id"
   client_secret                       = "test-client-secret"
