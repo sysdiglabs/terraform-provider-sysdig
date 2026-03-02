@@ -143,4 +143,10 @@ Sysdig SSO OpenID configurations can be imported using the ID, e.g.
 $ terraform import sysdig_sso_openid.example 12345
 ```
 
+For system-level SSO configurations (on-prem), prefix the ID with `system/`:
+
+```
+$ terraform import sysdig_sso_openid.example system/12345
+```
+
 ~> **Note:** The `client_secret` attribute cannot be imported and must be set in the configuration after import.

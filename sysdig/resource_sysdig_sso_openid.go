@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -21,7 +22,7 @@ func resourceSysdigSSOOpenID() *schema.Resource {
 		UpdateContext: resourceSysdigSSOOpenIDUpdate,
 		DeleteContext: resourceSysdigSSOOpenIDDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: importSSOOpenIDState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -190,6 +191,21 @@ func validateSSOOpenIDMetadata(_ context.Context, diff *schema.ResourceDiff, _ a
 	}
 
 	return nil
+}
+
+func importSSOOpenIDState(_ context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	if strings.HasPrefix(importID, "system/") {
+		if err := d.Set("is_system", true); err != nil {
+			return nil, err
+		}
+		d.SetId(strings.TrimPrefix(importID, "system/"))
+	} else {
+		if err := d.Set("is_system", false); err != nil {
+			return nil, err
+		}
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceSysdigSSOOpenIDRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {

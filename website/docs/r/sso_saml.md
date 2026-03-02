@@ -114,3 +114,9 @@ SAML SSO configurations can be imported using the SSO configuration ID:
 ```
 $ terraform import sysdig_sso_saml.example 12345
 ```
+
+For system-level SSO configurations (on-prem), prefix the ID with `system/`:
+
+```
+$ terraform import sysdig_sso_saml.example system/12345
+```
