@@ -18,13 +18,7 @@ func TestAccSSOOpenIDOnprem_Basic(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
-			secure := os.Getenv("SYSDIG_SECURE_API_TOKEN")
-			if monitor == "" && secure == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -87,13 +81,7 @@ func TestAccSSOOpenIDOnprem_WithMetadata(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
-			secure := os.Getenv("SYSDIG_SECURE_API_TOKEN")
-			if monitor == "" && secure == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -157,13 +145,7 @@ func TestAccSSOOpenIDOnprem_Update(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
-			secure := os.Getenv("SYSDIG_SECURE_API_TOKEN")
-			if monitor == "" && secure == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -213,13 +195,7 @@ func TestAccSSOOpenIDOnprem_WithAdditionalScopes(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
-			secure := os.Getenv("SYSDIG_SECURE_API_TOKEN")
-			if monitor == "" && secure == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil

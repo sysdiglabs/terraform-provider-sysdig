@@ -4,7 +4,6 @@ package sysdig_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
@@ -18,13 +17,7 @@ func TestAccSSOSamlOnprem_WithMetadataURL(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
-			secure := os.Getenv("SYSDIG_SECURE_API_TOKEN")
-			if monitor == "" && secure == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -86,13 +79,7 @@ func TestAccSSOSamlOnprem_WithMetadataXML(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
-			secure := os.Getenv("SYSDIG_SECURE_API_TOKEN")
-			if monitor == "" && secure == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -139,13 +126,7 @@ func TestAccSSOSamlOnprem_Update(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
-			secure := os.Getenv("SYSDIG_SECURE_API_TOKEN")
-			if monitor == "" && secure == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -195,13 +176,7 @@ func TestAccSSOSamlOnprem_SecuritySettings(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
-			secure := os.Getenv("SYSDIG_SECURE_API_TOKEN")
-			if monitor == "" && secure == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
