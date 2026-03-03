@@ -4,7 +4,6 @@ package sysdig_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
@@ -18,7 +17,7 @@ func TestAccSSOOpenIDOnprem_Basic(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
+		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
