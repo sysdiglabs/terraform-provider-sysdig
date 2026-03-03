@@ -24,6 +24,7 @@ resource "sysdig_sso_openid" "google" {
   integration_name = "Google SSO"
 
   is_active                   = true
+  is_system                   = false
   create_user_on_login        = true
   is_metadata_discovery_enabled = true
 }
@@ -41,6 +42,7 @@ resource "sysdig_sso_openid" "custom_idp" {
   integration_name = "Custom IDP"
 
   is_active                     = true
+  is_system                     = false
   is_metadata_discovery_enabled = false
 
   metadata {
@@ -65,6 +67,7 @@ resource "sysdig_sso_openid" "okta" {
   integration_name = "Okta SSO"
 
   is_active                          = true
+  is_system                          = false
   create_user_on_login               = true
   is_group_mapping_enabled           = true
   group_mapping_attribute_name       = "groups"

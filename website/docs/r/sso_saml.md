@@ -22,6 +22,7 @@ resource "sysdig_sso_saml" "example" {
   email_parameter  = "email"
   integration_name = "Corporate SAML SSO"
   is_active        = true
+  is_system        = false
 }
 ```
 
@@ -41,6 +42,7 @@ EOF
   email_parameter  = "email"
   integration_name = "Corporate SAML SSO"
   is_active        = true
+  is_system        = false
 }
 ```
 
@@ -52,6 +54,7 @@ resource "sysdig_sso_saml" "example_groups" {
   email_parameter               = "email"
   integration_name              = "Corporate SAML SSO"
   is_active                     = true
+  is_system                     = false
   is_group_mapping_enabled      = true
   group_mapping_attribute_name  = "groups"
 }
