@@ -22,7 +22,6 @@ const (
 	identAgentTags        ruleIdentifier = "agentTags"
 	identLocation         ruleIdentifier = "location"
 	identOrganization     ruleIdentifier = "organization"
-	identSubscription     ruleIdentifier = "subscription"
 	identName             ruleIdentifier = "name"
 	identRegistry         ruleIdentifier = "registry"
 	identRepository       ruleIdentifier = "repository"
@@ -64,7 +63,6 @@ var directFieldMap = map[string]ruleIdentifier{
 	"resourceGroupId":  identResourceGroupId,
 	"accountGroupId":   identAccountGroupId,
 	"accountGroupName": identAccountGroupName,
-	"subscription":     identSubscription,
 }
 
 // labelAsLabelsTargets lists target types where label.<key> maps to
@@ -97,7 +95,6 @@ var identToFieldPattern = map[ruleIdentifier]string{
 	identResourceGroupId:  "resourceGroupId",
 	identAccountGroupId:   "accountGroupId",
 	identAccountGroupName: "accountGroupName",
-	identSubscription:     "subscription",
 }
 
 // resolveIdentifier maps a v2 expression field to the backend's rule identifier,

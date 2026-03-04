@@ -52,7 +52,6 @@ const (
 	SchemaScopeKey                      = "scope"
 	SchemaScopesKey                     = "scopes"
 	SchemaTargetTypeKey                 = "target_type"
-	SchemaResourceTypeKey               = "resource_type"
 	SchemaExpressionKey                 = "expression"
 	SchemaFieldKey                      = "field"
 	SchemaOperatorKey                   = "operator"
