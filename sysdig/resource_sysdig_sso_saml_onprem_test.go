@@ -1,19 +1,19 @@
-//go:build tf_acc_sysdig_monitor || tf_acc_sysdig_secure
+//go:build tf_acc_onprem_monitor || tf_acc_onprem_secure
 
 package sysdig_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccSSOSaml_WithMetadataURL(t *testing.T) {
+func TestAccSSOSamlOnprem_WithMetadataURL(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -25,8 +25,13 @@ func TestAccSSOSaml_WithMetadataURL(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: ssoSamlWithMetadataURLConfig(integrationName),
+				Config: ssoSamlOnpremWithMetadataURLConfig(integrationName),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_sso_saml.test",
+						"is_system",
+						"true",
+					),
 					resource.TestCheckResourceAttr(
 						"sysdig_sso_saml.test",
 						"metadata_url",
@@ -62,12 +67,15 @@ func TestAccSSOSaml_WithMetadataURL(t *testing.T) {
 				ResourceName:      "sysdig_sso_saml.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					return "system/" + s.RootModule().Resources["sysdig_sso_saml.test"].Primary.ID, nil
+				},
 			},
 		},
 	})
 }
 
-func TestAccSSOSaml_WithMetadataXML(t *testing.T) {
+func TestAccSSOSamlOnprem_WithMetadataXML(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -79,8 +87,13 @@ func TestAccSSOSaml_WithMetadataXML(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: ssoSamlWithMetadataXMLConfig(integrationName),
+				Config: ssoSamlOnpremWithMetadataXMLConfig(integrationName),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_sso_saml.test_xml",
+						"is_system",
+						"true",
+					),
 					resource.TestCheckResourceAttrSet(
 						"sysdig_sso_saml.test_xml",
 						"metadata_xml",
@@ -101,22 +114,19 @@ func TestAccSSOSaml_WithMetadataXML(t *testing.T) {
 				ResourceName:      "sysdig_sso_saml.test_xml",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					return "system/" + s.RootModule().Resources["sysdig_sso_saml.test_xml"].Primary.ID, nil
+				},
 			},
 		},
 	})
 }
 
-func TestAccSSOSaml_Update(t *testing.T) {
+func TestAccSSOSamlOnprem_Update(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			monitor := os.Getenv("SYSDIG_MONITOR_API_TOKEN")
-			secure := os.Getenv("SYSDIG_SECURE_API_TOKEN")
-			if monitor == "" && secure == "" {
-				t.Fatal("SYSDIG_MONITOR_API_TOKEN or SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
-			}
-		},
+		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -124,7 +134,7 @@ func TestAccSSOSaml_Update(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: ssoSamlWithMetadataURLConfig(integrationName),
+				Config: ssoSamlOnpremWithMetadataURLConfig(integrationName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"sysdig_sso_saml.test",
@@ -139,7 +149,7 @@ func TestAccSSOSaml_Update(t *testing.T) {
 				),
 			},
 			{
-				Config: ssoSamlUpdatedConfig(integrationName),
+				Config: ssoSamlOnpremUpdatedConfig(integrationName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"sysdig_sso_saml.test",
@@ -162,7 +172,7 @@ func TestAccSSOSaml_Update(t *testing.T) {
 	})
 }
 
-func TestAccSSOSaml_SecuritySettings(t *testing.T) {
+func TestAccSSOSamlOnprem_SecuritySettings(t *testing.T) {
 	integrationName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -174,8 +184,13 @@ func TestAccSSOSaml_SecuritySettings(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: ssoSamlWithSecuritySettingsConfig(integrationName),
+				Config: ssoSamlOnpremWithSecuritySettingsConfig(integrationName),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_sso_saml.test_security",
+						"is_system",
+						"true",
+					),
 					resource.TestCheckResourceAttr(
 						"sysdig_sso_saml.test_security",
 						"is_signature_validation_enabled",
@@ -202,9 +217,10 @@ func TestAccSSOSaml_SecuritySettings(t *testing.T) {
 	})
 }
 
-func ssoSamlWithMetadataURLConfig(integrationName string) string {
+func ssoSamlOnpremWithMetadataURLConfig(integrationName string) string {
 	return fmt.Sprintf(`
 resource "sysdig_sso_saml" "test" {
+  is_system        = true
   metadata_url     = "https://idp.example.com/metadata"
   email_parameter  = "email"
   integration_name = "%s"
@@ -213,9 +229,10 @@ resource "sysdig_sso_saml" "test" {
 `, integrationName)
 }
 
-func ssoSamlWithMetadataXMLConfig(integrationName string) string {
+func ssoSamlOnpremWithMetadataXMLConfig(integrationName string) string {
 	return fmt.Sprintf(`
 resource "sysdig_sso_saml" "test_xml" {
+  is_system        = true
   metadata_xml     = <<-EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://idp.example.com">
@@ -231,9 +248,10 @@ EOF
 `, integrationName)
 }
 
-func ssoSamlUpdatedConfig(integrationName string) string {
+func ssoSamlOnpremUpdatedConfig(integrationName string) string {
 	return fmt.Sprintf(`
 resource "sysdig_sso_saml" "test" {
+  is_system                     = true
   metadata_url                  = "https://idp.example.com/metadata"
   email_parameter               = "email"
   integration_name              = "%s-updated"
@@ -244,9 +262,10 @@ resource "sysdig_sso_saml" "test" {
 `, integrationName)
 }
 
-func ssoSamlWithSecuritySettingsConfig(integrationName string) string {
+func ssoSamlOnpremWithSecuritySettingsConfig(integrationName string) string {
 	return fmt.Sprintf(`
 resource "sysdig_sso_saml" "test_security" {
+  is_system                           = true
   metadata_url                        = "https://idp.example.com/metadata"
   email_parameter                     = "email"
   integration_name                    = "%s"

@@ -24,6 +24,7 @@ resource "sysdig_sso_openid" "google" {
   integration_name = "Google SSO"
 
   is_active                   = true
+  is_system                   = false
   create_user_on_login        = true
   is_metadata_discovery_enabled = true
 }
@@ -41,6 +42,7 @@ resource "sysdig_sso_openid" "custom_idp" {
   integration_name = "Custom IDP"
 
   is_active                     = true
+  is_system                     = false
   is_metadata_discovery_enabled = false
 
   metadata {
@@ -65,6 +67,7 @@ resource "sysdig_sso_openid" "okta" {
   integration_name = "Okta SSO"
 
   is_active                          = true
+  is_system                          = false
   create_user_on_login               = true
   is_group_mapping_enabled           = true
   group_mapping_attribute_name       = "groups"
@@ -86,6 +89,8 @@ resource "sysdig_sso_openid" "okta" {
 * `client_secret` - (Required, Sensitive) The OAuth 2.0 client secret.
 
 ### Optional Arguments
+
+* `is_system` - (Optional) Whether this is a system SSO configuration (Only applicable to on-prem installations). Default: `false`.
 
 * `product` - (Optional) The Sysdig product to configure SSO for. Valid values are `monitor` or `secure`. Default is `secure`.
 
@@ -139,6 +144,12 @@ Sysdig SSO OpenID configurations can be imported using the ID, e.g.
 
 ```
 $ terraform import sysdig_sso_openid.example 12345
+```
+
+For system-level SSO configurations (on-prem), prefix the ID with `system/`:
+
+```
+$ terraform import sysdig_sso_openid.example system/12345
 ```
 
 ~> **Note:** The `client_secret` attribute cannot be imported and must be set in the configuration after import.
