@@ -22,6 +22,7 @@ resource "sysdig_sso_saml" "example" {
   email_parameter  = "email"
   integration_name = "Corporate SAML SSO"
   is_active        = true
+  is_system        = false
 }
 ```
 
@@ -41,6 +42,7 @@ EOF
   email_parameter  = "email"
   integration_name = "Corporate SAML SSO"
   is_active        = true
+  is_system        = false
 }
 ```
 
@@ -52,6 +54,7 @@ resource "sysdig_sso_saml" "example_groups" {
   email_parameter               = "email"
   integration_name              = "Corporate SAML SSO"
   is_active                     = true
+  is_system                     = false
   is_group_mapping_enabled      = true
   group_mapping_attribute_name  = "groups"
 }
@@ -85,6 +88,7 @@ resource "sysdig_sso_saml" "example_security" {
 
 ### Optional
 
+* `is_system` - (Optional) Whether this is a system SSO configuration (Only applicable to on-prem installations). Default: `false`.
 * `product` - (Optional) The Sysdig product to configure SSO for. Valid values are `monitor` or `secure`. Default: `secure`.
 * `is_active` - (Optional) Whether the SSO configuration is active. Default: `true`.
 * `create_user_on_login` - (Optional) Whether to automatically create a new user upon first login via SSO. Default: `false`.
@@ -112,4 +116,10 @@ SAML SSO configurations can be imported using the SSO configuration ID:
 
 ```
 $ terraform import sysdig_sso_saml.example 12345
+```
+
+For system-level SSO configurations (on-prem), prefix the ID with `system/`:
+
+```
+$ terraform import sysdig_sso_saml.example system/12345
 ```
