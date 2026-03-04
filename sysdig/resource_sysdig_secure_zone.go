@@ -528,15 +528,15 @@ func flattenZoneV2(z *v2.ZoneV2, preferRules bool) []map[string]any {
 	for _, s := range z.Scopes {
 		// ScopeV2 has no semantic meaning; it only groups filters in the backend model.
 		for _, f := range s.Filters {
-			allScopes = append(allScopes, flattenFilterV21(f, preferRules))
+			allScopes = append(allScopes, flattenFilterV2(f, preferRules))
 		}
 	}
 	return allScopes
 }
 
-// flattenFilterV21 converts a backend FilterV2 into a Terraform "scope" block.
+// flattenFilterV2 converts a backend FilterV2 into a Terraform "scope" block.
 // It handles both structured expressions and rules strings.
-func flattenFilterV21(f v2.FilterV2, preferRules bool) map[string]any {
+func flattenFilterV2(f v2.FilterV2, preferRules bool) map[string]any {
 	out := map[string]any{
 		SchemaIDKey:         f.ID,
 		SchemaTargetTypeKey: f.ResourceType,

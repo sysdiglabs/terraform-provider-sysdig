@@ -74,7 +74,7 @@ func TestExpandFlattenFilter_MultipleExpressions(t *testing.T) {
 	}
 
 	filter := expandFilterV2(raw)
-	flat := flattenFilterV21(filter, false)
+	flat := flattenFilterV2(filter, false)
 
 	require.Equal(t, "kubernetes", flat["target_type"])
 	require.Len(t, flat["expression"], 2)
