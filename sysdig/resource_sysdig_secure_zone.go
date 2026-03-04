@@ -362,22 +362,24 @@ func resourceSysdigSecureZoneUpdate(ctx context.Context, d *schema.ResourceData,
 		}
 
 		zone := expandZoneV2(d)
-		id, _ := strconv.Atoi(d.Id())
+
+		id, err := strconv.Atoi(d.Id())
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("invalid zone id %q: %w", d.Id(), err))
+		}
 		zone.ID = id
 
-		_, err = clientV2.UpdateZoneV2(ctx, zone)
-		if err != nil {
+		if _, err := clientV2.UpdateZoneV2(ctx, zone); err != nil {
 			return diag.FromErr(fmt.Errorf("error updating zone: %w", err))
 		}
 
 		return resourceSysdigSecureZoneRead(ctx, d, m)
-	} else {
-		zoneRequest := zoneRequestFromResourceData(d)
+	}
 
-		_, err = client.UpdateZone(ctx, zoneRequest)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("error updating Sysdig Zone: %s", err))
-		}
+	zoneRequest := zoneRequestFromResourceData(d)
+
+	if _, err := client.UpdateZone(ctx, zoneRequest); err != nil {
+		return diag.FromErr(fmt.Errorf("error updating Sysdig Zone: %w", err))
 	}
 
 	return resourceSysdigSecureZoneRead(ctx, d, m)
@@ -401,14 +403,12 @@ func resourceSysdigSecureZoneDelete(ctx context.Context, d *schema.ResourceData,
 	}
 	if !legacyZone {
 		err = clientV2.DeleteZoneV2(ctx, id)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("error deleting Sysdig Zone: %s", err))
-		}
 	} else {
 		err = client.DeleteZone(ctx, id)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("error deleting Sysdig Zone: %s", err))
-		}
+	}
+
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error deleting Sysdig Zone: %w", err))
 	}
 
 	d.SetId("")
