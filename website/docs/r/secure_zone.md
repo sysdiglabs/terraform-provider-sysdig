@@ -266,7 +266,8 @@ Common patterns:
 
 When using `rules` (**deprecated**), the following operators are supported:
 
-- `and` logical operators
+- `and` logical operator
+- `or` logical operator
 - `in`
 - `contains` to check partial values of attributes
 
