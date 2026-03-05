@@ -114,9 +114,11 @@ resource "sysdig_secure_cloud_auth_account_component" "cloud_responder_roles" {
   * `aws.responder_lambdas.lambda_names` - List of Lambda function names to use for response actions
   * `aws.responder_lambdas.regions` - List of AWS regions where the responder is deployed
   * `aws.responder_lambdas.delegate_role_name` - IAM role name that the responder assumes
+  * `aws.responder_lambdas.validation_role_name` - IAM role name used to validate the onboarded lambdas on the customer cloud account
 
 * `cloud_responder_roles_metadata` - (Optional) Metadata for `COMPONENT_CLOUD_RESPONDER_ROLES` type. Defines the IAM roles that can be assumed for response actions. Required fields:
   * `roles` - Array of role objects, each containing provider-specific role name (e.g., `aws.role_name` for AWS roles)
+  * `validation_role` - Role object, used to validate the onboarded roles on the customer cloud account
 
 -> **Note:** Please refer to Sysdig Secure API Documentation for the Cloud Accounts API for metadata types for `component`.
 
