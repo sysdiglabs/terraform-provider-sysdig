@@ -80,7 +80,7 @@ func TestExpandFlattenFilter_MultipleExpressions(t *testing.T) {
 	require.Len(t, flat["expression"], 2)
 }
 
-func TestFlattenZoneV21_MultipleScopesAndFilters(t *testing.T) {
+func TestFlattenZoneV2_MultipleScopesAndFilters(t *testing.T) {
 	zone := &v2.ZoneV2{
 		Scopes: []v2.ScopeV2{
 			{
@@ -112,7 +112,7 @@ func TestFlattenZoneV21_MultipleScopesAndFilters(t *testing.T) {
 	}
 }
 
-func TestExpandFlattenZoneV21_RoundTrip(t *testing.T) {
+func TestExpandFlattenZoneV2_RoundTrip(t *testing.T) {
 	hclInput := map[string]interface{}{
 		"name":        "example-zone-legacy",
 		"description": "Migrated to expressions",
