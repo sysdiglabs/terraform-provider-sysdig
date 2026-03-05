@@ -104,7 +104,7 @@ func dataSourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData,
 	if hasZoneID {
 		zoneID, err := strconv.Atoi(zoneIDRaw.(string))
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error fetching zone by ID: %s", err))
+			return diag.FromErr(fmt.Errorf("invalid zone id: %s", err))
 		}
 		zoneV2, err = clientV2.GetZoneV2(ctx, zoneID)
 		if err != nil {
