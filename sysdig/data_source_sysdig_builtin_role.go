@@ -8,11 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceSysdigDefaultRole() *schema.Resource {
+func dataSourceSysdigBuiltinRole() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		ReadContext: dataSourceSysdigDefaultRoleRead,
+		ReadContext: dataSourceSysdigBuiltinRoleRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),
@@ -41,7 +41,7 @@ func dataSourceSysdigDefaultRole() *schema.Resource {
 	}
 }
 
-func dataSourceSysdigDefaultRoleRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
+func dataSourceSysdigBuiltinRoleRead(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := m.(SysdigClients).sysdigCommonClientV2()
 	if err != nil {
 		return diag.FromErr(err)
@@ -49,24 +49,24 @@ func dataSourceSysdigDefaultRoleRead(ctx context.Context, d *schema.ResourceData
 
 	name := d.Get(SchemaNameKey).(string)
 
-	defaultRole, err := client.GetDefaultRole(ctx, name)
+	builtinRole, err := client.GetBuiltinRole(ctx, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(name)
 
-	err = d.Set(SchemaNameKey, defaultRole.Name)
+	err = d.Set(SchemaNameKey, builtinRole.Name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set(SchemaMonitorPermKey, defaultRole.MonitorPermissions)
+	err = d.Set(SchemaMonitorPermKey, builtinRole.MonitorPermissions)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set(SchemaSecurePermKey, defaultRole.SecurePermissions)
+	err = d.Set(SchemaSecurePermKey, builtinRole.SecurePermissions)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -56,7 +56,7 @@ type CustomRole struct {
 	SecurePermissions  []string `json:"securePermissions,omitempty"`
 }
 
-type DefaultRole struct {
+type BuiltinRole struct {
 	Name               string   `json:"name"`
 	MonitorPermissions []string `json:"monitorPermissions,omitempty"`
 	SecurePermissions  []string `json:"securePermissions,omitempty"`

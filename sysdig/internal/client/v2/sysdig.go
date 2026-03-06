@@ -21,7 +21,7 @@ type SysdigCommon interface {
 
 	CustomRoleInterface
 	CustomRolePermissionInterface
-	DefaultRoleInterface
+	BuiltinRoleInterface
 	GroupMappingConfigInterface
 	GroupMappingInterface
 	IPFilteringSettingsInterface

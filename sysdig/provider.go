@@ -200,7 +200,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_agent_access_key":       dataSourceSysdigAgentAccessKey(),
 			"sysdig_current_user":           dataSourceSysdigCurrentUser(),
 			"sysdig_custom_role":            dataSourceSysdigCustomRole(),
-			"sysdig_default_role":           dataSourceSysdigDefaultRole(),
+			"sysdig_builtin_role":           dataSourceSysdigBuiltinRole(),
 			"sysdig_fargate_workload_agent": dataSourceSysdigFargateWorkloadAgent(),
 			"sysdig_user":                   dataSourceSysdigUser(),
 
