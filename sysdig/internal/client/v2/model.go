@@ -55,6 +55,12 @@ type CustomRole struct {
 	MonitorPermissions []string `json:"monitorPermissions,omitempty"`
 	SecurePermissions  []string `json:"securePermissions,omitempty"`
 }
+
+type DefaultRole struct {
+	Name               string   `json:"name"`
+	MonitorPermissions []string `json:"monitorPermissions,omitempty"`
+	SecurePermissions  []string `json:"securePermissions,omitempty"`
+}
 type customRoleListWrapper struct {
 	Roles []CustomRole `json:"roles"`
 }
