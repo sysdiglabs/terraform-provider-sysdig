@@ -26,8 +26,17 @@ func TestAccDataSourceSysdigDefaultRole(t *testing.T) {
 }`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.sysdig_default_role.advanced", "name", "Advanced User"),
+					// Verify both permission sets are non-empty
 					resource.TestCheckResourceAttrSet("data.sysdig_default_role.advanced", "monitor_permissions.#"),
 					resource.TestCheckResourceAttrSet("data.sysdig_default_role.advanced", "secure_permissions.#"),
+					// Verify well-known monitor permissions are present
+					resource.TestCheckTypeSetElemAttr("data.sysdig_default_role.advanced", "monitor_permissions.*", "alerts.read"),
+					resource.TestCheckTypeSetElemAttr("data.sysdig_default_role.advanced", "monitor_permissions.*", "dashboards.read"),
+					resource.TestCheckTypeSetElemAttr("data.sysdig_default_role.advanced", "monitor_permissions.*", "token.view"),
+					// Verify well-known secure permissions are present
+					resource.TestCheckTypeSetElemAttr("data.sysdig_default_role.advanced", "secure_permissions.*", "scanning.read"),
+					resource.TestCheckTypeSetElemAttr("data.sysdig_default_role.advanced", "secure_permissions.*", "secure.policy.read"),
+					resource.TestCheckTypeSetElemAttr("data.sysdig_default_role.advanced", "secure_permissions.*", "policies.read"),
 				),
 			},
 		},
