@@ -1359,11 +1359,12 @@ type ExpressionV2 struct {
 	Field    string   `json:"field"`
 	Operator string   `json:"operator"`
 	Value    string   `json:"value,omitempty"`
-	Values   []string `json:"values,omitempty"`
+	Values   []string `json:"-"`
 }
 
 // MarshalJSON ensures the API receives the "value" key always as an array.
-// The backend rejects scalar values — even single-element lists must be sent as arrays.
+// The backend accepts both scalar and array formats for single-value operators,
+// but we normalize to arrays for consistency.
 func (e ExpressionV2) MarshalJSON() ([]byte, error) {
 	m := map[string]interface{}{
 		"field":    e.Field,
