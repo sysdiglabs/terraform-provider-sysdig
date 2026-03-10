@@ -319,31 +319,31 @@ func resourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m
 		if err := d.Set(SchemaScopeKey, fromZoneScopesResponse(zone.Scopes)); err != nil {
 			return diag.FromErr(fmt.Errorf("error setting scope: %s", err))
 		}
-	} else {
-		zone, err := clientv2.GetZoneV2(ctx, id)
-		if err != nil {
-			if isNotFound(err) {
-				d.SetId("")
-				return nil
-			}
-			return diag.FromErr(fmt.Errorf("error reading zone %d: %w", id, err))
-		}
-		_ = d.Set("name", zone.Name)
-		_ = d.Set("description", zone.Description)
-		_ = d.Set("is_system", zone.IsSystem)
-		_ = d.Set("author", zone.Author)
-		_ = d.Set("last_modified_by", zone.LastModifiedBy)
-		_ = d.Set("last_updated", time.UnixMilli(zone.LastUpdated).Format(time.RFC3339))
-		// "State follows config": if the user configured rules, write rules
-		// into state; if they configured expressions, write expressions.
-		// On the first Read (called from Create), d.Get returns the config
-		// values. On subsequent Reads, state reflects the prior Read — which
-		// already matched config — so the choice is self-reinforcing.
-		preferRules := !stateHasExpressions(d)
-		if err := d.Set(SchemaScopeKey, flattenZoneV2(zone, preferRules)); err != nil {
-			return diag.FromErr(fmt.Errorf("error setting scope: %s", err))
-		}
+		return nil
+	}
 
+	zone, err := clientv2.GetZoneV2(ctx, id)
+	if err != nil {
+		if isNotFound(err) {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(fmt.Errorf("error reading zone %d: %w", id, err))
+	}
+	_ = d.Set("name", zone.Name)
+	_ = d.Set("description", zone.Description)
+	_ = d.Set("is_system", zone.IsSystem)
+	_ = d.Set("author", zone.Author)
+	_ = d.Set("last_modified_by", zone.LastModifiedBy)
+	_ = d.Set("last_updated", time.UnixMilli(zone.LastUpdated).Format(time.RFC3339))
+	// "State follows config": if the user configured rules, write rules
+	// into state; if they configured expressions, write expressions.
+	// On the first Read (called from Create), d.Get returns the config
+	// values. On subsequent Reads, state reflects the prior Read — which
+	// already matched config — so the choice is self-reinforcing.
+	preferRules := !stateHasExpressions(d)
+	if err := d.Set(SchemaScopeKey, flattenZoneV2(zone, preferRules)); err != nil {
+		return diag.FromErr(fmt.Errorf("error setting scope: %s", err))
 	}
 
 	return nil
@@ -409,16 +409,18 @@ func resourceSysdigSecureZoneDelete(ctx context.Context, d *schema.ResourceData,
 	if e != nil {
 		return diag.FromErr(fmt.Errorf("error analyzing zone scope: %s", e))
 	}
-	if !legacyZone {
-		err = clientV2.DeleteZoneV2(ctx, id)
-	} else {
-		err = client.DeleteZone(ctx, id)
+	if legacyZone {
+		if err := client.DeleteZone(ctx, id); err != nil {
+			return diag.FromErr(fmt.Errorf("error deleting Sysdig Zone: %w", err))
+		}
+
+		d.SetId("")
+		return nil
 	}
 
-	if err != nil {
+	if err := clientV2.DeleteZoneV2(ctx, id); err != nil {
 		return diag.FromErr(fmt.Errorf("error deleting Sysdig Zone: %w", err))
 	}
-
 	d.SetId("")
 	return nil
 }
