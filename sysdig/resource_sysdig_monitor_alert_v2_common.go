@@ -296,8 +296,8 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 
 	customNotification := v2.CustomNotificationTemplateV2{}
 	if attr, ok := d.GetOk("custom_notification"); ok && attr != nil {
-		if len(attr.([]interface{})) > 0 && attr.([]interface{})[0] != nil {
-			m := attr.([]interface{})[0].(map[string]interface{})
+		if len(attr.([]any)) > 0 && attr.([]any)[0] != nil {
+			m := attr.([]any)[0].(map[string]any)
 
 			customNotification.Subject = m["subject"].(string)
 			customNotification.AppendText = m["append"].(string)
@@ -305,7 +305,7 @@ func buildAlertV2CommonStruct(d *schema.ResourceData) *v2.AlertV2Common {
 			customNotification.AdditionalNotificationFields = []v2.CustomNotificationAdditionalField{}
 			if m["additional_field"] != nil {
 				for _, field := range m["additional_field"].(*schema.Set).List() {
-					fieldMap := field.(map[string]interface{})
+					fieldMap := field.(map[string]any)
 					customNotification.AdditionalNotificationFields = append(customNotification.AdditionalNotificationFields, v2.CustomNotificationAdditionalField{
 						Name:  fieldMap["name"].(string),
 						Value: fieldMap["value"].(string),
@@ -414,19 +414,19 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *v2.AlertV2Common) (
 			alert.CustomNotificationTemplate.AppendText != "" ||
 			alert.CustomNotificationTemplate.PrependText != "" ||
 			len(alert.CustomNotificationTemplate.AdditionalNotificationFields) != 0) {
-		customNotification := map[string]interface{}{}
+		customNotification := map[string]any{}
 		customNotification["subject"] = alert.CustomNotificationTemplate.Subject
 		customNotification["append"] = alert.CustomNotificationTemplate.AppendText
 		customNotification["prepend"] = alert.CustomNotificationTemplate.PrependText
-		additionalFields := []interface{}{}
+		additionalFields := []any{}
 		for _, field := range alert.CustomNotificationTemplate.AdditionalNotificationFields {
-			additionalFields = append(additionalFields, map[string]interface{}{
+			additionalFields = append(additionalFields, map[string]any{
 				"name":  field.Name,
 				"value": field.Value,
 			})
 		}
 		customNotification["additional_field"] = additionalFields
-		_ = d.Set("custom_notification", []interface{}{customNotification})
+		_ = d.Set("custom_notification", []any{customNotification})
 	} else {
 		// if the custom notification template has all empty fields, we don't set it in the state
 		// this because, even if the alert was created without custom notification template, the api returs:
@@ -437,7 +437,7 @@ func updateAlertV2CommonState(d *schema.ResourceData, alert *v2.AlertV2Common) (
 		// ```
 		// and it would triggert a diff compared to the empty state defined in the schema.
 		// (an empty subject creates a notification with default title anyway, so it is equal to no subject definition)
-		_ = d.Set("custom_notification", []interface{}{})
+		_ = d.Set("custom_notification", []any{})
 	}
 
 	if alert.CaptureConfig != nil {

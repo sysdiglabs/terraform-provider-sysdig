@@ -1,6 +1,7 @@
 package sysdig
 
 import (
+	"maps"
 	"reflect"
 	"sort"
 
@@ -34,9 +35,7 @@ func createRuleSchema(original map[string]*schema.Schema) map[string]*schema.Sch
 		},
 	}
 
-	for k, v := range original {
-		ruleSchema[k] = v
-	}
+	maps.Copy(ruleSchema, original)
 
 	return ruleSchema
 }
