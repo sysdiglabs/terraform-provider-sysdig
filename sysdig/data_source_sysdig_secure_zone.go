@@ -154,7 +154,7 @@ func getZoneScopes(zoneV2 *v2.ZoneV2) []any {
 	if zoneV2 != nil {
 		for _, s := range zoneV2.Scopes {
 			for _, f := range s.Filters {
-				if f.ID != 0 && len(f.Expressions) > 0 {
+				if f.ID != 0 && (len(f.Expressions) > 0 || f.Rules != "") {
 					var exprs []any
 					for _, e := range f.Expressions {
 						exprs = append(exprs, flattenExpressionV2(e))
