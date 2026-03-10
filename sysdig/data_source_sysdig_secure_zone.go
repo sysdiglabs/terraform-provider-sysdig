@@ -127,7 +127,7 @@ func dataSourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData,
 		}
 		zoneV2, err = clientV2.GetZoneV2(ctx, zoneV2.ID)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error fetching zones: %s", err))
+			return diag.FromErr(fmt.Errorf("error fetching zone by name: %s", err))
 		}
 	} else {
 		return diag.FromErr(fmt.Errorf("either id or name must be specified"))
