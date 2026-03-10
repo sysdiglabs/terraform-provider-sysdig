@@ -21,6 +21,8 @@ import (
 var legacyAttributePattern = regexp.MustCompile(`\b(labelValues|labels|agentTags)\b`)
 
 func resourceSysdigSecureZone() *schema.Resource {
+	timeout := 5 * time.Minute
+
 	return &schema.Resource{
 		CreateContext: resourceSysdigSecureZoneCreate,
 		ReadContext:   resourceSysdigSecureZoneRead,
@@ -77,6 +79,12 @@ func resourceSysdigSecureZone() *schema.Resource {
 			}
 
 			return nil
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(timeout),
+			Update: schema.DefaultTimeout(timeout),
+			Read:   schema.DefaultTimeout(timeout),
+			Delete: schema.DefaultTimeout(timeout),
 		},
 
 		Schema: map[string]*schema.Schema{
