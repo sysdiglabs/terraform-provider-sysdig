@@ -10,8 +10,7 @@ import (
 	"strings"
 
 	"github.com/Jeffail/gabs/v2"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ecs"
+	ecstypes "github.com/aws/aws-sdk-go-v2/service/ecs/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sysdiglabs/agent-kilt/pkg/cfnpatcher"
@@ -222,12 +221,12 @@ func fargatePostKiltModifications(patchedBytes []byte, patchOpts *patchOptions) 
 		if containerName == "SysdigInstrumentation" {
 			// Add log configuration to the SysdigInstrumentation sidecar container
 			if len(patchOpts.LogConfiguration) != 0 {
-				awsLogConfig := &ecs.LogConfiguration{
-					LogDriver: aws.String("awslogs"),
-					Options: map[string]*string{
-						"awslogs-group":         aws.String(patchOpts.LogConfiguration["group"].(string)),
-						"awslogs-stream-prefix": aws.String(patchOpts.LogConfiguration["stream_prefix"].(string)),
-						"awslogs-region":        aws.String(patchOpts.LogConfiguration["region"].(string)),
+				awsLogConfig := &ecstypes.LogConfiguration{
+					LogDriver: ecstypes.LogDriverAwslogs,
+					Options: map[string]string{
+						"awslogs-group":         patchOpts.LogConfiguration["group"].(string),
+						"awslogs-stream-prefix": patchOpts.LogConfiguration["stream_prefix"].(string),
+						"awslogs-region":        patchOpts.LogConfiguration["region"].(string),
 					},
 				}
 				_, err = container.Set(awsLogConfig, "LogConfiguration")

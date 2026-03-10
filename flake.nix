@@ -22,7 +22,8 @@
           with pkgs;
           mkShell {
             packages = [
-              go
+              go_1_26
+              govulncheck
               terraform
               goreleaser
               gnupg

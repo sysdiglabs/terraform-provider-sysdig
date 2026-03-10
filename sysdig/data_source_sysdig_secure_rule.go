@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"maps"
 	"strconv"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -36,9 +37,7 @@ func createRuleDataSourceSchema(original map[string]*schema.Schema) map[string]*
 		},
 	}
 
-	for k, v := range original {
-		ruleSchema[k] = v
-	}
+	maps.Copy(ruleSchema, original)
 
 	return ruleSchema
 }

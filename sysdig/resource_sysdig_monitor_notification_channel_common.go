@@ -1,6 +1,8 @@
 package sysdig
 
 import (
+	"maps"
+
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -44,9 +46,7 @@ func createMonitorNotificationChannelSchema(original map[string]*schema.Schema) 
 		},
 	}
 
-	for k, v := range original {
-		notificationChannelSchema[k] = v
-	}
+	maps.Copy(notificationChannelSchema, original)
 
 	return notificationChannelSchema
 }
