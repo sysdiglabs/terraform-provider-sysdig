@@ -8,6 +8,8 @@ description: |-
 
 # sysdig_secure_posture_zone Data Source
 
+~> **Deprecated:** `sysdig_secure_posture_zone` is deprecated and will be removed in a future version. Use [`sysdig_secure_zone`](secure_zone) instead.
+
 The `sysdig_secure_posture_zone` data source allows you to retrieve information about a specific secure posture zone by its ID.
 
 ## Example Usage
