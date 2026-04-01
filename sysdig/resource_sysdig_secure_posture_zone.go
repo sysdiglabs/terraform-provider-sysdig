@@ -14,10 +14,11 @@ func resourceSysdigSecurePostureZone() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceCreateOrUpdatePostureZone,
-		UpdateContext: resourceCreateOrUpdatePostureZone,
-		DeleteContext: resourceSysdigSecurePostureZoneDelete,
-		ReadContext:   resourceSysdigSecurePostureZoneRead,
+		DeprecationMessage: "sysdig_secure_posture_zone is deprecated and will be removed in a future version. Use sysdig_secure_zone instead.",
+		CreateContext:      resourceCreateOrUpdatePostureZone,
+		UpdateContext:      resourceCreateOrUpdatePostureZone,
+		DeleteContext:      resourceSysdigSecurePostureZoneDelete,
+		ReadContext:        resourceSysdigSecurePostureZoneRead,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

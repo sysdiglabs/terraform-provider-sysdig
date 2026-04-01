@@ -8,6 +8,8 @@ description: |-
 
 # Resource: sysdig_secure_posture_zone
 
+~> **Deprecated:** `sysdig_secure_posture_zone` is deprecated and will be removed in a future version. Use [`sysdig_secure_zone`](secure_zone) instead. Zone IDs are the same across both APIs, so existing zones can be adopted via `terraform import` without recreation.
+
 Creates a Sysdig Secure Posture Zone.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
