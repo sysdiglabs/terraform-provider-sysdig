@@ -12,6 +12,29 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func TestAccPosturePolicyDataSource_ByName(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				data "sysdig_secure_posture_policy" "by_name" {
+					name = "Sysdig Kubernetes"
+				}`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.sysdig_secure_posture_policy.by_name", "id", "2"),
+					resource.TestCheckResourceAttr("data.sysdig_secure_posture_policy.by_name", "name", "Sysdig Kubernetes"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccPosturePolicyDataSource(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),

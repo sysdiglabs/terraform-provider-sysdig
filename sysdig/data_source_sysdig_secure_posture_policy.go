@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -17,12 +18,16 @@ func dataSourceSysdigSecurePosturePolicy() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			SchemaIDKey: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{SchemaIDKey, SchemaNameKey},
 			},
 			SchemaNameKey: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{SchemaIDKey, SchemaNameKey},
 			},
 			SchemaDescriptionKey: {
 				Type:     schema.TypeString,
@@ -67,11 +72,38 @@ func dataSourceSysdigSecurePosturePolicyRead(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	id, err := strconv.ParseInt(d.Get("id").(string), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
+	var policyID int64
+
+	if idRaw, hasID := d.GetOk(SchemaIDKey); hasID {
+		policyID, err = strconv.ParseInt(idRaw.(string), 10, 64)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("invalid policy id: %s", err))
+		}
+	} else if nameRaw, hasName := d.GetOk(SchemaNameKey); hasName {
+		name := nameRaw.(string)
+		policies, listErr := client.ListPosturePolicies(ctx)
+		if listErr != nil {
+			return diag.FromErr(fmt.Errorf("error listing posture policies: %s", listErr))
+		}
+		var matchedID string
+		for _, p := range policies {
+			if p.Name == name {
+				matchedID = p.ID
+				break
+			}
+		}
+		if matchedID == "" {
+			return diag.FromErr(fmt.Errorf("posture policy with name %q not found", name))
+		}
+		policyID, err = strconv.ParseInt(matchedID, 10, 64)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("invalid policy id %q: %s", matchedID, err))
+		}
+	} else {
+		return diag.FromErr(fmt.Errorf("either id or name must be specified"))
 	}
-	policy, err := client.GetPosturePolicyByID(ctx, id)
+
+	policy, err := client.GetPosturePolicyByID(ctx, policyID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
