@@ -170,6 +170,104 @@ func TestClient_ErrorFromResponse_json_nonStandard_error_format(t *testing.T) {
 	}
 }
 
+func TestClient_APIErrorFromResponse(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		statusCode     int
+		status         string
+		body           string
+		wantMessage    string
+		wantStatusCode int
+	}{
+		{
+			name:           "message field",
+			statusCode:     400,
+			status:         "400 Bad Request",
+			body:           `{"message":"invalid zone name"}`,
+			wantMessage:    "invalid zone name",
+			wantStatusCode: 400,
+		},
+		{
+			name:           "error field",
+			statusCode:     401,
+			status:         "401 Unauthorized",
+			body:           `{"timestamp":1715255725613,"status":401,"error":"Unauthorized","path":"/api/v2/zones/123"}`,
+			wantMessage:    "Unauthorized",
+			wantStatusCode: 401,
+		},
+		{
+			name:       "errors array with reason and message",
+			statusCode: 422,
+			status:     "422 Unprocessable Entity",
+			body: `{"errors":[
+				{"reason":"validation_error","message":"name is required"},
+				{"reason":"validation_error","message":"scope is required"}
+			]}`,
+			wantMessage:    "validation_error, name is required, validation_error, scope is required",
+			wantStatusCode: 422,
+		},
+		{
+			name:           "details array",
+			statusCode:     400,
+			status:         "400 Bad Request",
+			body:           `{"details":["field 'name' is required","field 'scope' is required"]}`,
+			wantMessage:    "field 'name' is required, field 'scope' is required",
+			wantStatusCode: 400,
+		},
+		{
+			name:           "non-json body falls back to status",
+			statusCode:     502,
+			status:         "502 Bad Gateway",
+			body:           "not json",
+			wantMessage:    "502 Bad Gateway",
+			wantStatusCode: 502,
+		},
+		{
+			name:           "empty json falls back to status",
+			statusCode:     500,
+			status:         "500 Internal Server Error",
+			body:           `{}`,
+			wantMessage:    "500 Internal Server Error",
+			wantStatusCode: 500,
+		},
+		{
+			name:           "404 not found",
+			statusCode:     404,
+			status:         "404 Not Found",
+			body:           `{"message":"zone not found"}`,
+			wantMessage:    "zone not found",
+			wantStatusCode: 404,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			c := Client{}
+			resp := &http.Response{
+				StatusCode: tt.statusCode,
+				Status:     tt.status,
+				Body:       io.NopCloser(strings.NewReader(tt.body)),
+			}
+
+			err := c.APIErrorFromResponse(resp)
+
+			apiErr, ok := err.(*APIError)
+			if !ok {
+				t.Fatalf("expected *APIError, got %T", err)
+			}
+			if apiErr.StatusCode != tt.wantStatusCode {
+				t.Errorf("StatusCode: want %d, got %d", tt.wantStatusCode, apiErr.StatusCode)
+			}
+			if apiErr.Error() != tt.wantMessage {
+				t.Errorf("Message: want %q, got %q", tt.wantMessage, apiErr.Error())
+			}
+		})
+	}
+}
+
 func TestRequest(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		agent := r.Header.Get(UserAgentHeader)
