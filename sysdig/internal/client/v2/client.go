@@ -62,6 +62,7 @@ type SecureCommon interface {
 	PostureAcceptRiskInterface
 	PostureVulnerabilityAcceptRiskInterface
 	ZoneInterface
+	ZoneV2Interface
 }
 
 type Requester interface {
@@ -72,6 +73,22 @@ type Requester interface {
 type Client struct {
 	config    *config
 	requester Requester
+}
+
+type APIError struct {
+	StatusCode int
+	Status     string
+	Message    string
+}
+
+func (e *APIError) Error() string {
+	if e.Message != "" {
+		return e.Message
+	}
+	if e.Status != "" {
+		return e.Status
+	}
+	return "api error"
 }
 
 func (c *Client) ErrorFromResponse(response *http.Response) error {
@@ -96,6 +113,35 @@ func (c *Client) ErrorFromResponse(response *http.Response) error {
 	}
 
 	return errors.New(response.Status)
+}
+
+// APIErrorFromResponse Introduces a new method that extracts error details from the API response and constructs an APIError with the relevant information.
+func (c *Client) APIErrorFromResponse(response *http.Response) error {
+	statusCode := response.StatusCode
+	status := response.Status
+
+	var data any
+	if err := json.NewDecoder(response.Body).Decode(&data); err != nil {
+		return &APIError{StatusCode: statusCode, Status: status}
+	}
+
+	search, err := jmespath.Search("[message, error, details[], errors[].[reason, message]][][] | join(', ', @)", data)
+	if err != nil {
+		return &APIError{StatusCode: statusCode, Status: status}
+	}
+
+	msg := ""
+	if searchArray, ok := search.([]any); ok {
+		msg = strings.Join(cast.ToStringSlice(searchArray), ", ")
+	} else {
+		msg = cast.ToString(search)
+	}
+
+	return &APIError{
+		StatusCode: statusCode,
+		Status:     status,
+		Message:    msg,
+	}
 }
 
 func Unmarshal[T any](data io.Reader) (T, error) {
