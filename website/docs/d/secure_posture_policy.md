@@ -3,26 +3,33 @@ subcategory: "Sysdig Secure"
 layout: "sysdig"
 page_title: "Sysdig: sysdig_secure_posture_policy"
 description: |-
-  Retrieves Posture policy by ID.
+  Retrieves Posture policy by ID or name.
 ---
 
 # Data Source: sysdig_secure_posture_policy
 
-Retrieves the information of a Posture Policy.
+Retrieves the information of a Posture Policy by ID or name.
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
 
 ```terraform
-data sysdig_secure_posture_policiy policy {
-  id = "454678"
+data "sysdig_secure_posture_policy" "by_id" {
+  id = "2"
+}
+
+data "sysdig_secure_posture_policy" "by_name" {
+  name = "Sysdig Kubernetes"
 }
 ```
 
 ## Argument Reference
 
-- `id` - (Required) The ID of the Posture Policy, eg. `2`
+Exactly one of the following arguments must be provided:
+
+- `id` - (Optional) The ID of the Posture Policy.
+- `name` - (Optional) The name of the Posture Policy. Policy names are unique.
 
 ## Attributes Reference
 
