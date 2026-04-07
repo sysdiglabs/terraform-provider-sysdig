@@ -459,6 +459,51 @@ In addition to all arguments above, the following attributes are exported:
 - `last_modified_by` - (Computed) By whom is last modification made.
 - `last_updated` - (Computed) Timestamp of last modification of zone.
 
+## Migrating from sysdig_secure_posture_zone
+
+`sysdig_secure_posture_zone` is deprecated. Zone IDs are the same across both APIs, so the migration does not recreate the zone.
+
+~> **Note:** `sysdig_secure_posture_zone` supports `policy_ids` to associate posture policies with a zone. `sysdig_secure_zone` does not manage policy assignments. Policy-to-zone associations must be managed separately.
+
+1. Replace the `sysdig_secure_posture_zone` block with `sysdig_secure_zone` in your configuration, mapping `scopes { scope { ... } }` to top-level `scope` blocks. Note that `scope` is required in `sysdig_secure_zone`:
+
+```terraform
+# Before
+resource "sysdig_secure_posture_zone" "example" {
+  name       = "my-zone"
+  policy_ids = [123, 456]
+  scopes {
+    scope {
+      target_type = "aws"
+      rules       = "account in (\"123456789\")"
+    }
+  }
+}
+
+# After
+resource "sysdig_secure_zone" "example" {
+  name = "my-zone"
+  scope {
+    target_type = "aws"
+    rules       = "account in (\"123456789\")"
+  }
+}
+```
+
+2. Remove the old resource from Terraform state:
+
+```
+$ terraform state rm sysdig_secure_posture_zone.example
+```
+
+3. Import the existing zone into the new resource:
+
+```
+$ terraform import sysdig_secure_zone.example 12345
+```
+
+4. Run `terraform plan` to verify there are no unexpected changes.
+
 ## How state is managed (drift prevention)
 
 When reading a zone from the API, the provider preserves the representation format from your configuration:

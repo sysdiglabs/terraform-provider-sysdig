@@ -10,7 +10,8 @@ import (
 
 func dataSourceSysdigSecurePostureZone() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceSysdigSecurePostureZoneRead,
+		DeprecationMessage: "sysdig_secure_posture_zone is deprecated and will be removed in a future version. Use sysdig_secure_zone instead.",
+		ReadContext:        dataSourceSysdigSecurePostureZoneRead,
 
 		Schema: map[string]*schema.Schema{
 			"id": {
