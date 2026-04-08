@@ -3,7 +3,10 @@
 package v2
 
 import (
+	"context"
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -36,6 +39,50 @@ func TestMarshalOrg(t *testing.T) {
 
 	if strings.ReplaceAll(marshaled, " ", "") != strings.ReplaceAll(expected, " ", "") {
 		t.Errorf("expected %v, got %v", expected, marshaled)
+	}
+}
+
+func TestUpdateOrganizationSecureUsesCamelCase(t *testing.T) {
+	t.Parallel()
+
+	var receivedBody string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		receivedBody = string(body)
+		// Return a valid protobuf JSON response
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"managementAccountId":"31ebd166-82ef-4ca4-baf9-ce760afa46fb","organizationRootId":"r-8llw"}`))
+	}))
+	defer server.Close()
+
+	c := newSysdigClient(
+		WithURL(server.URL),
+		WithToken("test-token"),
+	)
+
+	org := &OrganizationSecure{
+		cloudauth.CloudOrganization{
+			ManagementAccountId: "31ebd166-82ef-4ca4-baf9-ce760afa46fb",
+			OrganizationRootId:  "r-8llw",
+		},
+	}
+
+	_, _, err := c.UpdateOrganizationSecure(context.Background(), "e69f12fd-934d-43cc-8b8c-2964aba20003", org)
+	if err != nil {
+		t.Fatalf("UpdateOrganizationSecure failed: %v", err)
+	}
+
+	if strings.Contains(receivedBody, "management_account_id") {
+		t.Errorf("request body uses snake_case (json.Marshal), expected camelCase (protojson.Marshal): %s", receivedBody)
+	}
+	if !strings.Contains(receivedBody, "managementAccountId") {
+		t.Errorf("request body missing camelCase field 'managementAccountId': %s", receivedBody)
+	}
+	if strings.Contains(receivedBody, "organization_root_id") {
+		t.Errorf("request body uses snake_case 'organization_root_id', expected camelCase 'organizationRootId': %s", receivedBody)
+	}
+	if !strings.Contains(receivedBody, "organizationRootId") {
+		t.Errorf("request body missing camelCase field 'organizationRootId': %s", receivedBody)
 	}
 }
 
