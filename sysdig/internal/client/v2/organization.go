@@ -92,7 +92,7 @@ func (c *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) (er
 }
 
 func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org *OrganizationSecure) (organization *OrganizationSecure, errString string, err error) {
-	payload, err := Marshal(org)
+	payload, err := c.marshalCloudauthProto(org)
 	if err != nil {
 		return nil, "", err
 	}
