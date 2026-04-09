@@ -51,7 +51,7 @@ func TestUpdateOrganizationSecureUsesCamelCase(t *testing.T) {
 		receivedBody = string(body)
 		// Return a valid protobuf JSON response
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"managementAccountId":"31ebd166-82ef-4ca4-baf9-ce760afa46fb","organizationRootId":"r-8llw"}`))
+		_, _ = w.Write([]byte(`{"managementAccountId":"31ebd166-82ef-4ca4-baf9-ce760afa46fb","organizationRootId":"r-8llw"}`))
 	}))
 	defer server.Close()
 
