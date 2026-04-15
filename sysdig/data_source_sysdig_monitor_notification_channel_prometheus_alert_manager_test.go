@@ -40,7 +40,7 @@ func monitorNotificationChannelPrometheusAlertManager(name string) string {
 	return fmt.Sprintf(`
 resource "sysdig_monitor_notification_channel_prometheus_alert_manager" "nc_prometheus_alert_manager" {
 	name = "%s"
-	url = "https://testurl.com/xxx"
+	url = "https://example.com/test"
 	allow_insecure_connections = true
 }
 
