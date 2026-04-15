@@ -69,7 +69,7 @@ func monitorNotificationChannelPrometheusAlertManagerWithName(name string) strin
 resource "sysdig_monitor_notification_channel_prometheus_alert_manager" "sample-channel1" {
 	name = "Example Channel %s - prometheus alert manager"
 	enabled = true
-	url = "https://testurl.com/xxx"
+	url = "https://example.com/test"
 	notify_when_ok = false
 	notify_when_resolved = false
 	send_test_notification = false
@@ -81,7 +81,7 @@ func monitorNotificationChannelPrometheusAlertManagerWithNameWithAdditionalheade
 	resource "sysdig_monitor_notification_channel_prometheus_alert_manager" "sample-channel2" {
 		name = "Example Channel %s - prometheus alert manager With Additional Headers"
 		enabled = true
-		url = "https://testurl.com/xxx"
+		url = "https://example.com/test"
 		notify_when_ok = false
 		notify_when_resolved = false
 		send_test_notification = false
@@ -96,7 +96,7 @@ func monitorNotificationChannelPrometheusAlertManagerWithNameWithAllowInsecureCo
 	resource "sysdig_monitor_notification_channel_prometheus_alert_manager" "sample-channel3" {
 		name = "Example Channel %s - prometheus alert manager with insecure connections"
 		enabled = true
-		url = "https://testurl.com/xxx"
+		url = "https://example.com/test"
 		notify_when_ok = false
 		notify_when_resolved = false
 		send_test_notification = false
@@ -109,7 +109,7 @@ func monitorNotificationChannelPrometheusAlertManagerSharedWithCurrentTeam(name 
 	resource "sysdig_monitor_notification_channel_prometheus_alert_manager" "sample-channel4" {
 		name = "Example Channel %s - prometheus alert manager with share with current team"
 		enabled = true
-		url = "https://testurl.com/xxx"
+		url = "https://example.com/test"
 		notify_when_ok = false
 		notify_when_resolved = false
 		send_test_notification = false
