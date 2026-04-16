@@ -48,6 +48,7 @@ const (
 	SchemaTargetKey                     = "target"
 	SchemaZonesKey                      = "zones"
 	SchemaZonesIDsKey                   = "zone_ids"
+	SchemaZoneIDKey                     = "zone_id"
 	SchemaAllZones                      = "all_zones"
 	SchemaScopeKey                      = "scope"
 	SchemaScopesKey                     = "scopes"

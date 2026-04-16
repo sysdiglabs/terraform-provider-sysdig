@@ -195,6 +195,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_vulnerability_policy":                          resourceSysdigSecureVulnerabilityPolicy(),
 			"sysdig_secure_vulnerability_rule_bundle":                     resourceSysdigSecureVulnerabilityRuleBundle(),
 			"sysdig_secure_zone":                                          resourceSysdigSecureZone(),
+			"sysdig_secure_zone_posture_policy_assignment":                resourceSysdigSecureZonePosturePolicyAssignment(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sysdig_agent_access_key":       dataSourceSysdigAgentAccessKey(),
