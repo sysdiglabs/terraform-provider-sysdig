@@ -131,6 +131,41 @@ func TestAccSSOGroupMappingCustomRole(t *testing.T) {
 	})
 }
 
+func TestAccSSOGroupMappingTeamIDsFromResource(t *testing.T) {
+	groupName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: ssoGroupMappingWithTeamIDsConfig(groupName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"sysdig_sso_group_mapping.test_team_ids",
+						"group_name",
+						groupName,
+					),
+					resource.TestCheckResourceAttr(
+						"sysdig_sso_group_mapping.test_team_ids",
+						"team_map.0.is_for_all_teams",
+						"false",
+					),
+				),
+			},
+			{
+				ResourceName:      "sysdig_sso_group_mapping.test_team_ids",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func ssoGroupMappingAllTeamsConfig(groupName string) string {
 	return fmt.Sprintf(`
 resource "sysdig_sso_group_mapping" "test" {
@@ -159,6 +194,24 @@ resource "sysdig_sso_group_mapping" "test" {
   }
 
   weight = 10
+}
+`, groupName)
+}
+
+func ssoGroupMappingWithTeamIDsConfig(groupName string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_team" "test_team" {
+  name = "%[1]s-team"
+}
+
+resource "sysdig_sso_group_mapping" "test_team_ids" {
+  group_name         = "%[1]s"
+  standard_team_role = "ROLE_TEAM_STANDARD"
+
+  team_map {
+    is_for_all_teams = false
+    team_ids         = [sysdig_secure_team.test_team.id]
+  }
 }
 `, groupName)
 }
