@@ -30,16 +30,28 @@ func resourceSysdigSSOGroupMapping() *schema.Resource {
 			Delete: schema.DefaultTimeout(timeout),
 		},
 		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, meta any) error {
-			teamMaps := diff.Get("team_map").([]any)
-			if len(teamMaps) > 0 {
-				teamMap := teamMaps[0].(map[string]any)
-				isForAllTeams := teamMap["is_for_all_teams"].(bool)
-				teamIDs := teamMap["team_ids"].([]any)
-				if !isForAllTeams && len(teamIDs) == 0 {
-					return fmt.Errorf("team_ids must be set when is_for_all_teams is false")
-				}
+			plan := diff.GetRawPlan().AsValueMap()
+			teamMapPlan := plan["team_map"]
+			if teamMapPlan.IsNull() || !teamMapPlan.IsKnown() {
+				return nil
 			}
-
+			teamMapSlice := teamMapPlan.AsValueSlice()
+			if len(teamMapSlice) == 0 {
+				return nil
+			}
+			first := teamMapSlice[0]
+			if !first.IsKnown() {
+				return nil
+			}
+			inner := first.AsValueMap()
+			isForAllTeams := inner["is_for_all_teams"]
+			teamIDs := inner["team_ids"]
+			if !isForAllTeams.IsKnown() || !teamIDs.IsKnown() {
+				return nil
+			}
+			if !isForAllTeams.True() && (teamIDs.IsNull() || len(teamIDs.AsValueSlice()) == 0) {
+				return fmt.Errorf("team_ids must be set when is_for_all_teams is false")
+			}
 			return nil
 		},
 		Schema: map[string]*schema.Schema{
