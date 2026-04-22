@@ -62,6 +62,7 @@ func TestAccSysdigZone_basic(t *testing.T) {
 
 func TestAccSysdigSecureZone_LegacyRules(t *testing.T) {
 	resourceName := "sysdig_secure_zone.legacy"
+	name := "acc-legacy-" + randomText(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
@@ -72,16 +73,16 @@ func TestAccSysdigSecureZone_LegacyRules(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecureZoneLegacy(),
+				Config: testAccSecureZoneLegacy(name),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "acc-legacy"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "scope.0.target_type", "kubernetes"),
 				),
 			},
 			{
 				// refresh only
 				PlanOnly: true,
-				Config:   testAccSecureZoneLegacy(),
+				Config:   testAccSecureZoneLegacy(name),
 			},
 		},
 	})
@@ -89,6 +90,7 @@ func TestAccSysdigSecureZone_LegacyRules(t *testing.T) {
 
 func TestAccSysdigSecureZone_ExpressionOnly(t *testing.T) {
 	resourceName := "sysdig_secure_zone.expr"
+	name := "acc-expr-" + randomText(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
@@ -99,9 +101,9 @@ func TestAccSysdigSecureZone_ExpressionOnly(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecureZoneExpression(),
+				Config: testAccSecureZoneExpression(name),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "acc-expr"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "scope.0.target_type", "kubernetes"),
 					resource.TestCheckResourceAttr(resourceName, "scope.0.expression.#", "2"),
 					// In SDK v2, optional attributes in nested TypeSet elements are always
@@ -111,7 +113,7 @@ func TestAccSysdigSecureZone_ExpressionOnly(t *testing.T) {
 			},
 			{
 				PlanOnly: true,
-				Config:   testAccSecureZoneExpression(),
+				Config:   testAccSecureZoneExpression(name),
 			},
 		},
 	})
@@ -119,6 +121,7 @@ func TestAccSysdigSecureZone_ExpressionOnly(t *testing.T) {
 
 func TestAccSysdigSecureZone_MigrateRulesToExpression(t *testing.T) {
 	resourceName := "sysdig_secure_zone.migrate"
+	name := "acc-migrate-" + randomText(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
@@ -129,10 +132,10 @@ func TestAccSysdigSecureZone_MigrateRulesToExpression(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecureZoneLegacyMigration(),
+				Config: testAccSecureZoneLegacyMigration(name),
 			},
 			{
-				Config: testAccSecureZoneExpressionMigration(),
+				Config: testAccSecureZoneExpressionMigration(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "description", "migrated"),
 					resource.TestCheckResourceAttr(resourceName, "scope.0.expression.#", "2"),
@@ -140,7 +143,7 @@ func TestAccSysdigSecureZone_MigrateRulesToExpression(t *testing.T) {
 			},
 			{
 				PlanOnly: true,
-				Config:   testAccSecureZoneExpressionMigration(),
+				Config:   testAccSecureZoneExpressionMigration(name),
 			},
 		},
 	})
@@ -148,6 +151,7 @@ func TestAccSysdigSecureZone_MigrateRulesToExpression(t *testing.T) {
 
 func TestAccSysdigSecureZone_V2RulesOnly(t *testing.T) {
 	resourceName := "sysdig_secure_zone.v2rules"
+	name := "acc-v2rules-" + randomText(5)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv, SysdigIBMSecureAPIKeyEnv),
@@ -158,16 +162,16 @@ func TestAccSysdigSecureZone_V2RulesOnly(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecureZoneV2Rules(),
+				Config: testAccSecureZoneV2Rules(name),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "acc-v2rules"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "scope.0.target_type", "kubernetes"),
 					resource.TestCheckResourceAttr(resourceName, "scope.0.expression.#", "0"),
 				),
 			},
 			{
 				PlanOnly: true,
-				Config:   testAccSecureZoneV2Rules(),
+				Config:   testAccSecureZoneV2Rules(name),
 			},
 		},
 	})
@@ -203,10 +207,10 @@ resource "sysdig_secure_zone" "test" {
 `, name, description)
 }
 
-func testAccSecureZoneLegacy() string {
-	return `
+func testAccSecureZoneLegacy(name string) string {
+	return fmt.Sprintf(`
 resource "sysdig_secure_zone" "legacy" {
-  name        = "acc-legacy"
+  name        = "%s"
   description = "legacy rules"
 
   scope {
@@ -214,13 +218,13 @@ resource "sysdig_secure_zone" "legacy" {
     rules = "agentTags != \"key: value\" and not agentTags contains \"key2: value2\""
   }
 }
-`
+`, name)
 }
 
-func testAccSecureZoneExpression() string {
-	return `
+func testAccSecureZoneExpression(name string) string {
+	return fmt.Sprintf(`
 resource "sysdig_secure_zone" "expr" {
-  name        = "acc-expr"
+  name        = "%s"
   description = "expression test"
 
   scope {
@@ -239,13 +243,13 @@ resource "sysdig_secure_zone" "expr" {
     }
   }
 }
-`
+`, name)
 }
 
-func testAccSecureZoneLegacyMigration() string {
-	return `
+func testAccSecureZoneLegacyMigration(name string) string {
+	return fmt.Sprintf(`
 resource "sysdig_secure_zone" "migrate" {
-  name        = "acc-migrate"
+  name        = "%s"
   description = "legacy"
 
   scope {
@@ -253,13 +257,13 @@ resource "sysdig_secure_zone" "migrate" {
     rules = "agentTags != \"key: value\" and not agentTags contains \"key2: value2\""
   }
 }
-`
+`, name)
 }
 
-func testAccSecureZoneExpressionMigration() string {
-	return `
+func testAccSecureZoneExpressionMigration(name string) string {
+	return fmt.Sprintf(`
 resource "sysdig_secure_zone" "migrate" {
-  name        = "acc-migrate"
+  name        = "%s"
   description = "migrated"
 
   scope {
@@ -278,13 +282,13 @@ resource "sysdig_secure_zone" "migrate" {
     }
   }
 }
-`
+`, name)
 }
 
-func testAccSecureZoneV2Rules() string {
-	return `
+func testAccSecureZoneV2Rules(name string) string {
+	return fmt.Sprintf(`
 resource "sysdig_secure_zone" "v2rules" {
-  name        = "acc-v2rules"
+  name        = "%s"
   description = "v2 rules test"
 
   scope {
@@ -292,7 +296,7 @@ resource "sysdig_secure_zone" "v2rules" {
     rules = "agent.tag.key != \"value\" and not agent.tag.key2 contains \"value2\""
   }
 }
-`
+`, name)
 }
 
 func testAccSecureZoneInvalid() string {
