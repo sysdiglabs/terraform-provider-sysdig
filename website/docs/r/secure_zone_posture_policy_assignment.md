@@ -46,7 +46,7 @@ resource "sysdig_secure_zone_posture_policy_assignment" "production" {
 
 ## Attributes Reference
 
-No additional attributes are exported beyond the arguments.
+No additional attributes are exported.
 
 ## Import
 
