@@ -1124,7 +1124,7 @@ type PostureZoneResponse struct {
 }
 
 type ZonePolicyAssignment struct {
-	ZoneID    int   `json:"zoneId"`
+	ZoneID    int   `json:"zoneId,string"`
 	PolicyIDs []int `json:"policyIds"`
 }
 
