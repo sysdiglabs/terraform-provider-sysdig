@@ -1124,12 +1124,12 @@ type PostureZoneResponse struct {
 }
 
 type ZonePolicyAssignment struct {
-	ZoneID    int   `json:"zoneId,string"`
-	PolicyIDs []int `json:"policyIds"`
+	ZoneID    string   `json:"zoneId"`
+	PolicyIDs []string `json:"policyIds"`
 }
 
 type ZonePolicyAssignmentRequest struct {
-	PolicyIDs []int `json:"policyIds"`
+	PolicyIDs []string `json:"policyIds"`
 }
 
 type IdentityContext struct {

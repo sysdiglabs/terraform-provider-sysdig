@@ -66,7 +66,7 @@ func resourceSysdigSecureZonePosturePolicyAssignmentCreate(ctx context.Context, 
 
 	zoneID := d.Get(SchemaZoneIDKey).(int)
 	req := &v2.ZonePolicyAssignmentRequest{
-		PolicyIDs: expandIntSet(d.Get(SchemaPolicyIDsKey).(*schema.Set)),
+		PolicyIDs: expandIntSetToStrings(d.Get(SchemaPolicyIDsKey).(*schema.Set)),
 	}
 
 	_, err = client.CreateZonePolicyAssignment(ctx, zoneID, req)
@@ -99,7 +99,11 @@ func resourceSysdigSecureZonePosturePolicyAssignmentRead(ctx context.Context, d 
 	}
 
 	_ = d.Set(SchemaZoneIDKey, zoneID)
-	_ = d.Set(SchemaPolicyIDsKey, assignment.PolicyIDs)
+	policyIDs, err := stringsToInts(assignment.PolicyIDs)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error parsing policy IDs: %w", err))
+	}
+	_ = d.Set(SchemaPolicyIDsKey, policyIDs)
 	return nil
 }
 
@@ -115,7 +119,7 @@ func resourceSysdigSecureZonePosturePolicyAssignmentUpdate(ctx context.Context, 
 	}
 
 	req := &v2.ZonePolicyAssignmentRequest{
-		PolicyIDs: expandIntSet(d.Get(SchemaPolicyIDsKey).(*schema.Set)),
+		PolicyIDs: expandIntSetToStrings(d.Get(SchemaPolicyIDsKey).(*schema.Set)),
 	}
 
 	_, err = client.UpdateZonePolicyAssignment(ctx, zoneID, req)
@@ -145,10 +149,22 @@ func resourceSysdigSecureZonePosturePolicyAssignmentDelete(ctx context.Context, 
 	return nil
 }
 
-func expandIntSet(set *schema.Set) []int {
-	result := make([]int, 0, set.Len())
+func expandIntSetToStrings(set *schema.Set) []string {
+	result := make([]string, 0, set.Len())
 	for _, v := range set.List() {
-		result = append(result, v.(int))
+		result = append(result, strconv.Itoa(v.(int)))
 	}
 	return result
+}
+
+func stringsToInts(ss []string) ([]int, error) {
+	result := make([]int, len(ss))
+	for i, s := range ss {
+		v, err := strconv.Atoi(s)
+		if err != nil {
+			return nil, err
+		}
+		result[i] = v
+	}
+	return result, nil
 }
