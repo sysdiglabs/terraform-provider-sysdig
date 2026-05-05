@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSSOGroupMappingToResourceData_SortsTeamIDs(t *testing.T) {
+func TestSSOGroupMappingToResourceData_TeamIDsUnordered(t *testing.T) {
 	d := schema.TestResourceDataRaw(t, resourceSysdigSSOGroupMapping().Schema, map[string]any{})
 
 	gm := &v2.SSOGroupMapping{
@@ -27,6 +27,9 @@ func TestSSOGroupMappingToResourceData_SortsTeamIDs(t *testing.T) {
 	require.Len(t, teamMaps, 1)
 
 	teamMap := teamMaps[0].(map[string]any)
-	teamIDs := teamMap["team_ids"].([]any)
-	require.Equal(t, []any{1, 2, 3}, teamIDs)
+	teamIDsSet := teamMap["team_ids"].(*schema.Set)
+	teamIDs := teamIDsSet.List()
+
+	require.Len(t, teamIDs, 3)
+	require.ElementsMatch(t, []int{1, 2, 3}, teamIDs)
 }

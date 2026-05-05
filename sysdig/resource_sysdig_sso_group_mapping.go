@@ -3,7 +3,6 @@ package sysdig
 import (
 	"context"
 	"fmt"
-	"sort"
 	"strconv"
 	"time"
 
@@ -23,6 +22,14 @@ func resourceSysdigSSOGroupMapping() *schema.Resource {
 		DeleteContext: resourceSysdigSSOGroupMappingDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
+		},
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Version: 0,
+				Type:    resourceSysdigSSOGroupMappingV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: resourceSysdigSSOGroupMappingUpgradeV0,
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
@@ -50,7 +57,7 @@ func resourceSysdigSSOGroupMapping() *schema.Resource {
 			if !isForAllTeams.IsKnown() || !teamIDs.IsKnown() {
 				return nil
 			}
-			if !isForAllTeams.True() && (teamIDs.IsNull() || len(teamIDs.AsValueSlice()) == 0) {
+			if !isForAllTeams.True() && (teamIDs.IsNull() || teamIDs.LengthInt() == 0) {
 				return fmt.Errorf("team_ids must be set when is_for_all_teams is false")
 			}
 			return nil
@@ -89,7 +96,7 @@ func resourceSysdigSSOGroupMapping() *schema.Resource {
 							Required: true,
 						},
 						"team_ids": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeInt,
@@ -212,9 +219,10 @@ func ssoGroupMappingFromResourceData(d *schema.ResourceData) *v2.SSOGroupMapping
 	teamMaps := d.Get("team_map").([]any)
 	if len(teamMaps) > 0 {
 		teamMap := teamMaps[0].(map[string]any)
-		teamIDsInterface := teamMap["team_ids"].([]any)
-		teamIDs := make([]int, len(teamIDsInterface))
-		for i, id := range teamIDsInterface {
+		teamIDsSet := teamMap["team_ids"].(*schema.Set)
+		teamIDsList := teamIDsSet.List()
+		teamIDs := make([]int, len(teamIDsList))
+		for i, id := range teamIDsList {
 			teamIDs[i] = id.(int)
 		}
 		gm.TeamMap = &v2.SSOGroupMappingTeamMap{
@@ -244,12 +252,9 @@ func ssoGroupMappingToResourceData(gm *v2.SSOGroupMapping, d *schema.ResourceDat
 	}
 
 	if gm.TeamMap != nil {
-		sortedIDs := make([]int, len(gm.TeamMap.TeamIDs))
-		copy(sortedIDs, gm.TeamMap.TeamIDs)
-		sort.Ints(sortedIDs)
 		teamMap := map[string]any{
 			"is_for_all_teams": gm.TeamMap.IsForAllTeams,
-			"team_ids":         sortedIDs,
+			"team_ids":         gm.TeamMap.TeamIDs,
 		}
 		if err := d.Set("team_map", []map[string]any{teamMap}); err != nil {
 			return err
@@ -257,4 +262,46 @@ func ssoGroupMappingToResourceData(gm *v2.SSOGroupMapping, d *schema.ResourceDat
 	}
 
 	return nil
+}
+
+func resourceSysdigSSOGroupMappingV0() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"group_name": {
+				Type: schema.TypeString,
+			},
+			"standard_team_role": {
+				Type: schema.TypeString,
+			},
+			"custom_team_role_id": {
+				Type: schema.TypeInt,
+			},
+			"is_admin": {
+				Type: schema.TypeBool,
+			},
+			"team_map": {
+				Type: schema.TypeList,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"is_for_all_teams": {
+							Type: schema.TypeBool,
+						},
+						"team_ids": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeInt,
+							},
+						},
+					},
+				},
+			},
+			"weight": {
+				Type: schema.TypeInt,
+			},
+		},
+	}
+}
+
+func resourceSysdigSSOGroupMappingUpgradeV0(_ context.Context, rawState map[string]any, _ any) (map[string]any, error) {
+	return rawState, nil
 }
