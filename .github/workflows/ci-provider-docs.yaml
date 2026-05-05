@@ -20,36 +20,10 @@ jobs:
       with:
         go-version-file: go.mod
 
-    - name: go build
-      run: go build -o terraform-plugin-dir/registry.terraform.io/sysdiglabs/sysdig/99.99.99/$(go env GOOS)_$(go env GOARCH)/terraform-provider-sysdig .
-
     - uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: ${{ env.TERRAFORM_VERSION }}
         terraform_wrapper: false
 
-    - name: terraform init
-      run: |
-        # We need a file to initialize the provider
-        cat <<EOF > main.tf
-        terraform {
-          required_providers { sysdig = { source = "sysdiglabs/sysdig" } }
-        }
-        EOF
-        terraform init -plugin-dir terraform-plugin-dir
-
-    - name: terraform providers schema
-      run: |
-        mkdir -p terraform-providers-schema
-        terraform providers schema -json > terraform-providers-schema/schema.json
-
-    - run: cd /tmp && go install github.com/bflad/tfproviderdocs@latest
-
-    - name: tfproviderdocs check
-      run: |
-        tfproviderdocs check \
-          -allowed-resource-subcategories-file website/allowed-subcategories.txt \
-          -enable-contents-check \
-          -provider-source registry.terraform.io/sysdiglabs/sysdig \
-          -providers-schema-json terraform-providers-schema/schema.json \
-          -require-resource-subcategory
+    - name: provider-docs check
+      run: make provider-docs

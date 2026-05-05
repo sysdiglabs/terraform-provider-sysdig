@@ -1123,6 +1123,15 @@ type PostureZoneResponse struct {
 	Data PostureZone `json:"data"`
 }
 
+type ZonePolicyAssignment struct {
+	ZoneID    string   `json:"zoneId"`
+	PolicyIDs []string `json:"policyIds"`
+}
+
+type ZonePolicyAssignmentRequest struct {
+	PolicyIDs []string `json:"policyIds"`
+}
+
 type IdentityContext struct {
 	IdentityType       string `json:"identityType"`
 	CustomerID         int    `json:"customerId"`

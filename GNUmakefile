@@ -66,6 +66,22 @@ fmtcheck:
 lint:
 	golangci-lint run --build-tags "$(TEST_SUITE)" --timeout 1h ./...
 
+provider-docs:
+	go build -o terraform-plugin-dir/registry.terraform.io/sysdiglabs/sysdig/99.99.99/$$(go env GOOS)_$$(go env GOARCH)/terraform-provider-sysdig .
+	@printf 'terraform {\n  required_providers {\n    sysdig = { source = "sysdiglabs/sysdig" }\n  }\n}\n' > main.tf
+	terraform init -plugin-dir terraform-plugin-dir
+	mkdir -p terraform-providers-schema
+	terraform providers schema -json > terraform-providers-schema/schema.json
+	go install github.com/bflad/tfproviderdocs@latest
+	tfproviderdocs check \
+		-allowed-resource-subcategories-file website/allowed-subcategories.txt \
+		-enable-contents-check \
+		-provider-source registry.terraform.io/sysdiglabs/sysdig \
+		-providers-schema-json terraform-providers-schema/schema.json \
+		-require-resource-subcategory
+	@rm -f main.tf
+	@rm -rf terraform-plugin-dir terraform-providers-schema .terraform .terraform.lock.hcl
+
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 

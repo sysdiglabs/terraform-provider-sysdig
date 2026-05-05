@@ -25,6 +25,7 @@
               go_1_26
               govulncheck
               terraform
+              tfproviderdocs
               goreleaser
               gnupg
               golangci-lint
