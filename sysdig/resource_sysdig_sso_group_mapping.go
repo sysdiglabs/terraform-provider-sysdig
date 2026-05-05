@@ -3,6 +3,7 @@ package sysdig
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strconv"
 	"time"
 
@@ -243,9 +244,12 @@ func ssoGroupMappingToResourceData(gm *v2.SSOGroupMapping, d *schema.ResourceDat
 	}
 
 	if gm.TeamMap != nil {
+		sortedIDs := make([]int, len(gm.TeamMap.TeamIDs))
+		copy(sortedIDs, gm.TeamMap.TeamIDs)
+		sort.Ints(sortedIDs)
 		teamMap := map[string]any{
 			"is_for_all_teams": gm.TeamMap.IsForAllTeams,
-			"team_ids":         gm.TeamMap.TeamIDs,
+			"team_ids":         sortedIDs,
 		}
 		if err := d.Set("team_map", []map[string]any{teamMap}); err != nil {
 			return err

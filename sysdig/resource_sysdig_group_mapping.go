@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"sort"
 	"strconv"
 	"time"
 
@@ -189,9 +190,12 @@ func teamMapFromResourceData(d *schema.ResourceData) *v2.TeamMap {
 }
 
 func teamMapToResourceData(teamMap *v2.TeamMap) map[string]any {
+	sortedIDs := make([]int, len(teamMap.TeamIDs))
+	copy(sortedIDs, teamMap.TeamIDs)
+	sort.Ints(sortedIDs)
 	return map[string]any{
 		"all_teams": teamMap.AllTeams,
-		"team_ids":  teamMap.TeamIDs,
+		"team_ids":  sortedIDs,
 	}
 }
 
