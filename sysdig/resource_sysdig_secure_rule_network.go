@@ -17,10 +17,11 @@ func resourceSysdigSecureRuleNetwork() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigRuleNetworkCreate,
-		UpdateContext: resourceSysdigRuleNetworkUpdate,
-		ReadContext:   resourceSysdigRuleNetworkRead,
-		DeleteContext: resourceSysdigRuleNetworkDelete,
+		DeprecationMessage: "sysdig_secure_rule_network is deprecated and no longer creates or updates against current Sysdig backends — the backend rejects ruleType NETWORK since list-matching policy code was removed (SSPROD-66298). Migrate to sysdig_secure_rule_falco with an equivalent Falco condition. Tracking: SSPROD-68481.",
+		CreateContext:      resourceSysdigRuleNetworkCreate,
+		UpdateContext:      resourceSysdigRuleNetworkUpdate,
+		ReadContext:        resourceSysdigRuleNetworkRead,
+		DeleteContext:      resourceSysdigRuleNetworkDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
