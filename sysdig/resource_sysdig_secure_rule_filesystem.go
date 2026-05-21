@@ -17,7 +17,7 @@ func resourceSysdigSecureRuleFilesystem() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		DeprecationMessage: "sysdig_secure_rule_filesystem is deprecated and no longer creates or updates against current Sysdig backends — the backend rejects ruleType FILESYSTEM since list-matching policy code was removed (SSPROD-66298). Migrate to sysdig_secure_rule_falco with an equivalent Falco condition. Tracking: SSPROD-68481.",
+		DeprecationMessage: "sysdig_secure_rule_filesystem is deprecated and no longer functional against current Sysdig backends — the backend rejects ruleType FILESYSTEM. Migrate to sysdig_secure_rule_falco with an equivalent Falco condition.",
 		CreateContext:      resourceSysdigRuleFilesystemCreate,
 		UpdateContext:      resourceSysdigRuleFilesystemUpdate,
 		ReadContext:        resourceSysdigRuleFilesystemRead,

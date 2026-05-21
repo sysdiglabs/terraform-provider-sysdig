@@ -17,7 +17,7 @@ func resourceSysdigSecureRuleContainer() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		DeprecationMessage: "sysdig_secure_rule_container is deprecated and no longer creates or updates against current Sysdig backends — the backend rejects ruleType CONTAINER since list-matching policy code was removed (SSPROD-66298). Migrate to sysdig_secure_rule_falco with an equivalent Falco condition. Tracking: SSPROD-68481.",
+		DeprecationMessage: "sysdig_secure_rule_container is deprecated and no longer functional against current Sysdig backends — the backend rejects ruleType CONTAINER. Migrate to sysdig_secure_rule_falco with an equivalent Falco condition.",
 		CreateContext:      resourceSysdigRuleContainerCreate,
 		UpdateContext:      resourceSysdigRuleContainerUpdate,
 		ReadContext:        resourceSysdigRuleContainerRead,
