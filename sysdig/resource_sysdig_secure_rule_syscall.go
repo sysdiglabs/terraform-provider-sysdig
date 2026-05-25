@@ -16,10 +16,11 @@ func resourceSysdigSecureRuleSyscall() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigRuleSyscallCreate,
-		UpdateContext: resourceSysdigRuleSyscallUpdate,
-		ReadContext:   resourceSysdigRuleSyscallRead,
-		DeleteContext: resourceSysdigRuleSyscallDelete,
+		DeprecationMessage: "sysdig_secure_rule_syscall is deprecated and no longer functional against current Sysdig backends — the backend rejects ruleType SYSCALL. Migrate to sysdig_secure_rule_falco with an equivalent Falco condition.",
+		CreateContext:      resourceSysdigRuleSyscallCreate,
+		UpdateContext:      resourceSysdigRuleSyscallUpdate,
+		ReadContext:        resourceSysdigRuleSyscallRead,
+		DeleteContext:      resourceSysdigRuleSyscallDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

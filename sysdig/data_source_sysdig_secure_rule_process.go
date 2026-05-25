@@ -13,7 +13,8 @@ func dataSourceSysdigSecureRuleProcess() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		ReadContext: dataSourceSysdigRuleProcessRead,
+		DeprecationMessage: "data source sysdig_secure_rule_process is deprecated — the backend no longer returns rules of ruleType PROCESS. Use the sysdig_secure_rule_falco data source.",
+		ReadContext:        dataSourceSysdigRuleProcessRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),

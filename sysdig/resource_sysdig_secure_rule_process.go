@@ -17,10 +17,11 @@ func resourceSysdigSecureRuleProcess() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigRuleProcessCreate,
-		UpdateContext: resourceSysdigRuleProcessUpdate,
-		ReadContext:   resourceSysdigRuleProcessRead,
-		DeleteContext: resourceSysdigRuleProcessDelete,
+		DeprecationMessage: "sysdig_secure_rule_process is deprecated and no longer functional against current Sysdig backends — the backend rejects ruleType PROCESS. Migrate to sysdig_secure_rule_falco with an equivalent Falco condition.",
+		CreateContext:      resourceSysdigRuleProcessCreate,
+		UpdateContext:      resourceSysdigRuleProcessUpdate,
+		ReadContext:        resourceSysdigRuleProcessRead,
+		DeleteContext:      resourceSysdigRuleProcessDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

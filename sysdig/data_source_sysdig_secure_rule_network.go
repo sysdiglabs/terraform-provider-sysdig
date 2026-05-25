@@ -14,7 +14,8 @@ func dataSourceSysdigSecureRuleNetwork() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		ReadContext: dataSourceSysdigRuleNetworkRead,
+		DeprecationMessage: "data source sysdig_secure_rule_network is deprecated — the backend no longer returns rules of ruleType NETWORK. Use the sysdig_secure_rule_falco data source.",
+		ReadContext:        dataSourceSysdigRuleNetworkRead,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(timeout),

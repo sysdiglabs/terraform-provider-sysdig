@@ -17,10 +17,11 @@ func resourceSysdigSecureRuleFilesystem() *schema.Resource {
 	timeout := 5 * time.Minute
 
 	return &schema.Resource{
-		CreateContext: resourceSysdigRuleFilesystemCreate,
-		UpdateContext: resourceSysdigRuleFilesystemUpdate,
-		ReadContext:   resourceSysdigRuleFilesystemRead,
-		DeleteContext: resourceSysdigRuleFilesystemDelete,
+		DeprecationMessage: "sysdig_secure_rule_filesystem is deprecated and no longer functional against current Sysdig backends — the backend rejects ruleType FILESYSTEM. Migrate to sysdig_secure_rule_falco with an equivalent Falco condition.",
+		CreateContext:      resourceSysdigRuleFilesystemCreate,
+		UpdateContext:      resourceSysdigRuleFilesystemUpdate,
+		ReadContext:        resourceSysdigRuleFilesystemRead,
+		DeleteContext:      resourceSysdigRuleFilesystemDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
