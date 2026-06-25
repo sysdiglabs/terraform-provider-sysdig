@@ -16,7 +16,9 @@ import (
 
 var validatePolicyType = validation.StringInSlice([]string{
 	"falco",
-	"list_matching",
+	// "list_matching" removed: list-matching policy support was removed from the
+	// Sysdig backend on 2026-02-28 (creation deprecated 2025-12-15). The platform
+	// now rejects this type, so the provider no longer accepts it.
 	"k8s_audit",
 	"aws_cloudtrail",
 	"awscloudtrail",
