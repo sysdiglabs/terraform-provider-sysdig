@@ -518,6 +518,22 @@ type Rule struct {
 	Tags        []string `json:"tags"`
 	Details     Details  `json:"details"`
 	Version     int      `json:"version,omitempty"`
+	// Warnings carries Falco static-analyzer warnings (LOAD_NO_EVTTYPE today)
+	// returned by the backend on rule create/update. The provider's resource
+	// layer surfaces these as TF Diagnostics with severity Warning so
+	// `terraform apply` shows them without failing the apply.
+	Warnings []FalcoWarning `json:"warnings,omitempty"`
+}
+
+// FalcoWarning is a structured warning emitted by the Falco static analyzer at
+// rule-mutation time. EnabledInPolicies attributes the warning to the
+// customer's policies that have the consuming rule enabled.
+type FalcoWarning struct {
+	Code              string   `json:"code"`
+	Rule              string   `json:"rule"`
+	Message           string   `json:"message"`
+	EnabledInPolicies []string `json:"enabled_in_policies"`
+	AgentVersions     []string `json:"agent_versions"`
 }
 
 const (
