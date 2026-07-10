@@ -240,6 +240,8 @@ func resourceSysdigRuleFalcoUpdate(ctx context.Context, d *schema.ResourceData, 
 	}
 	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
 
+	_ = d.Set("version", updatedRule.Version)
+
 	return falcoWarningsToDiagnostics(updatedRule.Warnings, updatedRule.Name)
 }
 
