@@ -218,10 +218,29 @@ func createZone(ctx context.Context, d *schema.ResourceData, clientV1 v2.ZoneInt
 	zone := expandZoneV2(d)
 	created, err := clientV2.CreateZoneV2(ctx, zone)
 	if err != nil {
+		// Some backends do not expose /platform/v2/zones. A 404 on the
+		// collection endpoint means the endpoint itself is missing, so
+		// fall back to the v1 API when possible.
+		if isNotFound(err) {
+			if stateHasExpressions(d) {
+				return 0, diag.FromErr(errZoneV2EndpointMissing)
+			}
+			createdV1, v1Err := clientV1.CreateZone(ctx, zoneRequestFromResourceData(d))
+			if v1Err != nil {
+				return 0, diag.FromErr(fmt.Errorf("error creating Sysdig Zone: %w", v1Err))
+			}
+			return createdV1.ID, nil
+		}
 		return 0, diag.FromErr(fmt.Errorf("error creating zone: %w", err))
 	}
 	return created.ID, nil
 }
+
+// errZoneV2EndpointMissing is returned when the backend does not expose the
+// v2 zones API but the configuration requires it (expression-based scopes).
+var errZoneV2EndpointMissing = errors.New(
+	"the backend does not expose the /platform/v2/zones API, which is required for expression-based scopes; " +
+		"use rules-based scopes instead, or upgrade the backend to a version that exposes the v2 zones endpoint")
 
 func isNotFound(err error) bool {
 	var apiErr *v2.APIError
@@ -293,14 +312,21 @@ func resourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	id, _ := strconv.Atoi(d.Id())
+	return readZone(ctx, d, client, clientv2)
+}
+
+func readZone(ctx context.Context, d *schema.ResourceData, clientV1 v2.ZoneInterface, clientV2 v2.ZoneV2Interface) diag.Diagnostics {
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("invalid zone id %q: %w", d.Id(), err))
+	}
 
 	legacyZone, e := categorizeZone(d)
 	if e != nil {
 		return diag.FromErr(fmt.Errorf("error analyzing zone scope: %s", e))
 	}
 	if legacyZone {
-		zone, err := client.GetZoneByID(ctx, id)
+		zone, err := clientV1.GetZoneByID(ctx, id)
 		if err != nil {
 			if isNotFound(err) {
 				d.SetId("")
@@ -309,24 +335,31 @@ func resourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m
 			return diag.FromErr(fmt.Errorf("error reading zone %d: %w", id, err))
 		}
 
-		_ = d.Set("name", zone.Name)
-		_ = d.Set("description", zone.Description)
-		_ = d.Set("is_system", zone.IsSystem)
-		_ = d.Set("author", zone.Author)
-		_ = d.Set("last_modified_by", zone.LastModifiedBy)
-		_ = d.Set("last_updated", time.UnixMilli(zone.LastUpdated).Format(time.RFC3339))
-		// For legacy zones, we need to set the rules field in the scope
-		if err := d.Set(SchemaScopeKey, fromZoneScopesResponse(zone.Scopes)); err != nil {
-			return diag.FromErr(fmt.Errorf("error setting scope: %s", err))
-		}
-		return nil
+		return zoneV1ToState(d, zone)
 	}
 
-	zone, err := clientv2.GetZoneV2(ctx, id)
+	zone, err := clientV2.GetZoneV2(ctx, id)
 	if err != nil {
 		if isNotFound(err) {
-			d.SetId("")
-			return nil
+			// A 404 here is ambiguous: the zone may be gone, or the
+			// backend may not expose /platform/v2/zones at all. Probe
+			// the v1 endpoint to disambiguate before removing the
+			// zone from state.
+			zoneV1, v1Err := clientV1.GetZoneByID(ctx, id)
+			if v1Err != nil {
+				if isNotFound(v1Err) {
+					d.SetId("")
+					return nil
+				}
+				return diag.FromErr(fmt.Errorf("error reading zone %d: %w", id, v1Err))
+			}
+			// The v1 API only carries rules: writing its response into a
+			// state that uses expression blocks would silently rewrite
+			// the scopes as rules. Surface the explicit error instead.
+			if stateHasExpressions(d) {
+				return diag.FromErr(errZoneV2EndpointMissing)
+			}
+			return zoneV1ToState(d, zoneV1)
 		}
 		return diag.FromErr(fmt.Errorf("error reading zone %d: %w", id, err))
 	}
@@ -349,6 +382,21 @@ func resourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
+// zoneV1ToState writes a v1 Zone API response into the Terraform state.
+func zoneV1ToState(d *schema.ResourceData, zone *v2.Zone) diag.Diagnostics {
+	_ = d.Set("name", zone.Name)
+	_ = d.Set("description", zone.Description)
+	_ = d.Set("is_system", zone.IsSystem)
+	_ = d.Set("author", zone.Author)
+	_ = d.Set("last_modified_by", zone.LastModifiedBy)
+	_ = d.Set("last_updated", time.UnixMilli(zone.LastUpdated).Format(time.RFC3339))
+	// v1 zones only carry rules, so set the rules field in the scope
+	if err := d.Set(SchemaScopeKey, fromZoneScopesResponse(zone.Scopes)); err != nil {
+		return diag.FromErr(fmt.Errorf("error setting scope: %s", err))
+	}
+	return nil
+}
+
 func resourceSysdigSecureZoneUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	client, err := getZoneClient(m.(SysdigClients))
 	if err != nil {
@@ -358,6 +406,19 @@ func resourceSysdigSecureZoneUpdate(ctx context.Context, d *schema.ResourceData,
 	clientV2, err := getZoneV2Client(m.(SysdigClients))
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if diags := updateZone(ctx, d, client, clientV2); diags.HasError() {
+		return diags
+	}
+
+	return resourceSysdigSecureZoneRead(ctx, d, m)
+}
+
+func updateZone(ctx context.Context, d *schema.ResourceData, clientV1 v2.ZoneInterface, clientV2 v2.ZoneV2Interface) diag.Diagnostics {
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("invalid zone id %q: %w", d.Id(), err))
 	}
 
 	legacyZone, e := categorizeZone(d)
@@ -370,27 +431,36 @@ func resourceSysdigSecureZoneUpdate(ctx context.Context, d *schema.ResourceData,
 		}
 
 		zone := expandZoneV2(d)
-
-		id, err := strconv.Atoi(d.Id())
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("invalid zone id %q: %w", d.Id(), err))
-		}
 		zone.ID = id
 
 		if _, err := clientV2.UpdateZoneV2(ctx, zone); err != nil {
+			// Fall back to the v1 API when the backend does not
+			// expose /platform/v2/zones.
+			if isNotFound(err) {
+				if stateHasExpressions(d) {
+					return diag.FromErr(errZoneV2EndpointMissing)
+				}
+				zoneRequest := zoneRequestFromResourceData(d)
+				zoneRequest.ID = id
+				if _, v1Err := clientV1.UpdateZone(ctx, zoneRequest); v1Err != nil {
+					return diag.FromErr(fmt.Errorf("error updating Sysdig Zone: %w", v1Err))
+				}
+				return nil
+			}
 			return diag.FromErr(fmt.Errorf("error updating zone: %w", err))
 		}
 
-		return resourceSysdigSecureZoneRead(ctx, d, m)
+		return nil
 	}
 
 	zoneRequest := zoneRequestFromResourceData(d)
+	zoneRequest.ID = id
 
-	if _, err := client.UpdateZone(ctx, zoneRequest); err != nil {
+	if _, err := clientV1.UpdateZone(ctx, zoneRequest); err != nil {
 		return diag.FromErr(fmt.Errorf("error updating Sysdig Zone: %w", err))
 	}
 
-	return resourceSysdigSecureZoneRead(ctx, d, m)
+	return nil
 }
 
 func resourceSysdigSecureZoneDelete(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
@@ -404,13 +474,20 @@ func resourceSysdigSecureZoneDelete(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	id, _ := strconv.Atoi(d.Id())
+	return deleteZone(ctx, d, client, clientV2)
+}
+
+func deleteZone(ctx context.Context, d *schema.ResourceData, clientV1 v2.ZoneInterface, clientV2 v2.ZoneV2Interface) diag.Diagnostics {
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("invalid zone id %q: %w", d.Id(), err))
+	}
 	legacyZone, e := categorizeZone(d)
 	if e != nil {
 		return diag.FromErr(fmt.Errorf("error analyzing zone scope: %s", e))
 	}
 	if legacyZone {
-		if err := client.DeleteZone(ctx, id); err != nil {
+		if err := clientV1.DeleteZone(ctx, id); err != nil {
 			return diag.FromErr(fmt.Errorf("error deleting Sysdig Zone: %w", err))
 		}
 
@@ -419,6 +496,17 @@ func resourceSysdigSecureZoneDelete(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if err := clientV2.DeleteZoneV2(ctx, id); err != nil {
+		// A 404 here means either the zone is already gone or the backend
+		// does not expose /platform/v2/zones at all. The v1 delete covers
+		// both cases: it deletes the zone on v1-only backends and
+		// tolerates 404 when the zone no longer exists.
+		if isNotFound(err) {
+			if v1Err := clientV1.DeleteZone(ctx, id); v1Err != nil {
+				return diag.FromErr(fmt.Errorf("error deleting Sysdig Zone: %w", v1Err))
+			}
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(fmt.Errorf("error deleting Sysdig Zone: %w", err))
 	}
 	d.SetId("")
