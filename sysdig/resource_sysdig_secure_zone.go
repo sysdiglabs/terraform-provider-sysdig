@@ -316,7 +316,10 @@ func resourceSysdigSecureZoneRead(ctx context.Context, d *schema.ResourceData, m
 }
 
 func readZone(ctx context.Context, d *schema.ResourceData, clientV1 v2.ZoneInterface, clientV2 v2.ZoneV2Interface) diag.Diagnostics {
-	id, _ := strconv.Atoi(d.Id())
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("invalid zone id %q: %w", d.Id(), err))
+	}
 
 	legacyZone, e := categorizeZone(d)
 	if e != nil {
@@ -466,7 +469,10 @@ func resourceSysdigSecureZoneDelete(ctx context.Context, d *schema.ResourceData,
 }
 
 func deleteZone(ctx context.Context, d *schema.ResourceData, clientV1 v2.ZoneInterface, clientV2 v2.ZoneV2Interface) diag.Diagnostics {
-	id, _ := strconv.Atoi(d.Id())
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("invalid zone id %q: %w", d.Id(), err))
+	}
 	legacyZone, e := categorizeZone(d)
 	if e != nil {
 		return diag.FromErr(fmt.Errorf("error analyzing zone scope: %s", e))
