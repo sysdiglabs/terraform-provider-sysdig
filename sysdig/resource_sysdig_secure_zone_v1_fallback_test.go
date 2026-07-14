@@ -149,6 +149,46 @@ func (f *fakeZoneBackend) server(t *testing.T) *httptest.Server {
 			return out
 		}
 
+		fromV2 := func(zone *v2.ZoneV2) *v2.Zone {
+			out := &v2.Zone{
+				ID:          zone.ID,
+				Name:        zone.Name,
+				Description: zone.Description,
+			}
+			for _, s := range zone.Scopes {
+				for _, filter := range s.Filters {
+					out.Scopes = append(out.Scopes, v2.ZoneScope{
+						ID:         filter.ID,
+						TargetType: filter.ResourceType,
+						Rules:      filter.Rules,
+					})
+				}
+			}
+			return out
+		}
+
+		mux.HandleFunc("/platform/v2/zones", func(w http.ResponseWriter, r *http.Request) {
+			f.mu.Lock()
+			defer f.mu.Unlock()
+			f.v2Hits = append(f.v2Hits, r.Method+" "+r.URL.Path)
+
+			if r.Method != http.MethodPost {
+				http.NotFound(w, r)
+				return
+			}
+			var req v2.ZoneV2
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				t.Errorf("failed to decode zone v2 request: %v", err)
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			zone := fromV2(&req)
+			zone.ID = f.nextID
+			f.nextID++
+			f.zones[zone.ID] = zone
+			writeJSON(t, w, toV2(zone))
+		})
+
 		mux.HandleFunc("/platform/v2/zones/", func(w http.ResponseWriter, r *http.Request) {
 			f.mu.Lock()
 			defer f.mu.Unlock()
@@ -167,6 +207,22 @@ func (f *fakeZoneBackend) server(t *testing.T) *httptest.Server {
 					http.NotFound(w, r)
 					return
 				}
+				writeJSON(t, w, toV2(zone))
+			case http.MethodPut:
+				if !ok {
+					http.NotFound(w, r)
+					return
+				}
+				var req v2.ZoneV2
+				if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+					t.Errorf("failed to decode zone v2 request: %v", err)
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+				upd := fromV2(&req)
+				zone.Name = upd.Name
+				zone.Description = upd.Description
+				zone.Scopes = upd.Scopes
 				writeJSON(t, w, toV2(zone))
 			case http.MethodDelete:
 				if !ok {
@@ -405,4 +461,78 @@ func TestZoneV1Fallback_ReadWithExpressionsFailsClearly(t *testing.T) {
 	require.True(t, diags.HasError())
 	require.Contains(t, diags[0].Summary, "/platform/v2/zones")
 	require.Equal(t, "22", d.Id(), "zone must not be removed from state")
+}
+
+// Regression guard for backends with v2 available: create must go through the
+// v2 endpoint and never touch v1.
+func TestZoneV2Available_CreateDoesNotTouchV1(t *testing.T) {
+	backend := newFakeZoneBackend(true)
+	srv := backend.server(t)
+	clientV1, clientV2 := zoneTestClients(t, srv.URL)
+
+	d := zoneRulesResourceData(t)
+
+	id, diags := createZone(context.Background(), d, clientV1, clientV2)
+	require.False(t, diags.HasError(), "diags: %v", diags)
+	require.True(t, backend.has(id))
+
+	backend.mu.Lock()
+	defer backend.mu.Unlock()
+	require.Empty(t, backend.v1Hits, "v1 endpoint must not be called when v2 is available")
+	require.NotEmpty(t, backend.v2Hits)
+}
+
+// Regression guard for backends with v2 available: update must go through the
+// v2 endpoint and never touch v1.
+func TestZoneV2Available_UpdateDoesNotTouchV1(t *testing.T) {
+	backend := newFakeZoneBackend(true)
+	backend.seed(&v2.Zone{
+		ID:   22,
+		Name: "Old name",
+		Scopes: []v2.ZoneScope{
+			{ID: 1, TargetType: "kubernetes", Rules: `clusterId in ("non-existent")`},
+		},
+	})
+	srv := backend.server(t)
+	clientV1, clientV2 := zoneTestClients(t, srv.URL)
+
+	d := zoneRulesResourceData(t)
+	d.SetId("22")
+
+	diags := updateZone(context.Background(), d, clientV1, clientV2)
+	require.False(t, diags.HasError(), "diags: %v", diags)
+
+	backend.mu.Lock()
+	defer backend.mu.Unlock()
+	require.Equal(t, "Empty zone", backend.zones[22].Name, "update should have gone through the v2 endpoint")
+	require.Empty(t, backend.v1Hits, "v1 endpoint must not be called when v2 is available")
+	require.NotEmpty(t, backend.v2Hits)
+}
+
+// A zone configured with expression blocks cannot be represented by the v1
+// API: the update fallback must error explicitly instead of PUTting scopes
+// with empty rules to v1, which would wipe the zone's scopes server-side.
+func TestZoneV1Fallback_UpdateWithExpressionsFailsClearly(t *testing.T) {
+	backend := newFakeZoneBackend(false)
+	backend.seed(&v2.Zone{
+		ID:   22,
+		Name: "Expression zone",
+		Scopes: []v2.ZoneScope{
+			{ID: 1, TargetType: "kubernetes", Rules: `clusterId in ("prod")`},
+		},
+	})
+	srv := backend.server(t)
+	clientV1, clientV2 := zoneTestClients(t, srv.URL)
+
+	d := zoneExpressionResourceData(t)
+	d.SetId("22")
+
+	diags := updateZone(context.Background(), d, clientV1, clientV2)
+	require.True(t, diags.HasError())
+	require.Contains(t, diags[0].Summary, "/platform/v2/zones")
+
+	backend.mu.Lock()
+	defer backend.mu.Unlock()
+	require.Equal(t, `clusterId in ("prod")`, backend.zones[22].Scopes[0].Rules,
+		"zone scopes must not be modified through the v1 endpoint")
 }
