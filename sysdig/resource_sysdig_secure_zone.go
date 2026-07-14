@@ -353,6 +353,12 @@ func readZone(ctx context.Context, d *schema.ResourceData, clientV1 v2.ZoneInter
 				}
 				return diag.FromErr(fmt.Errorf("error reading zone %d: %w", id, v1Err))
 			}
+			// The v1 API only carries rules: writing its response into a
+			// state that uses expression blocks would silently rewrite
+			// the scopes as rules. Surface the explicit error instead.
+			if stateHasExpressions(d) {
+				return diag.FromErr(errZoneV2EndpointMissing)
+			}
 			return zoneV1ToState(d, zoneV1)
 		}
 		return diag.FromErr(fmt.Errorf("error reading zone %d: %w", id, err))

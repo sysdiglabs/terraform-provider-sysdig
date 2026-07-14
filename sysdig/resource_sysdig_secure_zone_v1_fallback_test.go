@@ -382,3 +382,27 @@ func TestZoneV2Available_DeleteAlreadyGoneSucceeds(t *testing.T) {
 	require.False(t, diags.HasError(), "diags: %v", diags)
 	require.Empty(t, d.Id())
 }
+
+// A zone whose state uses expression blocks cannot be represented by the v1
+// API: the read fallback must error explicitly instead of silently rewriting
+// the scopes as rules.
+func TestZoneV1Fallback_ReadWithExpressionsFailsClearly(t *testing.T) {
+	backend := newFakeZoneBackend(false)
+	backend.seed(&v2.Zone{
+		ID:   22,
+		Name: "Expression zone",
+		Scopes: []v2.ZoneScope{
+			{ID: 1, TargetType: "kubernetes", Rules: `clusterId in ("prod")`},
+		},
+	})
+	srv := backend.server(t)
+	clientV1, clientV2 := zoneTestClients(t, srv.URL)
+
+	d := zoneExpressionResourceData(t)
+	d.SetId("22")
+
+	diags := readZone(context.Background(), d, clientV1, clientV2)
+	require.True(t, diags.HasError())
+	require.Contains(t, diags[0].Summary, "/platform/v2/zones")
+	require.Equal(t, "22", d.Id(), "zone must not be removed from state")
+}
