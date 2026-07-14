@@ -410,6 +410,11 @@ func resourceSysdigSecureZoneUpdate(ctx context.Context, d *schema.ResourceData,
 }
 
 func updateZone(ctx context.Context, d *schema.ResourceData, clientV1 v2.ZoneInterface, clientV2 v2.ZoneV2Interface) diag.Diagnostics {
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("invalid zone id %q: %w", d.Id(), err))
+	}
+
 	legacyZone, e := categorizeZone(d)
 	if e != nil {
 		return diag.FromErr(fmt.Errorf("error analyzing zone scope: %s", e))
@@ -420,11 +425,6 @@ func updateZone(ctx context.Context, d *schema.ResourceData, clientV1 v2.ZoneInt
 		}
 
 		zone := expandZoneV2(d)
-
-		id, err := strconv.Atoi(d.Id())
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("invalid zone id %q: %w", d.Id(), err))
-		}
 		zone.ID = id
 
 		if _, err := clientV2.UpdateZoneV2(ctx, zone); err != nil {
@@ -434,7 +434,9 @@ func updateZone(ctx context.Context, d *schema.ResourceData, clientV1 v2.ZoneInt
 				if stateHasExpressions(d) {
 					return diag.FromErr(errZoneV2EndpointMissing)
 				}
-				if _, v1Err := clientV1.UpdateZone(ctx, zoneRequestFromResourceData(d)); v1Err != nil {
+				zoneRequest := zoneRequestFromResourceData(d)
+				zoneRequest.ID = id
+				if _, v1Err := clientV1.UpdateZone(ctx, zoneRequest); v1Err != nil {
 					return diag.FromErr(fmt.Errorf("error updating Sysdig Zone: %w", v1Err))
 				}
 				return nil
@@ -446,6 +448,7 @@ func updateZone(ctx context.Context, d *schema.ResourceData, clientV1 v2.ZoneInt
 	}
 
 	zoneRequest := zoneRequestFromResourceData(d)
+	zoneRequest.ID = id
 
 	if _, err := clientV1.UpdateZone(ctx, zoneRequest); err != nil {
 		return diag.FromErr(fmt.Errorf("error updating Sysdig Zone: %w", err))
