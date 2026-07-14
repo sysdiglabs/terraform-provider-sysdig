@@ -66,7 +66,11 @@ func (f *fakeZoneBackend) server(t *testing.T) *httptest.Server {
 			return
 		}
 		var req v2.ZoneRequest
-		require.NoError(t, json.NewDecoder(r.Body).Decode(&req))
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Errorf("failed to decode zone request: %v", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		zone := &v2.Zone{
 			ID:          f.nextID,
 			Name:        req.Name,
@@ -75,8 +79,7 @@ func (f *fakeZoneBackend) server(t *testing.T) *httptest.Server {
 		}
 		f.nextID++
 		f.zones[zone.ID] = zone
-		w.Header().Set("Content-Type", "application/json")
-		require.NoError(t, json.NewEncoder(w).Encode(zone))
+		writeJSON(t, w, zone)
 	})
 
 	mux.HandleFunc("/platform/v1/zones/", func(w http.ResponseWriter, r *http.Request) {
@@ -97,20 +100,22 @@ func (f *fakeZoneBackend) server(t *testing.T) *httptest.Server {
 				http.NotFound(w, r)
 				return
 			}
-			w.Header().Set("Content-Type", "application/json")
-			require.NoError(t, json.NewEncoder(w).Encode(zone))
+			writeJSON(t, w, zone)
 		case http.MethodPut:
 			if !ok {
 				http.NotFound(w, r)
 				return
 			}
 			var req v2.ZoneRequest
-			require.NoError(t, json.NewDecoder(r.Body).Decode(&req))
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				t.Errorf("failed to decode zone request: %v", err)
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
 			zone.Name = req.Name
 			zone.Description = req.Description
 			zone.Scopes = req.Scopes
-			w.Header().Set("Content-Type", "application/json")
-			require.NoError(t, json.NewEncoder(w).Encode(zone))
+			writeJSON(t, w, zone)
 		case http.MethodDelete:
 			if !ok {
 				http.NotFound(w, r)
@@ -162,8 +167,7 @@ func (f *fakeZoneBackend) server(t *testing.T) *httptest.Server {
 					http.NotFound(w, r)
 					return
 				}
-				w.Header().Set("Content-Type", "application/json")
-				require.NoError(t, json.NewEncoder(w).Encode(toV2(zone)))
+				writeJSON(t, w, toV2(zone))
 			case http.MethodDelete:
 				if !ok {
 					http.NotFound(w, r)
@@ -182,6 +186,16 @@ func (f *fakeZoneBackend) server(t *testing.T) *httptest.Server {
 	srv := httptest.NewServer(mux)
 	t.Cleanup(srv.Close)
 	return srv
+}
+
+// writeJSON encodes v as the JSON response body. It reports failures with
+// t.Errorf, which is safe to call from the server goroutine (unlike
+// require.NoError, whose FailNow must run on the test goroutine).
+func writeJSON(t *testing.T, w http.ResponseWriter, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(v); err != nil {
+		t.Errorf("failed to encode response: %v", err)
+	}
 }
 
 func zoneTestClients(t *testing.T, url string) (v2.ZoneInterface, v2.ZoneV2Interface) {
