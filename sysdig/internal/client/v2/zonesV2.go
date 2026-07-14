@@ -110,6 +110,10 @@ func (c *Client) UpdateZoneV2(ctx context.Context, zone *ZoneV2) (updatedZone *Z
 	return Unmarshal[*ZoneV2](response.Body)
 }
 
+// DeleteZoneV2 deletes a zone through the v2 API. Unlike DeleteZone, a 404 is
+// returned as an error: callers need it to distinguish an already-deleted zone
+// from a backend that does not expose the v2 zones endpoint, where they fall
+// back to the v1 API.
 func (c *Client) DeleteZoneV2(ctx context.Context, id int) (err error) {
 	response, err := c.requester.Request(ctx, http.MethodDelete, c.getZoneV2URL(id), nil)
 	if err != nil {
@@ -121,7 +125,7 @@ func (c *Client) DeleteZoneV2(ctx context.Context, id int) (err error) {
 		}
 	}()
 
-	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
 		return c.APIErrorFromResponse(response)
 	}
 

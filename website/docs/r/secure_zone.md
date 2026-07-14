@@ -95,6 +95,8 @@ A `scope` defines what resources belong to this zone.
 
   A scope must specify either `rules` or at least one `expression` block.
 
+  ~> **Note:** Expression-based scopes require the v2 zones API. If the backend only exposes the v1 zones API, the provider automatically falls back to it for rules-based scopes, while expression-based scopes will fail with an explicit error. Use `rules` in that case.
+
 #### Expression block
 
 Each `expression` block represents a single condition.
