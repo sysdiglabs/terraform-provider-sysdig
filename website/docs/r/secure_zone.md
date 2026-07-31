@@ -91,6 +91,8 @@ A `scope` defines what resources belong to this zone.
 
   ~> **Note:** The `rules` field supports both v2 and legacy (v1) syntax. When using legacy v1 attributes (`labels`, `labelValues`, `agentTags`), a deprecation warning will be shown — migrate to `expression` blocks with v2 field names (`label.<key>`, `agent.tag.<key>`). Rules using v2-compatible syntax (e.g., `organization`, `account`, `cluster`) are fully supported and produce no warning. `rules` and `expression` cannot be used together within the same `scope`.
 
+  ~> **Note:** The order of the values inside an `in (...)` or `not in (...)` list is not significant, so reordering them does not plan a change. This matters when the list is generated, for example with `join` and `formatlist` over a variable whose order is not stable across runs. The order you write is always preserved in state and sent to the API as-is. Value order inside `expression` blocks is still significant: use `sort()` there if the source list order may vary.
+
 - `expression` - One or more blocks that define the scope as a list of filter expressions.
 
   A scope must specify either `rules` or at least one `expression` block.
