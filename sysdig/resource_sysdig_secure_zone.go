@@ -4,9 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -116,65 +120,183 @@ func resourceSysdigSecureZone() *schema.Resource {
 				Type:     schema.TypeSet,
 				MinItems: 1,
 				Required: true,
+				Set:      zoneScopeSetHash,
+				Elem:     zoneScopeResource(),
+			},
+		},
+	}
+}
+
+// zoneScopeResource is the schema of a single "scope" block. It is shared by the
+// resource schema and by zoneScopeSetHash so both always agree on the shape of
+// an element.
+func zoneScopeResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			SchemaIDKey: {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			SchemaTargetTypeKey: {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			SchemaRulesKey: {
+				Type:     schema.TypeString,
+				Optional: true,
+				// The order of the values inside an `in (...)` list carries no
+				// meaning, so a mere reordering must not show up as a change.
+				DiffSuppressFunc: suppressZoneRulesValueOrder,
+				ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
+					rules := v.(string)
+					if rules != "" && legacyAttributePattern.MatchString(rules) {
+						return diag.Diagnostics{
+							diag.Diagnostic{
+								Severity: diag.Warning,
+								Summary:  "Deprecated legacy rules syntax",
+								Detail:   "The 'rules' field with legacy attributes (labels, labelValues, agentTags) is deprecated. Use 'expression' blocks or `rules` with v2 syntax (label.<key>, agent.tag.<key>) instead. See the documentation for migration guidance.",
+							},
+						}
+					}
+					return nil
+				},
+			},
+			SchemaExpressionKey: {
+				Type:     schema.TypeList,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						SchemaIDKey: {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						SchemaTargetTypeKey: {
+						SchemaFieldKey: {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						SchemaRulesKey: {
+						SchemaOperatorKey: {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						SchemaValueKey: {
 							Type:     schema.TypeString,
 							Optional: true,
-							ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
-								rules := v.(string)
-								if rules != "" && legacyAttributePattern.MatchString(rules) {
-									return diag.Diagnostics{
-										diag.Diagnostic{
-											Severity: diag.Warning,
-											Summary:  "Deprecated legacy rules syntax",
-											Detail:   "The 'rules' field with legacy attributes (labels, labelValues, agentTags) is deprecated. Use 'expression' blocks or `rules` with v2 syntax (label.<key>, agent.tag.<key>) instead. See the documentation for migration guidance.",
-										},
-									}
-								}
-								return nil
-							},
+							Computed: true,
 						},
-						SchemaExpressionKey: {
+						SchemaValuesKey: {
 							Type:     schema.TypeList,
 							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									SchemaFieldKey: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									SchemaOperatorKey: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									SchemaValueKey: {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									SchemaValuesKey: {
-										Type:     schema.TypeList,
-										Optional: true,
-										Computed: true,
-										Elem:     &schema.Schema{Type: schema.TypeString},
-									},
-								},
-							},
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
 			},
 		},
 	}
+}
+
+// zoneRuleInListPattern matches an `in (...)` / `not in (...)` value list.
+var zoneRuleInListPattern = regexp.MustCompile(`(?i)\b(not\s+in|in)\s*\(([^()]*)\)`)
+
+// canonicalizeZoneRules rewrites every `in (...)` / `not in (...)` value list of
+// a rules expression into a canonical, sorted form. It is only used to compare
+// two rules strings: it is never written to state nor sent to the API, so the
+// user's own ordering is always preserved.
+//
+// Operators that do not take a value list (contains, starts with, exists, ...)
+// are left untouched.
+func canonicalizeZoneRules(rules string) string {
+	return zoneRuleInListPattern.ReplaceAllStringFunc(rules, func(match string) string {
+		groups := zoneRuleInListPattern.FindStringSubmatch(match)
+		operator, body := groups[1], groups[2]
+
+		values := splitZoneRuleValues(body)
+		sort.Strings(values)
+
+		return operator + " (" + strings.Join(values, ", ") + ")"
+	})
+}
+
+// splitZoneRuleValues splits the body of a value list on the commas that are not
+// inside a quoted value. Zone values legitimately contain commas, for instance
+// `agentTags in ("project: foo, bar")`, so a plain strings.Split would treat one
+// value as two and could make two different rules compare equal.
+func splitZoneRuleValues(body string) []string {
+	var (
+		values  []string
+		current strings.Builder
+		quoted  bool
+		escaped bool
+	)
+
+	for _, r := range body {
+		switch {
+		case escaped:
+			current.WriteRune(r)
+			escaped = false
+		case r == '\\':
+			current.WriteRune(r)
+			escaped = true
+		case r == '"':
+			quoted = !quoted
+			current.WriteRune(r)
+		case r == ',' && !quoted:
+			values = append(values, strings.TrimSpace(current.String()))
+			current.Reset()
+		default:
+			current.WriteRune(r)
+		}
+	}
+	if last := strings.TrimSpace(current.String()); last != "" {
+		values = append(values, last)
+	}
+
+	return values
+}
+
+// suppressZoneRulesValueOrder reports whether two rules strings differ only in
+// the order of the values inside their `in (...)` lists.
+//
+// An empty side is never suppressed: expression-based scopes carry an empty
+// rules string, and suppressing empty-vs-empty drops the attribute from the
+// planned scope block, which then fails the "rules or expression is required"
+// validation in CustomizeDiff.
+func suppressZoneRulesValueOrder(_, old, new string, _ *schema.ResourceData) bool {
+	if old == "" || new == "" {
+		return false
+	}
+	return canonicalizeZoneRules(old) == canonicalizeZoneRules(new)
+}
+
+// zoneScopeDefaultHash is the stock hash of a scope block. Building it is not
+// free, and the hash function is called for every element of every set, so it is
+// computed once.
+var zoneScopeDefaultHash = sync.OnceValue(func() schema.SchemaSetFunc {
+	return schema.HashResource(zoneScopeResource())
+})
+
+// zoneScopeSetHash hashes a scope block so that reordering the values inside a
+// rules expression does not change the identity of the block. Without this, a
+// reordering changes the set element hash and Terraform renders the scope as
+// removed and re-added even though nothing changed.
+//
+// Expression-based scopes deliberately keep the stock hash: their identity
+// depends on the nested `values`, and folding those into the hash would make two
+// distinct scope blocks that share a field and operator collide into one.
+func zoneScopeSetHash(v any) int {
+	hash := zoneScopeDefaultHash()
+
+	scope, ok := v.(map[string]any)
+	if !ok {
+		return hash(v)
+	}
+	rules, ok := scope[SchemaRulesKey].(string)
+	if !ok || rules == "" {
+		return hash(v)
+	}
+
+	canonical := make(map[string]any, len(scope))
+	maps.Copy(canonical, scope)
+	canonical[SchemaRulesKey] = canonicalizeZoneRules(rules)
+
+	return hash(canonical)
 }
 
 func resourceSysdigSecureZoneCreate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
