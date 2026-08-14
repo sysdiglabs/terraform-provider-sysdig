@@ -1,4 +1,4 @@
-//go:build tf_acc_sysdig_secure || tf_acc_policies || tf_acc_onprem_secure
+//go:build tf_acc_sysdig_secure || tf_acc_policies
 
 package sysdig_test
 
@@ -12,7 +12,7 @@ import (
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
-func TestAccManagedPolicyDataSource(t *testing.T) {
+func TestAccManagedStatefulPolicyDataSource(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -26,17 +26,17 @@ func TestAccManagedPolicyDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: managedPolicyDataSource(),
+				Config: managedStatefulPolicyDataSource(),
 			},
 		},
 	})
 }
 
-func managedPolicyDataSource() string {
+func managedStatefulPolicyDataSource() string {
 	return `
-data "sysdig_secure_managed_policy" "example" {
-	name = "Sysdig Runtime Threat Detection"
-	type = "falco"
+data "sysdig_secure_managed_policy" "stateful_example" {
+	name = "Sysdig AWS Behavioral Analytics Threat Detection"
+	type = "awscloudtrail_stateful"
 }
 `
 }
