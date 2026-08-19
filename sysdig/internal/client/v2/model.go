@@ -536,38 +536,16 @@ type FalcoWarning struct {
 	AgentVersions     []string `json:"agent_versions"`
 }
 
+// The CONTAINER, FILESYSTEM, NETWORK, PROCESS and SYSCALL "fast engine" rule
+// types were removed from the backend, along with their Details fields.
 const (
-	RuleTypeContainer           = "CONTAINER"
 	RuleTypeFalco               = "FALCO"
-	RuleTypeFilesystem          = "FILESYSTEM"
-	RuleTypeNetwork             = "NETWORK"
-	RuleTypeProcess             = "PROCESS"
-	RuleTypeSyscall             = "SYSCALL"
 	RuleTypeStatefulSequence    = "STATEFUL_SEQUENCE"
 	RuleTypeStatefulUniqPercent = "STATEFUL_UNIQ_PERCENT"
 	RuleTypeStatefulCount       = "STATEFUL_COUNT"
 )
 
 type Details struct {
-	// Containers
-	Containers *Containers `json:"containers,omitempty"`
-
-	// Filesystems
-	ReadWritePaths *ReadWritePaths `json:"readWritePaths,omitempty"`
-	ReadPaths      *ReadPaths      `json:"readPaths,omitempty"`
-
-	// Network
-	AllOutbound    bool            `json:"allOutbound"`
-	AllInbound     bool            `json:"allInbound"`
-	TCPListenPorts *TCPListenPorts `json:"tcpListenPorts,omitempty"`
-	UDPListenPorts *UDPListenPorts `json:"udpListenPorts,omitempty"`
-
-	// Processes
-	Processes *Processes `json:"processes,omitempty"`
-
-	// Syscalls
-	Syscalls *Syscalls `json:"syscalls,omitempty"`
-
 	// Falco
 	Append               *bool        `json:"append,omitempty"`
 	Source               string       `json:"source,omitempty"`
@@ -578,40 +556,6 @@ type Details struct {
 	MinimumEngineVersion *int         `json:"minimumEngineVersion,omitempty"`
 
 	RuleType string `json:"ruleType"`
-}
-
-type Containers struct {
-	Items      []string `json:"items"`
-	MatchItems bool     `json:"matchItems"`
-}
-
-type ReadWritePaths struct {
-	Items      []string `json:"items"`
-	MatchItems bool     `json:"matchItems"`
-}
-type ReadPaths struct {
-	Items      []string `json:"items"`
-	MatchItems bool     `json:"matchItems"`
-}
-
-type TCPListenPorts struct {
-	Items      []string `json:"items"`
-	MatchItems bool     `json:"matchItems"`
-}
-
-type UDPListenPorts struct {
-	Items      []string `json:"items"`
-	MatchItems bool     `json:"matchItems"`
-}
-
-type Processes struct {
-	Items      []string `json:"items"`
-	MatchItems bool     `json:"matchItems"`
-}
-
-type Syscalls struct {
-	Items      []string `json:"items"`
-	MatchItems bool     `json:"matchItems"`
 }
 
 type Condition struct {
