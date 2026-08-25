@@ -40,7 +40,7 @@ func TestAccList(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: listAppendToDefault(),
+				Config: listAppendToDefault(rText()),
 			},
 			{
 				Config: listWithList(rText(), rText()),
@@ -67,14 +67,20 @@ resource "sysdig_secure_list" "sample" {
 `, name)
 }
 
-func listAppendToDefault() string {
-	return `
-resource "sysdig_secure_list" "sample2" {
-  name = "allowed_k8s_nodes"
+func listAppendToDefault(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_list" "sample" {
+  name  = "terraform_test_%s"
   items = ["foo", "bar"]
-  append = true
 }
-`
+
+resource "sysdig_secure_list" "sample2" {
+  name       = "terraform_test_%s"
+  items      = ["baz"]
+  append     = true
+  depends_on = [sysdig_secure_list.sample]
+}
+`, name, name)
 }
 
 func listWithList(name1, name2 string) string {
