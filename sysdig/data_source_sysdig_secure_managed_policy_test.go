@@ -4,8 +4,10 @@ package sysdig_test
 
 import (
 	"os"
+	"strings"
 	"testing"
 
+	"github.com/draios/terraform-provider-sysdig/buildinfo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -13,6 +15,18 @@ import (
 )
 
 func TestAccManagedPolicyDataSource(t *testing.T) {
+	steps := []resource.TestStep{
+		{
+			Config: managedPolicyDataSource(),
+		},
+	}
+
+	if !buildinfo.OnpremSecure && !strings.HasSuffix(os.Getenv("SYSDIG_SECURE_URL"), "ibm.com") {
+		steps = append(steps, resource.TestStep{
+			Config: managedStatefulPolicyDataSource(),
+		},
+		)
+	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -24,11 +38,7 @@ func TestAccManagedPolicyDataSource(t *testing.T) {
 				return sysdig.Provider(), nil
 			},
 		},
-		Steps: []resource.TestStep{
-			{
-				Config: managedPolicyDataSource(),
-			},
-		},
+		Steps: steps,
 	})
 }
 
@@ -37,6 +47,15 @@ func managedPolicyDataSource() string {
 data "sysdig_secure_managed_policy" "example" {
 	name = "Sysdig Runtime Threat Detection"
 	type = "falco"
+}
+`
+}
+
+func managedStatefulPolicyDataSource() string {
+	return `
+data "sysdig_secure_managed_policy" "stateful_example" {
+	name = "Sysdig AWS Behavioral Analytics Threat Detection"
+	type = "awscloudtrail_stateful"
 }
 `
 }
