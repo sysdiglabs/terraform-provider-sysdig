@@ -40,7 +40,7 @@ func TestAccMacro(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: macroAppendToDefault(rText()),
+				Config: macroAppendToDefault(),
 			},
 			{
 				Config: macroWithMacro(rText(), rText()),
@@ -73,20 +73,18 @@ resource "sysdig_secure_macro" "sample" {
 `, name)
 }
 
-func macroAppendToDefault(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_secure_macro" "sample" {
-  name      = "terraform_test_%s"
-  condition = "always_true"
-}
-
+// macroAppendToDefault exercises append mode, which the API only supports
+// against a macro provided by Sysdig (not one created by Terraform in the
+// same test) - see https://github.com/sysdiglabs/terraform-provider-sysdig/pull/749
+// for why appending onto a freshly-created custom macro doesn't work.
+func macroAppendToDefault() string {
+	return `
 resource "sysdig_secure_macro" "sample2" {
-  name       = "terraform_test_%s"
+  name       = "container"
   condition  = "and always_true"
   append     = true
-  depends_on = [sysdig_secure_macro.sample]
 }
-`, name, name)
+`
 }
 
 func macroWithMacro(name1, name2 string) string {

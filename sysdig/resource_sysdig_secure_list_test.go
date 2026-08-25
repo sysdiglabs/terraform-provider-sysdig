@@ -40,7 +40,7 @@ func TestAccList(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: listAppendToDefault(rText()),
+				Config: listAppendToDefault(),
 			},
 			{
 				Config: listWithList(rText(), rText()),
@@ -67,20 +67,18 @@ resource "sysdig_secure_list" "sample" {
 `, name)
 }
 
-func listAppendToDefault(name string) string {
-	return fmt.Sprintf(`
-resource "sysdig_secure_list" "sample" {
-  name  = "terraform_test_%s"
-  items = ["foo", "bar"]
-}
-
+// listAppendToDefault exercises append mode, which the API only supports
+// against a list provided by Sysdig (not one created by Terraform in the
+// same test) - see https://github.com/sysdiglabs/terraform-provider-sysdig/pull/749
+// for why appending onto a freshly-created custom list doesn't work.
+func listAppendToDefault() string {
+	return `
 resource "sysdig_secure_list" "sample2" {
-  name       = "terraform_test_%s"
-  items      = ["baz"]
-  append     = true
-  depends_on = [sysdig_secure_list.sample]
+  name   = "allowed_k8s_nodes"
+  items  = ["foo", "bar"]
+  append = true
 }
-`, name, name)
+`
 }
 
 func listWithList(name1, name2 string) string {

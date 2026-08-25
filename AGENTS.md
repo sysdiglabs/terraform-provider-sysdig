@@ -339,7 +339,7 @@ Multiple CI runs share the same Sysdig environment, so hardcoded resource names 
 
 - **Never hardcode resource names** in test configs — always use unique random names via `rText()` (`acctest.RandStringFromCharSet`) or `randomText()`
 - **Prefix with `terraform_test_`** for easy identification and cleanup
-- **Never reference built-in Sysdig resources by name** (e.g., the `"container"` macro or the `"allowed_k8s_nodes"` list) — instead, create your own base resource with a unique name and reference/append onto that
+- **The `append` field only works against a macro/list provided by Sysdig** (e.g. the `"container"` macro or the `"allowed_k8s_nodes"` list) — the API rejects `append = true` against a name that already belongs to a custom Terraform/Secure UI-created macro or list with "must not be the same as another Secure UI macro/list". So append tests must target one of these built-ins directly, not a resource created earlier in the same test. CI job cancellations (see fail-fast below) are the main source of leftover append state on these built-ins; there's no list endpoint to find and clean up an orphaned one by name, so keep `fail-fast: false` on the acceptance test matrices in `test.yml` to let in-flight jobs finish their own Terraform destroy instead of being killed mid-apply
 
 ## Development Workflow (TDD)
 
