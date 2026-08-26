@@ -67,11 +67,15 @@ resource "sysdig_secure_list" "sample" {
 `, name)
 }
 
+// listAppendToDefault exercises append mode, which the API only supports
+// against a list provided by Sysdig (not one created by Terraform in the
+// same test) - see https://github.com/sysdiglabs/terraform-provider-sysdig/pull/749
+// for why appending onto a freshly-created custom list doesn't work.
 func listAppendToDefault() string {
 	return `
 resource "sysdig_secure_list" "sample2" {
-  name = "allowed_k8s_nodes"
-  items = ["foo", "bar"]
+  name   = "allowed_k8s_nodes"
+  items  = ["foo", "bar"]
   append = true
 }
 `

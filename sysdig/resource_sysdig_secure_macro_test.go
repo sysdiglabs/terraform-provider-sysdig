@@ -73,12 +73,16 @@ resource "sysdig_secure_macro" "sample" {
 `, name)
 }
 
+// macroAppendToDefault exercises append mode, which the API only supports
+// against a macro provided by Sysdig (not one created by Terraform in the
+// same test) - see https://github.com/sysdiglabs/terraform-provider-sysdig/pull/749
+// for why appending onto a freshly-created custom macro doesn't work.
 func macroAppendToDefault() string {
 	return `
 resource "sysdig_secure_macro" "sample2" {
-  name = "container"
-  condition = "and always_true"
-  append = true
+  name       = "container"
+  condition  = "and always_true"
+  append     = true
 }
 `
 }
