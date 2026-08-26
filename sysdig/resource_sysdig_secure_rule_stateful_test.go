@@ -7,12 +7,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/draios/terraform-provider-sysdig/buildinfo"
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestRuleStatefulAppends(t *testing.T) {
+	if buildinfo.OnpremSecure {
+		t.Skip("Skipping stateful tests: awscloudtrail_stateful is disabled on-prem")
+	}
 	if strings.HasSuffix(os.Getenv("SYSDIG_SECURE_URL"), "ibm.com") {
 		t.Skip("Skipping stateful tests for IBM Cloud")
 		return

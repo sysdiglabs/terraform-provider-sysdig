@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/draios/terraform-provider-sysdig/buildinfo"
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
@@ -20,7 +21,7 @@ func TestAccManagedPolicyDataSource(t *testing.T) {
 		},
 	}
 
-	if !strings.HasSuffix(os.Getenv("SYSDIG_SECURE_URL"), "ibm.com") {
+	if !buildinfo.OnpremSecure && !strings.HasSuffix(os.Getenv("SYSDIG_SECURE_URL"), "ibm.com") {
 		steps = append(steps, resource.TestStep{
 			Config: managedStatefulPolicyDataSource(),
 		},
