@@ -1,37 +1,21 @@
 package sysdig
 
 import (
-	"context"
-	"net/http"
-	"strconv"
-	"time"
-
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// Non-functional; see secure_rule_fast_engine_removed.go.
 func resourceSysdigSecureRuleProcess() *schema.Resource {
-	timeout := 5 * time.Minute
+	const typeName = "sysdig_secure_rule_process"
+	const ruleType = "PROCESS"
 
 	return &schema.Resource{
-		DeprecationMessage: "sysdig_secure_rule_process is deprecated and no longer functional against current Sysdig backends — the backend rejects ruleType PROCESS. Migrate to sysdig_secure_rule_falco with an equivalent Falco condition.",
-		CreateContext:      resourceSysdigRuleProcessCreate,
-		UpdateContext:      resourceSysdigRuleProcessUpdate,
-		ReadContext:        resourceSysdigRuleProcessRead,
-		DeleteContext:      resourceSysdigRuleProcessDelete,
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
+		DeprecationMessage: fastEngineDeprecation("resource", typeName, ruleType),
 
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(timeout),
-			Update: schema.DefaultTimeout(timeout),
-			Read:   schema.DefaultTimeout(timeout),
-			Delete: schema.DefaultTimeout(timeout),
-		},
+		CreateContext: fastEngineResourceRemoved(typeName, ruleType),
+		ReadContext:   fastEngineRuleGone(typeName, ruleType),
+		UpdateContext: fastEngineResourceRemoved(typeName, ruleType),
+		DeleteContext: fastEngineRuleForget(typeName, ruleType),
 
 		Schema: createRuleSchema(map[string]*schema.Schema{
 			"matching": {
@@ -48,118 +32,4 @@ func resourceSysdigSecureRuleProcess() *schema.Resource {
 			},
 		}),
 	}
-}
-
-func resourceSysdigRuleProcessCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	sysdigClients := meta.(SysdigClients)
-	client, err := getSecureRuleClient(sysdigClients)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	rule := resourceSysdigRuleProcessFromResourceData(d)
-
-	rule, err = client.CreateRule(ctx, rule)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
-
-	d.SetId(strconv.Itoa(rule.ID))
-	_ = d.Set("version", rule.Version)
-
-	return nil
-}
-
-// Retrieves the information of a resource form the file and loads it in Terraform
-func resourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	rule, statusCode, err := client.GetRuleByID(ctx, id)
-	if err != nil {
-		if statusCode == http.StatusNotFound {
-			d.SetId("")
-			return nil
-		} else {
-			return diag.FromErr(err)
-		}
-	}
-
-	if rule.Details.Processes == nil {
-		return diag.Errorf("no process data for a process rule")
-	}
-
-	updateResourceDataForRule(d, rule)
-	_ = d.Set("matching", rule.Details.Processes.MatchItems)
-	_ = d.Set("processes", rule.Details.Processes.Items)
-
-	return nil
-}
-
-func resourceSysdigRuleProcessUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	sysdigClients := meta.(SysdigClients)
-	client, err := getSecureRuleClient(sysdigClients)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	rule := resourceSysdigRuleProcessFromResourceData(d)
-
-	rule.Version = d.Get("version").(int)
-	rule.ID, _ = strconv.Atoi(d.Id())
-
-	_, err = client.UpdateRule(ctx, rule)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
-
-	return nil
-}
-
-func resourceSysdigRuleProcessDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	sysdigClients := meta.(SysdigClients)
-	client, err := getSecureRuleClient(sysdigClients)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	err = client.DeleteRule(ctx, id)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
-
-	return nil
-}
-
-func resourceSysdigRuleProcessFromResourceData(d *schema.ResourceData) v2.Rule {
-	rule := ruleFromResourceData(d)
-	rule.Details.RuleType = v2.RuleTypeProcess
-
-	rule.Details.Processes = &v2.Processes{}
-	rule.Details.Processes.MatchItems = d.Get("matching").(bool)
-	rule.Details.Processes.Items = []string{}
-	if processes, ok := d.Get("processes").([]any); ok {
-		for _, rawProcess := range processes {
-			if process, ok := rawProcess.(string); ok {
-				rule.Details.Processes.Items = append(rule.Details.Processes.Items, process)
-			}
-		}
-	}
-
-	return rule
 }

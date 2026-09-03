@@ -1,24 +1,17 @@
 package sysdig
 
 import (
-	"context"
-	"time"
-
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// Non-functional; see secure_rule_fast_engine_removed.go.
 func dataSourceSysdigSecureRuleSyscall() *schema.Resource {
-	timeout := 5 * time.Minute
+	const typeName = "sysdig_secure_rule_syscall"
+	const ruleType = "SYSCALL"
 
 	return &schema.Resource{
-		DeprecationMessage: "data source sysdig_secure_rule_syscall is deprecated — the backend no longer returns rules of ruleType SYSCALL. Use the sysdig_secure_rule_falco data source.",
-		ReadContext:        dataSourceSysdigRuleSyscallRead,
-
-		Timeouts: &schema.ResourceTimeout{
-			Read: schema.DefaultTimeout(timeout),
-		},
+		DeprecationMessage: fastEngineDeprecation("data source", typeName, ruleType),
+		ReadContext:        fastEngineDataSourceRemoved(typeName, ruleType),
 
 		Schema: createRuleDataSourceSchema(map[string]*schema.Schema{
 			"matching": {
@@ -34,19 +27,4 @@ func dataSourceSysdigSecureRuleSyscall() *schema.Resource {
 			},
 		}),
 	}
-}
-
-func dataSourceSysdigRuleSyscallRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	return commonDataSourceSysdigRuleRead(ctx, d, meta, v2.RuleTypeSyscall, syscallRuleDataSourceToResourceData)
-}
-
-func syscallRuleDataSourceToResourceData(rule v2.Rule, d *schema.ResourceData) diag.Diagnostics {
-	if rule.Details.Syscalls == nil {
-		return diag.Errorf("no syscall data for a syscall rule")
-	}
-
-	_ = d.Set("matching", rule.Details.Syscalls.MatchItems)
-	_ = d.Set("syscalls", rule.Details.Syscalls.Items)
-
-	return nil
 }
