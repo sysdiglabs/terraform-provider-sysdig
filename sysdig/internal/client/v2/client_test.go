@@ -268,6 +268,91 @@ func TestClient_APIErrorFromResponse(t *testing.T) {
 	}
 }
 
+func TestRedactDump(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name         string
+		dump         string
+		knownSecrets []string
+		wantRedacted string   // substring that must appear in the output
+		wantAbsent   []string // secret values that must NOT appear in the output
+	}{
+		{
+			name:         "authorization header",
+			dump:         "GET / HTTP/1.1\r\nHost: example.com\r\nAuthorization: Bearer sekret-token\r\n\r\n",
+			wantRedacted: "Authorization: <REDACTED>",
+			wantAbsent:   []string{"sekret-token"},
+		},
+		{
+			name:         "proxy-authorization header from extra_headers",
+			dump:         "GET / HTTP/1.1\r\nHost: example.com\r\nProxy-Authorization: Basic sekret\r\n\r\n",
+			wantRedacted: "Proxy-Authorization: <REDACTED>",
+			wantAbsent:   []string{"sekret"},
+		},
+		{
+			name:         "accessKey in JSON body",
+			dump:         `{"user":{"customer":{"accessKey":"AKIA-sekret"}}}`,
+			wantRedacted: `"accessKey":"<REDACTED>"`,
+			wantAbsent:   []string{"AKIA-sekret"},
+		},
+		{
+			name:         "camelCase apiKey and clientSecret in JSON body",
+			dump:         `{"apiKey":"sekret-api","clientSecret":"sekret-client"}`,
+			wantRedacted: `"apiKey":"<REDACTED>","clientSecret":"<REDACTED>"`,
+			wantAbsent:   []string{"sekret-api", "sekret-client"},
+		},
+		{
+			name:         "snake_case access_token in JSON body",
+			dump:         `{"access_token":"sekret-ibm","expiration":123}`,
+			wantRedacted: `"access_token":"<REDACTED>"`,
+			wantAbsent:   []string{"sekret-ibm"},
+		},
+		{
+			name:         "routingKey, serviceKey and publicToken in JSON body",
+			dump:         `{"routingKey":"sekret-1","serviceKey":"sekret-2","publicToken":"sekret-3"}`,
+			wantRedacted: `"routingKey":"<REDACTED>","serviceKey":"<REDACTED>","publicToken":"<REDACTED>"`,
+			wantAbsent:   []string{"sekret-1", "sekret-2", "sekret-3"},
+		},
+		{
+			name:         "escaped quote inside secret value doesn't leak the remainder",
+			dump:         `{"password":"ab\"cd"}`,
+			wantRedacted: `"password":"<REDACTED>"`,
+			wantAbsent:   []string{"ab", "cd"},
+		},
+		{
+			name:         "apikey in x-www-form-urlencoded body",
+			dump:         "grant_type=urn:ibm:params:oauth:grant-type:apikey&apikey=sekret-ibm-key",
+			wantRedacted: "apikey=<REDACTED>",
+			wantAbsent:   []string{"sekret-ibm-key"},
+		},
+		{
+			name:         "known secret value under an unanticipated header name",
+			dump:         "GET / HTTP/1.1\r\nHost: example.com\r\nX-Custom: sekret-value\r\n\r\n",
+			knownSecrets: []string{"sekret-value"},
+			wantRedacted: "X-Custom: <REDACTED>",
+			wantAbsent:   []string{"sekret-value"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := redactDump([]byte(tt.dump), tt.knownSecrets...)
+
+			if !strings.Contains(got, tt.wantRedacted) {
+				t.Errorf("expected output to contain %q, got %q", tt.wantRedacted, got)
+			}
+			for _, secret := range tt.wantAbsent {
+				if strings.Contains(got, secret) {
+					t.Errorf("expected secret %q to be redacted, got %q", secret, got)
+				}
+			}
+		})
+	}
+}
+
 func TestRequest(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		agent := r.Header.Get(UserAgentHeader)

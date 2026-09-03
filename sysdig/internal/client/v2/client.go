@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"regexp"
 	"strings"
 	"time"
 
@@ -34,6 +35,53 @@ const (
 )
 
 var errMissingCurrentTeam = errors.New("missing user's current team")
+
+// sensitiveHeaderRe redacts the value of any header whose name looks like it
+// carries a credential (Authorization, Proxy-Authorization, X-Api-Key, ...),
+// rather than matching only the literal "Authorization" header.
+var sensitiveHeaderRe = regexp.MustCompile(`(?im)^([\w-]*(?:auth|key|token|secret|password|credential)[\w-]*:[ \t]*).*$`)
+
+// sensitiveJSONFieldRe redacts the value of any JSON field whose name looks
+// like it carries a credential (accessKey, apiKey, access_token,
+// clientSecret, publicToken, routingKey, serviceKey, ...). The value pattern
+// is escape-aware so it doesn't stop early on an escaped quote inside the
+// secret and leak the remainder.
+var sensitiveJSONFieldRe = regexp.MustCompile(`(?i)("\w*(?:key|token|secret|password|credential)\w*"\s*:\s*)"(?:[^"\\]|\\.)*"`)
+
+// sensitiveFormFieldRe redacts the value of any x-www-form-urlencoded (or
+// URL query string) field whose name looks like it carries a credential,
+// e.g. IBM IAM's "apikey=..." token-exchange request body.
+var sensitiveFormFieldRe = regexp.MustCompile(`(?i)(\w*(?:key|token|secret|password|credential)\w*=)[^&\s"]*`)
+
+// redactDump scrubs sensitive headers, JSON fields, form-encoded values, and
+// any already-known credential values out of a raw HTTP request/response
+// dump before it is written to the debug log. knownSecrets covers values
+// that a name-based pattern might miss (e.g. a secret sent under a header
+// name we didn't anticipate).
+func redactDump(dump []byte, knownSecrets ...string) string {
+	redacted := string(dump)
+	for _, secret := range knownSecrets {
+		if secret == "" {
+			continue
+		}
+		redacted = strings.ReplaceAll(redacted, secret, "<REDACTED>")
+	}
+	redacted = sensitiveHeaderRe.ReplaceAllString(redacted, "${1}<REDACTED>")
+	redacted = sensitiveJSONFieldRe.ReplaceAllString(redacted, `${1}"<REDACTED>"`)
+	redacted = sensitiveFormFieldRe.ReplaceAllString(redacted, "${1}<REDACTED>")
+	return redacted
+}
+
+// knownSecrets returns the credential values the provider itself configured
+// for this client, so they get scrubbed from debug dumps even where they
+// show up under a header/field name the patterns above don't anticipate.
+func knownSecrets(cfg *config) []string {
+	secrets := []string{cfg.token, cfg.ibmAPIKey}
+	for _, v := range cfg.extraHeaders {
+		secrets = append(secrets, v)
+	}
+	return secrets
+}
 
 type Base interface {
 	CurrentTeamID(ctx context.Context) (int, error)
@@ -171,12 +219,14 @@ func request(httpClient *http.Client, cfg *config, request *http.Request) (*http
 		}
 	}
 
+	secrets := knownSecrets(cfg)
+
 	out, err := httputil.DumpRequestOut(request, true)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[DEBUG] %s", string(out))
+	log.Printf("[DEBUG] %s", redactDump(out, secrets...))
 	response, err := httpClient.Do(request)
 	if err != nil {
 		log.Println(err.Error())
@@ -187,7 +237,7 @@ func request(httpClient *http.Client, cfg *config, request *http.Request) (*http
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("[DEBUG] %s", string(out))
+	log.Printf("[DEBUG] %s", redactDump(out, secrets...))
 	return response, err
 }
 
