@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"regexp"
 	"strings"
 	"time"
 
@@ -34,6 +35,21 @@ const (
 )
 
 var errMissingCurrentTeam = errors.New("missing user's current team")
+
+// sensitiveHeaderRe redacts the Authorization header from HTTP dumps.
+var sensitiveHeaderRe = regexp.MustCompile(`(?i)(\r?\n` + AuthorizationHeader + `: )[^\r\n]*`)
+
+// sensitiveJSONFieldRe redacts well-known secret fields (e.g. the customer
+// accessKey returned by GetMePath) from HTTP dumps.
+var sensitiveJSONFieldRe = regexp.MustCompile(`(?i)("(?:accessKey|accessKeySecret|password|secret|token)"\s*:\s*)"[^"]*"`)
+
+// redactDump scrubs sensitive headers and JSON fields out of a raw HTTP
+// request/response dump before it is written to the debug log.
+func redactDump(dump []byte) string {
+	redacted := sensitiveHeaderRe.ReplaceAllString(string(dump), "${1}<REDACTED>")
+	redacted = sensitiveJSONFieldRe.ReplaceAllString(redacted, `${1}"<REDACTED>"`)
+	return redacted
+}
 
 type Base interface {
 	CurrentTeamID(ctx context.Context) (int, error)
@@ -176,7 +192,7 @@ func request(httpClient *http.Client, cfg *config, request *http.Request) (*http
 		return nil, err
 	}
 
-	log.Printf("[DEBUG] %s", string(out))
+	log.Printf("[DEBUG] %s", redactDump(out))
 	response, err := httpClient.Do(request)
 	if err != nil {
 		log.Println(err.Error())
@@ -187,7 +203,7 @@ func request(httpClient *http.Client, cfg *config, request *http.Request) (*http
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("[DEBUG] %s", string(out))
+	log.Printf("[DEBUG] %s", redactDump(out))
 	return response, err
 }
 
