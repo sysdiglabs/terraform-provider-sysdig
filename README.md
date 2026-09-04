@@ -102,7 +102,7 @@ $ just uninstall
 * if it's your first time, validate you're taking into account every aspect of the [`./github/pull_request_template`](.github/pull_request_template.md)
 * on pull-requests some validations are enforced.
   - Defined in [`/.pre-commit-config.yaml`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.pre-commit-config.yaml)
-  - You can work on this before even pushing to remote, using [**pre-commit**](https://pre-commit.com) plugin
+  - You can work on this before even pushing to remote, using [**prek**](https://prek.j178.dev), a drop-in pre-commit replacement (same `.pre-commit-config.yaml`)
   
 * for the PR title use [conventional commit format](https://www.conventionalcommits.org/en/v1.0.0/) so when the branch is squashed to main branch it follows a convention
 * acceptance tests are launched in [Sysdig production `+kubelab` test environment](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.github/workflows/ci-pull-request.yml#L82-L83)

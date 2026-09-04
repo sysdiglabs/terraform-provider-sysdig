@@ -42,11 +42,11 @@
               jq
               just
               pinact
-              pre-commit
+              prek
             ];
 
             shellHook = ''
-              pre-commit install
+              prek install
             '';
           };
 
