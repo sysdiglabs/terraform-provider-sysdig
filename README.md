@@ -28,6 +28,12 @@
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.0 is recommended (the provider supports > 0.12.x)
 - [Go](https://golang.org/doc/install) > Go version specified in [go.mod](./go.mod#L3)
 
+All of the above (plus `just`, `golangci-lint`, `goreleaser`, `terraform`, and every other
+dev/CI tool) are installed via [Nix](https://nixos.org): run `nix develop` and you get the
+exact same toolchain versions that CI uses, instead of whatever happens to be on your
+`$PATH`. This is why the provider is built with Nix on every dev machine and in every
+CI/CD workflow — same versions everywhere, no "works on my machine" drift.
+
 ## Develop
 
 First **clone** the source repository:
