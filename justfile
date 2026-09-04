@@ -11,11 +11,6 @@ website_repo := "github.com/hashicorp/terraform-website"
 default:
     @just --list
 
-# Install dev tool dependencies
-[group('setup')]
-install-tools:
-    go install golang.org/x/tools/cmd/stringer@latest
-
 # Update nix flake inputs, Go module dependencies, pinned GitHub Actions, and pre-commit hook versions
 [group('update')]
 update:
@@ -70,7 +65,6 @@ testacc: fmtcheck
 junit-report: fmtcheck
     #!/usr/bin/env bash
     set -eu
-    go install github.com/jstemmer/go-junit-report/v2@latest
     CGO_ENABLED=1 TF_ACC=1 TF_LOG=DEBUG go test {{ test }} -v {{ test_args }} -tags={{ test_suite }} -timeout 120m -race -parallel=1 2>&1 | tee output.txt
     ! grep -q "\[build failed\]" output.txt
     go-junit-report -in output.txt -out junit-report.xml
@@ -91,7 +85,6 @@ vet:
 # Format code with go fmt and gofumpt
 [group('quality')]
 fmt:
-    go install mvdan.cc/gofumpt@latest
     go fmt ./...
     gofumpt -w ./
 

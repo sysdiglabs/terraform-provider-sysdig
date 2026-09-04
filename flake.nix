@@ -39,6 +39,8 @@
               gnupg
               golangci-lint
               gofumpt
+              gotools
+              go-junit-report
               jq
               just
               pinact
@@ -46,6 +48,7 @@
             ];
 
             shellHook = ''
+              export PATH="$(go env GOPATH)/bin:$PATH"
               prek install
             '';
           };
