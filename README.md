@@ -35,7 +35,7 @@ First **clone** the source repository:
 ```sh
 $ git clone git@github.com:draios/terraform-provider-sysdig
 $ cd terraform-provider-sysdig
-$ make build
+$ just build
 ```
 
 If you're a rookie, check [Official Terraform Provider development guides](https://developer.hashicorp.com/terraform/plugin/framework)
@@ -50,17 +50,17 @@ TL;DR;
 
 ## Compile
 
-To **compile** the provider, run `make build`. This will build the provider and put the provider binary in the `$(go env GOPATH)/bin` directory, which should be in your `PATH`.
+To **compile** the provider, run `just build`. This will build the provider and put the provider binary in the `$(go env GOPATH)/bin` directory, which should be in your `PATH`.
 
 ```sh
-$ make build
+$ just build
 $ $GOPATH/bin/terraform-provider-sysdig
 ```
 
 ## Tests
 
-In order to **test** the provider, you can simply run `make test` to run unit-tests.
-For acceptance tests, you can run `make testacc`, but note that 
+In order to **test** the provider, you can simply run `just test` to run unit-tests.
+For acceptance tests, you can run `just testacc`, but note that 
 - Sysdig Montir and/or Secure credentials are required, check [`/.envrc.template`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.envrc.template)
 - **acceptance tests rely on the creation of real infrastructure**, you should execute them in an environment where you can remove the resources easily.
 
@@ -71,7 +71,7 @@ If you're a rookie, check [Terraform acceptance test guidelines](https://develop
 To use the local provider you just built, follow the instructions to [**install** it as a plugin.](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) in your machine with:
 
 ```sh
-$ make install
+$ just install
 ```
 
 That will add the provider to the terraform plugins dir. Then just set `source` and `version` values appropriately:
@@ -94,7 +94,7 @@ terraform {
 To uninstall the plugin:
 
 ```sh
-$ make uninstall
+$ just uninstall
 ```
 
 ## Proposing PR's

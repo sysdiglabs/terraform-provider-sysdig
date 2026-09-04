@@ -27,8 +27,8 @@ pipeline {
              }
          }
          steps {
-            sh "make test"
-            sh "make testacc"
+            sh "just test"
+            sh "just testacc"
          }
       }
    }
