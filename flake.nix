@@ -41,6 +41,7 @@
               gofumpt
               jq
               just
+              pinact
               pre-commit
             ];
 

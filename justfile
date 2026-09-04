@@ -16,12 +16,13 @@ default:
 install-tools:
     go install golang.org/x/tools/cmd/stringer@latest
 
-# Update nix flake inputs and Go module dependencies
+# Update nix flake inputs, Go module dependencies, and pinned GitHub Actions
 [group('update')]
 update:
     nix flake update
     nix develop --command go get -u -t -v ./...
     nix develop --command go mod tidy
+    nix develop --command pinact run -u
 
 # Build and install the provider binary to $GOPATH/bin
 [group('build')]
