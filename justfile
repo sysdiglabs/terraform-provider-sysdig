@@ -117,7 +117,6 @@ provider-docs:
     terraform init -plugin-dir terraform-plugin-dir
     mkdir -p terraform-providers-schema
     terraform providers schema -json > terraform-providers-schema/schema.json
-    go install github.com/bflad/tfproviderdocs@latest
     tfproviderdocs check \
         -allowed-resource-subcategories-file website/allowed-subcategories.txt \
         -enable-contents-check \
