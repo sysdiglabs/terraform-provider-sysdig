@@ -4,26 +4,26 @@ repos:
     -   id: fmt
         name: fmt
         pass_filenames: false
-        entry: make fmt
+        entry: just fmt
         language: system
     -   id: fmtcheck
         pass_filenames: false
         name: fmtcheck
-        entry: make fmtcheck
+        entry: just fmtcheck
         language: system
     -   id: lint
         name: lint
         pass_filenames: false
-        entry: make lint
+        entry: just lint
         language: system
 #  -   id: test-compile
 #        name: test-compile
 #        pass_filenames: false
-#        entry: make test-compile
+#        entry: just test-compile
 #        language: system
     -   id: test
         name: test
         pass_filenames: false
-        entry: make test
+        entry: just test
         language: system
 

@@ -7,9 +7,9 @@ jobs:
     name: Slack Notification
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
         env:
           SLACK_CHANNEL: ws-cloudnative-alerts
           SLACK_ICON: https://github.com/fluidicon.png
@@ -18,7 +18,7 @@ jobs:
           SLACK_USERNAME: terraform-provider-sysdig
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           MSG_MINIMAL: true
-      - uses: 8398a7/action-slack@v3
+      - uses: 8398a7/action-slack@77eaa4f1c608a7d68b38af4e3f739dcd8cba273e # v3.19.0
         with:
           status: ${{ job.status }}
           fields: message,author,ref

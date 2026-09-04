@@ -6,7 +6,7 @@ gofmt_files=$(find . -name '*.go' ! -name '*pb.go' | grep -v vendor | xargs gofm
 if [[ -n ${gofmt_files} ]]; then
     echo 'gofmt needs running on the following files:'
     echo "${gofmt_files}"
-    echo "You can use the command: \`make fmt\` to reformat code."
+    echo "You can use the command: \`just fmt\` to reformat code."
     exit 1
 fi
 

@@ -28,6 +28,12 @@
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.0 is recommended (the provider supports > 0.12.x)
 - [Go](https://golang.org/doc/install) > Go version specified in [go.mod](./go.mod#L3)
 
+All of the above (plus `just`, `golangci-lint`, `goreleaser`, `terraform`, and every other
+dev/CI tool) are installed via [Nix](https://nixos.org): run `nix develop` and you get the
+exact same toolchain versions that CI uses, instead of whatever happens to be on your
+`$PATH`. This is why the provider is built with Nix on every dev machine and in every
+CI/CD workflow — same versions everywhere, no "works on my machine" drift.
+
 ## Develop
 
 First **clone** the source repository:
@@ -35,7 +41,7 @@ First **clone** the source repository:
 ```sh
 $ git clone git@github.com:draios/terraform-provider-sysdig
 $ cd terraform-provider-sysdig
-$ make build
+$ just build
 ```
 
 If you're a rookie, check [Official Terraform Provider development guides](https://developer.hashicorp.com/terraform/plugin/framework)
@@ -50,17 +56,17 @@ TL;DR;
 
 ## Compile
 
-To **compile** the provider, run `make build`. This will build the provider and put the provider binary in the `$(go env GOPATH)/bin` directory, which should be in your `PATH`.
+To **compile** the provider, run `just build`. This will build the provider and put the provider binary in the `$(go env GOPATH)/bin` directory, which should be in your `PATH`.
 
 ```sh
-$ make build
+$ just build
 $ $GOPATH/bin/terraform-provider-sysdig
 ```
 
 ## Tests
 
-In order to **test** the provider, you can simply run `make test` to run unit-tests.
-For acceptance tests, you can run `make testacc`, but note that 
+In order to **test** the provider, you can simply run `just test` to run unit-tests.
+For acceptance tests, you can run `just testacc`, but note that 
 - Sysdig Montir and/or Secure credentials are required, check [`/.envrc.template`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.envrc.template)
 - **acceptance tests rely on the creation of real infrastructure**, you should execute them in an environment where you can remove the resources easily.
 
@@ -71,7 +77,7 @@ If you're a rookie, check [Terraform acceptance test guidelines](https://develop
 To use the local provider you just built, follow the instructions to [**install** it as a plugin.](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) in your machine with:
 
 ```sh
-$ make install
+$ just install
 ```
 
 That will add the provider to the terraform plugins dir. Then just set `source` and `version` values appropriately:
@@ -94,7 +100,7 @@ terraform {
 To uninstall the plugin:
 
 ```sh
-$ make uninstall
+$ just uninstall
 ```
 
 ## Proposing PR's
@@ -102,7 +108,7 @@ $ make uninstall
 * if it's your first time, validate you're taking into account every aspect of the [`./github/pull_request_template`](.github/pull_request_template.md)
 * on pull-requests some validations are enforced.
   - Defined in [`/.pre-commit-config.yaml`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.pre-commit-config.yaml)
-  - You can work on this before even pushing to remote, using [**pre-commit**](https://pre-commit.com) plugin
+  - You can work on this before even pushing to remote, using [**prek**](https://prek.j178.dev), a drop-in pre-commit replacement (same `.pre-commit-config.yaml`)
   
 * for the PR title use [conventional commit format](https://www.conventionalcommits.org/en/v1.0.0/) so when the branch is squashed to main branch it follows a convention
 * acceptance tests are launched in [Sysdig production `+kubelab` test environment](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.github/workflows/ci-pull-request.yml#L82-L83)

@@ -5,25 +5,21 @@ on:
     branches:
     - master
 
-env:
-  TERRAFORM_VERSION: "0.14.8"
-
 jobs:
   ci-provider-docs:
     name: go build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: nix develop --command bash -e {0}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version-file: go.mod
+    - name: Set up Nix
+      uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
 
-    - uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: ${{ env.TERRAFORM_VERSION }}
-        terraform_wrapper: false
+    - name: Set up Magic Nix Cache
+      uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
 
     - name: provider-docs check
-      run: make provider-docs
+      run: just provider-docs
