@@ -41,6 +41,19 @@ jobs:
     - run: git checkout HEAD^2
       if: ${{ github.event_name == 'pull_request' }}
 
+    # go.mod requires a newer Go than what ubuntu-latest ships by default, and
+    # Autobuild below runs as a `uses:` step so it won't see the toolchain from
+    # a `nix develop` shell wrapper. Set up Nix and put the devShell's PATH
+    # (Go 1.27, etc.) ahead of the runner's own for every step that follows.
+    - name: Set up Nix
+      uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+
+    - name: Set up Magic Nix Cache
+      uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
+
+    - name: Expose Nix devShell tools on PATH
+      run: nix develop --command bash -c 'echo "$PATH"' | tr ':' '\n' >> "$GITHUB_PATH"
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9

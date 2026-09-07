@@ -41,6 +41,7 @@
               gofumpt
               gotools
               go-junit-report
+              gnumake
               jq
               just
               pinact
@@ -49,7 +50,9 @@
 
             shellHook = ''
               export PATH="$(go env GOPATH)/bin:$PATH"
-              prek install
+              if [ -z "${CI:-}" ]; then
+                prek install
+              fi
             '';
           };
 
