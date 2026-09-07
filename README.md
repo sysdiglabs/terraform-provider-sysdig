@@ -67,7 +67,7 @@ $ $GOPATH/bin/terraform-provider-sysdig
 
 In order to **test** the provider, you can simply run `just test` to run unit-tests.
 For acceptance tests, you can run `just testacc`, but note that 
-- Sysdig Montir and/or Secure credentials are required, check [`/.envrc.template`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.envrc.template)
+- Sysdig Monitor and/or Secure credentials are required, check [`/.envrc.template`](https://github.com/sysdiglabs/terraform-provider-sysdig/blob/master/.envrc.template)
 - **acceptance tests rely on the creation of real infrastructure**, you should execute them in an environment where you can remove the resources easily.
 
 If you're a rookie, check [Terraform acceptance test guidelines](https://developer.hashicorp.com/terraform/plugin/testing)
