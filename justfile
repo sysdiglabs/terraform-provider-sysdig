@@ -124,11 +124,6 @@ provider-docs:
 errcheck:
     @./scripts/errcheck.sh
 
-# Show status of vendored dependencies
-[group('utils')]
-vendor-status:
-    @govendor status
-
 # Compile tests without running them; set TEST to a specific package first
 [group('test')]
 test-compile:
