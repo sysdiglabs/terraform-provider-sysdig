@@ -28,10 +28,12 @@ pipeline {
          }
          steps {
             // Plain agent, no nix/just available here — inline what
-            // 'just test'/'just testacc' actually run instead.
-            sh "./scripts/gofmtcheck.sh"
-            sh "go test ./... -tags=unit -timeout=30s -parallel=4"
-            sh "CGO_ENABLED=1 TF_ACC=1 go test ./... -v -tags=tf_acc_sysdig_monitor,tf_acc_sysdig_secure -timeout 120m -race -parallel=1"
+            // 'just test'/'just testacc' actually run instead. Single-quoted
+            // so ${TEST:-...} is expanded by sh, not Groovy, keeping the same
+            // TEST/TESTARGS/TEST_SUITE override interface just/make had.
+            sh './scripts/gofmtcheck.sh'
+            sh 'go test ${TEST:-./...} -tags=unit -timeout=30s -parallel=4'
+            sh 'CGO_ENABLED=1 TF_ACC=1 go test ${TEST:-./...} -v ${TESTARGS:-} -tags=${TEST_SUITE:-tf_acc_sysdig_monitor,tf_acc_sysdig_secure} -timeout 120m -race -parallel=1'
          }
       }
    }
