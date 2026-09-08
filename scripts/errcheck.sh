@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Check gofmt
+# Check for unchecked errors
 echo "==> Checking for unchecked errors..."
 
 # nixpkgs' errcheck build lags behind our go.mod version (go/packages refuses to
