@@ -10,6 +10,8 @@ description: |-
 
 Creates a Sysdig Secure Custom Policy.
 
+-> **Note:** Use `sysdig_secure_custom_policy` only for policies you author from scratch (where you own the rule list). For a customer-owned policy that inherits a Sysdig-managed ruleset (e.g. created via "Copy Policy" on a Sysdig-managed policy in the UI), use [`sysdig_secure_managed_ruleset`](secure_managed_ruleset.md) instead. For tweaking a Sysdig-shipped default policy in place, use [`sysdig_secure_managed_policy`](secure_managed_policy.md). The three resources are distinguished by the API's `isDefault` and `templateId` fields: `managed_policy` for `isDefault: true`, `custom_policy` for `templateId: 0`, and `managed_ruleset` for `templateId != 0` with `isDefault: false`.
+
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage

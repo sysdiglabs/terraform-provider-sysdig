@@ -8,7 +8,13 @@ description: |-
 
 # Resource: sysdig_secure_managed_ruleset
 
-Creates a Sysdig Secure Managed Ruleset
+Creates a Sysdig Secure Managed Ruleset.
+
+-> **Note:** A "managed ruleset" is the Sysdig term for a customer-owned policy whose rule list is inherited from a Sysdig-provided template (in the API, `isDefault: false` and `templateId != 0`). Use this resource when:
+
+* You want to keep Sysdig's curated rule list but customize scope, notifications, actions, severity, or which rules are enabled.
+* You can disable individual rules via `disabled_rules`, but you cannot add new rules or modify rule definitions. To gain full control over the rule list, use [`sysdig_secure_custom_policy`](secure_custom_policy.md) instead.
+* For tweaking a Sysdig-shipped default policy in place (without making a customer-owned copy), use [`sysdig_secure_managed_policy`](secure_managed_policy.md).
 
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.  
 
