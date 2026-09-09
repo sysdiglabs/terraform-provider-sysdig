@@ -23,12 +23,17 @@ pipeline {
       stage('Tests') {
          agent {
              docker {
-                 image "golang:1.13"
+                 image "golang:1.27"
              }
          }
          steps {
-            sh "make test"
-            sh "make testacc"
+            // Plain agent, no nix/just available here — inline what
+            // 'just test'/'just testacc' actually run instead. Single-quoted
+            // so ${TEST:-...} is expanded by sh, not Groovy, keeping the same
+            // TEST/TESTARGS/TEST_SUITE override interface just/make had.
+            sh './scripts/gofmtcheck.sh'
+            sh 'go test ${TEST:-./...} -tags=unit -timeout=30s -parallel=4'
+            sh 'CGO_ENABLED=1 TF_ACC=1 go test ${TEST:-./...} -v ${TESTARGS:-} -tags=${TEST_SUITE:-tf_acc_sysdig_monitor,tf_acc_sysdig_secure} -timeout 120m -race -parallel=1'
          }
       }
    }

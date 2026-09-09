@@ -15,6 +15,9 @@ jobs:
   build-multiarch:
     name: Build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: nix develop --command bash -e {0}
     strategy:
       matrix:
         include:
@@ -44,12 +47,13 @@ jobs:
             arch: amd64
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
+      - name: Set up Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+
+      - name: Set up Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
 
       - name: Build project
         run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o terraform-provider-sysdig

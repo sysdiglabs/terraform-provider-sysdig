@@ -7,26 +7,34 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: nix develop --command bash -e {0}
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - name: Set up Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
       - name: Lint
-        uses: golangci/golangci-lint-action@v8
-        with:
-          args: --timeout 30m --build-tags unit,tf_acc_sysdig_monitor,tf_acc_sysdig_secure,tf_acc_ibm_monitor,tf_acc_ibm_secure
+        run: golangci-lint run --timeout 30m --build-tags unit,tf_acc_sysdig_monitor,tf_acc_sysdig_secure,tf_acc_ibm_monitor,tf_acc_ibm_secure ./...
 
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: nix develop --command bash -e {0}
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - name: Set up Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
       - name: Test
-        run: make test
+        run: just test
 
   # ============================================
   # Sysdig Secure - Dynamic Matrix
@@ -38,7 +46,7 @@ jobs:
     outputs:
       matrix: ${{ steps.list.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: list
         run: |
           files=$(grep -l "tf_acc_sysdig_secure" sysdig/*_test.go | xargs -I{} basename {} .go || echo "")
@@ -53,19 +61,20 @@ jobs:
     name: "Secure: ${{ matrix.file }}"
     runs-on: ubuntu-latest
     needs: list-sysdig-secure-tests
+    defaults:
+      run:
+        shell: nix develop --command bash -e {0}
     strategy:
       fail-fast: false
       max-parallel: 20
       matrix:
         file: ${{ fromJson(needs.list-sysdig-secure-tests.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - name: Set up Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
       - name: Run tests from ${{ matrix.file }}
         run: |
           tests=$(grep -oh "func Test[A-Za-z0-9_]*" sysdig/${{ matrix.file }}.go | sed 's/func //' | tr '\n' '|' | sed 's/|$//')
@@ -105,7 +114,7 @@ jobs:
     outputs:
       matrix: ${{ steps.list.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: list
         run: |
           files=$(grep -l "tf_acc_sysdig_monitor" sysdig/*_test.go | xargs -I{} basename {} .go || echo "")
@@ -120,19 +129,20 @@ jobs:
     name: "Monitor: ${{ matrix.file }}"
     runs-on: ubuntu-latest
     needs: list-sysdig-monitor-tests
+    defaults:
+      run:
+        shell: nix develop --command bash -e {0}
     strategy:
       fail-fast: false
       max-parallel: 20
       matrix:
         file: ${{ fromJson(needs.list-sysdig-monitor-tests.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - name: Set up Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
       - name: Run tests from ${{ matrix.file }}
         run: |
           tests=$(grep -oh "func Test[A-Za-z0-9_]*" sysdig/${{ matrix.file }}.go | sed 's/func //' | tr '\n' '|' | sed 's/|$//')
@@ -169,19 +179,18 @@ jobs:
     name: IBM Monitor Acceptance Tests
     runs-on: ubuntu-latest
     needs: test
+    defaults:
+      run:
+        shell: nix develop --command bash -e {0}
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: false
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - name: Set up Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
       - name: Test
-        run: make testacc
+        run: just testacc
         env:
           TEST_SUITE: tf_acc_ibm_monitor
           SYSDIG_IBM_MONITOR_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}
@@ -197,19 +206,18 @@ jobs:
     name: IBM Secure Acceptance Tests
     runs-on: ubuntu-latest
     needs: test
+    defaults:
+      run:
+        shell: nix develop --command bash -e {0}
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: false
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - name: Set up Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
       - name: Test
-        run: make testacc
+        run: just testacc
         env:
           TEST_SUITE: tf_acc_ibm_secure
           SYSDIG_IBM_SECURE_API_KEY: ${{ secrets.TERRAFORM_IBM_API_KEY }}

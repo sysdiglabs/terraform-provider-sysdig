@@ -6,24 +6,24 @@ This file provides guidance to AI agents (Claude Code, Cursor, Copilot, etc.) wh
 
 ```bash
 # Build and install
-make build              # Compile provider to $GOPATH/bin
-make install            # Build and install to local Terraform plugins directory
-make uninstall          # Remove from local plugins directory
+just build              # Compile provider to $GOPATH/bin
+just install            # Build and install to local Terraform plugins directory
+just uninstall          # Remove from local plugins directory
 
 # Code quality
-make fmt                # Format code with gofumpt
-make fmtcheck           # Verify code formatting
-make lint               # Run golangci-lint (1h timeout)
+just fmt                # Format code with gofumpt
+just fmtcheck           # Verify code formatting
+just lint               # Run golangci-lint (1h timeout)
 
 # Testing
-make test               # Run unit tests (30s timeout, 4 parallel)
-make testacc            # Run acceptance tests (120min timeout, requires credentials)
+just test               # Run unit tests (30s timeout, 4 parallel)
+just testacc            # Run acceptance tests (120min timeout, requires credentials)
 
 # Run specific test suite
-TEST_SUITE=tf_acc_sysdig_monitor make testacc
-TEST_SUITE=tf_acc_sysdig_secure make testacc
-TEST_SUITE=tf_acc_ibm_monitor make testacc
-TEST_SUITE=tf_acc_ibm_secure make testacc
+TEST_SUITE=tf_acc_sysdig_monitor just testacc
+TEST_SUITE=tf_acc_sysdig_secure just testacc
+TEST_SUITE=tf_acc_ibm_monitor just testacc
+TEST_SUITE=tf_acc_ibm_secure just testacc
 
 # Run a single test
 go test ./sysdig -v -run TestAccResourceSysdigUser -tags=tf_acc_sysdig_secure -timeout 120m
@@ -359,7 +359,7 @@ Follow the **Red-Green-Refactor** cycle:
 3. **Refactor:** Clean up if needed
    - Extract common patterns to shared functions
    - Ensure code follows existing conventions
-   - Run `make fmt` and `make lint`
+   - Run `just fmt` and `just lint`
 
 **Prefer small commits** - commit after each complete Red-Green-Refactor cycle. Each commit should represent a single, atomic, working change. This makes code review easier and keeps a clean git history.
 
@@ -436,7 +436,7 @@ Same structure but without Import section and with read-only field descriptions.
 
 ### PR Checks
 - Multi-architecture build (darwin, linux, windows, freebsd, openbsd, solaris)
-- golangci-lint (30min timeout in CI, 1h timeout in local GNUmakefile)
+- golangci-lint (30min timeout in CI, 1h timeout in local justfile)
 - Unit tests
 - Acceptance tests (Monitor, Secure, IBM suites in parallel)
 - Provider documentation validation (tfproviderdocs)
