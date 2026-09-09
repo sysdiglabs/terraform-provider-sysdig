@@ -207,10 +207,12 @@ func resourceSysdigRuleStatefulUpdate(ctx context.Context, d *schema.ResourceDat
 
 	rule.ID = id
 
-	_, err = client.UpdateStatefulRule(ctx, rule)
+	updatedRule, err := client.UpdateStatefulRule(ctx, rule)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	_ = d.Set("version", updatedRule.Version)
 
 	return nil
 }

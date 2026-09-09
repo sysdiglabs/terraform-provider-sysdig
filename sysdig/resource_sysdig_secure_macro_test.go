@@ -4,6 +4,7 @@ package sysdig_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -124,5 +125,81 @@ resource "sysdig_secure_macro" "sample" {
 	name = "terraform_test_%s"
 	condition = "always_true"
   }
+`, name)
+}
+
+// TestAccMacroVersionIsPersistedOnUpdate guards against the update path dropping
+// the version returned by the API. The resource sends the version it holds in
+// state on update; if the response version is not written back, state keeps the
+// pre-update value while the backend has already moved on.
+func TestAccMacroVersionIsPersistedOnUpdate(t *testing.T) {
+	name := randomText(10)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: macroWithName(name),
+				Check:  resource.TestCheckResourceAttr("sysdig_secure_macro.sample", "version", "1"),
+			},
+			{
+				// An in-place update bumps the backend version to 2; state must agree.
+				Config: macroUpdatedWithName(name),
+				Check:  resource.TestCheckResourceAttr("sysdig_secure_macro.sample", "version", "2"),
+			},
+		},
+	})
+}
+
+// TestAccMacroAppendToCustomMacro covers appending a macro the customer owns,
+// rather than one Sysdig ships (which macroAppendToDefault already covers).
+//
+// This is only supported on backends that migrated to the v2 macro storage.
+// Earlier backends reject it with "The field 'name' must not be the same as
+// another Secure UI macro", so the test is opt-in via SYSDIG_SECURE_MACROS_V2.
+func TestAccMacroAppendToCustomMacro(t *testing.T) {
+	if os.Getenv("SYSDIG_SECURE_MACROS_V2") == "" {
+		t.Skip("Skipping append-to-custom-macro test because SYSDIG_SECURE_MACROS_V2 is not set")
+		return
+	}
+
+	name := randomText(10)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: macroAppendToCustomMacro(name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sysdig_secure_macro.base", "append", "false"),
+					resource.TestCheckResourceAttr("sysdig_secure_macro.extension", "append", "true"),
+				),
+			},
+		},
+	})
+}
+
+func macroAppendToCustomMacro(name string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_macro" "base" {
+  name      = "terraform_test_%s"
+  condition = "proc.name = foo"
+}
+
+resource "sysdig_secure_macro" "extension" {
+  name      = sysdig_secure_macro.base.name
+  condition = "or proc.name = bar"
+  append    = true
+}
 `, name)
 }
