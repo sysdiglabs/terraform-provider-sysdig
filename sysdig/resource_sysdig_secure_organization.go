@@ -39,35 +39,35 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 				Required: true,
 			},
 			SchemaOrganizationalUnitIds: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			SchemaIncludedOrganizationalGroups: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			SchemaExcludedOrganizationalGroups: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			SchemaIncludedCloudAccounts: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			SchemaExcludedCloudAccounts: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -172,7 +172,7 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.Organizat
 	secureOrganization.ManagementAccountId = data.Get(SchemaManagementAccountID).(string)
 	secureOrganization.OrganizationRootId = data.Get(SchemaOrganizationRootID).(string)
 	secureOrganization.AutomaticOnboarding = data.Get(SchemaAutomaticOnboarding).(bool)
-	organizationalUnitIdsData := data.Get(SchemaOrganizationalUnitIds).([]any)
+	organizationalUnitIdsData := data.Get(SchemaOrganizationalUnitIds).(*schema.Set).List()
 	for _, organizationalUnitIDData := range organizationalUnitIdsData {
 		secureOrganization.OrganizationalUnitIds = append(
 			secureOrganization.OrganizationalUnitIds,
@@ -180,7 +180,7 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.Organizat
 		)
 	}
 
-	includedOrganizationalGroups := data.Get(SchemaIncludedOrganizationalGroups).([]any)
+	includedOrganizationalGroups := data.Get(SchemaIncludedOrganizationalGroups).(*schema.Set).List()
 	for _, includedOrganizationalGroup := range includedOrganizationalGroups {
 		secureOrganization.IncludedOrganizationalGroups = append(
 			secureOrganization.IncludedOrganizationalGroups,
@@ -188,7 +188,7 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.Organizat
 		)
 	}
 
-	excludedOrganizationalGroups := data.Get(SchemaExcludedOrganizationalGroups).([]any)
+	excludedOrganizationalGroups := data.Get(SchemaExcludedOrganizationalGroups).(*schema.Set).List()
 	for _, excludedOrganizationalGroup := range excludedOrganizationalGroups {
 		secureOrganization.ExcludedOrganizationalGroups = append(
 			secureOrganization.ExcludedOrganizationalGroups,
@@ -196,7 +196,7 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.Organizat
 		)
 	}
 
-	includedCloudAccounts := data.Get(SchemaIncludedCloudAccounts).([]any)
+	includedCloudAccounts := data.Get(SchemaIncludedCloudAccounts).(*schema.Set).List()
 	for _, includedCloudAccount := range includedCloudAccounts {
 		secureOrganization.IncludedCloudAccounts = append(
 			secureOrganization.IncludedCloudAccounts,
@@ -204,7 +204,7 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.Organizat
 		)
 	}
 
-	excludedCloudAccounts := data.Get(SchemaExcludedCloudAccounts).([]any)
+	excludedCloudAccounts := data.Get(SchemaExcludedCloudAccounts).(*schema.Set).List()
 	for _, excludedCloudAccount := range excludedCloudAccounts {
 		secureOrganization.ExcludedCloudAccounts = append(
 			secureOrganization.ExcludedCloudAccounts,

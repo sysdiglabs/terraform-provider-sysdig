@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -38,12 +39,12 @@ func TestAccSecureOrganization(t *testing.T) {
 			},
 		},
 		ErrorCheck: func(err error) error {
-			// if regex matches with the expected error, do t.Skip
-			re := regexp.MustCompile(fmt.Sprintf(`POST %s giving up after 5 attempt(s)`, organizationApiUrl))
+			re := regexp.MustCompile(fmt.Sprintf(`POST %s giving up after \d+ attempt\(s\)`, regexp.QuoteMeta(organizationApiUrl)))
 			if re.MatchString(err.Error()) {
 				t.Skipf("skipping test; this POST call is not supported without actual existing GCP projects and service principal.")
 			}
-			return nil
+			// anything else is a real failure; returning nil here would make the test pass vacuously
+			return err
 		},
 		Steps: []resource.TestStep{
 			{
@@ -55,13 +56,40 @@ func TestAccSecureOrganization(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"component"},
 			},
+			{
+				// reordering the include/exclude set elements must not produce a diff (SSPROD-71536)
+				Config:             secureOrgWithAccountIDReordered(accID),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
 		},
 	})
 }
 
 func secureOrgWithAccountID(accountID string) string {
+	return secureOrgConfig(accountID,
+		[]string{"ou-1111", "ou-2222"},
+		[]string{"group-a", "group-b"},
+		[]string{"group-c", "group-d"},
+		[]string{"111111111111", "222222222222"},
+		[]string{"333333333333", "444444444444"},
+	)
+}
+
+func secureOrgWithAccountIDReordered(accountID string) string {
+	return secureOrgConfig(accountID,
+		[]string{"ou-2222", "ou-1111"},
+		[]string{"group-b", "group-a"},
+		[]string{"group-d", "group-c"},
+		[]string{"222222222222", "111111111111"},
+		[]string{"444444444444", "333333333333"},
+	)
+}
+
+func secureOrgConfig(accountID string, organizationalUnitIDs, includedGroups, excludedGroups, includedAccounts, excludedAccounts []string) string {
 	// this is a base64 encoded service account key
 	test_service_account_key_encoded := getEncodedGCPServiceAccountKeyForOrg("sample", accountID)
+	quote := func(values []string) string { return `"` + strings.Join(values, `", "`) + `"` }
 
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "sample" {
@@ -120,11 +148,17 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 	}
 }
 resource "sysdig_secure_organization" "sample-org" {
-  management_account_id		= sysdig_secure_cloud_auth_account.sample.id
-  organization_root_id 		= "test-id"
-  automatic_onboarding      = false
+  management_account_id		     = sysdig_secure_cloud_auth_account.sample.id
+  organization_root_id 		     = "test-id"
+  automatic_onboarding           = false
+  organizational_unit_ids        = [%s]
+  included_organizational_groups = [%s]
+  excluded_organizational_groups = [%s]
+  included_cloud_accounts        = [%s]
+  excluded_cloud_accounts        = [%s]
 }
-`, accountID, test_service_account_key_encoded, test_service_account_key_encoded)
+`, accountID, test_service_account_key_encoded, test_service_account_key_encoded,
+		quote(organizationalUnitIDs), quote(includedGroups), quote(excludedGroups), quote(includedAccounts), quote(excludedAccounts))
 }
 
 func getEncodedGCPServiceAccountKeyForOrg(resourceName string, accountID string) string {

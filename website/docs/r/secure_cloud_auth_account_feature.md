@@ -60,7 +60,7 @@ resource "sysdig_secure_cloud_auth_account_feature" "sample" {
 
 * `enabled` - (Required) Whether or not to enable this feature on the given cloud account.
 
-* `components` - (Required) Based on the feature type to be created, this is the list of components to be enabled on the cloud account.
+* `components` - (Required) Based on the feature type to be created, this is the set of components to be enabled on the cloud account.
 
 * `flags` - (Optional) Based on the feature type to be created, these are the flags to be added to the feature on the cloud account.
 
