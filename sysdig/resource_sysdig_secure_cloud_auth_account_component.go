@@ -160,9 +160,6 @@ func resourceSysdigSecureCloudauthAccountComponentDelete(ctx context.Context, da
 	return nil
 }
 
-/*
-This function validates and restricts any fields not allowed to be updated during resource updates.
-*/
 func cloudauthAccountComponentFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountComponentSecure {
 	cloudAccountComponent := &v2.CloudauthAccountComponentSecure{
 		AccountComponent: cloudauth.AccountComponent{
