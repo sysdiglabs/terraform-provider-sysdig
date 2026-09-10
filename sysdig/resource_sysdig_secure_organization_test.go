@@ -26,7 +26,9 @@ func TestAccSecureOrganization(t *testing.T) {
 	// Skipping the test based on this error when it occurs.
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	accID := rText()
-	organizationApiUrl := fmt.Sprintf(`%s/api/cloudauth/v1/organizations`, os.Getenv("SYSDIG_SECURE_URL"))
+	// the host is left out on purpose: SYSDIG_SECURE_URL is not set in every environment, and with
+	// it interpolated the pattern stops matching the error raised against the default endpoint
+	organizationAPIFailure := regexp.MustCompile(`POST \S*/api/cloudauth/v1/organizations giving up after \d+ attempt\(s\)`)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -39,8 +41,7 @@ func TestAccSecureOrganization(t *testing.T) {
 			},
 		},
 		ErrorCheck: func(err error) error {
-			re := regexp.MustCompile(fmt.Sprintf(`POST %s giving up after \d+ attempt\(s\)`, regexp.QuoteMeta(organizationApiUrl)))
-			if re.MatchString(err.Error()) {
+			if organizationAPIFailure.MatchString(err.Error()) {
 				t.Skipf("skipping test; this POST call is not supported without actual existing GCP projects and service principal.")
 			}
 			// anything else is a real failure; returning nil here would make the test pass vacuously
@@ -66,27 +67,28 @@ func TestAccSecureOrganization(t *testing.T) {
 	})
 }
 
+// the values have to satisfy cloudauth's per-provider validation: organizational groups are
+// `folders/<id>` and cloud accounts are GCP project ids. organizational_unit_ids is left unset on
+// purpose, the API rejects it when the include/exclude fields are used.
 func secureOrgWithAccountID(accountID string) string {
 	return secureOrgConfig(accountID,
-		[]string{"ou-1111", "ou-2222"},
-		[]string{"group-a", "group-b"},
-		[]string{"group-c", "group-d"},
-		[]string{"111111111111", "222222222222"},
-		[]string{"333333333333", "444444444444"},
+		[]string{"folders/111111111111", "folders/222222222222"},
+		[]string{"folders/333333333333", "folders/444444444444"},
+		[]string{"sample-project-one", "sample-project-two"},
+		[]string{"sample-project-three", "sample-project-four"},
 	)
 }
 
 func secureOrgWithAccountIDReordered(accountID string) string {
 	return secureOrgConfig(accountID,
-		[]string{"ou-2222", "ou-1111"},
-		[]string{"group-b", "group-a"},
-		[]string{"group-d", "group-c"},
-		[]string{"222222222222", "111111111111"},
-		[]string{"444444444444", "333333333333"},
+		[]string{"folders/222222222222", "folders/111111111111"},
+		[]string{"folders/444444444444", "folders/333333333333"},
+		[]string{"sample-project-two", "sample-project-one"},
+		[]string{"sample-project-four", "sample-project-three"},
 	)
 }
 
-func secureOrgConfig(accountID string, organizationalUnitIDs, includedGroups, excludedGroups, includedAccounts, excludedAccounts []string) string {
+func secureOrgConfig(accountID string, includedGroups, excludedGroups, includedAccounts, excludedAccounts []string) string {
 	// this is a base64 encoded service account key
 	test_service_account_key_encoded := getEncodedGCPServiceAccountKeyForOrg("sample", accountID)
 	quote := func(values []string) string { return `"` + strings.Join(values, `", "`) + `"` }
@@ -149,16 +151,15 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 }
 resource "sysdig_secure_organization" "sample-org" {
   management_account_id		     = sysdig_secure_cloud_auth_account.sample.id
-  organization_root_id 		     = "test-id"
+  organization_root_id 		     = "organizations/123456789012"
   automatic_onboarding           = false
-  organizational_unit_ids        = [%s]
   included_organizational_groups = [%s]
   excluded_organizational_groups = [%s]
   included_cloud_accounts        = [%s]
   excluded_cloud_accounts        = [%s]
 }
 `, accountID, test_service_account_key_encoded, test_service_account_key_encoded,
-		quote(organizationalUnitIDs), quote(includedGroups), quote(excludedGroups), quote(includedAccounts), quote(excludedAccounts))
+		quote(includedGroups), quote(excludedGroups), quote(includedAccounts), quote(excludedAccounts))
 }
 
 func getEncodedGCPServiceAccountKeyForOrg(resourceName string, accountID string) string {
