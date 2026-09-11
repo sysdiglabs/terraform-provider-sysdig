@@ -3,31 +3,41 @@
 package sysdig_test
 
 import (
-	"bytes"
-	b64 "encoding/base64"
-	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 )
 
+const (
+	gcpOrgServiceAccountKeyEnv = "SYSDIG_SECURE_GCP_ORG_SERVICE_ACCOUNT_KEY"
+	gcpOrgRootIDEnv            = "SYSDIG_SECURE_GCP_ORG_ROOT_ID"
+	gcpOrgProjectIDEnv         = "SYSDIG_SECURE_GCP_ORG_PROJECT_ID"
+)
+
+type gcpOrgFixture struct {
+	projectID          string
+	organizationRootID string
+	serviceAccountKey  string
+}
+
 func TestAccSecureOrganization(t *testing.T) {
-	// The organization API scrapes every folder and project under the organization with the service
-	// principal from the config, so it only succeeds against a real GCP organization. Gate the test
-	// on that fixture: recognising the resulting failure by its message cannot be told apart from a
-	// genuine outage against the same endpoint.
-	if os.Getenv("SYSDIG_SECURE_GCP_ORG_TESTS") == "" {
-		t.Skip("Skipping tests on sysdig_secure_organization resource because SYSDIG_SECURE_GCP_ORG_TESTS is not set")
+	// Creating the organization scrapes every folder and project under it with this service
+	// principal, so the key, the organization root and the management project all have to be real.
+	fixture := gcpOrgFixture{
+		projectID:          os.Getenv(gcpOrgProjectIDEnv),
+		organizationRootID: os.Getenv(gcpOrgRootIDEnv),
+		serviceAccountKey:  os.Getenv(gcpOrgServiceAccountKeyEnv),
+	}
+	if fixture.projectID == "" || fixture.organizationRootID == "" || fixture.serviceAccountKey == "" {
+		t.Skipf("Skipping tests on sysdig_secure_organization resource because %s, %s and %s are not all set",
+			gcpOrgProjectIDEnv, gcpOrgRootIDEnv, gcpOrgServiceAccountKeyEnv)
 	}
 
-	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
-	accID := rText()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -41,7 +51,7 @@ func TestAccSecureOrganization(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureOrgWithAccountID(accID),
+				Config: secureOrgConfigInOrder(fixture),
 			},
 			{
 				ResourceName:            "sysdig_secure_cloud_auth_account.sample",
@@ -51,16 +61,16 @@ func TestAccSecureOrganization(t *testing.T) {
 			},
 			{
 				// reordering the include/exclude set elements must not produce a diff
-				Config:   secureOrgWithAccountIDReordered(accID),
+				Config:   secureOrgConfigReordered(fixture),
 				PlanOnly: true,
 			},
 		},
 	})
 }
 
-// the values have to satisfy cloudauth's per-provider validation: organizational groups are
-// `folders/<id>` and cloud accounts are GCP project ids. organizational_unit_ids is left unset on
-// purpose, the API rejects it when the include/exclude fields are used.
+// The include/exclude values stay synthetic: cloudauth validates their shape, not their
+// existence, so well-formed folder ids and project ids are enough and keep the reorder under the
+// test's control. organizational_unit_ids is left unset, the API rejects it alongside these.
 var (
 	secureOrgIncludedGroups   = []string{"folders/111111111111", "folders/222222222222"}
 	secureOrgExcludedGroups   = []string{"folders/333333333333", "folders/444444444444"}
@@ -68,16 +78,16 @@ var (
 	secureOrgExcludedAccounts = []string{"sample-project-three", "sample-project-four"}
 )
 
-func secureOrgWithAccountID(accountID string) string {
-	return secureOrgConfig(accountID,
+func secureOrgConfigInOrder(fixture gcpOrgFixture) string {
+	return secureOrgConfig(fixture,
 		secureOrgIncludedGroups, secureOrgExcludedGroups,
 		secureOrgIncludedAccounts, secureOrgExcludedAccounts,
 	)
 }
 
 // derived from the same slices so the two configs cannot drift apart and stop exercising a reorder
-func secureOrgWithAccountIDReordered(accountID string) string {
-	return secureOrgConfig(accountID,
+func secureOrgConfigReordered(fixture gcpOrgFixture) string {
+	return secureOrgConfig(fixture,
 		reversed(secureOrgIncludedGroups), reversed(secureOrgExcludedGroups),
 		reversed(secureOrgIncludedAccounts), reversed(secureOrgExcludedAccounts),
 	)
@@ -91,13 +101,10 @@ func reversed(values []string) []string {
 	return out
 }
 
-func secureOrgConfig(accountID string, includedGroups, excludedGroups, includedAccounts, excludedAccounts []string) string {
-	// this is a base64 encoded service account key
-	test_service_account_key_encoded := getEncodedGCPServiceAccountKeyForOrg("sample", accountID)
-
+func secureOrgConfig(fixture gcpOrgFixture, includedGroups, excludedGroups, includedAccounts, excludedAccounts []string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "sample" {
-  provider_id   = "%s"
+  provider_id   = %q
   provider_type = "PROVIDER_GCP"
   enabled       = "true"
   feature {
@@ -115,7 +122,7 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
     instance                   = "secure-posture"
     service_principal_metadata = jsonencode({
       gcp = {
-        key = "%s"
+        key = %q
       }
     })
   }
@@ -124,7 +131,7 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
     instance                   = "secure-onboarding"
     service_principal_metadata = jsonencode({
       gcp = {
-        key = "%s"
+        key = %q
       }
     })
   }
@@ -153,41 +160,13 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 }
 resource "sysdig_secure_organization" "sample-org" {
   management_account_id		     = sysdig_secure_cloud_auth_account.sample.id
-  organization_root_id 		     = "organizations/123456789012"
+  organization_root_id 		     = %q
   automatic_onboarding           = false
   included_organizational_groups = [%s]
   excluded_organizational_groups = [%s]
   included_cloud_accounts        = [%s]
   excluded_cloud_accounts        = [%s]
 }
-`, accountID, test_service_account_key_encoded, test_service_account_key_encoded,
+`, fixture.projectID, fixture.serviceAccountKey, fixture.serviceAccountKey, fixture.organizationRootID,
 		quoteJoin(includedGroups), quoteJoin(excludedGroups), quoteJoin(includedAccounts), quoteJoin(excludedAccounts))
-}
-
-func getEncodedGCPServiceAccountKeyForOrg(resourceName string, accountID string) string {
-	test_service_account_key_bytes, err := json.Marshal(map[string]any{
-		"type":                        "service_account",
-		"project_id":                  fmt.Sprintf("%s-%s", resourceName, accountID),
-		"private_key_id":              "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-		"private_key":                 "-----BEGIN PRIVATE KEY-----\nxxxxxxxxxxxxxxxxxxxxxxxxxxx\n-----END PRIVATE KEY-----\n",
-		"client_email":                fmt.Sprintf("some-sa-name@%s-%s.iam.gserviceaccount.com", resourceName, accountID),
-		"client_id":                   "some-client-id",
-		"auth_uri":                    "https://some-auth-uri",
-		"token_uri":                   "https://some-token-uri",
-		"auth_provider_x509_cert_url": "https://some-authprovider-cert-url",
-		"client_x509_cert_url":        "https://some-client-cert-url",
-		"universe_domain":             "googleapis.com",
-	})
-	if err != nil {
-		fmt.Printf("Failed to marshal test_service_account_key: %v", err)
-	}
-
-	var out bytes.Buffer
-	err = json.Indent(&out, test_service_account_key_bytes, "", "  ")
-	if err != nil {
-		fmt.Printf("Failed to indent test_service_account_key: %v", err)
-	}
-	out.WriteByte('\n')
-
-	return b64.StdEncoding.EncodeToString(out.Bytes())
 }

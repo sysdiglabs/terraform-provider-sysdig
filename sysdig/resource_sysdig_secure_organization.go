@@ -22,6 +22,14 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Version: 0,
+				Type:    resourceSysdigSecureOrganizationV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: resourceSysdigSecureOrganizationUpgradeV0,
+			},
+		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
 			Update: schema.DefaultTimeout(timeout),
@@ -228,4 +236,34 @@ func secureOrganizationToResourceData(data *schema.ResourceData, org *v2.Organiz
 	}
 
 	return nil
+}
+
+// resourceSysdigSecureOrganizationV0 is the schema as released before the include/exclude
+// collections became sets, so state written by those versions is decoded with the types it was
+// written with. The collections carry no nested state, hence the no-op upgrade.
+func resourceSysdigSecureOrganizationV0() *schema.Resource {
+	stringList := func() *schema.Schema {
+		return &schema.Schema{
+			Type: schema.TypeList,
+			Elem: &schema.Schema{Type: schema.TypeString},
+		}
+	}
+
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			SchemaIDKey:                        {Type: schema.TypeString},
+			SchemaManagementAccountID:          {Type: schema.TypeString},
+			SchemaOrganizationalUnitIds:        stringList(),
+			SchemaIncludedOrganizationalGroups: stringList(),
+			SchemaExcludedOrganizationalGroups: stringList(),
+			SchemaIncludedCloudAccounts:        stringList(),
+			SchemaExcludedCloudAccounts:        stringList(),
+			SchemaOrganizationRootID:           {Type: schema.TypeString},
+			SchemaAutomaticOnboarding:          {Type: schema.TypeBool},
+		},
+	}
+}
+
+func resourceSysdigSecureOrganizationUpgradeV0(_ context.Context, rawState map[string]any, _ any) (map[string]any, error) {
+	return rawState, nil
 }
