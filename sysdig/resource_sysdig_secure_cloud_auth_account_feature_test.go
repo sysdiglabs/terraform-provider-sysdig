@@ -48,10 +48,9 @@ func TestAccSecureCloudAuthAccountFeature(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				// reordering the components set elements must not produce a diff (SSPROD-71536)
-				Config:             secureAzureWithServicePrincipalFeature(accID, tenantID, true),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
+				// reordering the components set elements must not produce a diff
+				Config:   secureAzureWithServicePrincipalFeature(accID, tenantID, true),
+				PlanOnly: true,
 			},
 		},
 	})
@@ -111,7 +110,7 @@ resource "sysdig_secure_cloud_auth_account_component" "azure_service_principal_2
 				display_name              = "some-display-name-2"
 				app_display_name          = "some-app-display-name-2"
 				app_id                    = "some-app-id-2"
-				app_owner_organization_id = "some-app-owner-organization-id"
+				app_owner_organization_id = "some-app-owner-organization-id-2"
 		  }
 	  }
   })

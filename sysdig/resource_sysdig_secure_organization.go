@@ -172,45 +172,12 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.Organizat
 	secureOrganization.ManagementAccountId = data.Get(SchemaManagementAccountID).(string)
 	secureOrganization.OrganizationRootId = data.Get(SchemaOrganizationRootID).(string)
 	secureOrganization.AutomaticOnboarding = data.Get(SchemaAutomaticOnboarding).(bool)
-	organizationalUnitIdsData := data.Get(SchemaOrganizationalUnitIds).(*schema.Set).List()
-	for _, organizationalUnitIDData := range organizationalUnitIdsData {
-		secureOrganization.OrganizationalUnitIds = append(
-			secureOrganization.OrganizationalUnitIds,
-			organizationalUnitIDData.(string),
-		)
-	}
+	secureOrganization.OrganizationalUnitIds = schemaSetToList(data.Get(SchemaOrganizationalUnitIds))
+	secureOrganization.IncludedOrganizationalGroups = schemaSetToList(data.Get(SchemaIncludedOrganizationalGroups))
+	secureOrganization.ExcludedOrganizationalGroups = schemaSetToList(data.Get(SchemaExcludedOrganizationalGroups))
+	secureOrganization.IncludedCloudAccounts = schemaSetToList(data.Get(SchemaIncludedCloudAccounts))
+	secureOrganization.ExcludedCloudAccounts = schemaSetToList(data.Get(SchemaExcludedCloudAccounts))
 
-	includedOrganizationalGroups := data.Get(SchemaIncludedOrganizationalGroups).(*schema.Set).List()
-	for _, includedOrganizationalGroup := range includedOrganizationalGroups {
-		secureOrganization.IncludedOrganizationalGroups = append(
-			secureOrganization.IncludedOrganizationalGroups,
-			includedOrganizationalGroup.(string),
-		)
-	}
-
-	excludedOrganizationalGroups := data.Get(SchemaExcludedOrganizationalGroups).(*schema.Set).List()
-	for _, excludedOrganizationalGroup := range excludedOrganizationalGroups {
-		secureOrganization.ExcludedOrganizationalGroups = append(
-			secureOrganization.ExcludedOrganizationalGroups,
-			excludedOrganizationalGroup.(string),
-		)
-	}
-
-	includedCloudAccounts := data.Get(SchemaIncludedCloudAccounts).(*schema.Set).List()
-	for _, includedCloudAccount := range includedCloudAccounts {
-		secureOrganization.IncludedCloudAccounts = append(
-			secureOrganization.IncludedCloudAccounts,
-			includedCloudAccount.(string),
-		)
-	}
-
-	excludedCloudAccounts := data.Get(SchemaExcludedCloudAccounts).(*schema.Set).List()
-	for _, excludedCloudAccount := range excludedCloudAccounts {
-		secureOrganization.ExcludedCloudAccounts = append(
-			secureOrganization.ExcludedCloudAccounts,
-			excludedCloudAccount.(string),
-		)
-	}
 	return secureOrganization
 }
 

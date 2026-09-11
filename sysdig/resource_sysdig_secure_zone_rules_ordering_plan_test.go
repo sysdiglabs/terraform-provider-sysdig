@@ -378,11 +378,6 @@ func TestAccZoneRulesOrderingRealChangeIsApplied(t *testing.T) {
 }
 
 func zoneExpressionConfig(url, name string, values ...string) string {
-	quoted := make([]string, len(values))
-	for i, v := range values {
-		quoted[i] = fmt.Sprintf("%q", v)
-	}
-
 	return fmt.Sprintf(`
 provider "sysdig" {
   sysdig_secure_url       = %q
@@ -411,7 +406,7 @@ resource "sysdig_secure_zone" "test" {
     }
   }
 }
-`, url, name, strings.Join(quoted, ", "))
+`, url, name, quoteJoin(values))
 }
 
 // Expression-based scopes keep the stock set hash. Two scope blocks must stay

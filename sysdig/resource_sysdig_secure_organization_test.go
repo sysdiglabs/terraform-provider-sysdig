@@ -8,8 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -20,15 +18,16 @@ import (
 )
 
 func TestAccSecureOrganization(t *testing.T) {
-	// XXX: TF acceptance tests for secure org onboarding need an actual existing gcp project
-	// along with an actual service_principal_key to scrape all folders and projects under the org.
-	// Without it POST /organizations call will fail with 500 error.
-	// Skipping the test based on this error when it occurs.
+	// The organization API scrapes every folder and project under the organization with the service
+	// principal from the config, so it only succeeds against a real GCP organization. Gate the test
+	// on that fixture: recognising the resulting failure by its message cannot be told apart from a
+	// genuine outage against the same endpoint.
+	if os.Getenv("SYSDIG_SECURE_GCP_ORG_TESTS") == "" {
+		t.Skip("Skipping tests on sysdig_secure_organization resource because SYSDIG_SECURE_GCP_ORG_TESTS is not set")
+	}
+
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	accID := rText()
-	// the host is left out on purpose: SYSDIG_SECURE_URL is not set in every environment, and with
-	// it interpolated the pattern stops matching the error raised against the default endpoint
-	organizationAPIFailure := regexp.MustCompile(`POST \S*/api/cloudauth/v1/organizations giving up after \d+ attempt\(s\)`)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -39,13 +38,6 @@ func TestAccSecureOrganization(t *testing.T) {
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
 			},
-		},
-		ErrorCheck: func(err error) error {
-			if organizationAPIFailure.MatchString(err.Error()) {
-				t.Skipf("skipping test; this POST call is not supported without actual existing GCP projects and service principal.")
-			}
-			// anything else is a real failure; returning nil here would make the test pass vacuously
-			return err
 		},
 		Steps: []resource.TestStep{
 			{
@@ -58,10 +50,9 @@ func TestAccSecureOrganization(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"component"},
 			},
 			{
-				// reordering the include/exclude set elements must not produce a diff (SSPROD-71536)
-				Config:             secureOrgWithAccountIDReordered(accID),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
+				// reordering the include/exclude set elements must not produce a diff
+				Config:   secureOrgWithAccountIDReordered(accID),
+				PlanOnly: true,
 			},
 		},
 	})
@@ -70,28 +61,39 @@ func TestAccSecureOrganization(t *testing.T) {
 // the values have to satisfy cloudauth's per-provider validation: organizational groups are
 // `folders/<id>` and cloud accounts are GCP project ids. organizational_unit_ids is left unset on
 // purpose, the API rejects it when the include/exclude fields are used.
+var (
+	secureOrgIncludedGroups   = []string{"folders/111111111111", "folders/222222222222"}
+	secureOrgExcludedGroups   = []string{"folders/333333333333", "folders/444444444444"}
+	secureOrgIncludedAccounts = []string{"sample-project-one", "sample-project-two"}
+	secureOrgExcludedAccounts = []string{"sample-project-three", "sample-project-four"}
+)
+
 func secureOrgWithAccountID(accountID string) string {
 	return secureOrgConfig(accountID,
-		[]string{"folders/111111111111", "folders/222222222222"},
-		[]string{"folders/333333333333", "folders/444444444444"},
-		[]string{"sample-project-one", "sample-project-two"},
-		[]string{"sample-project-three", "sample-project-four"},
+		secureOrgIncludedGroups, secureOrgExcludedGroups,
+		secureOrgIncludedAccounts, secureOrgExcludedAccounts,
 	)
 }
 
+// derived from the same slices so the two configs cannot drift apart and stop exercising a reorder
 func secureOrgWithAccountIDReordered(accountID string) string {
 	return secureOrgConfig(accountID,
-		[]string{"folders/222222222222", "folders/111111111111"},
-		[]string{"folders/444444444444", "folders/333333333333"},
-		[]string{"sample-project-two", "sample-project-one"},
-		[]string{"sample-project-four", "sample-project-three"},
+		reversed(secureOrgIncludedGroups), reversed(secureOrgExcludedGroups),
+		reversed(secureOrgIncludedAccounts), reversed(secureOrgExcludedAccounts),
 	)
+}
+
+func reversed(values []string) []string {
+	out := make([]string, 0, len(values))
+	for i := len(values) - 1; i >= 0; i-- {
+		out = append(out, values[i])
+	}
+	return out
 }
 
 func secureOrgConfig(accountID string, includedGroups, excludedGroups, includedAccounts, excludedAccounts []string) string {
 	// this is a base64 encoded service account key
 	test_service_account_key_encoded := getEncodedGCPServiceAccountKeyForOrg("sample", accountID)
-	quote := func(values []string) string { return `"` + strings.Join(values, `", "`) + `"` }
 
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "sample" {
@@ -159,7 +161,7 @@ resource "sysdig_secure_organization" "sample-org" {
   excluded_cloud_accounts        = [%s]
 }
 `, accountID, test_service_account_key_encoded, test_service_account_key_encoded,
-		quote(includedGroups), quote(excludedGroups), quote(includedAccounts), quote(excludedAccounts))
+		quoteJoin(includedGroups), quoteJoin(excludedGroups), quoteJoin(includedAccounts), quoteJoin(excludedAccounts))
 }
 
 func getEncodedGCPServiceAccountKeyForOrg(resourceName string, accountID string) string {

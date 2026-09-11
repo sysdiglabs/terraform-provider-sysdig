@@ -99,6 +99,7 @@ func resourceSysdigSecureCloudauthAccountComponentRead(ctx context.Context, data
 		ctx, data.Get(SchemaAccountID).(string), data.Get(SchemaType).(string), data.Get(SchemaInstance).(string))
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
+			data.SetId("")
 			return nil
 		}
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
@@ -119,21 +120,13 @@ func resourceSysdigSecureCloudauthAccountComponentUpdate(ctx context.Context, da
 	}
 
 	accountID := data.Get(SchemaAccountID).(string)
-	_, errStatus, err := client.GetCloudauthAccountComponentSecure(
-		ctx, accountID, data.Get(SchemaType).(string), data.Get(SchemaInstance).(string))
-	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
-		}
-		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
-	}
-
 	newCloudAccountComponent := cloudauthAccountComponentFromResourceData(data)
 
-	_, errStatus, err = client.UpdateCloudauthAccountComponentSecure(
+	_, errStatus, err := client.UpdateCloudauthAccountComponentSecure(
 		ctx, accountID, data.Get(SchemaType).(string), data.Get(SchemaInstance).(string), newCloudAccountComponent)
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
+			data.SetId("")
 			return nil
 		}
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
