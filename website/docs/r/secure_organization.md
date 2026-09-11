@@ -28,11 +28,11 @@ resource "sysdig_secure_organization" "sample" {
 ## Argument Reference
 
 * `management_account_id` - (Required) Cloud Account created using resource sysdig_secure_cloud_auth_account.
-* `organizational_unit_ids` - (Optional) List of organizational unit identifiers from which to onboard. If empty, the entire organization is onboarded. 
-* `included_organizational_groups` - (Optional) List of organizational groups to include during onboarding.
-* `excluded_organizational_groups` - (Optional) List of organizational groups to exclude during onboarding.
-* `included_cloud_accounts` - (Optional) List of cloud accounts to include during onboarding.
-* `excluded_cloud_accounts` - (Optional) List of cloud accounts to exclude during onboarding.
+* `organizational_unit_ids` - (Optional) Set of organizational unit identifiers from which to onboard. If empty, the entire organization is onboarded. 
+* `included_organizational_groups` - (Optional) Set of organizational groups to include during onboarding.
+* `excluded_organizational_groups` - (Optional) Set of organizational groups to exclude during onboarding.
+* `included_cloud_accounts` - (Optional) Set of cloud accounts to include during onboarding.
+* `excluded_cloud_accounts` - (Optional) Set of cloud accounts to exclude during onboarding.
 * `organization_root_id` - (Optional) Organization's root id if available, else organization/tenant id.
 * `automatic_onboarding` - (Optional) Whether or not accounts in organization are to be detected automatically.
 

@@ -22,6 +22,14 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Version: 0,
+				Type:    resourceSysdigSecureOrganizationV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: resourceSysdigSecureOrganizationUpgradeV0,
+			},
+		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(timeout),
 			Update: schema.DefaultTimeout(timeout),
@@ -39,35 +47,35 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 				Required: true,
 			},
 			SchemaOrganizationalUnitIds: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			SchemaIncludedOrganizationalGroups: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			SchemaExcludedOrganizationalGroups: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			SchemaIncludedCloudAccounts: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			SchemaExcludedCloudAccounts: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -172,45 +180,12 @@ func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.Organizat
 	secureOrganization.ManagementAccountId = data.Get(SchemaManagementAccountID).(string)
 	secureOrganization.OrganizationRootId = data.Get(SchemaOrganizationRootID).(string)
 	secureOrganization.AutomaticOnboarding = data.Get(SchemaAutomaticOnboarding).(bool)
-	organizationalUnitIdsData := data.Get(SchemaOrganizationalUnitIds).([]any)
-	for _, organizationalUnitIDData := range organizationalUnitIdsData {
-		secureOrganization.OrganizationalUnitIds = append(
-			secureOrganization.OrganizationalUnitIds,
-			organizationalUnitIDData.(string),
-		)
-	}
+	secureOrganization.OrganizationalUnitIds = schemaSetToList(data.Get(SchemaOrganizationalUnitIds))
+	secureOrganization.IncludedOrganizationalGroups = schemaSetToList(data.Get(SchemaIncludedOrganizationalGroups))
+	secureOrganization.ExcludedOrganizationalGroups = schemaSetToList(data.Get(SchemaExcludedOrganizationalGroups))
+	secureOrganization.IncludedCloudAccounts = schemaSetToList(data.Get(SchemaIncludedCloudAccounts))
+	secureOrganization.ExcludedCloudAccounts = schemaSetToList(data.Get(SchemaExcludedCloudAccounts))
 
-	includedOrganizationalGroups := data.Get(SchemaIncludedOrganizationalGroups).([]any)
-	for _, includedOrganizationalGroup := range includedOrganizationalGroups {
-		secureOrganization.IncludedOrganizationalGroups = append(
-			secureOrganization.IncludedOrganizationalGroups,
-			includedOrganizationalGroup.(string),
-		)
-	}
-
-	excludedOrganizationalGroups := data.Get(SchemaExcludedOrganizationalGroups).([]any)
-	for _, excludedOrganizationalGroup := range excludedOrganizationalGroups {
-		secureOrganization.ExcludedOrganizationalGroups = append(
-			secureOrganization.ExcludedOrganizationalGroups,
-			excludedOrganizationalGroup.(string),
-		)
-	}
-
-	includedCloudAccounts := data.Get(SchemaIncludedCloudAccounts).([]any)
-	for _, includedCloudAccount := range includedCloudAccounts {
-		secureOrganization.IncludedCloudAccounts = append(
-			secureOrganization.IncludedCloudAccounts,
-			includedCloudAccount.(string),
-		)
-	}
-
-	excludedCloudAccounts := data.Get(SchemaExcludedCloudAccounts).([]any)
-	for _, excludedCloudAccount := range excludedCloudAccounts {
-		secureOrganization.ExcludedCloudAccounts = append(
-			secureOrganization.ExcludedCloudAccounts,
-			excludedCloudAccount.(string),
-		)
-	}
 	return secureOrganization
 }
 
@@ -261,4 +236,34 @@ func secureOrganizationToResourceData(data *schema.ResourceData, org *v2.Organiz
 	}
 
 	return nil
+}
+
+// resourceSysdigSecureOrganizationV0 is the schema as released before the include/exclude
+// collections became sets, so state written by those versions is decoded with the types it was
+// written with. The collections carry no nested state, hence the no-op upgrade.
+func resourceSysdigSecureOrganizationV0() *schema.Resource {
+	stringList := func() *schema.Schema {
+		return &schema.Schema{
+			Type: schema.TypeList,
+			Elem: &schema.Schema{Type: schema.TypeString},
+		}
+	}
+
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			SchemaIDKey:                        {Type: schema.TypeString},
+			SchemaManagementAccountID:          {Type: schema.TypeString},
+			SchemaOrganizationalUnitIds:        stringList(),
+			SchemaIncludedOrganizationalGroups: stringList(),
+			SchemaExcludedOrganizationalGroups: stringList(),
+			SchemaIncludedCloudAccounts:        stringList(),
+			SchemaExcludedCloudAccounts:        stringList(),
+			SchemaOrganizationRootID:           {Type: schema.TypeString},
+			SchemaAutomaticOnboarding:          {Type: schema.TypeBool},
+		},
+	}
+}
+
+func resourceSysdigSecureOrganizationUpgradeV0(_ context.Context, rawState map[string]any, _ any) (map[string]any, error) {
+	return rawState, nil
 }

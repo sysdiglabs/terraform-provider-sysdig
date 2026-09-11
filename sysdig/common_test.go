@@ -1,6 +1,7 @@
 package sysdig_test
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -44,4 +45,14 @@ func sysdigOrIBMMonitorPreCheck(t *testing.T) func() {
 
 func randomText(len int) string {
 	return acctest.RandStringFromCharSet(len, acctest.CharSetAlphaNum)
+}
+
+// quoteJoin renders values as the elements of an HCL list, so an empty slice yields an empty list
+// instead of a single empty string.
+func quoteJoin(values []string) string {
+	quoted := make([]string, len(values))
+	for i, value := range values {
+		quoted[i] = fmt.Sprintf("%q", value)
+	}
+	return strings.Join(quoted, ", ")
 }
