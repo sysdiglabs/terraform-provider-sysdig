@@ -151,6 +151,15 @@ When Secure resources are to be created, this authentication must be in place.
   on-prem installations. It can also be sourced from the `SYSDIG_SECURE_INSECURE_TLS`
   environment variable. By default, this is false.<br/><br/>
 
+* `sysdig_secure_org_api_async` - (Optional) Sends cloud organization create, update
+  and delete requests asynchronously, so the call returns as soon as the organization
+  is accepted instead of waiting for every member account to be discovered. Recommended
+  for large cloud organizations, where the synchronous call can exceed the API request
+  timeout. Member accounts are onboarded in the background afterwards, and
+  `terraform destroy` returns before the organization is fully removed. It can also be
+  sourced from the `SYSDIG_ORG_API_ASYNC` environment variable. By default, this is
+  false.<br/><br/>
+
 
 ### IBM Cloud Monitoring Authentication
 

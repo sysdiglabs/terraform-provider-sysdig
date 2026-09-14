@@ -107,3 +107,43 @@ func TestUnmarshalOrg(t *testing.T) {
 		t.Errorf("expected %v, got %v", expected, unmarshalled)
 	}
 }
+
+func TestOrganizationURLsAsyncFlag(t *testing.T) {
+	t.Parallel()
+
+	const orgID = "4c53102d-6846-447b-bfd1-4c0d5002cddf"
+
+	tests := []struct {
+		name              string
+		orgAPIAsync       bool
+		wantOrganizations string
+		wantOrganization  string
+	}{
+		{
+			name:              "disabled by default",
+			orgAPIAsync:       false,
+			wantOrganizations: "http://localhost/api/cloudauth/v1/organizations",
+			wantOrganization:  "http://localhost/api/cloudauth/v1/organizations/" + orgID,
+		},
+		{
+			name:              "enabled",
+			orgAPIAsync:       true,
+			wantOrganizations: "http://localhost/api/cloudauth/v1/organizations?async=true",
+			wantOrganization:  "http://localhost/api/cloudauth/v1/organizations/" + orgID + "?async=true",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			c := newSysdigClient(WithURL("http://localhost"), WithOrgAPIAsync(tt.orgAPIAsync))
+
+			if got := c.organizationsURL(); got != tt.wantOrganizations {
+				t.Errorf("organizationsURL() = %q, want %q", got, tt.wantOrganizations)
+			}
+			if got := c.organizationURL(orgID); got != tt.wantOrganization {
+				t.Errorf("organizationURL() = %q, want %q", got, tt.wantOrganization)
+			}
+		})
+	}
+}

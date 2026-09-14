@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 )
 
 const (
@@ -122,7 +121,7 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 
 func (c *Client) organizationsURL() string {
 	url := fmt.Sprintf(organizationsPath, c.config.url)
-	if os.Getenv("SYSDIG_ORG_API_ASYNC") == "true" {
+	if c.config.secureOrgAPIAsync {
 		url += "?async=true"
 	}
 	return url
@@ -130,7 +129,7 @@ func (c *Client) organizationsURL() string {
 
 func (c *Client) organizationURL(orgID string) string {
 	url := fmt.Sprintf(organizationPath, c.config.url, orgID)
-	if os.Getenv("SYSDIG_ORG_API_ASYNC") == "true" {
+	if c.config.secureOrgAPIAsync {
 		url += "?async=true"
 	}
 	return url

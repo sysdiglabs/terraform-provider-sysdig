@@ -26,6 +26,11 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_SECURE_SKIP_POLICYV2MSG", true),
 			},
+			"sysdig_secure_org_api_async": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_ORG_API_ASYNC", false),
+			},
 			"sysdig_secure_api_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
