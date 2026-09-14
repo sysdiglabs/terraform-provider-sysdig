@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"maps"
 	"strings"
 	"time"
@@ -46,10 +45,21 @@ func getAccountComponentSchema() map[string]*schema.Schema {
 		SchemaAccountID: {
 			Type:     schema.TypeString,
 			Required: true,
+			ForceNew: true,
 		},
 	}
 
 	maps.Copy(componentSchema, accountComponent.Schema)
+
+	// account_id, type and instance make up the component's API path and resource id, so they can
+	// only change by replacement; copied because accountComponent.Schema is shared with the nested
+	// component block of sysdig_secure_cloud_auth_account, where ForceNew would replace the account
+	for _, key := range []string{SchemaType, SchemaInstance} {
+		immutable := *componentSchema[key]
+		immutable.ForceNew = true
+		componentSchema[key] = &immutable
+	}
+
 	return componentSchema
 }
 
@@ -89,6 +99,7 @@ func resourceSysdigSecureCloudauthAccountComponentRead(ctx context.Context, data
 		ctx, data.Get(SchemaAccountID).(string), data.Get(SchemaType).(string), data.Get(SchemaInstance).(string))
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
+			data.SetId("")
 			return nil
 		}
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
@@ -109,27 +120,13 @@ func resourceSysdigSecureCloudauthAccountComponentUpdate(ctx context.Context, da
 	}
 
 	accountID := data.Get(SchemaAccountID).(string)
-	existingCloudAccountComponent, errStatus, err := client.GetCloudauthAccountComponentSecure(
-		ctx, accountID, data.Get(SchemaType).(string), data.Get(SchemaInstance).(string))
-	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
-		}
-		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
-	}
-
 	newCloudAccountComponent := cloudauthAccountComponentFromResourceData(data)
 
-	// validate and reject non-updatable resource schema fields upfront
-	err = validateCloudauthAccountComponentUpdate(existingCloudAccountComponent, newCloudAccountComponent)
-	if err != nil {
-		return diag.Errorf("Error updating resource: %s", err)
-	}
-
-	_, errStatus, err = client.UpdateCloudauthAccountComponentSecure(
+	_, errStatus, err := client.UpdateCloudauthAccountComponentSecure(
 		ctx, accountID, data.Get(SchemaType).(string), data.Get(SchemaInstance).(string), newCloudAccountComponent)
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
+			data.SetId("")
 			return nil
 		}
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
@@ -151,18 +148,6 @@ func resourceSysdigSecureCloudauthAccountComponentDelete(ctx context.Context, da
 			return nil
 		}
 		return diag.Errorf("Error deleting resource: %s %s", errStatus, err)
-	}
-
-	return nil
-}
-
-/*
-This function validates and restricts any fields not allowed to be updated during resource updates.
-*/
-func validateCloudauthAccountComponentUpdate(existingComponent *v2.CloudauthAccountComponentSecure, newComponent *v2.CloudauthAccountComponentSecure) error {
-	if existingComponent.Type != newComponent.Type || existingComponent.Instance != newComponent.Instance {
-		errorInvalidResourceUpdate := fmt.Sprintf("Bad Request. Updating restricted fields not allowed: %s", []string{"type", "instance"})
-		return errors.New(errorInvalidResourceUpdate)
 	}
 
 	return nil

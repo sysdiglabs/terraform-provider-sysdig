@@ -24,6 +24,9 @@ import (
 func TestAccSecureCloudAuthAccountFeature(t *testing.T) {
 	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
 	accID := rText()
+	// generated once so every step renders the same tenant id, otherwise the reorder step
+	// would also diff on provider_tenant_id
+	tenantID := acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
@@ -37,23 +40,30 @@ func TestAccSecureCloudAuthAccountFeature(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: secureAzureWithServicePrincipalFeature(accID),
+				Config: secureAzureWithServicePrincipalFeature(accID, tenantID, false),
 			},
 			{
 				ResourceName:      "sysdig_secure_cloud_auth_account.azure_sample",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				// reordering the components set elements must not produce a diff
+				Config:   secureAzureWithServicePrincipalFeature(accID, tenantID, true),
+				PlanOnly: true,
+			},
 		},
 	})
 }
 
-func secureAzureWithServicePrincipalFeature(accountID string) string {
+func secureAzureWithServicePrincipalFeature(accountID string, randomTenantId string, reorderComponents bool) string {
 	// to replicate user behavior, snippet creates an actual azure account and
-	// an actual Service Principal component. It then passes cloudauth returned account_id
+	// two actual Service Principal components. It then passes cloudauth returned account_id
 	// as input to the account feature calls.
-	rID := func() string { return acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum) }
-	randomTenantId := rID()
+	components := `["COMPONENT_SERVICE_PRINCIPAL/secure-posture", "COMPONENT_SERVICE_PRINCIPAL/secure-posture-2"]`
+	if reorderComponents {
+		components = `["COMPONENT_SERVICE_PRINCIPAL/secure-posture-2", "COMPONENT_SERVICE_PRINCIPAL/secure-posture"]`
+	}
 
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "azure_sample" {
@@ -88,15 +98,36 @@ resource "sysdig_secure_cloud_auth_account_component" "azure_service_principal" 
   })
 }
 
+resource "sysdig_secure_cloud_auth_account_component" "azure_service_principal_2" {
+  account_id		         = sysdig_secure_cloud_auth_account.azure_sample.id
+  type                       = "COMPONENT_SERVICE_PRINCIPAL"
+  instance                   = "secure-posture-2"
+  service_principal_metadata = jsonencode({
+	  azure = {
+		  active_directory_service_principal = {
+				id                        = "some-id-2"
+				account_enabled           = true
+				display_name              = "some-display-name-2"
+				app_display_name          = "some-app-display-name-2"
+				app_id                    = "some-app-id-2"
+				app_owner_organization_id = "some-app-owner-organization-id-2"
+		  }
+	  }
+  })
+}
+
 resource "sysdig_secure_cloud_auth_account_feature" "azure_config_posture" {
   account_id		         = sysdig_secure_cloud_auth_account.azure_sample.id
   type                       = "FEATURE_SECURE_CONFIG_POSTURE"
   enabled                    = true
-  components                 = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
+  components                 = %s
 
-  depends_on = [ sysdig_secure_cloud_auth_account_component.azure_service_principal ]
+  depends_on = [
+	sysdig_secure_cloud_auth_account_component.azure_service_principal,
+	sysdig_secure_cloud_auth_account_component.azure_service_principal_2,
+  ]
 }
-`, accountID, randomTenantId)
+`, accountID, randomTenantId, components)
 }
 
 func TestAccSecureCloudAuthAccountFeatureWithFlags(t *testing.T) {
