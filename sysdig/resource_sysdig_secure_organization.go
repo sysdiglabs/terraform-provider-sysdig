@@ -15,6 +15,8 @@ import (
 
 func resourceSysdigSecureOrganization() *schema.Resource {
 	timeout := 5 * time.Minute
+	// an async delete waits out the member-account cascade, which outlasts the other operations
+	deleteTimeout := 30 * time.Minute
 
 	return &schema.Resource{
 		CreateContext: resourceSysdigSecureOrganizationCreate,
@@ -36,7 +38,7 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 			Create: schema.DefaultTimeout(timeout),
 			Update: schema.DefaultTimeout(timeout),
 			Read:   schema.DefaultTimeout(timeout),
-			Delete: schema.DefaultTimeout(timeout),
+			Delete: schema.DefaultTimeout(deleteTimeout),
 		},
 		Schema: map[string]*schema.Schema{
 			SchemaIDKey: {
