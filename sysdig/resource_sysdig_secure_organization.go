@@ -3,6 +3,8 @@ package sysdig
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -141,24 +143,46 @@ func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.Re
 
 	// the request may only have been acknowledged, and a replacement cannot be created until the
 	// organization is actually gone
-	if err := waitForOrganizationDeletion(ctx, client, data); err != nil {
+	if err := waitForOrganizationDeletion(ctx, client, data.Id(), data.Timeout(schema.TimeoutDelete)); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func waitForOrganizationDeletion(ctx context.Context, client v2.OrganizationSecureInterface, data *schema.ResourceData) error {
-	return retry.RetryContext(ctx, data.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
-		_, errStatus, err := client.GetOrganizationSecure(ctx, data.Id())
-		if err != nil && strings.Contains(errStatus, "404") {
+// the timeout is passed in rather than read from the resource so it can be exercised in tests;
+// the SDK has already put the same deadline on ctx
+func waitForOrganizationDeletion(ctx context.Context, client v2.OrganizationSecureInterface, orgID string, timeout time.Duration) error {
+	return retry.RetryContext(ctx, timeout, func() *retry.RetryError {
+		_, errStatus, err := client.GetOrganizationSecure(ctx, orgID)
+		if err == nil {
+			return retry.RetryableError(fmt.Errorf("organization %s has not been deleted yet; the deletion may also have failed server side", orgID))
+		}
+
+		code := statusCodeFromStatus(errStatus)
+		if code == http.StatusNotFound || strings.Contains(errStatus, "404") {
 			return nil
 		}
-		if err != nil {
-			return retry.RetryableError(fmt.Errorf("waiting for organization %s to be deleted: %s %w", data.Id(), errStatus, err))
+		// waiting out the delete timeout will not fix a rejected request
+		if code >= 400 && code < 500 && code != http.StatusTooManyRequests {
+			return retry.NonRetryableError(fmt.Errorf("confirming deletion of organization %s: %s %w", orgID, errStatus, err))
 		}
-		return retry.RetryableError(fmt.Errorf("organization %s is still being deleted", data.Id()))
+		return retry.RetryableError(fmt.Errorf("confirming deletion of organization %s: %s %w", orgID, errStatus, err))
 	})
+}
+
+// the organization endpoints report a failure as an HTTP status line plus a plain error, so the
+// code has to be taken off that line
+func statusCodeFromStatus(status string) int {
+	fields := strings.Fields(status)
+	if len(fields) == 0 {
+		return 0
+	}
+	code, err := strconv.Atoi(fields[0])
+	if err != nil {
+		return 0
+	}
+	return code
 }
 
 func resourceSysdigSecureOrganizationRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
@@ -170,6 +194,7 @@ func resourceSysdigSecureOrganizationRead(ctx context.Context, data *schema.Reso
 	org, errStatus, err := client.GetOrganizationSecure(ctx, data.Id())
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
+			data.SetId("")
 			return nil
 		}
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
@@ -199,7 +224,7 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 
-	return nil
+	return resourceSysdigSecureOrganizationRead(ctx, data, i)
 }
 
 func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.OrganizationSecure {

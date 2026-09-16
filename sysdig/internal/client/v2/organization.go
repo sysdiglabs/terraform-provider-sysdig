@@ -1,8 +1,10 @@
 package v2
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -41,7 +43,7 @@ func (c *Client) CreateOrganizationSecure(ctx context.Context, org *Organization
 	}
 
 	organization = &OrganizationSecure{}
-	if err := c.unmarshalOrganizationBody(response, organization); err != nil {
+	if err = c.unmarshalCloudauthProto(response.Body, organization); err != nil {
 		return nil, "", err
 	}
 	return organization, "", nil
@@ -117,13 +119,17 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 	return organization, "", nil
 }
 
-// a 202 only acknowledges the request, so it may come back without a usable body
+// an async acknowledgement may carry no body at all; anything else still has to decode cleanly,
+// so a malformed payload is not mistaken for an empty one
 func (c *Client) unmarshalOrganizationBody(response *http.Response, organization *OrganizationSecure) error {
-	err := c.unmarshalCloudauthProto(response.Body, organization)
-	if err != nil && response.StatusCode == http.StatusAccepted {
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+	if response.StatusCode == http.StatusAccepted && len(bytes.TrimSpace(body)) == 0 {
 		return nil
 	}
-	return err
+	return c.unmarshalCloudauthProto(io.NopCloser(bytes.NewReader(body)), organization)
 }
 
 // deliberately not applied to the read: GetOrganizationSecure accepts only 200

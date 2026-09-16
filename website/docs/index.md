@@ -151,13 +151,17 @@ When Secure resources are to be created, this authentication must be in place.
   on-prem installations. It can also be sourced from the `SYSDIG_SECURE_INSECURE_TLS`
   environment variable. By default, this is false.<br/><br/>
 
-* `sysdig_secure_org_api_async` - (Optional) Creates, updates and deletes
+* `sysdig_secure_org_api_async` - (Optional) Creates and updates
   `sysdig_secure_organization` asynchronously, so the call returns as soon as the request
-  is accepted instead of waiting for every member account. Recommended for large cloud
-  organizations, where the synchronous call can exceed the API request timeout; member
-  accounts then appear some time after the apply finishes. It can also be sourced from the
-  `SYSDIG_SECURE_ORG_API_ASYNC` environment variable, or from the older
-  `SYSDIG_ORG_API_ASYNC`. By default, this is false.<br/><br/>
+  is accepted instead of waiting for every member account; member accounts then appear
+  some time after the apply finishes. Recommended for large cloud organizations, where the
+  synchronous call can exceed the API request timeout.
+  <br/>Destroy is also sent asynchronously, but Terraform still waits for the organization
+  to disappear before completing, so that a replacement cannot race a deletion that is
+  still running. That wait is bounded by the resource's delete timeout, which defaults to
+  30 minutes and can be raised with a `timeouts` block.
+  <br/>It can also be sourced from the `SYSDIG_SECURE_ORG_API_ASYNC` environment variable.
+  By default, this is false.<br/><br/>
 
 
 ### IBM Cloud Monitoring Authentication

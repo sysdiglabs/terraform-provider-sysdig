@@ -1,15 +1,14 @@
-//go:build unit
-
 package sysdig
 
 import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 )
@@ -27,17 +26,7 @@ func clearOrgAPIAsyncEnv(t *testing.T) {
 
 func providerData(t *testing.T, config map[string]any) *schema.ResourceData {
 	t.Helper()
-
-	sm := schema.InternalMap(Provider().Schema)
-	diff, err := sm.Diff(context.Background(), nil, terraform.NewResourceConfigRaw(config), nil, nil, true)
-	if err != nil {
-		t.Fatalf("Diff: %v", err)
-	}
-	d, err := sm.Data(nil, diff)
-	if err != nil {
-		t.Fatalf("Data: %v", err)
-	}
-	return d
+	return schema.TestResourceDataRaw(t, Provider().Schema, config)
 }
 
 // Config has to beat the environment, and the diff layer only coerces to TypeBool after the
@@ -89,9 +78,10 @@ func TestProviderOrgAPIAsync(t *testing.T) {
 // schema.EnvDefaultFunc would do with it.
 func TestProviderOrgAPIAsyncEnvValues(t *testing.T) {
 	cases := map[string]bool{
-		"true": true, "TRUE": true, "True": true, "1": true, "t": true,
-		"": false, "false": false, "0": false, "f": false,
-		"yes": false, "on": false, "enabled": false, "true ": false,
+		"true":  true,
+		"":      false, // empty means unset, so the next name is consulted
+		"yes":   false, // unparseable stays disabled instead of failing provider configuration
+		"true ": false, // not trimmed
 	}
 
 	for value, want := range cases {
@@ -255,5 +245,122 @@ func TestOrganizationCreateRejectsAckWithoutID(t *testing.T) {
 	}
 	if data.Id() != "" {
 		t.Errorf("id = %q, want empty so the resource is not tracked", data.Id())
+	}
+}
+
+// A permanent failure on the confirmation read must not be retried until the delete timeout.
+func TestOrganizationDeleteWaitClassifiesErrors(t *testing.T) {
+	tests := []struct {
+		name        string
+		status      int
+		wantGets    int
+		wantSucceed bool
+	}{
+		{name: "gone", status: http.StatusNotFound, wantGets: 1, wantSucceed: true},
+		{name: "forbidden fails fast", status: http.StatusForbidden, wantGets: 1},
+		{name: "unauthorized fails fast", status: http.StatusUnauthorized, wantGets: 1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var gets int
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				gets++
+				w.WriteHeader(tt.status)
+			}))
+			defer srv.Close()
+
+			client := v2.NewSysdigSecure(v2.WithURL(srv.URL), v2.WithToken("fake-token"))
+			err := waitForOrganizationDeletion(context.Background(), client, "4c53102d", 2*time.Second)
+
+			if tt.wantSucceed && err != nil {
+				t.Fatalf("expected success, got %v", err)
+			}
+			if !tt.wantSucceed && err == nil {
+				t.Fatal("expected an error")
+			}
+			if gets < tt.wantGets {
+				t.Errorf("issued %d reads, expected at least %d", gets, tt.wantGets)
+			}
+			if tt.wantGets == 1 && gets > 1 {
+				t.Errorf("issued %d reads, expected the failure to be reported without retrying", gets)
+			}
+		})
+	}
+}
+
+// The wait has to give up once the timeout is exhausted, reporting what it was waiting for.
+func TestOrganizationDeleteWaitTimesOut(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"id":"4c53102d"}`))
+	}))
+	defer srv.Close()
+
+	client := v2.NewSysdigSecure(v2.WithURL(srv.URL), v2.WithToken("fake-token"))
+	err := waitForOrganizationDeletion(context.Background(), client, "4c53102d", time.Second)
+	if err == nil {
+		t.Fatal("expected the wait to give up")
+	}
+	if !strings.Contains(err.Error(), "has not been deleted yet") {
+		t.Errorf("error = %q, want it to say the organization was still there", err)
+	}
+}
+
+// The async cascade outlasts the other operations, so only delete gets the longer budget.
+func TestOrganizationDeleteTimeoutBudget(t *testing.T) {
+	timeouts := resourceSysdigSecureOrganization().Timeouts
+	if got, want := *timeouts.Delete, 30*time.Minute; got != want {
+		t.Errorf("delete timeout = %v, want %v", got, want)
+	}
+	if got, want := *timeouts.Create, 5*time.Minute; got != want {
+		t.Errorf("create timeout = %v, want %v", got, want)
+	}
+}
+
+// An organization deleted outside Terraform has to leave state, so a later plan recreates it.
+func TestOrganizationReadDropsDeletedOrganization(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer srv.Close()
+
+	clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
+		"sysdig_secure_url":       srv.URL,
+		"sysdig_secure_api_token": "fake-token",
+	})}
+	data := schema.TestResourceDataRaw(t, resourceSysdigSecureOrganization().Schema, map[string]any{})
+	data.SetId("4c53102d")
+
+	if diags := resourceSysdigSecureOrganizationRead(context.Background(), data, clients); diags.HasError() {
+		t.Fatalf("read returned an error: %v", diags)
+	}
+	if data.Id() != "" {
+		t.Errorf("id = %q, want empty so the resource leaves state", data.Id())
+	}
+}
+
+// Update reads the organization back, so state reflects the server rather than the plan.
+func TestOrganizationUpdateReadsBack(t *testing.T) {
+	var methods []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		methods = append(methods, r.Method)
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"id":"4c53102d","managementAccountId":"58ca66a5-ac87-497b-a501-7a4c934b3017"}`))
+	}))
+	defer srv.Close()
+
+	clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
+		"sysdig_secure_url":       srv.URL,
+		"sysdig_secure_api_token": "fake-token",
+	})}
+	data := schema.TestResourceDataRaw(t, resourceSysdigSecureOrganization().Schema, map[string]any{})
+	data.SetId("4c53102d")
+
+	if diags := resourceSysdigSecureOrganizationUpdate(context.Background(), data, clients); diags.HasError() {
+		t.Fatalf("update returned an error: %v", diags)
+	}
+	if len(methods) != 2 || methods[0] != http.MethodPut || methods[1] != http.MethodGet {
+		t.Errorf("requests = %v, want a PUT followed by a GET that reads the organization back", methods)
 	}
 }

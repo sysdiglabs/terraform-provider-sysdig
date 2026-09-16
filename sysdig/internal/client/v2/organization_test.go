@@ -137,7 +137,8 @@ func TestOrganizationURLsAsyncFlag(t *testing.T) {
 	}
 }
 
-// cloudauth answers an async mutation with 202; the body is an acknowledgement and may be empty.
+// cloudauth answers an async mutation with 202; update discards the body, so an empty one is
+// tolerated there, while create needs an id and so keeps decoding strictly.
 func TestOrganizationAsyncAckWithoutBody(t *testing.T) {
 	t.Parallel()
 
@@ -149,14 +150,30 @@ func TestOrganizationAsyncAckWithoutBody(t *testing.T) {
 	c := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"), WithOrgAPIAsync(true))
 	org := &OrganizationSecure{}
 
-	if _, _, err := c.CreateOrganizationSecure(context.Background(), org); err != nil {
-		t.Errorf("CreateOrganizationSecure on a bodyless 202: %v", err)
-	}
 	if _, _, err := c.UpdateOrganizationSecure(context.Background(), "oid", org); err != nil {
 		t.Errorf("UpdateOrganizationSecure on a bodyless 202: %v", err)
+	}
+	if _, _, err := c.CreateOrganizationSecure(context.Background(), org); err == nil {
+		t.Error("CreateOrganizationSecure on a bodyless 202: expected an error, an id is required")
 	}
 	// the read keeps rejecting anything but 200, so an unexpected 202 there stays an error
 	if _, _, err := c.GetOrganizationSecure(context.Background(), "oid"); err == nil {
 		t.Error("GetOrganizationSecure on a 202: expected an error")
+	}
+}
+
+// a malformed 202 payload must not be mistaken for an empty acknowledgement
+func TestOrganizationAsyncAckMalformedBody(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusAccepted)
+		_, _ = w.Write([]byte(`{"error":"quota exceeded"`))
+	}))
+	defer srv.Close()
+
+	c := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"), WithOrgAPIAsync(true))
+	if _, _, err := c.UpdateOrganizationSecure(context.Background(), "oid", &OrganizationSecure{}); err == nil {
+		t.Error("UpdateOrganizationSecure on a malformed 202: expected an error")
 	}
 }
