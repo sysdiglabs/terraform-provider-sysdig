@@ -79,6 +79,8 @@ func TestProviderOrgAPIAsync(t *testing.T) {
 func TestProviderOrgAPIAsyncEnvValues(t *testing.T) {
 	cases := map[string]bool{
 		"true":  true,
+		"1":     true,  // the conventional truthy forms work, not just the exact string
+		"TRUE":  true,  // case does not matter either
 		"":      false, // empty means unset, so the next name is consulted
 		"yes":   false, // unparseable stays disabled instead of failing provider configuration
 		"true ": false, // not trimmed
