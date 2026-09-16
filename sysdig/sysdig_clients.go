@@ -136,7 +136,7 @@ func getSysdigSecureVariables(data *schema.ResourceData) (*sysdigSecureVariables
 			token: token.(string),
 		},
 		skipPolicyV2Msg: skipPolicyV2Msg,
-		// Get, not GetOk: an explicit false must win over the env var default
+		// Get, not GetOk: GetOk reports ok=false for a zero value, dropping an explicit false
 		orgAPIAsync: data.Get("sysdig_secure_org_api_async").(bool),
 	}, nil
 }

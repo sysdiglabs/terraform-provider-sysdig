@@ -274,9 +274,6 @@ func zoneRulesConfig(url, name, rules string) string {
 provider "sysdig" {
   sysdig_secure_url       = %q
   sysdig_secure_api_token = "fake-token"
-
-  # pinned to the default on purpose: the plan below must stay empty either way
-  sysdig_secure_org_api_async = false
 }
 
 resource "sysdig_secure_zone" "test" {
@@ -385,9 +382,6 @@ func zoneExpressionConfig(url, name string, values ...string) string {
 provider "sysdig" {
   sysdig_secure_url       = %q
   sysdig_secure_api_token = "fake-token"
-
-  # pinned to the default on purpose: the plan below must stay empty either way
-  sysdig_secure_org_api_async = false
 }
 
 resource "sysdig_secure_zone" "test" {

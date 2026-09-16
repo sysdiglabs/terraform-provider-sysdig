@@ -73,7 +73,7 @@ func (c *Client) GetOrganizationSecure(ctx context.Context, orgID string) (organ
 }
 
 func (c *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) (errString string, err error) {
-	response, err := c.requester.Request(ctx, http.MethodDelete, c.organizationURL(orgID), nil)
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.organizationMutationURL(orgID), nil)
 	if err != nil {
 		return "", err
 	}
@@ -83,7 +83,7 @@ func (c *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) (er
 		}
 	}()
 
-	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusAccepted {
 		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return errStatus, err
 	}
@@ -96,7 +96,7 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 		return nil, "", err
 	}
 
-	response, err := c.requester.Request(ctx, http.MethodPut, c.organizationURL(orgID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.organizationMutationURL(orgID), payload)
 	if err != nil {
 		return nil, "", err
 	}
@@ -119,18 +119,22 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 	return organization, "", nil
 }
 
-func (c *Client) organizationsURL() string {
-	url := fmt.Sprintf(organizationsPath, c.config.url)
-	if c.config.secureOrgAPIAsync {
-		url += "?async=true"
+func (c *Client) withAsync(url string) string {
+	if !c.config.secureOrgAPIAsync {
+		return url
 	}
-	return url
+	return url + "?async=true"
 }
 
+func (c *Client) organizationsURL() string {
+	return c.withAsync(fmt.Sprintf(organizationsPath, c.config.url))
+}
+
+// a read has no async semantics, so the flag stops at the mutating calls below
 func (c *Client) organizationURL(orgID string) string {
-	url := fmt.Sprintf(organizationPath, c.config.url, orgID)
-	if c.config.secureOrgAPIAsync {
-		url += "?async=true"
-	}
-	return url
+	return fmt.Sprintf(organizationPath, c.config.url, orgID)
+}
+
+func (c *Client) organizationMutationURL(orgID string) string {
+	return c.withAsync(c.organizationURL(orgID))
 }

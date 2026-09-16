@@ -112,24 +112,29 @@ func TestOrganizationURLsAsyncFlag(t *testing.T) {
 	t.Parallel()
 
 	const orgID = "4c53102d-6846-447b-bfd1-4c0d5002cddf"
+	const base = "http://localhost/api/cloudauth/v1/organizations"
 
 	tests := []struct {
-		name              string
-		orgAPIAsync       bool
-		wantOrganizations string
-		wantOrganization  string
+		name           string
+		orgAPIAsync    bool
+		wantCollection string
+		wantRead       string
+		wantMutation   string
 	}{
 		{
-			name:              "disabled by default",
-			orgAPIAsync:       false,
-			wantOrganizations: "http://localhost/api/cloudauth/v1/organizations",
-			wantOrganization:  "http://localhost/api/cloudauth/v1/organizations/" + orgID,
+			name:           "disabled by default",
+			orgAPIAsync:    false,
+			wantCollection: base,
+			wantRead:       base + "/" + orgID,
+			wantMutation:   base + "/" + orgID,
 		},
 		{
-			name:              "enabled",
-			orgAPIAsync:       true,
-			wantOrganizations: "http://localhost/api/cloudauth/v1/organizations?async=true",
-			wantOrganization:  "http://localhost/api/cloudauth/v1/organizations/" + orgID + "?async=true",
+			// the read stays clean on purpose: GetOrganizationSecure only accepts 200
+			name:           "enabled on the mutating calls only",
+			orgAPIAsync:    true,
+			wantCollection: base + "?async=true",
+			wantRead:       base + "/" + orgID,
+			wantMutation:   base + "/" + orgID + "?async=true",
 		},
 	}
 
@@ -138,11 +143,14 @@ func TestOrganizationURLsAsyncFlag(t *testing.T) {
 			t.Parallel()
 			c := newSysdigClient(WithURL("http://localhost"), WithOrgAPIAsync(tt.orgAPIAsync))
 
-			if got := c.organizationsURL(); got != tt.wantOrganizations {
-				t.Errorf("organizationsURL() = %q, want %q", got, tt.wantOrganizations)
+			if got := c.organizationsURL(); got != tt.wantCollection {
+				t.Errorf("organizationsURL() = %q, want %q", got, tt.wantCollection)
 			}
-			if got := c.organizationURL(orgID); got != tt.wantOrganization {
-				t.Errorf("organizationURL() = %q, want %q", got, tt.wantOrganization)
+			if got := c.organizationURL(orgID); got != tt.wantRead {
+				t.Errorf("organizationURL() = %q, want %q", got, tt.wantRead)
+			}
+			if got := c.organizationMutationURL(orgID); got != tt.wantMutation {
+				t.Errorf("organizationMutationURL() = %q, want %q", got, tt.wantMutation)
 			}
 		})
 	}

@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -29,7 +30,7 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 			"sysdig_secure_org_api_async": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("SYSDIG_ORG_API_ASYNC", false),
+				DefaultFunc: orgAPIAsyncDefaultFunc,
 			},
 			"sysdig_secure_api_token": {
 				Type:        schema.TypeString,
@@ -276,4 +277,18 @@ func (p *SysdigProvider) Provider() *schema.Provider {
 func (p *SysdigProvider) providerConfigure(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 	p.SysdigClient.Configure(ctx, d)
 	return p.SysdigClient, nil
+}
+
+// checked in order; the second name shipped before the attribute existed and has to keep working
+var orgAPIAsyncEnvVars = []string{"SYSDIG_SECURE_ORG_API_ASYNC", "SYSDIG_ORG_API_ASYNC"}
+
+// returns a bool, unlike schema.EnvDefaultFunc, which hands back the raw string: a value the SDK
+// cannot coerce fails provider configuration, and these variables have only ever honoured "true"
+func orgAPIAsyncDefaultFunc() (any, error) {
+	for _, name := range orgAPIAsyncEnvVars {
+		if v := os.Getenv(name); v != "" {
+			return v == "true", nil
+		}
+	}
+	return false, nil
 }
