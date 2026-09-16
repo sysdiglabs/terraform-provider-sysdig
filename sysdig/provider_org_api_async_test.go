@@ -226,7 +226,9 @@ func TestOrganizationDeleteWaitsForRemoval(t *testing.T) {
 // A 202 without a usable body must not surface as a proto parse error, but create still needs an id.
 func TestOrganizationCreateRejectsAckWithoutID(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		// a body that parses cleanly but carries no id, so the guard is what rejects it
 		w.WriteHeader(http.StatusAccepted)
+		_, _ = w.Write([]byte(`{}`))
 	}))
 	defer srv.Close()
 
@@ -242,6 +244,9 @@ func TestOrganizationCreateRejectsAckWithoutID(t *testing.T) {
 	diags := resourceSysdigSecureOrganizationCreate(context.Background(), data, clients)
 	if !diags.HasError() {
 		t.Fatal("expected an error when the acknowledgement carries no id")
+	}
+	if !strings.Contains(diags[0].Summary, "no id was returned") {
+		t.Errorf("diagnostic = %q, want the missing-id guard rather than a decode failure", diags[0].Summary)
 	}
 	if data.Id() != "" {
 		t.Errorf("id = %q, want empty so the resource is not tracked", data.Id())
