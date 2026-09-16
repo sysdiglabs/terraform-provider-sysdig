@@ -371,3 +371,32 @@ func TestOrganizationUpdateReadsBack(t *testing.T) {
 		t.Errorf("requests = %v, want a PUT followed by a GET that reads the organization back", methods)
 	}
 }
+
+// If the organization disappears between the update and the read-back, the update has to say so:
+// returning an empty state makes Terraform report an inconsistent result and blame the provider.
+func TestOrganizationUpdateReportsDisappearance(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"id":"4c53102d"}`))
+	}))
+	defer srv.Close()
+
+	clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
+		"sysdig_secure_url":       srv.URL,
+		"sysdig_secure_api_token": "fake-token",
+	})}
+	data := schema.TestResourceDataRaw(t, resourceSysdigSecureOrganization().Schema, map[string]any{})
+	data.SetId("4c53102d")
+
+	diags := resourceSysdigSecureOrganizationUpdate(context.Background(), data, clients)
+	if !diags.HasError() {
+		t.Fatal("expected an error when the organization disappears before the read-back")
+	}
+	if !strings.Contains(diags[0].Summary, "was deleted while it was being updated") {
+		t.Errorf("diagnostic = %q, want it to name the disappearance", diags[0].Summary)
+	}
+}

@@ -215,8 +215,9 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 	}
 
 	org := secureOrganizationFromResourceData(data)
+	orgID := data.Id()
 
-	_, errStatus, err := client.UpdateOrganizationSecure(ctx, data.Id(), org)
+	_, errStatus, err := client.UpdateOrganizationSecure(ctx, orgID, org)
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
 			return nil
@@ -224,7 +225,13 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 
-	return resourceSysdigSecureOrganizationRead(ctx, data, i)
+	diags := resourceSysdigSecureOrganizationRead(ctx, data, i)
+	// the read drops the id when the organization is gone, which an update has to report rather
+	// than hand back as an empty state that Terraform rejects as an inconsistent result
+	if !diags.HasError() && data.Id() == "" {
+		return diag.Errorf("Error updating resource: organization %s was deleted while it was being updated", orgID)
+	}
+	return diags
 }
 
 func secureOrganizationFromResourceData(data *schema.ResourceData) *v2.OrganizationSecure {
