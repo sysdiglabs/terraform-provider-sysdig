@@ -2,12 +2,14 @@ package sysdig
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -111,6 +113,10 @@ func resourceSysdigSecureOrganizationCreate(ctx context.Context, data *schema.Re
 	if err != nil {
 		return diag.Errorf("Error creating resource: %s %s", errStatus, err)
 	}
+	// an empty id would drop the organization out of state while it exists server side
+	if orgCreated.GetId() == "" {
+		return diag.Errorf("Error creating resource: the organization was accepted but no id was returned")
+	}
 
 	data.SetId(orgCreated.Id)
 
@@ -131,7 +137,26 @@ func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.Re
 		return diag.Errorf("Error deleting resource: %s %s", errStatus, err)
 	}
 
+	// the request may only have been acknowledged, and a replacement cannot be created until the
+	// organization is actually gone
+	if err := waitForOrganizationDeletion(ctx, client, data); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
+}
+
+func waitForOrganizationDeletion(ctx context.Context, client v2.OrganizationSecureInterface, data *schema.ResourceData) error {
+	return retry.RetryContext(ctx, data.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
+		_, errStatus, err := client.GetOrganizationSecure(ctx, data.Id())
+		if err != nil && strings.Contains(errStatus, "404") {
+			return nil
+		}
+		if err != nil {
+			return retry.RetryableError(fmt.Errorf("waiting for organization %s to be deleted: %s %w", data.Id(), errStatus, err))
+		}
+		return retry.RetryableError(fmt.Errorf("organization %s is still being deleted", data.Id()))
+	})
 }
 
 func resourceSysdigSecureOrganizationRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {

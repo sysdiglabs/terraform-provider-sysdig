@@ -25,7 +25,7 @@ func (c *Client) CreateOrganizationSecure(ctx context.Context, org *Organization
 		return nil, "", err
 	}
 
-	response, err := c.requester.Request(ctx, http.MethodPost, c.organizationsURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.withAsync(c.organizationsURL()), payload)
 	if err != nil {
 		return nil, "", err
 	}
@@ -41,8 +41,7 @@ func (c *Client) CreateOrganizationSecure(ctx context.Context, org *Organization
 	}
 
 	organization = &OrganizationSecure{}
-	err = c.unmarshalCloudauthProto(response.Body, organization)
-	if err != nil {
+	if err := c.unmarshalOrganizationBody(response, organization); err != nil {
 		return nil, "", err
 	}
 	return organization, "", nil
@@ -73,7 +72,7 @@ func (c *Client) GetOrganizationSecure(ctx context.Context, orgID string) (organ
 }
 
 func (c *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) (errString string, err error) {
-	response, err := c.requester.Request(ctx, http.MethodDelete, c.organizationMutationURL(orgID), nil)
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.withAsync(c.organizationURL(orgID)), nil)
 	if err != nil {
 		return "", err
 	}
@@ -96,7 +95,7 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 		return nil, "", err
 	}
 
-	response, err := c.requester.Request(ctx, http.MethodPut, c.organizationMutationURL(orgID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.withAsync(c.organizationURL(orgID)), payload)
 	if err != nil {
 		return nil, "", err
 	}
@@ -112,13 +111,22 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 	}
 
 	organization = &OrganizationSecure{}
-	err = c.unmarshalCloudauthProto(response.Body, organization)
-	if err != nil {
+	if err := c.unmarshalOrganizationBody(response, organization); err != nil {
 		return nil, "", err
 	}
 	return organization, "", nil
 }
 
+// a 202 only acknowledges the request, so it may come back without a usable body
+func (c *Client) unmarshalOrganizationBody(response *http.Response, organization *OrganizationSecure) error {
+	err := c.unmarshalCloudauthProto(response.Body, organization)
+	if err != nil && response.StatusCode == http.StatusAccepted {
+		return nil
+	}
+	return err
+}
+
+// deliberately not applied to the read: GetOrganizationSecure accepts only 200
 func (c *Client) withAsync(url string) string {
 	if !c.config.secureOrgAPIAsync {
 		return url
@@ -127,14 +135,9 @@ func (c *Client) withAsync(url string) string {
 }
 
 func (c *Client) organizationsURL() string {
-	return c.withAsync(fmt.Sprintf(organizationsPath, c.config.url))
+	return fmt.Sprintf(organizationsPath, c.config.url)
 }
 
-// a read has no async semantics, so the flag stops at the mutating calls below
 func (c *Client) organizationURL(orgID string) string {
 	return fmt.Sprintf(organizationPath, c.config.url, orgID)
-}
-
-func (c *Client) organizationMutationURL(orgID string) string {
-	return c.withAsync(c.organizationURL(orgID))
 }

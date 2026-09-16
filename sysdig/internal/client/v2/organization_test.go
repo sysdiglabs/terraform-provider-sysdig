@@ -114,44 +114,49 @@ func TestOrganizationURLsAsyncFlag(t *testing.T) {
 	const orgID = "4c53102d-6846-447b-bfd1-4c0d5002cddf"
 	const base = "http://localhost/api/cloudauth/v1/organizations"
 
-	tests := []struct {
-		name           string
-		orgAPIAsync    bool
-		wantCollection string
-		wantRead       string
-		wantMutation   string
-	}{
-		{
-			name:           "disabled by default",
-			orgAPIAsync:    false,
-			wantCollection: base,
-			wantRead:       base + "/" + orgID,
-			wantMutation:   base + "/" + orgID,
-		},
-		{
-			// the read stays clean on purpose: GetOrganizationSecure only accepts 200
-			name:           "enabled on the mutating calls only",
-			orgAPIAsync:    true,
-			wantCollection: base + "?async=true",
-			wantRead:       base + "/" + orgID,
-			wantMutation:   base + "/" + orgID + "?async=true",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, async := range []bool{false, true} {
+		t.Run(map[bool]string{false: "disabled", true: "enabled"}[async], func(t *testing.T) {
 			t.Parallel()
-			c := newSysdigClient(WithURL("http://localhost"), WithOrgAPIAsync(tt.orgAPIAsync))
+			c := newSysdigClient(WithURL("http://localhost"), WithOrgAPIAsync(async))
 
-			if got := c.organizationsURL(); got != tt.wantCollection {
-				t.Errorf("organizationsURL() = %q, want %q", got, tt.wantCollection)
+			suffix := ""
+			if async {
+				suffix = "?async=true"
 			}
-			if got := c.organizationURL(orgID); got != tt.wantRead {
-				t.Errorf("organizationURL() = %q, want %q", got, tt.wantRead)
+			if got, want := c.withAsync(c.organizationsURL()), base+suffix; got != want {
+				t.Errorf("collection URL = %q, want %q", got, want)
 			}
-			if got := c.organizationMutationURL(orgID); got != tt.wantMutation {
-				t.Errorf("organizationMutationURL() = %q, want %q", got, tt.wantMutation)
+			if got, want := c.withAsync(c.organizationURL(orgID)), base+"/"+orgID+suffix; got != want {
+				t.Errorf("mutation URL = %q, want %q", got, want)
+			}
+			// the read is never wrapped: GetOrganizationSecure accepts only 200
+			if got, want := c.organizationURL(orgID), base+"/"+orgID; got != want {
+				t.Errorf("read URL = %q, want %q", got, want)
 			}
 		})
+	}
+}
+
+// cloudauth answers an async mutation with 202; the body is an acknowledgement and may be empty.
+func TestOrganizationAsyncAckWithoutBody(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	defer srv.Close()
+
+	c := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"), WithOrgAPIAsync(true))
+	org := &OrganizationSecure{}
+
+	if _, _, err := c.CreateOrganizationSecure(context.Background(), org); err != nil {
+		t.Errorf("CreateOrganizationSecure on a bodyless 202: %v", err)
+	}
+	if _, _, err := c.UpdateOrganizationSecure(context.Background(), "oid", org); err != nil {
+		t.Errorf("UpdateOrganizationSecure on a bodyless 202: %v", err)
+	}
+	// the read keeps rejecting anything but 200, so an unexpected 202 there stays an error
+	if _, _, err := c.GetOrganizationSecure(context.Background(), "oid"); err == nil {
+		t.Error("GetOrganizationSecure on a 202: expected an error")
 	}
 }
