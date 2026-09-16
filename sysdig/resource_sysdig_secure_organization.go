@@ -219,8 +219,10 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 
 	_, errStatus, err := client.UpdateOrganizationSecure(ctx, orgID, org)
 	if err != nil {
+		// clearing the id here instead would hand Terraform an empty state for an update it
+		// planned, which it rejects as an inconsistent result
 		if strings.Contains(errStatus, "404") {
-			return nil
+			return diag.Errorf("Error updating resource: organization %s no longer exists", orgID)
 		}
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}

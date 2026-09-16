@@ -400,3 +400,27 @@ func TestOrganizationUpdateReportsDisappearance(t *testing.T) {
 		t.Errorf("diagnostic = %q, want it to name the disappearance", diags[0].Summary)
 	}
 }
+
+// A 404 on the update itself is the same situation as one on the read-back, and has to be
+// reported the same way rather than recorded as a successful update.
+func TestOrganizationUpdateReportsMissingOrganization(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer srv.Close()
+
+	clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
+		"sysdig_secure_url":       srv.URL,
+		"sysdig_secure_api_token": "fake-token",
+	})}
+	data := schema.TestResourceDataRaw(t, resourceSysdigSecureOrganization().Schema, map[string]any{})
+	data.SetId("4c53102d")
+
+	diags := resourceSysdigSecureOrganizationUpdate(context.Background(), data, clients)
+	if !diags.HasError() {
+		t.Fatal("expected an error when the organization no longer exists")
+	}
+	if data.Id() == "" {
+		t.Error("id was cleared, which Terraform rejects as an inconsistent result for an update")
+	}
+}
