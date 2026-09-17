@@ -153,8 +153,12 @@ func TestOrganizationAsyncAckWithoutBody(t *testing.T) {
 	if _, _, err := c.UpdateOrganizationSecure(context.Background(), "oid", org); err != nil {
 		t.Errorf("UpdateOrganizationSecure on a bodyless 202: %v", err)
 	}
-	if _, _, err := c.CreateOrganizationSecure(context.Background(), org); err == nil {
-		t.Error("CreateOrganizationSecure on a bodyless 202: expected an error, an id is required")
+	// the client only reports transport and decode failures; the missing id is the resource's call
+	created, _, err := c.CreateOrganizationSecure(context.Background(), org)
+	if err != nil {
+		t.Errorf("CreateOrganizationSecure on a bodyless 202: %v", err)
+	} else if created.GetId() != "" {
+		t.Errorf("CreateOrganizationSecure returned id %q, want nothing invented for an empty ack", created.GetId())
 	}
 	// the read keeps rejecting anything but 200, so an unexpected 202 there stays an error
 	if _, _, err := c.GetOrganizationSecure(context.Background(), "oid"); err == nil {

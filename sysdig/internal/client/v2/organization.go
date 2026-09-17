@@ -32,7 +32,8 @@ func (c *Client) CreateOrganizationSecure(ctx context.Context, org *Organization
 		return nil, "", err
 	}
 	defer func() {
-		if dErr := response.Body.Close(); dErr != nil {
+		// a close failure here would discard a successful create and leave the organization untracked
+		if dErr := response.Body.Close(); dErr != nil && err == nil {
 			err = fmt.Errorf("unable to close response body: %w", dErr)
 		}
 	}()
@@ -43,7 +44,7 @@ func (c *Client) CreateOrganizationSecure(ctx context.Context, org *Organization
 	}
 
 	organization = &OrganizationSecure{}
-	if err = c.unmarshalCloudauthProto(response.Body, organization); err != nil {
+	if err = c.unmarshalOrganizationBody(response, organization); err != nil {
 		return nil, "", err
 	}
 	return organization, "", nil
@@ -55,7 +56,8 @@ func (c *Client) GetOrganizationSecure(ctx context.Context, orgID string) (organ
 		return nil, "", err
 	}
 	defer func() {
-		if dErr := response.Body.Close(); dErr != nil {
+		// a close failure must not overwrite a real error, nor fail an otherwise successful call
+		if dErr := response.Body.Close(); dErr != nil && err == nil {
 			err = fmt.Errorf("unable to close response body: %w", dErr)
 		}
 	}()
@@ -79,7 +81,8 @@ func (c *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) (er
 		return "", err
 	}
 	defer func() {
-		if dErr := response.Body.Close(); dErr != nil {
+		// a close failure must not overwrite a real error, nor fail an otherwise successful call
+		if dErr := response.Body.Close(); dErr != nil && err == nil {
 			err = fmt.Errorf("unable to close response body: %w", dErr)
 		}
 	}()
@@ -102,7 +105,8 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 		return nil, "", err
 	}
 	defer func() {
-		if dErr := response.Body.Close(); dErr != nil {
+		// a close failure must not overwrite a real error, nor fail an otherwise successful call
+		if dErr := response.Body.Close(); dErr != nil && err == nil {
 			err = fmt.Errorf("unable to close response body: %w", dErr)
 		}
 	}()

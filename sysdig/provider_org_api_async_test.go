@@ -2,8 +2,10 @@ package sysdig
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -19,8 +21,8 @@ const orgAPIAsyncKey = "sysdig_secure_org_api_async"
 // ones an engineer working on large-organization onboarding has exported.
 func clearOrgAPIAsyncEnv(t *testing.T) {
 	t.Helper()
-	for _, name := range orgAPIAsyncEnvVars {
-		t.Setenv(name, "")
+	for _, env := range orgAPIAsyncEnvVars {
+		t.Setenv(env.name, "")
 	}
 }
 
@@ -74,27 +76,53 @@ func TestProviderOrgAPIAsync(t *testing.T) {
 	}
 }
 
-// An unparseable value must stay disabled rather than fail provider configuration, which is what
-// schema.EnvDefaultFunc would do with it.
+// The legacy name keeps its exact-string rule so an upgrade cannot flip anyone from sync to async,
+// while the new name accepts the conventional forms. Neither may fail provider configuration.
 func TestProviderOrgAPIAsyncEnvValues(t *testing.T) {
-	cases := map[string]bool{
+	legacy := map[string]bool{
+		"true": true,
+		"":     false,
+		"1":    false, // exact match only: this was a no-op before the attribute existed
+		"TRUE": false,
+		"yes":  false,
+	}
+	prefixed := map[string]bool{
 		"true":  true,
-		"1":     true,  // the conventional truthy forms work, not just the exact string
-		"TRUE":  true,  // case does not matter either
-		"":      false, // empty means unset, so the next name is consulted
+		"1":     true,
+		"TRUE":  true,
+		"":      false,
 		"yes":   false, // unparseable stays disabled instead of failing provider configuration
 		"true ": false, // not trimmed
 	}
 
-	for value, want := range cases {
-		t.Run(value, func(t *testing.T) {
+	for value, want := range legacy {
+		t.Run("legacy/"+value, func(t *testing.T) {
 			clearOrgAPIAsyncEnv(t)
 			t.Setenv("SYSDIG_ORG_API_ASYNC", value)
-
 			if got := providerData(t, map[string]any{}).Get(orgAPIAsyncKey); got != want {
-				t.Errorf("env %q resolved to %#v, want %v", value, got, want)
+				t.Errorf("legacy env %q resolved to %#v, want %v", value, got, want)
 			}
 		})
+	}
+	for value, want := range prefixed {
+		t.Run("prefixed/"+value, func(t *testing.T) {
+			clearOrgAPIAsyncEnv(t)
+			t.Setenv("SYSDIG_SECURE_ORG_API_ASYNC", value)
+			if got := providerData(t, map[string]any{}).Get(orgAPIAsyncKey); got != want {
+				t.Errorf("prefixed env %q resolved to %#v, want %v", value, got, want)
+			}
+		})
+	}
+}
+
+// An unparseable value in the new name must not shadow a working legacy one.
+func TestProviderOrgAPIAsyncUnparseableFallsThrough(t *testing.T) {
+	clearOrgAPIAsyncEnv(t)
+	t.Setenv("SYSDIG_SECURE_ORG_API_ASYNC", "tru")
+	t.Setenv("SYSDIG_ORG_API_ASYNC", "true")
+
+	if got := providerData(t, map[string]any{}).Get(orgAPIAsyncKey); got != true {
+		t.Errorf("resolved to %#v, want the legacy value to win over an unparseable one", got)
 	}
 }
 
@@ -347,13 +375,16 @@ func TestOrganizationReadDropsDeletedOrganization(t *testing.T) {
 	}
 }
 
-// Update reads the organization back, so state reflects the server rather than the plan.
-func TestOrganizationUpdateReadsBack(t *testing.T) {
+// The PUT already returns the persisted organization, so Update must take state from that response
+// instead of paying for a second read that could also outlive the update timeout.
+func TestOrganizationUpdateUsesResponseBody(t *testing.T) {
+	const managementAccountID = "58ca66a5-ac87-497b-a501-7a4c934b3017"
+
 	var methods []string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		methods = append(methods, r.Method)
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"id":"4c53102d","managementAccountId":"58ca66a5-ac87-497b-a501-7a4c934b3017"}`))
+		_, _ = w.Write([]byte(`{"id":"4c53102d","managementAccountId":"` + managementAccountID + `"}`))
 	}))
 	defer srv.Close()
 
@@ -367,37 +398,11 @@ func TestOrganizationUpdateReadsBack(t *testing.T) {
 	if diags := resourceSysdigSecureOrganizationUpdate(context.Background(), data, clients); diags.HasError() {
 		t.Fatalf("update returned an error: %v", diags)
 	}
-	if len(methods) != 2 || methods[0] != http.MethodPut || methods[1] != http.MethodGet {
-		t.Errorf("requests = %v, want a PUT followed by a GET that reads the organization back", methods)
+	if len(methods) != 1 || methods[0] != http.MethodPut {
+		t.Errorf("requests = %v, want just the PUT", methods)
 	}
-}
-
-// If the organization disappears between the update and the read-back, the update has to say so:
-// returning an empty state makes Terraform report an inconsistent result and blame the provider.
-func TestOrganizationUpdateReportsDisappearance(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"id":"4c53102d"}`))
-	}))
-	defer srv.Close()
-
-	clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
-		"sysdig_secure_url":       srv.URL,
-		"sysdig_secure_api_token": "fake-token",
-	})}
-	data := schema.TestResourceDataRaw(t, resourceSysdigSecureOrganization().Schema, map[string]any{})
-	data.SetId("4c53102d")
-
-	diags := resourceSysdigSecureOrganizationUpdate(context.Background(), data, clients)
-	if !diags.HasError() {
-		t.Fatal("expected an error when the organization disappears before the read-back")
-	}
-	if !strings.Contains(diags[0].Summary, "was deleted while it was being updated") {
-		t.Errorf("diagnostic = %q, want it to name the disappearance", diags[0].Summary)
+	if got := data.Get(SchemaManagementAccountID); got != managementAccountID {
+		t.Errorf("management account id = %q, want the value the update returned", got)
 	}
 }
 
@@ -422,5 +427,70 @@ func TestOrganizationUpdateReportsMissingOrganization(t *testing.T) {
 	}
 	if data.Id() == "" {
 		t.Error("id was cleared, which Terraform rejects as an inconsistent result for an update")
+	}
+}
+
+// A synchronous delete is complete when it returns, so confirming it would only cost a call
+// and would fail the destroy on a 403 from a token that may no longer need read access.
+func TestOrganizationDeleteSkipsWaitWhenSync(t *testing.T) {
+	var methods []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		methods = append(methods, r.Method)
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer srv.Close()
+
+	clearOrgAPIAsyncEnv(t)
+	clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
+		"sysdig_secure_url":       srv.URL,
+		"sysdig_secure_api_token": "fake-token",
+		orgAPIAsyncKey:            false,
+	})}
+	data := schema.TestResourceDataRaw(t, resourceSysdigSecureOrganization().Schema, map[string]any{})
+	data.SetId("4c53102d")
+
+	if diags := resourceSysdigSecureOrganizationDelete(context.Background(), data, clients); diags.HasError() {
+		t.Fatalf("delete returned an error: %v", diags)
+	}
+	if len(methods) != 1 || methods[0] != http.MethodDelete {
+		t.Errorf("requests = %v, want just the DELETE with no confirmation read", methods)
+	}
+}
+
+// The transport already retries 409 and 5xx on its own, so those statuses cannot be driven through
+// a test server in reasonable time; the classification is asserted directly instead.
+func TestOrganizationDeleteProbeClassification(t *testing.T) {
+	tests := []struct {
+		name          string
+		status        string
+		err           error
+		wantDone      bool
+		wantRetryable bool
+	}{
+		{name: "not found is done", status: "404 Not Found", err: errors.New("nope"), wantDone: true},
+		{name: "gone is done", status: "410 Gone", err: errors.New("nope"), wantDone: true},
+		{name: "conflict retries", status: "409 Conflict", err: errors.New("nope"), wantRetryable: true},
+		{name: "too many requests retries", status: "429 Too Many Requests", err: errors.New("nope"), wantRetryable: true},
+		{name: "server error retries", status: "503 Service Unavailable", err: errors.New("nope"), wantRetryable: true},
+		{name: "forbidden is fatal", status: "403 Forbidden", err: errors.New("nope")},
+		{name: "bad request is fatal", status: "400 Bad Request", err: errors.New("nope")},
+		{name: "transport failure retries", err: &url.Error{Op: "Get", Err: errors.New("connection reset")}, wantRetryable: true},
+		{name: "unreadable answer is fatal", err: errors.New("unable to read response body")},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := classifyDeletionProbe("4c53102d", tt.status, tt.err)
+			switch {
+			case tt.wantDone:
+				if got != nil {
+					t.Fatalf("classified as %+v, want the organization treated as gone", got)
+				}
+			case got == nil:
+				t.Fatal("classified as gone, want the poll to keep going or fail")
+			case got.Retryable != tt.wantRetryable:
+				t.Errorf("retryable = %v, want %v (%v)", got.Retryable, tt.wantRetryable, got.Err)
+			}
+		})
 	}
 }

@@ -280,16 +280,30 @@ func (p *SysdigProvider) providerConfigure(ctx context.Context, d *schema.Resour
 	return p.SysdigClient, nil
 }
 
-// checked in order; the second name shipped before the attribute existed and has to keep working
-var orgAPIAsyncEnvVars = []string{"SYSDIG_SECURE_ORG_API_ASYNC", "SYSDIG_ORG_API_ASYNC"}
+// the legacy name keeps its exact-string rule so an upgrade cannot flip anyone from sync to async;
+// the new name is free to accept the conventional forms
+var orgAPIAsyncEnvVars = []struct {
+	name   string
+	strict bool
+}{
+	{name: "SYSDIG_SECURE_ORG_API_ASYNC"},
+	{name: "SYSDIG_ORG_API_ASYNC", strict: true},
+}
 
-// not schema.MultiEnvDefaultFunc: that returns the raw string, and a value the SDK cannot coerce
-// fails provider configuration for everyone already exporting one of these
+// not schema.MultiEnvDefaultFunc: that hands back the raw string, and a value the SDK cannot
+// coerce fails provider configuration for everyone already exporting one of these
 func orgAPIAsyncDefaultFunc() (any, error) {
-	for _, name := range orgAPIAsyncEnvVars {
-		if v := os.Getenv(name); v != "" {
-			enabled, err := strconv.ParseBool(v)
-			return err == nil && enabled, nil
+	for _, env := range orgAPIAsyncEnvVars {
+		v := os.Getenv(env.name)
+		if v == "" {
+			continue
+		}
+		if env.strict {
+			return v == "true", nil
+		}
+		// an unparseable value falls through to the next name rather than deciding on its own
+		if enabled, err := strconv.ParseBool(v); err == nil {
+			return enabled, nil
 		}
 	}
 	return false, nil

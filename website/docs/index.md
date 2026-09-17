@@ -156,10 +156,10 @@ When Secure resources are to be created, this authentication must be in place.
   is accepted instead of waiting for every member account; member accounts then appear
   some time after the apply finishes. Recommended for large cloud organizations, where the
   synchronous call can exceed the API request timeout.
-  <br/>Destroy is also sent asynchronously, but Terraform still waits for the organization
-  to disappear before completing, so that a replacement cannot race a deletion that is
-  still running. That wait is bounded by the resource's delete timeout, which defaults to
-  30 minutes and can be raised with a `timeouts` block.
+  <br/>When this option is enabled, destroy is also sent asynchronously, and Terraform waits
+  for the organization to disappear before completing, so that a replacement cannot race a
+  deletion that is still running. That wait is bounded by the resource's delete timeout,
+  which defaults to 30 minutes and can be raised with a `timeouts` block.
   <br/>It can also be sourced from the `SYSDIG_SECURE_ORG_API_ASYNC` environment variable.
   By default, this is false.<br/><br/>
 

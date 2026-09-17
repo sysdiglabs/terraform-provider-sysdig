@@ -19,6 +19,7 @@ type SysdigClients interface {
 	GetSecureAPIToken() (string, error)
 
 	Configure(context.Context, *schema.ResourceData)
+	orgAPIAsyncEnabled() bool
 	AddCleanupHook(func(context.Context, SysdigClients) error)
 
 	// v2
@@ -367,6 +368,12 @@ func (c *sysdigClients) commonClientV2() (v2.Common, error) {
 	}
 
 	return c.commonV2, err
+}
+
+// the organization resource has to know this to decide whether a delete needs confirming
+func (c *sysdigClients) orgAPIAsyncEnabled() bool {
+	enabled, _ := c.d.Get("sysdig_secure_org_api_async").(bool)
+	return enabled
 }
 
 func (c *sysdigClients) GetClientType() ClientType {
