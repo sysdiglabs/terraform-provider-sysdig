@@ -1,10 +1,11 @@
 package v2
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
-	"os"
 )
 
 const (
@@ -26,12 +27,13 @@ func (c *Client) CreateOrganizationSecure(ctx context.Context, org *Organization
 		return nil, "", err
 	}
 
-	response, err := c.requester.Request(ctx, http.MethodPost, c.organizationsURL(), payload)
+	response, err := c.requester.Request(ctx, http.MethodPost, c.withAsync(c.organizationsURL()), payload)
 	if err != nil {
 		return nil, "", err
 	}
 	defer func() {
-		if dErr := response.Body.Close(); dErr != nil {
+		// a close failure here would discard a successful create and leave the organization untracked
+		if dErr := response.Body.Close(); dErr != nil && err == nil {
 			err = fmt.Errorf("unable to close response body: %w", dErr)
 		}
 	}()
@@ -42,8 +44,7 @@ func (c *Client) CreateOrganizationSecure(ctx context.Context, org *Organization
 	}
 
 	organization = &OrganizationSecure{}
-	err = c.unmarshalCloudauthProto(response.Body, organization)
-	if err != nil {
+	if err = c.unmarshalOrganizationBody(response, organization); err != nil {
 		return nil, "", err
 	}
 	return organization, "", nil
@@ -55,7 +56,8 @@ func (c *Client) GetOrganizationSecure(ctx context.Context, orgID string) (organ
 		return nil, "", err
 	}
 	defer func() {
-		if dErr := response.Body.Close(); dErr != nil {
+		// a close failure must not overwrite a real error, nor fail an otherwise successful call
+		if dErr := response.Body.Close(); dErr != nil && err == nil {
 			err = fmt.Errorf("unable to close response body: %w", dErr)
 		}
 	}()
@@ -74,17 +76,18 @@ func (c *Client) GetOrganizationSecure(ctx context.Context, orgID string) (organ
 }
 
 func (c *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) (errString string, err error) {
-	response, err := c.requester.Request(ctx, http.MethodDelete, c.organizationURL(orgID), nil)
+	response, err := c.requester.Request(ctx, http.MethodDelete, c.withAsync(c.organizationURL(orgID)), nil)
 	if err != nil {
 		return "", err
 	}
 	defer func() {
-		if dErr := response.Body.Close(); dErr != nil {
+		// a close failure must not overwrite a real error, nor fail an otherwise successful call
+		if dErr := response.Body.Close(); dErr != nil && err == nil {
 			err = fmt.Errorf("unable to close response body: %w", dErr)
 		}
 	}()
 
-	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusAccepted {
 		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return errStatus, err
 	}
@@ -97,12 +100,13 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 		return nil, "", err
 	}
 
-	response, err := c.requester.Request(ctx, http.MethodPut, c.organizationURL(orgID), payload)
+	response, err := c.requester.Request(ctx, http.MethodPut, c.withAsync(c.organizationURL(orgID)), payload)
 	if err != nil {
 		return nil, "", err
 	}
 	defer func() {
-		if dErr := response.Body.Close(); dErr != nil {
+		// a close failure must not overwrite a real error, nor fail an otherwise successful call
+		if dErr := response.Body.Close(); dErr != nil && err == nil {
 			err = fmt.Errorf("unable to close response body: %w", dErr)
 		}
 	}()
@@ -113,25 +117,37 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 	}
 
 	organization = &OrganizationSecure{}
-	err = c.unmarshalCloudauthProto(response.Body, organization)
-	if err != nil {
+	if err := c.unmarshalOrganizationBody(response, organization); err != nil {
 		return nil, "", err
 	}
 	return organization, "", nil
 }
 
-func (c *Client) organizationsURL() string {
-	url := fmt.Sprintf(organizationsPath, c.config.url)
-	if os.Getenv("SYSDIG_ORG_API_ASYNC") == "true" {
-		url += "?async=true"
+// an async acknowledgement may carry no body at all; anything else still has to decode cleanly,
+// so a malformed payload is not mistaken for an empty one
+func (c *Client) unmarshalOrganizationBody(response *http.Response, organization *OrganizationSecure) error {
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return err
 	}
-	return url
+	if response.StatusCode == http.StatusAccepted && len(bytes.TrimSpace(body)) == 0 {
+		return nil
+	}
+	return c.unmarshalCloudauthProto(io.NopCloser(bytes.NewReader(body)), organization)
+}
+
+// deliberately not applied to the read: GetOrganizationSecure accepts only 200
+func (c *Client) withAsync(url string) string {
+	if !c.config.secureOrgAPIAsync {
+		return url
+	}
+	return url + "?async=true"
+}
+
+func (c *Client) organizationsURL() string {
+	return fmt.Sprintf(organizationsPath, c.config.url)
 }
 
 func (c *Client) organizationURL(orgID string) string {
-	url := fmt.Sprintf(organizationPath, c.config.url, orgID)
-	if os.Getenv("SYSDIG_ORG_API_ASYNC") == "true" {
-		url += "?async=true"
-	}
-	return url
+	return fmt.Sprintf(organizationPath, c.config.url, orgID)
 }

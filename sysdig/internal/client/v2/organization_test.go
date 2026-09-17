@@ -107,3 +107,77 @@ func TestUnmarshalOrg(t *testing.T) {
 		t.Errorf("expected %v, got %v", expected, unmarshalled)
 	}
 }
+
+func TestOrganizationURLsAsyncFlag(t *testing.T) {
+	t.Parallel()
+
+	const orgID = "4c53102d-6846-447b-bfd1-4c0d5002cddf"
+	const base = "http://localhost/api/cloudauth/v1/organizations"
+
+	for _, async := range []bool{false, true} {
+		t.Run(map[bool]string{false: "disabled", true: "enabled"}[async], func(t *testing.T) {
+			t.Parallel()
+			c := newSysdigClient(WithURL("http://localhost"), WithOrgAPIAsync(async))
+
+			suffix := ""
+			if async {
+				suffix = "?async=true"
+			}
+			if got, want := c.withAsync(c.organizationsURL()), base+suffix; got != want {
+				t.Errorf("collection URL = %q, want %q", got, want)
+			}
+			if got, want := c.withAsync(c.organizationURL(orgID)), base+"/"+orgID+suffix; got != want {
+				t.Errorf("mutation URL = %q, want %q", got, want)
+			}
+			// the read is never wrapped: GetOrganizationSecure accepts only 200
+			if got, want := c.organizationURL(orgID), base+"/"+orgID; got != want {
+				t.Errorf("read URL = %q, want %q", got, want)
+			}
+		})
+	}
+}
+
+// cloudauth answers an async mutation with 202; update discards the body, so an empty one is
+// tolerated there, while create needs an id and so keeps decoding strictly.
+func TestOrganizationAsyncAckWithoutBody(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	defer srv.Close()
+
+	c := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"), WithOrgAPIAsync(true))
+	org := &OrganizationSecure{}
+
+	if _, _, err := c.UpdateOrganizationSecure(context.Background(), "oid", org); err != nil {
+		t.Errorf("UpdateOrganizationSecure on a bodyless 202: %v", err)
+	}
+	// the client only reports transport and decode failures; the missing id is the resource's call
+	created, _, err := c.CreateOrganizationSecure(context.Background(), org)
+	if err != nil {
+		t.Errorf("CreateOrganizationSecure on a bodyless 202: %v", err)
+	} else if created.GetId() != "" {
+		t.Errorf("CreateOrganizationSecure returned id %q, want nothing invented for an empty ack", created.GetId())
+	}
+	// the read keeps rejecting anything but 200, so an unexpected 202 there stays an error
+	if _, _, err := c.GetOrganizationSecure(context.Background(), "oid"); err == nil {
+		t.Error("GetOrganizationSecure on a 202: expected an error")
+	}
+}
+
+// a malformed 202 payload must not be mistaken for an empty acknowledgement
+func TestOrganizationAsyncAckMalformedBody(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusAccepted)
+		_, _ = w.Write([]byte(`{"error":"quota exceeded"`))
+	}))
+	defer srv.Close()
+
+	c := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"), WithOrgAPIAsync(true))
+	if _, _, err := c.UpdateOrganizationSecure(context.Background(), "oid", &OrganizationSecure{}); err == nil {
+		t.Error("UpdateOrganizationSecure on a malformed 202: expected an error")
+	}
+}
