@@ -245,9 +245,12 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 	}
 
 	// the response already carries the persisted organization, so state comes from it rather than
-	// from a second read that would cost another call and could outlive the update timeout
-	if err := secureOrganizationToResourceData(data, updated); err != nil {
-		return diag.FromErr(err)
+	// from a second read that would cost another call and could outlive the update timeout;
+	// an acknowledgement without one would wipe the planned values, which the plan already holds
+	if updated.GetId() != "" {
+		if err := secureOrganizationToResourceData(data, updated); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return nil

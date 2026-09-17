@@ -494,3 +494,37 @@ func TestOrganizationDeleteProbeClassification(t *testing.T) {
 		})
 	}
 }
+
+// The client tolerates an acknowledgement without a body, so Update must not map that zero value
+// into state: it would clear the management account and the collections the plan just set, which
+// Terraform reports as an inconsistent result rather than as the server's answer.
+func TestOrganizationUpdateKeepsStateOnBodylessAck(t *testing.T) {
+	const managementAccountID = "58ca66a5-ac87-497b-a501-7a4c934b3017"
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	defer srv.Close()
+
+	clearOrgAPIAsyncEnv(t)
+	clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
+		"sysdig_secure_url":       srv.URL,
+		"sysdig_secure_api_token": "fake-token",
+		orgAPIAsyncKey:            true,
+	})}
+	data := schema.TestResourceDataRaw(t, resourceSysdigSecureOrganization().Schema, map[string]any{
+		SchemaManagementAccountID: managementAccountID,
+		SchemaAutomaticOnboarding: true,
+	})
+	data.SetId("4c53102d")
+
+	if diags := resourceSysdigSecureOrganizationUpdate(context.Background(), data, clients); diags.HasError() {
+		t.Fatalf("update returned an error: %v", diags)
+	}
+	if got := data.Get(SchemaManagementAccountID); got != managementAccountID {
+		t.Errorf("management account id = %q, want the planned value kept", got)
+	}
+	if got := data.Get(SchemaAutomaticOnboarding); got != true {
+		t.Errorf("automatic onboarding = %v, want the planned value kept", got)
+	}
+}
