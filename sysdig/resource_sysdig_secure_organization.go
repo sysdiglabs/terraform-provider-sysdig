@@ -12,6 +12,7 @@ import (
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -137,7 +138,7 @@ func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.Re
 
 	errStatus, err := client.DeleteOrganizationSecure(ctx, data.Id())
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
+		if organizationIsGone(errStatus) {
 			return nil
 		}
 		return diag.Errorf("Error deleting resource: %s %s", errStatus, err)
@@ -162,30 +163,55 @@ func waitForOrganizationDeletion(ctx context.Context, client v2.OrganizationSecu
 			return retry.RetryableError(fmt.Errorf("organization %s has not been deleted yet; the deletion may also have failed server side", orgID))
 		}
 
-		return classifyDeletionProbe(orgID, errStatus, err)
+		return classifyDeletionProbe(ctx, orgID, errStatus, err)
 	})
+}
+
+// a gone organization is reported as either of these, and both mean there is nothing left to act on
+func organizationIsGone(errStatus string) bool {
+	code := statusCodeFromStatus(errStatus)
+	return code == http.StatusNotFound || code == http.StatusGone
 }
 
 // nil means the organization is gone; anything retryable is worth another poll, and everything
 // else has to be reported instead of waiting out the whole delete timeout.
-func classifyDeletionProbe(orgID, errStatus string, err error) *retry.RetryError {
-	switch code := statusCodeFromStatus(errStatus); {
-	case code == http.StatusNotFound || code == http.StatusGone:
-		return nil
-	// 409 is what the transport itself retries, so it is transient here too
-	case code == http.StatusConflict || code == http.StatusTooManyRequests || code >= 500:
+func classifyDeletionProbe(ctx context.Context, orgID, errStatus string, err error) *retry.RetryError {
+	retryable := func() *retry.RetryError {
 		return retry.RetryableError(fmt.Errorf("confirming deletion of organization %s: %s %w", orgID, errStatus, err))
-	case code >= 400:
+	}
+	fatal := func() *retry.RetryError {
 		return retry.NonRetryableError(fmt.Errorf("confirming deletion of organization %s: %s %w", orgID, errStatus, err))
 	}
 
-	// no status at all: a transport failure can pass, anything else (an unreadable body, say)
-	// will not fix itself by waiting out the delete timeout
+	if organizationIsGone(errStatus) {
+		return nil
+	}
+	if code := statusCodeFromStatus(errStatus); code != 0 {
+		switch {
+		// the same set the transport itself retries: 409, 429 and 5xx other than 501
+		case code == http.StatusConflict, code == http.StatusTooManyRequests:
+			return retryable()
+		case code >= 500:
+			if code == http.StatusNotImplemented {
+				return fatal()
+			}
+			return retryable()
+		case code >= 400:
+			return fatal()
+		}
+		// an unexpected 2xx or 3xx still means the organization answered, so keep waiting for it
+		return retryable()
+	}
+
+	// without a status the failure is transport level or a body that could not be read; only the
+	// deterministic ones are hopeless, and the transport already knows which those are
 	var urlErr *url.Error
 	if errors.As(err, &urlErr) {
-		return retry.RetryableError(fmt.Errorf("confirming deletion of organization %s: %w", orgID, err))
+		if transient, _ := retryablehttp.DefaultRetryPolicy(ctx, nil, urlErr); !transient {
+			return fatal()
+		}
 	}
-	return retry.NonRetryableError(fmt.Errorf("confirming deletion of organization %s: %w", orgID, err))
+	return retryable()
 }
 
 // the organization endpoints report a failure as an HTTP status line plus a plain error, so the
@@ -210,7 +236,7 @@ func resourceSysdigSecureOrganizationRead(ctx context.Context, data *schema.Reso
 
 	org, errStatus, err := client.GetOrganizationSecure(ctx, data.Id())
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
+		if organizationIsGone(errStatus) {
 			data.SetId("")
 			return nil
 		}
@@ -238,7 +264,7 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 	if err != nil {
 		// clearing the id here instead would hand Terraform an empty state for an update it
 		// planned, which it rejects as an inconsistent result
-		if strings.Contains(errStatus, "404") {
+		if organizationIsGone(errStatus) {
 			return diag.Errorf("Error updating resource: organization %s no longer exists", orgID)
 		}
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
@@ -246,8 +272,8 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 
 	// the response already carries the persisted organization, so state comes from it rather than
 	// from a second read that would cost another call and could outlive the update timeout;
-	// an acknowledgement without one would wipe the planned values, which the plan already holds
-	if updated.GetId() != "" {
+	// a bare acknowledgement lacks the required management account and would wipe planned values
+	if updated.GetId() != "" && updated.GetManagementAccountId() != "" {
 		if err := secureOrganizationToResourceData(data, updated); err != nil {
 			return diag.FromErr(err)
 		}

@@ -2,6 +2,8 @@ package sysdig
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +13,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 )
@@ -33,6 +36,19 @@ func providerData(t *testing.T, config map[string]any) *schema.ResourceData {
 
 // Config has to beat the environment, and the diff layer only coerces to TypeBool after the
 // default func runs, so an explicit false could otherwise lose to the variable.
+// TestResourceDataRaw does not attach the resource's Timeouts, so data.Timeout() would fall back
+// to the SDK's generic default and a regression in the delete budget would go unnoticed. Going
+// through the resource itself pins the real value into whatever the code under test reads.
+func organizationData(t *testing.T, id string, attrs map[string]string) *schema.ResourceData {
+	t.Helper()
+	res := resourceSysdigSecureOrganization()
+	data := res.Data(&terraform.InstanceState{ID: id, Attributes: attrs})
+	if got, want := data.Timeout(schema.TimeoutDelete), 30*time.Minute; got != want {
+		t.Fatalf("delete timeout the wait will use = %v, want %v", got, want)
+	}
+	return data
+}
+
 func TestProviderOrgAPIAsync(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -242,8 +258,7 @@ func TestOrganizationDeleteWaitsForRemoval(t *testing.T) {
 		orgAPIAsyncKey:            true,
 	}
 	clients := &sysdigClients{ctx: context.Background(), d: providerData(t, config)}
-	data := schema.TestResourceDataRaw(t, resourceSysdigSecureOrganization().Schema, map[string]any{})
-	data.SetId(orgID)
+	data := organizationData(t, orgID, nil)
 
 	if diags := resourceSysdigSecureOrganizationDelete(context.Background(), data, clients); diags.HasError() {
 		t.Fatalf("delete returned an error: %v", diags)
@@ -446,8 +461,7 @@ func TestOrganizationDeleteSkipsWaitWhenSync(t *testing.T) {
 		"sysdig_secure_api_token": "fake-token",
 		orgAPIAsyncKey:            false,
 	})}
-	data := schema.TestResourceDataRaw(t, resourceSysdigSecureOrganization().Schema, map[string]any{})
-	data.SetId("4c53102d")
+	data := organizationData(t, "4c53102d", nil)
 
 	if diags := resourceSysdigSecureOrganizationDelete(context.Background(), data, clients); diags.HasError() {
 		t.Fatalf("delete returned an error: %v", diags)
@@ -472,15 +486,20 @@ func TestOrganizationDeleteProbeClassification(t *testing.T) {
 		{name: "conflict retries", status: "409 Conflict", err: errors.New("nope"), wantRetryable: true},
 		{name: "too many requests retries", status: "429 Too Many Requests", err: errors.New("nope"), wantRetryable: true},
 		{name: "server error retries", status: "503 Service Unavailable", err: errors.New("nope"), wantRetryable: true},
+		{name: "not implemented is fatal", status: "501 Not Implemented", err: errors.New("nope")},
+		{name: "unexpected success keeps waiting", status: "202 Accepted", err: errors.New("nope"), wantRetryable: true},
 		{name: "forbidden is fatal", status: "403 Forbidden", err: errors.New("nope")},
 		{name: "bad request is fatal", status: "400 Bad Request", err: errors.New("nope")},
 		{name: "transport failure retries", err: &url.Error{Op: "Get", Err: errors.New("connection reset")}, wantRetryable: true},
-		{name: "unreadable answer is fatal", err: errors.New("unable to read response body")},
+		{name: "bad scheme is fatal", err: &url.Error{Op: "Get", Err: errors.New(`unsupported protocol scheme "foo"`)}},
+		{name: "untrusted certificate is fatal", err: &url.Error{Op: "Get", Err: &tls.CertificateVerificationError{Err: x509.UnknownAuthorityError{}}}},
+		// a body that could not be read says nothing about the organization, and often clears
+		{name: "unreadable answer keeps waiting", err: errors.New("unable to read response body"), wantRetryable: true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := classifyDeletionProbe("4c53102d", tt.status, tt.err)
+			got := classifyDeletionProbe(context.Background(), "4c53102d", tt.status, tt.err)
 			switch {
 			case tt.wantDone:
 				if got != nil {
@@ -526,5 +545,107 @@ func TestOrganizationUpdateKeepsStateOnBodylessAck(t *testing.T) {
 	}
 	if got := data.Get(SchemaAutomaticOnboarding); got != true {
 		t.Errorf("automatic onboarding = %v, want the planned value kept", got)
+	}
+}
+
+// An id on its own is still only an acknowledgement: the management account is required, so a
+// response without it cannot be the persisted organization and must not reach state.
+func TestOrganizationUpdateKeepsStateOnPartialAck(t *testing.T) {
+	const managementAccountID = "58ca66a5-ac87-497b-a501-7a4c934b3017"
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusAccepted)
+		_, _ = w.Write([]byte(`{"id":"4c53102d"}`))
+	}))
+	defer srv.Close()
+
+	clearOrgAPIAsyncEnv(t)
+	clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
+		"sysdig_secure_url":       srv.URL,
+		"sysdig_secure_api_token": "fake-token",
+		orgAPIAsyncKey:            true,
+	})}
+	data := organizationData(t, "4c53102d", map[string]string{
+		SchemaManagementAccountID: managementAccountID,
+		SchemaAutomaticOnboarding: "true",
+	})
+
+	if diags := resourceSysdigSecureOrganizationUpdate(context.Background(), data, clients); diags.HasError() {
+		t.Fatalf("update returned an error: %v", diags)
+	}
+	if got := data.Get(SchemaManagementAccountID); got != managementAccountID {
+		t.Errorf("management account id = %q, want the planned value kept", got)
+	}
+	if got := data.Get(SchemaAutomaticOnboarding); got != true {
+		t.Errorf("automatic onboarding = %v, want the planned value kept", got)
+	}
+}
+
+// A 202 on delete is only meaningful when async was requested. Accepting it with the flag off
+// would end the destroy on an acknowledgement that nothing is waiting for.
+func TestOrganizationDeleteAcceptsAckOnlyWhenAsync(t *testing.T) {
+	for _, tt := range []struct {
+		name      string
+		async     bool
+		wantError bool
+	}{
+		{name: "async accepts the acknowledgement", async: true},
+		{name: "sync rejects it", wantError: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method == http.MethodGet {
+					w.WriteHeader(http.StatusNotFound) // already gone, so the wait ends at once
+					return
+				}
+				w.WriteHeader(http.StatusAccepted)
+			}))
+			defer srv.Close()
+
+			clearOrgAPIAsyncEnv(t)
+			clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
+				"sysdig_secure_url":       srv.URL,
+				"sysdig_secure_api_token": "fake-token",
+				orgAPIAsyncKey:            tt.async,
+			})}
+			data := organizationData(t, "4c53102d", nil)
+
+			diags := resourceSysdigSecureOrganizationDelete(context.Background(), data, clients)
+			if got := diags.HasError(); got != tt.wantError {
+				t.Fatalf("delete error = %v, want %v (%v)", got, tt.wantError, diags)
+			}
+		})
+	}
+}
+
+// 410 means the organization is gone just as 404 does, and the deletion poll already knows that;
+// Read and Delete have to agree, or a gone organization stays in state and a destroy errors out.
+func TestOrganizationGoneIsHandledForBothStatuses(t *testing.T) {
+	for _, status := range []int{http.StatusNotFound, http.StatusGone} {
+		t.Run(http.StatusText(status), func(t *testing.T) {
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(status)
+			}))
+			defer srv.Close()
+
+			clearOrgAPIAsyncEnv(t)
+			clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
+				"sysdig_secure_url":       srv.URL,
+				"sysdig_secure_api_token": "fake-token",
+			})}
+
+			read := organizationData(t, "4c53102d", nil)
+			if diags := resourceSysdigSecureOrganizationRead(context.Background(), read, clients); diags.HasError() {
+				t.Fatalf("read returned an error: %v", diags)
+			}
+			if read.Id() != "" {
+				t.Errorf("id = %q, want empty so the resource leaves state", read.Id())
+			}
+
+			del := organizationData(t, "4c53102d", nil)
+			if diags := resourceSysdigSecureOrganizationDelete(context.Background(), del, clients); diags.HasError() {
+				t.Errorf("delete returned an error for an organization that is already gone: %v", diags)
+			}
+		})
 	}
 }

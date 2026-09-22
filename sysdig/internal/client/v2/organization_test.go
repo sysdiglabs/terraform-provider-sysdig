@@ -4,6 +4,8 @@ package v2
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -179,5 +181,64 @@ func TestOrganizationAsyncAckMalformedBody(t *testing.T) {
 	c := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"), WithOrgAPIAsync(true))
 	if _, _, err := c.UpdateOrganizationSecure(context.Background(), "oid", &OrganizationSecure{}); err == nil {
 		t.Error("UpdateOrganizationSecure on a malformed 202: expected an error")
+	}
+}
+
+// The delete only answers 202 when async was requested, so accepting it with the option off would
+// let a destroy finish on an acknowledgement while the resource skips the confirmation wait.
+func TestOrganizationDeleteAckRequiresAsync(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	defer srv.Close()
+
+	sync := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"))
+	if _, err := sync.DeleteOrganizationSecure(context.Background(), "oid"); err == nil {
+		t.Error("DeleteOrganizationSecure on a 202 without async: expected an error")
+	}
+
+	async := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"), WithOrgAPIAsync(true))
+	if _, err := async.DeleteOrganizationSecure(context.Background(), "oid"); err != nil {
+		t.Errorf("DeleteOrganizationSecure on a 202 with async: %v", err)
+	}
+}
+
+// a body whose Close fails after the response was already read
+type closeFailingRequester struct {
+	status int
+	body   string
+}
+
+func (r closeFailingRequester) CurrentTeamID(_ context.Context) (int, error) { return 0, nil }
+
+func (r closeFailingRequester) Request(_ context.Context, _ string, _ string, _ io.Reader) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: r.status,
+		Status:     fmt.Sprintf("%d %s", r.status, http.StatusText(r.status)),
+		Body:       closeFailingBody{Reader: strings.NewReader(r.body)},
+	}, nil
+}
+
+type closeFailingBody struct{ io.Reader }
+
+func (closeFailingBody) Close() error { return errors.New("connection reset by peer") }
+
+// A close failure arrives after the organization has already been created server side. Reporting
+// it would stop the resource from recording the id, leaving the organization untracked and
+// duplicated on the next apply.
+func TestOrganizationCloseFailureDoesNotDiscardCreate(t *testing.T) {
+	t.Parallel()
+
+	c := newSysdigClient(WithURL("http://localhost"), WithToken("fake-token"))
+	c.requester = closeFailingRequester{status: http.StatusOK, body: `{"id":"4c53102d"}`}
+
+	created, _, err := c.CreateOrganizationSecure(context.Background(), &OrganizationSecure{})
+	if err != nil {
+		t.Fatalf("CreateOrganizationSecure: %v", err)
+	}
+	if created.GetId() != "4c53102d" {
+		t.Errorf("id = %q, want the created organization to come back so the resource can track it", created.GetId())
 	}
 }

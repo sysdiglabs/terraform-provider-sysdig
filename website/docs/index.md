@@ -160,7 +160,10 @@ When Secure resources are to be created, this authentication must be in place.
   for the organization to disappear before completing, so that a replacement cannot race a
   deletion that is still running. That wait is bounded by the resource's delete timeout,
   which defaults to 30 minutes and can be raised with a `timeouts` block.
-  <br/>It can also be sourced from the `SYSDIG_SECURE_ORG_API_ASYNC` environment variable.
+  <br/>It can also be sourced from the `SYSDIG_SECURE_ORG_API_ASYNC` environment variable, which
+  accepts the conventional boolean forms (`true`, `1`, `TRUE`). The older `SYSDIG_ORG_API_ASYNC`
+  variable is still read as well, but only the exact value `true` enables the option there, and it
+  no longer applies to reads. The attribute takes precedence over both.
   By default, this is false.<br/><br/>
 
 

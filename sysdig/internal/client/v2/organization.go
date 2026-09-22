@@ -31,12 +31,9 @@ func (c *Client) CreateOrganizationSecure(ctx context.Context, org *Organization
 	if err != nil {
 		return nil, "", err
 	}
-	defer func() {
-		// a close failure here would discard a successful create and leave the organization untracked
-		if dErr := response.Body.Close(); dErr != nil && err == nil {
-			err = fmt.Errorf("unable to close response body: %w", dErr)
-		}
-	}()
+	// a close failure says nothing the caller can act on, and returning it would discard a
+	// successful call: a created organization would exist server side with nothing tracking it
+	defer func() { _ = response.Body.Close() }()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
 		errStatus, err := c.ErrorAndStatusFromResponse(response)
@@ -55,12 +52,9 @@ func (c *Client) GetOrganizationSecure(ctx context.Context, orgID string) (organ
 	if err != nil {
 		return nil, "", err
 	}
-	defer func() {
-		// a close failure must not overwrite a real error, nor fail an otherwise successful call
-		if dErr := response.Body.Close(); dErr != nil && err == nil {
-			err = fmt.Errorf("unable to close response body: %w", dErr)
-		}
-	}()
+	// a close failure says nothing the caller can act on, and returning it would discard a
+	// successful call: a created organization would exist server side with nothing tracking it
+	defer func() { _ = response.Body.Close() }()
 
 	if response.StatusCode != http.StatusOK {
 		errStatus, err := c.ErrorAndStatusFromResponse(response)
@@ -80,14 +74,14 @@ func (c *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) (er
 	if err != nil {
 		return "", err
 	}
-	defer func() {
-		// a close failure must not overwrite a real error, nor fail an otherwise successful call
-		if dErr := response.Body.Close(); dErr != nil && err == nil {
-			err = fmt.Errorf("unable to close response body: %w", dErr)
-		}
-	}()
+	// a close failure says nothing the caller can act on, and returning it would discard a
+	// successful call: a created organization would exist server side with nothing tracking it
+	defer func() { _ = response.Body.Close() }()
 
-	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusAccepted {
+	// 202 is only expected when async was requested: accepting it otherwise would let a destroy
+	// return on an acknowledgement while the resource, seeing the flag off, skips the wait
+	acknowledged := c.config.secureOrgAPIAsync && response.StatusCode == http.StatusAccepted
+	if !acknowledged && response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
 		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return errStatus, err
 	}
@@ -104,12 +98,9 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 	if err != nil {
 		return nil, "", err
 	}
-	defer func() {
-		// a close failure must not overwrite a real error, nor fail an otherwise successful call
-		if dErr := response.Body.Close(); dErr != nil && err == nil {
-			err = fmt.Errorf("unable to close response body: %w", dErr)
-		}
-	}()
+	// a close failure says nothing the caller can act on, and returning it would discard a
+	// successful call: a created organization would exist server side with nothing tracking it
+	defer func() { _ = response.Body.Close() }()
 
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
 		errStatus, err := c.ErrorAndStatusFromResponse(response)
