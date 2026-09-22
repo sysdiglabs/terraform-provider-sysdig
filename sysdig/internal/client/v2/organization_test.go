@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"testing/iotest"
 
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
@@ -166,6 +167,53 @@ func TestOrganizationAsyncAckWithoutBody(t *testing.T) {
 	if _, _, err := c.GetOrganizationSecure(context.Background(), "oid"); err == nil {
 		t.Error("GetOrganizationSecure on a 202: expected an error")
 	}
+
+	// without async the same answer is not an acknowledgement, and tolerating it would report a
+	// synchronous update that returned nothing as a success
+	sync := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"))
+	if _, _, err := sync.UpdateOrganizationSecure(context.Background(), "oid", org); err == nil {
+		t.Error("UpdateOrganizationSecure on a bodyless 202 without async: expected an error")
+	}
+	if _, _, err := sync.CreateOrganizationSecure(context.Background(), org); err == nil {
+		t.Error("CreateOrganizationSecure on a bodyless 202 without async: expected an error")
+	}
+}
+
+// A body that arrived whole but does not parse cannot be fixed by asking again, while one that
+// failed to arrive can; the deletion poll relies on telling those apart.
+func TestOrganizationMalformedBodyIsTyped(t *testing.T) {
+	t.Parallel()
+
+	c := newSysdigClient(WithURL("http://localhost"), WithToken("fake-token"))
+	c.requester = closeFailingRequester{status: http.StatusOK, body: `{"id":`}
+
+	_, _, err := c.GetOrganizationSecure(context.Background(), "oid")
+	var malformed *MalformedBodyError
+	if !errors.As(err, &malformed) {
+		t.Fatalf("error = %v (%T), want it marked as a body that will not parse", err, err)
+	}
+
+	c.requester = unreadableRequester{}
+	_, _, err = c.GetOrganizationSecure(context.Background(), "oid")
+	if err == nil {
+		t.Fatal("expected an error when the body cannot be read")
+	}
+	if errors.As(err, &malformed) {
+		t.Errorf("error = %v, want a read failure left retryable rather than marked malformed", err)
+	}
+}
+
+// a body that fails midway through, as a truncated response does
+type unreadableRequester struct{}
+
+func (unreadableRequester) CurrentTeamID(_ context.Context) (int, error) { return 0, nil }
+
+func (unreadableRequester) Request(_ context.Context, _ string, _ string, _ io.Reader) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Status:     "200 OK",
+		Body:       closeFailingBody{Reader: iotest.TimeoutReader(strings.NewReader(`{"id":"4c53102d"}`))},
+	}, nil
 }
 
 // a malformed 202 payload must not be mistaken for an empty acknowledgement

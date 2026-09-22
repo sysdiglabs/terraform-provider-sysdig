@@ -3,6 +3,7 @@ package v2
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -62,8 +63,7 @@ func (c *Client) GetOrganizationSecure(ctx context.Context, orgID string) (organ
 	}
 
 	organization = &OrganizationSecure{}
-	err = c.unmarshalCloudauthProto(response.Body, organization)
-	if err != nil {
+	if err = c.unmarshalOrganizationBody(response, organization); err != nil {
 		return nil, "", err
 	}
 	return organization, "", nil
@@ -116,15 +116,33 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 
 // an async acknowledgement may carry no body at all; anything else still has to decode cleanly,
 // so a malformed payload is not mistaken for an empty one
+// MalformedBodyError marks a body that arrived whole but does not parse. Retrying will not make
+// it parse, unlike a body that failed to arrive, which is reported as the plain read error.
+type MalformedBodyError struct{ Err error }
+
+func (e *MalformedBodyError) Error() string {
+	return fmt.Sprintf("unable to parse the organization in the response: %v", e.Err)
+}
+
+func (e *MalformedBodyError) Unwrap() error { return e.Err }
+
 func (c *Client) unmarshalOrganizationBody(response *http.Response, organization *OrganizationSecure) error {
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return err
 	}
 	if response.StatusCode == http.StatusAccepted && len(bytes.TrimSpace(body)) == 0 {
+		// tolerating this without having asked for async would report a synchronous call, which
+		// answers with the organization, as a success that carries nothing
+		if !c.config.secureOrgAPIAsync {
+			return errors.New("the organization API acknowledged the request with no body while async was not requested")
+		}
 		return nil
 	}
-	return c.unmarshalCloudauthProto(io.NopCloser(bytes.NewReader(body)), organization)
+	if err := c.unmarshalCloudauthProto(io.NopCloser(bytes.NewReader(body)), organization); err != nil {
+		return &MalformedBodyError{Err: err}
+	}
+	return nil
 }
 
 // deliberately not applied to the read: GetOrganizationSecure accepts only 200

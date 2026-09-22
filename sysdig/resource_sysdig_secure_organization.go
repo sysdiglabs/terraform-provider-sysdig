@@ -203,8 +203,13 @@ func classifyDeletionProbe(ctx context.Context, orgID, errStatus string, err err
 		return retryable()
 	}
 
-	// without a status the failure is transport level or a body that could not be read; only the
-	// deterministic ones are hopeless, and the transport already knows which those are
+	// without a status the failure is transport level or a body problem; only the deterministic
+	// ones are hopeless: a body that does not parse will not parse on the next attempt either,
+	// and for the transport the same classification the request layer uses already knows which
+	var malformed *v2.MalformedBodyError
+	if errors.As(err, &malformed) {
+		return fatal()
+	}
 	var urlErr *url.Error
 	if errors.As(err, &urlErr) {
 		if transient, _ := retryablehttp.DefaultRetryPolicy(ctx, nil, urlErr); !transient {

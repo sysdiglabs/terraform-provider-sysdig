@@ -495,6 +495,8 @@ func TestOrganizationDeleteProbeClassification(t *testing.T) {
 		{name: "untrusted certificate is fatal", err: &url.Error{Op: "Get", Err: &tls.CertificateVerificationError{Err: x509.UnknownAuthorityError{}}}},
 		// a body that could not be read says nothing about the organization, and often clears
 		{name: "unreadable answer keeps waiting", err: errors.New("unable to read response body"), wantRetryable: true},
+		// one that arrived whole and does not parse will not parse on the next attempt either
+		{name: "malformed answer is fatal", err: &v2.MalformedBodyError{Err: errors.New("unexpected EOF")}},
 	}
 
 	for _, tt := range tests {
@@ -647,5 +649,26 @@ func TestOrganizationGoneIsHandledForBothStatuses(t *testing.T) {
 				t.Errorf("delete returned an error for an organization that is already gone: %v", diags)
 			}
 		})
+	}
+}
+
+// A malformed confirmation read has to be reported at once rather than polled for the whole
+// delete timeout, since asking again cannot make the same body parse.
+func TestOrganizationDeleteWaitStopsOnMalformedAnswer(t *testing.T) {
+	var gets int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		gets++
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"id":`))
+	}))
+	defer srv.Close()
+
+	client := v2.NewSysdigSecure(v2.WithURL(srv.URL), v2.WithToken("fake-token"))
+	err := waitForOrganizationDeletion(context.Background(), client, "4c53102d", 10*time.Second)
+	if err == nil {
+		t.Fatal("expected the wait to report the malformed answer")
+	}
+	if gets != 1 {
+		t.Errorf("issued %d reads, want the failure reported without retrying", gets)
 	}
 }
