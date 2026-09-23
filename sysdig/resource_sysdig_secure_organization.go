@@ -154,16 +154,24 @@ func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.Re
 	return nil
 }
 
+// a confirmation read carries the transport's own retries, which back off as far as 30 seconds
+// each; without a cap one unlucky probe spends that inside a single tick of the wait, burning the
+// delete budget on backoff rather than on checking whether the cascade finished
+const organizationDeletionProbeTimeout = 10 * time.Second
+
 // the timeout is passed in rather than read from the resource so it can be exercised in tests;
 // the SDK has already put the same deadline on ctx
 func waitForOrganizationDeletion(ctx context.Context, client v2.OrganizationSecureInterface, orgID string, timeout time.Duration) error {
 	return retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		_, errStatus, err := client.GetOrganizationSecure(ctx, orgID)
+		probeCtx, cancel := context.WithTimeout(ctx, organizationDeletionProbeTimeout)
+		defer cancel()
+
+		_, errStatus, err := client.GetOrganizationSecure(probeCtx, orgID)
 		if err == nil {
 			return retry.RetryableError(fmt.Errorf("organization %s has not been deleted yet; the deletion may also have failed server side", orgID))
 		}
 
-		return classifyDeletionProbe(ctx, orgID, errStatus, err)
+		return classifyDeletionProbe(orgID, errStatus, err)
 	})
 }
 
@@ -175,7 +183,7 @@ func organizationIsGone(errStatus string) bool {
 
 // nil means the organization is gone; anything retryable is worth another poll, and everything
 // else has to be reported instead of waiting out the whole delete timeout.
-func classifyDeletionProbe(ctx context.Context, orgID, errStatus string, err error) *retry.RetryError {
+func classifyDeletionProbe(orgID, errStatus string, err error) *retry.RetryError {
 	retryable := func() *retry.RetryError {
 		return retry.RetryableError(fmt.Errorf("confirming deletion of organization %s: %s %w", orgID, errStatus, err))
 	}
@@ -212,7 +220,9 @@ func classifyDeletionProbe(ctx context.Context, orgID, errStatus string, err err
 	}
 	var urlErr *url.Error
 	if errors.As(err, &urlErr) {
-		if transient, _ := retryablehttp.DefaultRetryPolicy(ctx, nil, urlErr); !transient {
+		// asked with a fresh context on purpose: the wait's own deadline, once expired, makes the
+		// policy report any error as permanent and the failure would blame the network instead
+		if transient, _ := retryablehttp.DefaultRetryPolicy(context.Background(), nil, urlErr); !transient {
 			return fatal()
 		}
 	}
@@ -275,10 +285,10 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 
-	// the response already carries the persisted organization, so state comes from it rather than
-	// from a second read that would cost another call and could outlive the update timeout;
-	// a bare acknowledgement lacks the required management account and would wipe planned values
-	if updated.GetId() != "" && updated.GetManagementAccountId() != "" {
+	// a persisted organization comes back from the update itself, so state comes from it rather
+	// than from a second read that would cost another call and could outlive the update timeout;
+	// an acknowledgement carries no organization, and the plan already holds what was sent
+	if updated != nil {
 		if err := secureOrganizationToResourceData(data, updated); err != nil {
 			return diag.FromErr(err)
 		}

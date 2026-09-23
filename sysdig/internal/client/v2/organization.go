@@ -36,13 +36,15 @@ func (c *Client) CreateOrganizationSecure(ctx context.Context, org *Organization
 	// successful call: a created organization would exist server side with nothing tracking it
 	defer func() { _ = response.Body.Close() }()
 
-	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
+	acknowledged := c.config.secureOrgAPIAsync && response.StatusCode == http.StatusAccepted
+	if !acknowledged && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
 		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
 
+	// the create still has to read the body: without the id there is nothing to track
 	organization = &OrganizationSecure{}
-	if err = c.unmarshalOrganizationBody(response, organization); err != nil {
+	if _, err = c.unmarshalOrganizationBody(response, organization, c.config.secureOrgAPIAsync); err != nil {
 		return nil, "", err
 	}
 	return organization, "", nil
@@ -63,7 +65,7 @@ func (c *Client) GetOrganizationSecure(ctx context.Context, orgID string) (organ
 	}
 
 	organization = &OrganizationSecure{}
-	if err = c.unmarshalOrganizationBody(response, organization); err != nil {
+	if _, err = c.unmarshalOrganizationBody(response, organization, false); err != nil {
 		return nil, "", err
 	}
 	return organization, "", nil
@@ -102,20 +104,26 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 	// successful call: a created organization would exist server side with nothing tracking it
 	defer func() { _ = response.Body.Close() }()
 
-	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
+	acknowledged := c.config.secureOrgAPIAsync && response.StatusCode == http.StatusAccepted
+	if !acknowledged && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
 		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
 
 	organization = &OrganizationSecure{}
-	if err := c.unmarshalOrganizationBody(response, organization); err != nil {
+	var decoded bool
+	decoded, err = c.unmarshalOrganizationBody(response, organization, c.config.secureOrgAPIAsync)
+	if err != nil {
 		return nil, "", err
+	}
+	// an acknowledgement says the update was accepted, not what was persisted: reporting no
+	// organization keeps the caller on what it planned instead of on a possibly partial body
+	if acknowledged || !decoded {
+		return nil, "", nil
 	}
 	return organization, "", nil
 }
 
-// an async acknowledgement may carry no body at all; anything else still has to decode cleanly,
-// so a malformed payload is not mistaken for an empty one
 // MalformedBodyError marks a body that arrived whole but does not parse. Retrying will not make
 // it parse, unlike a body that failed to arrive, which is reported as the plain read error.
 type MalformedBodyError struct{ Err error }
@@ -126,23 +134,24 @@ func (e *MalformedBodyError) Error() string {
 
 func (e *MalformedBodyError) Unwrap() error { return e.Err }
 
-func (c *Client) unmarshalOrganizationBody(response *http.Response, organization *OrganizationSecure) error {
+// allowEmptyAck belongs to the caller, not to the status: an async mutation may be acknowledged
+// with nothing whichever 2xx carries it, while a read always needs the organization itself. The
+// first return says whether an organization was decoded at all.
+func (c *Client) unmarshalOrganizationBody(response *http.Response, organization *OrganizationSecure, allowEmptyAck bool) (bool, error) {
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return err
+		return false, err
 	}
-	if response.StatusCode == http.StatusAccepted && len(bytes.TrimSpace(body)) == 0 {
-		// tolerating this without having asked for async would report a synchronous call, which
-		// answers with the organization, as a success that carries nothing
-		if !c.config.secureOrgAPIAsync {
-			return errors.New("the organization API acknowledged the request with no body while async was not requested")
+	if len(bytes.TrimSpace(body)) == 0 {
+		if allowEmptyAck {
+			return false, nil
 		}
-		return nil
+		return false, errors.New("the organization API answered with no body")
 	}
 	if err := c.unmarshalCloudauthProto(io.NopCloser(bytes.NewReader(body)), organization); err != nil {
-		return &MalformedBodyError{Err: err}
+		return false, &MalformedBodyError{Err: err}
 	}
-	return nil
+	return true, nil
 }
 
 // deliberately not applied to the read: GetOrganizationSecure accepts only 200

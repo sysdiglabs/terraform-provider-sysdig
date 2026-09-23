@@ -501,7 +501,7 @@ func TestOrganizationDeleteProbeClassification(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := classifyDeletionProbe(context.Background(), "4c53102d", tt.status, tt.err)
+			got := classifyDeletionProbe("4c53102d", tt.status, tt.err)
 			switch {
 			case tt.wantDone:
 				if got != nil {
@@ -550,14 +550,14 @@ func TestOrganizationUpdateKeepsStateOnBodylessAck(t *testing.T) {
 	}
 }
 
-// An id on its own is still only an acknowledgement: the management account is required, so a
-// response without it cannot be the persisted organization and must not reach state.
+// An acknowledgement is not a statement of final state, whatever it happens to carry: a body with
+// an id and a management account but nothing else must not wipe the collections from state.
 func TestOrganizationUpdateKeepsStateOnPartialAck(t *testing.T) {
 	const managementAccountID = "58ca66a5-ac87-497b-a501-7a4c934b3017"
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusAccepted)
-		_, _ = w.Write([]byte(`{"id":"4c53102d"}`))
+		_, _ = w.Write([]byte(`{"id":"4c53102d","managementAccountId":"` + managementAccountID + `"}`))
 	}))
 	defer srv.Close()
 
@@ -568,8 +568,10 @@ func TestOrganizationUpdateKeepsStateOnPartialAck(t *testing.T) {
 		orgAPIAsyncKey:            true,
 	})}
 	data := organizationData(t, "4c53102d", map[string]string{
-		SchemaManagementAccountID: managementAccountID,
-		SchemaAutomaticOnboarding: "true",
+		SchemaManagementAccountID:   managementAccountID,
+		SchemaAutomaticOnboarding:   "true",
+		"organizational_unit_ids.#": "1",
+		"organizational_unit_ids.0": "ou-1234",
 	})
 
 	if diags := resourceSysdigSecureOrganizationUpdate(context.Background(), data, clients); diags.HasError() {
@@ -580,6 +582,9 @@ func TestOrganizationUpdateKeepsStateOnPartialAck(t *testing.T) {
 	}
 	if got := data.Get(SchemaAutomaticOnboarding); got != true {
 		t.Errorf("automatic onboarding = %v, want the planned value kept", got)
+	}
+	if got := data.Get(SchemaOrganizationalUnitIds).(*schema.Set).List(); len(got) != 1 {
+		t.Errorf("organizational unit ids = %v, want the planned value kept", got)
 	}
 }
 
@@ -671,4 +676,57 @@ func TestOrganizationDeleteWaitStopsOnMalformedAnswer(t *testing.T) {
 	if gets != 1 {
 		t.Errorf("issued %d reads, want the failure reported without retrying", gets)
 	}
+}
+
+// G4: one confirmation read must not be able to spend the transport's whole backoff budget inside
+// a single tick, or a cascade that is progressing fine runs the wait out of time.
+func TestOrganizationDeleteProbeIsBounded(t *testing.T) {
+	probe := &deadlineRecordingClient{errStatus: "404 Not Found"}
+
+	if err := waitForOrganizationDeletion(context.Background(), probe, "4c53102d", 30*time.Minute); err != nil {
+		t.Fatalf("wait returned an error: %v", err)
+	}
+	if len(probe.budgets) == 0 {
+		t.Fatal("the wait never issued a confirmation read")
+	}
+	switch got := probe.budgets[0]; {
+	case got < 0:
+		t.Error("the confirmation read was given no deadline of its own, so one probe can spend the whole delete budget backing off")
+	case got > organizationDeletionProbeTimeout:
+		t.Errorf("first read had %v to answer in, want no more than %v out of the whole delete budget", got, organizationDeletionProbeTimeout)
+	}
+}
+
+// A transport failure has to keep the wait going until the budget is out, rather than ending it
+// as a permanent error and blaming the network for what is really a timeout.
+func TestOrganizationDeleteWaitKeepsProbingOnTransportErrors(t *testing.T) {
+	probe := &deadlineRecordingClient{err: &url.Error{Op: "Get", Err: errors.New("connection reset by peer")}}
+
+	err := waitForOrganizationDeletion(context.Background(), probe, "4c53102d", 2*time.Second)
+	if err == nil {
+		t.Fatal("expected the wait to give up once the budget was out")
+	}
+	if len(probe.budgets) < 2 {
+		t.Errorf("issued %d reads, want the wait to keep probing instead of failing on the first transport error", len(probe.budgets))
+	}
+}
+
+// records the budget each confirmation read is given
+type deadlineRecordingClient struct {
+	v2.OrganizationSecureInterface
+	errStatus string
+	err       error
+	budgets   []time.Duration
+}
+
+func (c *deadlineRecordingClient) GetOrganizationSecure(ctx context.Context, _ string) (*v2.OrganizationSecure, string, error) {
+	if deadline, ok := ctx.Deadline(); ok {
+		c.budgets = append(c.budgets, time.Until(deadline))
+	} else {
+		c.budgets = append(c.budgets, -1)
+	}
+	if c.err != nil {
+		return nil, c.errStatus, c.err
+	}
+	return nil, c.errStatus, errors.New("organization not found")
 }

@@ -68,6 +68,65 @@ func TestAccSecureOrganization(t *testing.T) {
 	})
 }
 
+// Exercises the same resource with the async organization API turned on, so create, update and
+// destroy run against the real endpoint rather than against assumptions about how it answers.
+// Serial on purpose: it onboards the same management account as the test above.
+func TestAccSecureOrganizationAsync(t *testing.T) {
+	fixture := gcpOrgFixture{
+		projectID:          os.Getenv(gcpOrgProjectIDEnv),
+		organizationRootID: os.Getenv(gcpOrgRootIDEnv),
+		serviceAccountKey:  os.Getenv(gcpOrgServiceAccountKeyEnv),
+	}
+	if fixture.projectID == "" || fixture.organizationRootID == "" || fixture.serviceAccountKey == "" {
+		t.Skipf("Skipping tests on sysdig_secure_organization resource because %s, %s and %s are not all set",
+			gcpOrgProjectIDEnv, gcpOrgRootIDEnv, gcpOrgServiceAccountKeyEnv)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			if v := os.Getenv("SYSDIG_SECURE_API_TOKEN"); v == "" {
+				t.Fatal("SYSDIG_SECURE_API_TOKEN must be set for acceptance tests")
+			}
+		},
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				// the create is only acknowledged, so this also covers the id coming back in the ack
+				Config: secureOrgAsyncConfig(fixture, secureOrgExcludedAccounts),
+			},
+			{
+				// an acknowledged create must still leave state matching the configuration
+				Config:   secureOrgAsyncConfig(fixture, secureOrgExcludedAccounts),
+				PlanOnly: true,
+			},
+			{
+				Config: secureOrgAsyncConfig(fixture, reversed(secureOrgExcludedAccounts)[:1]),
+			},
+			{
+				// an acknowledged update must not leave the planned values out of state either
+				Config:   secureOrgAsyncConfig(fixture, reversed(secureOrgExcludedAccounts)[:1]),
+				PlanOnly: true,
+			},
+		},
+		// the destroy the framework runs last is what exercises the wait for the delete cascade
+	})
+}
+
+func secureOrgAsyncConfig(fixture gcpOrgFixture, excludedAccounts []string) string {
+	return `
+provider "sysdig" {
+  sysdig_secure_org_api_async = true
+}
+` + secureOrgConfig(fixture,
+		secureOrgIncludedGroups, secureOrgExcludedGroups,
+		secureOrgIncludedAccounts, excludedAccounts,
+	)
+}
+
 // The include/exclude values stay synthetic: cloudauth validates their shape, not their
 // existence, so well-formed folder ids and project ids are enough and keep the reorder under the
 // test's control. organizational_unit_ids is left unset, the API rejects it alongside these.

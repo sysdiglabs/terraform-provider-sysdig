@@ -153,8 +153,12 @@ func TestOrganizationAsyncAckWithoutBody(t *testing.T) {
 	c := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"), WithOrgAPIAsync(true))
 	org := &OrganizationSecure{}
 
-	if _, _, err := c.UpdateOrganizationSecure(context.Background(), "oid", org); err != nil {
+	updated, _, err := c.UpdateOrganizationSecure(context.Background(), "oid", org)
+	if err != nil {
 		t.Errorf("UpdateOrganizationSecure on a bodyless 202: %v", err)
+	}
+	if updated != nil {
+		t.Errorf("UpdateOrganizationSecure returned %+v, want no organization for an acknowledgement", updated)
 	}
 	// the client only reports transport and decode failures; the missing id is the resource's call
 	created, _, err := c.CreateOrganizationSecure(context.Background(), org)
@@ -227,6 +231,9 @@ func TestOrganizationAsyncAckMalformedBody(t *testing.T) {
 	defer srv.Close()
 
 	c := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"), WithOrgAPIAsync(true))
+	if _, _, err := c.CreateOrganizationSecure(context.Background(), &OrganizationSecure{}); err == nil {
+		t.Error("CreateOrganizationSecure on a malformed 202: expected an error")
+	}
 	if _, _, err := c.UpdateOrganizationSecure(context.Background(), "oid", &OrganizationSecure{}); err == nil {
 		t.Error("UpdateOrganizationSecure on a malformed 202: expected an error")
 	}
@@ -288,5 +295,29 @@ func TestOrganizationCloseFailureDoesNotDiscardCreate(t *testing.T) {
 	}
 	if created.GetId() != "4c53102d" {
 		t.Errorf("id = %q, want the created organization to come back so the resource can track it", created.GetId())
+	}
+}
+
+// G2: whether an empty body is an acknowledgement follows from the call being async, not from
+// which 2xx carried it; a read is never an acknowledgement and still needs the organization.
+func TestOrganizationEmptyBodyDependsOnTheCallNotTheStatus(t *testing.T) {
+	t.Parallel()
+
+	for _, status := range []int{http.StatusOK, http.StatusCreated, http.StatusAccepted} {
+		t.Run(http.StatusText(status), func(t *testing.T) {
+			c := newSysdigClient(WithURL("http://localhost"), WithToken("fake-token"), WithOrgAPIAsync(true))
+			c.requester = closeFailingRequester{status: status}
+
+			if _, _, err := c.CreateOrganizationSecure(context.Background(), &OrganizationSecure{}); err != nil {
+				t.Errorf("CreateOrganizationSecure on an empty %d: %v", status, err)
+			}
+		})
+	}
+
+	// the read has to report it: an empty answer would otherwise become empty state
+	c := newSysdigClient(WithURL("http://localhost"), WithToken("fake-token"), WithOrgAPIAsync(true))
+	c.requester = closeFailingRequester{status: http.StatusOK}
+	if _, _, err := c.GetOrganizationSecure(context.Background(), "oid"); err == nil {
+		t.Error("GetOrganizationSecure on an empty 200: expected an error")
 	}
 }
