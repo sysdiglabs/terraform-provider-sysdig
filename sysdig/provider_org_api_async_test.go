@@ -390,25 +390,32 @@ func TestOrganizationReadDropsDeletedOrganization(t *testing.T) {
 	}
 }
 
-// The PUT already returns the persisted organization, so Update must take state from that response
-// instead of paying for a second read that could also outlive the update timeout.
-func TestOrganizationUpdateUsesResponseBody(t *testing.T) {
+// A successful update must leave the configuration in state, whatever the answer carried: a body
+// that omits fields, as a partial or acknowledged one does, would otherwise overwrite what was
+// just applied with protobuf zero values. Still exactly one request: no read-back.
+func TestOrganizationUpdateKeepsPlannedState(t *testing.T) {
 	const managementAccountID = "58ca66a5-ac87-497b-a501-7a4c934b3017"
 
 	var methods []string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		methods = append(methods, r.Method)
+		// a decodable but incomplete answer: no id, no collections, no onboarding flag
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"id":"4c53102d","managementAccountId":"` + managementAccountID + `"}`))
+		_, _ = w.Write([]byte(`{"organizationRootId":"r-8llw"}`))
 	}))
 	defer srv.Close()
 
+	clearOrgAPIAsyncEnv(t)
 	clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
 		"sysdig_secure_url":       srv.URL,
 		"sysdig_secure_api_token": "fake-token",
 	})}
-	data := schema.TestResourceDataRaw(t, resourceSysdigSecureOrganization().Schema, map[string]any{})
-	data.SetId("4c53102d")
+	data := organizationData(t, "4c53102d", map[string]string{
+		SchemaManagementAccountID:   managementAccountID,
+		SchemaAutomaticOnboarding:   "true",
+		"organizational_unit_ids.#": "1",
+		"organizational_unit_ids.0": "ou-1234",
+	})
 
 	if diags := resourceSysdigSecureOrganizationUpdate(context.Background(), data, clients); diags.HasError() {
 		t.Fatalf("update returned an error: %v", diags)
@@ -417,7 +424,16 @@ func TestOrganizationUpdateUsesResponseBody(t *testing.T) {
 		t.Errorf("requests = %v, want just the PUT", methods)
 	}
 	if got := data.Get(SchemaManagementAccountID); got != managementAccountID {
-		t.Errorf("management account id = %q, want the value the update returned", got)
+		t.Errorf("management account id = %q, want the applied value kept", got)
+	}
+	if got := data.Get(SchemaAutomaticOnboarding); got != true {
+		t.Errorf("automatic onboarding = %v, want the applied value kept", got)
+	}
+	if got := data.Get(SchemaOrganizationalUnitIds).(*schema.Set).List(); len(got) != 1 {
+		t.Errorf("organizational unit ids = %v, want the applied value kept", got)
+	}
+	if data.Id() != "4c53102d" {
+		t.Errorf("id = %q, want it untouched", data.Id())
 	}
 }
 
@@ -729,4 +745,43 @@ func (c *deadlineRecordingClient) GetOrganizationSecure(ctx context.Context, _ s
 		return nil, c.errStatus, c.err
 	}
 	return nil, c.errStatus, errors.New("organization not found")
+}
+
+// Since an update no longer records the server's answer, Read is the only thing that brings the
+// server's own view into state; without it drift would never show up in a plan.
+func TestOrganizationReadBringsServerStateIn(t *testing.T) {
+	const serverManagementAccountID = "9d1f0d4c-5a71-4b9e-9f0e-2b3a4c5d6e7f"
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"id":"4c53102d","managementAccountId":"` + serverManagementAccountID + `",` +
+			`"organizationalUnitIds":["ou-9999"],"automaticOnboarding":true}`))
+	}))
+	defer srv.Close()
+
+	clearOrgAPIAsyncEnv(t)
+	clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
+		"sysdig_secure_url":       srv.URL,
+		"sysdig_secure_api_token": "fake-token",
+	})}
+	data := organizationData(t, "4c53102d", map[string]string{
+		SchemaManagementAccountID:   "58ca66a5-ac87-497b-a501-7a4c934b3017",
+		SchemaAutomaticOnboarding:   "false",
+		"organizational_unit_ids.#": "1",
+		"organizational_unit_ids.0": "ou-1234",
+	})
+
+	if diags := resourceSysdigSecureOrganizationRead(context.Background(), data, clients); diags.HasError() {
+		t.Fatalf("read returned an error: %v", diags)
+	}
+	if got := data.Get(SchemaManagementAccountID); got != serverManagementAccountID {
+		t.Errorf("management account id = %q, want the value the server reported", got)
+	}
+	if got := data.Get(SchemaAutomaticOnboarding); got != true {
+		t.Errorf("automatic onboarding = %v, want the value the server reported", got)
+	}
+	units := data.Get(SchemaOrganizationalUnitIds).(*schema.Set).List()
+	if len(units) != 1 || units[0] != "ou-9999" {
+		t.Errorf("organizational unit ids = %v, want the value the server reported", units)
+	}
 }

@@ -275,7 +275,7 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 	org := secureOrganizationFromResourceData(data)
 	orgID := data.Id()
 
-	updated, errStatus, err := client.UpdateOrganizationSecure(ctx, orgID, org)
+	_, errStatus, err := client.UpdateOrganizationSecure(ctx, orgID, org)
 	if err != nil {
 		// clearing the id here instead would hand Terraform an empty state for an update it
 		// planned, which it rejects as an inconsistent result
@@ -285,15 +285,9 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 
-	// a persisted organization comes back from the update itself, so state comes from it rather
-	// than from a second read that would cost another call and could outlive the update timeout;
-	// an acknowledgement carries no organization, and the plan already holds what was sent
-	if updated != nil {
-		if err := secureOrganizationToResourceData(data, updated); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
+	// the answer to an update is not read into state: whatever it carries, mapping it would let a
+	// body that omits fields overwrite what was just applied. The plan holds what the organization
+	// was set to, and the next refresh reads the server's own view through Read.
 	return nil
 }
 
