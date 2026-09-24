@@ -171,8 +171,8 @@ func TestOrganizationAsyncAckWithoutBody(t *testing.T) {
 		t.Error("GetOrganizationSecure on a 202: expected an error")
 	}
 
-	// without async the same answer is not an acknowledgement, and tolerating it would report a
-	// synchronous update that returned nothing as a success
+	// without async the status is still accepted, as it was before the option existed, but the
+	// empty body is not: a synchronous call answers with the organization
 	sync := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"))
 	if _, _, err := sync.UpdateOrganizationSecure(context.Background(), "oid", org); err == nil {
 		t.Error("UpdateOrganizationSecure on a bodyless 202 without async: expected an error")
@@ -348,5 +348,33 @@ func TestOrganizationCloseFailureDoesNotDiscardCreate(t *testing.T) {
 	}
 	if created.GetId() != "4c53102d" {
 		t.Errorf("id = %q, want the created organization to come back so the resource can track it", created.GetId())
+	}
+}
+
+// A 202 that carries the organization is accepted whether or not the option is on: that is how
+// the client behaved before the option existed, and the status alone is not a reason to fail.
+func TestOrganizationAcceptsPopulatedAckWithoutAsync(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusAccepted)
+		_, _ = w.Write([]byte(`{"id":"4c53102d","managementAccountId":"58ca66a5-ac87-497b-a501-7a4c934b3017"}`))
+	}))
+	defer srv.Close()
+
+	c := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"))
+
+	created, _, err := c.CreateOrganizationSecure(context.Background(), &OrganizationSecure{})
+	if err != nil {
+		t.Errorf("CreateOrganizationSecure on a populated 202 without async: %v", err)
+	} else if created.GetId() != "4c53102d" {
+		t.Errorf("id = %q, want the organization the answer carried", created.GetId())
+	}
+
+	updated, _, err := c.UpdateOrganizationSecure(context.Background(), "oid", &OrganizationSecure{})
+	if err != nil {
+		t.Errorf("UpdateOrganizationSecure on a populated 202 without async: %v", err)
+	} else if updated.GetId() != "4c53102d" {
+		t.Errorf("id = %q, want the organization the answer carried", updated.GetId())
 	}
 }

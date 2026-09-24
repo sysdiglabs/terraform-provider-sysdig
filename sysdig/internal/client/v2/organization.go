@@ -42,8 +42,9 @@ func (c *Client) CreateOrganizationSecure(ctx context.Context, org *Organization
 	// successful call: a created organization would exist server side with nothing tracking it
 	defer func() { _ = response.Body.Close() }()
 
-	acknowledged := c.config.secureOrgAPIAsync && response.StatusCode == http.StatusAccepted
-	if !acknowledged && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
+	// 202 stays acceptable whatever the option says, as it was before the option existed; what the
+	// option decides is whether an acknowledgement may come with no organization in it
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
 		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
@@ -140,8 +141,10 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 	// successful call: a created organization would exist server side with nothing tracking it
 	defer func() { _ = response.Body.Close() }()
 
+	// 202 stays acceptable whatever the option says, as it was before the option existed; what the
+	// option decides is whether an acknowledgement may come with no organization in it
 	acknowledged := c.config.secureOrgAPIAsync && response.StatusCode == http.StatusAccepted
-	if !acknowledged && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusAccepted {
 		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return nil, errStatus, err
 	}
