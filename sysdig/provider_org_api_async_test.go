@@ -800,3 +800,45 @@ func TestOrganizationDeleteWaitSeesTransientStatuses(t *testing.T) {
 		t.Errorf("error = %q, want the status the server returned to survive", err)
 	}
 }
+
+// The retry helper returns on its deadline without waiting for a probe that is still running, so
+// anything the probe reports has to travel with the error rather than in a variable beside it.
+// Only the race detector fails this: run it with -race, as the acceptance suite does.
+func TestOrganizationDeleteWaitHasNoSharedProbeState(t *testing.T) {
+	t.Parallel()
+
+	// which of the two lands first is a race by nature, so only the detector judges this one
+	probe := blockingUntilCancelledProbe{}
+	if err := waitForOrganizationDeletion(context.Background(), probe, "4c53102d", 300*time.Millisecond); err == nil {
+		t.Fatal("expected the wait to give up once the budget was out")
+	}
+}
+
+// A failure the probe called final is reported as it is: wrapping it in the budget message would
+// claim the wait ran out when it gave up at once.
+func TestOrganizationDeleteWaitReportsFinalFailureAsItIs(t *testing.T) {
+	t.Parallel()
+
+	probe := &deadlineRecordingClient{errStatus: "403 Forbidden", err: errors.New("forbidden")}
+
+	err := waitForOrganizationDeletion(context.Background(), probe, "4c53102d", time.Hour)
+	if err == nil {
+		t.Fatal("expected the permanent failure to be reported")
+	}
+	if strings.Contains(err.Error(), "was not confirmed deleted within") {
+		t.Errorf("error = %q, want the failure itself rather than the budget", err)
+	}
+	if !strings.Contains(err.Error(), "403") {
+		t.Errorf("error = %q, want the status that caused it", err)
+	}
+}
+
+// answers only once its probe deadline passes, which is when the wait has already returned
+type blockingUntilCancelledProbe struct {
+	v2.OrganizationSecureInterface
+}
+
+func (blockingUntilCancelledProbe) OrganizationExistsSecure(ctx context.Context, _ string) (bool, string, error) {
+	<-ctx.Done()
+	return false, "403 Forbidden", errors.New("forbidden")
+}

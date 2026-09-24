@@ -159,10 +159,13 @@ func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.Re
 // spend; the next tick of the wait asks again
 const organizationDeletionProbeTimeout = 10 * time.Second
 
+// fatalProbeError marks a probe failure the classification called final. It travels with the
+// error rather than in a variable beside it: the retry helper runs the probe in a goroutine it
+// does not wait for, so anything written there and read here would be a data race.
+type fatalProbeError struct{ error }
+
 // the budget is passed in rather than read from the resource so it can be exercised in tests
 func waitForOrganizationDeletion(ctx context.Context, client v2.OrganizationSecureInterface, orgID string, budget time.Duration) error {
-	var fatal bool
-
 	// every probe hangs off the budget rather than off the caller's context: the retry helper
 	// cannot interrupt a probe that is already blocked, so a slow one would otherwise outlive a
 	// budget shorter than its own deadline
@@ -177,10 +180,11 @@ func waitForOrganizationDeletion(ctx context.Context, client v2.OrganizationSecu
 		switch {
 		case err != nil:
 			probe := classifyDeletionProbe(orgID, errStatus, err)
-			fatal = probe != nil && !probe.Retryable
+			if probe != nil && !probe.Retryable {
+				return retry.NonRetryableError(fatalProbeError{probe.Err})
+			}
 			return probe
 		case exists:
-			fatal = false
 			return retry.RetryableError(fmt.Errorf("organization %s has not been deleted yet; the deletion may also have failed server side", orgID))
 		}
 		return nil
@@ -189,7 +193,8 @@ func waitForOrganizationDeletion(ctx context.Context, client v2.OrganizationSecu
 	// the retry helper hands back the last probe error, which after a short probe deadline is
 	// usually a context deadline and points at the probe instead of at the deletion never
 	// finishing; a failure the probe itself called final is reported as it is
-	if err != nil && !fatal {
+	var fatal fatalProbeError
+	if err != nil && !errors.As(err, &fatal) {
 		return fmt.Errorf("organization %s was not confirmed deleted within %s; the deletion may also have failed server side: %w", orgID, budget, err)
 	}
 	return err
