@@ -11,7 +11,6 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"testing/iotest"
 
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
@@ -202,19 +201,6 @@ func (r closeFailingRequester) Request(_ context.Context, _ string, _ string, _ 
 type closeFailingBody struct{ io.Reader }
 
 func (closeFailingBody) Close() error { return errors.New("connection reset by peer") }
-
-// a body that fails midway through, as a truncated response does
-type unreadableRequester struct{}
-
-func (unreadableRequester) CurrentTeamID(_ context.Context) (int, error) { return 0, nil }
-
-func (unreadableRequester) Request(_ context.Context, _ string, _ string, _ io.Reader) (*http.Response, error) {
-	return &http.Response{
-		StatusCode: http.StatusOK,
-		Status:     "200 OK",
-		Body:       closeFailingBody{Reader: iotest.TimeoutReader(strings.NewReader(`{"id":"4c53102d"}`))},
-	}, nil
-}
 
 // a malformed 202 payload must not be mistaken for an empty acknowledgement
 func TestOrganizationAsyncAckMalformedBody(t *testing.T) {
