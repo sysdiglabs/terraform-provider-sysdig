@@ -163,8 +163,14 @@ const organizationDeletionProbeTimeout = 10 * time.Second
 func waitForOrganizationDeletion(ctx context.Context, client v2.OrganizationSecureInterface, orgID string, budget time.Duration) error {
 	var fatal bool
 
-	err := retry.RetryContext(ctx, budget, func() *retry.RetryError {
-		probeCtx, cancel := context.WithTimeout(ctx, organizationDeletionProbeTimeout)
+	// every probe hangs off the budget rather than off the caller's context: the retry helper
+	// cannot interrupt a probe that is already blocked, so a slow one would otherwise outlive a
+	// budget shorter than its own deadline
+	budgetCtx, cancelBudget := context.WithTimeout(ctx, budget)
+	defer cancelBudget()
+
+	err := retry.RetryContext(budgetCtx, budget, func() *retry.RetryError {
+		probeCtx, cancel := context.WithTimeout(budgetCtx, organizationDeletionProbeTimeout)
 		defer cancel()
 
 		exists, errStatus, err := client.OrganizationExistsSecure(probeCtx, orgID)

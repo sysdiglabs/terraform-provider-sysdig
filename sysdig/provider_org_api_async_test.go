@@ -655,6 +655,24 @@ func TestOrganizationDeleteProbeIsBounded(t *testing.T) {
 	}
 }
 
+// A budget shorter than one probe's deadline still has to bound the probe: the retry helper cannot
+// interrupt a read that is already blocked, so the deadline has to come off the budget.
+func TestOrganizationDeleteProbeNeverOutlivesTheBudget(t *testing.T) {
+	t.Parallel()
+
+	const budget = time.Second
+	probe := &deadlineRecordingClient{err: &url.Error{Op: "Get", Err: errors.New("connection reset by peer")}}
+
+	_ = waitForOrganizationDeletion(context.Background(), probe, "4c53102d", budget)
+
+	if len(probe.budgets) == 0 {
+		t.Fatal("the wait never issued a confirmation read")
+	}
+	if got := probe.budgets[0]; got > budget {
+		t.Errorf("first read had %v to answer in, want no more than the %v budget", got, budget)
+	}
+}
+
 // A transport failure has to keep the wait going until the budget is out, rather than ending it
 // as a permanent error and blaming the network for what is really a timeout.
 func TestOrganizationDeleteWaitKeepsProbingOnTransportErrors(t *testing.T) {
