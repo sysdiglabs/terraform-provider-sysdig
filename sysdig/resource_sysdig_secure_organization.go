@@ -2,17 +2,27 @@ package sysdig
 
 import (
 	"context"
+	"crypto/tls"
+	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceSysdigSecureOrganization() *schema.Resource {
 	timeout := 5 * time.Minute
+	// an async delete waits out the member-account cascade, which outlasts the other operations
+	deleteTimeout := 30 * time.Minute
 
 	return &schema.Resource{
 		CreateContext: resourceSysdigSecureOrganizationCreate,
@@ -34,7 +44,7 @@ func resourceSysdigSecureOrganization() *schema.Resource {
 			Create: schema.DefaultTimeout(timeout),
 			Update: schema.DefaultTimeout(timeout),
 			Read:   schema.DefaultTimeout(timeout),
-			Delete: schema.DefaultTimeout(timeout),
+			Delete: schema.DefaultTimeout(deleteTimeout),
 		},
 		Schema: map[string]*schema.Schema{
 			SchemaIDKey: {
@@ -111,6 +121,10 @@ func resourceSysdigSecureOrganizationCreate(ctx context.Context, data *schema.Re
 	if err != nil {
 		return diag.Errorf("Error creating resource: %s %s", errStatus, err)
 	}
+	// an empty id would drop the organization out of state while it exists server side
+	if orgCreated.GetId() == "" {
+		return diag.Errorf("Error creating resource: the organization was accepted but no id was returned")
+	}
 
 	data.SetId(orgCreated.Id)
 
@@ -125,13 +139,128 @@ func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.Re
 
 	errStatus, err := client.DeleteOrganizationSecure(ctx, data.Id())
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
+		if organizationIsGone(errStatus) {
 			return nil
 		}
 		return diag.Errorf("Error deleting resource: %s %s", errStatus, err)
 	}
 
+	// only an async delete is merely acknowledged; a synchronous one is done when it returns
+	if client.OrgAPIAsyncEnabled() {
+		if err := waitForOrganizationDeletion(ctx, client, data.Id(), data.Timeout(schema.TimeoutDelete)); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return nil
+}
+
+// a confirmation read is not retried by the transport, so this is the whole budget one probe can
+// spend; the next tick of the wait asks again
+const organizationDeletionProbeTimeout = 10 * time.Second
+
+// fatalProbeError marks a probe failure the classification called final. It travels with the
+// error rather than in a variable beside it: the retry helper runs the probe in a goroutine it
+// does not wait for, so anything written there and read here would be a data race.
+type fatalProbeError struct{ error }
+
+// the budget is passed in rather than read from the resource so it can be exercised in tests
+func waitForOrganizationDeletion(ctx context.Context, client v2.OrganizationSecureInterface, orgID string, budget time.Duration) error {
+	// every probe hangs off the budget rather than off the caller's context: the retry helper
+	// cannot interrupt a probe that is already blocked, so a slow one would otherwise outlive a
+	// budget shorter than its own deadline
+	budgetCtx, cancelBudget := context.WithTimeout(ctx, budget)
+	defer cancelBudget()
+
+	err := retry.RetryContext(budgetCtx, budget, func() *retry.RetryError {
+		probeCtx, cancel := context.WithTimeout(budgetCtx, organizationDeletionProbeTimeout)
+		defer cancel()
+
+		exists, errStatus, err := client.OrganizationExistsSecure(probeCtx, orgID)
+		switch {
+		case err != nil:
+			probe := classifyDeletionProbe(orgID, errStatus, err)
+			if probe != nil && !probe.Retryable {
+				return retry.NonRetryableError(fatalProbeError{probe.Err})
+			}
+			return probe
+		case exists:
+			return retry.RetryableError(fmt.Errorf("organization %s has not been deleted yet; the deletion may also have failed server side", orgID))
+		}
+		return nil
+	})
+
+	// the retry helper hands back the last probe error, which after a short probe deadline is
+	// usually a context deadline and points at the probe instead of at the deletion never
+	// finishing; a failure the probe itself called final is reported as it is
+	var fatal fatalProbeError
+	if err != nil && !errors.As(err, &fatal) {
+		return fmt.Errorf("organization %s was not confirmed deleted within %s; the deletion may also have failed server side: %w", orgID, budget, err)
+	}
+	return err
+}
+
+// nil means the probe answered; anything retryable is worth another poll, and everything else has
+// to be reported instead of waiting out the whole budget.
+func classifyDeletionProbe(orgID, errStatus string, err error) *retry.RetryError {
+	retryable := func() *retry.RetryError {
+		return retry.RetryableError(fmt.Errorf("confirming deletion of organization %s: %s %w", orgID, errStatus, err))
+	}
+	fatal := func() *retry.RetryError {
+		return retry.NonRetryableError(fmt.Errorf("confirming deletion of organization %s: %s %w", orgID, errStatus, err))
+	}
+
+	if code := statusCodeFromStatus(errStatus); code != 0 {
+		switch {
+		// the same set the transport retries when it is allowed to: 409, 429 and 5xx but not 501
+		case code == http.StatusConflict, code == http.StatusTooManyRequests:
+			return retryable()
+		case code >= 500:
+			if code == http.StatusNotImplemented {
+				return fatal()
+			}
+			return retryable()
+		case code >= 400:
+			return fatal()
+		}
+		// an unexpected 2xx or 3xx still means the organization answered, so keep waiting for it
+		return retryable()
+	}
+
+	// no status: a certificate the client will never trust, or any other deterministic transport
+	// failure, cannot be waited out. errors.As, not the transport's own check: by the time the
+	// error gets here it is wrapped, and a type assertion on one level would miss it
+	var certErr *tls.CertificateVerificationError
+	if errors.As(err, &certErr) {
+		return fatal()
+	}
+	var urlErr *url.Error
+	if errors.As(err, &urlErr) {
+		if transient, _ := retryablehttp.DefaultRetryPolicy(context.Background(), nil, urlErr); !transient {
+			return fatal()
+		}
+	}
+	return retryable()
+}
+
+// a gone organization is reported as either of these, and both mean there is nothing left to act on
+func organizationIsGone(errStatus string) bool {
+	code := statusCodeFromStatus(errStatus)
+	return code == http.StatusNotFound || code == http.StatusGone
+}
+
+// the organization endpoints report a failure as an HTTP status line plus a plain error, so the
+// code has to be taken off that line
+func statusCodeFromStatus(status string) int {
+	fields := strings.Fields(status)
+	if len(fields) == 0 {
+		return 0
+	}
+	code, err := strconv.Atoi(fields[0])
+	if err != nil {
+		return 0
+	}
+	return code
 }
 
 func resourceSysdigSecureOrganizationRead(ctx context.Context, data *schema.ResourceData, i any) diag.Diagnostics {
@@ -142,7 +271,8 @@ func resourceSysdigSecureOrganizationRead(ctx context.Context, data *schema.Reso
 
 	org, errStatus, err := client.GetOrganizationSecure(ctx, data.Id())
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
+		if organizationIsGone(errStatus) {
+			data.SetId("")
 			return nil
 		}
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
@@ -163,15 +293,21 @@ func resourceSysdigSecureOrganizationUpdate(ctx context.Context, data *schema.Re
 	}
 
 	org := secureOrganizationFromResourceData(data)
+	orgID := data.Id()
 
-	_, errStatus, err := client.UpdateOrganizationSecure(ctx, data.Id(), org)
+	_, errStatus, err := client.UpdateOrganizationSecure(ctx, orgID, org)
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
+		// clearing the id here instead would hand Terraform an empty state for an update it
+		// planned, which it rejects as an inconsistent result
+		if organizationIsGone(errStatus) {
+			return diag.Errorf("Error updating resource: organization %s no longer exists", orgID)
 		}
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 
+	// the answer to an update is not read into state: whatever it carries, mapping it would let a
+	// body that omits fields overwrite what was just applied. The plan holds what the organization
+	// was set to, and the next refresh reads the server's own view through Read.
 	return nil
 }
 

@@ -36,6 +36,29 @@ resource "sysdig_secure_organization" "sample" {
 * `organization_root_id` - (Optional) Organization's root id if available, else organization/tenant id.
 * `automatic_onboarding` - (Optional) Whether or not accounts in organization are to be detected automatically.
 
+## Timeouts
+
+Create, read and update default to 5 minutes. Destroy defaults to 30 minutes, for every
+configuration, because deleting an organization also deletes its member accounts; with
+`sysdig_secure_org_api_async` enabled, that budget also bounds the wait for the deletion to
+finish. All four can be changed with a `timeouts` block.
+
+Terraform stores these values with the resource when it is created, so an organization created by
+an earlier provider version keeps the delete timeout it was created with, 5 minutes, until an
+apply that changes the resource records the current one. A `timeouts` block on its own does not
+produce a change, so pair it with a change to the resource if an existing organization needs the
+longer budget before it is destroyed.
+
+```terraform
+resource "sysdig_secure_organization" "sample" {
+  management_account_id = sysdig_secure_cloud_auth_account.sample.id
+
+  timeouts {
+    delete = "60m"
+  }
+}
+```
+
 ## Attributes Reference
 
 No additional attributes are exported.

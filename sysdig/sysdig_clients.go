@@ -75,6 +75,7 @@ type sysdigVariables struct {
 type sysdigSecureVariables struct {
 	*sysdigVariables
 	skipPolicyV2Msg bool
+	orgAPIAsync     bool
 }
 
 type ibmVariables struct {
@@ -135,6 +136,8 @@ func getSysdigSecureVariables(data *schema.ResourceData) (*sysdigSecureVariables
 			token: token.(string),
 		},
 		skipPolicyV2Msg: skipPolicyV2Msg,
+		// Get, not GetOk: GetOk reports ok=false for a zero value, dropping an explicit false
+		orgAPIAsync: data.Get("sysdig_secure_org_api_async").(bool),
 	}, nil
 }
 
@@ -264,6 +267,7 @@ func (c *sysdigClients) sysdigSecureClientV2() (v2.SysdigSecure, error) {
 		v2.WithInsecure(vars.insecure),
 		v2.WithExtraHeaders(vars.extraHeaders),
 		v2.WithSkipPolicyV2Msg(vars.skipPolicyV2Msg),
+		v2.WithOrgAPIAsync(vars.orgAPIAsync),
 	)
 
 	return c.secureClientV2, nil

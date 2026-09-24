@@ -12,6 +12,7 @@ type config struct {
 	sysdigTeamID          *int
 	product               string
 	secureSkipPolicyV2Msg bool
+	secureOrgAPIAsync     bool
 }
 
 type Product string
@@ -100,5 +101,11 @@ func configure(opts ...ClientOption) *config {
 func WithSkipPolicyV2Msg(skipPolicyV2Msg bool) ClientOption {
 	return func(c *config) {
 		c.secureSkipPolicyV2Msg = skipPolicyV2Msg
+	}
+}
+
+func WithOrgAPIAsync(orgAPIAsync bool) ClientOption {
+	return func(c *config) {
+		c.secureOrgAPIAsync = orgAPIAsync
 	}
 }

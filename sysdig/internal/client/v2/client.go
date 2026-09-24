@@ -291,6 +291,12 @@ func newHTTPClient(cfg *config) *http.Client {
 	httpClient.Backoff = retryablehttp.DefaultBackoff // Exponential backoff strategy
 
 	httpClient.CheckRetry = func(ctx context.Context, resp *http.Response, err error) (bool, error) {
+		// a caller that polls on its own schedule needs the status the server actually returned,
+		// and retrying inside its attempt would only spend that attempt's budget on backoff
+		if transportRetriesDisabled(ctx) {
+			return false, nil
+		}
+
 		// Use default retry logic for connection errors and 5xx
 		shouldRetry, checkErr := retryablehttp.DefaultRetryPolicy(ctx, resp, err)
 		if shouldRetry || checkErr != nil {
@@ -306,4 +312,16 @@ func newHTTPClient(cfg *config) *http.Client {
 	}
 
 	return httpClient.StandardClient()
+}
+
+// noTransportRetriesKey marks a request the transport must hand back as it is, without retrying.
+type noTransportRetriesKey struct{}
+
+// WithoutTransportRetries returns a context whose requests are not retried by the transport.
+func WithoutTransportRetries(ctx context.Context) context.Context {
+	return context.WithValue(ctx, noTransportRetriesKey{}, struct{}{})
+}
+
+func transportRetriesDisabled(ctx context.Context) bool {
+	return ctx.Value(noTransportRetriesKey{}) != nil
 }

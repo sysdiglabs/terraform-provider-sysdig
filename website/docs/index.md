@@ -151,6 +151,31 @@ When Secure resources are to be created, this authentication must be in place.
   on-prem installations. It can also be sourced from the `SYSDIG_SECURE_INSECURE_TLS`
   environment variable. By default, this is false.<br/><br/>
 
+* `sysdig_secure_org_api_async` - (Optional) Creates and updates
+  `sysdig_secure_organization` asynchronously, so the call returns as soon as the request
+  is accepted instead of waiting for every member account; member accounts then appear
+  some time after the apply finishes. Recommended for large cloud organizations, where the
+  synchronous call can exceed the API request timeout.
+  <br/>Asynchronous calls also change how failures surface. A synchronous create fails the apply
+  when onboarding fails, for example when the service principal cannot read a folder. An
+  asynchronous create is accepted first and onboarded afterwards, so that failure is not reported
+  to Terraform: the apply succeeds, the plan stays clean, and the member accounts never appear.
+  Check the organization in Sysdig Secure after an asynchronous apply. An asynchronous update can
+  also wait on an onboarding job that still holds the organization, which may exceed the update
+  timeout of 5 minutes; raise it with a `timeouts` block if that happens.
+  <br/>When this option is enabled, destroy is also sent asynchronously, and Terraform waits
+  for the organization to disappear before completing, so that a replacement cannot race a
+  deletion that is still running. That wait is bounded by the resource's delete timeout,
+  which defaults to 30 minutes and can be raised with a `timeouts` block. Organizations created
+  by an earlier version of this provider keep the previous 5 minute delete timeout in their state
+  until an apply that changes the resource stores the new one, so destroy those only after such an
+  apply, or raise the timeout in a `timeouts` block together with a change to the resource.
+  <br/>It can also be sourced from the `SYSDIG_SECURE_ORG_API_ASYNC` environment variable, which
+  accepts the conventional boolean forms (`true`, `1`, `TRUE`). The older `SYSDIG_ORG_API_ASYNC`
+  variable is still read as well, but only the exact value `true` enables the option there, and it
+  no longer applies to reads. The attribute takes precedence over both.
+  By default, this is false.<br/><br/>
+
 
 ### IBM Cloud Monitoring Authentication
 
