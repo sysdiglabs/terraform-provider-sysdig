@@ -2,6 +2,7 @@ package sysdig
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net/http"
@@ -145,7 +146,7 @@ func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.Re
 	}
 
 	// only an async delete is merely acknowledged; a synchronous one is done when it returns
-	if i.(SysdigClients).orgAPIAsyncEnabled() {
+	if client.OrgAPIAsyncEnabled() {
 		if err := waitForOrganizationDeletion(ctx, client, data.Id(), data.Timeout(schema.TimeoutDelete)); err != nil {
 			return diag.FromErr(err)
 		}
@@ -154,35 +155,42 @@ func resourceSysdigSecureOrganizationDelete(ctx context.Context, data *schema.Re
 	return nil
 }
 
-// a confirmation read carries the transport's own retries, which back off as far as 30 seconds
-// each; without a cap one unlucky probe spends that inside a single tick of the wait, burning the
-// delete budget on backoff rather than on checking whether the cascade finished
+// a confirmation read is not retried by the transport, so this is the whole budget one probe can
+// spend; the next tick of the wait asks again
 const organizationDeletionProbeTimeout = 10 * time.Second
 
-// the timeout is passed in rather than read from the resource so it can be exercised in tests;
-// the SDK has already put the same deadline on ctx
-func waitForOrganizationDeletion(ctx context.Context, client v2.OrganizationSecureInterface, orgID string, timeout time.Duration) error {
-	return retry.RetryContext(ctx, timeout, func() *retry.RetryError {
+// the budget is passed in rather than read from the resource so it can be exercised in tests
+func waitForOrganizationDeletion(ctx context.Context, client v2.OrganizationSecureInterface, orgID string, budget time.Duration) error {
+	var fatal bool
+
+	err := retry.RetryContext(ctx, budget, func() *retry.RetryError {
 		probeCtx, cancel := context.WithTimeout(ctx, organizationDeletionProbeTimeout)
 		defer cancel()
 
-		_, errStatus, err := client.GetOrganizationSecure(probeCtx, orgID)
-		if err == nil {
+		exists, errStatus, err := client.OrganizationExistsSecure(probeCtx, orgID)
+		switch {
+		case err != nil:
+			probe := classifyDeletionProbe(orgID, errStatus, err)
+			fatal = probe != nil && !probe.Retryable
+			return probe
+		case exists:
+			fatal = false
 			return retry.RetryableError(fmt.Errorf("organization %s has not been deleted yet; the deletion may also have failed server side", orgID))
 		}
-
-		return classifyDeletionProbe(orgID, errStatus, err)
+		return nil
 	})
+
+	// the retry helper hands back the last probe error, which after a short probe deadline is
+	// usually a context deadline and points at the probe instead of at the deletion never
+	// finishing; a failure the probe itself called final is reported as it is
+	if err != nil && !fatal {
+		return fmt.Errorf("organization %s was not confirmed deleted within %s; the deletion may also have failed server side: %w", orgID, budget, err)
+	}
+	return err
 }
 
-// a gone organization is reported as either of these, and both mean there is nothing left to act on
-func organizationIsGone(errStatus string) bool {
-	code := statusCodeFromStatus(errStatus)
-	return code == http.StatusNotFound || code == http.StatusGone
-}
-
-// nil means the organization is gone; anything retryable is worth another poll, and everything
-// else has to be reported instead of waiting out the whole delete timeout.
+// nil means the probe answered; anything retryable is worth another poll, and everything else has
+// to be reported instead of waiting out the whole budget.
 func classifyDeletionProbe(orgID, errStatus string, err error) *retry.RetryError {
 	retryable := func() *retry.RetryError {
 		return retry.RetryableError(fmt.Errorf("confirming deletion of organization %s: %s %w", orgID, errStatus, err))
@@ -191,12 +199,9 @@ func classifyDeletionProbe(orgID, errStatus string, err error) *retry.RetryError
 		return retry.NonRetryableError(fmt.Errorf("confirming deletion of organization %s: %s %w", orgID, errStatus, err))
 	}
 
-	if organizationIsGone(errStatus) {
-		return nil
-	}
 	if code := statusCodeFromStatus(errStatus); code != 0 {
 		switch {
-		// the same set the transport itself retries: 409, 429 and 5xx other than 501
+		// the same set the transport retries when it is allowed to: 409, 429 and 5xx but not 501
 		case code == http.StatusConflict, code == http.StatusTooManyRequests:
 			return retryable()
 		case code >= 500:
@@ -211,22 +216,26 @@ func classifyDeletionProbe(orgID, errStatus string, err error) *retry.RetryError
 		return retryable()
 	}
 
-	// without a status the failure is transport level or a body problem; only the deterministic
-	// ones are hopeless: a body that does not parse will not parse on the next attempt either,
-	// and for the transport the same classification the request layer uses already knows which
-	var malformed *v2.MalformedBodyError
-	if errors.As(err, &malformed) {
+	// no status: a certificate the client will never trust, or any other deterministic transport
+	// failure, cannot be waited out. errors.As, not the transport's own check: by the time the
+	// error gets here it is wrapped, and a type assertion on one level would miss it
+	var certErr *tls.CertificateVerificationError
+	if errors.As(err, &certErr) {
 		return fatal()
 	}
 	var urlErr *url.Error
 	if errors.As(err, &urlErr) {
-		// asked with a fresh context on purpose: the wait's own deadline, once expired, makes the
-		// policy report any error as permanent and the failure would blame the network instead
 		if transient, _ := retryablehttp.DefaultRetryPolicy(context.Background(), nil, urlErr); !transient {
 			return fatal()
 		}
 	}
 	return retryable()
+}
+
+// a gone organization is reported as either of these, and both mean there is nothing left to act on
+func organizationIsGone(errStatus string) bool {
+	code := statusCodeFromStatus(errStatus)
+	return code == http.StatusNotFound || code == http.StatusGone
 }
 
 // the organization endpoints report a failure as an HTTP status line plus a plain error, so the

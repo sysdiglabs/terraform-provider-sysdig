@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -247,7 +248,8 @@ func TestOrganizationDeleteWaitsForRemoval(t *testing.T) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		w.WriteHeader(http.StatusAccepted)
+		// what cloudauth really answers, async or not: the cascade runs on after this
+		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer srv.Close()
 
@@ -341,6 +343,8 @@ func TestOrganizationDeleteWaitClassifiesErrors(t *testing.T) {
 
 // The wait has to give up once the timeout is exhausted, reporting what it was waiting for.
 func TestOrganizationDeleteWaitTimesOut(t *testing.T) {
+	t.Parallel()
+
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"id":"4c53102d"}`))
@@ -490,15 +494,14 @@ func TestOrganizationDeleteSkipsWaitWhenSync(t *testing.T) {
 // The transport already retries 409 and 5xx on its own, so those statuses cannot be driven through
 // a test server in reasonable time; the classification is asserted directly instead.
 func TestOrganizationDeleteProbeClassification(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name          string
 		status        string
 		err           error
-		wantDone      bool
 		wantRetryable bool
 	}{
-		{name: "not found is done", status: "404 Not Found", err: errors.New("nope"), wantDone: true},
-		{name: "gone is done", status: "410 Gone", err: errors.New("nope"), wantDone: true},
 		{name: "conflict retries", status: "409 Conflict", err: errors.New("nope"), wantRetryable: true},
 		{name: "too many requests retries", status: "429 Too Many Requests", err: errors.New("nope"), wantRetryable: true},
 		{name: "server error retries", status: "503 Service Unavailable", err: errors.New("nope"), wantRetryable: true},
@@ -508,23 +511,20 @@ func TestOrganizationDeleteProbeClassification(t *testing.T) {
 		{name: "bad request is fatal", status: "400 Bad Request", err: errors.New("nope")},
 		{name: "transport failure retries", err: &url.Error{Op: "Get", Err: errors.New("connection reset")}, wantRetryable: true},
 		{name: "bad scheme is fatal", err: &url.Error{Op: "Get", Err: errors.New(`unsupported protocol scheme "foo"`)}},
-		{name: "untrusted certificate is fatal", err: &url.Error{Op: "Get", Err: &tls.CertificateVerificationError{Err: x509.UnknownAuthorityError{}}}},
+		// the shape the client really produces: the transport wraps the cert error before the
+		// url.Error, so a type assertion on one level would miss it
+		{name: "untrusted certificate is fatal", err: &url.Error{Op: "Get", Err: fmt.Errorf("giving up after 1 attempt(s): %w",
+			&tls.CertificateVerificationError{Err: x509.UnknownAuthorityError{}})}},
 		// a body that could not be read says nothing about the organization, and often clears
 		{name: "unreadable answer keeps waiting", err: errors.New("unable to read response body"), wantRetryable: true},
-		// one that arrived whole and does not parse will not parse on the next attempt either
-		{name: "malformed answer is fatal", err: &v2.MalformedBodyError{Err: errors.New("unexpected EOF")}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := classifyDeletionProbe("4c53102d", tt.status, tt.err)
 			switch {
-			case tt.wantDone:
-				if got != nil {
-					t.Fatalf("classified as %+v, want the organization treated as gone", got)
-				}
 			case got == nil:
-				t.Fatal("classified as gone, want the poll to keep going or fail")
+				t.Fatal("a failed probe was classified as an answer")
 			case got.Retryable != tt.wantRetryable:
 				t.Errorf("retryable = %v, want %v (%v)", got.Retryable, tt.wantRetryable, got.Err)
 			}
@@ -604,43 +604,6 @@ func TestOrganizationUpdateKeepsStateOnPartialAck(t *testing.T) {
 	}
 }
 
-// A 202 on delete is only meaningful when async was requested. Accepting it with the flag off
-// would end the destroy on an acknowledgement that nothing is waiting for.
-func TestOrganizationDeleteAcceptsAckOnlyWhenAsync(t *testing.T) {
-	for _, tt := range []struct {
-		name      string
-		async     bool
-		wantError bool
-	}{
-		{name: "async accepts the acknowledgement", async: true},
-		{name: "sync rejects it", wantError: true},
-	} {
-		t.Run(tt.name, func(t *testing.T) {
-			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.Method == http.MethodGet {
-					w.WriteHeader(http.StatusNotFound) // already gone, so the wait ends at once
-					return
-				}
-				w.WriteHeader(http.StatusAccepted)
-			}))
-			defer srv.Close()
-
-			clearOrgAPIAsyncEnv(t)
-			clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
-				"sysdig_secure_url":       srv.URL,
-				"sysdig_secure_api_token": "fake-token",
-				orgAPIAsyncKey:            tt.async,
-			})}
-			data := organizationData(t, "4c53102d", nil)
-
-			diags := resourceSysdigSecureOrganizationDelete(context.Background(), data, clients)
-			if got := diags.HasError(); got != tt.wantError {
-				t.Fatalf("delete error = %v, want %v (%v)", got, tt.wantError, diags)
-			}
-		})
-	}
-}
-
 // 410 means the organization is gone just as 404 does, and the deletion poll already knows that;
 // Read and Delete have to agree, or a gone organization stays in state and a destroy errors out.
 func TestOrganizationGoneIsHandledForBothStatuses(t *testing.T) {
@@ -673,27 +636,6 @@ func TestOrganizationGoneIsHandledForBothStatuses(t *testing.T) {
 	}
 }
 
-// A malformed confirmation read has to be reported at once rather than polled for the whole
-// delete timeout, since asking again cannot make the same body parse.
-func TestOrganizationDeleteWaitStopsOnMalformedAnswer(t *testing.T) {
-	var gets int
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		gets++
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"id":`))
-	}))
-	defer srv.Close()
-
-	client := v2.NewSysdigSecure(v2.WithURL(srv.URL), v2.WithToken("fake-token"))
-	err := waitForOrganizationDeletion(context.Background(), client, "4c53102d", 10*time.Second)
-	if err == nil {
-		t.Fatal("expected the wait to report the malformed answer")
-	}
-	if gets != 1 {
-		t.Errorf("issued %d reads, want the failure reported without retrying", gets)
-	}
-}
-
 // G4: one confirmation read must not be able to spend the transport's whole backoff budget inside
 // a single tick, or a cascade that is progressing fine runs the wait out of time.
 func TestOrganizationDeleteProbeIsBounded(t *testing.T) {
@@ -716,6 +658,8 @@ func TestOrganizationDeleteProbeIsBounded(t *testing.T) {
 // A transport failure has to keep the wait going until the budget is out, rather than ending it
 // as a permanent error and blaming the network for what is really a timeout.
 func TestOrganizationDeleteWaitKeepsProbingOnTransportErrors(t *testing.T) {
+	t.Parallel()
+
 	probe := &deadlineRecordingClient{err: &url.Error{Op: "Get", Err: errors.New("connection reset by peer")}}
 
 	err := waitForOrganizationDeletion(context.Background(), probe, "4c53102d", 2*time.Second)
@@ -735,16 +679,16 @@ type deadlineRecordingClient struct {
 	budgets   []time.Duration
 }
 
-func (c *deadlineRecordingClient) GetOrganizationSecure(ctx context.Context, _ string) (*v2.OrganizationSecure, string, error) {
+func (c *deadlineRecordingClient) OrganizationExistsSecure(ctx context.Context, _ string) (bool, string, error) {
 	if deadline, ok := ctx.Deadline(); ok {
 		c.budgets = append(c.budgets, time.Until(deadline))
 	} else {
 		c.budgets = append(c.budgets, -1)
 	}
 	if c.err != nil {
-		return nil, c.errStatus, c.err
+		return false, c.errStatus, c.err
 	}
-	return nil, c.errStatus, errors.New("organization not found")
+	return false, "", nil
 }
 
 // Since an update no longer records the server's answer, Read is the only thing that brings the
@@ -783,5 +727,58 @@ func TestOrganizationReadBringsServerStateIn(t *testing.T) {
 	units := data.Get(SchemaOrganizationalUnitIds).(*schema.Set).List()
 	if len(units) != 1 || units[0] != "ou-9999" {
 		t.Errorf("organizational unit ids = %v, want the value the server reported", units)
+	}
+}
+
+// A 200 the provider cannot parse, a proxy maintenance page say, still proves the organization is
+// there: the wait keeps going rather than failing the destroy.
+func TestOrganizationDeleteWaitTreatsUnparseableAnswerAsPresent(t *testing.T) {
+	t.Parallel()
+
+	var gets int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		gets++
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("<html><body>maintenance</body></html>"))
+	}))
+	defer srv.Close()
+
+	client := v2.NewSysdigSecure(v2.WithURL(srv.URL), v2.WithToken("fake-token"))
+	err := waitForOrganizationDeletion(context.Background(), client, "4c53102d", 2*time.Second)
+	if err == nil {
+		t.Fatal("expected the wait to give up once the budget was out")
+	}
+	if gets < 2 {
+		t.Errorf("issued %d reads, want the wait to keep going instead of failing on the body", gets)
+	}
+	if !strings.Contains(err.Error(), "was not confirmed deleted within 2s") {
+		t.Errorf("error = %q, want it to name the budget rather than the last probe", err)
+	}
+}
+
+// A transient status has to reach the classification, which it cannot do if the transport retries
+// the probe until its deadline and hands back a context error carrying no status at all.
+func TestOrganizationDeleteWaitSeesTransientStatuses(t *testing.T) {
+	t.Parallel()
+
+	var gets int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		gets++
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	defer srv.Close()
+
+	client := v2.NewSysdigSecure(v2.WithURL(srv.URL), v2.WithToken("fake-token"))
+	err := waitForOrganizationDeletion(context.Background(), client, "4c53102d", 2*time.Second)
+	if err == nil {
+		t.Fatal("expected the wait to give up once the budget was out")
+	}
+	// one probe per tick, rather than one probe soaking up the transport's whole backoff
+	if gets < 3 {
+		t.Errorf("issued %d probes, want the wait polling rather than backing off inside one attempt", gets)
+	}
+	if !strings.Contains(err.Error(), "503") {
+		t.Errorf("error = %q, want the status the server returned to survive", err)
 	}
 }

@@ -12,10 +12,16 @@ import (
 const (
 	organizationsPath = "%s/api/cloudauth/v1/organizations"
 	organizationPath  = "%s/api/cloudauth/v1/organizations/%s"
+
+	// identifying information only: the default verbosity makes the backend read every member
+	// account, and the deletion probe only needs to know whether the organization row is there
+	organizationProbeVerbosity = "VERBOSITY_IDENT"
 )
 
 type OrganizationSecureInterface interface {
 	Base
+	OrganizationExistsSecure(ctx context.Context, orgID string) (bool, string, error)
+	OrgAPIAsyncEnabled() bool
 	CreateOrganizationSecure(ctx context.Context, org *OrganizationSecure) (*OrganizationSecure, string, error)
 	GetOrganizationSecure(ctx context.Context, orgID string) (*OrganizationSecure, string, error)
 	DeleteOrganizationSecure(ctx context.Context, orgID string) (string, error)
@@ -71,6 +77,37 @@ func (c *Client) GetOrganizationSecure(ctx context.Context, orgID string) (organ
 	return organization, "", nil
 }
 
+// OrgAPIAsyncEnabled reports whether the organization API is being called asynchronously. The
+// caller needs it to know whether a delete was merely accepted; reading it here keeps the answer
+// off the provider's shared ResourceData, which other resources read without a lock.
+func (c *Client) OrgAPIAsyncEnabled() bool {
+	return c.config.secureOrgAPIAsync
+}
+
+// OrganizationExistsSecure answers whether the organization is still there, and nothing else.
+// Identity verbosity keeps the backend from listing every member account, which is megabytes per
+// call on the organizations this path exists for, and the transport is told not to retry so the
+// caller sees the status the server returned rather than spending its attempt on backoff.
+func (c *Client) OrganizationExistsSecure(ctx context.Context, orgID string) (exists bool, errString string, err error) {
+	url := fmt.Sprintf("%s?verbosity=%s", c.organizationURL(orgID), organizationProbeVerbosity)
+	response, err := c.requester.Request(WithoutTransportRetries(ctx), http.MethodGet, url, nil)
+	if err != nil {
+		return false, "", err
+	}
+	defer func() { _ = response.Body.Close() }()
+
+	switch response.StatusCode {
+	// the body is deliberately not read: an answer that does not parse, a proxy error page say,
+	// still proves the organization is there
+	case http.StatusOK:
+		return true, "", nil
+	case http.StatusNotFound, http.StatusGone:
+		return false, "", nil
+	}
+	errStatus, err := c.ErrorAndStatusFromResponse(response)
+	return false, errStatus, err
+}
+
 func (c *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) (errString string, err error) {
 	response, err := c.requester.Request(ctx, http.MethodDelete, c.withAsync(c.organizationURL(orgID)), nil)
 	if err != nil {
@@ -80,10 +117,9 @@ func (c *Client) DeleteOrganizationSecure(ctx context.Context, orgID string) (er
 	// successful call: a created organization would exist server side with nothing tracking it
 	defer func() { _ = response.Body.Close() }()
 
-	// 202 is only expected when async was requested: accepting it otherwise would let a destroy
-	// return on an acknowledgement while the resource, seeing the flag off, skips the wait
-	acknowledged := c.config.secureOrgAPIAsync && response.StatusCode == http.StatusAccepted
-	if !acknowledged && response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
+	// an async delete answers 204 as well, with the cascade still running in the background, so
+	// there is no acknowledgement status to accept here
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
 		errStatus, err := c.ErrorAndStatusFromResponse(response)
 		return errStatus, err
 	}
@@ -124,16 +160,6 @@ func (c *Client) UpdateOrganizationSecure(ctx context.Context, orgID string, org
 	return organization, "", nil
 }
 
-// MalformedBodyError marks a body that arrived whole but does not parse. Retrying will not make
-// it parse, unlike a body that failed to arrive, which is reported as the plain read error.
-type MalformedBodyError struct{ Err error }
-
-func (e *MalformedBodyError) Error() string {
-	return fmt.Sprintf("unable to parse the organization in the response: %v", e.Err)
-}
-
-func (e *MalformedBodyError) Unwrap() error { return e.Err }
-
 // allowEmptyAck belongs to the caller, not to the status: an async mutation may be acknowledged
 // with nothing whichever 2xx carries it, while a read always needs the organization itself. The
 // first return says whether an organization was decoded at all.
@@ -149,7 +175,7 @@ func (c *Client) unmarshalOrganizationBody(response *http.Response, organization
 		return false, errors.New("the organization API answered with no body")
 	}
 	if err := c.unmarshalCloudauthProto(io.NopCloser(bytes.NewReader(body)), organization); err != nil {
-		return false, &MalformedBodyError{Err: err}
+		return false, err
 	}
 	return true, nil
 }

@@ -183,29 +183,25 @@ func TestOrganizationAsyncAckWithoutBody(t *testing.T) {
 	}
 }
 
-// A body that arrived whole but does not parse cannot be fixed by asking again, while one that
-// failed to arrive can; the deletion poll relies on telling those apart.
-func TestOrganizationMalformedBodyIsTyped(t *testing.T) {
-	t.Parallel()
-
-	c := newSysdigClient(WithURL("http://localhost"), WithToken("fake-token"))
-	c.requester = closeFailingRequester{status: http.StatusOK, body: `{"id":`}
-
-	_, _, err := c.GetOrganizationSecure(context.Background(), "oid")
-	var malformed *MalformedBodyError
-	if !errors.As(err, &malformed) {
-		t.Fatalf("error = %v (%T), want it marked as a body that will not parse", err, err)
-	}
-
-	c.requester = unreadableRequester{}
-	_, _, err = c.GetOrganizationSecure(context.Background(), "oid")
-	if err == nil {
-		t.Fatal("expected an error when the body cannot be read")
-	}
-	if errors.As(err, &malformed) {
-		t.Errorf("error = %v, want a read failure left retryable rather than marked malformed", err)
-	}
+// a requester answering with a fixed status and body, whose Close fails after the read
+type closeFailingRequester struct {
+	status int
+	body   string
 }
+
+func (r closeFailingRequester) CurrentTeamID(_ context.Context) (int, error) { return 0, nil }
+
+func (r closeFailingRequester) Request(_ context.Context, _ string, _ string, _ io.Reader) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: r.status,
+		Status:     fmt.Sprintf("%d %s", r.status, http.StatusText(r.status)),
+		Body:       closeFailingBody{Reader: strings.NewReader(r.body)},
+	}, nil
+}
+
+type closeFailingBody struct{ io.Reader }
+
+func (closeFailingBody) Close() error { return errors.New("connection reset by peer") }
 
 // a body that fails midway through, as a truncated response does
 type unreadableRequester struct{}
@@ -239,65 +235,6 @@ func TestOrganizationAsyncAckMalformedBody(t *testing.T) {
 	}
 }
 
-// The delete only answers 202 when async was requested, so accepting it with the option off would
-// let a destroy finish on an acknowledgement while the resource skips the confirmation wait.
-func TestOrganizationDeleteAckRequiresAsync(t *testing.T) {
-	t.Parallel()
-
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusAccepted)
-	}))
-	defer srv.Close()
-
-	sync := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"))
-	if _, err := sync.DeleteOrganizationSecure(context.Background(), "oid"); err == nil {
-		t.Error("DeleteOrganizationSecure on a 202 without async: expected an error")
-	}
-
-	async := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"), WithOrgAPIAsync(true))
-	if _, err := async.DeleteOrganizationSecure(context.Background(), "oid"); err != nil {
-		t.Errorf("DeleteOrganizationSecure on a 202 with async: %v", err)
-	}
-}
-
-// a body whose Close fails after the response was already read
-type closeFailingRequester struct {
-	status int
-	body   string
-}
-
-func (r closeFailingRequester) CurrentTeamID(_ context.Context) (int, error) { return 0, nil }
-
-func (r closeFailingRequester) Request(_ context.Context, _ string, _ string, _ io.Reader) (*http.Response, error) {
-	return &http.Response{
-		StatusCode: r.status,
-		Status:     fmt.Sprintf("%d %s", r.status, http.StatusText(r.status)),
-		Body:       closeFailingBody{Reader: strings.NewReader(r.body)},
-	}, nil
-}
-
-type closeFailingBody struct{ io.Reader }
-
-func (closeFailingBody) Close() error { return errors.New("connection reset by peer") }
-
-// A close failure arrives after the organization has already been created server side. Reporting
-// it would stop the resource from recording the id, leaving the organization untracked and
-// duplicated on the next apply.
-func TestOrganizationCloseFailureDoesNotDiscardCreate(t *testing.T) {
-	t.Parallel()
-
-	c := newSysdigClient(WithURL("http://localhost"), WithToken("fake-token"))
-	c.requester = closeFailingRequester{status: http.StatusOK, body: `{"id":"4c53102d"}`}
-
-	created, _, err := c.CreateOrganizationSecure(context.Background(), &OrganizationSecure{})
-	if err != nil {
-		t.Fatalf("CreateOrganizationSecure: %v", err)
-	}
-	if created.GetId() != "4c53102d" {
-		t.Errorf("id = %q, want the created organization to come back so the resource can track it", created.GetId())
-	}
-}
-
 // G2: whether an empty body is an acknowledgement follows from the call being async, not from
 // which 2xx carried it; a read is never an acknowledgement and still needs the organization.
 func TestOrganizationEmptyBodyDependsOnTheCallNotTheStatus(t *testing.T) {
@@ -319,5 +256,111 @@ func TestOrganizationEmptyBodyDependsOnTheCallNotTheStatus(t *testing.T) {
 	c.requester = closeFailingRequester{status: http.StatusOK}
 	if _, _, err := c.GetOrganizationSecure(context.Background(), "oid"); err == nil {
 		t.Error("GetOrganizationSecure on an empty 200: expected an error")
+	}
+}
+
+// The probe answers the one question the wait has, and it must not pay for the transport's retries
+// or for the backend listing every member account.
+func TestOrganizationProbeIsThinAndUnretried(t *testing.T) {
+	t.Parallel()
+
+	t.Run("identity verbosity and no retries", func(t *testing.T) {
+		var requests int
+		var query string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			requests++
+			query = r.URL.RawQuery
+			w.WriteHeader(http.StatusServiceUnavailable)
+		}))
+		defer srv.Close()
+
+		c := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"))
+		exists, errStatus, err := c.OrganizationExistsSecure(context.Background(), "oid")
+		if exists || err == nil {
+			t.Fatalf("exists=%v err=%v, want the failure reported", exists, err)
+		}
+		if requests != 1 {
+			t.Errorf("issued %d requests, want one: the transport must not retry a probe", requests)
+		}
+		if query != "verbosity=VERBOSITY_IDENT" {
+			t.Errorf("query = %q, want identity verbosity", query)
+		}
+		// the status has to survive, or the caller cannot tell a transient 503 from a permanent 403
+		if errStatus == "" || errStatus[:3] != "503" {
+			t.Errorf("errStatus = %q, want the 503 the server returned", errStatus)
+		}
+	})
+
+	t.Run("gone statuses", func(t *testing.T) {
+		for _, status := range []int{http.StatusNotFound, http.StatusGone} {
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(status)
+			}))
+			c := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"))
+			exists, errStatus, err := c.OrganizationExistsSecure(context.Background(), "oid")
+			if exists || errStatus != "" || err != nil {
+				t.Errorf("%d: exists=%v errStatus=%q err=%v, want a clean answer that it is gone", status, exists, errStatus, err)
+			}
+			srv.Close()
+		}
+	})
+
+	t.Run("a body that does not parse still proves it exists", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/html")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte("<html><body>maintenance</body></html>"))
+		}))
+		defer srv.Close()
+
+		c := newSysdigClient(WithURL(srv.URL), WithToken("fake-token"))
+		exists, _, err := c.OrganizationExistsSecure(context.Background(), "oid")
+		if err != nil || !exists {
+			t.Errorf("exists=%v err=%v, want a 200 taken as proof the organization is there", exists, err)
+		}
+	})
+}
+
+// The async delete answers 204 with the cascade still running, which is the response the wait is
+// built around; nothing else is accepted.
+func TestOrganizationDeleteAcceptsWhatTheBackendSends(t *testing.T) {
+	t.Parallel()
+
+	for status, wantErr := range map[int]bool{
+		http.StatusNoContent: false,
+		http.StatusOK:        false,
+		http.StatusAccepted:  true,
+	} {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(status)
+		}))
+		for _, async := range []bool{false, true} {
+			opts := []ClientOption{WithURL(srv.URL), WithToken("fake-token")}
+			if async {
+				opts = append(opts, WithOrgAPIAsync(true))
+			}
+			_, err := newSysdigClient(opts...).DeleteOrganizationSecure(context.Background(), "oid")
+			if got := err != nil; got != wantErr {
+				t.Errorf("status %d async=%v: error = %v, want %v (%v)", status, async, got, wantErr, err)
+			}
+		}
+		srv.Close()
+	}
+}
+
+// A close failure arrives after the organization has already been created server side. Reporting
+// it would stop the resource from recording the id, leaving the organization untracked.
+func TestOrganizationCloseFailureDoesNotDiscardCreate(t *testing.T) {
+	t.Parallel()
+
+	c := newSysdigClient(WithURL("http://localhost"), WithToken("fake-token"))
+	c.requester = closeFailingRequester{status: http.StatusOK, body: `{"id":"4c53102d"}`}
+
+	created, _, err := c.CreateOrganizationSecure(context.Background(), &OrganizationSecure{})
+	if err != nil {
+		t.Fatalf("CreateOrganizationSecure: %v", err)
+	}
+	if created.GetId() != "4c53102d" {
+		t.Errorf("id = %q, want the created organization to come back so the resource can track it", created.GetId())
 	}
 }
