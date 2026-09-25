@@ -286,7 +286,14 @@ func monitorCloudAccountToResourceData(data *schema.ResourceData, cloudAccount *
 		return err
 	}
 
-	err = data.Set("role_name", strings.Split(cloudAccount.Credentials.RoleName, ":role/")[1])
+	// AWS role names can be in the format of "arn:aws:iam::account-id:role/role-name", so we need to extract the role name from the ARN.
+	// For GCP account RoleName contains a dummy text like: "DummyRole-1234"
+	roleName := cloudAccount.Credentials.RoleName
+	if strings.Contains(roleName, ":role/") {
+		roleName = strings.Split(roleName, ":role/")[1]
+	}
+
+	err = data.Set("role_name", roleName)
 	if err != nil {
 		return err
 	}
@@ -332,7 +339,14 @@ func monitorCloudAccountForCostToResourceData(data *schema.ResourceData, cloudAc
 		return err
 	}
 
-	err = data.Set("role_name", strings.Split(cloudAccount.RoleArn, ":role/")[1])
+	// AWS role names can be in the format of "arn:aws:iam::account-id:role/role-name", so we need to extract the role name from the ARN.
+	// For GCP account RoleName contains a dummy text like: "DummyRole-1234"
+	roleName := cloudAccount.RoleArn
+	if strings.Contains(roleName, ":role/") {
+		roleName = strings.Split(roleName, ":role/")[1]
+	}
+
+	err = data.Set("role_name", roleName)
 	if err != nil {
 		return err
 	}
