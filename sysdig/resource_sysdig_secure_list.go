@@ -94,11 +94,13 @@ func resourceSysdigListUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	id, _ := strconv.Atoi(d.Id())
 	list.ID = id
 
-	_, err = client.UpdateList(ctx, list)
+	updatedList, err := client.UpdateList(ctx, list)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
+
+	_ = d.Set("version", updatedList.Version)
 
 	return nil
 }

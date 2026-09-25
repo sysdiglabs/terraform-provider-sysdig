@@ -15,15 +15,21 @@ Creates a Sysdig Secure Falco Macro.
 ## Example Usage
 
 ```terraform
-resource "sysdig_secure_macro" "http_port" {
-  name = "web_port"
+resource "sysdig_secure_macro" "web_port" {
+  name      = "web_port"
   condition = "fd.sport=80"
 }
+```
 
-resource "sysdig_secure_macro" "https_port" {
-  name = "web_port"
-  condition = "or fd.sport=443"
-  append = true # default: false
+To extend a macro that Sysdig ships, create a macro with the same `name` and
+`append = true`. The condition is concatenated onto the existing one, so it must
+begin with a logical operator (`or` / `and`):
+
+```terraform
+resource "sysdig_secure_macro" "allow_my_etc_writer" {
+  name      = "user_known_write_below_etc_activities"
+  condition = "or (proc.name = my_installer and fd.name startswith /etc/myapp/)"
+  append    = true # default: false
 }
 ```
 
@@ -33,9 +39,14 @@ resource "sysdig_secure_macro" "https_port" {
 
 * `condition` - (Required) Macro condition. It can contain lists or other macros.
 
-* `append` - (Optional)  Adds these elements to an existing macro. Used to extend existing macros provided by Sysdig.
-    The macros can only be extended once, for example if there is an existing macro called "foo", one can have another 
-    append macro called "foo" but not a second one. By default this is false.
+* `append` - (Optional) Adds these elements to an existing macro. Used to extend existing macros provided by Sysdig.
+    A macro of the same `name` must already exist, and `condition` must begin with a logical operator (`or` / `and`)
+    because it is concatenated onto the existing condition. By default this is false.
+
+    ~> **Note:** Appending a macro that you created yourself (rather than one provided by Sysdig) is only supported on
+    backends that have migrated to the v2 macro storage. On earlier backends the create fails with
+    `The field 'name' must not be the same as another Secure UI macro`. Appending a Sysdig-provided macro works on all
+    backends. On earlier backends a macro can also only be extended once; newer backends do not enforce that limit.
 
 * `minimum_engine_version` - (Optional) This is used to indicate that the macro requires a minimum engine version. This
     can allow you to add macros that would not normally pass validation with older agents in your environment. The macro
