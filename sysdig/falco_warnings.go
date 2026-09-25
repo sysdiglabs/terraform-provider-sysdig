@@ -43,9 +43,9 @@ var falcoSnapshotOnce sync.Once
 //
 // Intentionally NOT wired:
 //   - sysdig_secure_rule_container / _filesystem / _network / _process /
-//     _syscall — deprecated and non-functional against current backends
-//     (Create/Update return HTTP 400 before any validation runs; see their
-//     DeprecationMessage). Wiring them would be dead code.
+//     _syscall — non-functional, and they never call the API, so there is no
+//     save for the analyzer to run against (see
+//     secure_rule_fast_engine_removed.go).
 //   - sysdig_secure_rule_stateful — stateful-detection rules don't go through the
 //     Falco static-analyzer path and the backend doesn't emit warnings for them.
 //   - sysdig_secure_macro / sysdig_secure_list — the backend doesn't surface

@@ -1,24 +1,17 @@
 package sysdig
 
 import (
-	"context"
-	"time"
-
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// Non-functional; see secure_rule_fast_engine_removed.go.
 func dataSourceSysdigSecureRuleProcess() *schema.Resource {
-	timeout := 5 * time.Minute
+	const typeName = "sysdig_secure_rule_process"
+	const ruleType = "PROCESS"
 
 	return &schema.Resource{
-		DeprecationMessage: "data source sysdig_secure_rule_process is deprecated — the backend no longer returns rules of ruleType PROCESS. Use the sysdig_secure_rule_falco data source.",
-		ReadContext:        dataSourceSysdigRuleProcessRead,
-
-		Timeouts: &schema.ResourceTimeout{
-			Read: schema.DefaultTimeout(timeout),
-		},
+		DeprecationMessage: fastEngineDeprecation("data source", typeName, ruleType),
+		ReadContext:        fastEngineDataSourceRemoved(typeName, ruleType),
 
 		Schema: createRuleDataSourceSchema(map[string]*schema.Schema{
 			"matching": {
@@ -34,18 +27,4 @@ func dataSourceSysdigSecureRuleProcess() *schema.Resource {
 			},
 		}),
 	}
-}
-
-func dataSourceSysdigRuleProcessRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	return commonDataSourceSysdigRuleRead(ctx, d, meta, v2.RuleTypeProcess, processRuleDataSourceToResourceData)
-}
-
-func processRuleDataSourceToResourceData(rule v2.Rule, d *schema.ResourceData) diag.Diagnostics {
-	if rule.Details.Processes == nil {
-		return diag.Errorf("no process data for a process rule")
-	}
-	_ = d.Set("matching", rule.Details.Processes.MatchItems)
-	_ = d.Set("processes", rule.Details.Processes.Items)
-
-	return nil
 }
