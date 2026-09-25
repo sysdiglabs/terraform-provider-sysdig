@@ -13,6 +13,8 @@ Manages configuration of a Sysdig Secure Managed Policy.
 -> **Note:** Sysdig managed policies are not resources that you create. They are provided by Sysdig. This resource
 allows you to identify and configure a managed policy. The managed policy is looked up by its name and type.
 
+-> **Note:** Use `sysdig_secure_managed_policy` only for Sysdig-shipped default policies (`isDefault: true` in the API). For a customer-owned policy that inherits a Sysdig-managed ruleset (e.g. created via "Copy Policy" on a Sysdig-managed policy in the UI), use [`sysdig_secure_managed_ruleset`](secure_managed_ruleset.md) instead. For fully customer-authored policies, use [`sysdig_secure_custom_policy`](secure_custom_policy.md).
+
 -> **Note:** Sysdig Terraform Provider is under rapid development at this point. If you experience any issue or discrepancy while using it, please make sure you have the latest version. If the issue persists, or you have a Feature Request to support an additional set of resources, please open a [new issue](https://github.com/sysdiglabs/terraform-provider-sysdig/issues/new) in the GitHub repository.
 
 ## Example Usage
