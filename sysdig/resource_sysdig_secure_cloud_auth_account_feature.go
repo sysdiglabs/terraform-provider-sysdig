@@ -103,6 +103,7 @@ func resourceSysdigSecureCloudauthAccountFeatureRead(ctx context.Context, data *
 		ctx, data.Get(SchemaAccountID).(string), data.Get(SchemaType).(string))
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
+			data.SetId("")
 			return nil
 		}
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)

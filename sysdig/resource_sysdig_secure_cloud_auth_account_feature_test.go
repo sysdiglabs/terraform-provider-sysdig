@@ -3,7 +3,6 @@
 package sysdig_test
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -11,10 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 )
 
 // TF acceptance tests for secure account feature need an actual azure account
@@ -237,11 +234,7 @@ func TestAccSecureCloudAuthAccountUpdateKeepsFeatures(t *testing.T) {
 				// the account PUT must keep the flags and the feature types the account resource does
 				// not map, otherwise the feature resources plan to restore them after this apply
 				Config: secureAzureAccountWithFeatureResources(accID, tenantID, "renamed-alias"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.azure_sample", "provider_alias", "renamed-alias"),
-					// the feature resource ignores a 404 on read, so only the API shows a deleted feature
-					testAccCheckCloudAuthAccountFeatureExists("sysdig_secure_cloud_auth_account_feature.azure_workload_scanning_containers"),
-				),
+				Check:  resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.azure_sample", "provider_alias", "renamed-alias"),
 			},
 		},
 	})
@@ -302,23 +295,4 @@ resource "sysdig_secure_cloud_auth_account_feature" "azure_workload_scanning_con
   depends_on = [ sysdig_secure_cloud_auth_account_feature.azure_config_posture ]
 }
 `, accountID, tenantID, alias)
-}
-
-func testAccCheckCloudAuthAccountFeatureExists(resourceName string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("%s not found in state", resourceName)
-		}
-		url := os.Getenv("SYSDIG_SECURE_URL")
-		if url == "" {
-			url = "https://secure.sysdig.com"
-		}
-		client := v2.NewSysdigSecure(v2.WithURL(url), v2.WithToken(os.Getenv("SYSDIG_SECURE_API_TOKEN")))
-		_, errStatus, err := client.GetCloudauthAccountFeatureSecure(context.Background(), rs.Primary.Attributes["account_id"], rs.Primary.Attributes["type"])
-		if err != nil {
-			return fmt.Errorf("%s: %s %w", resourceName, errStatus, err)
-		}
-		return nil
-	}
 }

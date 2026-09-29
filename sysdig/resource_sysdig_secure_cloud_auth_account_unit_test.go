@@ -153,3 +153,28 @@ func TestCloudauthAccountUpdateSendsPlannedFeaturesAndComponents(t *testing.T) {
 		t.Errorf("PUT components = %v, want only the planned one", put.GetComponents())
 	}
 }
+
+// A feature deleted outside Terraform has to leave the state, so the next plan recreates it.
+func TestCloudauthAccountFeatureReadDropsDeletedFeature(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, `{"error":"the requested entity was not found"}`, http.StatusNotFound)
+	}))
+	defer srv.Close()
+
+	clients := &sysdigClients{ctx: context.Background(), d: providerData(t, map[string]any{
+		"sysdig_secure_url":       srv.URL,
+		"sysdig_secure_api_token": "fake-token",
+	})}
+	data := schema.TestResourceDataRaw(t, resourceSysdigSecureCloudauthAccountFeature().Schema, map[string]any{
+		SchemaAccountID: testCloudauthAccountID,
+		SchemaType:      cloudauth.Feature_FEATURE_SECURE_WORKLOAD_SCANNING_CONTAINERS.String(),
+	})
+	data.SetId(testCloudauthAccountID + "/" + cloudauth.Feature_FEATURE_SECURE_WORKLOAD_SCANNING_CONTAINERS.String())
+
+	if diags := resourceSysdigSecureCloudauthAccountFeatureRead(context.Background(), data, clients); diags.HasError() {
+		t.Fatalf("read returned an error: %v", diags)
+	}
+	if data.Id() != "" {
+		t.Errorf("id = %q, want it cleared", data.Id())
+	}
+}
