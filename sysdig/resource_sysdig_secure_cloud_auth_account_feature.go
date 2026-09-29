@@ -2,8 +2,6 @@ package sysdig
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -37,14 +35,17 @@ func resourceSysdigSecureCloudauthAccountFeature() *schema.Resource {
 func getAccountFeatureSchema() map[string]*schema.Schema {
 	// though the schema fields are already defined in cloud_auth_account resource, for AccountFeature
 	// calls they are required fields. Also, account_id & flags are needed additionally.
+	// account_id and type make up the feature's API path and resource id, so they can only change by replacement
 	featureSchema := map[string]*schema.Schema{
 		SchemaAccountID: {
 			Type:     schema.TypeString,
 			Required: true,
+			ForceNew: true,
 		},
 		SchemaType: {
 			Type:     schema.TypeString,
 			Required: true,
+			ForceNew: true,
 		},
 		SchemaEnabled: {
 			Type:     schema.TypeBool,
@@ -103,6 +104,7 @@ func resourceSysdigSecureCloudauthAccountFeatureRead(ctx context.Context, data *
 		ctx, data.Get(SchemaAccountID).(string), data.Get(SchemaType).(string))
 	if err != nil {
 		if strings.Contains(errStatus, "404") {
+			data.SetId("")
 			return nil
 		}
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
@@ -122,30 +124,10 @@ func resourceSysdigSecureCloudauthAccountFeatureUpdate(ctx context.Context, data
 		return diag.FromErr(err)
 	}
 
-	accountID := data.Get(SchemaAccountID).(string)
-	existingCloudAccountFeature, errStatus, err := client.GetCloudauthAccountFeatureSecure(
-		ctx, accountID, data.Get(SchemaType).(string))
+	// the PUT creates or replaces the feature, so one deleted since the refresh is written again
+	_, errStatus, err := client.CreateOrUpdateCloudauthAccountFeatureSecure(
+		ctx, data.Get(SchemaAccountID).(string), data.Get(SchemaType).(string), cloudauthAccountFeatureFromResourceData(data))
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
-		}
-		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
-	}
-
-	newCloudAccountFeature := cloudauthAccountFeatureFromResourceData(data)
-
-	// validate and reject non-updatable resource schema fields upfront
-	err = validateCloudauthAccountFeatureUpdate(existingCloudAccountFeature, newCloudAccountFeature)
-	if err != nil {
-		return diag.Errorf("Error updating resource: %s", err)
-	}
-
-	_, errStatus, err = client.CreateOrUpdateCloudauthAccountFeatureSecure(
-		ctx, accountID, data.Get(SchemaType).(string), newCloudAccountFeature)
-	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
-		}
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 
@@ -165,18 +147,6 @@ func resourceSysdigSecureCloudauthAccountFeatureDelete(ctx context.Context, data
 			return nil
 		}
 		return diag.Errorf("Error deleting resource: %s %s", errStatus, err)
-	}
-
-	return nil
-}
-
-/*
-This function validates and restricts any fields not allowed to be updated during resource updates.
-*/
-func validateCloudauthAccountFeatureUpdate(existingFeature *v2.CloudauthAccountFeatureSecure, newFeature *v2.CloudauthAccountFeatureSecure) error {
-	if existingFeature.Type != newFeature.Type {
-		errorInvalidResourceUpdate := fmt.Sprintf("Bad Request. Updating restricted fields not allowed: %s", []string{"type"})
-		return errors.New(errorInvalidResourceUpdate)
 	}
 
 	return nil

@@ -90,6 +90,8 @@ resource "sysdig_secure_cloud_auth_account" "aws_response_actions" {
 
 -> **Note:** Please refer to Sysdig Secure API Documentation for the Cloud Accounts API for providing `feature` & `component`.
 
+-> **Note:** A `feature` or `component` block without a planned change, for example under `ignore_changes`, is sent as it is stored. A changed `feature` block keeps the stored feature flags and the features the block has no argument for (Workload Scanning, Sensitive Content Posture); a feature type removed from the block is deleted. A changed `component` block keeps the components that features still reference, and the apply warns about them.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:

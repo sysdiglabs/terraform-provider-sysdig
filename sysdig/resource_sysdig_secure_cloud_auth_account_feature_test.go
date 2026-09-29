@@ -164,13 +164,81 @@ func secureAzureWithScanningFeatureWithFlags(accountID string) string {
 	rID := func() string { return acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum) }
 	randomTenantId := rID()
 
+	return azureAccountWithServicePrincipal("azure-vmscan-test-"+accountID, randomTenantId, "some-alias", "secure-scanning") + `
+resource "sysdig_secure_cloud_auth_account_feature" "azure_agentless_scanning" {
+  account_id		         = sysdig_secure_cloud_auth_account.azure_sample.id
+  type                       = "FEATURE_SECURE_AGENTLESS_SCANNING"
+  enabled                    = true
+  components                 = ["COMPONENT_SERVICE_PRINCIPAL/secure-scanning"]
+  flags                      = {
+      "SCANNING_HOST_CONTAINER_ENABLED": "true"
+  }
+
+  depends_on = [ sysdig_secure_cloud_auth_account_component.azure_service_principal ]
+}
+`
+}
+
+func TestAccSecureCloudAuthAccountUpdateKeepsFeatures(t *testing.T) {
+	rText := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum) }
+	accID := rText()
+	tenantID := acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"sysdig": func() (*schema.Provider, error) {
+				return sysdig.Provider(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: secureAzureAccountWithFeatureResources(accID, tenantID, "some-alias"),
+			},
+			{
+				// the account PUT must keep the flags and the feature types the account resource does
+				// not map, otherwise the feature resources plan to restore them after this apply
+				Config: secureAzureAccountWithFeatureResources(accID, tenantID, "renamed-alias"),
+				Check:  resource.TestCheckResourceAttr("sysdig_secure_cloud_auth_account.azure_sample", "provider_alias", "renamed-alias"),
+			},
+		},
+	})
+}
+
+func secureAzureAccountWithFeatureResources(accountID, tenantID, alias string) string {
+	return azureAccountWithServicePrincipal("azure-update-test-"+accountID, tenantID, alias, "secure-posture") + `
+resource "sysdig_secure_cloud_auth_account_feature" "azure_config_posture" {
+  account_id = sysdig_secure_cloud_auth_account.azure_sample.id
+  type       = "FEATURE_SECURE_CONFIG_POSTURE"
+  enabled    = true
+  components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
+  flags      = {
+      "POSTURE_VALIDATED_EXPOSURE_ENABLED": "true"
+  }
+
+  depends_on = [ sysdig_secure_cloud_auth_account_component.azure_service_principal ]
+}
+
+resource "sysdig_secure_cloud_auth_account_feature" "azure_workload_scanning_containers" {
+  account_id = sysdig_secure_cloud_auth_account.azure_sample.id
+  type       = "FEATURE_SECURE_WORKLOAD_SCANNING_CONTAINERS"
+  enabled    = true
+  components = ["COMPONENT_SERVICE_PRINCIPAL/secure-posture"]
+
+  depends_on = [ sysdig_secure_cloud_auth_account_feature.azure_config_posture ]
+}
+`
+}
+
+// azureAccountWithServicePrincipal renders an Azure account and one Service Principal component that
+// feature resources can reference as COMPONENT_SERVICE_PRINCIPAL/<instance>.
+func azureAccountWithServicePrincipal(providerID, tenantID, alias, instance string) string {
 	return fmt.Sprintf(`
 resource "sysdig_secure_cloud_auth_account" "azure_sample" {
-  provider_id        = "azure-vmscan-test-%s"
+  provider_id        = "%s"
   provider_type      = "PROVIDER_AZURE"
   enabled            = true
   provider_tenant_id = "%s"
-  provider_alias     = "some-alias"
+  provider_alias     = "%s"
   lifecycle {
 	ignore_changes = [
 	  component,
@@ -182,7 +250,7 @@ resource "sysdig_secure_cloud_auth_account" "azure_sample" {
 resource "sysdig_secure_cloud_auth_account_component" "azure_service_principal" {
   account_id		         = sysdig_secure_cloud_auth_account.azure_sample.id
   type                       = "COMPONENT_SERVICE_PRINCIPAL"
-  instance                   = "secure-scanning"
+  instance                   = "%s"
   service_principal_metadata = jsonencode({
 	  azure = {
 		  active_directory_service_principal = {
@@ -196,17 +264,5 @@ resource "sysdig_secure_cloud_auth_account_component" "azure_service_principal" 
 	  }
   })
 }
-
-resource "sysdig_secure_cloud_auth_account_feature" "azure_agentless_scanning" {
-  account_id		         = sysdig_secure_cloud_auth_account.azure_sample.id
-  type                       = "FEATURE_SECURE_AGENTLESS_SCANNING"
-  enabled                    = true
-  components                 = ["COMPONENT_SERVICE_PRINCIPAL/secure-scanning"]
-  flags                      = {
-      "SCANNING_HOST_CONTAINER_ENABLED": "true"
-  }
-
-  depends_on = [ sysdig_secure_cloud_auth_account_component.azure_service_principal ]
-}
-`, accountID, randomTenantId)
+`, providerID, tenantID, alias, instance)
 }
