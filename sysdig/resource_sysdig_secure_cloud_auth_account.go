@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -88,9 +87,8 @@ var (
 	}
 )
 
-func resourceSysdigSecureCloudauthAccount() *schema.Resource {
-	timeout := 5 * time.Minute
-
+// cloudauthAccountFeaturesResource is the schema of the account's feature block.
+func cloudauthAccountFeaturesResource() *schema.Resource {
 	accountFeature := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaType: {
@@ -111,7 +109,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 		},
 	}
 
-	accountFeatures := &schema.Resource{
+	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SchemaSecureConfigPosture: {
 				Type:     schema.TypeSet,
@@ -145,6 +143,10 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceSysdigSecureCloudauthAccount() *schema.Resource {
+	timeout := 5 * time.Minute
 
 	return &schema.Resource{
 		CreateContext: resourceSysdigSecureCloudauthAccountCreate,
@@ -182,7 +184,7 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 			SchemaFeature: {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Elem:     accountFeatures,
+				Elem:     cloudauthAccountFeaturesResource(),
 			},
 			SchemaComponent: {
 				Type:     schema.TypeSet,
@@ -265,14 +267,24 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 
 	newCloudAccount := cloudauthAccountFromResourceData(data)
 	// The PUT replaces features and components, and the state carries neither feature flags nor every
-	// feature type, so a block without a planned change (e.g. under ignore_changes) is sent back as stored.
+	// feature type: a block without a planned change (e.g. under ignore_changes) is sent back as stored,
+	// a changed one is merged with what the resource cannot express.
+	var diags diag.Diagnostics
 	if data.HasChange(SchemaFeature) {
-		newCloudAccount.Feature = mergeStoredAccountFeatures(newCloudAccount.Feature, existingCloudAccount.Feature)
+		mergeStoredAccountFeatures(newCloudAccount.Feature, existingCloudAccount.Feature)
 	} else {
 		newCloudAccount.Feature = existingCloudAccount.Feature
 	}
 	if data.HasChange(SchemaComponent) {
-		newCloudAccount.Components = keepReferencedComponents(newCloudAccount.Components, existingCloudAccount.Components, newCloudAccount.Feature)
+		var kept []string
+		newCloudAccount.Components, kept = keepReferencedComponents(newCloudAccount.Components, existingCloudAccount.Components, newCloudAccount.Feature)
+		if len(kept) > 0 {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "Components kept on the cloud account",
+				Detail:   fmt.Sprintf("%s stay on the account because features still reference them; remove the references from those features to delete the components.", strings.Join(kept, ", ")),
+			})
+		}
 	} else {
 		newCloudAccount.Components = existingCloudAccount.Components
 	}
@@ -288,7 +300,7 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 
-	return nil
+	return diags
 }
 
 func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
@@ -308,43 +320,37 @@ func resourceSysdigSecureCloudauthAccountDelete(ctx context.Context, data *schem
 	return nil
 }
 
-// mappedAccountFeatureTypes are the AccountFeatures fields the feature block can express.
-var mappedAccountFeatureTypes = map[string]bool{
-	SchemaSecureConfigPosture:       true,
-	SchemaSecureIdentityEntitlement: true,
-	SchemaSecureThreatDetection:     true,
-	SchemaSecureAgentlessScanning:   true,
-	SchemaMonitorCloudMetrics:       true,
-	SchemaSecureResponseActions:     true,
+// mappedAccountFeatureTypes are the AccountFeatures fields the feature block has an argument for.
+var mappedAccountFeatureTypes = cloudauthAccountFeaturesResource().Schema
+
+// accountComponentID is how features reference a component of their own account.
+func accountComponentID(component *cloudauth.AccountComponent) string {
+	return component.GetType().String() + "/" + component.GetInstance()
 }
 
 // mergeStoredAccountFeatures adds to the planned features what the resource cannot express: the stored
-// flags of each planned feature and the stored features of types the feature block does not map.
-func mergeStoredAccountFeatures(planned, stored *cloudauth.AccountFeatures) *cloudauth.AccountFeatures {
-	merged := proto.Clone(planned).(*cloudauth.AccountFeatures)
-	target := merged.ProtoReflect()
+// flags of each planned feature and the stored features of types the feature block has no argument for.
+func mergeStoredAccountFeatures(planned, stored *cloudauth.AccountFeatures) {
+	target := planned.ProtoReflect()
 	stored.ProtoReflect().Range(func(field protoreflect.FieldDescriptor, value protoreflect.Value) bool {
+		_, mapped := mappedAccountFeatureTypes[string(field.Name())]
 		switch {
 		case target.Has(field):
 			target.Get(field).Message().Interface().(*cloudauth.AccountFeature).Flags = value.Message().Interface().(*cloudauth.AccountFeature).GetFlags()
-		case !mappedAccountFeatureTypes[string(field.Name())]:
+		case !mapped:
 			target.Set(field, value)
 		}
 		return true
 	})
-	return merged
 }
 
-// keepReferencedComponents adds back the stored components that the features being sent still reference:
-// cloudauth rejects a feature pointing at a missing component, and the feature resources that would move
-// those references are only applied after the account.
-func keepReferencedComponents(planned, stored []*cloudauth.AccountComponent, features *cloudauth.AccountFeatures) []*cloudauth.AccountComponent {
-	componentID := func(component *cloudauth.AccountComponent) string {
-		return component.GetType().String() + "/" + component.GetInstance()
-	}
+// keepReferencedComponents adds back, and returns the ids of, the stored components that the features
+// being sent still reference: cloudauth rejects a feature pointing at a missing component, and the
+// feature resources that would move those references are only applied after the account.
+func keepReferencedComponents(planned, stored []*cloudauth.AccountComponent, features *cloudauth.AccountFeatures) ([]*cloudauth.AccountComponent, []string) {
 	sent := map[string]bool{}
 	for _, component := range planned {
-		sent[componentID(component)] = true
+		sent[accountComponentID(component)] = true
 	}
 	referenced := map[string]bool{}
 	features.ProtoReflect().Range(func(_ protoreflect.FieldDescriptor, value protoreflect.Value) bool {
@@ -355,12 +361,14 @@ func keepReferencedComponents(planned, stored []*cloudauth.AccountComponent, fea
 	})
 
 	components := planned
+	var kept []string
 	for _, component := range stored {
-		if id := componentID(component); referenced[id] && !sent[id] {
+		if id := accountComponentID(component); referenced[id] && !sent[id] {
 			components = append(components, component)
+			kept = append(kept, id)
 		}
 	}
-	return components
+	return components, kept
 }
 
 /*

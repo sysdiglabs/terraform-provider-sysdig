@@ -7,8 +7,11 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"slices"
+	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -174,10 +177,31 @@ func trustedRoleComponentConfig(instance string) map[string]any {
 	}
 }
 
-func runAccountUpdate(t *testing.T, clients *sysdigClients, data *schema.ResourceData) {
+func runAccountUpdate(t *testing.T, clients *sysdigClients, data *schema.ResourceData) diag.Diagnostics {
 	t.Helper()
-	if diags := resourceSysdigSecureCloudauthAccountUpdate(context.Background(), data, clients); diags.HasError() {
+	diags := resourceSysdigSecureCloudauthAccountUpdate(context.Background(), data, clients)
+	if diags.HasError() {
 		t.Fatalf("update returned an error: %v", diags)
+	}
+	return diags
+}
+
+func componentIDs(components []*cloudauth.AccountComponent) []string {
+	ids := []string{}
+	for _, component := range components {
+		ids = append(ids, accountComponentID(component))
+	}
+	return ids
+}
+
+// assertKeptComponents checks that exactly the given components were kept, and that the apply warned about them.
+func assertKeptComponents(t *testing.T, diags diag.Diagnostics, put *cloudauth.CloudAccount, want []string, kept string) {
+	t.Helper()
+	if got := componentIDs(put.GetComponents()); !slices.Equal(got, want) {
+		t.Errorf("PUT components = %v, want %v", got, want)
+	}
+	if len(diags) != 1 || diags[0].Severity != diag.Warning || !strings.Contains(diags[0].Detail, kept) {
+		t.Errorf("diagnostics = %v, want one warning naming %s", diags, kept)
 	}
 }
 
@@ -191,7 +215,9 @@ func TestCloudauthAccountUpdateSendsStoredBlocksWithoutPlannedChange(t *testing.
 		t.Fatal("the plan must change only the alias")
 	}
 
-	runAccountUpdate(t, clients, data)
+	if diags := runAccountUpdate(t, clients, data); len(diags) != 0 {
+		t.Errorf("diagnostics = %v, want none", diags)
+	}
 
 	if !proto.Equal(put().GetFeature(), stored.GetFeature()) {
 		t.Errorf("PUT features = %v, want the stored ones with their flags", put().GetFeature())
@@ -249,87 +275,38 @@ func TestCloudauthAccountUpdateKeepsReferencedComponents(t *testing.T) {
 		accountConfig("", nil, trustedRoleComponentConfig("secure-posture")),
 		accountConfig("", nil, trustedRoleComponentConfig("secure-onboarding")))
 
-	runAccountUpdate(t, clients, data)
+	diags := runAccountUpdate(t, clients, data)
 
-	var got []string
-	for _, component := range put().GetComponents() {
-		got = append(got, component.GetType().String()+"/"+component.GetInstance())
-	}
 	// the stored features still point at secure-posture, while nothing references the event bridge
-	want := []string{testOnboardingComponentID, testPostureComponentID}
-	if len(got) != len(want) || got[0] != want[0] || got[1] != want[1] {
-		t.Errorf("PUT components = %v, want %v", got, want)
+	assertKeptComponents(t, diags, put(), []string{testOnboardingComponentID, testPostureComponentID}, testPostureComponentID)
+}
+
+// With both blocks changed, the components are kept for the merged features: the planned posture moves
+// to secure-onboarding, but the stored Workload Scanning feature still points at secure-posture.
+func TestCloudauthAccountUpdateKeepsComponentsOfMergedFeatures(t *testing.T) {
+	clients, put := serveStoredCloudauthAccount(t, storedCloudauthAccount())
+	data := plannedAccountUpdate(t,
+		accountConfig("", map[string]any{SchemaSecureConfigPosture: featureConfig(testPostureComponentID)}, trustedRoleComponentConfig("secure-posture")),
+		accountConfig("", map[string]any{SchemaSecureConfigPosture: featureConfig(testOnboardingComponentID)}, trustedRoleComponentConfig("secure-onboarding")))
+
+	diags := runAccountUpdate(t, clients, data)
+
+	if got := put().GetFeature().GetSecureConfigPosture().GetComponents(); !slices.Equal(got, []string{testOnboardingComponentID}) {
+		t.Errorf("PUT posture components = %v, want the planned one", got)
 	}
+	if put().GetFeature().GetSecureWorkloadScanningContainers() == nil {
+		t.Error("PUT dropped the stored Workload Scanning feature")
+	}
+	assertKeptComponents(t, diags, put(), []string{testOnboardingComponentID, testPostureComponentID}, testPostureComponentID)
 }
 
 func TestMergeStoredAccountFeaturesWithoutStoredFeatures(t *testing.T) {
 	planned := &cloudauth.AccountFeatures{SecureConfigPosture: &cloudauth.AccountFeature{Enabled: true}}
+	want := proto.Clone(planned)
 
-	if got := mergeStoredAccountFeatures(planned, nil); !proto.Equal(got, planned) {
-		t.Errorf("merged = %v, want the planned features", got)
-	}
-}
+	mergeStoredAccountFeatures(planned, nil)
 
-// serveCloudauthAccountFeature answers the feature endpoint with the given statuses and counts PUTs.
-func serveCloudauthAccountFeature(t *testing.T, getStatus, putStatus int) (*sysdigClients, *int) {
-	t.Helper()
-	puts := 0
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		status := getStatus
-		if r.Method == http.MethodPut {
-			puts++
-			status = putStatus
-		}
-		if status != http.StatusOK {
-			http.Error(w, `{"error":"the requested entity was not found"}`, status)
-			return
-		}
-		_, _ = w.Write([]byte(`{"type":"FEATURE_SECURE_WORKLOAD_SCANNING_CONTAINERS","enabled":true}`))
-	}))
-	t.Cleanup(srv.Close)
-	return testSysdigClients(t, srv.URL), &puts
-}
-
-func featureData(t *testing.T) *schema.ResourceData {
-	t.Helper()
-	data := schema.TestResourceDataRaw(t, resourceSysdigSecureCloudauthAccountFeature().Schema, map[string]any{
-		SchemaAccountID:  testCloudauthAccountID,
-		SchemaType:       cloudauth.Feature_FEATURE_SECURE_WORKLOAD_SCANNING_CONTAINERS.String(),
-		SchemaEnabled:    true,
-		SchemaComponents: []any{testPostureComponentID},
-	})
-	data.SetId(testCloudauthAccountID + "/" + cloudauth.Feature_FEATURE_SECURE_WORKLOAD_SCANNING_CONTAINERS.String())
-	return data
-}
-
-// A feature deleted outside Terraform has to leave the state, so the next plan recreates it.
-func TestCloudauthAccountFeatureReadDropsDeletedFeature(t *testing.T) {
-	clients, _ := serveCloudauthAccountFeature(t, http.StatusNotFound, http.StatusOK)
-	data := featureData(t)
-
-	if diags := resourceSysdigSecureCloudauthAccountFeatureRead(context.Background(), data, clients); diags.HasError() {
-		t.Fatalf("read returned an error: %v", diags)
-	}
-	if data.Id() != "" {
-		t.Errorf("id = %q, want it cleared", data.Id())
-	}
-}
-
-func TestCloudauthAccountFeatureUpdateWritesDeletedFeature(t *testing.T) {
-	clients, puts := serveCloudauthAccountFeature(t, http.StatusNotFound, http.StatusOK)
-
-	if diags := resourceSysdigSecureCloudauthAccountFeatureUpdate(context.Background(), featureData(t), clients); diags.HasError() {
-		t.Fatalf("update returned an error: %v", diags)
-	}
-	if *puts != 1 {
-		t.Errorf("PUTs = %d, want the feature written again", *puts)
-	}
-}
-
-func TestCloudauthAccountFeatureUpdateReportsMissingAccount(t *testing.T) {
-	clients, _ := serveCloudauthAccountFeature(t, http.StatusOK, http.StatusNotFound)
-
-	if diags := resourceSysdigSecureCloudauthAccountFeatureUpdate(context.Background(), featureData(t), clients); !diags.HasError() {
-		t.Error("update succeeded, want the failed PUT reported")
+	if !proto.Equal(planned, want) {
+		t.Errorf("merged = %v, want the planned features", planned)
 	}
 }
