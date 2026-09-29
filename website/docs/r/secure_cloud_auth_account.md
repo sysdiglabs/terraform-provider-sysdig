@@ -90,6 +90,8 @@ resource "sysdig_secure_cloud_auth_account" "aws_response_actions" {
 
 -> **Note:** Please refer to Sysdig Secure API Documentation for the Cloud Accounts API for providing `feature` & `component`.
 
+-> **Note:** An update of this resource keeps what the `feature` and `component` blocks cannot express: feature flags, feature types not listed under `feature`, and components still referenced by the features. A block without a planned change, for example under `ignore_changes`, is sent as it is stored.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:

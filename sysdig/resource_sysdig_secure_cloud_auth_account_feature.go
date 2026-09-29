@@ -126,27 +126,24 @@ func resourceSysdigSecureCloudauthAccountFeatureUpdate(ctx context.Context, data
 	accountID := data.Get(SchemaAccountID).(string)
 	existingCloudAccountFeature, errStatus, err := client.GetCloudauthAccountFeatureSecure(
 		ctx, accountID, data.Get(SchemaType).(string))
-	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
-		}
+	// a feature deleted since the refresh is written again by the PUT below, so there is nothing to validate
+	if err != nil && !strings.Contains(errStatus, "404") {
 		return diag.Errorf("Error reading resource: %s %s", errStatus, err)
 	}
 
 	newCloudAccountFeature := cloudauthAccountFeatureFromResourceData(data)
 
 	// validate and reject non-updatable resource schema fields upfront
-	err = validateCloudauthAccountFeatureUpdate(existingCloudAccountFeature, newCloudAccountFeature)
-	if err != nil {
-		return diag.Errorf("Error updating resource: %s", err)
+	if err == nil {
+		err = validateCloudauthAccountFeatureUpdate(existingCloudAccountFeature, newCloudAccountFeature)
+		if err != nil {
+			return diag.Errorf("Error updating resource: %s", err)
+		}
 	}
 
 	_, errStatus, err = client.CreateOrUpdateCloudauthAccountFeatureSecure(
 		ctx, accountID, data.Get(SchemaType).(string), newCloudAccountFeature)
 	if err != nil {
-		if strings.Contains(errStatus, "404") {
-			return nil
-		}
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
 	}
 

@@ -68,6 +68,8 @@ resource "sysdig_secure_cloud_auth_account_feature" "sample" {
 
 -> **Note:** Since creation of component resource updates the account resource in the backend, in these configurations we indicate to Terraform to ignore `component` & `feature` attributes when planning updates to the remote account resource object.
 
+-> **Note:** A feature deleted outside Terraform is removed from the state on refresh, so the next plan creates it again.
+
 ## Attributes Reference
 
 No additional attributes are exported.
