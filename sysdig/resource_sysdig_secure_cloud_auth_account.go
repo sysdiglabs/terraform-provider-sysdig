@@ -263,6 +263,14 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 	}
 
 	newCloudAccount := cloudauthAccountFromResourceData(data)
+	// The PUT replaces features and components, and the state carries neither feature flags nor every
+	// feature type, so a block without a planned change (e.g. under ignore_changes) is sent back as stored.
+	if !data.HasChange(SchemaFeature) {
+		newCloudAccount.Feature = existingCloudAccount.Feature
+	}
+	if !data.HasChange(SchemaComponent) {
+		newCloudAccount.Components = existingCloudAccount.Components
+	}
 
 	// validate and reject non-updatable resource schema fields upfront
 	err = validateCloudauthAccountUpdate(existingCloudAccount, newCloudAccount)
