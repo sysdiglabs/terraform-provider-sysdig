@@ -6,6 +6,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -13,14 +14,14 @@ import (
 	cloudauth "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2/cloudauth/go"
 )
 
-// serveCloudauthAccountFeature answers the feature endpoint with the given statuses and counts PUTs.
-func serveCloudauthAccountFeature(t *testing.T, getStatus, putStatus int) (*sysdigClients, *int) {
+// serveCloudauthAccountFeature answers the feature endpoint with the given statuses and records the methods.
+func serveCloudauthAccountFeature(t *testing.T, getStatus, putStatus int) (*sysdigClients, *[]string) {
 	t.Helper()
-	puts := 0
+	var methods []string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		methods = append(methods, r.Method)
 		status := getStatus
 		if r.Method == http.MethodPut {
-			puts++
 			status = putStatus
 		}
 		if status != http.StatusOK {
@@ -30,7 +31,24 @@ func serveCloudauthAccountFeature(t *testing.T, getStatus, putStatus int) (*sysd
 		_, _ = w.Write([]byte(`{"type":"FEATURE_SECURE_WORKLOAD_SCANNING_CONTAINERS","enabled":true}`))
 	}))
 	t.Cleanup(srv.Close)
-	return testSysdigClients(t, srv.URL), &puts
+	return testSysdigClients(t, srv.URL), &methods
+}
+
+// account_id and type are the feature's API path, so an in-place change would write a new feature and
+// orphan the old one.
+func TestCloudauthAccountFeatureIdentityIsForceNew(t *testing.T) {
+	featureSchema := resourceSysdigSecureCloudauthAccountFeature().Schema
+
+	for _, key := range []string{SchemaAccountID, SchemaType} {
+		if !featureSchema[key].ForceNew {
+			t.Errorf("%s must be ForceNew: it identifies the feature in the API path and in the resource id", key)
+		}
+	}
+	for _, key := range []string{SchemaEnabled, SchemaComponents, SchemaFeatureFlags} {
+		if featureSchema[key].ForceNew {
+			t.Errorf("%s must stay updatable in place", key)
+		}
+	}
 }
 
 func featureData(t *testing.T) *schema.ResourceData {
@@ -58,14 +76,15 @@ func TestCloudauthAccountFeatureReadDropsDeletedFeature(t *testing.T) {
 	}
 }
 
+// The PUT creates or replaces the feature, so a feature deleted since the refresh is written again.
 func TestCloudauthAccountFeatureUpdateWritesDeletedFeature(t *testing.T) {
-	clients, puts := serveCloudauthAccountFeature(t, http.StatusNotFound, http.StatusOK)
+	clients, methods := serveCloudauthAccountFeature(t, http.StatusNotFound, http.StatusOK)
 
 	if diags := resourceSysdigSecureCloudauthAccountFeatureUpdate(context.Background(), featureData(t), clients); diags.HasError() {
 		t.Fatalf("update returned an error: %v", diags)
 	}
-	if *puts != 1 {
-		t.Errorf("PUTs = %d, want the feature written again", *puts)
+	if !slices.Equal(*methods, []string{http.MethodPut}) {
+		t.Errorf("requests = %v, want just the PUT", *methods)
 	}
 }
 
