@@ -1,24 +1,17 @@
 package sysdig
 
 import (
-	"context"
-	"time"
-
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// Non-functional; see secure_rule_fast_engine_removed.go.
 func dataSourceSysdigSecureRuleFilesystem() *schema.Resource {
-	timeout := 5 * time.Minute
+	const typeName = "sysdig_secure_rule_filesystem"
+	const ruleType = "FILESYSTEM"
 
 	return &schema.Resource{
-		DeprecationMessage: "data source sysdig_secure_rule_filesystem is deprecated — the backend no longer returns rules of ruleType FILESYSTEM. Use the sysdig_secure_rule_falco data source.",
-		ReadContext:        dataSourceSysdigRuleFilesystemRead,
-
-		Timeouts: &schema.ResourceTimeout{
-			Read: schema.DefaultTimeout(timeout),
-		},
+		DeprecationMessage: fastEngineDeprecation("data source", typeName, ruleType),
+		ReadContext:        fastEngineDataSourceRemoved(typeName, ruleType),
 
 		Schema: createRuleDataSourceSchema(map[string]*schema.Schema{
 			"read_only": {
@@ -61,45 +54,4 @@ func dataSourceSysdigSecureRuleFilesystem() *schema.Resource {
 			},
 		}),
 	}
-}
-
-func dataSourceSysdigRuleFilesystemRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := getSecureRuleClient(meta.(SysdigClients))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	ruleName := d.Get("name").(string)
-	ruleType := v2.RuleTypeFilesystem
-
-	rules, err := client.GetRuleGroup(ctx, ruleName, ruleType)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if len(rules) == 0 {
-		return diag.Errorf("unable to find rule")
-	}
-
-	if len(rules) > 1 {
-		return diag.Errorf("more than one rule with that name was found")
-	}
-
-	rule := rules[0]
-
-	ruleDataSourceToResourceData(rule, d)
-	if len(rule.Details.ReadPaths.Items) > 0 {
-		_ = d.Set("read_only", []map[string]any{{
-			"matching": rule.Details.ReadPaths.MatchItems,
-			"paths":    rule.Details.ReadPaths.Items,
-		}})
-	}
-	if len(rule.Details.ReadWritePaths.Items) > 0 {
-		_ = d.Set("read_write", []map[string]any{{
-			"matching": rule.Details.ReadWritePaths.MatchItems,
-			"paths":    rule.Details.ReadWritePaths.Items,
-		}})
-	}
-
-	return nil
 }

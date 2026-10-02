@@ -1,24 +1,17 @@
 package sysdig
 
 import (
-	"context"
-	"time"
-
-	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// Non-functional; see secure_rule_fast_engine_removed.go.
 func dataSourceSysdigSecureRuleContainer() *schema.Resource {
-	timeout := 5 * time.Minute
+	const typeName = "sysdig_secure_rule_container"
+	const ruleType = "CONTAINER"
 
 	return &schema.Resource{
-		DeprecationMessage: "data source sysdig_secure_rule_container is deprecated — the backend no longer returns rules of ruleType CONTAINER. Use the sysdig_secure_rule_falco data source.",
-		ReadContext:        dataSourceSysdigRuleContainerRead,
-
-		Timeouts: &schema.ResourceTimeout{
-			Read: schema.DefaultTimeout(timeout),
-		},
+		DeprecationMessage: fastEngineDeprecation("data source", typeName, ruleType),
+		ReadContext:        fastEngineDataSourceRemoved(typeName, ruleType),
 
 		Schema: createRuleDataSourceSchema(map[string]*schema.Schema{
 			"matching": {
@@ -34,15 +27,4 @@ func dataSourceSysdigSecureRuleContainer() *schema.Resource {
 			},
 		}),
 	}
-}
-
-func dataSourceSysdigRuleContainerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	return commonDataSourceSysdigRuleRead(ctx, d, meta, v2.RuleTypeContainer, containerRuleDataSourceToResourceData)
-}
-
-func containerRuleDataSourceToResourceData(rule v2.Rule, d *schema.ResourceData) diag.Diagnostics {
-	_ = d.Set("matching", rule.Details.Containers.MatchItems)
-	_ = d.Set("containers", rule.Details.Containers.Items)
-
-	return nil
 }
