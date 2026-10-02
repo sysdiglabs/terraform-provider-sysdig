@@ -94,11 +94,13 @@ func resourceSysdigMacroUpdate(ctx context.Context, d *schema.ResourceData, meta
 	id, _ := strconv.Atoi(d.Id())
 	macro.ID = id
 
-	_, err = client.UpdateMacro(ctx, macro)
+	updatedMacro, err := client.UpdateMacro(ctx, macro)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
+
+	_ = d.Set("version", updatedMacro.Version)
 
 	return nil
 }
