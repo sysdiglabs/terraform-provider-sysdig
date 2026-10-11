@@ -341,7 +341,11 @@ func updateAlertV2ChangeState(d *schema.ResourceData, alert *v2.AlertV2Change) e
 
 	_ = d.Set("group_aggregation", alert.Config.GroupAggregation)
 
-	_ = d.Set("metric", alert.Config.Metric.ID)
+	metricID := alert.Config.Metric.ID
+	if metricID == "" {
+		metricID = alert.Config.MetricID
+	}
+	_ = d.Set("metric", metricID)
 
 	_ = d.Set("shorter_time_range_seconds", alert.Config.ShorterRangeSec)
 

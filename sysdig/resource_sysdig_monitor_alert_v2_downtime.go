@@ -210,7 +210,11 @@ func updateAlertV2DowntimeState(d *schema.ResourceData, alert *v2.AlertV2Downtim
 
 	_ = d.Set("threshold", (1-alert.Config.Threshold)*100)
 
-	_ = d.Set("metric", alert.Config.Metric.ID)
+	metricID := alert.Config.Metric.ID
+	if metricID == "" {
+		metricID = alert.Config.MetricID
+	}
+	_ = d.Set("metric", metricID)
 
 	if alert.UnreportedAlertNotificationsRetentionSec != nil {
 		_ = d.Set("unreported_alert_notifications_retention_seconds", *alert.UnreportedAlertNotificationsRetentionSec)

@@ -822,6 +822,7 @@ type AlertV2ConfigDowntime struct {
 	GroupAggregation string                  `json:"groupAggregation"`
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
+	MetricID         string                  `json:"metricId,omitempty"` // Legacy API field, used as fallback when Metric.ID is empty
 
 	Range int `json:"range"`
 }
@@ -847,6 +848,7 @@ type AlertV2ConfigChange struct {
 	GroupAggregation string                  `json:"groupAggregation"`
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
+	MetricID         string                  `json:"metricId,omitempty"` // Legacy API field, used as fallback when Metric.ID is empty
 
 	ShorterRangeSec int `json:"shorterRangeSec"`
 	LongerRangeSec  int `json:"longerRangeSec"`
@@ -886,6 +888,7 @@ type AlertV2ConfigGroupOutlier struct {
 	GroupAggregation string                  `json:"groupAggregation"`
 	TimeAggregation  string                  `json:"timeAggregation"`
 	Metric           AlertMetricDescriptorV2 `json:"metric"`
+	MetricID         string                  `json:"metricId,omitempty"` // Legacy API field, used as fallback when Metric.ID is empty
 	NoDataBehaviour  string                  `json:"noDataBehaviour"`
 
 	ObservationWindow int `json:"observationWindow"`
