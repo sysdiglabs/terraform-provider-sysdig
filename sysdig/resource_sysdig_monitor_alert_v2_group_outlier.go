@@ -271,7 +271,11 @@ func updateAlertV2GroupOutlierState(d *schema.ResourceData, alert *v2.AlertV2Gro
 
 	_ = d.Set("dbscan_tolerance", alert.Config.DbscanTolerance)
 
-	_ = d.Set("metric", alert.Config.Metric.ID)
+	metricID := alert.Config.Metric.ID
+	if metricID == "" {
+		metricID = alert.Config.MetricID
+	}
+	_ = d.Set("metric", metricID)
 
 	_ = d.Set("time_aggregation", alert.Config.TimeAggregation)
 
