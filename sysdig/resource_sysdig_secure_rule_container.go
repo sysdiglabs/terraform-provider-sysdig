@@ -116,11 +116,13 @@ func resourceSysdigRuleContainerUpdate(ctx context.Context, d *schema.ResourceDa
 	rule.Version = d.Get("version").(int)
 	rule.ID, _ = strconv.Atoi(d.Id())
 
-	_, err = client.UpdateRule(ctx, rule)
+	updatedRule, err := client.UpdateRule(ctx, rule)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	sysdigClients.AddCleanupHook(sendPoliciesToAgents)
+
+	_ = d.Set("version", updatedRule.Version)
 
 	return nil
 }
