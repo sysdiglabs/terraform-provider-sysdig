@@ -199,12 +199,14 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			// Computed because Read stores the backend's alias for Azure, which would otherwise plan
-			// to clear it on every apply when the configuration leaves it unset.
+			// Sysdig keeps its stored alias when it gets an empty one, so an unset or empty alias is no
+			// change. Read stores the backend's alias for Azure, which would otherwise plan to clear it.
 			SchemaCloudProviderAlias: {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+				DiffSuppressFunc: func(_, _, newValue string, _ *schema.ResourceData) bool {
+					return newValue == ""
+				},
 			},
 			SchemaProviderPartition: {
 				Type:     schema.TypeString,
@@ -305,6 +307,10 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 	_, errStatus, err = client.UpdateCloudauthAccountSecure(ctx, data.Id(), newCloudAccount)
 	if err != nil {
 		return diag.Errorf("Error updating resource: %s %s", errStatus, err)
+	}
+	// Read refreshes the alias only for Azure, so the state would otherwise keep an unconfigured one
+	if err := data.Set(SchemaCloudProviderAlias, newCloudAccount.ProviderAlias); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return diags
@@ -527,14 +533,18 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 	return accountComponents
 }
 
-// providerAliasConfigured tells whether the configuration sets provider_alias. Without a raw
-// configuration to inspect it trusts the resource data.
+// providerAliasConfigured tells whether the configuration sets a non-empty provider_alias. Without a
+// raw configuration to inspect it trusts the resource data.
 func providerAliasConfigured(data *schema.ResourceData) bool {
 	raw := data.GetRawConfig()
-	if raw.IsNull() || !raw.Type().IsObjectType() || !raw.Type().HasAttribute(SchemaCloudProviderAlias) {
-		return true
+	if raw.IsNull() {
+		return data.Get(SchemaCloudProviderAlias).(string) != ""
 	}
-	return !raw.GetAttr(SchemaCloudProviderAlias).IsNull()
+	alias := raw.GetAttr(SchemaCloudProviderAlias)
+	if alias.IsNull() {
+		return false
+	}
+	return !alias.IsKnown() || alias.AsString() != ""
 }
 
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
