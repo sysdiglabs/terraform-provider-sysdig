@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -311,16 +312,93 @@ func TestMergeStoredAccountFeaturesWithoutStoredFeatures(t *testing.T) {
 	}
 }
 
-func TestCloudauthAccountUnsetAliasKeepsTheStoredOne(t *testing.T) {
-	planned := accountConfig("", nil)
-	delete(planned, SchemaCloudProviderAlias)
-
-	data := plannedAccountUpdate(t, accountConfig("draios-demo", nil), planned)
-
-	if data.HasChange(SchemaCloudProviderAlias) {
-		t.Error("an unset alias must not plan to clear the stored one")
+// aliasRawConfig is the raw configuration Terraform sends, reduced to provider_alias; a nil alias leaves it unset.
+func aliasRawConfig(alias *string) cty.Value {
+	value := cty.NullVal(cty.String)
+	if alias != nil {
+		value = cty.StringVal(*alias)
 	}
-	if got := data.Get(SchemaCloudProviderAlias).(string); got != "draios-demo" {
-		t.Errorf("provider alias = %q, want the stored one", got)
+	return cty.ObjectVal(map[string]cty.Value{SchemaCloudProviderAlias: value})
+}
+
+// refreshedAccountUpdate runs Read over the prior state, then builds the ResourceData Update gets for planned.
+func refreshedAccountUpdate(t *testing.T, clients *sysdigClients, prior, planned map[string]any, rawConfig cty.Value) *schema.ResourceData {
+	t.Helper()
+	r := resourceSysdigSecureCloudauthAccount()
+	priorData := schema.TestResourceDataRaw(t, r.Schema, prior)
+	priorData.SetId(testCloudauthAccountID)
+	if diags := resourceSysdigSecureCloudauthAccountRead(context.Background(), priorData, clients); diags.HasError() {
+		t.Fatalf("read returned an error: %v", diags)
 	}
+	state := priorData.State()
+
+	diff, err := r.Diff(context.Background(), state, terraform.NewResourceConfigRaw(planned), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff == nil {
+		diff = &terraform.InstanceDiff{}
+	}
+	diff.RawConfig = rawConfig
+	data, err := schema.InternalMap(r.Schema).Data(state, diff)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return data
+}
+
+func withoutAlias(config map[string]any) map[string]any {
+	delete(config, SchemaCloudProviderAlias)
+	return config
+}
+
+func TestCloudauthAccountUnsetAlias(t *testing.T) {
+	t.Run("azure: the alias Read stored is neither planned away nor overwritten", func(t *testing.T) {
+		stored := storedCloudauthAccount()
+		stored.Provider = cloudauth.Provider_PROVIDER_AZURE
+		stored.ProviderAlias = "subscription-name"
+		clients, put := serveStoredCloudauthAccount(t, stored)
+		azure := func(config map[string]any) map[string]any {
+			config[SchemaCloudProviderType] = cloudauth.Provider_PROVIDER_AZURE.String()
+			return config
+		}
+
+		data := refreshedAccountUpdate(t, clients, azure(accountConfig("", nil)), azure(withoutAlias(accountConfig("", nil))), aliasRawConfig(nil))
+		if data.HasChange(SchemaCloudProviderAlias) {
+			t.Error("an unset alias must not plan to clear the one Read stored")
+		}
+
+		runAccountUpdate(t, clients, data)
+		if got := put().GetProviderAlias(); got != "subscription-name" {
+			t.Errorf("PUT provider alias = %q, want the stored one", got)
+		}
+	})
+
+	t.Run("aws: an alias no longer configured is not sent back", func(t *testing.T) {
+		stored := storedCloudauthAccount()
+		stored.ProviderAlias = "resolved-by-sysdig"
+		clients, put := serveStoredCloudauthAccount(t, stored)
+
+		// Read leaves an AWS alias alone, so the state still holds the one configured earlier
+		data := refreshedAccountUpdate(t, clients, accountConfig("old-name", nil), withoutAlias(accountConfig("", nil)), aliasRawConfig(nil))
+
+		runAccountUpdate(t, clients, data)
+		if got := put().GetProviderAlias(); got != "resolved-by-sysdig" {
+			t.Errorf("PUT provider alias = %q, want the stored one, not the old configured one", got)
+		}
+	})
+
+	t.Run("a configured alias is sent", func(t *testing.T) {
+		stored := storedCloudauthAccount()
+		stored.ProviderAlias = "resolved-by-sysdig"
+		clients, put := serveStoredCloudauthAccount(t, stored)
+		alias := "renamed"
+
+		data := refreshedAccountUpdate(t, clients, accountConfig("old-name", nil), accountConfig(alias, nil), aliasRawConfig(&alias))
+
+		runAccountUpdate(t, clients, data)
+		if got := put().GetProviderAlias(); got != alias {
+			t.Errorf("PUT provider alias = %q, want the configured one", got)
+		}
+	})
 }

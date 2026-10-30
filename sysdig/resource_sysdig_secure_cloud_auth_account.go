@@ -199,8 +199,8 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			// Computed so that an unset alias keeps the one the backend resolved from the cloud
-			// provider, instead of planning to clear it on every apply.
+			// Computed because Read stores the backend's alias for Azure, which would otherwise plan
+			// to clear it on every apply when the configuration leaves it unset.
 			SchemaCloudProviderAlias: {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -269,6 +269,10 @@ func resourceSysdigSecureCloudauthAccountUpdate(ctx context.Context, data *schem
 	}
 
 	newCloudAccount := cloudauthAccountFromResourceData(data)
+	if !providerAliasConfigured(data) {
+		// the state may hold an alias that is no longer configured, which must not overwrite the stored one
+		newCloudAccount.ProviderAlias = existingCloudAccount.ProviderAlias
+	}
 	// The PUT replaces features and components, and the state carries neither feature flags nor every
 	// feature type: a block without a planned change (e.g. under ignore_changes) is sent back as stored,
 	// a changed one is merged with what the resource cannot express.
@@ -521,6 +525,16 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 	}
 
 	return accountComponents
+}
+
+// providerAliasConfigured tells whether the configuration sets provider_alias. Without a raw
+// configuration to inspect it trusts the resource data.
+func providerAliasConfigured(data *schema.ResourceData) bool {
+	raw := data.GetRawConfig()
+	if raw.IsNull() || !raw.Type().IsObjectType() || !raw.Type().HasAttribute(SchemaCloudProviderAlias) {
+		return true
+	}
+	return !raw.GetAttr(SchemaCloudProviderAlias).IsNull()
 }
 
 func cloudauthAccountFromResourceData(data *schema.ResourceData) *v2.CloudauthAccountSecure {
