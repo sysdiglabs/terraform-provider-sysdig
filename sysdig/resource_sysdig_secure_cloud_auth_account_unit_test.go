@@ -310,3 +310,17 @@ func TestMergeStoredAccountFeaturesWithoutStoredFeatures(t *testing.T) {
 		t.Errorf("merged = %v, want the planned features", planned)
 	}
 }
+
+func TestCloudauthAccountUnsetAliasKeepsTheStoredOne(t *testing.T) {
+	planned := accountConfig("", nil)
+	delete(planned, SchemaCloudProviderAlias)
+
+	data := plannedAccountUpdate(t, accountConfig("draios-demo", nil), planned)
+
+	if data.HasChange(SchemaCloudProviderAlias) {
+		t.Error("an unset alias must not plan to clear the stored one")
+	}
+	if got := data.Get(SchemaCloudProviderAlias).(string); got != "draios-demo" {
+		t.Errorf("provider alias = %q, want the stored one", got)
+	}
+}

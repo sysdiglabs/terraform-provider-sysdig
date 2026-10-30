@@ -199,9 +199,12 @@ func resourceSysdigSecureCloudauthAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			// Computed so that an unset alias keeps the one the backend resolved from the cloud
+			// provider, instead of planning to clear it on every apply.
 			SchemaCloudProviderAlias: {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			SchemaProviderPartition: {
 				Type:     schema.TypeString,

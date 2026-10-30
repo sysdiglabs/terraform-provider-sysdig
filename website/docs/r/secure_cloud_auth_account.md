@@ -85,6 +85,8 @@ resource "sysdig_secure_cloud_auth_account" "aws_response_actions" {
 
 * `cloud_responder_roles_metadata` - (Optional) Configuration metadata for the Cloud Responder Roles component (type `COMPONENT_CLOUD_RESPONDER_ROLES`). Defines the IAM roles that the cloud responder can assume when executing response actions.
 
+* `provider_alias` - (Optional) The display name of the cloud account. When it is not set, the name Sysdig read from the cloud provider is kept.
+
 * `provider_partition` - (Optional - AWS installs only) The type of Partition of the Provider for cloud account. Currently supported options are `PROVIDER_PARTITION_UNSPECIFIED` and `PROVIDER_PARTITION_AWS_GOVCLOUD`.
 
 
