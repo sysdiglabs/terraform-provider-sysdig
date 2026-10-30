@@ -533,14 +533,9 @@ func constructAccountComponents(data *schema.ResourceData) []*cloudauth.AccountC
 	return accountComponents
 }
 
-// providerAliasConfigured tells whether the configuration sets a non-empty provider_alias. Without a
-// raw configuration to inspect it trusts the resource data.
+// providerAliasConfigured tells whether the configuration sets a non-empty provider_alias.
 func providerAliasConfigured(data *schema.ResourceData) bool {
-	raw := data.GetRawConfig()
-	if raw.IsNull() {
-		return data.Get(SchemaCloudProviderAlias).(string) != ""
-	}
-	alias := raw.GetAttr(SchemaCloudProviderAlias)
+	alias := data.GetRawConfig().GetAttr(SchemaCloudProviderAlias)
 	if alias.IsNull() {
 		return false
 	}
