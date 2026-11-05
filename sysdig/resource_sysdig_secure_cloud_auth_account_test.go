@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -834,4 +835,71 @@ resource "sysdig_secure_cloud_auth_account" "sample" {
 		})
 	  }
 	}`, fmt.Sprintf("ocid1.tenancy.oc1..%s", compartmentID), fmt.Sprintf("ocid1.tenancy.oc1..%s", tenantID))
+}
+
+// An unset or empty provider_alias keeps the alias stored in Sysdig, so neither may plan a change: Azure
+// because Read stores the backend's alias, AWS because the state keeps the one configured earlier.
+func TestAccSecureCloudAuthAccountUnsetAlias(t *testing.T) {
+	accounts := map[string]func(alias string) string{
+		"azure": func(alias string) string {
+			return secureCloudAuthAccountWithAlias(
+				"azure_alias", "azure-alias-test-"+acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum), "PROVIDER_AZURE",
+				`provider_tenant_id = "`+acctest.RandStringFromCharSet(36, acctest.CharSetAlphaNum)+`"`, alias)
+		},
+		"aws": func(alias string) string {
+			return secureCloudAuthAccountWithAlias(
+				"aws_alias", acctest.RandStringFromCharSet(12, "0123456789"), "PROVIDER_AWS", "", alias)
+		},
+	}
+	for name, newConfig := range accounts {
+		t.Run(name, func(t *testing.T) {
+			// one account per run: the configs below only differ in the alias line
+			config := memoizedAliasConfig(newConfig)
+			resourceName := "sysdig_secure_cloud_auth_account." + name + "_alias"
+			alias := "terraform_test_" + acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+			resource.ParallelTest(t, resource.TestCase{
+				PreCheck: preCheckAnyEnv(t, SysdigSecureApiTokenEnv),
+				ProviderFactories: map[string]func() (*schema.Provider, error){
+					"sysdig": func() (*schema.Provider, error) {
+						return sysdig.Provider(), nil
+					},
+				},
+				Steps: []resource.TestStep{
+					{
+						Config: config(`provider_alias = "` + alias + `"`),
+						Check:  resource.TestCheckResourceAttr(resourceName, "provider_alias", alias),
+					},
+					{
+						Config:   config(""),
+						PlanOnly: true,
+					},
+					{
+						Config:   config(`provider_alias = ""`),
+						PlanOnly: true,
+					},
+				},
+			})
+		})
+	}
+}
+
+// memoizedAliasConfig fixes the random parts of newConfig at the first call, so that only the alias
+// line changes between steps.
+func memoizedAliasConfig(newConfig func(alias string) string) func(aliasLine string) string {
+	const placeholder = "__ALIAS_LINE__"
+	template := newConfig(placeholder)
+	return func(aliasLine string) string {
+		return strings.Replace(template, placeholder, aliasLine, 1)
+	}
+}
+
+func secureCloudAuthAccountWithAlias(name, providerID, providerType, extra, aliasLine string) string {
+	return fmt.Sprintf(`
+resource "sysdig_secure_cloud_auth_account" "%s" {
+  provider_id   = "%s"
+  provider_type = "%s"
+  enabled       = true
+  %s
+  %s
+}`, name, providerID, providerType, extra, aliasLine)
 }
