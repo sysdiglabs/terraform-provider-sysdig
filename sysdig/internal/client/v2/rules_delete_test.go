@@ -39,7 +39,9 @@ func TestDeleteRuleStatusHandling(t *testing.T) {
 
 			c := newSysdigClient(WithURL(server.URL), WithToken("test-token"))
 
-			err := c.DeleteRule(context.Background(), 1)
+			// Without this the transport retries 5xx with ~31s of backoff, which would test
+			// retry exhaustion rather than DeleteRule's status handling.
+			err := c.DeleteRule(WithoutTransportRetries(context.Background()), 1)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("DeleteRule() error = %v, wantErr %v", err, tt.wantErr)
 			}
