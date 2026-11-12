@@ -59,7 +59,9 @@ func (c *Client) DeletePolicy(ctx context.Context, policyID int) (err error) {
 		}
 	}()
 
-	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
+	// A 404 means the policy is already gone, e.g. when a retried DELETE follows one that
+	// completed after a gateway timeout. Deleting something that no longer exists is a success.
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotFound {
 		return c.ErrorFromResponse(response)
 	}
 

@@ -1,5 +1,7 @@
 package v2
 
+import "time"
+
 type config struct {
 	url                   string
 	token                 string
@@ -13,6 +15,7 @@ type config struct {
 	product               string
 	secureSkipPolicyV2Msg bool
 	secureOrgAPIAsync     bool
+	retryWaitMin          time.Duration // overrides the transport retry backoff floor; tests only
 }
 
 type Product string
@@ -107,5 +110,12 @@ func WithSkipPolicyV2Msg(skipPolicyV2Msg bool) ClientOption {
 func WithOrgAPIAsync(orgAPIAsync bool) ClientOption {
 	return func(c *config) {
 		c.secureOrgAPIAsync = orgAPIAsync
+	}
+}
+
+// withRetryWaitMin shortens the transport retry backoff so tests that exercise retries stay fast.
+func withRetryWaitMin(d time.Duration) ClientOption {
+	return func(c *config) {
+		c.retryWaitMin = d
 	}
 }
