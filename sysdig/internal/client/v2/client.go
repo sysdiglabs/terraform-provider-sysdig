@@ -288,6 +288,9 @@ func newHTTPClient(cfg *config) *http.Client {
 	httpClient.RetryMax = 5
 	httpClient.RetryWaitMin = 1 * time.Second
 	httpClient.RetryWaitMax = 30 * time.Second
+	if cfg.retryWaitMin > 0 {
+		httpClient.RetryWaitMin = cfg.retryWaitMin
+	}
 	httpClient.Backoff = retryablehttp.DefaultBackoff // Exponential backoff strategy
 
 	httpClient.CheckRetry = func(ctx context.Context, resp *http.Response, err error) (bool, error) {
