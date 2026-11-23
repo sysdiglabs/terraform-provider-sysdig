@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
 	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
@@ -75,17 +76,24 @@ resource "sysdig_sso_global_settings" "test" {
 // restoreSSOGlobalSettingsAfterTest records the current global SSO settings of the product and registers a
 // cleanup that puts them back. The resource's Delete is a no-op, so without this the test leaves password
 // login disabled for the whole customer. t.Cleanup runs even when the test fails or aborts.
+// ssoGlobalSettingsRestoreTimeout bounds the snapshot and restore requests, as the API client has no timeout of its own.
+const ssoGlobalSettingsRestoreTimeout = 5 * time.Minute
+
 func restoreSSOGlobalSettingsAfterTest(t *testing.T, product string) {
 	t.Helper()
 
 	client := ssoGlobalSettingsTestClient()
-	original, err := client.GetSSOGlobalSettings(context.Background(), product)
+	ctx, cancel := context.WithTimeout(context.Background(), ssoGlobalSettingsRestoreTimeout)
+	defer cancel()
+	original, err := client.GetSSOGlobalSettings(ctx, product)
 	if err != nil {
 		t.Fatalf("cannot read the %s global SSO settings to restore them after the test: %v", product, err)
 	}
 
 	t.Cleanup(func() {
-		if _, err := client.UpdateSSOGlobalSettings(context.Background(), product, original); err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), ssoGlobalSettingsRestoreTimeout)
+		defer cancel()
+		if _, err := client.UpdateSSOGlobalSettings(ctx, product, original); err != nil {
 			t.Errorf("cannot restore the %s global SSO settings (is_password_login_enabled=%t): %v",
 				product, original.IsPasswordLoginEnabled, err)
 		}
