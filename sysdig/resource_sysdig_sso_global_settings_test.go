@@ -1,4 +1,6 @@
-//go:build tf_acc_sysdig_monitor || tf_acc_sysdig_secure || tf_acc_onprem_monitor || tf_acc_onprem_secure
+// This test changes the tenant-wide Monitor password login setting, so it only builds into the Monitor suites:
+// running it from the Secure suites too would let two processes race on the same setting.
+//go:build tf_acc_sysdig_monitor || tf_acc_onprem_monitor
 
 package sysdig_test
 
@@ -6,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
@@ -15,10 +18,11 @@ import (
 )
 
 func TestAccSSOGlobalSettings(t *testing.T) {
-	restoreSSOGlobalSettingsAfterTest(t, "monitor")
-
 	resource.Test(t, resource.TestCase{
-		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
+		PreCheck: func() {
+			preCheckAnyEnv(t, SysdigMonitorApiTokenEnv)()
+			restoreSSOGlobalSettingsAfterTest(t, "monitor")
+		},
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
 				return sysdig.Provider(), nil
@@ -88,20 +92,14 @@ func restoreSSOGlobalSettingsAfterTest(t *testing.T, product string) {
 	})
 }
 
-// ssoGlobalSettingsTestClient builds an API client from the same environment the provider reads, preferring
-// the Monitor credentials like the provider's common client does.
+// ssoGlobalSettingsTestClient builds an API client from the same environment the provider reads.
 func ssoGlobalSettingsTestClient() v2.SSOGlobalSettingsInterface {
-	if token := os.Getenv(SysdigMonitorApiTokenEnv); token != "" {
-		return v2.NewSysdigMonitor(
-			v2.WithToken(token),
-			v2.WithURL(envOrDefault("SYSDIG_MONITOR_URL", "https://app.sysdigcloud.com")),
-			v2.WithInsecure(os.Getenv("SYSDIG_MONITOR_INSECURE_TLS") == "true"),
-		)
-	}
-	return v2.NewSysdigSecure(
-		v2.WithToken(os.Getenv(SysdigSecureApiTokenEnv)),
-		v2.WithURL(envOrDefault("SYSDIG_SECURE_URL", "https://secure.sysdig.com")),
-		v2.WithInsecure(os.Getenv("SYSDIG_SECURE_INSECURE_TLS") == "true"),
+	// Parsed like the provider's boolean attributes, so 1 or TRUE also enable it. An invalid value counts as false.
+	insecure, _ := strconv.ParseBool(os.Getenv("SYSDIG_MONITOR_INSECURE_TLS"))
+	return v2.NewSysdigMonitor(
+		v2.WithToken(os.Getenv(SysdigMonitorApiTokenEnv)),
+		v2.WithURL(envOrDefault("SYSDIG_MONITOR_URL", "https://app.sysdigcloud.com")),
+		v2.WithInsecure(insecure),
 	)
 }
 
