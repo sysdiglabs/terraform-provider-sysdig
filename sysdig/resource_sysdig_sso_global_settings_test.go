@@ -3,15 +3,20 @@
 package sysdig_test
 
 import (
+	"context"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/draios/terraform-provider-sysdig/sysdig"
+	v2 "github.com/draios/terraform-provider-sysdig/sysdig/internal/client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestAccSSOGlobalSettings(t *testing.T) {
+	restoreSSOGlobalSettingsAfterTest(t, "monitor")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: preCheckAnyEnv(t, SysdigMonitorApiTokenEnv, SysdigSecureApiTokenEnv),
 		ProviderFactories: map[string]func() (*schema.Provider, error){
@@ -61,4 +66,48 @@ resource "sysdig_sso_global_settings" "test" {
   is_password_login_enabled  = %t
 }
 `, product, isPasswordLoginEnabled)
+}
+
+// restoreSSOGlobalSettingsAfterTest records the current global SSO settings of the product and registers a
+// cleanup that puts them back. The resource's Delete is a no-op, so without this the test leaves password
+// login disabled for the whole customer. t.Cleanup runs even when the test fails or aborts.
+func restoreSSOGlobalSettingsAfterTest(t *testing.T, product string) {
+	t.Helper()
+
+	client := ssoGlobalSettingsTestClient()
+	original, err := client.GetSSOGlobalSettings(context.Background(), product)
+	if err != nil {
+		t.Fatalf("cannot read the %s global SSO settings to restore them after the test: %v", product, err)
+	}
+
+	t.Cleanup(func() {
+		if _, err := client.UpdateSSOGlobalSettings(context.Background(), product, original); err != nil {
+			t.Errorf("cannot restore the %s global SSO settings (is_password_login_enabled=%t): %v",
+				product, original.IsPasswordLoginEnabled, err)
+		}
+	})
+}
+
+// ssoGlobalSettingsTestClient builds an API client from the same environment the provider reads, preferring
+// the Monitor credentials like the provider's common client does.
+func ssoGlobalSettingsTestClient() v2.SSOGlobalSettingsInterface {
+	if token := os.Getenv(SysdigMonitorApiTokenEnv); token != "" {
+		return v2.NewSysdigMonitor(
+			v2.WithToken(token),
+			v2.WithURL(envOrDefault("SYSDIG_MONITOR_URL", "https://app.sysdigcloud.com")),
+			v2.WithInsecure(os.Getenv("SYSDIG_MONITOR_INSECURE_TLS") == "true"),
+		)
+	}
+	return v2.NewSysdigSecure(
+		v2.WithToken(os.Getenv(SysdigSecureApiTokenEnv)),
+		v2.WithURL(envOrDefault("SYSDIG_SECURE_URL", "https://secure.sysdig.com")),
+		v2.WithInsecure(os.Getenv("SYSDIG_SECURE_INSECURE_TLS") == "true"),
+	)
+}
+
+func envOrDefault(name, fallback string) string {
+	if value := os.Getenv(name); value != "" {
+		return value
+	}
+	return fallback
 }
