@@ -22,7 +22,7 @@ func TestAccSSOGlobalSettings(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			preCheckAnyEnv(t, SysdigMonitorApiTokenEnv)()
-			restoreSSOGlobalSettingsAfterTest(t, "monitor")
+			enablePasswordLoginAfterTest(t, "monitor")
 		},
 		ProviderFactories: map[string]func() (*schema.Provider, error){
 			"sysdig": func() (*schema.Provider, error) {
@@ -73,29 +73,21 @@ resource "sysdig_sso_global_settings" "test" {
 `, product, isPasswordLoginEnabled)
 }
 
-// restoreSSOGlobalSettingsAfterTest records the current global SSO settings of the product and registers a
-// cleanup that puts them back. The resource's Delete is a no-op, so without this the test leaves password
-// login disabled for the whole customer. t.Cleanup runs even when the test fails or aborts.
-// ssoGlobalSettingsRestoreTimeout bounds the snapshot and restore requests, as the API client has no timeout of its own.
-const ssoGlobalSettingsRestoreTimeout = 5 * time.Minute
+// ssoGlobalSettingsCleanupTimeout bounds the cleanup request, as the API client has no timeout of its own.
+const ssoGlobalSettingsCleanupTimeout = 5 * time.Minute
 
-func restoreSSOGlobalSettingsAfterTest(t *testing.T, product string) {
+// enablePasswordLoginAfterTest registers a cleanup that turns password login back on for the product. The
+// resource's Delete is a no-op, so without this the test leaves password login disabled for the whole customer.
+// t.Cleanup runs even when the test fails or aborts.
+func enablePasswordLoginAfterTest(t *testing.T, product string) {
 	t.Helper()
 
 	client := ssoGlobalSettingsTestClient()
-	ctx, cancel := context.WithTimeout(context.Background(), ssoGlobalSettingsRestoreTimeout)
-	defer cancel()
-	original, err := client.GetSSOGlobalSettings(ctx, product)
-	if err != nil {
-		t.Fatalf("cannot read the %s global SSO settings to restore them after the test: %v", product, err)
-	}
-
 	t.Cleanup(func() {
-		ctx, cancel := context.WithTimeout(context.Background(), ssoGlobalSettingsRestoreTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), ssoGlobalSettingsCleanupTimeout)
 		defer cancel()
-		if _, err := client.UpdateSSOGlobalSettings(ctx, product, original); err != nil {
-			t.Errorf("cannot restore the %s global SSO settings (is_password_login_enabled=%t): %v",
-				product, original.IsPasswordLoginEnabled, err)
+		if _, err := client.UpdateSSOGlobalSettings(ctx, product, &v2.SSOGlobalSettings{IsPasswordLoginEnabled: true}); err != nil {
+			t.Errorf("cannot re-enable password login in the %s global SSO settings: %v", product, err)
 		}
 	})
 }
